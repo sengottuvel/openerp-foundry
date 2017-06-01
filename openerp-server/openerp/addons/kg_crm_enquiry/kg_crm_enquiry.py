@@ -1428,7 +1428,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		
 		'capacity_in': fields.integer('Capacity in M3/hr(Water)',),
 		'head_in': fields.float('Total Head in Mlc(Water)'),
-		'viscosity_crt_factor': fields.float('Viscosity correction factors'),
+		'viscosity_crt_factor': fields.char('Viscosity correction factors'),
 		'suction_pressure': fields.selection([('normal','Normal'),('centre_line','Centre Line')],'Suction pressure'),
 		'differential_pressure_kg': fields.float('Differential Pressure - kg/cm2'),
 		'slurry_correction_in': fields.float('Slurry Correction in'),

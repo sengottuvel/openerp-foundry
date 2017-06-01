@@ -2192,7 +2192,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement x="277" y="196" width="278" height="12" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[$F{viscosity_crt_factor} > 0]]></printWhenExpression>
+						<printWhenExpression><![CDATA[!($F{viscosity_crt_factor}.equals(null ))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="0" leftPadding="2">
 						<bottomPen lineWidth="0.5"/>
@@ -2205,7 +2205,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement x="0" y="196" width="277" height="12" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[$F{viscosity_crt_factor} > 0]]></printWhenExpression>
+						<printWhenExpression><![CDATA[!($F{viscosity_crt_factor}.equals(null ))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
