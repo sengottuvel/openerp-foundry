@@ -71,11 +71,15 @@
 										<field name="wo_moc_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 										<field name="uom_id"/>
 										<field name="issue_qty" on_change="onchange_issue_qty_2(issue_qty)"/>
+										<field name="length" attrs="{'invisible': ['|',('dep_code','!=','DP2'),('uom_conversation_factor','=',False)]}"/>
+										<field name="breadth" attrs="{'invisible': ['|',('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')]}"/>
 										<field name="reject_qty"/>
 										<field name="remarks"/>
 										<field name="issue_type" invisible="1" required="1"/>
 										<field name="location_dest_id" invisible="1"/>
 										<field name="issue_qty_2" invisible="1"/>
+										<field name="dep_code" invisible="1"/>
+										<field name="uom_conversation_factor" invisible="1"/>
 									</group>
 								  </group>
 								  <group string = "GRN Details" colspan="4">
@@ -537,6 +541,10 @@
 							<field name="product_id" readonly="1"/>
 							<field name="accept_date" readonly="1"/>
 							<field name="remark_id" attrs="{'required':[('reject_qty','>',0)]}"/>
+							<field name="length" attrs="{'invisible': ['|',('dep_code','!=','DP2'),('uom_conversation_factor','=',False)]}"/>
+							<field name="breadth" attrs="{'invisible': ['|',('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')]}"/>
+							<field name="dep_code" invisible="1"/>
+							<field name="uom_conversation_factor" invisible="1"/>
 						</group>
 						<group>
 							<field name="issue_date" readonly="1"/>

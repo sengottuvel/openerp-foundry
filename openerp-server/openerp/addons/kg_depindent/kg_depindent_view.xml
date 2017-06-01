@@ -93,7 +93,7 @@
                </form>
            </field>
         </record>
-
+		
         <!--
         =====================
         Tree view
@@ -115,9 +115,9 @@
 					<field name="indent_type" invisible="1"/>
                 </tree> 
             </field>
-        </record>
+		</record>
        
-       <record id="depindent_group_view" model="ir.ui.view">
+		<record id="depindent_group_view" model="ir.ui.view">
             <field name="name">Dep Indent</field>
             <field name="model">kg.depindent</field>
             <field name="arch" type="xml">
@@ -141,22 +141,22 @@
 					</group>
                 </search>
 			</field>
-		</record>	
+		</record>
        
        <!--
         =====================
         Form Action
         ===================== -->
-
+		
 		<record id="action_kg_depindent_form" model="ir.actions.act_window">
-				<field name="name">Department Indent</field>
-				<field name="type">ir.actions.act_window</field>
-				<field name="res_model">kg.depindent</field>
-				<field name="view_type">form</field>
-				<field name="view_id" ref="view_kg_depindent_tree"/>
-				<field name="search_view_id" ref="depindent_group_view"/>
+			<field name="name">Department Indent</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.depindent</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="view_kg_depindent_tree"/>
+			<field name="search_view_id" ref="depindent_group_view"/>
 		</record>
-	
+		
 		<!-- dep indent line tree view -->
 		
 		<record id="t_form_v_indent_line" model="ir.ui.view">
@@ -173,6 +173,10 @@
 							<field name="qty" attrs="{'readonly': [('uom', '=', False)]}"
 								on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
 							<field name="cutting_qty" readonly="1"/>
+							<field name="length" attrs="{'invisible': ['|',('dep_code','!=','DP2'),('uom_conversation_factor','=',False)]}"/>
+							<field name="breadth" attrs="{'invisible': ['|',('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')]}"/>
+							<field name="dep_code" invisible="1"/>
+							<field name="uom_conversation_factor" invisible="1"/>
 							<field name="po_qty" invisible="1"/>
 						</group>
 						<group>
@@ -206,7 +210,7 @@
 				</form>
 			</field>
 		</record>
-			
+		
 		<record id="view_kg_depindent_line_tree" model="ir.ui.view">
 			<field name="name">kg.depindent.line.tree</field>
 			<field name="model">kg.depindent.line</field>
@@ -229,7 +233,7 @@
 				</tree>
 			</field>
 		</record>
-
+		
 		<record id="di_search_view" model="ir.ui.view">
 			<field name="name">Indent</field>
 			<field name="model">kg.depindent.line</field>
@@ -250,12 +254,12 @@
 				</search>
 			</field>
 		</record> 
-     
+		
 		<!--
         =====================
         Form Action
         ===================== -->
-
+		
 		<record id="action_kg_depindent_line_form" model="ir.actions.act_window">
 			<field name="name">Dept Indent Item Details</field>
 			<field name="type">ir.actions.act_window</field>
@@ -289,8 +293,6 @@
 							<field name="issue_pending_qty" invisible="1"/>
 							<field name="pending_qty" invisible="1"/>
 							<field name="po_qty" invisible="1"/>
-							
-							
 						</group>
 						<group>
 							<field name="product_id" readonly="1"/>
@@ -300,7 +302,6 @@
 							<field name="fns_item_name" readonly="1"/>
 						</group>
 					</group>
-					
 				</form>
 			</field>
 		</record>
@@ -321,7 +322,6 @@
 				</tree>
 			</field>
 		</record>
-		
 		
 		<record id="tma_dynamic_indent_line" model="ir.actions.act_window">
 			<field name="name">Dynamic Length Items</field>
@@ -346,16 +346,13 @@
             <field name="act_window_id" ref="tma_dynamic_indent_line"/>
         </record>
 		
-		
-		
-		
 		<!-- Department Indent -->
 		<menuitem action="action_kg_depindent_form" id="iam_depindent" name="Department Indent" parent="kg_menus.ipm_dep_indent_menu" sequence="1"/>
-
+		
 		<!-- Department Indent Line-->
 		<menuitem action="action_kg_depindent_line_form" id="iam_depindent_line" name="Item Details" parent="kg_menus.ipm_dep_indent_menu" sequence="2"/>
 		
 		<menuitem action="tma_dynamic_indent_line" id="tam_dynamic_depindent_line" parent="kg_menus.ipm_dep_indent_menu" sequence="3"/>
-
+		
     </data>
 </openerp>

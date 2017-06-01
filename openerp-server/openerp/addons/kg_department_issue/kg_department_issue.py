@@ -136,7 +136,8 @@ class kg_department_issue(osv.osv):
 							number_dec = str(qty-int(qty))[1:]
 							number_dec = float(number_dec)
 							if number_dec > 0.00:
-								raise osv.except_osv(_('Warning!'),_('System not allow to issue %s. Insufficient MS Qty"'%(item.product_id.name)))
+								raise osv.except_osv(_('Warning!'),
+									_('System not allow to issue %s. Insufficient MS Qty"'%(item.product_id.name)))
 							else:
 								pass
 		return True
@@ -280,6 +281,9 @@ class kg_department_issue(osv.osv):
 						'issue_qty':cutting_qty,
 						'issue_qty_2':cutting_qty,
 						'indent_qty':qty,
+						'length':group[0].length,
+						'breadth':group[0].breadth,
+						'uom_conversation_factor':group[0].uom_conversation_factor,
 						'name':prod_browse.name,
 						'location_id':main_location,
 						'location_dest_id':dep_stock_location,
@@ -849,6 +853,11 @@ class kg_department_issue_line(osv.osv):
 		'order_priority': fields.related('wo_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True),
 		'accept_date': fields.date('Accepted Date'),
 		'remark_id': fields.many2one('kg.rejection.master','Rejection Remarks'),
+		'dep_id': fields.related('issue_id','department_id',relation='kg.depmaster',type='many2one',string='Department Name',store=True),
+		'dep_code': fields.related('dep_id','name',type='char',string='Department Code',store=True),
+		'length': fields.float('Length',readonly=True),
+		'breadth': fields.float('Breadth',readonly=True),
+		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
 		
 		## Child Tables Declaration
 		
