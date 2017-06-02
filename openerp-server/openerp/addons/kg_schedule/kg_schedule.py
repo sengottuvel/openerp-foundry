@@ -1821,7 +1821,8 @@ class kg_schedule(osv.osv):
 											'moc_id': ms_indent_item['moc_id'],
 											'length': length,
 											'breadth': ms_raw_rec.breadth,
-											'flag_dynamic_length': flag_dynamic_length
+											'flag_dynamic_length': flag_dynamic_length,
+											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor
 										}
 
 										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
