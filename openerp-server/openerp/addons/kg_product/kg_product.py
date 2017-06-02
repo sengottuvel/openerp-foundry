@@ -65,6 +65,7 @@ class kg_product(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'sleeve_dia': fields.char('Sleeve dia(MM)'),
 		'coupling_make': fields.many2one('kg.brand.master','Coupling Make'),
+		'is_depreciation': fields.boolean('Is Depreciation'),
 		
 		## Child 
 		
