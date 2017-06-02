@@ -241,20 +241,6 @@ class kg_crm_offer(osv.osv):
 		
 	}
 	
-	def _spl_name(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.customer_po_no:
-			customer_po_no = ''.join(c for c in rec.customer_po_no if c in '!@#$%^~*{}?+/=')
-			if customer_po_no:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Customer PO No.!'))
-		if rec.dealer_po_no:
-			dealer_po_no = ''.join(c for c in rec.dealer_po_no if c in '!@#$%^~*{}?+/=')
-			if dealer_po_no:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Dealer PO No.!'))
-		return True
-		
 	def _supervision(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.line_supervision_ids:
@@ -340,7 +326,6 @@ class kg_crm_offer(osv.osv):
 		return True
 	
 	_constraints = [
-		(_spl_name, 'Special Character Not Allowed!', ['']),
 		(_supervision, 'Supervision more than one not allowed!', ['']),
 		#~ (_exceed_discount, 'Discount more than confirgured not allowed!', ['']),
 		]
