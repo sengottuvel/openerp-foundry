@@ -145,7 +145,7 @@ class kg_department_issue(osv.osv):
 	_constraints = [
 		
 		(_issdate_validation, 'Issue Date should not be greater than current date !!',['issue_date']),
-		(_dp2_qty_validation, 'Qty mismatched',['']),
+		#~ (_dp2_qty_validation, 'Qty mismatched',['']),
 		
 		]
 	
