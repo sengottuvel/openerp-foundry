@@ -252,7 +252,8 @@ class kg_department_issue(osv.osv):
 							cutting_qty = group[0].issue_pending_qty / (group[0].qty/group[0].cutting_qty)
 						else:
 							cutting_qty = qty
-					
+					else:
+						cutting_qty = qty
 					depindent_line_ids = map(lambda x:x.id,group)
 					prod_browse = group[0].product_id
 					ms_bot_id = group[0].ms_bot_id.id
