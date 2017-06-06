@@ -1264,6 +1264,9 @@ class kg_quotation_entry_header(osv.osv):
 					for items in resultant:
 						po_line_vals = {
 							'product_id': items['product_id'],
+							'brand_id': items['brand_id'],
+							'moc_id': items['moc_id'],
+							'moc_id_temp': items['moc_id_temp'],
 							'product_uom_id': items['product_uom_id'],
 							'order_id': po_id,
 							'price_unit': items['price_unit'],
