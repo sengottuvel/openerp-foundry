@@ -134,7 +134,8 @@ class kg_crm_offer(osv.osv):
 		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'road_permit': fields.selection([('yes','Yes'),('no','No')],'Road Permit',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'l_d_clause': fields.selection([('5_1','0.5 - 1.0% of total order value'),('1_10','1 to 10% of total order value'),('nill','Nill')],'L. D. CLAUSE / Penalty',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'l_d_clause': fields.char('L. D. CLAUSE / Penalty',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		#~ 'l_d_clause': fields.selection([('5_1','0.5 - 1.0% of total order value'),('1_10','1 to 10% of total order value'),('nill','Nill')],'L. D. CLAUSE / Penalty',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'pump_per_flag': fields.boolean('Pump',readonly=True, states={'draft':[('readonly',False)]}),
 		'spare_per_flag': fields.boolean('Spare',readonly=True, states={'draft':[('readonly',False)]}),
 		'access_per_flag': fields.boolean('Accessories',readonly=True, states={'draft':[('readonly',False)]}),
@@ -150,6 +151,7 @@ class kg_crm_offer(osv.osv):
 		'o_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_customer_discount': fields.float('Customer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_tax': fields.float('Tax(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_ed': fields.float('ED(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'off_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Offer Status',readonly=False,states={'wo_created':[('readonly',True)],'wo_released':[('readonly',True)]}),
 		'dummy_flag': fields.boolean('Dummy Flag'),
 		
@@ -429,6 +431,7 @@ class kg_crm_offer(osv.osv):
 									  'insurance_in_ex':entry.o_insurance_in_ex,
 									  'customer_discount':entry.o_customer_discount,
 									  'tax':entry.o_tax,
+									  'tax':entry.o_ed,
 									  })
 		return True
 	

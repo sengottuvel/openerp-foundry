@@ -96,6 +96,7 @@
 								</div>
 								<field name="o_customer_discount"/>
 								<field name="o_tax"/>
+								<field name="o_ed"/>
 							</group>
 							<button name="update_percentage" type="object" string="Update" states="draft" class="oe_highlight"/>
 						</group>
