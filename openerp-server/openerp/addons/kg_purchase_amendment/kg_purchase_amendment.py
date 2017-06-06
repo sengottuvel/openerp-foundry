@@ -626,6 +626,7 @@ class kg_purchase_amendment(osv.osv):
 							raise osv.except_osv(_('If you want to change PO Product'),
 								_('Select PI for this Product')) 
 				elif amend_obj.po_type == 'direct' or amend_obj.po_type == 'fromquote':
+					print"amend_line.po_line_id.idamend_line.po_line_id.id",amend_line.po_line_id.id
 					grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
 					print"grn_idgrn_id",grn_id
 					if grn_id:
