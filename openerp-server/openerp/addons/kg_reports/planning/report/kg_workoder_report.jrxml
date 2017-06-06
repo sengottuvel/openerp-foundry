@@ -142,11 +142,8 @@ case
 when wo.road_permit = 'yes' then 'Yes'
 when wo.road_permit = 'no' then 'No'
 else '-' end as road_permit,
-case
-when wo.l_d_clause = '5_1' then '0.5 - 1.0% of total order value'
-when wo.l_d_clause = '1_10' then '1 to 10% of total order value'
-when wo.l_d_clause = 'nill' then 'Nill'
-else '-' end as l_d_clause,
+
+coalesce(wo.l_d_clause,'-') as l_d_clause,
 
 case
 when wo.excise_duty = 'inclusive' then 'Inclusive'

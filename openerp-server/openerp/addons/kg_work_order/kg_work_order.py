@@ -105,7 +105,8 @@ class kg_work_order(osv.osv):
 		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval'),
 		'road_permit': fields.selection([('yes','Yes'),('no','No')],'Road Permit'),
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
-		'l_d_clause': fields.selection([('5_1','0.5 - 1.0% of total order value'),('1_10','1 to 10% of total order value'),('nill','Nill')],'L. D. CLAUSE / Penalty'),
+		#~ 'l_d_clause': fields.selection([('5_1','0.5 - 1.0% of total order value'),('1_10','1 to 10% of total order value'),('nill','Nill')],'L. D. CLAUSE / Penalty'),
+		'l_d_clause':fields.char('L. D. CLAUSE / Penalty'),
 		'flag_data_bank': fields.boolean('Is Data WO'),
 		
 		### Entry Info ####
