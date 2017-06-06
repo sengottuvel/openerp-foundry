@@ -13,7 +13,7 @@
 
 (select description,value,'' as remarks,1 as type,
 DENSE_RANK() OVER (ORDER BY id asc) AS test
- from ch_packing_default_details where header_id = $P{slip_id}
+ from ch_packing_default_details where header_id = $P{slip_id} and flag_is_applicable = 't'
 order by id)
 
 union
@@ -22,34 +22,37 @@ union
 select *,7 as test from (
 
 
-(select description,qty::char as value,remarks,2 as type from ch_packing_foundry_details where header_id =$P{slip_id}   order by id asc)
+(select description,qty::char as value,remarks,2 as type from ch_packing_foundry_details where header_id =$P{slip_id} and flag_is_applicable = 't' order by id asc)
 
 union
 
-(select description,qty::char as value,remarks,3 as type from ch_packing_ms_details where header_id = $P{slip_id}
+(select description,qty::char as value,remarks,3 as type from ch_packing_ms_details where header_id = $P{slip_id}  and flag_is_applicable = 't'
 order by id asc)
 
 union
 
-(select description,qty::char as value,remarks,4 as type from ch_packing_bot_details where header_id = $P{slip_id}
+(select description,qty::char as value,remarks,4 as type from ch_packing_bot_details where header_id = $P{slip_id}  and flag_is_applicable = 't'
 order by id asc)
 
 union
 
 (select description,qty::char as value,remarks,5 as type from ch_packing_accessories_foundry
 where header_id in (select id from ch_packing_accessories where header_id = $P{slip_id})
+ and flag_is_applicable = 't'
 order by id asc)
 
 union
 
 (select description,qty::char as value,remarks,6 as type from ch_packing_accessories_ms
 where header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )
+ and flag_is_applicable = 't'
 order by id asc)
 
 union
 
 (select description,qty::char as value,remarks,7 as type from ch_packing_accessories_bot
 where header_id in (select id from ch_packing_accessories where header_id =$P{slip_id})
+ and flag_is_applicable = 't'
 order by id asc
 )
 
@@ -59,7 +62,7 @@ union
 check_master.name as description,pack_check.value::char as value,pack_check.remarks,8 as type
 from ch_packing_checklist pack_check
 left join kg_packing_checklist check_master on (check_master.id = pack_check.checklist_id)
-where pack_check.header_id = $P{slip_id}
+where pack_check.header_id = $P{slip_id}  and pack_check.flag_is_applicable = 't'
 order by pack_check.id asc)
 
 

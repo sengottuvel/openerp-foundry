@@ -16,7 +16,7 @@
 
 (select '' as moc,description,value,'' as material_code,1 as type,
 DENSE_RANK() OVER (ORDER BY id asc) AS test
- from ch_packing_default_details where header_id = $P{slip_id}
+ from ch_packing_default_details where header_id = $P{slip_id} and flag_is_applicable = 't'
 order by id)
 
 union
@@ -29,7 +29,7 @@ select *,7 as test from (
 left join kg_moc_master moc on (moc.id = pack_foun.moc_id)
 
 
-where pack_foun.header_id =$P{slip_id}
+where pack_foun.header_id =$P{slip_id} and pack_foun.flag_is_applicable = 't'
 
 order by pack_foun.id asc)
 
@@ -38,14 +38,14 @@ union
 (select moc.name as moc,pack_ms.description,pack_ms.qty::char as value,pack_ms.material_code,3 as type from ch_packing_ms_details pack_ms
 
 left join kg_moc_master moc on (moc.id = pack_ms.moc_id)
-where pack_ms.header_id = $P{slip_id}
+where pack_ms.header_id = $P{slip_id}  and pack_ms.flag_is_applicable = 't'
 order by pack_ms.id asc)
 
 union
 
 (select moc.name as moc,pack_bot.description,pack_bot.qty::char as value,pack_bot.material_code,4 as type from ch_packing_bot_details pack_bot
 left join kg_moc_master moc on (moc.id = pack_bot.moc_id)
-where pack_bot.header_id = $P{slip_id}
+where pack_bot.header_id = $P{slip_id}  and pack_bot.flag_is_applicable = 't'
 order by pack_bot.id asc)
 
 union
@@ -53,21 +53,21 @@ union
 (select moc.name as moc,acc_foun.description,acc_foun.qty::char as value,acc_foun.material_code,5 as type from ch_packing_accessories_foundry acc_foun
 
 left join kg_moc_master moc on (moc.id = acc_foun.moc_id)
-where acc_foun.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )
+where acc_foun.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )  and acc_foun.flag_is_applicable = 't'
 order by acc_foun.id asc)
 
 union
 
 (select moc.name as moc,acc_ms.description,acc_ms.qty::char as value,acc_ms.material_code,6 as type from ch_packing_accessories_ms acc_ms
 left join kg_moc_master moc on (moc.id = acc_ms.moc_id)
-where acc_ms.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )
+where acc_ms.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )  and acc_ms.flag_is_applicable = 't'
 order by acc_ms.id asc)
 
 union
 
 (select moc.name as moc,acc_bot.description,acc_bot.qty::char as value,acc_bot.material_code,7 as type from ch_packing_accessories_bot acc_bot
 left join kg_moc_master moc on (moc.id = acc_bot.moc_id)
-where acc_bot.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id})
+where acc_bot.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id}) and acc_bot.flag_is_applicable = 't'
 order by acc_bot.id asc
 )
 
@@ -77,7 +77,7 @@ union
 '' as moc,check_master.name as description,pack_check.value::char as value,'' as material_code,8 as type
 from ch_packing_checklist pack_check
 left join kg_packing_checklist check_master on (check_master.id = pack_check.checklist_id)
-where pack_check.header_id = $P{slip_id}
+where pack_check.header_id = $P{slip_id} and pack_check.flag_is_applicable = 't'
 order by pack_check.id asc)
 
 ) as a
