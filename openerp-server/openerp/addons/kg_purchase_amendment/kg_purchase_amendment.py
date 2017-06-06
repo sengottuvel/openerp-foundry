@@ -605,6 +605,7 @@ class kg_purchase_amendment(osv.osv):
 					else:
 						if amend_line.po_line_id.id:
 							grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
+							print"grn_idgrn_id",grn_id
 							if grn_id:
 								grn_bro = self.pool.get('po.grn.line').browse(cr, uid, grn_id[0])
 								if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
@@ -626,8 +627,11 @@ class kg_purchase_amendment(osv.osv):
 								_('Select PI for this Product')) 
 				elif amend_obj.po_type == 'direct' or amend_obj.po_type == 'fromquote':
 					grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
+					print"grn_idgrn_id",grn_id
 					if grn_id:
 						grn_bro = self.pool.get('po.grn.line').browse(cr, uid, grn_id[0])
+						print"grn_bro.po_grn_qtygrn_bro.po_grn_qty",grn_bro.po_grn_qty
+						print"amend_line.product_qty_amendamend_line.product_qty_amend",amend_line.product_qty_amend
 						if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
 							pass
 						else:

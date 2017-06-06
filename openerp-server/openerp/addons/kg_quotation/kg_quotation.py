@@ -691,7 +691,7 @@ class kg_quotation_entry_header(osv.osv):
 		## Basic Info
 		
 		'name': fields.char('Quotation No.', size=500,readonly=True),
-		'state': fields.selection([('draft', 'Draft'),('confirmed', 'WFA'),('approved', 'Approved'),('cancel', 'Cancel'),('po_generate', 'PO Generate'),], 'State',readonly=True),
+		'state': fields.selection([('draft', 'Draft'),('confirmed', 'WFA'),('approved', 'Approved'),('cancel', 'Cancel'),('po_generate', 'PO Generated'),], 'State',readonly=True),
 		'comparison_remarks': fields.text('Remarks'),
 		'remarks': fields.text('Approve/Reject Remarks'),
 		
