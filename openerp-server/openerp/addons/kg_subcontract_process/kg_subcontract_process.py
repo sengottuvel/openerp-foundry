@@ -231,9 +231,7 @@ class kg_subcontract_wo(osv.osv):
 						'moc_id':item.moc_id.id,
 						'position_id':item.position_id.id,
 						'pump_model_id':item.pump_model_id.id,
-						'pattern_id':item.pattern_id.id,
-						'pattern_code':item.pattern_code,
-						'pattern_name':item.pattern_name,
+						'pattern_id':item.pattern_id.id,						
 						'item_code':item.item_code,
 						'item_name':item.item_name,
 						'qty':item.pending_qty ,
@@ -253,9 +251,7 @@ class kg_subcontract_wo(osv.osv):
 						'moc_id':item.moc_id.id,
 						'position_id':item.position_id.id,
 						'pump_model_id':item.pump_model_id.id,
-						'pattern_id':item.pattern_id.id,
-						'pattern_code':item.pattern_code,
-						'pattern_name':item.pattern_name,
+						'pattern_id':item.pattern_id.id,						
 						'item_code':item.item_code,
 						'item_name':item.item_name,
 						'qty':item.pending_qty ,
@@ -625,11 +621,11 @@ class ch_subcontract_wo_line(osv.osv):
 		'position_id': fields.many2one('kg.position.number','Position No.', required=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number'),
-		'ms_shop_id': fields.many2one('kg.machine.shop','MS Item Name', domain="[('type','=','ms')]"),
-		'pattern_code': fields.char('Pattern Code'),
-		'pattern_name': fields.char('Pattern Name'),
+		'ms_shop_id': fields.many2one('kg.machine.shop','MS Item Code', domain="[('type','=','ms')]"),
+		'pattern_code': fields.char('MS Item Code'),
+		'pattern_name': fields.char('MS Item Name'),
 		'item_code': fields.char('Item Code'),
-		'item_name': fields.char('Item Name'),
+		'item_name': fields.char('Pattern Name'),
 		'entry_type': fields.selection([('direct','Direct'),('manual','Manual')], 'Entry Type', readonly=True),
 		
 		
@@ -687,7 +683,7 @@ class ch_subcontract_wo_line(osv.osv):
 			pattern_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pattern_id)
 			print"pattern_rec.codepattern_rec.code",pattern_rec.name
 			print"pattern_rec.pattern_namepattern_rec.pattern_name",pattern_rec.pattern_name
-			value = {'pattern_code':pattern_rec.name,'pattern_name': pattern_rec.pattern_name,'item_code': pattern_rec.name,'item_name':pattern_rec.pattern_name}
+			value = {'item_code': pattern_rec.name,'item_name':pattern_rec.pattern_name}
 		return {'value': value}
 		
 	def onchange_ms(self, cr, uid, ids,ms_shop_id, context=None):
@@ -696,7 +692,7 @@ class ch_subcontract_wo_line(osv.osv):
 			print"sssssssssss",ms_shop_id
 			ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_shop_id)
 			
-			value = {'item_code': ms_rec.code,'item_name':ms_rec.name}
+			value = {'pattern_code': ms_rec.code,'pattern_name':ms_rec.name}
 		return {'value': value}
 	
 	
@@ -732,8 +728,7 @@ class ch_wo_operation_details(osv.osv):
 	_name = "ch.wo.operation.details"
 	_description = "WO Operation Details"
 	
-	_columns = {
-		
+	_columns = {		
 		
 		'header_id':fields.many2one('ch.subcontract.wo.line', 'WO line Details', required=True, ondelete='cascade'),		
 		'position_id': fields.many2one('kg.position.number','Position No'),
@@ -1099,7 +1094,8 @@ class kg_subcontract_dc(osv.osv):
 						if (line_item.sc_wo_line_id.sc_dc_qty + line_item.qty) < line_item.sc_wo_line_id.qty:
 							wo_dc_state = 'partial'
 						direct_sc_dc_qty = line_item.sc_id.sc_dc_qty + line_item.qty	
-						
+					
+					
 					
 					self.pool.get('ch.subcontract.dc.line').write(cr,uid,line_item.id,{'pending_qty':line_item.qty,'entry_type':'sub_contract'})
 						
@@ -1110,7 +1106,10 @@ class kg_subcontract_dc(osv.osv):
 								{'pending_qty': line_item.sc_wo_line_id.pending_qty - line_item.qty,'sc_dc_qty': line_item.sc_wo_line_id.sc_dc_qty + line_item.qty,'dc_state': wo_dc_state})				
 															
 					
-					
+			if 	entry.line_ids:
+				for line in entry.line_ids:
+					if line.ms_id:
+						self.pool.get('kg.machineshop').write(cr, uid, line.ms_id.id,{'ms_state': 'op_in_sc'})						
 			sc_wo_name = ''	
 			sc_wo_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.dc')])
 			rec = self.pool.get('ir.sequence').browse(cr,uid,sc_wo_seq_id[0])
@@ -1580,7 +1579,7 @@ class kg_subcontract_inspection(osv.osv):
 		inward_line_obj = self.pool.get('ch.subcontract.inward.line')
 		sub_obj = self.pool.get('ch.subcontract.inspection.operation.line')
 		dim_obj = self.pool.get('ch.inspection.dimension.details')
-		ch_pos_obj = self.pool.get('ch.kg.position.number')			
+		ch_pos_obj = self.pool.get('ch.kg.position.number')				
 		del_sql = """ delete from ch_subcontract_inspection_line where header_id=%s """ %(ids[0])
 		cr.execute(del_sql)
 		cr.execute(""" select order_id from m2m_work_order_inspection_details where inspection_id = %s """ %(entry.id))
@@ -1593,11 +1592,11 @@ class kg_subcontract_inspection(osv.osv):
 			inward_line_data = cr.dictfetchall()
 			print"inward_line_data",inward_line_data	
 			for line_item in inward_line_data:						
-				inward_line_record = inward_line_obj.browse(cr, uid, line_item['id'])			
-				print"inward_line_record",inward_line_record
+				inward_line_record = inward_line_obj.browse(cr, uid, line_item['id'])					
 				vals = {
 				
 					'header_id': entry.id,
+					'customer_id': inward_line_record.order_id.partner_id.id,
 					'sc_inward_line_id': inward_line_record.id,
 					'sc_id':inward_line_record.sc_id.id,
 					'qty':inward_line_record.pending_qty,								
@@ -1978,6 +1977,9 @@ class kg_subcontract_inspection(osv.osv):
 												ms_operation_id = ms_operation_obj.create(cr, uid, operation_vals)
 												
 												ms_operation_obj.write(cr, uid, ms_operation_id, {'last_operation_check_id':ms_operation_id})
+												
+												### MS State updation ##
+												self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, item.ms_id.id,ms_operation_id)
 												
 												### Creating Dimension Details ###
 												
@@ -2615,6 +2617,10 @@ class kg_subcontract_inspection(osv.osv):
 								
 								ms_operation_obj.write(cr, uid, ms_operation_id, {'last_operation_check_id':ms_operation_id})
 								
+								### MS State updation ##
+								self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, item.ms_id.id,ms_operation_id)
+												
+								
 								### Creating Dimension Details ###
 								
 								if item.position_id.id != False:
@@ -3083,6 +3089,7 @@ class ch_subcontract_inspection_line(osv.osv):
 		
 		'header_id': fields.many2one('kg.subcontract.inward','Header Id'),
 		'sub_wo_id': fields.many2one('kg.subcontract.wo','SUB Work Id'),
+		'customer_id': fields.many2one('res.partner','Customer Name'),
 		'contractor_id': fields.related('header_id','contractor_id', type='many2one', relation='res.partner', string='Contractor Name', store=True, readonly=True),
 		'inward_no': fields.related('header_id','name', type='char', string='Inward No', store=True, readonly=True),
 		
