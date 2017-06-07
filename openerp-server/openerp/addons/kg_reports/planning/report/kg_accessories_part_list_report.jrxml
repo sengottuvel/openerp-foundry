@@ -13,8 +13,9 @@ sub.pattern_no,
 sub.pattern_name,
 sub.moc_name,
 sub.qty,
-sub.access_id
-
+sub.access_id,
+sub.acc_name,
+case when ((row_number() OVER (PARTITION by sub.acc_name)) = 1 ) then sub.acc_name else '-' end as ref_acc_name
 
 from (
 
@@ -28,15 +29,22 @@ pattern.name as pattern_no,
 pattern.pattern_name as pattern_name,
 moc.name as moc_name,
 ch_bom.qty as qty,
-ch_access.id as access_id
+ch_access.id as access_id,
+case
+when accessories.is_coupling_flag = True then (coalesce(accessories.name,'-')||' - Motor Shaft dia -'||coalesce(primemover.shaft_dia::text,'-')||'- Pump Shaft Dia - '||coalesce(pump_type.pump_shaft_dia_at::text,''))
+else '-' end as acc_name
 
 FROM ch_work_order_details work_order
 
 left join ch_wo_accessories ch_access on (ch_access.header_id = work_order.id)
+left join kg_accessories_master accessories on (accessories.id = ch_access.access_id)
+left join kg_pumpmodel_master pump_type on (pump_type.id = work_order.pump_model_id)
 left join ch_wo_accessories_foundry ch_bom on (ch_bom.header_id = ch_access.id)
 left join kg_pattern_master pattern on (pattern.id = ch_bom.pattern_id)
 left join kg_position_number position_num on (position_num.id = ch_bom.position_id)
 left join kg_moc_master moc on (moc.id = ch_bom.moc_id)
+left join ch_kg_crm_pumpmodel enq_line on (enq_line.id = work_order.enquiry_line_id)
+left join kg_primemover_master primemover on (primemover.id = enq_line.primemover_id)
 
 where ch_bom.is_applicable = True and
 
@@ -55,15 +63,22 @@ machine.code as pattern_no,
 machine.name as pattern_name,
 moc.name as moc_name,
 ch_machineshop.qty as qty,
-ch_access.id as access_id
+ch_access.id as access_id,
+case
+when accessories.is_coupling_flag = True then (coalesce(accessories.name,'-')||' - Motor Shaft dia -'||coalesce(primemover.shaft_dia::text,'-')||'- Pump Shaft Dia - '||coalesce(pump_type.pump_shaft_dia_at::text,''))
+else '-' end as acc_name
 
 FROM ch_work_order_details work_order
 
 left join ch_wo_accessories ch_access on (ch_access.header_id = work_order.id)
+left join kg_accessories_master accessories on (accessories.id = ch_access.access_id)
+left join kg_pumpmodel_master pump_type on (pump_type.id = work_order.pump_model_id)
 left join ch_wo_accessories_ms ch_machineshop on (ch_machineshop.header_id = ch_access.id)
 left join kg_machine_shop machine on (machine.id = ch_machineshop.ms_id)
 left join kg_position_number position_num on (position_num.id = ch_machineshop.position_id)
 left join kg_moc_master moc on (moc.id = ch_machineshop.moc_id)
+left join ch_kg_crm_pumpmodel enq_line on (enq_line.id = work_order.enquiry_line_id)
+left join kg_primemover_master primemover on (primemover.id = enq_line.primemover_id)
 
 where ch_machineshop.is_applicable = True and
 work_order.id =$P{header_id}
@@ -81,15 +96,22 @@ machine.code as pattern_no,
 machine.name as pattern_name,
 moc.name as moc_name,
 ch_bot.qty as qty,
-ch_access.id as access_id
+ch_access.id as access_id,
+case
+when accessories.is_coupling_flag = True then (coalesce(accessories.name,'-')||' - Motor Shaft dia -'||coalesce(primemover.shaft_dia::text,'-')||'- Pump Shaft Dia - '||coalesce(pump_type.pump_shaft_dia_at::text,''))
+else '-' end as acc_name
 
 FROM ch_work_order_details work_order
 
 left join ch_wo_accessories ch_access on (ch_access.header_id = work_order.id)
+left join kg_accessories_master accessories on (accessories.id = ch_access.access_id)
+left join kg_pumpmodel_master pump_type on (pump_type.id = work_order.pump_model_id)
 left join ch_wo_accessories_bot ch_bot on (ch_bot.header_id = ch_access.id)
 left join kg_machine_shop machine on (machine.id = ch_bot.ms_id)
 left join kg_position_number position_num on (position_num.id = ch_bot.position_id)
 left join kg_moc_master moc on (moc.id = ch_bot.moc_id)
+left join ch_kg_crm_pumpmodel enq_line on (enq_line.id = work_order.enquiry_line_id)
+left join kg_primemover_master primemover on (primemover.id = enq_line.primemover_id)
 
 
 where ch_bot.is_applicable = True and
@@ -104,6 +126,8 @@ work_order.id = $P{header_id}) as sub order by sub.access_id]]>
 		<field name="moc_name" class="java.lang.String"/>
 		<field name="qty" class="java.lang.Integer"/>
 		<field name="access_id" class="java.lang.Integer"/>
+		<field name="acc_name" class="java.lang.String"/>
+		<field name="ref_acc_name" class="java.lang.String"/>
 	</subDataset>
 	<parameter name="printed_by" class="java.lang.String"/>
 	<parameter name="print_date" class="java.lang.String"/>
@@ -284,7 +308,7 @@ and ch_access.id is not null]]>
 					<textFieldExpression><![CDATA[$F{motor_power_frame}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" x="0" y="95" width="70" height="20" isPrintWhenDetailOverflows="true"/>
+					<reportElement stretchType="RelativeToTallestObject" x="0" y="95" width="51" height="20" isPrintWhenDetailOverflows="true"/>
 					<box topPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.75"/>
@@ -296,7 +320,7 @@ and ch_access.id is not null]]>
 					<textFieldExpression><![CDATA["POSI NO"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" x="70" y="95" width="105" height="20" isPrintWhenDetailOverflows="true"/>
+					<reportElement stretchType="RelativeToTallestObject" x="51" y="95" width="105" height="20" isPrintWhenDetailOverflows="true"/>
 					<box topPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.5"/>
@@ -308,7 +332,7 @@ and ch_access.id is not null]]>
 					<textFieldExpression><![CDATA["PAT.NO / Code NO"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" x="175" y="95" width="125" height="20" isPrintWhenDetailOverflows="true"/>
+					<reportElement stretchType="RelativeToTallestObject" x="156" y="95" width="125" height="20" isPrintWhenDetailOverflows="true"/>
 					<box topPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.5"/>
@@ -320,7 +344,7 @@ and ch_access.id is not null]]>
 					<textFieldExpression><![CDATA["PARTNAME"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" x="300" y="95" width="40" height="20" isPrintWhenDetailOverflows="true"/>
+					<reportElement stretchType="RelativeToTallestObject" x="281" y="95" width="24" height="20" isPrintWhenDetailOverflows="true"/>
 					<box topPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.5"/>
@@ -332,7 +356,7 @@ and ch_access.id is not null]]>
 					<textFieldExpression><![CDATA["REQ QTY"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" x="340" y="95" width="47" height="20" isPrintWhenDetailOverflows="true"/>
+					<reportElement stretchType="RelativeToTallestObject" x="305" y="95" width="47" height="20" isPrintWhenDetailOverflows="true"/>
 					<box topPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.5"/>
@@ -344,7 +368,7 @@ and ch_access.id is not null]]>
 					<textFieldExpression><![CDATA["DRG NO"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" x="387" y="95" width="34" height="20" isPrintWhenDetailOverflows="true"/>
+					<reportElement stretchType="RelativeToTallestObject" x="353" y="95" width="34" height="20" isPrintWhenDetailOverflows="true"/>
 					<box topPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.5"/>
@@ -367,7 +391,7 @@ and ch_access.id is not null]]>
 						</datasetRun>
 						<jr:listContents height="20" width="565">
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="70" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2" leftPadding="2" bottomPadding="2">
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.75"/>
@@ -379,7 +403,7 @@ and ch_access.id is not null]]>
 								<textFieldExpression><![CDATA[$F{position_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="70" y="0" width="105" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="51" y="0" width="105" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2" leftPadding="2" bottomPadding="2">
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
@@ -391,7 +415,7 @@ and ch_access.id is not null]]>
 								<textFieldExpression><![CDATA[$F{pattern_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="175" y="0" width="125" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="156" y="0" width="125" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2" leftPadding="2" bottomPadding="2">
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
@@ -403,7 +427,7 @@ and ch_access.id is not null]]>
 								<textFieldExpression><![CDATA[$F{pattern_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="300" y="0" width="40" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="281" y="0" width="24" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2" bottomPadding="2" rightPadding="2">
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
@@ -415,7 +439,7 @@ and ch_access.id is not null]]>
 								<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="340" y="0" width="47" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="305" y="0" width="47" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2" leftPadding="2" bottomPadding="2">
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
@@ -427,7 +451,7 @@ and ch_access.id is not null]]>
 								<textFieldExpression><![CDATA[$F{drawing_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="387" y="0" width="34" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="353" y="0" width="34" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2" leftPadding="2" bottomPadding="2">
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
@@ -440,7 +464,7 @@ and ch_access.id is not null]]>
 								<textFieldExpression><![CDATA[$F{mtl_form}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="421" y="0" width="144" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="387" y="0" width="75" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2" leftPadding="2" bottomPadding="2">
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.0"/>
@@ -452,11 +476,24 @@ and ch_access.id is not null]]>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
 							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" x="462" y="0" width="103" height="20" isPrintWhenDetailOverflows="true"/>
+								<box topPadding="2" leftPadding="2" bottomPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.0"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{ref_acc_name}]]></textFieldExpression>
+							</textField>
 						</jr:listContents>
 					</jr:list>
 				</componentElement>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" x="421" y="95" width="144" height="20" isPrintWhenDetailOverflows="true"/>
+					<reportElement stretchType="RelativeToTallestObject" x="387" y="95" width="75" height="20" isPrintWhenDetailOverflows="true"/>
 					<box topPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.5"/>
@@ -467,6 +504,19 @@ and ch_access.id is not null]]>
 						<font size="8" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["MOC"]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" x="462" y="95" width="103" height="20" isPrintWhenDetailOverflows="true"/>
+					<box topPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Accessory Name"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
