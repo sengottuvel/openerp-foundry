@@ -891,7 +891,7 @@ class kg_purchase_amendment(osv.osv):
 				pol_record = amend_line.po_line_id
 				diff_qty = amend_line.product_qty - amend_line.product_qty_amend
 				pending_diff_qty = amend_line.product_qty - amend_line.pending_qty
-				if pol_record.pi_line_id.id:
+				if pol_record.pi_line_id:
 					if amend_line.product_qty < amend_line.product_qty_amend:
 						pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
 						if pi_line_record.pending_qty <= 0:
