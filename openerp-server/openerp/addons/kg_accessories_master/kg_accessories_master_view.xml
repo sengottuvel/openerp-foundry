@@ -2,7 +2,7 @@
 <openerp>
 	<data>	
 
-	<!-- Form View Start -->
+	<!-- Form View Start --> 
 	
 		<record id="m_form_v_accessories_master" model="ir.ui.view">
 			<field name="name">Accessories Master Form</field>
@@ -36,6 +36,7 @@
 					<group>
 						<group>						
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+							<field name="is_coupling_flag" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							<field name="access_cate_id" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 						</group>

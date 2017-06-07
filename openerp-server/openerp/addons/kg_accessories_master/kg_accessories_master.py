@@ -83,9 +83,10 @@ class kg_accessories_master(osv.osv):
 		'access_cate_id': fields.many2one('kg.accessories.category','Accessories Category',domain="[('state','=','approved')]"),
 		'access_id': fields.many2one('kg.accessories.master','Source Accessories',domain="[('state','=','approved')]"),
 		'copy_flag':fields.boolean('Copy Flag'),		
-		'product_id': fields.many2one('product.product','Item Name'), 		
+		'product_id': fields.many2one('product.product','Item Name'), 
+		'is_coupling_flag': fields.boolean('Is Coupling'),		
 		
-		## Child Tables Declaration	
+		## Child Tables Declaration	 
 		
 		'line_ids': fields.one2many('ch.kg.accessories.master','header_id','BOT Line Details',readonly=False,states={'approved':[('readonly',True)]}),
 		'line_ids_a':fields.one2many('ch.accessories.ms', 'header_id', "Machine Shop Line",readonly=False,states={'approved':[('readonly',True)]}),
