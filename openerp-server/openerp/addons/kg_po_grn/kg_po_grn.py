@@ -846,9 +846,24 @@ class kg_po_grn(osv.osv):
 			
 			for line in grn_entry.line_ids:
 				if line.po_grn_qty > line.recvd_qty:
-					raise osv.except_osv(_('Warning!'),
-						_('Accepted qty should not be greater than Received qty!'))
-			
+					raise osv.except_osv(_('Warning!'),_('Accepted qty should not be greater than Received qty!'))
+				
+				# Depreciation creation process start
+				if line.product_id.is_depreciation == True:
+					depre_obj = self.pool.get('kg.depreciation')
+					depre_id = depre_obj.create(cr,uid,{'product_id': line.product_id.id,
+														'grn_no': grn_entry.name,
+														'grn_date': grn_entry.grn_date,
+														'qty': line.po_grn_qty,
+														'entry_mode': 'auto',
+														'each_val_actual': line.po_line_id.price_unit,
+														'tot_val_actual': line.po_line_id.price_unit * line.po_grn_qty,
+														'each_val_crnt': line.po_line_id.price_unit,
+														'tot_val_crnt': line.po_line_id.price_unit * line.po_grn_qty,
+														})
+					print"depre_iddepre_id",depre_id
+				# Depreciation creation process end
+				
 				# Expiry date validation start
 				
 				if line.product_id.flag_expiry_alert == True:
