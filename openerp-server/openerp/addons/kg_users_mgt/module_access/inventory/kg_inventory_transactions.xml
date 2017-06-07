@@ -794,6 +794,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
 		</record>
 		
+		<record id="t_inventory_kg_depreciation" model="ir.model.access">
+			<field name="model_id" ref="kg_depreciation.model_kg_depreciation"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Depreciation</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
+		</record>
+		
 </data>
 </openerp>
 	
