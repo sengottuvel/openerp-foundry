@@ -431,7 +431,7 @@ class kg_crm_offer(osv.osv):
 									  'insurance_in_ex':entry.o_insurance_in_ex,
 									  'customer_discount':entry.o_customer_discount,
 									  'tax':entry.o_tax,
-									  'tax':entry.o_ed,
+									  'ed':entry.o_ed,
 									  })
 		return True
 	
