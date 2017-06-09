@@ -84,7 +84,8 @@ class kg_accessories_master(osv.osv):
 		'access_id': fields.many2one('kg.accessories.master','Source Accessories',domain="[('state','=','approved')]"),
 		'copy_flag':fields.boolean('Copy Flag'),		
 		'product_id': fields.many2one('product.product','Item Name'), 
-		'is_coupling_flag': fields.boolean('Is Coupling'),		
+		'is_coupling_flag': fields.boolean('Is Coupling'),	
+		'is_pump_acc_flag': fields.boolean('Is Pump Accessories'),		
 		
 		## Child Tables Declaration	 
 		
