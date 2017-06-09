@@ -547,6 +547,7 @@ class kg_crm_offer(osv.osv):
 																  'road_permit': entry.road_permit,
 																  'inspection': entry.inspection,
 																  'l_d_clause': entry.l_d_clause,
+																  'flag_data_bank': entry.flag_data_bank,
 																	})
 			if wo_id:
 				if entry.line_pump_ids:
