@@ -113,12 +113,10 @@ class kg_fluid_master(osv.osv):
 			cr.execute(""" select upper(name) from kg_fluid_master where upper(name)  = '%s' """ %(name))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				raise osv.except_osv(_('Warning!'),
-					_('Fluid name must be unique!'))
-			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
-			if name_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Name!'))			
+				raise osv.except_osv(_('Warning!'),_('Fluid name must be unique!'))
+			#~ name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
+			#~ if name_special_char:
+				#~ raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in Name!'))			
 		return True
 			
 	def entry_cancel(self,cr,uid,ids,context=None):
