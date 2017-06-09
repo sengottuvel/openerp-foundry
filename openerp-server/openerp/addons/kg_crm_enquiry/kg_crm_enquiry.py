@@ -1444,7 +1444,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'spare_pump_id': fields.many2one('kg.pumpmodel.master','Pump Model'),		
 		'size_suctionx': fields.char('Size-SuctionX Delivery(mm)'),
 		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',domain="[('flange_type','=',flange_type),('header_id','=',pumpseries_id)]"),
-		'efficiency_in': fields.float('Efficiency in % Wat'),
+		'efficiency_in': fields.float('Efficiency in % W/L'),
 		'npsh_r_m': fields.float('NPSH R - M'),
 		'best_efficiency': fields.float('Best Efficiency NPSH in M'),
 		'bkw_water': fields.float('BKW Water'),
