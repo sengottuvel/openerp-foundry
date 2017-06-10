@@ -420,7 +420,13 @@ class kg_crm_offer(osv.osv):
 	
 	def update_to_all(self,cr,uid,entry,obj,line_ids,context=None):
 		for item in line_ids:
+			if entry.o_sam_ratio:
+				sam_ratio_flag = True
+			else:
+				sam_ratio_flag = False
 			obj.write(cr,uid,item.id,{'sam_ratio':entry.o_sam_ratio,
+									  'sam_ratio_flag':sam_ratio_flag,
+									  'works_value':entry.o_sam_ratio*item.prime_cost,
 									  'dealer_discount':entry.o_dealer_discount,
 									  'special_discount':entry.o_special_discount,
 									  'p_f':entry.o_p_f,
@@ -2175,6 +2181,9 @@ class ch_pump_offer(osv.osv):
 		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
+		'works_value': fields.float('Works Value'),
+		'works_value_flag': fields.boolean('Works Value Flag'),
+		'sam_ratio_flag': fields.boolean('Sam Ratio Flag'),
 		'total_price': fields.float('Total Price(%)'),
 		'wo_line_id': fields.many2one('ch.work.order.details','WO Line'),
 		
@@ -2207,6 +2216,14 @@ class ch_pump_offer(osv.osv):
 		#~ 'load_bom':False,
 		#~ 
 	#~ }
+	
+	def onchange_sam_ratio(self, cr, uid, ids, prime_cost, works_value, works_value_flag, sam_ratio, sam_ratio_flag, context=None):
+		value = {'works_value':'','sam_ratio':''}
+		if works_value_flag == True and works_value:
+			value = {'sam_ratio': float(works_value)/float(prime_cost)}
+		elif sam_ratio_flag == True and sam_ratio:
+			value = {'works_value': prime_cost * sam_ratio}
+		return {'value': value}
 	
 ch_pump_offer()
 
@@ -2528,6 +2545,9 @@ class ch_spare_offer(osv.osv):
 		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
+		'works_value': fields.float('Works Value'),
+		'works_value_flag': fields.boolean('Works Value Flag'),
+		'sam_ratio_flag': fields.boolean('Sam Ratio Flag'),
 		'total_price': fields.float('Total Price'),
 		'spare_offer_line_id': fields.many2one('ch.spare.offer','Spare Offer Line Id'),
 		'moc_changed_flag': fields.boolean('MOC Changed'),
@@ -2553,6 +2573,13 @@ class ch_spare_offer(osv.osv):
 		
 	}
 	
+	def onchange_sam_ratio(self, cr, uid, ids, prime_cost, works_value, works_value_flag, sam_ratio, sam_ratio_flag, context=None):
+		value = {'works_value':'','sam_ratio':''}
+		if works_value_flag == True and works_value:
+			value = {'sam_ratio': float(works_value)/float(prime_cost)}
+		elif sam_ratio_flag == True and sam_ratio:
+			value = {'works_value': prime_cost * sam_ratio}
+		return {'value': value}
 	
 ch_spare_offer()
 
@@ -2660,6 +2687,9 @@ class ch_accessories_offer(osv.osv):
 		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
+		'works_value': fields.float('Works Value'),
+		'works_value_flag': fields.boolean('Works Value Flag'),
+		'sam_ratio_flag': fields.boolean('Sam Ratio Flag'),
 		'pump_price': fields.float('Pump Price'),
 		'total_price': fields.float('Total Price'),
 		'moc_changed_flag': fields.boolean('MOC Changed'),
@@ -2684,6 +2714,14 @@ class ch_accessories_offer(osv.osv):
 		'off_bot_id': fields.related('enquiry_line_access_id','line_ids_b', type='one2many', relation='ch.crm.access.bot', string='BOT Items'),
 		
 	}
+	
+	def onchange_sam_ratio(self, cr, uid, ids, prime_cost, works_value, works_value_flag, sam_ratio, sam_ratio_flag, context=None):
+		value = {'works_value':'','sam_ratio':''}
+		if works_value_flag == True and works_value:
+			value = {'sam_ratio': float(works_value)/float(prime_cost)}
+		elif sam_ratio_flag == True and sam_ratio:
+			value = {'works_value': prime_cost * sam_ratio}
+		return {'value': value}
 	
 ch_accessories_offer()
 

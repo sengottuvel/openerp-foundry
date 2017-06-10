@@ -41,7 +41,7 @@
 							</group>											
 							<group>
 								<field name="enquiry_id" readonly="1" invisible="1"/>
-								<field name="enquiry_no" readonly="1"/>
+								<field name="enquiry_no" readonly="1" widget = "offer_reminder"/>
 								<field name="enquiry_date" readonly="1"/>
 								<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="del_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
@@ -304,7 +304,20 @@
 							<field name="prime_cost" readonly="1"/>
 							<field name="additional_cost"/>
 							<field name="additional_cost_remark" widget="char"/>
-							<field name="sam_ratio"/>
+							<label for="sam_ratio" string="Sam Ratio" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="sam_ratio" style="width: 40%%" on_change="onchange_sam_ratio(prime_cost,works_value,works_value_flag,sam_ratio,sam_ratio_flag)" attrs="{'readonly':[('sam_ratio_flag','!=',True)]}"/>
+									<field name="sam_ratio_flag" style="width: 35%%" attrs="{'readonly':[('works_value_flag','=',True)]}"/>
+								</div>
+							</div>
+							<label for="works_value" string="Works Value"/>
+							<div>
+								<div class="address_format">
+									<field name="works_value" style="width: 40%%" on_change="onchange_sam_ratio(prime_cost,works_value,works_value_flag,sam_ratio,sam_ratio_flag)" attrs="{'readonly':[('works_value_flag','!=',True)]}"/>
+									<field name="works_value_flag" style="width: 35%%" attrs="{'readonly':[('sam_ratio_flag','=',True)]}"/>
+								</div>
+							</div>
 							<field name="purpose_categ" readonly="1"/>
 						</group>
 						<group>
@@ -463,7 +476,20 @@
 							<field name="prime_cost" readonly="1"/>
 							<field name="additional_cost"/>
 							<field name="additional_cost_remark" widget="char"/>
-							<field name="sam_ratio"/>
+							<label for="sam_ratio" string="Sam Ratio" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="sam_ratio" style="width: 40%%" on_change="onchange_sam_ratio(prime_cost,works_value,works_value_flag,sam_ratio,sam_ratio_flag)" attrs="{'readonly':[('sam_ratio_flag','!=',True)]}"/>
+									<field name="sam_ratio_flag" style="width: 35%%" attrs="{'readonly':[('works_value_flag','=',True)]}"/>
+								</div>
+							</div>
+							<label for="works_value" string="Works Value"/>
+							<div>
+								<div class="address_format">
+									<field name="works_value" style="width: 40%%" on_change="onchange_sam_ratio(prime_cost,works_value,works_value_flag,sam_ratio,sam_ratio_flag)" attrs="{'readonly':[('works_value_flag','!=',True)]}"/>
+									<field name="works_value_flag" style="width: 35%%" attrs="{'readonly':[('sam_ratio_flag','=',True)]}"/>
+								</div>
+							</div>
 							<field name="pattern_id" readonly="1" invisible="1"/>
 							<field name="ms_id" readonly="1" invisible="1"/>
 							<field name="bot_id" readonly="1" invisible="1"/>
@@ -568,9 +594,7 @@
 								<field name="freight_tot"/>
 								<field name="insurance_tot"/>
 								<field name="pump_price_tot"/>
-<!--
-								<field name="tot_price"/>
--->
+						<!--	<field name="tot_price"/>	-->
 								<div class="oe_subtotal_footer_separator oe_inline">
 								<label for="net_amount"/>
 								</div>
@@ -599,7 +623,20 @@
 							<field name="prime_cost" readonly="1"/>
 							<field name="additional_cost"/>
 							<field name="additional_cost_remark" widget="char"/>
-							<field name="sam_ratio"/>
+							<label for="sam_ratio" string="Sam Ratio" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="sam_ratio" style="width: 40%%" on_change="onchange_sam_ratio(prime_cost,works_value,works_value_flag,sam_ratio,sam_ratio_flag)" attrs="{'readonly':[('sam_ratio_flag','!=',True)]}"/>
+									<field name="sam_ratio_flag" style="width: 35%%" attrs="{'readonly':[('works_value_flag','=',True)]}"/>
+								</div>
+							</div>
+							<label for="works_value" string="Works Value"/>
+							<div>
+								<div class="address_format">
+									<field name="works_value" style="width: 40%%" on_change="onchange_sam_ratio(prime_cost,works_value,works_value_flag,sam_ratio,sam_ratio_flag)" attrs="{'readonly':[('works_value_flag','!=',True)]}"/>
+									<field name="works_value_flag" style="width: 35%%" attrs="{'readonly':[('sam_ratio_flag','=',True)]}"/>
+								</div>
+							</div>
 						</group>
 						<group>
 							<field name="dealer_discount"/>
