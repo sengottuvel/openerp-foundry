@@ -1358,6 +1358,30 @@
 		
 		<!-- Accessories Category End-->
 		
+		<!-- Dispatch Update Start -->
+		
+		<record id="m_foundry_dispatch_update" model="ir.model.access">
+			<field name="model_id" ref="kg_dispatch_update.model_kg_dispatch_update"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dispatch Update</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="m_foundry_dispatch_update_line" model="ir.model.access">
+			<field name="model_id" ref="kg_dispatch_update.model_ch_dispatch_update_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dispatch Update Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Dispatch Update End -->
+		
 		
     </data>
 </openerp>

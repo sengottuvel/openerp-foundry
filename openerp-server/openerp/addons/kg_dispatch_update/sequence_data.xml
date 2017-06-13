@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+		
+	<record forcecreate="1" id="seq_type_dispatch_update" model="ir.sequence.type">	
+		<field name="name">KG Dispatch Update</field>
+		<field name="code">kg.dispatch.update</field>
+	</record>
+
+	<record forcecreate="1" id="seq_dispatch_update" model="ir.sequence">
+	  <field name="name">KG Dispatch Update</field>
+	  <field name="code">kg.dispatch.update</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">DC/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+		
+	
+		
+</data>
+</openerp>
