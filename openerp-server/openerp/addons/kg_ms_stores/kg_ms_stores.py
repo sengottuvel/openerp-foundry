@@ -499,11 +499,11 @@ class kg_ms_stores(osv.osv):
 											'order_bot_qty': order_bot_qty,
 											}
 											assembly_bot_id = assembly_bot_obj.create(cr, uid, ass_bot_vals)	
-								
-							### State Updation in store ###
-							store_ids = self.search(cr,uid,[('order_line_id','=',ass_header_item['order_line_id']),('state','=','in_store')])
-							for store_item in store_ids:
-								self.write(cr, uid,store_item,{'state':'sent_to_ass'})	
+							if assembly_create == 'yes':	
+								### State Updation in store ###
+								store_ids = self.search(cr,uid,[('order_line_id','=',ass_header_item['order_line_id']),('state','=','in_store')])
+								for store_item in store_ids:
+									self.write(cr, uid,store_item,{'state':'sent_to_ass'})	
 							
 				for assembly_item in assembly_list:
 					assembly_ids = assembly_obj.search(cr, uid, [
