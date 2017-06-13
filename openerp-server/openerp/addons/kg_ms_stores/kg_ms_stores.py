@@ -174,7 +174,7 @@ class kg_ms_stores(osv.osv):
 
 				group by 1,2,3,4,5,6,7,8 ''')
 			reprocess_foundry_details = cr.dictfetchall()
-			print "reprocess_foundry_details",reprocess_foundry_details
+			
 			for reprocess_item in reprocess_foundry_details:
 		
 				assembly_id = assembly_obj.search(cr, uid, [
@@ -184,7 +184,7 @@ class kg_ms_stores(osv.osv):
 				('moc_construction_id','=',reprocess_item['moc_construction_id']),
 				('id','=',reprocess_item['foundry_assembly_id'])
 				])
-				print "sdzfffffffffffffffffffffffffffccccfff",assembly_id
+				
 				if assembly_id:
 					assembly_foundry_id = assembly_foundry_obj.search(cr, uid, [
 						('order_bom_id','=',reprocess_item['order_bomline_id']),
@@ -227,7 +227,6 @@ class kg_ms_stores(osv.osv):
 
 					group by 1,2,3,4,5,6,7,8,9 ''')
 			reprocess_ms_details = cr.dictfetchall()
-			print "reprocess_ms_details",reprocess_ms_details
 			
 			for reprocess_item in reprocess_ms_details:
 		
@@ -246,14 +245,10 @@ class kg_ms_stores(osv.osv):
 						('header_id','=',reprocess_item['ms_assembly_id']),
 						('id','=',reprocess_item['ms_assembly_line_id'])
 						])
-					print "assembly_ms_idassembly_ms_id",assembly_ms_id
 					
 					if assembly_ms_id:
 						assembly_ms_rec = assembly_ms_obj.browse(cr, uid,assembly_ms_id[0])
-						print "reprocess_item['ms_qty']",reprocess_item['ms_qty']
-						print "ssembly_ms_rec.order_ms_qty",assembly_ms_rec.order_ms_qty
-						print "reprocess_item['ms_assembly_id']",reprocess_item['ms_assembly_id']
-						print "ccccccccccccccccccccccccccccccccccccc"
+						
 						assembly_ms_obj.write(cr,uid,reprocess_item['ms_assembly_line_id'],{'state':'waiting'})
 						cr.execute(""" update kg_assembly_inward set state = 'waiting' where 
 							id in (select header_id from ch_assembly_machineshop_details where state != 're_process' and header_id = %s) 
@@ -281,7 +276,7 @@ class kg_ms_stores(osv.osv):
 
 				group by 1,2,3,4,5,6 ''')
 			foundry_details = cr.dictfetchall()
-			print "foundry_details----------------",foundry_details
+			
 			for foundry_item in foundry_details:
 				
 				### Check all the foundry items fully completed ###
@@ -326,8 +321,7 @@ class kg_ms_stores(osv.osv):
 					cr.execute(''' select id as order_bom_id,qty as bom_qty from ch_order_bom_details  where header_id = %s and id = %s ''',
 					[foundry_item['order_line_id'],foundry_item['order_bomline_id']])
 					foundry_item_qty = cr.dictfetchone()
-					print "foundry_item['ms_qty']----------------",foundry_item['ms_qty']
-					print "foundry_item['bom_qty']----------------",foundry_item_qty['bom_qty']
+					
 					if foundry_item['ms_qty'] == foundry_item_qty['bom_qty']:
 						
 						assembly_list.append({
@@ -422,7 +416,7 @@ class kg_ms_stores(osv.osv):
 						'type': 'ms'
 						})
 			
-			print "assembly_list-----------------------",assembly_list
+			
 			if assembly_list:
 				groupby_orderid = {v['order_line_id']:v for v in assembly_list}.values()
 				
@@ -431,15 +425,12 @@ class kg_ms_stores(osv.osv):
 				for ass_header_item in final_assembly_header_list:
 					
 					completion_list = [element for element in assembly_list if element['order_line_id'] == ass_header_item['order_line_id']]
-					print "completion_list",completion_list
-					print "leeeeeeeeeeeeeeeeeeeeeeeeeeee",len(completion_list)
 					
 					cr.execute(""" select sum(count) from (
 						select count(id) from ch_order_bom_details  where header_id = %s and flag_applicable = 't'
 						union all
 						select count(id) from ch_order_machineshop_details where header_id = %s and flag_applicable = 't') as order_count """ %(ass_header_item['order_line_id'],ass_header_item['order_line_id']))
 					order_items_count = cr.fetchone()
-					print "order_items_count",order_items_count
 					
 					if len(completion_list) == order_items_count[0]:
 						assembly_id = assembly_obj.search(cr, uid, [
@@ -463,11 +454,11 @@ class kg_ms_stores(osv.osv):
 									and is_applicable = 't' ''',[ass_header_item['order_line_id']])
 							acc_botitems_count = cr.fetchone()
 							if order_bot_items_count != []:
-								if (order_bot_items_count[0]) == (store_bot_items_count[0] + acc_botitems_count[0]):
+								if (order_bot_items_count[0] + acc_botitems_count[0]) == (store_bot_items_count[0] ):
 									assembly_create = 'yes'
 								else:
 									assembly_create = 'no'
-							print "assembly_createassembly_create----------------------------------",assembly_create
+							
 							for assembly in range(wo_order_qty):
 								ass_header_values = {
 								'name': '',
@@ -531,16 +522,14 @@ class kg_ms_stores(osv.osv):
 							assembly_foundry_id = assembly_foundry_obj.create(cr, uid, ass_foundry_vals)
 							
 							### Dynamic Balancing and Pre Hydro Static Test Creation for Pattern ###
-							print "assembly_item['order_line_id']",assembly_item['order_line_id']
+							
 							order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, assembly_item['order_line_id'])
-							print "order_line_rec.order_no",order_line_rec.order_no
-							print "order_line_rec.qap_plan_id",order_line_rec.qap_plan_id
-							print "order_bom_rec.pattern_id",order_bom_rec.pattern_id
+							
 							qap_dynamic_bal_id = self.pool.get('ch.dynamic.balancing').search(cr,uid,[('header_id','=',order_line_rec.qap_plan_id.id),
 								('pattern_id','=',order_bom_rec.pattern_id.id)])
 							if qap_dynamic_bal_id:
 								qap_dynamic_bal_rec = self.pool.get('ch.dynamic.balancing').browse(cr,uid,qap_dynamic_bal_id[0])
-								print "qap_dynamic_bal_rec",qap_dynamic_bal_rec
+								
 								min_weight = qap_dynamic_bal_rec.min_weight
 								max_weight = qap_dynamic_bal_rec.max_weight
 							else:
@@ -564,9 +553,7 @@ class kg_ms_stores(osv.osv):
 							if order_bom_rec.pattern_id.need_hydro_test == True:
 								hs_flag = True
 								
-							print "db_flag",db_flag
-							print "hs_flag",hs_flag
-								
+							
 							if db_flag == True or hs_flag == True:
 								
 								part_qap_vals = {
@@ -592,7 +579,6 @@ class kg_ms_stores(osv.osv):
 									
 									
 								}
-								print "part_qap_vals",part_qap_vals
 								
 								for pattern in range(order_bom_qty):
 								
@@ -647,7 +633,7 @@ class kg_ms_stores(osv.osv):
 
 				group by 1,2,3,4,5,6,7,8 ''',[order_line_id,pump_model_id])
 			reprocess_foundry_details = cr.dictfetchall()
-			print "reprocess_foundry_details",reprocess_foundry_details
+			
 			for reprocess_item in reprocess_foundry_details:
 		
 				assembly_id = assembly_obj.search(cr, uid, [
@@ -703,7 +689,7 @@ class kg_ms_stores(osv.osv):
 
 					group by 1,2,3,4,5,6,7,8,9 ''',[order_line_id,pump_model_id])
 			reprocess_ms_details = cr.dictfetchall()
-			print "reprocess_ms_details",reprocess_ms_details
+			
 			for reprocess_item in reprocess_ms_details:
 		
 				assembly_id = assembly_obj.search(cr, uid, [
@@ -794,10 +780,17 @@ class kg_ms_stores(osv.osv):
 						and is_applicable = 't' ''',[foundry_item['order_line_id']])
 				acc_foundryitems_count = cr.fetchall()
 				acc_foundry_items = acc_foundryitems_count[0][0]
+				print "foundry_item['order_line_id']foundry_item['order_line_id']foundry_item['order_line_id']>>>",foundry_item['order_line_id']
+				print "(store_foundry_items)>>>>>>>>",(store_foundry_items)
+				print "(wo_foundry_items)>>>>>>>>",(wo_foundry_items)
+				print "(acc_foundry_items)>>>>>>>>",(acc_foundry_items)
+				print "(wo_foundry_items + acc_foundry_items or 0)>>>>>>>>",(wo_foundry_items + acc_foundry_items or 0)
 				if (store_foundry_items) == (wo_foundry_items + acc_foundry_items or 0):
 					cr.execute(''' select id as order_bom_id,qty as bom_qty from ch_order_bom_details  where header_id = %s and id = %s ''',
 					[foundry_item['order_line_id'],foundry_item['order_bomline_id']])
 					foundry_item_qty = cr.dictfetchone()
+					print "foundry_item['ms_qty']",foundry_item['ms_qty']
+					print "foundry_item_qty['bom_qty']",foundry_item_qty['bom_qty']
 					if foundry_item['ms_qty'] == foundry_item_qty['bom_qty']:
 						assembly_list.append({
 						'order_line_id':foundry_item['order_line_id'],
@@ -875,11 +868,17 @@ class kg_ms_stores(osv.osv):
 						and is_applicable = 't' ''',[ms_item['order_line_id']])
 				acc_msitems_count = cr.fetchall()
 				acc_ms_items = acc_msitems_count[0][0]
+				print "foundry_item['order_line_id']foundry_item['order_line_id']foundry_item['order_line_id']>>>",ms_item['order_line_id']
+				print "(store_ms_items)>>>>>>>>",(store_ms_items)
+				print "(wo_ms_items)>>>>>>>>",(wo_ms_items)
+				print "(acc_ms_items)>>>>>>>>",(acc_ms_items)
+				print "(wo_ms_items + acc_ms_items or 0)>>>>>>>>",(wo_ms_items + acc_ms_items or 0)
 				if (store_ms_items) == (wo_ms_items + acc_ms_items or 0):	
 					cr.execute(''' select id as order_ms_id,qty as bom_qty from ch_order_machineshop_details  where header_id = %s and id = %s ''',
 					[ms_item['order_line_id'],ms_item['order_ms_line_id']])
 					ms_item_qty = cr.dictfetchone()
-					
+					print "ms_item['ms_qty']",ms_item['ms_qty']
+					print "ms_item_qty['bom_qty']",ms_item_qty['bom_qty']
 					if ms_item['ms_qty'] == ms_item_qty['bom_qty']:
 						
 						assembly_list.append({
@@ -892,21 +891,18 @@ class kg_ms_stores(osv.osv):
 						'order_bom_id': '',
 						'type': 'ms'
 						})
-			print "assembly_list---------------------",assembly_list
+			
 			if assembly_list:
 				groupby_orderid = {v['order_line_id']:v for v in assembly_list}.values()
 				final_assembly_header_list = groupby_orderid
 				for ass_header_item in final_assembly_header_list:
 					completion_list = [element for element in assembly_list if element['order_line_id'] == ass_header_item['order_line_id']]
-					print "completion_list",completion_list
-					print "leeeeeeeeeeeeeeeeeeeeeeeeeeee",len(completion_list)
 					
 					cr.execute(""" select sum(count) from (
 						select count(id) from ch_order_bom_details  where header_id = %s and flag_applicable = 't'
 						union all
 						select count(id) from ch_order_machineshop_details where header_id = %s and flag_applicable = 't' ) as order_count """ %(ass_header_item['order_line_id'],ass_header_item['order_line_id']))
 					order_items_count = cr.fetchone()
-					print "order_items_count",order_items_count
 					
 					if len(completion_list) == order_items_count[0]:
 					
@@ -930,12 +926,18 @@ class kg_ms_stores(osv.osv):
 									from ch_wo_accessories_bot where header_id in (select id from ch_wo_accessories  where header_id = %s)
 									and is_applicable = 't' ''',[ass_header_item['order_line_id']])
 							acc_botitems_count = cr.fetchone()
+							
+							print "foundry_item['order_line_id']foundry_item['order_line_id']foundry_item['order_line_id']>>>",ass_header_item['order_line_id']
+							print "(order_bot_items_count)>>>>>>>>",(order_bot_items_count)
+							print "(store_bot_items_count)>>>>>>>>",(store_bot_items_count)
+							print "(acc_botitems_count)>>>>>>>>",(acc_botitems_count)
+							print "(wo_ms_items + acc_ms_items or 0)>>>>>>>>",(order_bot_items_count[0] + acc_botitems_count[0]) 
 							if order_bot_items_count != []:
-								if (order_bot_items_count[0]) == (store_bot_items_count[0] + acc_botitems_count[0]):
+								if (order_bot_items_count[0] + acc_botitems_count[0]) == (store_bot_items_count[0]):
 									assembly_create = 'yes'
 								else:
 									assembly_create = 'no'
-							print "assembly_createassembly_create----------------------------------",assembly_create
+							
 							for assembly in range(wo_order_qty):
 								ass_header_values = {
 								'name': '',
