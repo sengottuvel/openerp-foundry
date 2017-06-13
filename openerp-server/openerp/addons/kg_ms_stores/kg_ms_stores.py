@@ -317,9 +317,12 @@ class kg_ms_stores(osv.osv):
 						from ch_order_bom_details where header_id = %s and flag_applicable = 't' ''',[foundry_item['order_line_id']])
 				wo_foundryitems_count = cr.fetchall()
 				wo_foundry_items = wo_foundryitems_count[0][0]
-				print "store_foundry_items----------------",store_foundry_items
-				print "wo_foundry_items----------------",wo_foundry_items
-				if store_foundry_items == wo_foundry_items:
+				cr.execute(''' select count(id)
+						from ch_wo_accessories_foundry where header_id in (select id from ch_wo_accessories  where header_id = %s)
+						and is_applicable = 't' ''',[foundry_item['order_line_id']])
+				acc_foundryitems_count = cr.fetchall()
+				acc_foundry_items = acc_foundryitems_count[0][0]
+				if (store_foundry_items) == (wo_foundry_items + acc_foundry_items or 0):
 					cr.execute(''' select id as order_bom_id,qty as bom_qty from ch_order_bom_details  where header_id = %s and id = %s ''',
 					[foundry_item['order_line_id'],foundry_item['order_bomline_id']])
 					foundry_item_qty = cr.dictfetchone()
@@ -396,8 +399,12 @@ class kg_ms_stores(osv.osv):
 						from ch_order_machineshop_details where header_id = %s and flag_applicable='t' ''',[ms_item['order_line_id']])
 				wo_msitems_count = cr.fetchall()
 				wo_ms_items = wo_msitems_count[0][0]
-				if store_ms_items == wo_ms_items:
-					
+				cr.execute(''' select count(id)
+						from ch_wo_accessories_ms where header_id in (select id from ch_wo_accessories  where header_id = %s)
+						and is_applicable = 't' ''',[ms_item['order_line_id']])
+				acc_msitems_count = cr.fetchall()
+				acc_ms_items = acc_msitems_count[0][0]
+				if (store_ms_items) == (wo_ms_items + acc_ms_items or 0):	
 					cr.execute(''' select id as order_ms_id,qty as bom_qty from ch_order_machineshop_details  where header_id = %s and id = %s ''',
 					[ms_item['order_line_id'],ms_item['order_ms_line_id']])
 					ms_item_qty = cr.dictfetchone()
@@ -451,10 +458,12 @@ class kg_ms_stores(osv.osv):
 							order_bot_items_count = cr.fetchone()
 							cr.execute(''' select count(id) from kg_ms_stores where order_line_id = %s and accept_state = 'received' and state = 'in_store' and ms_type = 'bot_item' ''',[ass_header_item['order_line_id']])
 							store_bot_items_count = cr.fetchone()
-							print "order_bot_items_count[0]",order_bot_items_count
-							print "store_bot_items_count[0]",store_bot_items_count
+							cr.execute(''' select count(id)
+									from ch_wo_accessories_bot where header_id in (select id from ch_wo_accessories  where header_id = %s)
+									and is_applicable = 't' ''',[ass_header_item['order_line_id']])
+							acc_botitems_count = cr.fetchone()
 							if order_bot_items_count != []:
-								if order_bot_items_count[0] == store_bot_items_count[0]:
+								if (order_bot_items_count[0]) == (store_bot_items_count[0] + acc_botitems_count[0]):
 									assembly_create = 'yes'
 								else:
 									assembly_create = 'no'
@@ -780,7 +789,12 @@ class kg_ms_stores(osv.osv):
 						from ch_order_bom_details where header_id = %s and flag_applicable = 't' ''',[foundry_item['order_line_id']])
 				wo_foundryitems_count = cr.fetchall()
 				wo_foundry_items = wo_foundryitems_count[0][0]
-				if store_foundry_items == wo_foundry_items:
+				cr.execute(''' select count(id)
+						from ch_wo_accessories_foundry where header_id in (select id from ch_wo_accessories  where header_id = %s)
+						and is_applicable = 't' ''',[foundry_item['order_line_id']])
+				acc_foundryitems_count = cr.fetchall()
+				acc_foundry_items = acc_foundryitems_count[0][0]
+				if (store_foundry_items) == (wo_foundry_items + acc_foundry_items or 0):
 					cr.execute(''' select id as order_bom_id,qty as bom_qty from ch_order_bom_details  where header_id = %s and id = %s ''',
 					[foundry_item['order_line_id'],foundry_item['order_bomline_id']])
 					foundry_item_qty = cr.dictfetchone()
@@ -856,8 +870,12 @@ class kg_ms_stores(osv.osv):
 						from ch_order_machineshop_details where header_id = %s and flag_applicable = 't' ''',[ms_item['order_line_id']])
 				wo_msitems_count = cr.fetchall()
 				wo_ms_items = wo_msitems_count[0][0]
-				if store_ms_items == wo_ms_items:
-					
+				cr.execute(''' select count(id)
+						from ch_wo_accessories_ms where header_id in (select id from ch_wo_accessories  where header_id = %s)
+						and is_applicable = 't' ''',[ms_item['order_line_id']])
+				acc_msitems_count = cr.fetchall()
+				acc_ms_items = acc_msitems_count[0][0]
+				if (store_ms_items) == (wo_ms_items + acc_ms_items or 0):	
 					cr.execute(''' select id as order_ms_id,qty as bom_qty from ch_order_machineshop_details  where header_id = %s and id = %s ''',
 					[ms_item['order_line_id'],ms_item['order_ms_line_id']])
 					ms_item_qty = cr.dictfetchone()
@@ -902,7 +920,22 @@ class kg_ms_stores(osv.osv):
 						wo_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, ass_header_item['order_line_id'])
 						wo_order_qty = wo_line_rec.qty
 						if not assembly_id:
-							
+							assembly_create = 'no'
+							### Checking bot items are completed are not ### 
+							cr.execute(''' select count(id) from ch_order_bot_details where header_id = %s and flag_applicable = 't' ''',[ass_header_item['order_line_id']])
+							order_bot_items_count = cr.fetchone()
+							cr.execute(''' select count(id) from kg_ms_stores where order_line_id = %s and accept_state = 'received' and state = 'in_store' and ms_type = 'bot_item' ''',[ass_header_item['order_line_id']])
+							store_bot_items_count = cr.fetchone()
+							cr.execute(''' select count(id)
+									from ch_wo_accessories_bot where header_id in (select id from ch_wo_accessories  where header_id = %s)
+									and is_applicable = 't' ''',[ass_header_item['order_line_id']])
+							acc_botitems_count = cr.fetchone()
+							if order_bot_items_count != []:
+								if (order_bot_items_count[0]) == (store_bot_items_count[0] + acc_botitems_count[0]):
+									assembly_create = 'yes'
+								else:
+									assembly_create = 'no'
+							print "assembly_createassembly_create----------------------------------",assembly_create
 							for assembly in range(wo_order_qty):
 								ass_header_values = {
 								'name': '',
@@ -913,27 +946,28 @@ class kg_ms_stores(osv.osv):
 								'state': 'waiting',
 								'entry_mode': 'manual'
 								}
-								assembly_id = assembly_obj.create(cr, uid, ass_header_values)
-								### Creating BOT Details ###
-								cr.execute(''' select id as order_bot_id,qty as order_bot_qty from ch_order_bot_details where header_id = %s and flag_applicable = 't' ''',[ass_header_item['order_line_id']])
-								order_bot_items = cr.dictfetchall()
-								if order_bot_items:
-									for bot_item in order_bot_items:
-										if bot_item['order_bot_qty'] == 1:
-											order_bot_qty = bot_item['order_bot_qty']
-										if bot_item['order_bot_qty'] > 1:
-											order_bot_qty = bot_item['order_bot_qty'] / wo_order_qty
-										ass_bot_vals = {
-										'header_id': assembly_id,
-										'order_bot_id': bot_item['order_bot_id'],
-										'order_bot_qty': order_bot_qty,
-										}
-										assembly_bot_id = assembly_bot_obj.create(cr, uid, ass_bot_vals)	
-								
-						### State Updation in store ###
-						store_ids = self.search(cr,uid,[('order_line_id','=',ass_header_item['order_line_id']),('state','=','in_store')])
-						for store_item in store_ids:
-							self.write(cr, uid,store_item,{'state':'sent_to_ass'})	
+								if assembly_create == 'yes':
+									assembly_id = assembly_obj.create(cr, uid, ass_header_values)
+									### Creating BOT Details ###
+									cr.execute(''' select id as order_bot_id,qty as order_bot_qty from ch_order_bot_details where header_id = %s and flag_applicable = 't' ''',[ass_header_item['order_line_id']])
+									order_bot_items = cr.dictfetchall()
+									if order_bot_items:
+										for bot_item in order_bot_items:
+											if bot_item['order_bot_qty'] == 1:
+												order_bot_qty = bot_item['order_bot_qty']
+											if bot_item['order_bot_qty'] > 1:
+												order_bot_qty = bot_item['order_bot_qty'] / wo_order_qty
+											ass_bot_vals = {
+											'header_id': assembly_id,
+											'order_bot_id': bot_item['order_bot_id'],
+											'order_bot_qty': order_bot_qty,
+											}
+											assembly_bot_id = assembly_bot_obj.create(cr, uid, ass_bot_vals)	
+							if assembly_create == 'yes':
+								### State Updation in store ###
+								store_ids = self.search(cr,uid,[('order_line_id','=',ass_header_item['order_line_id']),('state','=','in_store')])
+								for store_item in store_ids:
+									self.write(cr, uid,store_item,{'state':'sent_to_ass'})	
 					
 					else:
 						raise osv.except_osv(_('Warning!'),
