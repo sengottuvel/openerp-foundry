@@ -154,6 +154,7 @@ class kg_crm_offer(osv.osv):
 		'o_ed': fields.float('ED(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'off_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Offer Status',readonly=False,states={'wo_created':[('readonly',True)],'wo_released':[('readonly',True)]}),
 		'dummy_flag': fields.boolean('Dummy Flag'),
+		'annexure_1': fields.html('Annexure 1',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		# Pump Offer Fields
 		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -2207,6 +2208,7 @@ class ch_pump_offer(osv.osv):
 		'off_ms_id': fields.related('enquiry_line_id','line_ids_a', type='one2many', relation='ch.kg.crm.machineshop.item', string='MS Items'),
 		'off_bot_id': fields.related('enquiry_line_id','line_ids_b', type='one2many', relation='ch.kg.crm.bot', string='BOT Items'),
 		'line_development_ids': fields.one2many('ch.pump.offer.development', 'header_id', "Pump Offer Development"),
+		'spl_remark': fields.related('enquiry_line_id','spl_remark',type='html',string="Special Remark",store=True),
 		
 	}
 	

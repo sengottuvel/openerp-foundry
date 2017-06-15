@@ -54,7 +54,7 @@
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 								<field name="drive" invisible="1"/>
 								<field name="transmision" invisible="1"/>
-								<field name="acces" invisible="1"/>
+								<field name="acces" invisible="1" />
 								<field name="revision" invisible="1"/>
 							</group>	
 						</group>
@@ -100,7 +100,6 @@
 									<field name="acces"/>
 									<field name="quantity_in_no" required="1" invisible="1"/>
 								</tree>
-								
 							</field>
 						</group>
 						<group string="Remarks" attrs="{'invisible': [('enq_status','not in',('on_hold','closed'))],'required': [('enq_status','in',('on_hold','closed'))]}" >
@@ -111,7 +110,7 @@
 								
 							</field>
 						</group>
-							
+						
 						<button name="list_details" type="object" string="List" states="draft" class="oe_highlight"/>
 						
 						<group string="Old History">
@@ -262,7 +261,15 @@
 						<field name="max_particle_size_mm" />
 						<field name="density" />
 						<field name="head_in_liquid" on_change="onchange_capacity_in_liquid(capacity_in_liquid,head_in_liquid)"/>
-					</group>					
+					</group>
+				</group>
+				<group>
+					<field name="line_ids_liquid" colspan="4" nolabel="1" widget="one2many_selectable">
+						<tree string="Liquid History" editable="bootom">
+							<field name="label_val" required="1" nolabel="1"/>
+							<field name="content" required="1" nolabel="1"/>
+						</tree>
+					</field>
 				</group>
 				<group string="Duty Parameters">
 					<group>
@@ -279,10 +286,18 @@
 						<field name="temperature" />
 					</group>					
 				</group>
-			
+				<group>
+					<field name="line_ids_duty" colspan="4" nolabel="1" widget="one2many_selectable">
+						<tree string="Duty History" editable="bootom">
+							<field name="label_val" required="1" nolabel="1"/>
+							<field name="content" required="1" nolabel="1"/>
+						</tree>
+					</field>
+				</group>
 				<group string="Pump Specification">
 					<group>
 						<field name="pump_id" on_change="onchange_pumpmodel(pump_id,division_id,suction_pressure_kg,discharge_pressure_kg,purpose_categ)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="alias_name"/>
 						<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="qap_plan_id"/>
@@ -391,7 +406,14 @@
 						<field name="division_id" invisible="1"/>
 					</group>
 				</group>
-				
+				<group>
+					<field name="line_ids_pump" colspan="4" nolabel="1" widget="one2many_selectable">
+						<tree string="Pump History" editable="bootom">
+							<field name="label_val" required="1" nolabel="1"/>
+							<field name="content" required="1" nolabel="1"/>
+						</tree>
+					</field>
+				</group>
 				<group>
 					<group>
 						<field name="moc_const_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}" on_change="onchange_moc(moc_const_id,flag_standard,purpose_categ)"/>
@@ -405,7 +427,7 @@
 					<page string="Offer Material">
 						<field name="line_ids_moc_a" context="{'flag_standard':flag_standard}">
 							<tree string="Material of Construction Details Entry Tree" editable="top" >
-								<field name="offer_id" readonly="1"/>
+								<field name="offer_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
 								<field name="moc_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
 								<field name="remarks" widget="char" readonly="1"/>
 								<field name="flag_standard" invisible="1"/>
@@ -415,7 +437,8 @@
 				</notebook>
 				<group>
 					<group>
-						<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm)" attrs="{'invisible':[('purpose_categ','in',('access','in_development'))]}"/>
+						<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all)" attrs="{'invisible':[('purpose_categ','in',('access','in_development'))]}"/>
+						<field name="is_selectable_all" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all)" attrs="{'invisible':[('load_bom','!=',True)]}"/>
 					</group>
 					<group>
 					</group>
@@ -485,7 +508,7 @@
 							<field name="moc_name" invisible="1"/>
 							<field name="moc_changed_flag" invisible="1"/>
 						</tree>
-					</field>								
+					</field>
 				</page>
 				<page string = "MS Items">
 					<field name="line_ids_a">
@@ -506,7 +529,7 @@
 							<field name="moc_name" invisible="1"/>
 							<field name="moc_changed_flag" invisible="1"/>
 						</tree>
-					</field>								
+					</field>
 				</page>
 				<page string = "BOT Items">
 					<field name="line_ids_b">
@@ -527,7 +550,10 @@
 							<field name="moc_name" invisible="1"/>
 							<field name="moc_changed_flag" invisible="1"/>
 						</tree>
-					</field>								
+					</field>
+				</page>
+				<page string = "Special Remarks">
+					<field name="spl_remark" nolabel="1"/>			
 				</page>
 			</notebook>
 		
@@ -566,9 +592,10 @@
 								</group>
 								<group>
 								<group>
-									<field name="load_access" on_change="onchange_load_access(load_access,access_id,moc_id,qty)"/>
+									<field name="load_access" on_change="onchange_load_access(load_access,access_id,moc_id,qty,is_selectable_all)"/>
 								</group>
 								<group>
+									<field name="is_selectable_all" on_change="onchange_load_access(load_access,access_id,moc_id,qty,is_selectable_all)" attrs="{'invisible':[('load_access','!=',True)]}"/>
 								</group>
 								</group>
 							</group>

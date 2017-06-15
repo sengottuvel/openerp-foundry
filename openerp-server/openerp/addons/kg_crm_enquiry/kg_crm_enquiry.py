@@ -584,8 +584,7 @@ class kg_crm_enquiry(osv.osv):
 							if bot_item.is_applicable == True:
 								if bot_item.flag_is_bearing == True:
 									if not bot_item.brand_id:
-										raise osv.except_osv(_('Warning!'),
-											_('%s You cannot save without Brand'%(bot_item.ms_id.code)))
+										raise osv.except_osv(_('Warning!'),_('%s You cannot save without Brand'%(bot_item.ms_id.code)))
 								print "ffffffffffffffffffbotbotbotfffffffffffffffffffffffff"
 								bot_prime_cost = self._prime_cost_calculation(cr,uid,'bot',0,
 								0,bot_item.ms_id.id,order_item.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
@@ -646,7 +645,7 @@ class kg_crm_enquiry(osv.osv):
 										'state': 'moved_to_offer',
 										'confirm_user_id': uid, 
 										'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
-									})		
+									})
 		return True
 	
   	def access_creation(self,cr,uid,offer_id,order_item,item_type,context=None):
@@ -839,68 +838,19 @@ class kg_crm_enquiry(osv.osv):
 					if item.purpose_categ == 'spare':
 						catg='non_acc'
 						if item.line_ids:
-							#~ for item_1 in item.line_ids:
 							primecost_vals = 0.00
-							#~ if item_1.is_applicable == True:
 							bom = 'fou'
 							purpose_categ = 'spare'
 							primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ,offer_id)
-							#~ print"spare_primecost_vals",primecost_vals
-							
-							#~ spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
-																			#~ 'header_id': offer_id,
-																			#~ 'pumpseries_id': item.spare_pumpseries_id.id,
-																			#~ 'pump_id': item.spare_pump_id.id,
-																			#~ 'moc_const_id': item.spare_moc_const_id.id,
-																			#~ 'prime_cost': primecost_vals,
-																			#~ 'enquiry_line_id': item.id,
-																			#~ 'item_code': item_1.pattern_id.name,
-																			#~ 'item_name': item_1.pattern_id.pattern_name,
-																			#~ 'pattern_id': item_1.pattern_id.id,
-																			#~ 'moc_id': item_1.moc_id.id,
-																			#~ 'qty': item_1.qty,
-																			#~ })
-									
-								
 						if item.line_ids_a:
-							#~ for item_1 in item.line_ids_a:
 							primecost_vals = 0.00
-							#~ if item_1.is_applicable == True:
 							bom = 'ms'
 							purpose_categ = 'spare'
-							#~ spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
-																			#~ 'header_id': offer_id,
-																			#~ 'pumpseries_id': item.spare_pumpseries_id.id,
-																			#~ 'pump_id': item.spare_pump_id.id,
-																			#~ 'moc_const_id': item.spare_moc_const_id.id,
-																			#~ 'prime_cost': primecost_vals,
-																			#~ 'enquiry_line_id': item.id,
-																			#~ 'item_code': item_1.ms_id.code,
-																			#~ 'item_name': item_1.ms_id.name,
-																			#~ 'ms_id': item_1.ms_id.id,
-																			#~ 'moc_id': item_1.moc_id.id,
-																			#~ 'qty': item_1.qty,
-																			#~ })
 							primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ,offer_id)
 						if item.line_ids_b:
-							#~ for item_1 in item.line_ids_b:
 							primecost_vals = 0.00
-							#~ if item_1.is_applicable == True:
 							bom = 'bot'
 							purpose_categ = 'spare'
-							#~ spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
-																			#~ 'header_id': offer_id,
-																			#~ 'pumpseries_id': item.spare_pumpseries_id.id,
-																			#~ 'pump_id': item.spare_pump_id.id,
-																			#~ 'moc_const_id': item.spare_moc_const_id.id,
-																			#~ 'prime_cost': item_1.prime_cost,
-																			#~ 'enquiry_line_id': item.id,
-																			#~ 'item_code': item_1.ms_id.code,
-																			#~ 'item_name': item_1.ms_id.name,
-																			#~ 'bot_id': item_1.ms_id.id,
-																			#~ 'moc_id': item_1.moc_id.id,
-																			#~ 'qty': item_1.qty,
-																			#~ })
 							primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ,offer_id)
 					if item.acces == 'yes':
 						ite = item
@@ -1081,10 +1031,6 @@ class kg_crm_enquiry(osv.osv):
 		prime_cost += prime_cost_1
 		print"prime_costprime_costprime_cost",prime_cost
 		
-		#~ if bom == 'fou' and purpose_categ == 'spare' and catg == 'non_acc':
-			#~ primecost_vals = prime_cost
-			#~ return primecost_vals
-			
 		# MS Item 
 		
 		ms_price = 0.00
@@ -1188,9 +1134,7 @@ class kg_crm_enquiry(osv.osv):
 				if catg == 'non_acc':
 					if bot_line.flag_is_bearing == True:
 						if not bot_line.brand_id:
-							raise osv.except_osv(_('Warning!'),
-								_('%s You cannot save without Brand'%(bot_line.ms_id.code)))
-				
+							raise osv.except_osv(_('Warning!'),_('%s You cannot save without Brand'%(bot_line.ms_id.code)))
 				moc_id = 0
 				tot_price = 0.00
 				if catg == 'non_acc':
@@ -1318,13 +1262,13 @@ class kg_crm_enquiry(osv.osv):
 		print"primecost_valsprimecost_vals",primecost_vals
 		
 		return primecost_vals
-				
+	
 	def entry_call_back(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'draft':
 			self.write(cr, uid, ids, {'state': 'call','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-		
+	
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []	 
 		for rec in self.browse(cr,uid,ids): 
@@ -1334,7 +1278,7 @@ class kg_crm_enquiry(osv.osv):
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
+	
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_crm_enquiry, self).write(cr, uid, ids, vals, context)
@@ -1378,7 +1322,6 @@ class ch_kg_crm_enquiry(osv.osv):
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_kg_crm_enquiry, self).write(cr, uid, ids, vals, context)
-	
 	
 ch_kg_crm_enquiry()
 
@@ -1440,8 +1383,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		# Pump Specification
 		'pump_type': fields.char('Pump Model'),
 		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location'),
-		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),		
-		'spare_pump_id': fields.many2one('kg.pumpmodel.master','Pump Model'),		
+		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
+		'alias_name': fields.char('Alias Name'),
+		'spare_pump_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
 		'size_suctionx': fields.char('Size-SuctionX Delivery(mm)'),
 		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',domain="[('flange_type','=',flange_type),('header_id','=',pumpseries_id)]"),
 		'efficiency_in': fields.float('Efficiency in % W/L'),
@@ -1564,11 +1508,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
 		'acces_type': fields.selection([('coupling','Coupling'),('coupling_guard','Coupling Guard'),('base_plate','Base Plate')],'Type'),
 		
-		'wo_line_id': fields.many2one('ch.work.order.details','WO',domain="[('order_category','=',purpose_categ),('state','not in',('draft','cancel'))]"),
+		'wo_line_id': fields.many2one('ch.work.order.details','WO',domain="[('state','not in',('draft','cancel'))]"),
 		'wo_no': fields.char('WO Number'),
 		
 		'load_bom': fields.boolean('Load BOM'),
 		'spare_load_bom': fields.boolean('Load BOM'),
+		'is_selectable_all': fields.boolean('Select All'),
+		'spl_remark': fields.html('Special Remark'),
 		
 		## Child Tables Declaration
 		
@@ -1578,6 +1524,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'line_ids_moc_a': fields.one2many('ch.moc.construction', 'header_id', "MOC Construction"),
 		'line_ids_access_a': fields.one2many('ch.kg.crm.accessories', 'header_id', "Accessories"),
 		'line_ids_development': fields.one2many('ch.crm.development.details', 'header_id', "Accessories"),
+		'line_ids_liquid': fields.one2many('ch.crm.liquid', 'header_id', "Liquid"),
+		'line_ids_duty': fields.one2many('ch.crm.duty', 'header_id', "Duty"),
+		'line_ids_pump': fields.one2many('ch.crm.pump', 'header_id', "Pump"),
 		
 	}
 	
@@ -1860,7 +1809,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		return {'value': {'line_ids_moc_a': moc_const_vals,'moc_construction_name':moc_const_rec.name}}
 	
 	def onchange_load_bom(self, cr, uid, ids, load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,
-		motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm):
+		motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all):
 		
 		delivery_pipe_size = del_pipe_size
 		lubrication = bush_bearing_lubrication
@@ -1904,9 +1853,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		bot_vals=[]
 		data_rec = ''
 		if not moc_const_id and purpose_categ == 'pump' and load_bom == True:
-			raise osv.except_osv(_('Warning!'),
-				_('System sholud not be accept without MOC Construction'))
-		
+			raise osv.except_osv(_('Warning!'),_('System sholud not be accept without MOC Construction'))
 		print"pump_id",pump_id
 		print"load_bom",load_bom
 		if load_bom == True:
@@ -1956,6 +1903,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
+						if is_selectable_all == True:
+							is_selectable_all = True
+						else:
+							is_selectable_all = False
 						fou_vals.append({
 										'position_id': item.position_id.id,
 										'pattern_id': item.pattern_id.id,
@@ -1965,7 +1916,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty,
 										'load_bom': True,
-										'is_applicable': False,
+										'is_applicable': is_selectable_all,
 										'purpose_categ': purpose_categ,
 										#~ 'csd_no': item.csd_no,
 										#~ 'remarks': item.remarks,
@@ -1993,6 +1944,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
+						if is_selectable_all == True:
+							is_selectable_all = True
+						else:
+							is_selectable_all = False
 						ms_vals.append({
 										'name': item.name,
 										'position_id': item.position_id.id,							
@@ -2002,7 +1957,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty,
 										'load_bom': True,
-										'is_applicable': False,
+										'is_applicable': is_selectable_all,
 										'purpose_categ': purpose_categ,
 										#~ 'csd_no': item.csd_no,
 										#~ 'remarks': item.remarks,
@@ -2034,6 +1989,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
+						if is_selectable_all == True:
+							is_selectable_all = True
+						else:
+							is_selectable_all = False
 						bot_vals.append({
 										'item_name': item_name,
 										'ms_id': item.bot_id.id,
@@ -2042,7 +2001,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty,
 										'load_bom': True,
-										'is_applicable': False,
+										'is_applicable': is_selectable_all,
 										'flag_is_bearing': is_bearing,
 										'purpose_categ': purpose_categ,
 										'position_id': item.position_id.id,
@@ -2072,6 +2031,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True	
 							moc_name = moc_rec.name
+						if is_selectable_all == True:
+							is_selectable_all = True
+						else:
+							is_selectable_all = True
 						fou_vals.append({
 										'position_id': item.position_id.id,
 										'pattern_id': item.pattern_id.id,
@@ -2081,7 +2044,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty * qty,
 										'load_bom': True,
-										'is_applicable': True,
+										'is_applicable': is_selectable_all,
 										'purpose_categ': purpose_categ,
 										#~ 'csd_no': item.csd_no,
 										#~ 'remarks': item.remarks,
@@ -2105,6 +2068,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
+						if is_selectable_all == True:
+							is_selectable_all = True
+						else:
+							is_selectable_all = True
 						ms_vals.append({
 										'name': item.name,
 										'position_id': item.position_id.id,							
@@ -2114,7 +2081,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty * qty,
 										'load_bom': True,
-										'is_applicable': True,
+										'is_applicable': is_selectable_all,
 										'purpose_categ': purpose_categ,
 										#~ 'csd_no': item.csd_no,
 										#~ 'remarks': item.remarks,
@@ -2139,6 +2106,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
+						if is_selectable_all == True:
+							is_selectable_all = True
+						else:
+							is_selectable_all = True
 						bot_vals.append({
 										'item_name': item_name,
 										'ms_id': item.bot_id.id,
@@ -2147,7 +2118,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty * qty,
 										'load_bom': True,
-										'is_applicable': True,
+										'is_applicable': is_selectable_all,
 										'flag_is_bearing': bot_rec.is_bearing,
 										'purpose_categ': purpose_categ,
 										'position_id': item.position_id.id,
@@ -2419,6 +2390,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
+						if is_selectable_all == True:
+							is_selectable_all = True
+						else:
+							is_selectable_all = True
 						fou_vals.append({
 							
 							'pattern_id': vertical_foundry['pattern_id'],
@@ -2426,7 +2401,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							'position_id': vertical_foundry['position_id'],			  
 							'qty' : bom_qty * qty,
 							'moc_id': moc_id,
-							'is_applicable': True,
+							'is_applicable': is_selectable_all,
 							'active': True,
 							'load_bom': True,
 							'moc_name': moc_name,
@@ -2816,6 +2791,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
+						if is_selectable_all == True:
+							is_selectable_all = True
+						else:
+							is_selectable_all = True
 						ms_vals.append({
 							
 							'position_id':vertical_ms_details['position_id'],
@@ -2824,7 +2803,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							'ms_name': vertical_ms_details['name'],
 							'length': vertical_ms_qty,
 							'load_bom': True,
-							'is_applicable': True,
+							'is_applicable': is_selectable_all,
 							'active': True,
 							'moc_id': moc_id,
 							'moc_name': moc_name,
@@ -2996,6 +2975,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							vertical_bot_qty = vertical_bot_qty
 						else:
 							vertical_bot_qty = 0
+						if is_selectable_all == True:
+							is_selectable_all = True
+						else:
+							is_selectable_all = True
 						bot_vals.append({
 							
 							#~ 'bot_line_id': vertical_bot_details['id'],
@@ -3008,7 +2991,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							'position_id': vertical_bot_details['position_id'] or False,
 							'qty': vertical_bot_qty * qty,
 							'load_bom': True,
-							'is_applicable': True,
+							'is_applicable': is_selectable_all,
 							'active': True,
 							'flag_is_bearing': bot_rec.is_bearing,
 							'moc_id': moc_id,
@@ -3271,6 +3254,65 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	
 ch_kg_crm_pumpmodel()
 
+class ch_crm_liquid(osv.osv):
+	
+	_name = "ch.crm.liquid"
+	_description = "Child Liquid"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Enquiry Line Id', ondelete='cascade'),
+		'label_val': fields.char('Field'),
+		'content': fields.char('Value'),
+		
+	}
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_crm_liquid, self).write(cr, uid, ids, vals, context)
+	
+ch_crm_liquid()
+
+class ch_crm_duty(osv.osv):
+	
+	_name = "ch.crm.duty"
+	_description = "Child Duty"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Enquiry Line Id', ondelete='cascade'),
+		'label_val': fields.char('Field'),
+		'content': fields.char('Value'),
+		
+	}
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_crm_duty, self).write(cr, uid, ids, vals, context)
+	
+ch_crm_duty()
+
+class ch_crm_pump(osv.osv):
+	
+	_name = "ch.crm.pump"
+	_description = "Child Pump"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Enquiry Line Id', ondelete='cascade'),
+		'label_val': fields.char('Field'),
+		'content': fields.char('Value'),
+		
+	}
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_crm_pump, self).write(cr, uid, ids, vals, context)
+	
+ch_crm_pump()
 
 class ch_crm_development_details(osv.osv):
 	
@@ -3630,6 +3672,7 @@ class ch_kg_crm_accessories(osv.osv):
 		#~ 'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',
 			 #~ multi="sums", help="The amount without tax", track_visibility='always',store=True),
 		'prime_cost': fields.float('Prime Cost'),
+		'is_selectable_all': fields.boolean('Is Selectable'),
 		
 		## Child Tables Declaration
 		
@@ -3660,7 +3703,7 @@ class ch_kg_crm_accessories(osv.osv):
 				_('System should allow without accessories category!'))
 		return {'value': value}
 	
-	def onchange_load_access(self,cr,uid,ids,load_access,access_id,moc_id,qty):
+	def onchange_load_access(self,cr,uid,ids,load_access,access_id,moc_id,qty,is_selectable_all):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
@@ -3671,12 +3714,17 @@ class ch_kg_crm_accessories(osv.osv):
 			if access_obj:
 				data_rec = self.pool.get('kg.accessories.master').browse(cr, uid, access_obj[0])
 		print"data_recdata_rec",data_rec
+		print"is_selectable_all-------------------------",is_selectable_all
 		if data_rec:
 			if data_rec.line_ids_b:
 				for item in data_rec.line_ids_b:
 					if moc_id:
 						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 						moc_changed_flag = True
+					if is_selectable_all == True:
+						is_selectable_all = True
+					else:
+						is_selectable_all = True
 					fou_vals.append({
 									'position_id': item.position_id.id,
 									'pattern_id': item.pattern_id.id,
@@ -3686,7 +3734,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'moc_changed_flag': moc_changed_flag,
 									'qty': item.qty * qty,
 									'load_bom': True,
-									'is_applicable': True,
+									'is_applicable': is_selectable_all,
 									'csd_no': item.csd_no,
 									'remarks': item.remarks,
 									})
@@ -3695,7 +3743,11 @@ class ch_kg_crm_accessories(osv.osv):
 				for item in data_rec.line_ids_a:
 					if moc_id:
 						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
-						moc_changed_flag = True	
+						moc_changed_flag = True
+					if is_selectable_all == True:
+						is_selectable_all = True
+					else:
+						is_selectable_all = True
 					ms_vals.append({
 									'name': item.name,
 									'position_id': item.position_id.id,							
@@ -3705,7 +3757,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'moc_changed_flag': moc_changed_flag,
 									'qty': item.qty * qty,
 									'load_bom': True,
-									'is_applicable': True,
+									'is_applicable': is_selectable_all,
 									'csd_no': item.csd_no,
 									'remarks': item.remarks,
 									})
@@ -3715,6 +3767,10 @@ class ch_kg_crm_accessories(osv.osv):
 					if moc_id:
 						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 						moc_changed_flag = True
+					if is_selectable_all == True:
+						is_selectable_all = True
+					else:
+						is_selectable_all = True
 					bot_vals.append({
 									#~ 'product_id': item.product_id.id,
 									#~ 'brand_id': item.brand_id.id,
@@ -3728,7 +3784,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'moc_changed_flag': moc_changed_flag,
 									'qty': item.qty * qty,
 									'load_bom': True,
-									'is_applicable': True,
+									'is_applicable': is_selectable_all,
 									'csd_no': item.csd_no,
 									'remarks': item.remark,
 									})
