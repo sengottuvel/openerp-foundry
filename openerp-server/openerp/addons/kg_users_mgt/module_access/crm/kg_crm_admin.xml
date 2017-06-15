@@ -992,6 +992,36 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
 		</record>
 		
+		<record id="t_crm_ch_crm_liquid" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_crm_liquid"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch crm liquid</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_crm_duty" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_crm_duty"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch crm duty</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_crm_pump" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_crm_pump"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch crm pump</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
