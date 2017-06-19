@@ -342,7 +342,8 @@ class kg_packing_slip(osv.osv):
 					'total_qty': bot_item['qty'],
 					
 					})
-			
+		
+		print "order_line_idorder_line_id",order_line_id
 		### Loading Accessories Items ###
 		cr.execute(''' select id,access_id,moc_id,qty from ch_wo_accessories where header_id=%s ''',[order_line_id])
 		acc_items = cr.dictfetchall()
