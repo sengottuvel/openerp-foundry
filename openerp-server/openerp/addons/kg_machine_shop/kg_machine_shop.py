@@ -167,14 +167,20 @@ class kg_machine_shop(osv.osv):
 			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('constuction_type_id','in',moc_type_ids)]))
 		else:
 			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))		
-		cr.execute(""" delete from ch_machine_mocwise where header_id  = %s """ %(ids[0]))		
+		#~ cr.execute(""" delete from ch_machine_mocwise where header_id  = %s """ %(ids[0]))		
 		for item in moc_const_obj:			
-			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)				
-			line = self.pool.get('ch.machine.mocwise').create(cr,uid,{
-				   'header_id':rec.id,
-				   'moc_id':rec.moc_id.id,
-				   'code':moc_const_rec.code,
-						})	
+			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)
+			sql_check = """ select code from ch_machine_mocwise where code=%s and header_id  = %s """ %(moc_const_rec.id,ids[0])
+			cr.execute(sql_check)
+			data = cr.dictfetchall()
+			if data == []:					
+				line = self.pool.get('ch.machine.mocwise').create(cr,uid,{
+					   'header_id':rec.id,
+					   'moc_id':rec.moc_id.id,
+					   'code':moc_const_rec.id,
+							})	
+			else:
+				pass
 		self.write(cr, uid, ids, {'list_moc_flag': True})			
 		return True	
 		
@@ -557,8 +563,8 @@ class ch_machine_mocwise(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.machine.shop', 'Pattern Entry', required=True, ondelete='cascade'),	
-		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]" ),		
-		'code':fields.char('MOC Construction Code'),		
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]" ),	
+		'code':fields.many2one('kg.moc.construction','MOC Construction Code'),			
 		'remarks':fields.text('Remarks'),
 		
 	}
