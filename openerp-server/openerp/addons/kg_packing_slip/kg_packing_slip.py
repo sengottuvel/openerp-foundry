@@ -365,7 +365,7 @@ class kg_packing_slip(osv.osv):
 			for foundry_item in foundry_items:
 				### Checking the packed qty ###
 				cr.execute(''' select sum(qty) as packed_qty from ch_packing_accessories_foundry 
-					where order_line_id = %s and order_bom_id=%s and header_id != %s ''',[order_line_id,foundry_item['id'],entry_rec.id])
+					where header_id in (select id from ch_packing_accessories where order_line_id = %s) and order_bom_id=%s and header_id != %s ''',[order_line_id,foundry_item['id'],entry_rec.id])
 				packed_qty = cr.fetchone()
 				print "packed_qty",packed_qty
 				if packed_qty[0] != None:
@@ -396,7 +396,7 @@ class kg_packing_slip(osv.osv):
 			for ms_item in ms_items:
 				### Checking the packed qty ###
 				cr.execute(''' select sum(qty) as packed_qty from ch_packing_accessories_ms
-					where order_line_id = %s and order_bom_id=%s and header_id != %s ''',[order_line_id,ms_item['id'],entry_rec.id])
+					where header_id in (select id from ch_packing_accessories where order_line_id = %s) and order_bom_id=%s and header_id != %s ''',[order_line_id,ms_item['id'],entry_rec.id])
 				packed_qty = cr.fetchone()
 				print "packed_qty",packed_qty
 				if packed_qty[0] != None:
@@ -426,7 +426,7 @@ class kg_packing_slip(osv.osv):
 			for bot_item in bot_items:
 				### Checking the packed qty ###
 				cr.execute(''' select sum(qty) as packed_qty from ch_packing_accessories_bot
-					where order_line_id = %s and order_bom_id=%s and header_id != %s ''',[order_line_id,bot_item['id'],entry_rec.id])
+					where header_id in (select id from ch_packing_accessories where order_line_id = %s) and order_bom_id=%s and header_id != %s ''',[order_line_id,bot_item['id'],entry_rec.id])
 				packed_qty = cr.fetchone()
 				print "packed_qty",packed_qty
 				
