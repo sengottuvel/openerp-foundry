@@ -600,7 +600,7 @@ class kg_service_order_line(osv.osv):
 	
 	'so_date': fields.related('service_id','date', type='date', string='SO Date',store=True),
 	'partner_id': fields.related('service_id','partner_id', type='many2one',relation="res.partner", string='Supplier',store=True),
-	'price_subtotal': fields.function(_amount_line, string='Linetotal', digits_compute= dp.get_precision('Account')),
+	'price_subtotal': fields.function(_amount_line, string='Linetotal', digits_compute= dp.get_precision('Account'),store=True),
 	'product_id': fields.many2one('product.product', 'Product', domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
 	'product_uom': fields.many2one('product.uom', 'UOM'),
 	'product_qty': fields.float('Quantity'),

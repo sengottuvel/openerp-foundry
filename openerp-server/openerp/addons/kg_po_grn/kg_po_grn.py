@@ -662,9 +662,8 @@ class kg_po_grn(osv.osv):
 				
 				if line.product_id.flag_expiry_alert == True:
 					if not line.po_exp_id:
-						raise osv.except_osv(_('Warning!'),
-							_('System should not be accept without S/N Details!'))
-					for item in line.exp_batch_id:
+						raise osv.except_osv(_('Warning!'),_('System should not be accept without S/N Details!'))
+					for item in line.po_exp_id:
 						if not item.exp_date:
 							raise osv.except_osv(_('Warning!'),
 								_('%s Kindly mention expiry date for this S/N %s '%(line.product_id.name,item.batch_no)))
