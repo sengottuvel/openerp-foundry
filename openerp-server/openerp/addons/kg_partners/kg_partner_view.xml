@@ -19,6 +19,7 @@
 			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','not in',('approve'))]}"/> 
 		</header>
 		</xpath>
+        
         <field name="name" position="after">
         <field name="con_category_id" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('contractor','!=',True)],'required':[('contractor','=',True)]}"/>
 		</field>
@@ -66,6 +67,7 @@
 		<field name="pan_no" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		<field name="adhar_id" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		<field name="gst_no" attrs="{'readonly':[('partner_state','=','approve')]}"/>
+		<field name="gs_tin_no" attrs="{'readonly':[('partner_state','=','approve')],'invisible': [('supplier','!=',True),('customer','!=',True)]}"/>
 		<field name="transport_id" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		<field name="sector" attrs="{'invisible': [('supplier','=',True)],'readonly': [('partner_state','=','approve')]}"/>
 		<field name="industry_id" attrs="{'readonly':[('partner_state','=','approve')]}"/>
@@ -306,7 +308,8 @@
 		</field>
 	</record>
 	
-	<!-- Contractor tree view -->
+	
+	<!-- contractor tree view -->
 	
 	<record id="kg_contractor_tree_1" model="ir.ui.view">
 			<field name="name">Contractor Tree</field>
@@ -349,7 +352,9 @@
 		<field name="domain">[('customer','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
-	</record>
+	</record>		
+	
+	
 	
 	<record id="kg_action_dealer_form" model="ir.actions.act_window">
 		<field name="name">Dealer</field>
@@ -364,7 +369,9 @@
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>
 	
-	<record id="kg_action_contractor_form" model="ir.actions.act_window">
+		
+	
+	<record id="kg_action_contractor_form_1" model="ir.actions.act_window">
 		<field name="name">Contractor</field>
 		<field name="type">ir.actions.act_window</field>
 		<field name="res_model">res.partner</field>
@@ -376,6 +383,10 @@
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>
+	
+		
+	
+	
 	
 	<record id="kg_action_group_form" model="ir.actions.act_window">
 		<field name="name">Groups</field>
@@ -389,7 +400,7 @@
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>
-    
+
 	<!--- Purchase Menu -->
 	
     <!--  Supplier Master  --> 
