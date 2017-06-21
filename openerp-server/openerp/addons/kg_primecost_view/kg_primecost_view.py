@@ -690,7 +690,7 @@ class kg_primecost_view(osv.osv):
 							
 							cr.execute(''' select machine_moc.moc_id
 								from ch_machine_mocwise machine_moc
-								LEFT JOIN kg_moc_construction const on const.code = machine_moc.code
+								LEFT JOIN kg_moc_construction const on const.id = machine_moc.code
 								where machine_moc.header_id = %s and const.id = %s ''',[vertical_ms_details['ms_id'],moc_construction_id])
 							const_moc_id = cr.fetchone()
 							if const_moc_id != None:
@@ -1087,7 +1087,7 @@ class kg_primecost_view(osv.osv):
 							
 							cr.execute(''' select bot_moc.moc_id
 								from ch_machine_mocwise bot_moc
-								LEFT JOIN kg_moc_construction const on const.code = bot_moc.code
+								LEFT JOIN kg_moc_construction const on const.id = bot_moc.code
 								where bot_moc.header_id = %s and const.id = %s ''',[vertical_bot_details['bot_id'],moc_construction_id])
 							const_moc_id = cr.fetchone()
 							if const_moc_id != None:
