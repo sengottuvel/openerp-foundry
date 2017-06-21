@@ -307,6 +307,7 @@
 						
 <!--	Vertical Specification end	-->
 						<field name="del_pipe_size" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
+						<field name="sump_depth"/>
 						<field name="pre_suppliy_ref"/>
 						<field name="shaft_sealing" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
 						<field name="scope_of_supply" on_change="onchange_scope_of_supply(scope_of_supply,primemover_categ)"/>

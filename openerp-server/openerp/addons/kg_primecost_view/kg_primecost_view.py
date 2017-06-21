@@ -87,7 +87,7 @@ class kg_primecost_view(osv.osv):
 		'setting_height': fields.float('Setting Height (MM)'),
 		'del_pipe_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Delivery Pipe Size(MM)'),
 		'shaft_sealing': fields.selection([('g_p','Gland Packing'),('m_s','Mechanical Seal'),('f_s','Felt Seal'),('d_s','Dynamic Seal')],'Shaft Sealing'),
-		'bush_bearing': fields.selection([('grease','Grease'),('cft_self','CFT'),('cut_less_rubber','Cut less Rubber')],'Bush Bearing'),
+		'bush_bearing': fields.selection([('grease','Bronze'),('cft_self','CFT'),('cut_less_rubber','Cut less Rubber')],'Bush Bearing'),
 		'bush_bearing_lubrication':fields.selection([('grease','Grease'),('external','External'),('self','Self'),('ex_pressure','External Under Pressure')], 'Bush Bearing Lubrication'),
 		'motor_kw': fields.float('Motor KW'),
 		'moc_construction_name': fields.char('MOC Construction Name',readonly=True),
