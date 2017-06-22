@@ -145,6 +145,7 @@ class kg_machineshop(osv.osv):
 		('op_completed','Operations Completed'),
 		('op_rejected','Operations Rejected'),
 		('sent_to_store','Sent to MS Store'),
+		('op_in_sc','Operation In SC'),
 		
 		],'MS Status', readonly=True),
 		'item_code': fields.char('Item Code', size=128),
