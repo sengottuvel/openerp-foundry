@@ -2,9 +2,7 @@
 <openerp>
 	<data>
 	
-	
-	
-	<!-- Drawing Indent Name process --> 
+	<!-- Drawing Issue Name process start--> 
 	
 	<record forcecreate="1" id="seq_type_drawing_issue" model="ir.sequence.type">	
 		<field name="name">KG drawing Issue</field>
@@ -19,7 +17,24 @@
 	  <field name="reset_sequence">fiscal_reset</field>
 	</record>
 	
+	<!-- Drawing Issue Name process End --> 
 	
+	<!-- Drawing Return Name process start--> 
+	
+	<record forcecreate="1" id="seq_type_drawing_return" model="ir.sequence.type">	
+		<field name="name">KG drawing Return</field>
+		<field name="code">kg.drawing.return</field>
+	</record>
+
+	<record forcecreate="1" id="seq_drawing_return" model="ir.sequence">
+	  <field name="name">KG drawing Return</field>
+	  <field name="code">kg.drawing.return</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">Return/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Drawing Return Name process End --> 
 	
 		
 </data>

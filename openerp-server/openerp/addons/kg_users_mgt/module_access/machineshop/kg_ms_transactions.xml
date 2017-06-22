@@ -816,6 +816,30 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<!-- Drawing Issue Return start-->
+		
+		<record id="t_ms_drawing_return" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_issue.model_kg_drawing_return"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing Return</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_drawing_return_line" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_issue.model_ch_drawing_return_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing Return Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Drawing Issue Return End-->
+		
 		<record id="t_ms_kg_spare_assembly_inward" model="ir.model.access">
 			<field name="model_id" ref="kg_assembly.model_kg_spare_assembly"/>
 			<field eval="1" name="perm_read"/>
