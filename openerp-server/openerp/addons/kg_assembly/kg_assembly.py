@@ -1319,7 +1319,7 @@ class kg_spare_assembly(osv.osv):
 					'moc_construction_id': entry.order_line_id.moc_construction_id.id,
 					'test_state':'di',
 					'di_state': 'pending',
-					'assembly_id': ids[0]
+					'spare_assembly_id': ids[0]
 				}
 				print "pump_qap_header_vals",pump_qap_header_vals
 				pump_qap_id = self.pool.get('kg.pump.qap').create(cr, uid, pump_qap_header_vals)
