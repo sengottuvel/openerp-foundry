@@ -554,4 +554,14 @@ class kg_scheduler(osv.osv):
 		print "data<<<<<<<<<", data
 		return True
 	
+	## Weekly once primecostview entry delete start
+	
+	def auto_primecost_delete(self, cr, uid, ids=0, context=None):
+		
+		cr.execute(''' delete from kg_primecost_view where entry_date < (current_date - interval '7' day)::date ''')
+		
+		return True
+	
+	## Weekly once primecostview entry delete end
+	
 kg_scheduler()

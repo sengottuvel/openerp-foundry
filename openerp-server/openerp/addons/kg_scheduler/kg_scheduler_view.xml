@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
-	
-	
-	<record id="kg_sch_form_view" model="ir.ui.view">
+		<record id="kg_sch_form_view" model="ir.ui.view">
 			<field name="name">Scheduler</field>
 			<field name="model">kg.scheduler</field>
 			<field name="arch" type="xml">
@@ -16,6 +14,7 @@
 					<button name="opening_stock_entry_creation" string="Opening Stock" type="object" class="oe_highlight"/>
 					<button name="opening_stock_mail_creation" string="Open Stock Mail" type="object" class="oe_highlight"/>
 					<button name="auto_purchase_indent" string="Auto Indent" type="object" class="oe_highlight"/>
+					<button name="auto_primecost_delete" string="Delete Primecost" type="object" class="oe_highlight"/>
 				</header>	
 				<group>
 					<button name="auto_scheduler_pouring_date" string="Pouring Date" type="object" class="oe_highlight"/>
@@ -24,25 +23,18 @@
 					<button name="auto_scheduler_in_house_date" string="IN House Date" type="object" class="oe_highlight"/>
 					<button name="auto_scheduler_sc_wo_date" string="SUB Completed Date" type="object" class="oe_highlight"/>
 					<button name="auto_scheduler_rm_date" string="RM Date" type="object" class="oe_highlight"/>
-				
-				</group>		
-					
+				</group>
 				</form>
-			</field> 
+			</field>
 		</record>
 		
-		
-		
-		 <record id="export_sch_action_form" model="ir.actions.act_window">
+		<record id="export_sch_action_form" model="ir.actions.act_window">
 			<field name="name">Forms Scheduler</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.scheduler</field>
 			<field name="view_type">form</field>
 			<field name="view_id" ref="kg_sch_form_view"/>
 		</record>
-
-	
-	
-
-</data>
-	</openerp>
+		
+	</data>
+</openerp>
