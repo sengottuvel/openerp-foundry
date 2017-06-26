@@ -140,12 +140,13 @@ class kg_machineshop(osv.osv):
 		'position_id': fields.many2one('kg.position.number','Position No',domain="[('active','=','t')]"),
 		'ms_state': fields.selection([
 		('in_plan','Planning In Progress'),
-		('sent_to_sc','Sent to SC'),
-		('op_progress','Operation In Progress'),
+		('sent_to_sc','In SC List'),
+		('inhouse_1','In House -1'),
+		('inhouse_2','In House -2'),
 		('op_completed','Operations Completed'),
-		('op_rejected','Operations Rejected'),
-		('sent_to_store','Sent to MS Store'),
 		('op_in_sc','Operation In SC'),
+		('op_rejected','Operations Rejected'),
+		('sent_to_store','In F.P store'),
 		
 		],'MS Status', readonly=True),
 		'item_code': fields.char('Item Code', size=128),

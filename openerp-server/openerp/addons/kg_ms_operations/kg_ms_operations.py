@@ -1450,8 +1450,11 @@ class kg_ms_operations(osv.osv):
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
-			pass	
+			pass
+			
+		### MS State updation ##
 		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 		
 		return True
 		
@@ -2135,7 +2138,11 @@ class kg_ms_operations(osv.osv):
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
-			pass			
+			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)		
 				
 		return True
 		
@@ -2819,6 +2826,10 @@ class kg_ms_operations(osv.osv):
 				
 		else:
 			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 						
 				
 		return True
@@ -3503,6 +3514,10 @@ class kg_ms_operations(osv.osv):
 				
 		else:
 			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 						
 				
 		return True
@@ -4184,6 +4199,10 @@ class kg_ms_operations(osv.osv):
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 						
 				
 		return True
@@ -4865,6 +4884,10 @@ class kg_ms_operations(osv.osv):
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 						
 				
 		return True
@@ -5546,6 +5569,10 @@ class kg_ms_operations(osv.osv):
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 						
 				
 		return True
@@ -6227,6 +6254,10 @@ class kg_ms_operations(osv.osv):
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 						
 				
 		return True
@@ -6911,6 +6942,10 @@ class kg_ms_operations(osv.osv):
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 						
 				
 		return True
@@ -7595,6 +7630,10 @@ class kg_ms_operations(osv.osv):
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 						
 				
 		return True
@@ -8277,6 +8316,10 @@ class kg_ms_operations(osv.osv):
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 						
 				
 		return True
@@ -8951,6 +8994,10 @@ class kg_ms_operations(osv.osv):
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
+			
+		### MS State updation ##
+		
+		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
 				
 		return True
 		

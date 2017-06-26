@@ -116,6 +116,29 @@ class kg_ms_daily_planning(osv.osv):
 			
 		return True
 		
+	def op_status_update(self, cr, uid, ids, ms_id, operation_id, context=None):
+		ms_operation_obj = self.pool.get('kg.ms.operations')
+		ms_obj = self.pool.get('kg.machineshop')
+		
+		ms_operation_rec = ms_operation_obj.browse(cr,uid,operation_id)
+	
+		
+		if (ms_operation_rec.op1_state == 'pending' or ms_operation_rec.op2_state == 'pending'  or ms_operation_rec.op3_state  == 'pending' or
+			ms_operation_rec.op4_state  == 'pending' or ms_operation_rec.op5_state == 'pending' ) and (ms_operation_rec.op6_state in ('pending','done') or ms_operation_rec.op7_state  in ('pending','done') or 
+			ms_operation_rec.op8_state  in ('pending','done')  or ms_operation_rec.op9_state  in ('pending','done')  or ms_operation_rec.op10_state  in ('pending','done')  or ms_operation_rec.op11_state  in ('pending','done')  or 
+			ms_operation_rec.op12_state in ('pending','done') ) :
+			
+			ms_obj.write(cr,uid,ms_id,{'ms_state': 'inhouse_1'})
+		if (ms_operation_rec.op1_state in ('','done') and ms_operation_rec.op2_state in ('','done') and ms_operation_rec.op3_state in ('','done') and
+			ms_operation_rec.op4_state in ('','done')  and ms_operation_rec.op5_state in ('','done') ) and (ms_operation_rec.op6_state == 'pending' or ms_operation_rec.op7_state == 'pending' or 
+			ms_operation_rec.op8_state == 'pending' or ms_operation_rec.op9_state == 'pending' or ms_operation_rec.op10_state == 'pending' or ms_operation_rec.op11_state == 'pending' or 
+			ms_operation_rec.op12_state == 'pending'):
+			
+			ms_obj.write(cr,uid,ms_id,{'ms_state': 'inhouse_2'})
+		
+		
+		return True
+		
 	def entry_confirm(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr,uid,ids[0])
 		ms_operation_obj = self.pool.get('kg.ms.operations')
@@ -407,6 +430,9 @@ class kg_ms_daily_planning(osv.osv):
 								}
 								
 								ms_operation_id = ms_operation_obj.create(cr, uid, operation_vals)
+								
+								### MS State updation ##
+								self.op_status_update(cr, uid, 0, line_item.ms_id.id,ms_operation_id)
 								
 								ms_operation_obj.write(cr, uid, ms_operation_id, {'last_operation_check_id':ms_operation_id})
 								
@@ -781,6 +807,9 @@ class kg_ms_daily_planning(osv.osv):
 								}
 								
 								ms_operation_id = ms_operation_obj.create(cr, uid, operation_vals)
+								
+								### MS State updation ##
+								self.op_status_update(cr, uid, 0,line_item.ms_id.id,ms_operation_id)
 								
 								ms_operation_obj.write(cr, uid, ms_operation_id, {'last_operation_check_id':ms_operation_id})
 								

@@ -1805,6 +1805,9 @@ class kg_schedule(osv.osv):
 											pending_qty = indent_qty/order_line_rec.qty
 											issue_pending_qty = indent_qty/order_line_rec.qty
 											flag_dynamic_length = False
+											
+										if cutting_qty > 0:
+											cutting_qty = cutting_qty/order_line_rec.qty
 									
 										ms_dep_indent_line_vals = {
 											'indent_id':indent_id,
