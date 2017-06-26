@@ -142,7 +142,7 @@
 					<field name="pump_id"/>
 					<field name="pump_cost"/>
 					<field name="total_cost"/>
-					<field name="state"/>
+					<field name="state" invisible="1"/>
 				</tree>
 			</field>
 		</record>
