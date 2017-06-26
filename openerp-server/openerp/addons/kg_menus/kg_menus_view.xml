@@ -35,7 +35,7 @@
 			<menuitem id="cpm_crm_master_menu" name="Masters" parent="cpm_crm" sequence="1"/>
 				
 				<!-- Contractor Master  -->
-				<menuitem action="kg_partners.kg_action_contractor_form" name="Contractor" id="mam_contractor_master123" parent="kg_pumpmodel_master.mpm_planning_master" sequence="19"/>
+				<menuitem action="kg_partners.kg_action_contractor_form_1" name="Contractor" id="mam_contractor_master123" parent="kg_pumpmodel_master.mpm_planning_master" sequence="19"/>
 				
 				<!-- Country -->
 <!--
