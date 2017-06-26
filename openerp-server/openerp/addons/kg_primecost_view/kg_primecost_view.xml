@@ -38,13 +38,13 @@
 								<field name="motor_kw" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
 								<field name="total_cost" readonly="1"/>
 								<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>
-							</group>					
+								<field name="state" style="width: 30%%" class="att_state_change" invisible="1"/>
+							</group>
 						</group>
 						<notebook>
 							<page string="Foundry Items" >
 								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string="Foundry Details Entry Tree" editable="top" create="false" delete="false">					
+									<tree string="Foundry Details Entry Tree" editable="top" create="false" delete="false">
 										<field name="is_applicable"/>
 										<field name="position_id" readonly="1"/>
 										<field name="pattern_id" readonly="1"/>
@@ -59,7 +59,7 @@
 							</page>
 							<page string="MS Items" >
 								<field name="line_ids_a" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string="MS Details Entry Tree" editable="top" create="false" delete="false">					
+									<tree string="MS Details Entry Tree" editable="top" create="false" delete="false">
 										<field name="is_applicable"/>
 										<field name="position_id" readonly="1"/>
 										<field name="ms_id" readonly="1"/>
@@ -75,7 +75,7 @@
 							</page>
 							<page string="BOT Items" >
 								<field name="line_ids_b" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string="BOT Details Entry Tree" editable="top" create="false" delete="false">					
+									<tree string="BOT Details Entry Tree" editable="top" create="false" delete="false">
 										<field name="is_applicable"/>
 										<field name="position_id" readonly="1"/>
 										<field name="bot_id" readonly="1"/>

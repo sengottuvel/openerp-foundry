@@ -411,7 +411,7 @@ class kg_attendance_device_info(osv.osv):
 							
 						else:
 							
-							perm_req=self.pool.get('hr.holidays').search(cr,uid,[('from_date','=',yesterday),('employee_id','=',emp_id),('holiday_status_id','=',29),('status','=','approved')])
+							perm_req=self.pool.get('hr.holidays').search(cr,uid,[('from_date','=',yesterday),('employee_id','=',emp_id),('holiday_status_id','=',12),('status','=','approved')])
 							print "permission request --------------------------------------------------->>>>>>>>>>>>>>>>",perm_req
 							if perm_req:
 								perm_req_1=self.pool.get('hr.holidays').browse(cr,uid,perm_req)
@@ -499,7 +499,7 @@ class kg_attendance_device_info(osv.osv):
 										print "*******yesterdayyesterday******************",yesterday
 										if str(d3) == str(betw_days):
 											print "Updated++++++++%%%%%%%%%%%%%%%%%%%%%++++++++"
-											if holi_rec.holiday_status_id.id == 25:
+											if holi_rec.holiday_status_id.id == 8:
 												status = 'onduty'
 												rmks = holi_rec.holiday_status_id.name
 											elif holi_rec.holiday_status_id.id == 31:
