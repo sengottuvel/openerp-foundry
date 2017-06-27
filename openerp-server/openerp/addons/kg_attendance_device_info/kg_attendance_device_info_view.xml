@@ -11,7 +11,7 @@
 				<form string="Attendance Device Info" version="7.0">
 					<header>
 						<button name="attendance_entry_move" type="object" string="Load"/>
-						<button name="data_upload" type="object" string="Data Upload"/>
+						<button name="data_upload" invisible="1" type="object" string="Data Upload"/>
 					</header>
 					<group>
 						<group>

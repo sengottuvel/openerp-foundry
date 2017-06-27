@@ -169,7 +169,7 @@ class kg_attendance_device_info(osv.osv):
 			for ele in daily_id:
 				daily_rec = daily_obj.browse(cr,uid,ele)
 				emp_id = daily_rec.employee_id.id
-				att_code = daily_rec.employee_id.att_code				
+				att_code = '0000' + daily_rec.employee_id.att_code				
 				print "------------------------------------------",yesterday
 				
 				entry_ids = att_device_obj.search(cr,uid,[('att_code','=',att_code),
@@ -366,7 +366,7 @@ class kg_attendance_device_info(osv.osv):
 						### Validating Using Shift Hours####
 						
 						rec=self.browse(cr,uid,ids[0])
-						check_emp = self.pool.get('hr.employee').search(cr,uid,[('att_code','=',rec.att_code)])
+						check_emp = self.pool.get('hr.employee').search(cr,uid,[('att_code','=',att_code[4:8])])
 						check_cont = self.pool.get('hr.contract').search(cr,uid,[('employee_id','=',check_emp)])
 						print "************************************************",check_emp
 						check_emp_1 = self.pool.get('hr.employee').browse(cr,uid,check_emp[0])
@@ -502,7 +502,7 @@ class kg_attendance_device_info(osv.osv):
 											if holi_rec.holiday_status_id.id == 8:
 												status = 'onduty'
 												rmks = holi_rec.holiday_status_id.name
-											elif holi_rec.holiday_status_id.id == 31:
+											elif holi_rec.holiday_status_id.id == 19:
 												status = 'absent'
 												rmks = holi_rec.holiday_status_id.name
 												print "Updated++++++++++++++++++++++++++++++++++++++++++++++"
