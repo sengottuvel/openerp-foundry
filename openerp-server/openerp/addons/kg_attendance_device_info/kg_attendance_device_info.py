@@ -187,60 +187,60 @@ class kg_attendance_device_info(osv.osv):
 							device_rec = att_device_obj.browse(cr,uid,item1)
 							#~ punch = 
 							print "device_rec.punch_timedevice_rec.punch_timedevice_rec.punch_time",device_rec.punch_time[0:5]
-							in_time_val = datetime.strptime(device_rec.punch_time, "%H:%M")
-							out_time_val = datetime.strptime(device_rec.punch_time, "%H:%M")
+							in_time_val = datetime.strptime(device_rec.punch_time[0:5], "%H:%M")
+							out_time_val = datetime.strptime(device_rec.punch_time[0:5], "%H:%M")
 
 							if pos1 == 0:
 								in1=in_time_val
-								line_in1 = device_rec.punch_time
+								line_in1 = device_rec.punch_time[0:5]
 							elif pos1 == 2:
 								in2 = in_time_val
-								line_in2 = device_rec.punch_time
+								line_in2 = device_rec.punch_time[0:5]
 							elif pos1 == 4:
 								in3 = in_time_val
-								line_in3 = device_rec.punch_time
+								line_in3 = device_rec.punch_time[0:5]
 							elif pos1 == 6:
 								in4 = in_time_val
-								line_in4 = device_rec.punch_time
+								line_in4 = device_rec.punch_time[0:5]
 							elif pos1 == 8:
 								in5 = in_time_val
-								line_in5 = device_rec.punch_time
+								line_in5 = device_rec.punch_time[0:5]
 							elif pos1 == 10:								
 								in6 = in_time_val
-								line_in6 = device_rec.punch_time
+								line_in6 = device_rec.punch_time[0:5]
 							elif pos1 == 12:								
 								in7 = in_time_val
-								line_in7 = device_rec.punch_time
+								line_in7 = device_rec.punch_time[0:5]
 							elif pos1 == 14:								
 								in8 = in_time_val
-								line_in8 = device_rec.punch_time						
+								line_in8 = device_rec.punch_time[0:5]					
 
 							## IN PUNCH COMPLETED ##
 							
 							elif pos1 == 1:
 								out1 = out_time_val
-								line_out1 = device_rec.punch_time
+								line_out1 = device_rec.punch_time[0:5]
 							elif pos1 == 3:
 								out2 = out_time_val
-								line_out2 = device_rec.punch_time
+								line_out2 = device_rec.punch_time[0:5]
 							elif pos1 == 5:
 								out3 = out_time_val
-								line_out3 = device_rec.punch_time
+								line_out3 = device_rec.punch_time[0:5]
 							elif pos1 == 7:
 								out4 = out_time_val
-								line_out4 = device_rec.punch_time
+								line_out4 = device_rec.punch_time[0:5]
 							elif pos1 == 9:
 								out5 = out_time_val
-								line_out5 = device_rec.punch_time
+								line_out5 = device_rec.punch_time[0:5]
 							elif pos1 == 11:
 								out6 = out_time_val
-								line_out6 = device_rec.punch_time
+								line_out6 = device_rec.punch_time[0:5]
 							elif pos1 == 13:
 								out7 = out_time_val
-								line_out7 = device_rec.punch_time
+								line_out7 = device_rec.punch_time[0:5]
 							elif pos1 == 15:
 								out8 = out_time_val
-								line_out8 = device_rec.punch_time
+								line_out8 = device_rec.punch_time[0:5]
 
 						## OUT PUNCH COMPLETED
 						
