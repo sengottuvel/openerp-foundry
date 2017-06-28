@@ -172,9 +172,14 @@ class kg_attendance_device_info(osv.osv):
 				att_code = '0000' + daily_rec.employee_id.att_code				
 				print "------------------------------------------",yesterday
 				
-				entry_ids = att_device_obj.search(cr,uid,[('att_code','=',att_code),
-								('date','=',yesterday)])
-				entry_ids.sort()
+				#~ entry_ids = att_device_obj.search(cr,uid,[('att_code','=',att_code),
+								#~ ('date','=',yesterday)])
+				#~ entry_ids.sort()
+				
+				cr.execute("""select id,punch_time from kg_attendance_device_info where date ='%s' and att_code='%s'"""%(yesterday,att_code))
+				entry_ids=cr.dictfetchall()
+				entry_ids.sort(key=lambda entry_ids: (entry_ids['punch_time']),reverse=False)
+				
 				add_ids = line_obj.search(cr,uid,[('employee_id','=',emp_id),
 									('date','=',yesterday),('header_id','=',ele)])
 				if not add_ids:									
@@ -184,7 +189,7 @@ class kg_attendance_device_info(osv.osv):
 						line_in1,line_in2,line_in3,line_in4,line_in5,line_in6,line_in7,line_in8 = '','','','','','','',''
 						line_out1,line_out2,line_out3,line_out4,line_out5,line_out6,line_out7,line_out8 = '','','','','','','',''
 						for pos1, item1 in enumerate(entry_ids):
-							device_rec = att_device_obj.browse(cr,uid,item1)
+							device_rec = att_device_obj.browse(cr,uid,item1['id'])
 							#~ punch = 
 							print "device_rec.punch_timedevice_rec.punch_timedevice_rec.punch_time",device_rec.punch_time[0:5]
 							in_time_val = datetime.strptime(device_rec.punch_time[0:5], "%H:%M")
