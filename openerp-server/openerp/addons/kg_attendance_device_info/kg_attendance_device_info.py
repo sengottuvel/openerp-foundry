@@ -360,7 +360,9 @@ class kg_attendance_device_info(osv.osv):
 						for tm in time_list:
 							print "tmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",tm
 							timeParts = [int(s) for s in tm.split(':')]
+							print "timepartnsssssssssssss",timeParts
 							totalSecs += (timeParts[0] * 60 + timeParts[1]) * 60 + timeParts[2]
+						stop
 						totalSecs, sec = divmod(totalSecs, 60)
 						hr, min = divmod(totalSecs, 60)
 						tot_hrs = hr
