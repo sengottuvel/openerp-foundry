@@ -256,6 +256,7 @@ class kg_attendance_device_info(osv.osv):
 								test1 = datetime.strptime(b1, FMT) - datetime.strptime(a1, FMT)
 								
 							test1 = str(test1)
+							print "test1test1test1test1test1",test1
 							time_list.append(test1)
 						else:
 							tot_hrs1 = 0							
@@ -269,6 +270,7 @@ class kg_attendance_device_info(osv.osv):
 								test2 = datetime.strptime(b2, FMT) - datetime.strptime(a2, FMT)
 								
 							test2 = str(test2)
+							print "test2test2test2test2test2",test2
 							time_list.append(test2)							
 						else:
 							tot_hrs2 = 0						
@@ -281,7 +283,7 @@ class kg_attendance_device_info(osv.osv):
 							else:
 								test3 = datetime.strptime(b3, FMT) - datetime.strptime(a3, FMT)
 							test3 = str(test3)
-							
+							print "test3test3test3test3test3",test3
 							time_list.append(test3)
 						else:
 							tot_hrs3 = 0
@@ -295,6 +297,7 @@ class kg_attendance_device_info(osv.osv):
 								test4 = datetime.strptime(b4, FMT) - datetime.strptime(a4, FMT)
 								
 							test4 = str(test4)
+							print "test4test4test4test4test4",test4
 							time_list.append(test4)
 						else:
 							tot_hrs4 = 0
@@ -308,6 +311,7 @@ class kg_attendance_device_info(osv.osv):
 								test5 = datetime.strptime(b5, FMT) - datetime.strptime(a5, FMT)
 								
 							test5 = str(test5)
+							print "test5test5test5test5",test5
 							time_list.append(test5)
 						else:
 							tot_hrs5 = 0						
@@ -321,6 +325,7 @@ class kg_attendance_device_info(osv.osv):
 								test6 = datetime.strptime(b6, FMT) - datetime.strptime(a6, FMT)
 								
 							test6 = str(test6)
+							print "test6test6test6test6test6test6test6",test6
 							time_list.append(test6)
 						else:
 							tot_hrs6 = 0
@@ -334,6 +339,7 @@ class kg_attendance_device_info(osv.osv):
 								test7 = datetime.strptime(b7, FMT) - datetime.strptime(a7, FMT)
 								
 							test7 = str(test7)
+							print "test7test7test7test7test7",test7
 							time_list.append(test7)
 						else:
 							tot_hrs7 = 0
@@ -348,6 +354,7 @@ class kg_attendance_device_info(osv.osv):
 								test8 = datetime.strptime(b8, FMT) - datetime.strptime(a8, FMT)
 								
 							test8 = str(test8)
+							print "test8test8test8test8test8test8",test8
 							time_list.append(test8)
 							
 							#if type(val8).__name__!='int':
