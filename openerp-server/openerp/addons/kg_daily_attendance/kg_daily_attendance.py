@@ -127,6 +127,8 @@ class kg_daily_attendance(osv.osv):
 				'emp_code':emp_rec.code,
 				'month':cur_month,
 				'att_code':emp_rec.att_code,
+				'emp_categ_id':emp_rec.emp_categ_id.id,
+				'division_id':emp_rec.division_id.id,
 				'date': today,
 
 				}
