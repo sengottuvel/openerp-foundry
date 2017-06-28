@@ -174,7 +174,7 @@ class kg_attendance_device_info(osv.osv):
 				
 				entry_ids = att_device_obj.search(cr,uid,[('att_code','=',att_code),
 								('date','=',yesterday)])
-				entry_ids.sort(reverse=True)
+				entry_ids.sort()
 				add_ids = line_obj.search(cr,uid,[('employee_id','=',emp_id),
 									('date','=',yesterday),('header_id','=',ele)])
 				if not add_ids:									
