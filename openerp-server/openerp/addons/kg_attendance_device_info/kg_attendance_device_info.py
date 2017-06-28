@@ -348,7 +348,7 @@ class kg_attendance_device_info(osv.osv):
 							#val8 = (out8 - in8) / 12
 							a8 = out8.strftime(FMT)
 							b8 = in8.strftime(FMT)
-							if a7 > b7:
+							if a8 > b8:
 								test8 = datetime.strptime(a8, FMT) - datetime.strptime(b8, FMT)
 							else:
 								test8 = datetime.strptime(b8, FMT) - datetime.strptime(a8, FMT)
