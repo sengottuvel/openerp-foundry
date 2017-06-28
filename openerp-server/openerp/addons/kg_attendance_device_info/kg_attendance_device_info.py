@@ -185,6 +185,8 @@ class kg_attendance_device_info(osv.osv):
 						line_out1,line_out2,line_out3,line_out4,line_out5,line_out6,line_out7,line_out8 = '','','','','','','',''
 						for pos1, item1 in enumerate(entry_ids):
 							device_rec = att_device_obj.browse(cr,uid,item1)
+							#~ punch = 
+							print "device_rec.punch_timedevice_rec.punch_timedevice_rec.punch_time",device_rec.punch_time[0:4]
 							in_time_val = datetime.strptime(device_rec.punch_time, "%H:%M")
 							out_time_val = datetime.strptime(device_rec.punch_time, "%H:%M")
 
