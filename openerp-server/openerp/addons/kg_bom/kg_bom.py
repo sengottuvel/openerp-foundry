@@ -163,12 +163,22 @@ class kg_bom(osv.osv):
 		if rec.name:
 			pump_name = rec.pump_model_id
 			if rec.category_type =='pump_bom':									
-				cr.execute(""" select * from kg_bom where pump_model_id  = '%s' and state != '%s' """ %(pump_name.id,'reject'))
+				cr.execute(""" select * from kg_bom where category_type='pump_bom' and pump_model_id  = '%s' and state != '%s' """ %(pump_name.id,'reject'))
 				data = cr.dictfetchall()			
 				if len(data) > 1:
 					res = False
 			else:
 				res = True				
+		return res
+		
+	def _bom_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.name:													
+			cr.execute(""" select * from kg_bom where name  = '%s' and state != '%s' """ %(rec.name,'reject'))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False						
 		return res
 
 	def entry_confirm(self,cr,uid,ids,context=None):		
@@ -479,7 +489,8 @@ class kg_bom(osv.osv):
 		
 	_constraints = [
 		
-		(_pump_validate, 'Pump Model name must be unique !!', ['Pump Name']),			
+		(_pump_validate, 'Pump Model Name must be unique !!', ['Pump Model Name']),			
+		(_bom_validate, 'BOM Name must be unique !!', ['BOM Name']),			
 		
 	]
 	

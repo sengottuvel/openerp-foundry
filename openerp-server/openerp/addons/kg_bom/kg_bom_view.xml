@@ -47,7 +47,7 @@
 							
 							
 						
-							<field name="pump_model_id" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire']),('category_type','=','pump_bom')],'required': [('category_type','in',['pump_bom'])]}"/>
+							<field name="pump_model_id" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
 							<field name="qty" readonly="1"/>
 							<field name="copy_flag" invisible="1"/>									
 							<field name="modify" invisible="1"/>															
