@@ -37,6 +37,7 @@ class kg_subcontract_advance(osv.osv):
 		'cancel_remark': fields.text('Cancel'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+		'sc_type': fields.selection([('ms','MS'),('foundry','Foundry')],'SC Type', readonly=True),
 		'flag_sms': fields.boolean('SMS Notification'),
 		'flag_email': fields.boolean('Email Notification'),
 		'flag_spl_approve': fields.boolean('Special Approval'),
@@ -60,11 +61,13 @@ class kg_subcontract_advance(osv.osv):
 		
 		'contractor_id': fields.many2one('res.partner', 'Sub Contractor', domain = "['|',('contractor','=',True),('supplier','=',True)]"),		
 		
-		'wo_id':fields.many2one('kg.subcontract.wo','Subcontract WO No',domain="[('contractor_id','=',contractor_id), '&', ('state','!=','draft')]",required=True),
+		'wo_id':fields.many2one('kg.subcontract.wo','Subcontract WO No',domain="[('contractor_id','=',contractor_id), '&', ('state','!=','draft')]"),
+		'fou_wo_id':fields.many2one('kg.fettling.workorder','Subcontract WO No',domain="[('contractor_id','=',contractor_id), '&', ('state','!=','draft')]"),
 		
 	    'advance_amt': fields.float('Advance Amount'),			
 		'order_value': fields.float('Order Value'),		
 		'adjusted_amt': fields.float('Adjusted Amount'),		
+		'wo_bal_amt': fields.float('WO Balance Advance'),		
 		'balance_amt': fields.function(_balance_amount_value, digits_compute= dp.get_precision('Account'),string='Balance Amount',store=True, type='float',multi="sums"),	
 				
 		'order_no': fields.char('Order NO',readonly=True),				
@@ -89,19 +92,41 @@ class kg_subcontract_advance(osv.osv):
 		
 	}
 	
-	def onchange_order_value(self, cr, uid, ids, wo_id, context=None):
+	def onchange_order_value(self, cr, uid, ids, wo_id,contractor_id,sc_type, context=None):
 		value = {'order_value':0.00}		
 		total_value = 0.00
+		advance_amt = 0.00
 		order_no = ''
-		if wo_id:			
+		if wo_id:
+			sup_ids = self.pool.get('kg.subcontract.advance').search(cr,uid,[('wo_id','=',wo_id),('contractor_id','=',contractor_id),('state','=','confirmed'),('sc_type','=',sc_type)])					
+			for item in sup_ids:
+				adv_rec = self.pool.get('kg.subcontract.advance').browse(cr,uid,item)
+				advance_amt += adv_rec.advance_amt			
 			po_rec = self.pool.get('kg.subcontract.wo').browse(cr,uid,wo_id)		
 			total_value = po_rec.wo_value
-			order_no = po_rec.name				
-		return {'value': {'order_value' : total_value,'order_no':order_no}}	
+			order_no = po_rec.name
+			balance_value = total_value - advance_amt					
+		return {'value': {'order_value' : total_value,'order_no':order_no,'wo_bal_amt':balance_value}}
+		
+	def onchange_fou_order_value(self, cr, uid, ids, fou_wo_id,contractor_id,sc_type, context=None):
+		value = {'order_value':0.00}		
+		total_value = 0.00
+		advance_amt = 0.00
+		order_no = ''
+		if fou_wo_id:
+			sup_ids = self.pool.get('kg.subcontract.advance').search(cr,uid,[('fou_wo_id','=',fou_wo_id),('contractor_id','=',contractor_id),('state','=','confirmed'),('sc_type','=',sc_type)])					
+			for item in sup_ids:
+				adv_rec = self.pool.get('kg.subcontract.advance').browse(cr,uid,item)
+				advance_amt += adv_rec.advance_amt
+			po_rec = self.pool.get('kg.fettling.workorder').browse(cr,uid,fou_wo_id)		
+			total_value = po_rec.wo_value
+			order_no = po_rec.name
+			balance_value = total_value - advance_amt				
+		return {'value': {'order_value' : total_value,'order_no':order_no,'wo_bal_amt':balance_value}}		
 	
-	def onchange_contractor_id(self, cr, uid, ids, contractor_id, context=None):
+	def onchange_contractor_id(self, cr, uid, ids, contractor_id,sc_type, context=None):
 		value = {}		
-		sup_ids = self.pool.get('kg.subcontract.advance').search(cr,uid,[('contractor_id','=',contractor_id),('state','=','confirmed')])		
+		sup_ids = self.pool.get('kg.subcontract.advance').search(cr,uid,[('contractor_id','=',contractor_id),('state','=','confirmed'),('sc_type','=',sc_type)])		
 		adv_line_vals=[]
 		if sup_ids:
 			for ele in sup_ids:			
@@ -144,13 +169,8 @@ class kg_subcontract_advance(osv.osv):
 		return True		
 		
 	def _check_adv_amt(self,cr,uid,ids,context = None):
-		rec = self.browse(cr,uid,ids[0])
-		total = 0.00
-		for line in rec.line_ids:
-			if rec.order_no == line.order_no:
-				total += line.balance_amt
-		total_amt = rec.advance_amt + total
-		if rec.advance_amt <= 0.00 or total_amt > rec.order_value:
+		rec = self.browse(cr,uid,ids[0])		
+		if rec.advance_amt <= 0.00 or rec.advance_amt > rec.wo_bal_amt:
 			return False
 		else:
 			return True		
@@ -170,15 +190,24 @@ class kg_subcontract_advance(osv.osv):
 		if rec.state == 'draft':
 			
 			### Sequence Number Generation  ###
-			
-			if rec.name == '' or rec.name == False:
-				seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.advance')])
-				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
-				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
-				entry_name = cr.fetchone();
-				entry_name = entry_name[0]
-			else:
-				entry_name = rec.name		
+			if rec.sc_type == 'ms':
+				if rec.name == '' or rec.name == False:
+					seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.advance')])
+					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
+					entry_name = cr.fetchone();
+					entry_name = entry_name[0]
+				else:
+					entry_name = rec.name	
+			if rec.sc_type == 'foundry':
+				if rec.name == '' or rec.name == False:
+					seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.foundry.subcontract.advance')])
+					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
+					entry_name = cr.fetchone();
+					entry_name = entry_name[0]
+				else:
+					entry_name = rec.name		
 				
 			
 			self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})

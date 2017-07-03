@@ -16,18 +16,22 @@
 						<group>
 							<group>
 								<field name="name"/>
-								<field name="contractor_id" required="1" on_change="onchange_contractor_id(contractor_id)" attrs="{'readonly': [('state','in',['confirmed'])]}" />
-								<field name="wo_id" on_change="onchange_order_value(wo_id)" attrs="{'readonly': [('state','in',['confirmed'])]}" />								
+								<field name="contractor_id" required="1" on_change="onchange_contractor_id(contractor_id,sc_type)" attrs="{'readonly': [('state','in',['confirmed'])]}" />
+								<field name="wo_id" on_change="onchange_order_value(wo_id,contractor_id,sc_type)" attrs="{'readonly': [('state','in',['confirmed'])],'invisible':[('sc_type','=','foundry')],'required':[('sc_type','=','ms')]}" />								
+								<field name="fou_wo_id" on_change="onchange_fou_order_value(fou_wo_id,contractor_id,sc_type)" attrs="{'readonly': [('state','in',['confirmed'])],'invisible':[('sc_type','=','ms')],'required':[('sc_type','=','foundry')]}" />								
 								<field name="order_value" readonly="1"/>
-								<field name="balance_amt" readonly="1"/>
+								
+								<field name="wo_bal_amt" readonly="1"/>
 								<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>								
 								<field name="advance_amt" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="adjusted_amt" readonly="1"/>
+								<field name="balance_amt" readonly="1"/>
+								<field name="adjusted_amt" readonly="1"/>								
 								<field name="order_no" invisible="1"/>								
+								<field name="sc_type" invisible="1"/>								
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 							</group>					
 						</group>
@@ -153,20 +157,35 @@
 		
 	<!-- Search View End -->		
 			
-	<!-- Menu Action Start-->
+	<!-- MS SC Advance Menu Action Start-->
 		
 		<record id="tma_subcontract_advance" model="ir.actions.act_window">
-			<field name="name">Subcontract Advance</field>
+			<field name="name">MS Subcontract Advance</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.subcontract.advance</field>
+			<field name="view_type">form</field>			
+			<field name="context">{"search_default_draft":1,'default_sc_type': 'ms'}</field>
+			<field name="domain">[('sc_type','=','ms')]</field>	
+			<field name="view_id" ref="t_tree_v_subcontract_advance"/>
+			<field name="search_view_id" ref="t_search_v_subcontract_advance"/>			
+		</record>
+		
+	<!-- MS SC Advance Menu Menu Action End-->
+	
+	<!-- MS SC Advance Menu Action Start-->
+		
+		<record id="tma_foundry_subcontract_advance" model="ir.actions.act_window">
+			<field name="name">Fettling Subcontract Advance</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.subcontract.advance</field>
 			<field name="view_type">form</field>
-			<field name="context">{}</field>
+			<field name="context">{"search_default_draft":1,'default_sc_type': 'foundry'}</field>
+			<field name="domain">[('sc_type','=','foundry')]</field>	
 			<field name="view_id" ref="t_tree_v_subcontract_advance"/>
-			<field name="search_view_id" ref="t_search_v_subcontract_advance"/>
-			<field name="context">{"search_default_draft":1}</field>
+			<field name="search_view_id" ref="t_search_v_subcontract_advance"/>			
 		</record>
 		
-	<!-- Menu Action End-->
+	<!-- MS SC Advance Menu Menu Action End-->
 	
 	<!-- Audit Log Xml Data Start -->
 		
@@ -187,6 +206,7 @@
 	<!-- Menu Item Start -->
 	
 		<menuitem action="tma_subcontract_advance" id="tam_subcontract_advance" parent="kg_subcontract_process.tpm_sc_process" sequence="5" />	     
+		<menuitem action="tma_foundry_subcontract_advance" id="tam_foundry_subcontract_advance" parent="kg_fettling_process.tpm_fettling_sc_process" sequence="3"/>	
 		
 				
 	<!-- Menu Item End -->	
