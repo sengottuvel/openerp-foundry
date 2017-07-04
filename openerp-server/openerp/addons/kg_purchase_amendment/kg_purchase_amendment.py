@@ -194,7 +194,7 @@ class kg_purchase_amendment(osv.osv):
 		'term_freight_amend':fields.selection([('Inclusive','Inclusive'),('Extra','Extra'),('To Pay','To Pay'),('Paid','Paid'),
 						  ('Extra at our Cost','Extra at our Cost')], 'Amend Freight',readonly=False,states={'approved':[('readonly',True)]}),
 		'po_type_amend': fields.selection([('direct', 'Direct'),('frompi', 'From PI')], 'PO Type',readonly=True),
-		'item_quality_term_id_amend': fields.many2many('kg.item.quality.master','general_term','po_id','term_id','Amend Item Quality Term',readonly=False, states={'approved':[('readonly',True)]}),
+		'item_quality_term_id_amend': fields.many2many('kg.item.quality.master','general_term_amend','po_id','term_id','Amend Item Quality Term',readonly=False, states={'approved':[('readonly',True)]}),
 		'mode_of_dispatch_amend': fields.many2one('kg.dispatch.master','Amend Mode of Dispatch',readonly=False, states={'approved':[('readonly',True)]}),
 		'insurance_amend': fields.selection([('sam','By Sam'),('supplier','By Supplier'),('na','N/A')],'Amend Insurance',readonly=False, states={'approved':[('readonly',True)]}),
 		'purpose_amend':fields.selection([('for_sale','For Production'),('own_use','Own use')], 'Amend Purpose',readonly=False, states={'approved':[('readonly',True)]}), 
