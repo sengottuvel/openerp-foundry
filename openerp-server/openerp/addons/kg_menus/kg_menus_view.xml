@@ -307,6 +307,14 @@
 				<menuitem parent="menu_masters_menu" id="mam_kg_contribution"  action="kg_contribution.mma_kg_contribution" sequence="0" name="Contribution"/>	
 				<menuitem parent="menu_masters_menu" id="mam_kg_job_nature"  action="kg_job_nature.mma_standard_kg_job_nature" sequence="10" name="Nature of Job"/>
 				<menuitem parent="menu_masters_menu" id="mam_kg_division_master_action"  action="kg_division_master.mma_division_master" sequence="10" name="Division"/>
+				
+		<!-- HRMS Reports -->
+			 <menuitem name="HRMS" id="rpm_hrms_reports" parent = "rpm_reports" sequence="1"/>	
+				<!-- CTC Report-->
+				
+				<menuitem name="Permission" parent="rpm_hrms_reports" action="kg_reports.ram_permission_excel_rep" id="ram_permission_reports" sequence="3"/>
+				<menuitem name="ON Duty" parent="rpm_hrms_reports" action="kg_reports.ram_od_excel_rep" id="ram_on_duty_reports" sequence="4"/>
+				
 		
 			<!--Duplicate Account Menus-->
 			<menuitem  name="Views" id="menu_kg_chart_acc" parent = "account.mpm_acc_masters" sequence="4"/>

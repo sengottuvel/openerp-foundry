@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+		<!-- Form View Start -->
+        <record id="r_form_v_permission_excel_rep" model="ir.ui.view">
+            <field name="name">Permission Report</field>
+            <field name="model">kg.excel.permission.report</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+			<form string="Permission Report" version="7.0">             			 
+				<header>
+					<button name="produce_xls" string="Generate" type="object" class="oe_highlight"/>
+				</header>
+				<group>
+					<group>
+						 <field name="date_from" attrs="{'readonly': [('state','in',['done'])]}" required='1'/>
+						 <field name="employee_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['done'])]}"/>
+						 <field name="emp_categ_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['done'])]}"/>
+					 </group>
+					 <group>
+						 <field name="date_to" attrs="{'readonly': [('state','in',['done'])]}" required='1'/>
+						 <field name="division_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['done'])]}"/>
+						 <field name="state" style="width: 30%%" class="att_state_change"/>
+						 <field name="rep_data" nolabel="1" readonly="1" width="100" filename="name"/>
+					 </group>
+				</group>
+			</form>
+            </field>
+        </record>
+        
+        <!-- Form View End -->
+        
+        <!-- Tree View Start -->
+        
+        <record id="r_tree_v_permission_excel_rep" model="ir.ui.view">
+            <field name="name">Permission Report</field>
+            <field name="model">kg.excel.permission.report</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+             <tree string="Permission Report">
+				 <field name="creation_date"/>
+				 <field name="date_from"/>
+				 <field name="date_to"/>
+				 <field name="year"/>
+				 <field name="rep_data"/>
+				 <field name="state"/>				 
+			</tree>
+            </field>
+        </record>
+        
+         <!-- Tree View End -->
+        
+        <!-- Menu Action Start -->
+
+        <record id="ram_permission_excel_rep" model="ir.actions.act_window">
+			<field name="name">Permission Report</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.excel.permission.report</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="r_tree_v_permission_excel_rep"/>
+		</record>
+		
+		<!-- Menu Action End -->
+        
+    </data>
+</openerp>
+

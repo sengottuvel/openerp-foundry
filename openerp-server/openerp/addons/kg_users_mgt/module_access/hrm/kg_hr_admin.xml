@@ -776,6 +776,88 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<!--Reports module access -->
+		
+		<record id="r_kg_excel_attendance_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_attendance_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Attendance Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="r_kg_excel_esi_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_esi_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ESI Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="r_kg_excel_on_duty_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_on_duty_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ON Duty Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="r_kg_excel_permission_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_permission_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Permission Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="r_kg_excel_pf_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_pf_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">PF Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="r_kg_excel_worker_ctc_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_worker_ctc_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WORKER CTC Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="r_kg_excel_staff_ctc_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_staff_ctc_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">STAFF CTC Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="r_kg_excel_advance_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_advance_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ADVANCE Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
