@@ -26,5 +26,29 @@
 				header="False"
         />
         
+         <!-- Spare Offer Regular Copy -->
+		
+		<report string="Spare Regular Copy"
+				model="kg.crm.offer"
+				auto="True"
+				name="onscreen_spare_regular_report"
+				rml="kg_crm_offer/report/kg_offer_spare_regular.jrxml"
+				id="onscreen_spare_regular_report_menu"
+				menu="True"
+				header="False"
+        />
+        
+        <!-- Spare Offer Budgetary Copy -->
+		
+		<report string="Spare Budgetary Copy"
+				model="kg.crm.offer"
+				auto="True"
+				name="onscreen_spare_budgetary_report"
+				rml="kg_crm_offer/report/kg_offer_spare_budgetary.jrxml"
+				id="onscreen_spare_budgetary_report_menu"
+				menu="True"
+				header="False"
+        />
+        
     </data>
 </openerp>

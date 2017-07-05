@@ -1,2 +1,4 @@
 import onscreen_cd_report
 import onscreen_offer_copy_report
+import onscreen_spare_regular_report
+import onscreen_spare_budgetary_report
