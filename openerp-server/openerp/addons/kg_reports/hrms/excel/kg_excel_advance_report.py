@@ -30,6 +30,9 @@ class kg_excel_advance_report(osv.osv):
 		'emp_categ_id':fields.many2many('kg.employee.category','kg_ex_adv_cat_rep_wiz','report_id','categ_id','Category'),
 		'division_id':fields.many2many('kg.division.master','kg_ex_adv_div_rep_wiz','report_id','div_id','Division'),
 		'employee_id':fields.many2many('hr.employee','kg_ex_adv_emp_rep_wiz','report_id','emp_id','Employee'),
+		'ded_type': fields.selection([('advance', 'Advance'),('loan', 'Loan'),('insurance', 'Insurance'),
+						('tax', 'Tax'),('others','Others'),('cloth','Cloth')], 
+						'Deduction Type'),
 		'department_id':fields.many2many('kg.depmaster','kg_ex_adv_dep_rep_wiz','report_id','dep_id','Department'),
 		'date_from': fields.date("Start Date",required=True),
 		'date_to': fields.date("End Date",required=True),		
@@ -122,16 +125,6 @@ class kg_excel_advance_report(osv.osv):
 			div_names = ",".join(str(x) for x in div_name)
 			filter_div.append("Division : %s"%(div_names))
 			
-			
-		#~ if rec.department_id:
-			#~ department_id = [x.id for x in rec.department_id]
-			#~ department_ids = ",".join(str(x) for x in department_id)
-			#~ department.append("payslip.division_id in (%s)"%(department_id))
-			#~ 
-			#~ div_name = [x.name for x in rec.division_id]
-			#~ div_names = ",".join(str(x) for x in div_name)
-			#~ filter_div.append("Division : %s"%(div_names))
-		
 		if employee:
 			employee = 'and '+' or '.join(employee)
 			employee =  employee+' '
@@ -159,14 +152,12 @@ class kg_excel_advance_report(osv.osv):
 			division = ''
 			filter_div = ''
 			
-		#~ if division:
-			#~ division = 'and '+' or '.join(division)
-			#~ division =  division+' '
-			#~ 
-			#~ filter_dep = filter_dep
-		#~ else:
-			#~ division = ''
-			#~ filter_dep = ''
+		if rec.ded_type:
+			ded_type =  'and '+'advance.ded_type = '+"'"+rec.ded_type+"'"
+			division =  ded_type+' '
+		else:
+			ded_type = ''
+			
 		
 		date_from = "'"+rec.date_from+"'"
 		date_to = 	"'"+rec.date_to+"'"
@@ -183,7 +174,7 @@ class kg_excel_advance_report(osv.osv):
 				department.name as dep_name,
 				advance.ded_type as type,
 				advance.tot_amt as total_amt,
-				payslip.date_from as due_month,
+				advance.period as due_month,
 				(select amount from hr_payslip_line where code='ADV' and slip_id=payslip.id) as due_amt
 
 				from hr_payslip payslip
@@ -194,7 +185,7 @@ class kg_excel_advance_report(osv.osv):
 				left join kg_depmaster department on (department.id=emp.dep_id)
 				left join kg_advance_deduction advance on (advance.id=(select COALESCE(cum_ded_id,0) from hr_payslip_line where slip_id=payslip.id and employee_id=payslip.employee_id and cum_ded_id!=0))
 
-				where payslip.date_from >="""+date_from+""" and payslip.date_to <="""+date_to+' '+""" """+ employee +""" """+ category+ """ """+ division + """"""
+				where payslip.date_from >="""+date_from+""" and payslip.date_to <="""+date_to+' '+""" """+ employee +""" """+ category+ """ """+ division + """ """+ ded_type + """"""
 
 				
 
@@ -215,7 +206,7 @@ class kg_excel_advance_report(osv.osv):
 		s2=6
 		sheet1.col(0).width = 2000
 		sheet1.col(1).width = 3000
-		sheet1.col(2).width = 5000
+		sheet1.col(2).width = 6000
 		sheet1.col(3).width = 4000
 		sheet1.col(4).width = 4000
 		sheet1.col(5).width = 4000
@@ -239,7 +230,7 @@ class kg_excel_advance_report(osv.osv):
 		sheet1.write_merge(5, 5, 0, 8,"",style2)
 		#~ sheet1.write_merge(3, 3, 0, 5,"",style2)
 		
-		sheet1.insert_bitmap('/home/sujith/SVN_Projects/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+		sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/sam.bmp',0,0)
 		sheet1.write(s2,0,"S.NO",style1)
 		#~ sheet1.row(s1).height = 490
 		sheet1.write(s2,1,"CODE",style1)
