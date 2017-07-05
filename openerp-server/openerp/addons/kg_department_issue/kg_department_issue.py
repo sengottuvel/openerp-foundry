@@ -712,6 +712,7 @@ class kg_department_issue(osv.osv):
 						print"valvalvalvalval",val
 						issue_qty = line_ids.issue_qty
 						remain_qty = 0
+						reserved_qty_in_po_uom = 0
 						for i in val:
 							print'aaaaaaaaaaaaaaaaaa'
 							lot_rec = lot_obj.browse(cr,uid,i)
@@ -720,10 +721,13 @@ class kg_department_issue(osv.osv):
 							print"lot_rec.pending_qty",lot_rec.pending_qty
 							if move_qty > 0 and move_qty <= lot_rec.pending_qty:
 								lot_pending_qty = lot_rec.pending_qty - move_qty
-								
 								print"lot_pending_qty",lot_pending_qty
 								print"lot_reclot_rec",lot_rec.id
-								lot_rec.write({'pending_qty': lot_pending_qty,'issue_qty': 0.0,'reserved_qty': lot_pending_qty})
+								if issue_record.department_id.name == 'DP2':
+									reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
+								else:
+									reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
+								lot_rec.write({'pending_qty': lot_pending_qty,'issue_qty': 0.0,'reserved_qty': lot_pending_qty,'reserved_qty_in_po_uom':reserved_qty_in_po_uom})
 								#### wrting data into kg_issue_details ###
 								lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
 								if lot_issue_qty == 0:
@@ -748,9 +752,12 @@ class kg_department_issue(osv.osv):
 								if move_qty > 0:								
 									lot_pending_qty = lot_rec.pending_qty
 									remain_qty =  move_qty - lot_pending_qty
-									
 									print'remain_qty',remain_qty
-									lot_rec.write({'pending_qty': 0.0,'reserved_qty': 0.0})
+									if issue_record.department_id.name == 'DP2':
+										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
+									else:
+										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
+									lot_rec.write({'pending_qty': 0.0,'reserved_qty': 0.0,'reserved_qty_in_po_uom':reserved_qty_in_po_uom})
 									#### wrting data into kg_issue_details ###
 									lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
 									if lot_issue_qty == 0:
@@ -776,7 +783,11 @@ class kg_department_issue(osv.osv):
 									print"issue_record.issue_qty",line_ids.issue_qty
 									print"lot_rec.reserved_qty",lot_rec.reserved_qty
 									print":ffffffffffff",lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)
-									lot_rec.write({'reserved_qty': lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)})
+									if issue_record.department_id.name == 'DP2':
+										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
+									else:
+										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
+									lot_rec.write({'reserved_qty': lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty),'reserved_qty_in_po_uom':reserved_qty_in_po_uom})
 								else:
 									pass
 							issue_qty = remain_qty
