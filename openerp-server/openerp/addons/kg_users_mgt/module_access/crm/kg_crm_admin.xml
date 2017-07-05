@@ -1022,6 +1022,76 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
 		</record>
 		
+		<record id="t_crm_kg_coupling_type" model="ir.model.access">
+			<field name="model_id" ref="kg_coupling_type.model_kg_coupling_type"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Coupling Type</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_pc_view_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_primecost_view.model_ch_pc_view_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch pc view ms</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_kg_crm_ms_raw" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_kg_crm_ms_raw"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch kg crm ms raw</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_kg_crm_spare_bom" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_kg_crm_spare_bom"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch kg crm bom</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_kg_crm_spare_fou" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_kg_crm_spare_fou"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch kg crm fou</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_kg_crm_spare_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_kg_crm_spare_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch kg crm ms</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_kg_crm_spare_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_kg_crm_spare_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch kg crm bot</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
