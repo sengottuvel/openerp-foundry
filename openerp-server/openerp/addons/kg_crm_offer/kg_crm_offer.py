@@ -66,11 +66,11 @@ class kg_crm_offer(osv.osv):
 			res[order.id]['supervision_amount'] = supervision_amount
 			
 		return res
-		
+	
 	_name = "kg.crm.offer"
 	_description = "CRM Offer Entry"
 	_order = "enquiry_date desc"
-
+	
 	_columns = {
 		
 		## Basic Info
@@ -97,7 +97,9 @@ class kg_crm_offer(osv.osv):
 		'offer_copy': fields.char('Offer Copy'),
 		'term_copy': fields.char('Terms Copy'),
 		'customer_po_no': fields.char('Customer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)],'approved_md':[('readonly',False)]}),
+		'cust_po_date': fields.date('Customer PO Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)],'approved_md':[('readonly',False)]}),
 		'dealer_po_no': fields.char('Dealer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'deal_po_date': fields.date('Dealer PO Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'revision': fields.integer('Revision'),
 		'wo_flag': fields.boolean('WO Flag'),
 		'load_term': fields.boolean('Terms Applicable',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
@@ -149,12 +151,14 @@ class kg_crm_offer(osv.osv):
 		'o_p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_ed_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'ED',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_customer_discount': fields.float('Customer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_tax': fields.float('Tax(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_ed': fields.float('ED(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'off_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Offer Status',readonly=False,states={'wo_created':[('readonly',True)],'wo_released':[('readonly',True)]}),
 		'dummy_flag': fields.boolean('Dummy Flag'),
 		'annexure_1': fields.html('Annexure 1',readonly=True, states={'draft':[('readonly',False)]}),
+		'prj_name': fields.char('Project Name',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		# Pump Offer Fields
 		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -436,6 +440,7 @@ class kg_crm_offer(osv.osv):
 									  'freight_in_ex':entry.o_freight_in_ex,
 									  'insurance':entry.o_insurance,
 									  'insurance_in_ex':entry.o_insurance_in_ex,
+									  'ed_in_ex':entry.o_ed_in_ex,
 									  'customer_discount':entry.o_customer_discount,
 									  'tax':entry.o_tax,
 									  'ed':entry.o_ed,
@@ -544,6 +549,7 @@ class kg_crm_offer(osv.osv):
 																  'order_priority': '',
 																  'enquiry_no': entry.enquiry_id.name,
 																  'offer_no': entry.name,
+																  'project_name': entry.prj_name,
 																  'division_id': entry.division_id.id,
 																  'location': entry.location,
 																  'entry_mode': 'auto',
@@ -556,6 +562,7 @@ class kg_crm_offer(osv.osv):
 																  'l_d_clause': entry.l_d_clause,
 																  'flag_data_bank': entry.flag_data_bank,
 																	})
+			print"wo_idwo_id",wo_id
 			if wo_id:
 				if entry.line_pump_ids:
 					groups = []
@@ -583,6 +590,9 @@ class kg_crm_offer(osv.osv):
 											off_line_id = acc_off_obj
 										purpose='access'
 										self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+									
+									
+									
 				if entry.line_spare_ids:
 					groups = []
 					#~ for item in entry.line_spare_ids:
@@ -613,6 +623,16 @@ class kg_crm_offer(osv.osv):
 										off_line_id = acc_off_obj
 									purpose='access'
 									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+								
+								## Spare BOM creation start
+									
+								if group[0].enquiry_line_id.line_ids_spare_bom:
+									print"aaaaaaaaaaaaaaaaaaaaaa"
+									self.prepare_spare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+									
+									
+				
+				
 				if entry.line_accessories_ids:
 					groups = []
 					for key, group in groupby(entry.line_accessories_ids, lambda x: x.pump_id.id):
@@ -772,6 +792,7 @@ class kg_crm_offer(osv.osv):
 			
 			'header_id': wo_id,
 			'pump_model_id': pump_id,
+			'order_summary': item.order_summary,
 			'flange_standard': item.flange_standard.id,
 			'qap_plan_id': qap_plan_id,
 			'order_category': purpose,
@@ -801,7 +822,7 @@ class kg_crm_offer(osv.osv):
 			}
 			
 		return pump_vals
-			
+	
 	def prepare_bom_revision(self,cr,uid,wo_line_id,item,off_line_id,purpose,context=None):
 		
 		if purpose in ('pump','spare'):
@@ -938,6 +959,88 @@ class kg_crm_offer(osv.osv):
 		
 		return True
 	
+	def prepare_spare_bom(self,cr,uid,wo_line_id,item,off_line_id,purpose,context=None):
+		
+		if item.line_ids_spare_bom:
+			for ele in item.line_ids_spare_bom:
+				spare_bom_id = self.pool.get('ch.wo.spare.bom').create(cr,uid,{'header_id': wo_line_id,
+																		   'moc_const_id': ele.moc_const_id.id,
+																		   'bom_id': ele.bom_id.id,
+																		   'qty': ele.qty,
+																		   'off_name': ele.off_name,
+																		   'load_bom': ele.load_bom,
+																		   'prime_cost': ele.prime_cost,
+																		})
+				if spare_bom_id:
+					if ele.line_ids:
+						for fou in ele.line_ids:
+							spare_fou_id = self.pool.get('ch.wo.spare.foundry').create(cr,uid,{'header_id': spare_bom_id,
+																		   'oth_spec': fou.oth_spec,
+																		   'position_id': fou.position_id.id,
+																		   'qty': fou.qty,
+																		   'off_name': fou.off_name,
+																		   'csd_no': fou.csd_no,
+																		   'pattern_name': fou.pattern_name,
+																		   'pattern_id': fou.pattern_id.id,
+																		   'is_applicable': fou.is_applicable,
+																		   'load_bom': fou.load_bom,
+																		   'moc_id': fou.moc_id.id,
+																		   'moc_name': fou.moc_name,
+																		   'moc_changed_flag': fou.moc_changed_flag,
+																		   'prime_cost': fou.prime_cost,
+																		   'material_code': fou.material_code,
+																		   'purpose_categ': fou.purpose_categ,
+																		   'spare_offer_line_id': off_line_id,
+																		})
+					if ele.line_ids_a:
+						for fou in ele.line_ids_a:
+							spare_fou_id = self.pool.get('ch.wo.spare.ms').create(cr,uid,{'header_id': spare_bom_id,
+																		   'position_id': fou.position_id.id,
+																		   'qty': fou.qty,
+																		   'off_name': fou.off_name,
+																		   'bom_id': fou.bom_id.id,
+																		   'csd_no': fou.csd_no,
+																		   'ms_id': fou.ms_id.id,
+																		   'moc_id': fou.moc_id.id,
+																		   'is_applicable': fou.is_applicable,
+																		   'load_bom': fou.load_bom,
+																		   'moc_id': fou.moc_id.id,
+																		   'moc_name': fou.moc_name,
+																		   'moc_changed_flag': fou.moc_changed_flag,
+																		   'prime_cost': fou.prime_cost,
+																		   'material_code': fou.material_code,
+																		   'purpose_categ': fou.purpose_categ,
+																		   'length': fou.length,
+																		   'spare_offer_line_id': off_line_id,
+																		})
+					if ele.line_ids_b:
+						for fou in ele.line_ids_b:
+							spare_fou_id = self.pool.get('ch.wo.spare.bot').create(cr,uid,{'header_id': spare_bom_id,
+																		   'product_temp_id': fou.product_temp_id.id,
+																		   'position_id': fou.position_id.id,
+																		   'qty': fou.qty,
+																		   'off_name': fou.off_name,
+																		   'bom_id': fou.bom_id.id,
+																		   'code': fou.code,
+																		   'ms_id': fou.ms_id.id,
+																		   'moc_id': fou.moc_id.id,
+																		   'brand_id': fou.brand_id.id,
+																		   'is_applicable': fou.is_applicable,
+																		   'load_bom': fou.load_bom,
+																		   'flag_is_bearing': fou.flag_is_bearing,
+																		   'moc_id': fou.moc_id.id,
+																		   'moc_name': fou.moc_name,
+																		   'moc_changed_flag': fou.moc_changed_flag,
+																		   'prime_cost': fou.prime_cost,
+																		   'material_code': fou.material_code,
+																		   'purpose_categ': fou.purpose_categ,
+																		   'spare_offer_line_id': off_line_id,
+																		})
+							
+		
+		
+		return True
+	
 	def prepare_bom(self,cr,uid,wo_line_id,item,off_line_id,purpose,context=None):	
 		prime_cost = 0
 		if purpose in ('pump','spare'):
@@ -960,6 +1063,7 @@ class kg_crm_offer(osv.osv):
 																							'position_id': ele.position_id.id,
 																							'pattern_id': ele.pattern_id.id,
 																							'pattern_name': ele.pattern_name,
+																							'off_name': ele.off_name,
 																							'material_code': ele.material_code,
 																							'unit_price': ele.prime_cost,
 																							'mar_prime_cost': ele.prime_cost,
@@ -987,6 +1091,7 @@ class kg_crm_offer(osv.osv):
 																							'indent_qty': ele.qty,
 																							'position_id': ele.position_id.id,
 																							'ms_id': ele.ms_id.id,
+																							'off_name': ele.off_name,
 																							'material_code': ele.material_code,
 																							'unit_price': ele.prime_cost,
 																							'mar_prime_cost': ele.prime_cost,
@@ -994,6 +1099,21 @@ class kg_crm_offer(osv.osv):
 																							'entry_mode': 'auto',
 																							'spare_offer_line_id': of_li_id,
 																							})
+							if ms_line and ele.line_ids:
+								for raw_line in ele.line_ids:
+									ms_raw_line_id = self.pool.get('ch.wo.ms.raw').create(cr,uid,{'header_id': ms_line,
+																				 'remarks': raw_line.remarks,
+																				 'product_id': raw_line.product_id.id,
+																				 'uom': raw_line.uom.id,
+																				 'od': raw_line.od,
+																				 'length': raw_line.length,
+																				 'breadth': raw_line.breadth,
+																				 'thickness': raw_line.thickness,
+																				 'weight': raw_line.weight,
+																				 'uom_conversation_factor': raw_line.uom_conversation_factor,
+																				 'temp_qty': raw_line.temp_qty,
+																				 'qty': raw_line.qty,
+																				 })
 							self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
 							prime_cost += ele.prime_cost
 							print"bbbbbbbbbbbbbb",prime_cost
@@ -1013,6 +1133,7 @@ class kg_crm_offer(osv.osv):
 																							'qty': ele.qty,
 																							'position_id': ele.position_id.id,
 																							'bot_id': ele.ms_id.id,
+																							'off_name': ele.off_name,
 																							'material_code': ele.material_code,
 																							'unit_price': ele.prime_cost,
 																							'mar_prime_cost': ele.prime_cost,
@@ -1052,6 +1173,7 @@ class kg_crm_offer(osv.osv):
 						print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",of_li_id
 						wo_access_id = self.pool.get('ch.wo.accessories').create(cr,uid,{'header_id':wo_line_id,
 																						 'access_id':line.access_id.id,
+																						 'off_name':line.off_name,
 																						 'moc_id':line.moc_id.id,
 																						 'qty':line.qty,
 																						 'load_access':line.load_access,
@@ -2181,6 +2303,7 @@ class ch_pump_offer(osv.osv):
 		'p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F'),
 		'freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight'),
 		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
+		'ed_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'ED'),
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'works_value': fields.float('Works Value'),
@@ -2188,6 +2311,7 @@ class ch_pump_offer(osv.osv):
 		'sam_ratio_flag': fields.boolean('Sam Ratio Flag'),
 		'total_price': fields.float('Total Price(%)'),
 		'wo_line_id': fields.many2one('ch.work.order.details','WO Line'),
+		'order_summary': fields.char('Order Summary'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
@@ -2529,7 +2653,7 @@ class ch_spare_offer(osv.osv):
 		'bot_id': fields.many2one('kg.machine.shop','BOT Name'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
-		'moc_const_id': fields.many2one('kg.moc.construction','MOC'),
+		'moc_const_id': fields.many2one('kg.moc.construction','MOC Construction'),
 		'per_spare_prime_cost': fields.float('Per Spare Prime Cost'),
 		'additional_cost': fields.float('Additional Cost'),
 		'additional_cost_remark': fields.text('Additional Cost Remark'),
@@ -2546,6 +2670,7 @@ class ch_spare_offer(osv.osv):
 		'p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F'),
 		'freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight'),
 		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
+		'ed_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'ED'),
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'works_value': fields.float('Works Value'),
@@ -2554,6 +2679,7 @@ class ch_spare_offer(osv.osv):
 		'total_price': fields.float('Total Price'),
 		'spare_offer_line_id': fields.many2one('ch.spare.offer','Spare Offer Line Id'),
 		'moc_changed_flag': fields.boolean('MOC Changed'),
+		'off_name': fields.char('Offer Name'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
@@ -2688,6 +2814,7 @@ class ch_accessories_offer(osv.osv):
 		'p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F'),
 		'freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight'),
 		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
+		'ed_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'ED'),
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'works_value': fields.float('Works Value'),
@@ -2696,6 +2823,7 @@ class ch_accessories_offer(osv.osv):
 		'pump_price': fields.float('Pump Price'),
 		'total_price': fields.float('Total Price'),
 		'moc_changed_flag': fields.boolean('MOC Changed'),
+		'off_name': fields.char('Offer Name'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	

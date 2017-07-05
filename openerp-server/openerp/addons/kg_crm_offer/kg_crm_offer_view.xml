@@ -25,9 +25,12 @@
 								<field name="name" readonly="1"/>
 								<field name="offer_date" readonly="1"/>
 								<field name="customer_id" required="1" readonly="1"/>
+								<field name="prj_name" readonly="1"/>
 								<field name="ref_mode" readonly="1"/>
 								<field name="customer_po_no"/>
+								<field name="cust_po_date"/>
 								<field name="dealer_po_no"/>
+								<field name="deal_po_date"/>
 								<field name="division_id" readonly="1"/>
 								<field name="road_permit"/>
 								<field name="inspection"/>
@@ -96,7 +99,13 @@
 								</div>
 								<field name="o_customer_discount"/>
 								<field name="o_tax"/>
-								<field name="o_ed"/>
+								<label for="o_ed" string="ED" class="append_percentage"/>
+								<div>
+									<div class="address_format">
+										<field name="o_ed" style="width: 21%%"/>
+										<field name="o_ed_in_ex" style="width: 19%%" attrs="{'required': [('o_ed','>',0)]}"/>
+									</div>
+								</div>
 							</group>
 							<button name="update_percentage" type="object" string="Update" states="draft" class="oe_highlight"/>
 						</group>
@@ -152,8 +161,10 @@
 									<field name="pump_id" required="1"/>
 									<field name="item_code" required="1"/>
 									<field name="item_name" required="1"/>
+									<field name="off_name"/>
 									<field name="moc_id"/>
 									<field name="moc_changed_flag" readonly="1"/>
+									<field name="moc_const_id" readonly="1"/>
 									<field name="qty" sum="qty"/>
 									<field name="additional_cost"/>
 									<field name="prime_cost" sum="prime_cost"/>
@@ -197,6 +208,7 @@
 							<field name="line_accessories_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
 								<tree string="Accessories History" create="false" delete="false">
 									<field name="access_id" required="1" readonly="1"/>
+									<field name="off_name" readonly="1"/>
 									<field name="pump_id" required="1" readonly="1"/>
 									<field name="moc_id" required="1" readonly="1"/>
 									<field name="moc_changed_flag" readonly="1"/>
@@ -349,8 +361,15 @@
 									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
 								</div>
 							</div>
-							<field name="ed"/>
+							<label for="ed" string="ED" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="ed" style="width: 40%%"/>
+									<field name="ed_in_ex" style="width: 35%%" attrs="{'required': [('ed','>',0)]}"/>
+								</div>
+							</div>
 							<field name="supervision_amount"/>
+							<field name="order_summary"/>
 						</group>
 					</group>
 					<notebook attrs="{'invisible':[('purpose_categ','!=','pump')]}">
@@ -362,6 +381,7 @@
 										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="off_name" readonly="1"/>
 										<field name="moc_id" required="1" readonly="1"/>
 										<field name="moc_changed_flag" readonly="1"/>
 										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
@@ -381,6 +401,7 @@
 										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="off_name" readonly="1"/>
 										<field name="moc_id" readonly="1" required="1"/>
 										<field name="length" readonly="1"/>
 										<field name="moc_changed_flag" readonly="1"/>
@@ -401,6 +422,7 @@
 										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="off_name" readonly="1"/>
 										<field name="moc_id" readonly="1" required="1"/>
 										<field name="moc_changed_flag" readonly="1"/>
 										<field name="brand_id" readonly="1"/>
@@ -478,6 +500,7 @@
 							<field name="pump_id" required="1" readonly="1"/>
 							<field name="item_code" required="1" readonly="1"/>
 							<field name="item_name" required="1" readonly="1"/>
+							<field name="off_name" readonly="1"/>
 							<field name="moc_id" required="1" readonly="1"/>
 							<field name="moc_changed_flag" readonly="1"/>
 							<field name="qty" readonly="1"/>
@@ -528,7 +551,13 @@
 									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
 								</div>
 							</div>
-							<field name="ed"/>
+							<label for="ed" string="ED" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="ed" style="width: 40%%"/>
+									<field name="ed_in_ex" style="width: 35%%" attrs="{'required': [('ed','>',0)]}"/>
+								</div>
+							</div>
 							<field name="supervision_amount"/>
 						</group>					
 					</group>
@@ -624,6 +653,7 @@
 					<group string="Accessories Offer Details">
 						<group>
 							<field name="access_id" required="1" readonly="1"/>
+							<field name="off_name" readonly="1"/>
 							<field name="moc_id" required="1" readonly="1"/>
 							<field name="moc_changed_flag" readonly="1"/>
 							<field name="pump_id" readonly="1"/>
@@ -672,7 +702,13 @@
 									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
 								</div>
 							</div>
-							<field name="ed"/>
+							<label for="ed" string="ED" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="ed" style="width: 40%%"/>
+									<field name="ed_in_ex" style="width: 35%%" attrs="{'required': [('ed','>',0)]}"/>
+								</div>
+							</div>
 							<field name="supervision_amount"/>
 <!--
 						<field name="pump_price" readonly="1"/>
