@@ -108,6 +108,7 @@ class kg_work_order(osv.osv):
 		#~ 'l_d_clause': fields.selection([('5_1','0.5 - 1.0% of total order value'),('1_10','1 to 10% of total order value'),('nill','Nill')],'L. D. CLAUSE / Penalty'),
 		'l_d_clause':fields.char('L. D. CLAUSE / Penalty'),
 		'flag_data_bank': fields.boolean('Is Data WO'),
+		'project_name':fields.char('Project Name'),
 		
 		### Entry Info ####
 		
@@ -287,16 +288,16 @@ class kg_work_order(osv.osv):
 					#~ if not item.line_ids:
 						#~ raise osv.except_osv(_('Warning!'),
 									#~ _('Specify BOM Details for Pump Model %s !!')%(item.pump_model_id.name))
-					#~ 
+					
 				#~ else:
-					#~ cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and header_id = %s ''',[item.id])	  
-					#~ bom_check_id = cr.fetchone()
-					#~ 
-					#~ if item.order_category != 'access':
-						#~ if item.line_ids: 
-							#~ if bom_check_id == None:
-								#~ raise osv.except_osv(_('Warning!'),
-										#~ _('Kindly enable BOM Details for Pump Model %s!!')%(item.pump_model_id.name))
+				#~ cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and header_id = %s ''',[item.id])	  
+				#~ bom_check_id = cr.fetchone()
+				#~ 
+				#~ if item.order_category != 'access':
+					#~ if item.line_ids: 
+						#~ if bom_check_id == None:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('Kindly enable BOM Details for Pump Model %s!!')%(item.pump_model_id.name))
 					
 				
 				cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and moc_id is null and header_id = %s ''',[item.id])	   
@@ -968,7 +969,7 @@ class kg_work_order(osv.osv):
 					for foundry_item in order_item.line_ids:
 						if foundry_item.flag_applicable == True:
 							foundry_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'foundry',foundry_item.pattern_id.id,
-							0,0,order_item.moc_construction_id.id,foundry_item.moc_id.id,0)
+							0,0,0,order_item.moc_construction_id.id,foundry_item.moc_id.id,0)
 							self.pool.get('ch.order.bom.details').write(cr,uid,foundry_item.id,{'wo_prime_cost':foundry_prime_cost * foundry_item.qty })
 							primecost = foundry_prime_cost * foundry_item.qty
 							total_primecost += primecost
@@ -976,7 +977,7 @@ class kg_work_order(osv.osv):
 					for ms_item in order_item.line_ids_a:
 						if ms_item.flag_applicable == True:
 							ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
-							ms_item.ms_id.id,0,order_item.moc_construction_id.id,ms_item.moc_id.id,0)
+							ms_item.ms_id.id,ms_item,0,order_item.moc_construction_id.id,ms_item.moc_id.id,0)
 							self.pool.get('ch.order.machineshop.details').write(cr,uid,ms_item.id,{'wo_prime_cost':ms_prime_cost * ms_item.qty})
 							primecost = ms_prime_cost * ms_item.qty
 							total_primecost += primecost
@@ -984,7 +985,7 @@ class kg_work_order(osv.osv):
 					for bot_item in order_item.line_ids_b:
 						if bot_item.flag_applicable == True:
 							bot_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'bot',0,
-							0,bot_item.bot_id.id,order_item.moc_construction_id.id,bot_item.moc_id.id,0)
+							0,0,bot_item.bot_id.id,order_item.moc_construction_id.id,bot_item.moc_id.id,0)
 							self.pool.get('ch.order.bot.details').write(cr,uid,bot_item.id,{'wo_prime_cost':bot_prime_cost * bot_item.qty})
 							primecost = bot_prime_cost * bot_item.qty
 							total_primecost += primecost
@@ -994,28 +995,50 @@ class kg_work_order(osv.osv):
 						for acc_foundry_item in acc_item.line_ids:
 							if acc_foundry_item.is_applicable == True:
 								acc_foundry_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'foundry',acc_foundry_item.pattern_id.id,
-								0,0,order_item.moc_construction_id.id,acc_foundry_item.moc_id.id,0)
+								0,0,0,order_item.moc_construction_id.id,acc_foundry_item.moc_id.id,0)
 								self.pool.get('ch.wo.accessories.foundry').write(cr,uid,acc_foundry_item.id,{'wo_prime_cost':acc_foundry_prime_cost * acc_foundry_item.qty })
 								acc_primecost = acc_foundry_prime_cost * acc_foundry_item.qty
 								acc_total_primecost += acc_primecost
 						for acc_ms_item in acc_item.line_ids_a:
 							if acc_ms_item.is_applicable == True:
 								acc_ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
-								acc_ms_item.ms_id.id,0,order_item.moc_construction_id.id,acc_ms_item.moc_id.id,0)
+								acc_ms_item.ms_id.id,0,0,order_item.moc_construction_id.id,acc_ms_item.moc_id.id,0)
 								self.pool.get('ch.wo.accessories.ms').write(cr,uid,acc_ms_item.id,{'wo_prime_cost':acc_ms_prime_cost * acc_ms_item.qty})
 								acc_primecost = acc_ms_prime_cost * acc_ms_item.qty
 								acc_total_primecost += acc_primecost 
 						for acc_bot_item in acc_item.line_ids_b:
 							if acc_bot_item.is_applicable == True:
 								acc_bot_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'bot',0,
-								0,acc_bot_item.ms_id.id,order_item.moc_construction_id.id,acc_bot_item.moc_id.id,0)
+								0,0,acc_bot_item.ms_id.id,order_item.moc_construction_id.id,acc_bot_item.moc_id.id,0)
 								self.pool.get('ch.wo.accessories.bot').write(cr,uid,acc_bot_item.id,{'wo_prime_cost':acc_bot_prime_cost * acc_bot_item.qty})
 								acc_primecost = acc_bot_prime_cost * acc_bot_item.qty
 								acc_total_primecost += acc_primecost 
+					
 						
 						### Accessories total primecost updation ###
 						self.pool.get('ch.wo.accessories').write(cr,uid,acc_item.id,{'wo_prime_cost':acc_total_primecost})
 						print "acc_total_primecost640",acc_total_primecost
+				
+				### For Spare BOM ###
+				if order_item.line_ids_e:
+					for spare_item in order_item.line_ids_e:
+						for spare_foundry_item in spare_item.line_ids:
+							if spare_foundry_item.is_applicable == True:
+								spare_foundry_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'foundry',spare_foundry_item.pattern_id.id,
+								0,0,0,order_item.moc_construction_id.id,spare_foundry_item.moc_id.id,0)
+								self.pool.get('ch_wo_spare_foundry').write(cr,uid,spare_foundry_item.id,{'prime_cost':spare_foundry_prime_cost * spare_foundry_item.qty })
+						for spare_ms_item in spare_item.line_ids_a:
+							if spare_ms_item.is_applicable == True:
+								spare_ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
+								spare_ms_item.ms_id.id,0,0,order_item.moc_construction_id.id,spare_ms_item.moc_id.id,0)
+								self.pool.get('ch.wo.accessories.ms').write(cr,uid,spare_ms_item.id,{'wo_prime_cost':spare_ms_prime_cost * spare_ms_item.qty})
+						for spare_bot_item in spare_item.line_ids_b:
+							if spare_bot_item.is_applicable == True:
+								spare_bot_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'bot',0,
+								0,0,spare_bot_item.ms_id.id,order_item.moc_construction_id.id,spare_bot_item.moc_id.id,0)
+								self.pool.get('ch.wo.accessories.bot').write(cr,uid,acc_bot_item.id,{'wo_prime_cost':spare_bot_prime_cost * spare_bot_item.qty})
+								
+						
 				### Total Pump primecost ###
 				overall_primecost = total_primecost
 				print "overall_primecost",overall_primecost
@@ -1185,6 +1208,8 @@ class ch_work_order_details(osv.osv):
 		'trimming_dia': fields.char('Trimming Dia'),
 		'cc_drill': fields.selection([('basic_design','BASIC DESIGN'),('basic_design_a','BASIC DESIGN+A'),
 			('basic_design_c','BASIC DESIGN+C'),('nill','NILL')],' C.C. Drill'),
+		'order_summary': fields.char('Order Summary'),
+		'line_ids_e': fields.one2many('ch.wo.spare.bom', 'header_id', "Spare BOM"),
 		
 	}
 	
@@ -1358,7 +1383,7 @@ class ch_work_order_details(osv.osv):
 					### Loading MOC from MOC Construction
 					
 					if moc_construction_id != False:
-						
+						print "bom_ms_details['ms_id'],moc_construction_id",bom_ms_details['ms_id'],moc_construction_id
 						cr.execute(''' select machine_moc.moc_id
 							from ch_machine_mocwise machine_moc
 							LEFT JOIN kg_moc_construction const on const.id = machine_moc.code
@@ -2386,11 +2411,12 @@ class ch_work_order_details(osv.osv):
 	def _check_flag_applicable(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.order_category == 'spare' and entry.header_id.entry_mode != 'auto':
-			cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and
-				header_id = %s ''',[entry.id])
-			applicable_id = cr.fetchone()
-			if not applicable_id:
-				return False
+			if entry.line_ids:
+				cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and
+					header_id = %s ''',[entry.id])
+				applicable_id = cr.fetchone()
+				if not applicable_id:
+					return False
 		return True
 		
 		
@@ -2472,6 +2498,7 @@ class ch_order_bom_details(osv.osv):
 		'material_code': fields.char('Material Code'),
 		
 		'sequence_no': fields.integer('Sequence No.'),
+		'off_name': fields.char('Offer Name'),
 	
 	}
 	
@@ -2589,9 +2616,11 @@ class ch_order_machineshop_details(osv.osv):
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'material_code': fields.char('Material Code'),
-		'flag_dynamic_length': fields.boolean('Dynamic Length'), 
+		'flag_dynamic_length': fields.boolean('Dynamic Length'),
 		
 		'sequence_no': fields.integer('Sequence No.'),
+		'line_ids': fields.one2many('ch.wo.ms.raw', 'header_id', 'MS Raw'),
+		'off_name': fields.char('Offer Name'),
 	
 	}  
 	
@@ -2617,6 +2646,75 @@ class ch_order_machineshop_details(osv.osv):
 		return super(ch_order_machineshop_details, self).write(cr, uid, ids, vals, context)   
 
 ch_order_machineshop_details()
+
+
+class ch_wo_ms_raw(osv.osv):
+	
+	_name = "ch.wo.ms.raw"
+	_description = "Ch wo raw Details"
+	
+	_columns = {
+		
+		### Basic Info
+		
+		'header_id':fields.many2one('ch.order.machineshop.details', 'MS', ondelete='cascade'),
+		'remarks': fields.char('Remarks'),
+		'active': fields.boolean('Active'),	
+		
+		### Module Requirement
+		
+		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
+		'uom':fields.many2one('product.uom','UOM',size=128 ,required=True),
+		'od': fields.float('OD'),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
+		'thickness': fields.float('Thickness'),
+		'weight': fields.float('Weight' ,digits=(16,5)),
+		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),		
+		'temp_qty':fields.float('Qty'),
+		'qty':fields.float('Testing Qty',readonly=True),
+		
+	}
+	
+	_defaults = {
+		
+		'active': True,
+		
+	}
+	
+	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
+		value = {'qty': '','weight': '',}
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		qty_value = 0.00
+		weight=0.00
+		if uom_conversation_factor == 'one_dimension':	
+			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
+				qty_value = length * temp_qty
+				weight = 0.00
+			if length == 0.00:
+				qty_value = temp_qty
+			else:				
+				qty_value = length * temp_qty			
+				weight = qty_value * prod_rec.po_uom_in_kgs
+		if uom_conversation_factor == 'two_dimension':
+			qty_value = length * breadth * temp_qty				
+			weight = qty_value * prod_rec.po_uom_in_kgs		
+		value = {'qty': qty_value,'weight':weight}			
+		return {'value': value}
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
+	
+	_constraints = [
+		
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+	
+ch_wo_ms_raw()
 
 class ch_order_bot_details(osv.osv):
 	
@@ -2650,6 +2748,7 @@ class ch_order_bot_details(osv.osv):
 		'material_code': fields.char('Material Code'),
 		
 		'sequence_no': fields.integer('Sequence No.'),
+		'off_name': fields.char('Offer Name'),
 		
 	
 	}
@@ -2736,6 +2835,7 @@ class ch_wo_accessories(osv.osv):
 		### Prime Cost ###
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
+		'off_name': fields.char('Offer Name'),
 		
 	}
 	
@@ -2836,6 +2936,7 @@ class ch_wo_accessories_foundry(osv.osv):
 		'prime_cost': fields.float('Prime Cost'),
 		'wo_prime_cost': fields.float('WO PC'),
 		'material_code': fields.char('Material Code'),
+		'off_name': fields.char('Offer Name'),
 		
 	}
 	
@@ -2867,7 +2968,8 @@ class ch_wo_accessories_ms(osv.osv):
 		'wo_prime_cost': fields.float('WO PC'),
 		'indent_qty': fields.integer('Indent Creation Qty'),
 		'material_code': fields.char('Material Code'),
-		'flag_dynamic_length': fields.boolean('Dynamic Length'), 
+		'flag_dynamic_length': fields.boolean('Dynamic Length'),
+		'off_name': fields.char('Offer Name'),
 		
 	}
 	
@@ -2906,10 +3008,414 @@ class ch_wo_accessories_bot(osv.osv):
 		'prime_cost': fields.float('Prime Cost'),
 		'wo_prime_cost': fields.float('WO PC'),
 		'material_code': fields.char('Material Code'),
+		'off_name': fields.char('Offer Name'),
 		
 	}
 	
 ch_wo_accessories_bot()
+
+
+class ch_wo_spare_bom(osv.osv):
+	
+	_name = "ch.wo.spare.bom"
+	_description = "Spare Item Details"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.work.order.details', 'Header Id', ondelete='cascade'),
+		'remarks': fields.char('Remarks'),
+		
+		## Module Requirement Fields
+		
+		'pump_id':fields.many2one('kg.pumpmodel.master','Pumpmodel'),
+		'moc_const_id':fields.many2one('kg.moc.construction','MOC Construction'),
+		'bom_id':fields.many2one('kg.bom','BOM Name',domain="[('pump_model_id','=',parent.pump_model_id),('category_type','=','part_list_bom')]"),
+		'qty':fields.integer('Qty'),
+		'off_name':fields.char('Offer Name'),
+		'load_bom':fields.boolean('Load BOM'),
+		
+		## Child Tables Declaration
+		
+		'line_ids': fields.one2many('ch.wo.spare.foundry', 'header_id', "FOU"),
+		'line_ids_a': fields.one2many('ch.wo.spare.ms', 'header_id', "MS"),
+		'line_ids_b': fields.one2many('ch.wo.spare.bot', 'header_id', "BOT"),
+		
+		}
+	
+	_defaults = {
+		
+		#~ 'is_applicable': False,
+		#~ 'load_bom': False,
+		
+	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		print"contextcontextcontext",context
+		return context
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_wo_spare_bom, self).write(cr, uid, ids, vals, context)
+	
+	#~ def _check_qty(self, cr, uid, ids, context=None):
+		#~ rec = self.browse(cr, uid, ids[0])
+		#~ if rec.qty <= 0.00:
+			#~ return False
+		#~ return True
+	
+	_constraints = [
+		
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+	
+	def onchange_spare_off_name(self, cr, uid, ids, bom_id):
+		value = {'off_name':'','qty':0}
+		if bom_id:
+			bom_obj = self.pool.get('kg.bom').search(cr,uid,([('id','=',bom_id)]))
+			if bom_obj:
+				bom_rec = self.pool.get('kg.bom').browse(cr,uid,bom_obj[0])
+				value = {'off_name':bom_rec.name,'qty':bom_rec.qty}
+		return {'value': value}
+	
+	def onchange_spare_bom(self, cr, uid, ids, bom_id,off_name,moc_const_id,qty):
+		fou_vals=[]
+		ms_vals=[]
+		bot_vals=[]
+		if bom_id:
+			bom_obj = self.pool.get('kg.bom').search(cr,uid,([('id','=',bom_id),('name','=',off_name)]))
+			if bom_obj:
+				bom_rec = self.pool.get('kg.bom').browse(cr,uid,bom_obj[0])
+				moc_name = ''
+				moc_changed_flag = False
+				if bom_rec.line_ids:
+					for item in bom_rec.line_ids:
+						moc_id = ''
+						pat_obj = self.pool.get('kg.pattern.master').search(cr,uid,[('id','=',item.pattern_id.id)])
+						if pat_obj:
+							pat_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pat_obj[0])
+							if pat_rec.line_ids:
+								pat_line_obj = self.pool.get('ch.mocwise.rate').search(cr,uid,[('code','=',moc_const_id),('header_id','=',pat_rec.id)])
+								if pat_line_obj:
+									pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
+									moc_id = pat_line_rec.moc_id.id
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
+							moc_name = moc_rec.name
+						fou_vals.append({
+									'position_id': item.position_id.id,
+									'pattern_id': item.pattern_id.id,
+									'pattern_name': item.pattern_id.name,
+									'off_name': item.pattern_id.name,
+									'moc_id': moc_id,
+									'moc_name': moc_name,
+									'moc_changed_flag': moc_changed_flag,
+									'qty': item.qty * qty,
+									'load_bom': True,
+									'is_applicable': True,
+									#~ 'purpose_categ': purpose_categ,
+									#~ 'csd_no': item.csd_no,
+									#~ 'remarks': item.remarks,
+									})
+				
+				if bom_rec.line_ids_a:
+					for item in bom_rec.line_ids_a:
+						moc_id = ''
+						ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
+						print"ms_objms_obj",ms_obj
+						if ms_obj:
+							ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
+							if ms_rec.line_ids_a:
+								#~ for ele in ms_rec.line_ids_a:
+								cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
+								ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.id),('header_id','=',ms_rec.id)])
+								if ms_line_obj:
+									ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
+									moc_id = ms_line_rec.moc_id.id
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
+							moc_name = moc_rec.name
+						ms_vals.append({
+										'name': item.name,
+										'off_name': item.name,
+										'position_id': item.position_id.id,							
+										'ms_id': item.ms_id.id,
+										'moc_id': moc_id,
+										'moc_name': moc_name,
+										'moc_changed_flag': moc_changed_flag,
+										'qty': item.qty * qty,
+										'load_bom': True,
+										'is_applicable': True,
+										#~ 'purpose_categ': purpose_categ,
+										#~ 'line_ids': ch_ms_vals,
+										#~ 'csd_no': item.csd_no,
+										#~ 'remarks': item.remarks,
+										})
+				
+				
+				if bom_rec.line_ids_b:
+					for item in bom_rec.line_ids_b:
+						moc_id = ''
+						item_name = item.name
+						bot_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.bot_id.id)])
+						if bot_obj:
+							bot_rec = self.pool.get('kg.machine.shop').browse(cr,uid,bot_obj[0])
+							is_bearing = bot_rec.is_bearing
+							if bot_rec.line_ids_a:
+								cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
+								bot_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.id),('header_id','=',bot_rec.id)])
+								if bot_line_obj:
+									bot_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,bot_line_obj[0])
+									moc_id = bot_line_rec.moc_id.id
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
+							moc_name = moc_rec.name
+						bot_vals.append({
+										'item_name': item_name,
+										'off_name': item_name,
+										'ms_id': item.bot_id.id,
+										'moc_id': moc_id,
+										'moc_name': moc_name,
+										'moc_changed_flag': moc_changed_flag,
+										'qty': item.qty * qty,
+										'load_bom': True,
+										'flag_is_bearing': is_bearing,
+										'is_applicable': True,
+										#~ 'purpose_categ': purpose_categ,
+										'position_id': item.position_id.id,
+										#~ 'remarks': item.remarks,
+										})
+										
+		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
+	
+ch_wo_spare_bom()
+
+class ch_wo_spare_foundry(osv.osv):
+	
+	_name = "ch.wo.spare.foundry"
+	_description = "Spare Foundry Item Details"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.wo.spare.bom', 'Header Id', ondelete='cascade'),
+		'remarks': fields.char('Remarks'),
+		
+		## Module Requirement Fields
+		
+		'qty':fields.integer('Quantity'),
+		'oth_spec':fields.char('Other Specification'),
+		'position_id': fields.many2one('kg.position.number','Position No.'),
+		'csd_no': fields.char('CSD No.', size=128),
+		'pattern_name': fields.char('Pattern Name'),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No.'),
+		'is_applicable': fields.boolean('Is Applicable'),
+		'load_bom': fields.boolean('Load BOM'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
+		'prime_cost': fields.float('Prime Cost'),
+		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'material_code': fields.char('Material Code'),
+		'off_name': fields.char('Offer Name'),
+		
+	}
+	
+	_defaults = {
+		
+		'is_applicable': False,
+		'load_bom': False,
+		
+	}
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_wo_spare_foundry, self).write(cr, uid, ids, vals, context)
+	
+	#~ def _check_qty(self, cr, uid, ids, context=None):
+		#~ rec = self.browse(cr, uid, ids[0])
+		#~ if rec.qty <= 0.00:
+			#~ return False
+		#~ return True
+	
+	_constraints = [
+		
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+	
+	def onchange_pattern_name(self, cr, uid, ids, pattern_code,pattern_name):
+		value = {'pattern_name':''}
+		pattern_obj = self.pool.get('kg.pattern.master').search(cr,uid,([('id','=',pattern_code)]))
+		if pattern_obj:
+			pattern_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pattern_obj[0])
+			value = {'pattern_name':pattern_rec.pattern_name}
+		return {'value': value}
+	
+	def onchange_moc(self,cr,uid,ids,moc_id,moc_name, context=None):
+		value = {'moc_changed_flag':''}
+		if moc_id:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+			if moc_rec.name == moc_name:
+				pass
+			else:
+				value = {'moc_changed_flag': True}
+		return {'value': value}
+	
+ch_wo_spare_foundry()
+
+class ch_wo_spare_ms(osv.osv):
+	
+	_name = "ch.wo.spare.ms"
+	_description = "Macine Shop Item Details"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.wo.spare.bom', 'Header Id', ondelete='cascade'),
+		'remarks':fields.text('Remarks'),
+		
+		## Module Requirement Fields
+		
+		'pos_no': fields.related('position_id','name', type='char', string='Position No.', store=True),
+		'position_id': fields.many2one('kg.position.number','Position No.'),
+		'csd_no': fields.char('CSD No.'),
+		'bom_id': fields.many2one('kg.bom','BOM'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
+		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
+		#~ 'ms_line_id':fields.many2one('ch.machineshop.details', 'Item Name'),
+		'qty': fields.integer('Qty', required=True),
+		'flag_applicable': fields.boolean('Is Applicable'),
+		#'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
+		'is_applicable': fields.boolean('Is Applicable'),
+		'load_bom': fields.boolean('Load BOM'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
+		'prime_cost': fields.float('Prime Cost'),
+		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'length': fields.float('Length'),
+		'material_code': fields.char('Material Code'),
+		'off_name': fields.char('Offer Name'),
+		
+		## Child Tables Declaration 
+		
+		#~ 'line_ids': fields.one2many('ch.kg.crm.ms.raw', 'header_id', "Raw Details"),
+		
+	}
+	
+	_defaults = {
+		
+		'is_applicable': False,
+		'load_bom': False,
+		
+	}
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_wo_spare_ms, self).write(cr, uid, ids, vals, context)
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
+	
+	def onchange_moc(self,cr,uid,ids,moc_id,moc_name, context=None):
+		value = {'moc_changed_flag':''}
+		if moc_id:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+			if moc_rec.name == moc_name:
+				pass
+			else:
+				value = {'moc_changed_flag': True}
+		return {'value': value}
+	
+	_constraints = [
+		
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+	
+ch_wo_spare_ms()
+
+class ch_wo_spare_bot(osv.osv):
+	
+	_name = "ch.wo.spare.bot"
+	_description = "BOT Details"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.wo.spare.bom', 'Header Id', ondelete='cascade'),
+		'remarks':fields.text('Remarks'),
+		
+		## Module Requirement Fields
+		
+		'product_temp_id':fields.many2one('product.product', 'Product Name',domain = [('type','=','bot')], ondelete='cascade'),
+		#~ 'bot_line_id':fields.many2one('ch.bot.details', 'Item Name'),
+		'position_id': fields.many2one('kg.position.number','Position No.'),
+		'bom_id': fields.many2one('kg.bom','BOM'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot')], ondelete='cascade',required=True),
+		'item_name': fields.related('ms_id','name', type='char', size=128, string='Item Name', store=True, readonly=True),
+		'code':fields.char('Item Code', size=128),	  
+		'qty': fields.integer('Qty', required=True),
+		'flag_applicable': fields.boolean('Is Applicable'),
+		#'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
+		'is_applicable': fields.boolean('Is Applicable'),
+		'load_bom': fields.boolean('Load BOM'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
+		'prime_cost': fields.float('Prime Cost'),
+		'brand_id': fields.many2one('kg.brand.master','Brand '),
+		'flag_is_bearing': fields.boolean('Is Bearing'),
+		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'material_code': fields.char('Material Code'),
+		'off_name': fields.char('Offer Name'),
+		
+	}
+	
+	_defaults = {
+		
+		'is_applicable': False,
+		'load_bom': False,
+		'flag_is_bearing': False,
+		
+	}
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_wo_spare_bot, self).write(cr, uid, ids, vals, context)
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
+	
+	def onchange_moc(self,cr,uid,ids,moc_id,moc_name, context=None):
+		value = {'moc_changed_flag':''}
+		if moc_id:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+			if moc_rec.name == moc_name:
+				pass
+			else:
+				value = {'moc_changed_flag': True}
+		return {'value': value}
+	
+	_constraints = [
+		
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+	
+ch_wo_spare_bot()
+
 
 
 ### For Sequence No Generation ###

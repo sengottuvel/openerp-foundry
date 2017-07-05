@@ -31,6 +31,7 @@
 							<field name="inspection" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" />
 							<field name="order_category" string="Purpose" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="partner_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="project_name" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="flag_cancel" invisible="1"/>
 							<field name="entry_mode" invisible="1"/>
@@ -157,7 +158,7 @@
 			<field name="model">ch.work.order.details</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<form string="Work Order Details Entry Form">
+				<form string="Work Order Details Entry Form" version="7.0">
 					<group>
 						<group>
 							<field name="order_no" required="1"/>
@@ -202,6 +203,7 @@
 							<field name="mar_prime_cost" readonly="1" invisible="0"/>
 							<field name="wo_prime_cost" readonly="1"/>
 							<field name="flag_offer" invisible="1"/>
+							<field name="order_summary" readonly="1"/>
 							<field name="note" string="Remarks"/>
 						</group>
 					</group>
@@ -224,6 +226,7 @@
 								   <field name="sequence_no" attrs="{'required': [('order_category','=','spare'),('flag_applicable','!=',False)],'readonly': [('order_category','!=','spare')]}"/>
 								   <field name="pattern_id"/>
 								   <field name="pattern_name" readonly="1"/>
+								   <field name="off_name"/>
 								   <field name="position_id"/>
 								   <field name="material_code"/>
 								   <field name="weight" />
@@ -251,12 +254,59 @@
 						
 						<page string="Machine Shop">
 							<field name="line_ids_a" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
-								<tree string="Order Machine Shop Details Entry Tree" editable="bottom" colors="red:mar_prime_cost &lt; wo_prime_cost;">
+								<form string="Order Machine Shop Details Entry Form">
+									<group colspan="4">
+										<group>
+											<field name="order_category" invisible="1"/>
+											<field name="flag_applicable"/>
+											<field name="ms_id"/>
+											<field name="position_id"/>
+											<field name="qty" required="1" on_change="onchange_qty(qty)"/>
+											<field name="indent_qty" invisible="1"/>
+											<field name="mar_prime_cost" readonly="1" invisible="0"/>
+											<field name="length"/>
+											<field name="remarks" widget="char" string="Other Specification"/>
+											<field name="entry_mode" invisible="1"/>
+										</group>
+										<group>
+											<field name="sequence_no" attrs="{'required': [('order_category','=','spare'),('flag_applicable','!=',False)],'readonly': [('order_category','!=','spare')]}"/>
+											<field name="name" readonly="1"/>
+											<field name="off_name"/>
+											<field name="material_code"/>
+											<field name="unit_price"/>
+											<field name="wo_prime_cost" readonly="1"/>
+											<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)]}"/>
+											<field name="flag_standard" invisible="1"/>
+										</group>
+									</group>
+									<notebook>
+										<page string="Raw Materials" >
+											<field name="line_ids" colspan="4" nolabel="1">
+												<tree string="Raw Materials Entry Tree" editable="top"  delete="false">					
+													<field name="product_id"/>
+													<field name="uom" required="1" readonly="0"/>
+													<field name="uom_conversation_factor" readonly="0"/>
+													<field name="od" invisible="1"/>
+													<field name="length" readonly="0"/>
+													<field name="breadth" readonly="0"/>
+													<field name="thickness" invisible="1"/>
+													<field name="weight" invisible="1"/>
+													<field name="temp_qty" required="1" on_change="onchange_weight(uom_conversation_factor,length,breadth,temp_qty,product_id)"/>
+													<field name="qty" readonly="1"/>
+													<field name="weight" readonly="1"/>
+													<field name="remarks" readonly="0"/>
+												</tree>
+											</field>
+										</page>
+									</notebook>								
+								</form>
+								<tree string="Order Machine Shop Details Entry Tree" colors="red:mar_prime_cost &lt; wo_prime_cost;">
 									<field name="order_category" invisible="1"/>
 									<field name="flag_applicable"/>
 									<field name="sequence_no" attrs="{'required': [('order_category','=','spare'),('flag_applicable','!=',False)],'readonly': [('order_category','!=','spare')]}"/>
 									<field name="ms_id"/>		
 									<field name="name" readonly="1"/>
+									<field name="off_name"/>
 									<field name="position_id"/>
 									<field name="material_code"/>
 									<field name="qty" required="1" on_change="onchange_qty(qty)"/>
@@ -283,6 +333,7 @@
 									<field name="sequence_no" attrs="{'required': [('order_category','=','spare'),('flag_applicable','!=',False)],'readonly': [('order_category','!=','spare')]}"/>
 									<field name="bot_id" on_change="onchange_bot(bot_id)"/>	
 									<field name="item_name" readonly="1"/>
+									<field name="off_name"/>
 									<field name="position_id"/>
 									<field name="material_code"/>																			
 									<field name="qty" required="1"/>
@@ -304,6 +355,7 @@
 							<field name="line_ids_d" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="Accessories Entry Tree">
 									<field name="access_id" required="1"/>
+									<field name="off_name"/>
 									<field name="moc_id" required="1"/>
 									<field name="qty" required="1"/>
 									<field name="wo_prime_cost" readonly="1"/>
@@ -313,13 +365,15 @@
 									<group colspan="4">
 										<group>
 											<field name="access_id" required="1"/>
-											<field name="moc_id" required="1"/>
+											<field name="qty" required="1"/>
+											<field name="oth_spec"/>
 											
 											<field name="mar_prime_cost" readonly="1" invisible="0"/>
 										</group>
 										<group>
-											<field name="qty" required="1"/>
-											<field name="oth_spec"/>
+											<field name="off_name"/>
+											<field name="moc_id" required="1"/>
+											
 											<field name="wo_prime_cost" readonly="1"/>
 										</group>
 										<group>
@@ -339,6 +393,7 @@
 													<field name="position_id"/>
 													<field name="pattern_id"/>
 													<field name="pattern_name" readonly="1"/>
+													<field name="off_name"/>
 													<field name="material_code"/>
 													<field name="moc_id"/>
 													<field name="csd_no"/>
@@ -359,6 +414,7 @@
 													<field name="position_id"/>
 													<field name="ms_id"/>
 													<field name="name" readonly="1"/>
+													<field name="off_name"/>
 													<field name="material_code"/>
 													<field name="moc_id"/>
 													<field name="csd_no"/>
@@ -380,6 +436,7 @@
 													<field name="position_id"/>
 													<field name="ms_id"/>
 													<field name="item_name" readonly="1"/>
+													<field name="off_name"/>
 													<field name="material_code"/>
 													<field name="moc_id"/>
 													<field name="csd_no" required="1"/>
@@ -396,6 +453,96 @@
 								</form>
 							</field>								
 						</page>
+						
+						<page string = "Spare BOM" attrs="{'invisible':[('order_category','!=','spare')]}">
+							<field name="line_ids_e" context="{'moc_const_id':moc_construction_id}">
+								<tree string="BOM Tree" delete="false">
+									<field name="bom_id" required="1"/>
+									<field name="qty" required="1"/>
+									<field name="off_name"/>
+								</tree>
+								<form string="Spare Details Entry Form" create="false" delete="false">
+									<group colspan="4">
+										<group>
+											<field name="bom_id" required="1" on_change="onchange_spare_off_name(bom_id)"/>
+											<field name="off_name"/>
+											<field name="load_bom" on_change="onchange_spare_bom(bom_id,off_name,moc_const_id,qty)" attrs="{'invisible':[('bom_id','=',False)]}"/>
+										</group>
+										<group>
+											<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+											<field name="moc_const_id" invisible="1"/>
+										</group>
+									</group>
+									
+									<notebook>
+										<page string="Foundry">
+											<field name="line_ids" nolabel="1">
+												<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
+													<field name="is_applicable"/>
+													<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="off_name"/>
+													<field name="material_code"/>
+													<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+													<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="qty" required="1" />
+													<field name="prime_cost" readonly="1"/>
+													<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="load_bom" invisible="1"/>
+													<field name="moc_name" invisible="1"/>
+													<field name="moc_changed_flag" invisible="1"/>
+												</tree>
+											</field>
+										</page>
+										<page string="MS">
+											<field name="line_ids_a" nolabel="1">
+												<tree string="MS Item Tree" create="false" delete="false">
+													<field name="is_applicable"/>
+													<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="off_name"/>
+													<field name="material_code"/>
+													<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+													<field name="length"/>
+													<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="qty" required="1" />
+													<field name="prime_cost" readonly="1"/>
+													<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="load_bom" invisible="1"/>
+													<field name="moc_name" invisible="1"/>
+													<field name="moc_changed_flag" invisible="1"/>
+												</tree>
+											</field>
+										</page>
+										<page string="BOT">
+											<field name="line_ids_b" nolabel="1">
+												<tree string="BOT Item Tree" editable="top" create="false" delete="false">
+													<field name="is_applicable"/>
+													<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="off_name"/>
+													<field name="material_code"/>
+													<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+													<field name="brand_id" attrs="{'required': [('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
+													<field name="qty" required="1" />
+													<field name="prime_cost" readonly="1"/>
+													<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="load_bom" invisible="1"/>
+													<field name="flag_is_bearing" invisible="1"/>
+													<field name="moc_name" invisible="1"/>
+													<field name="moc_changed_flag" invisible="1"/>
+												</tree>
+											</field>
+										</page>
+									</notebook>
+								</form>
+							</field>
+						</page>
+						
+
 						
 					</notebook>
 					
