@@ -247,7 +247,7 @@ EACH IN Rs.]]></text>
 				</textField>
 				<image>
 					<reportElement x="126" y="0" width="69" height="46"/>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
 				</image>
 				<textField isBlankWhenNull="true">
 					<reportElement mode="Transparent" x="0" y="46" width="387" height="40"/>
