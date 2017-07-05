@@ -21,7 +21,7 @@
 								<field name="pump_model_type" required="1"/>
 								<field name="rpm" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
 								<field name="speed_in_rpm"/>
-								<field name="setting_height" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
+								<field name="setting_height" attrs="{'required': [('pump_model_type','=','vertical')],'invisible': [('pump_model_type','!=','vertical')]}"/>
 								<field name="shaft_sealing" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
 								<field name="bush_bearing_lubrication" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
 								<field name="qty" attrs="{'readonly': [('load_bom','=',True)]}" required="1"/>
@@ -29,8 +29,8 @@
 								<field name="load_bom" on_change="onchange_bom(load_bom,pump_id,moc_const_id,qty,speed_in_rpm,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,del_pipe_size,bush_bearing_lubrication)" attrs="{'invisible': [('moc_const_id','=',False)]}" />
 							</group>
 							<group>
-								<field name="entry_date" attrs="{'readonly': [('load_bom','=',True)]}"/>
-								<field name="moc_const_id" attrs="{'readonly': [('load_bom','=',True)]}" required="1"/>
+								<field name="entry_date" attrs="{'readonly': [('load_bom','=',True)]}" options="{'datepicker':{'minDate': -10,'maxDate': null,}}"/>
+								<field name="moc_const_id" on_change="onchange_moc_const(moc_const_id)" attrs="{'readonly': [('load_bom','=',True)]}" required="1"/>
 								<field name="moc_construction_name"/>
 								<field name="motor_power" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
 								<field name="del_pipe_size" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
@@ -39,12 +39,12 @@
 								<field name="total_cost" readonly="1"/>
 								<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="state" style="width: 30%%" class="att_state_change" invisible="1"/>
-							</group>
+							</group>					
 						</group>
 						<notebook>
 							<page string="Foundry Items" >
 								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string="Foundry Details Entry Tree" editable="top" create="false" delete="false">
+									<tree string="Foundry Details Entry Tree" editable="top" create="false" delete="false">					
 										<field name="is_applicable"/>
 										<field name="position_id" readonly="1"/>
 										<field name="pattern_id" readonly="1"/>
@@ -59,7 +59,7 @@
 							</page>
 							<page string="MS Items" >
 								<field name="line_ids_a" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string="MS Details Entry Tree" editable="top" create="false" delete="false">
+									<tree string="MS Details Entry Tree" create="false" delete="false">					
 										<field name="is_applicable"/>
 										<field name="position_id" readonly="1"/>
 										<field name="ms_id" readonly="1"/>
@@ -71,11 +71,49 @@
 										<field name="prime_cost" readonly="1"/>
 										<field name="active" invisible="1"/>
 									</tree>
+									<form string="MS Details Entry Tree" create="false" delete="false">					
+										<group colspan="4">
+											<group>
+												<field name="is_applicable"/>
+												<field name="position_id" readonly="1"/>
+												<field name="ms_id" readonly="1"/>
+												<field name="ms_name" readonly="1"/>
+												<field name="material_code"/>
+											</group>
+											<group>
+												<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}"/>
+												<field name="length" readonly="1"/>
+												<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
+												<field name="prime_cost" readonly="1"/>
+												<field name="active" invisible="1"/>
+											</group>
+										</group>
+										<notebook>
+											<page string="Raw Materials" >
+												<field name="line_ids" colspan="4" nolabel="1">
+													<tree string="Raw Materials Entry Tree" editable="top"  delete="false">					
+														<field name="product_id" readonly="1"/>
+														<field name="uom" required="1" readonly="1"/>
+														<field name="uom_conversation_factor" readonly="1"/>
+														<field name="od" invisible="1"/>
+														<field name="length" readonly="1"/>
+														<field name="breadth" readonly="1"/>
+														<field name="thickness" invisible="1"/>
+														<field name="weight" invisible="1"/>
+														<field name="temp_qty" attrs="{'required':[('length','=',0)],'readonly':[('length','=',0)]}" on_change="onchange_weight(uom_conversation_factor,length,breadth,temp_qty,product_id)"/>
+														<field name="qty" readonly="1"/>
+														<field name="weight" readonly="1"/>
+														<field name="remarks" readonly="1"/>
+													</tree>
+												</field>
+											</page>
+										</notebook>
+									</form>
 								</field>
 							</page>
 							<page string="BOT Items" >
 								<field name="line_ids_b" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string="BOT Details Entry Tree" editable="top" create="false" delete="false">
+									<tree string="BOT Details Entry Tree" editable="top" create="false" delete="false">					
 										<field name="is_applicable"/>
 										<field name="position_id" readonly="1"/>
 										<field name="bot_id" readonly="1"/>

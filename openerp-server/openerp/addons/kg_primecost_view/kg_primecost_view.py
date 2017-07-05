@@ -126,7 +126,7 @@ class kg_primecost_view(osv.osv):
 		if entry_date > today:
 			return False
 		return True
-		
+	
 	def _check_lineitems(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if not entry.line_ids:
@@ -135,26 +135,26 @@ class kg_primecost_view(osv.osv):
 	
 	def _check_is_applicable(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		
 		if entry.line_ids:
 			for line in entry.line_ids:
 				if line.is_applicable == True and not line.moc_id:
-					raise osv.except_osv(
-						_('Warning!'),
-						_('Pattern Name %s You cannot save without MOC'%(line.pattern_id.pattern_name)))
+					raise osv.except_osv(_('Warning!'),_('Pattern Name %s You cannot save without MOC'%(line.pattern_id.pattern_name)))
 		if entry.line_ids_a:
 			for line in entry.line_ids:
 				if line.is_applicable == True and not line.moc_id:
-					raise osv.except_osv(
-						_('Warning!'),
-						_('Item Name %s You cannot save without MOC'%(line.ms_id.name)))
+					raise osv.except_osv(_('Warning!'),_('Item Name %s You cannot save without MOC'%(line.ms_id.name)))
 		if entry.line_ids_b:
 			for line in entry.line_ids:
 				if line.is_applicable == True and not line.moc_id:
-					raise osv.except_osv(
-						_('Warning!'),
-						_('Item Name %s You cannot save without MOC'%(line.bot_id.name)))
-					
+					raise osv.except_osv(_('Warning!'),_('Item Name %s You cannot save without MOC'%(line.bot_id.name)))
+		return True
+	
+	def _duplicate_removed(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.load_bom != True:
+			cr.execute(''' delete from ch_primecost_view_fou where header_id = %s '''%(rec.id))
+			cr.execute(''' delete from ch_primecost_view_ms where header_id = %s '''%(rec.id))
+			cr.execute(''' delete from ch_primecost_view_bot where header_id = %s '''%(rec.id))
 		return True
 	
 	_constraints = [        
@@ -162,6 +162,7 @@ class kg_primecost_view(osv.osv):
 			(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
 			(_check_is_applicable, 'Kindly select anyone is appli !!',['']),
 			#~ (_check_lineitems, 'System not allow to save with empty Details !!',['']),
+			(_duplicate_removed, 'Duplcates removed !',['']),
 			
        ]
 	
@@ -172,12 +173,12 @@ class kg_primecost_view(osv.osv):
 			value = {'moc_construction_name':moc_rec.name}
 		return {'value': value}
 	
-	def onchange_bom(self, cr, uid, ids, load_bom,pump_id,moc_const_id,qty,speed_in_rpm,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,del_pipe_size,bush_bearing_lubrication):
+	def onchange_bom(self, cr, uid, ids, load_bom,pump_id,moc_const_id,qty,speed_in_rpm,rpm,setting_height,shaft_sealing,
+					motor_power,bush_bearing,del_pipe_size,bush_bearing_lubrication):
 		delivery_pipe_size = del_pipe_size
 		lubrication = bush_bearing_lubrication
 		if qty <= 0:
-			raise osv.except_osv(_('Warning!'),
-				_('System sholud not be accept without Quantity'))
+			raise osv.except_osv(_('Warning!'),_('System sholud not be accept without Quantity'))
 		if lubrication:
 			if lubrication == 'external':
 				lubrication = 'cft_ext'
@@ -195,9 +196,9 @@ class kg_primecost_view(osv.osv):
 				#~ rpm = '1450'
 			#~ elif rpm > 1450 and rpm <= 2900:
 				#~ rpm = '2900'
-				
 		fou_vals=[]
 		ms_vals=[]
+		ch_ms_vals = []
 		bot_vals=[]
 		data_rec = ''
 		if load_bom == True and pump_id:
@@ -237,11 +238,27 @@ class kg_primecost_view(osv.osv):
 						if ms_rec.line_ids_a:
 							if moc_const_id:
 								cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
-								ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.code),('header_id','=',ms_rec.id)])
+								ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.id),('header_id','=',ms_rec.id)])
 								if ms_line_obj:
 									ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 									moc_id = ms_line_rec.moc_id.id
-						ms_vals.append({
+						if ms_rec.line_ids:
+							ch_ms_vals = []
+							for raw in ms_rec.line_ids:
+								ch_ms_vals.append([0, 0,{
+										'product_id': raw.product_id.id,
+										'uom': raw.uom.id,
+										'od': raw.od,
+										'length': raw.length,
+										'breadth': raw.breadth,
+										'thickness': raw.thickness,
+										'weight': raw.weight,
+										'uom_conversation_factor': raw.uom_conversation_factor,
+										'temp_qty': raw.temp_qty,
+										'qty': raw.qty,
+										'remarks': raw.remarks,
+										}])
+							ms_vals.append({
 										'position_id': item.position_id.id,
 										'ms_name': item.name,
 										'ms_id': item.ms_id.id,
@@ -250,7 +267,7 @@ class kg_primecost_view(osv.osv):
 										'load_bom': True,
 										'is_applicable': True,
 										'active': True,
-										#~ 'remarks': item.remarks,
+										'line_ids': ch_ms_vals,
 										})
 			if data_rec.line_ids_b:
 				for item in data_rec.line_ids_b:
@@ -262,7 +279,7 @@ class kg_primecost_view(osv.osv):
 						if bot_rec.line_ids_a:
 							if moc_const_id:
 								cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
-								bot_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.code),('header_id','=',bot_rec.id)])
+								bot_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.id),('header_id','=',bot_rec.id)])
 								if bot_line_obj:
 									bot_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,bot_line_obj[0])
 									moc_id = bot_line_rec.moc_id.id
@@ -278,8 +295,7 @@ class kg_primecost_view(osv.osv):
 										'flag_is_bearing': bot_rec.is_bearing,
 										#~ 'remarks': item.remarks,
 										})
-		
-		
+			
 			if rpm != False:
 				
 				if shaft_sealing != False and motor_power != False and bush_bearing != False and setting_height > 0 and delivery_pipe_size != False and lubrication != False:
@@ -929,7 +945,27 @@ class kg_primecost_view(osv.osv):
 						if vertical_ms_details['position_id'] == None:
 							raise osv.except_osv(_('Warning!'),
 							_('Kindly Configure Position No. in MS Items for respective Pump Bom and proceed further !!'))
-							
+						
+						if vertical_ms_details['ms_id']:
+							ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,vertical_ms_details['ms_id'])
+							if ms_rec.line_ids_a:
+								if ms_rec.line_ids:
+									ch_ms_vals = []
+									for raw in ms_rec.line_ids:
+										ch_ms_vals.append([0, 0,{
+												'product_id': raw.product_id.id,
+												'uom': raw.uom.id,
+												'od': raw.od,
+												'length': raw.length,
+												'breadth': raw.breadth,
+												'thickness': raw.thickness,
+												'weight': raw.weight,
+												'uom_conversation_factor': raw.uom_conversation_factor,
+												'temp_qty': raw.temp_qty,
+												'qty': raw.qty,
+												'remarks': raw.remarks,
+												}])
+						
 						ms_vals.append({
 							
 							'position_id':vertical_ms_details['position_id'],
@@ -941,6 +977,7 @@ class kg_primecost_view(osv.osv):
 							'is_applicable': True,
 							'active': True,
 							'moc_id': moc_id,
+							'line_ids': ch_ms_vals,
 							
 							#~ 'pos_no':pos_no,
 							#~ 'ms_line_id': vertical_ms_details['id'],
@@ -1123,7 +1160,7 @@ class kg_primecost_view(osv.osv):
 							#~ 'position_id': item.position_id.id,
 							#~ 'bot_name': item_name,
 							#~ 'moc_id': moc_id,
-										
+							
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
 	
 	def prime_cost_update(self,cr,uid,ids,context=None):
@@ -1136,16 +1173,16 @@ class kg_primecost_view(osv.osv):
 				for foundry_item in entry.line_ids:
 					if foundry_item.is_applicable == True:
 						fou_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'foundry',foundry_item.pattern_id.id,
-						0,0,entry.moc_const_id.id,foundry_item.moc_id.id,0)
+						0,0,0,entry.moc_const_id.id,foundry_item.moc_id.id,0)
 						self.pool.get('ch.primecost.view.fou').write(cr,uid,foundry_item.id,{'prime_cost':fou_prime_cost * foundry_item.qty })
 						prime_cost += fou_prime_cost * foundry_item.qty
-			
+						
 			if entry.line_ids_a:
 				prime_cost = 0
 				for ms_item in entry.line_ids_a:
 					if ms_item.is_applicable == True:
 						ms_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'ms',0,
-						ms_item.ms_id.id,0,entry.moc_const_id.id,ms_item.moc_id.id,0)
+						ms_item.ms_id.id,ms_item,0,entry.moc_const_id.id,ms_item.moc_id.id,0)
 						self.pool.get('ch.primecost.view.ms').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost * ms_item.qty})
 						prime_cost += ms_prime_cost * ms_item.qty
 						
@@ -1155,10 +1192,9 @@ class kg_primecost_view(osv.osv):
 					if bot_item.is_applicable == True:
 						if bot_item.flag_is_bearing == True:
 							if not bot_item.brand_id:
-								raise osv.except_osv(_('Warning!'),
-									_('%s You cannot save without Brand'%(bot_item.bot_id.code)))
+								raise osv.except_osv(_('Warning!'),_('%s You cannot save without Brand'%(bot_item.bot_id.code)))
 						bot_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'bot',0,
-						0,bot_item.bot_id.id,entry.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
+						0,0,bot_item.bot_id.id,entry.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
 						self.pool.get('ch.primecost.view.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost * bot_item.qty})
 						prime_cost += bot_prime_cost * bot_item.qty
 				
@@ -1388,11 +1424,8 @@ class kg_primecost_view(osv.osv):
 		return primecost_vals
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
-		
 		rec = self.browse(cr,uid,ids[0])		
-		
 		### Sequence Number Generation  ###
-		
 		if rec.name == '' or rec.name == False:
 			seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.primecost.view')])
 			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
@@ -1401,15 +1434,13 @@ class kg_primecost_view(osv.osv):
 			entry_name = entry_name[0]
 		else:
 			entry_name = rec.name		
-		
 		self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		
 		return True
 	
 	def entry_approve(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-		
+	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
@@ -1418,23 +1449,22 @@ class kg_primecost_view(osv.osv):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
 			if rec.state != 'draft':			
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
+				raise osv.except_osv(_('Warning!'),_('You can not delete this entry !!'))
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 	
-	def create(self, cr, uid, vals, context=None):
-		return super(kg_primecost_view, self).create(cr, uid, vals, context=context)
+	#~ def create(self, cr, uid, vals, context=None):
+		#~ return super(kg_primecost_view, self).create(cr, uid, vals, context=context)
 	
-	def write(self, cr, uid, ids, vals, context=None):
-		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_primecost_view, self).write(cr, uid, ids, vals, context)
+	#~ def write(self, cr, uid, ids, vals, context=None):
+		#~ vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		#~ return super(kg_primecost_view, self).write(cr, uid, ids, vals, context)
 	
 	_sql_constraints = [
 		
 		('name', 'unique(name)', 'No must be Unique !!'),
-	]	
+	]
 	
 kg_primecost_view()
 
@@ -1528,6 +1558,7 @@ class ch_primecost_view_ms(osv.osv):
 		
 		## Child Tables Declaration 
 		
+		'line_ids': fields.one2many('ch.pc.view.ms', 'header_id', "Fou Details"),
 		'load_bom': fields.boolean('Load BOM'),
 		
 	}
@@ -1551,8 +1582,76 @@ class ch_primecost_view_ms(osv.osv):
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
-	
+	 
 ch_primecost_view_ms()
+
+class ch_pc_view_ms(osv.osv):
+	
+	_name = "ch.pc.view.ms"
+	_description = "Child PC MS Item Details"
+	
+	_columns = {
+		
+		### Basic Info
+		
+		'header_id':fields.many2one('ch.primecost.view.ms', 'MS', ondelete='cascade'),
+		'remarks': fields.char('Remarks'),
+		'active': fields.boolean('Active'),	
+		
+		### Module Requirement
+		
+		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
+		'uom':fields.many2one('product.uom','UOM',size=128 ,required=True),
+		'od': fields.float('OD'),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
+		'thickness': fields.float('Thickness'),
+		'weight': fields.float('Weight' ,digits=(16,5)),
+		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),		
+		'temp_qty':fields.float('Qty'),
+		'qty':fields.float('Testing Qty',readonly=True),
+		
+	}
+	
+	_defaults = {
+		
+		'active': True,
+		
+	}
+	
+	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
+		value = {'qty': '','weight': '',}
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		qty_value = 0.00
+		weight=0.00
+		if uom_conversation_factor == 'one_dimension':	
+			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
+				qty_value = length * temp_qty
+				weight = 0.00
+			if length == 0.00:
+				qty_value = temp_qty
+			else:				
+				qty_value = length * temp_qty			
+				weight = qty_value * prod_rec.po_uom_in_kgs
+		if uom_conversation_factor == 'two_dimension':
+			qty_value = length * breadth * temp_qty				
+			weight = qty_value * prod_rec.po_uom_in_kgs		
+		value = {'qty': qty_value,'weight':weight}			
+		return {'value': value}
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
+	
+	_constraints = [
+		
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+	
+ch_pc_view_ms()
 
 class ch_primecost_view_bot(osv.osv):
 	
