@@ -1724,11 +1724,20 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			return False
 		return True
 	
+	def _duplicate_removed(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.load_bom != True:
+			cr.execute(''' delete from ch_kg_crm_spare_fou where header_id = %s '''%(rec.id))
+			cr.execute(''' delete from ch_kg_crm_spare_ms where header_id = %s '''%(rec.id))
+			cr.execute(''' delete from ch_kg_crm_spare_bot where header_id = %s '''%(rec.id))
+		return True
+	
 	_constraints = [
 		
 		(_check_qty,'You cannot save with zero qty !',['Qty']),
 		(_check_access,'You cannot save without accessories !',['']),
 		(_check_access_qty,'You cannot save with zero qty !',['Qty']),
+		(_duplicate_removed,'Duplicates removed !',['']),
 		#~ (_check_lineitems, 'System not allow to save with empty Accessories Details !!',['']),
 		#~ (_check_is_applicable,'You cannot save without Is applicable !',['Is Applicable']),
 		
