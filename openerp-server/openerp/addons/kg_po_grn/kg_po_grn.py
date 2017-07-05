@@ -867,8 +867,7 @@ class kg_po_grn(osv.osv):
 				
 				if line.product_id.flag_expiry_alert == True:
 					if not line.po_exp_id:
-						raise osv.except_osv(_('Warning!'),
-							_('System should not be accept without S/N Details!'))
+						raise osv.except_osv(_('Warning!'),_('System should not be accept without S/N Details!'))
 					for item in line.po_exp_id:
 						if not item.exp_date:
 							raise osv.except_osv(_('Warning!'),
@@ -1272,6 +1271,7 @@ class kg_po_grn(osv.osv):
 								'po_uom':line.uom_id.id,
 								'grn_type':'material',
 								'reserved_qty':product_qty,
+								'reserved_qty_in_po_uom':exp.product_qty,
 							})
 					else:
 						if line.billing_type == 'cost':
@@ -1309,6 +1309,7 @@ class kg_po_grn(osv.osv):
 							'batch_no':line.po_grn_id.name,
 							'grn_type':'material',
 							'reserved_qty':product_qty,
+							'reserved_qty_in_po_uom':line.po_grn_qty,
 						})
 				if grn_entry.grn_type == 'from_so':
 					if line.po_exp_id:
@@ -1349,6 +1350,7 @@ class kg_po_grn(osv.osv):
 								'po_uom':line.uom_id.id,
 								'grn_type':'service',
 								'reserved_qty':product_qty,
+								'reserved_qty_in_po_uom':exp.product_qty,
 							})
 					else:
 						if line.billing_type == 'cost':
@@ -1386,6 +1388,7 @@ class kg_po_grn(osv.osv):
 							'batch_no':line.po_grn_id.name,
 							'grn_type':'service' ,
 							'reserved_qty':product_qty,
+							'reserved_qty_in_po_uom':line.po_grn_qty,
 						})
 				if grn_entry.grn_type == 'from_gp':
 					if line.po_exp_id:
@@ -1416,6 +1419,7 @@ class kg_po_grn(osv.osv):
 								'po_uom':line.uom_id.id,
 								'grn_type':'service',
 								'reserved_qty':po_grn_qty,
+								'reserved_qty_in_po_uom':exp.product_qty,
 							})
 					else:
 						if line.billing_type == 'free':
@@ -1443,6 +1447,7 @@ class kg_po_grn(osv.osv):
 							'batch_no':line.po_grn_id.name,
 							'grn_type':'service',
 							'reserved_qty':po_grn_qty,
+							'reserved_qty_in_po_uom':line.po_grn_qty,
 							
 						})
 				#Write a tax amount in line
@@ -1546,7 +1551,7 @@ class po_grn_line(osv.osv):
 		'po_grn_date':fields.date('PO GRN Date'),
 		'name':fields.char('Product'),
 		'product_id':fields.many2one('product.product','Product Name',required=True, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
-		'uom_id':fields.many2one('product.uom','UOM',required=True),
+		'uom_id':fields.many2one('product.uom','PO UOM',required=True),
 		'po_grn_qty':fields.float('Qty',required=True),
 		'recvd_qty':fields.float('Received Qty'),
 		'reject_qty':fields.float('Rejected Qty'),

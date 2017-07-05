@@ -21,11 +21,11 @@ import calendar
 today = datetime.now()
 
 class kg_general_grn(osv.osv):
-
+	
 	_name = "kg.general.grn"
 	_description = "General GRN Provision"
 	_order = "grn_date desc,name desc"
-
+	
 	def _amount_line_tax(self, cr, uid, line, context=None):
 		grn_qty = val = 0.0
 		if line.grn_qty == 0:
@@ -41,7 +41,7 @@ class kg_general_grn(osv.osv):
 			 line.grn_id.supplier_id)['taxes']:
 			val += c.get('amount', 0.0)
 		return val
-
+	
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
@@ -77,12 +77,12 @@ class kg_general_grn(osv.osv):
 			res[order.id]['amount_total']=(round(val + val1 + res[order.id]['other_charge'],0))
 			res[order.id]['discount']=(round(val3,0))
 		return res
-
+	
 	def _get_journal(self, cr, uid, context=None):
 		journal_obj = self.pool.get('account.journal')
 		res = journal_obj.search(cr, uid, [('type','=','sale')], limit=1)
 		return res and res[0] or False
-
+	
 	def _get_currency(self, cr, uid, context=None):
 		res = False
 		journal_id = self._get_journal(cr, uid, context=context)
@@ -90,16 +90,16 @@ class kg_general_grn(osv.osv):
 			journal = self.pool.get('account.journal').browse(cr, uid, journal_id, context=context)
 			res = journal.currency and journal.currency.id or journal.company_id.currency_id.id
 		return res
-
+	
 	def _get_order(self, cr, uid, ids, context=None):
 		result = {}
 		for line in self.pool.get('kg.general.grn.line').browse(cr, uid, ids, context=context):
 			result[line.grn_id.id] = True
 		return result.keys()
-
+	
 	def button_dummy(self, cr, uid, ids, context=None):
 		return True
-
+	
 	_columns = {
 		
 		## Basic Info
@@ -201,13 +201,12 @@ class kg_general_grn(osv.osv):
 						print "name,,,,,,,,,,,,",vals['name']
 		grn =  super(kg_general_grn, self).create(cr, uid, vals, context=context)
 		return grn"""
-
+	
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_general_grn, self).write(cr, uid, ids, vals, context)
-		
+	
 	def onchange_grn_date(self, cr, uid, ids, grn_date):
-
 		exp_grn_qty = 0
 		line_tot = 0
 		#if grn_entry.name == '':
@@ -218,28 +217,24 @@ class kg_general_grn(osv.osv):
 		today_new = today.date()
 		bk_date = date.today() - timedelta(days=3)
 		back_date = bk_date.strftime('%Y-%m-%d')
-
 		d1 = today_new
 		d2 = bk_date
 		delta = d1 - d2
-
 		for i in range(delta.days + 1):
 			bkk_date = d1 - timedelta(days=i)
 			backk_date = bkk_date.strftime('%Y-%m-%d')
 			back_list.append(backk_date)
-
 		if grn_date <= back_date:
-			raise osv.except_osv(_('Warning'),
-				_('GRN Entry is not allowed for this date!'))
+			raise osv.except_osv(_('Warning'),_('GRN Entry is not allowed for this date!'))
 		return True
-
+	
 	def onchange_user_id(self, cr, uid, ids, user_id, context=None):
 		value = {'dep_name': ''}
 		if user_id:
 			user = self.pool.get('res.users').browse(cr, uid, user_id, context=context)
 			value = {'dep_name': user.dep_name.id}
 		return {'value': value}		
-		
+	
 	def entry_confirm(self, cr, uid, ids,context=None):
 		grn_entry = self.browse(cr, uid, ids[0])
 		if grn_entry.state == 'draft':
@@ -265,19 +260,17 @@ class kg_general_grn(osv.osv):
 				backk_date = bkk_date.strftime('%Y-%m-%d')
 				back_list.append(backk_date)
 				if grn_date <= back_date:
-					raise osv.except_osv(_('Warning'),
-						_('GRN Entry is not allowed for this date!'))
+					raise osv.except_osv(_('Warning'),_('GRN Entry is not allowed for this date!'))
 
 			for line in grn_entry.grn_line:
 				if line.inward_type.id == False:
-					raise osv.except_osv(_('Warning!'), _('Kindly Give Inward Type for %s !!' %(line.product_id.name)))
+					raise osv.except_osv(_('Warning!'),_('Kindly Give Inward Type for %s !!' %(line.product_id.name)))
 				
 				# Expiry date validation start
 				
 				if line.product_id.flag_expiry_alert == True:
 					if not line.exp_batch_id:
-						raise osv.except_osv(_('Warning!'),
-							_('System should not be accept without S/N Details!'))
+						raise osv.except_osv(_('Warning!'),_('System should not be accept without S/N Details!'))
 					for item in line.exp_batch_id:
 						if not item.exp_date:
 							raise osv.except_osv(_('Warning!'),
@@ -289,15 +282,12 @@ class kg_general_grn(osv.osv):
 				pro_rec = self.pool.get('product.product').browse(cr, uid, product_id)
 				if pro_rec.expiry == True:
 					if not line.exp_batch_id:
-						raise osv.except_osv(_('Warning!'), _('You should specify Expiry date and batch no for this item!!'))
-
+						raise osv.except_osv(_('Warning!'),_('You should specify Expiry date and batch no for this item!!'))
 				if line.exp_batch_id:
 					for exp_line in line.exp_batch_id:
 						exp_grn_qty += exp_line.product_qty
-
 						if exp_grn_qty > line.grn_qty:
-							raise osv.except_osv(_('Please Check!'), _('Quantity should not exceed than GRN Quantity !!'))
-
+							raise osv.except_osv(_('Please Check!'),_('Quantity should not exceed than GRN Quantity !!'))
 				line.write({'state':'confirmed'})
 			for line in grn_entry.grn_line:
 				product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
@@ -314,7 +304,7 @@ class kg_general_grn(osv.osv):
 									  })
 		
 		return True
-
+	
 	def entry_approve(self, cr, uid, ids,context=None):
 		grn_entry = self.browse(cr, uid, ids[0])
 		if grn_entry.state == 'confirmed':
@@ -330,7 +320,6 @@ class kg_general_grn(osv.osv):
 			dep_id = grn_entry.dep_name.id
 			dep_record = dep_obj.browse(cr,uid,dep_id)
 			dest_location_id = dep_record.main_location.id
-
 			pi_obj = self.pool.get('kg.purchase.invoice')
 			pi_gen_grn_obj = self.pool.get('kg.gengrn.purchase.invoice.line')
 			if grn_entry.grn_dc == 'dc_invoice' and grn_entry.bill == 'applicable':
@@ -350,12 +339,9 @@ class kg_general_grn(osv.osv):
 							'sup_invoice_no':grn_entry.sup_invoice_no,
 							'sup_invoice_date':grn_entry.sup_invoice_date,
 						})
-
 				sql1 = """ insert into purchase_invoice_general_grn_ids(invoice_id,grn_id) values(%s,%s)"""%(invoice_no,grn_entry.id)
 				cr.execute(sql1)
-
 			line_tot = 0
-			
 			### Gate Pass Creation Process
 			if grn_entry.grn_line:
 				reject_qty_data = [x.id for x in grn_entry.grn_line if x.reject_qty > 0]
@@ -402,8 +388,7 @@ class kg_general_grn(osv.osv):
 				
 				if line.product_id.flag_expiry_alert == True:
 					if not line.exp_batch_id:
-						raise osv.except_osv(_('Warning!'),
-							_('System should not be accept without S/N Details!'))
+						raise osv.except_osv(_('Warning!'),_('System should not be accept without S/N Details!'))
 					for item in line.exp_batch_id:
 						if not item.exp_date:
 							raise osv.except_osv(_('Warning!'),
@@ -464,10 +449,8 @@ class kg_general_grn(osv.osv):
 					'stock_rate':line.price_unit or 0.0,
 					})
 				if grn_entry.grn_dc == 'dc_invoice' and grn_entry.bill == 'applicable':
-
 						pi_gen_grn_obj.create(cr,uid,
 								{
-
 								'general_grn_id':grn_entry.id,
 								'general_grn_line_id':line.id,
 								'product_id': line.product_id.id,
@@ -482,7 +465,6 @@ class kg_general_grn(osv.osv):
 								'net_amt':  line.price_subtotal or 0.0,
 								'invoice_header_id' :invoice_no
 								})
-
 				line.write({'state':'done'})
 				# This code will create Production lot
 				if line.exp_batch_id:
@@ -512,9 +494,9 @@ class kg_general_grn(osv.osv):
 							'po_uom':line.uom_id.id,
 							'grn_type':'material',
 							'reserved_qty': product_qty,
+							'reserved_qty_in_po_uom': exp.product_qty,
 							#'po_qty':move_record.po_to_stock_qty,
 						})
-
 				else:
 					if line.uom_id.id != line.product_id.uom_po_id.id:
 						product_uom = line.product_id.uom_id.id
@@ -525,11 +507,8 @@ class kg_general_grn(osv.osv):
 						product_uom = line.product_id.uom_id.id
 						product_qty = line.grn_qty
 						price_unit = line.price_subtotal / product_qty or 1
-								
 					lot_obj.create(cr,uid,
-
 						{
-
 						'grn_no':line.grn_id.name,
 						'product_id':line.product_id.id,
 						'brand_id':line.brand_id.id,
@@ -545,6 +524,7 @@ class kg_general_grn(osv.osv):
 						'batch_no':line.grn_id.name,
 						'grn_type':'material',
 						'reserved_qty': product_qty,
+						'reserved_qty_in_po_uom': line.grn_qty,
 						#'po_qty':move_record.po_to_stock_qty,
 					})
 				grn_price = line.grn_qty * line.price_unit
@@ -555,7 +535,7 @@ class kg_general_grn(osv.osv):
 				cr.execute("""update kg_general_grn_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))
 		
 		return True
-			
+	
 	def entry_cancel(self, cr, uid, ids, context=None):
 		grn = self.browse(cr, uid, ids[0])
 		if grn.state == 'done':
@@ -566,7 +546,7 @@ class kg_general_grn(osv.osv):
 			for line in grn.grn_line:
 				line.write({'state':'cancel'})
 		return True
-
+	
 	def entry_reject(self, cr, uid, ids, context=None):
 		grn = self.browse(cr, uid, ids[0])
 		if grn.state == 'confirmed':
@@ -575,7 +555,7 @@ class kg_general_grn(osv.osv):
 			else:
 				self.write(cr, uid, ids[0], {'state' : 'reject','rej_user_id': uid,'reject_date': time.strftime("%Y-%m-%d %H:%M:%S")})
 		return True
-
+	
 	def print_grn(self, cr, uid, ids, context=None):
 		assert len(ids) == 1, 'This option should only be used for a single id at a time'
 		wf_service = netsvc.LocalService("workflow")
@@ -586,9 +566,9 @@ class kg_general_grn(osv.osv):
 				 'form': self.read(cr, uid, ids[0], context=context),
 		}
 		return {'type': 'ir.actions.report.xml', 'report_name': 'general.grn.print', 'datas': datas, 'nodestroy': True,'name': 'GRN'}
-
+	
 	_defaults = {
-
+		
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'bill': 'not_applicable',
@@ -602,7 +582,7 @@ class kg_general_grn(osv.osv):
 		'grn_dc': 'only_grn',
 		
 	}
-
+	
 	def _get_invoice_type(self, pick):
 		print "_get_invoice_type called from PICKING^^^^^^^^^^^^^^^^^^^^66"
 		src_usage = dest_usage = None
@@ -616,18 +596,17 @@ class kg_general_grn(osv.osv):
 			else:
 				inv_type = 'out_invoice'
 		return inv_type
-
+	
 	def action_invoice_create(self, cr, uid, ids, journal_id=False,
 			group=False, type='out_invoice', context=None):
 		if context is None:
 			context = {}
-
+		
 		invoice_obj = self.pool.get('account.invoice')
 		invoice_line_obj = self.pool.get('account.invoice.line')
 		partner_obj = self.pool.get('res.partner')
 		line_obj = self.pool.get('kg.general.grn.line')
 		picking_obj = self.pool.get('stock.picking')
-
 		invoices_group = {}
 		res = {}
 		inv_type = type
@@ -636,8 +615,7 @@ class kg_general_grn(osv.osv):
 			if isinstance(partner, int):
 				partner = partner_obj.browse(cr, uid, [partner], context=context)[0]
 			if not partner:
-				raise osv.except_osv(_('Error, no partner!'),
-					_('Please put a partner on the GRN if you want to generate invoice.'))
+				raise osv.except_osv(_('Error, no partner!'),_('Please put a partner on the GRN if you want to generate invoice.'))
 			if not inv_type:
 				inv_type = self._get_invoice_type(picking)
 			if group and partner.id in invoices_group:
@@ -672,7 +650,7 @@ class kg_general_grn(osv.osv):
 			'invoice_flag': 'False'
 			}, context=context)
 		return res
-
+	
 	def _prepare_invoice(self, cr, uid, picking, partner, inv_type, journal_id, context=None):
 		print "_prepare_invoice called from PICKING^^^^^^^^^^^^^^^^^^^^FROM KGGG"
 		val1 = picking.value1 or 0.0
@@ -693,7 +671,7 @@ class kg_general_grn(osv.osv):
 			account_id = 13
 			payment_term = partner.property_supplier_payment_term.id or False
 		comment = 'Invoice'
-
+		
 		invoice_vals = {
 
 			'name': self.pool.get('ir.sequence').get(cr, uid, 'account.invoice'),
@@ -725,13 +703,14 @@ class kg_general_grn(osv.osv):
 			'other_charge':other_charge
 
 		}
+		
 		#cur_id = self.get_currency_id(cr, uid, picking)
 		#if cur_id:
 			#invoice_vals['currency_id'] = cur_id
 		if journal_id:
 			invoice_vals['journal_id'] = journal_id
 		return invoice_vals
-
+	
 	def _prepare_invoice_line(self, cr, uid, group, picking, move_line, invoice_id,
 		invoice_vals, context=None):
 		if invoice_vals['fiscal_position']:
@@ -756,7 +735,7 @@ class kg_general_grn(osv.osv):
 			'discount':move_line.kg_discount_per,
 			'kg_disc_amt':move_line.kg_discount,
 		}
-
+	
 	def _check_lineqty(self, cr, uid, ids, context=None):
 		print "called _check_lineqty ___ function"
 		grn = self.browse(cr, uid, ids[0])
@@ -765,7 +744,7 @@ class kg_general_grn(osv.osv):
 				return False
 			else:
 				return True
-
+	
 	def _check_lineprice(self, cr, uid, ids, context=None):
 		print "called _check_lineprice ___ function"
 		grn = self.browse(cr, uid, ids[0])
@@ -774,7 +753,7 @@ class kg_general_grn(osv.osv):
 				return False
 			else:
 				return True
-
+	
 	def _grndate_validation(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		today = date.today()
@@ -782,7 +761,7 @@ class kg_general_grn(osv.osv):
 		if grn_date > today:
 			return False
 		return True
-
+	
 	def _dcdate_validation(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		today = date.today()
@@ -790,7 +769,7 @@ class kg_general_grn(osv.osv):
 		if dc_date > today:
 			return False
 		return True
-
+	
 	def unlink(self, cr, uid, ids, context=None):
 		unlink_ids = []
 		grn_rec = self.browse(cr, uid, ids[0])
@@ -799,9 +778,8 @@ class kg_general_grn(osv.osv):
 		else:
 			unlink_ids.append(grn_rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-
+	
 	def expiry_alert(self, cr, uid, ids, context=None):
-
 		now = time.strftime("%Y-%m-%d")
 		cr.execute(""" select id,grn_line_id,product_qty,exp_date,batch_no from kg_exp_batch """)
 		data = cr.dictfetchall()
@@ -824,14 +802,14 @@ class kg_general_grn(osv.osv):
 				rep=[product_name,grn_no,item['exp_date'],item['batch_no']]
 				value_data.append(rep)
 		return value_data
-
+	
 	_constraints = [
 		(_check_lineqty, 'You can not save an GRN with 0 product qty!!',['grn_qty']),
 		#(_check_lineprice, 'You can not save an GRN with 0 price_unit!!',['price_unit']),
 		(_grndate_validation, 'GRN date should not be greater than current date !!',['grn_date']),
 		(_dcdate_validation, 'DC date should not be greater than current date !!',['dc_date']),
 		]
-
+	
 kg_general_grn()
 
 
@@ -874,7 +852,7 @@ class kg_general_grn_line(osv.osv):
 			cur = line.grn_id.supplier_id.property_product_pricelist_purchase.currency_id
 			res[line.id] = (round(taxes['total'],0))
 		return res
-
+	
 	_columns = {
 		
 		## Basic Info
@@ -884,7 +862,8 @@ class kg_general_grn_line(osv.osv):
 		## Module Requirement Fields
 		
 		'product_id':fields.many2one('product.product','Item Name',required=True,readonly=False, states={'done':[('readonly',True)],'calcel':[('readonly',True)]}, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
-		'uom_id':fields.many2one('product.uom','UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'uom_id':fields.many2one('product.uom','Store UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'po_uom_id':fields.many2one('product.uom','PO UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'grn_qty':fields.float('GRN Quantity',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'recvd_qty':fields.float('Received Qty'),
 		'reject_qty':fields.float('Rejected Qty'),
@@ -906,9 +885,9 @@ class kg_general_grn_line(osv.osv):
 		## Child Tables Declaration
 		
 		'exp_batch_id':fields.one2many('kg.exp.batch','grn_line_id','Exp Batch No',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-
+		
 	}
-
+	
 	_defaults = {
 		
 		'state': 'draft',
@@ -921,16 +900,15 @@ class kg_general_grn_line(osv.osv):
 		if rec.weight < 0.00:
 			return False					
 		return True
-		
-	_constraints = [
 	
+	_constraints = [
+		
 		(_check_weight,'You cannot save with negative weight !',['Weight']),
 		
 		]
-		
+	
 	def default_get(self, cr, uid, fields, context=None):
 		print"contextcontextcontext",context
-		
 		return context
 	
 	def onchange_moc(self, cr, uid, ids, moc_id_temp):
@@ -939,25 +917,24 @@ class kg_general_grn_line(osv.osv):
 			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
 			value = {'moc_id': rate_rec.moc_id.id}
 		return {'value': value}
-		
+	
 	def onchange_qty(self,cr,uid,ids, grn_qty, recvd_qty, reject_qty, context=None):
 		value = {'recvd_qty': 0,'reject_qty': 0}
 		if grn_qty and recvd_qty == 0:
 			value = {'recvd_qty': grn_qty,'reject_qty': 0}
 		elif grn_qty and recvd_qty >= 0:
 			if grn_qty > recvd_qty:
-				raise osv.except_osv(_('Warning!'),
-					_('Accepted qty should not be greater than Received qty!'))
+				raise osv.except_osv(_('Warning!'),_('Accepted qty should not be greater than Received qty!'))
 			value = {'recvd_qty': recvd_qty,'reject_qty': recvd_qty - grn_qty}
 		return {'value': value}
-		
+	
 	def onchange_uom_id(self, cr, uid, ids, product_id, context=None):
 		value = {'uom_id': ''}
 		if product_id:
 			pro_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'uom_id': pro_rec.uom_id.id,'price_unit':pro_rec.standard_price}
+			value = {'uom_id': pro_rec.uom_id.id,'po_uom_id': pro_rec.uom_po_id.id,'price_unit':pro_rec.standard_price}
 		return {'value': value}
-
+	
 	def create(self, cr, uid, vals,context=None):
 		if vals.has_key('product_id') and vals['product_id']:
 			product_rec = self.pool.get('product.product').browse(cr,uid,vals['product_id'])
@@ -965,7 +942,7 @@ class kg_general_grn_line(osv.osv):
 				vals.update({'uom_id':product_rec.uom_id.id})
 		grn_line =  super(kg_general_grn_line, self).create(cr, uid, vals, context=context)
 		return grn_line
-
+	
 	def grn_line_cancel(self, cr, uid, ids, context=None):
 		grn_line = self.browse(cr, uid, ids[0])
 		if not grn_line.cancel_remark:
@@ -973,15 +950,15 @@ class kg_general_grn_line(osv.osv):
 		else:
 			self.write(cr, uid, ids[0], {'state' : 'cancel'})
 		return True
-
+	
 kg_general_grn_line()
 
 
 class kg_exp_batch(osv.osv):
-
+	
 	_name = "kg.exp.batch"
 	_description = "Expiry Date and Batch NO"
-
+	
 	_columns = {
 		
 		## Basic Info
@@ -993,10 +970,11 @@ class kg_exp_batch(osv.osv):
 		'exp_date':fields.date('Expiry Date'),
 		'batch_no':fields.char('Batch No'),
 		'product_qty':fields.integer('Product Qty'),
-
+		
 	}
+	
 	_sql_constraints = [
-
+		
 		('batch_no', 'unique(batch_no)', 'S/N must be unique per Item !!'),
 	]
 
@@ -1005,7 +983,7 @@ kg_exp_batch()
 
 
 class kg_gen_grn_expense_track(osv.osv):
-
+	
 	_name = "kg.gen.grn.expense.track"
 	_description = "kg expense track"
 	
@@ -1022,13 +1000,14 @@ class kg_gen_grn_expense_track(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company Name'),
 		'description': fields.char('Description'),
 		'expense_amt': fields.float('Amount'),
+		
 	}
 	
 	_defaults = {
 		
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.gen.grn.expense.entry', context=c),
 		'date' : lambda * a: time.strftime('%Y-%m-%d'),
-	
+		
 		}
 	
 kg_gen_grn_expense_track()

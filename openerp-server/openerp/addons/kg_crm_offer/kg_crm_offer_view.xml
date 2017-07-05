@@ -25,6 +25,7 @@
 								<field name="name" readonly="1"/>
 								<field name="offer_date" readonly="1"/>
 								<field name="customer_id" required="1" readonly="1"/>
+								<field name="dealer_id" readonly="1"/>
 								<field name="prj_name" readonly="1"/>
 								<field name="ref_mode" readonly="1"/>
 								<field name="customer_po_no"/>

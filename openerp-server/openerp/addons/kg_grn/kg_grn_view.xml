@@ -614,6 +614,7 @@
 				<field name="product_qty" string="Received Qty" readonly="1"/>
 				<field name="pending_qty" readonly="1"/>
 				<field name="reserved_qty" string="Available Qty" readonly="1"/>
+				<field name="reserved_qty_in_po_uom" string="Available Qty in PO UOM" readonly="1"/>
 			</field>
 		</field>
 	</record>
@@ -634,6 +635,7 @@
 			<field name="product_uom"/>
 			<field name="pending_qty" invisible="1"/>
 			<field name="reserved_qty" string="Available Qty"/>
+			<field name="reserved_qty_in_po_uom" string="Available Qty in PO UOM"/>
 			<field name="price_unit" sum="price_unit" invisible="1"/>
 			<field name="product_qty" string="Received Qty" invisible="1"/>
 			<field name="expiry_date" invisible="1"/>
