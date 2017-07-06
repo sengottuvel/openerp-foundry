@@ -84,14 +84,25 @@ class kg_accessories_master(osv.osv):
 		'access_id': fields.many2one('kg.accessories.master','Source Accessories',domain="[('state','=','approved')]"),
 		'copy_flag':fields.boolean('Copy Flag'),		
 		'product_id': fields.many2one('product.product','Item Name'), 
-		'is_coupling_flag': fields.boolean('Is Coupling'),	
-		'is_pump_acc_flag': fields.boolean('Is Pump Accessories'),		
+		'is_coupling_flag': fields.boolean('Is Coupling'),		
+		'is_pump_acc_flag': fields.boolean('Is Pump Accessories'),
+		
+		'accessories_type': fields.selection([('base_plate','Base Plate'),('coupling','Coupling'),('coupling_guard','Coupling Guard'),
+		('foundation_bolt','Foundation Bolt'),
+		('pump_pulley','Pump Pulley'),('motor_pulley','Motor Pulley'),('slide_rail','Slide Rail'),('belt','Belt'),('belt_guard','Belt Guard'),('others','Others')],'Accessories type',required=True),				
+		
+		'primemover_id': fields.many2one('kg.primemover.master','Prime Mover'),
+		'framesize': fields.char('Framesize'),
+		
+		'pump_id':fields.many2one('kg.pumpmodel.master','Pumpmodel'),
+		'product_id': fields.many2one('product.product','Coupling', required=True, domain="[('product_type','in',['coupling'])]"),			
 		
 		## Child Tables Declaration	 
 		
 		'line_ids': fields.one2many('ch.kg.accessories.master','header_id','BOT Line Details',readonly=False,states={'approved':[('readonly',True)]}),
 		'line_ids_a':fields.one2many('ch.accessories.ms', 'header_id', "Machine Shop Line",readonly=False,states={'approved':[('readonly',True)]}),
 		'line_ids_b':fields.one2many('ch.accessories.fou', 'header_id', "FOU Line",readonly=False,states={'approved':[('readonly',True)]}),
+		'line_ids_c':fields.one2many('ch.foundation.bolt', 'header_id', "Foundation Bolt Configuration Line",readonly=False,states={'approved':[('readonly',True)]}),
 	}
 	
 	_defaults = {
@@ -137,7 +148,14 @@ class kg_accessories_master(osv.osv):
 				res = True				
 		return res	
 	
-	## Basic Needs	
+	## Basic Needs
+	
+	def onchange_framesize(self, cr, uid, ids, primemover_id, context=None):
+		value = {'framesize': ''}
+		if primemover_id:
+			primemover_rec = self.pool.get('kg.primemover.master').browse(cr, uid, primemover_id, context=context)
+			value = {'framesize': primemover_rec.framesize}
+		return {'value': value}	
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -587,5 +605,36 @@ class ch_kg_accessories_master(osv.osv):
 	   ]
 			
 ch_kg_accessories_master()
+
+
+
+
+
+class ch_foundation_bolt(osv.osv):
+
+	_name = "ch.foundation.bolt"
+	_description = "Foundation Bolt Configuration Details"
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.accessories.master', 'Foundation Bolt Configuration', ondelete='cascade',required=True),
+		'access_id': fields.many2one('kg.accessories.master','Foundation Bolt',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','foundation_bolt')]"),
+		'remarks':fields.text('Remarks'),   
+	
+	}
+	
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute(""" select access_id from ch_foundation_bolt where access_id  = '%s' and header_id = '%s' """ %(entry.access_id.id,entry.header_id.id))
+		data = cr.dictfetchall()			
+		if len(data) > 1:		
+			return False
+		return True	
+		
+	_constraints = [		
+		(_check_values, 'Please Check the same Foundation Bolt not allowed..!!',['Foundation Bolt']),			
+	   ]
+
+ch_foundation_bolt()
 
 
