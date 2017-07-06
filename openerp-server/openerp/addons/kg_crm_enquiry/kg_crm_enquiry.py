@@ -2019,6 +2019,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 					print"fou_valsfou_vals",fou_vals
 				if data_rec.line_ids_a:
 					for item in data_rec.line_ids_a:
+						ch_ms_vals = []
 						#~ if item.flag_applicable == True:
 						moc_id = ''
 						if wo_line_id:
@@ -2036,7 +2037,6 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 										moc_id = ms_line_rec.moc_id.id
 								if ms_rec.line_ids:
-									ch_ms_vals = []
 									for raw in ms_rec.line_ids:
 										ch_ms_vals.append([0, 0,{
 												'product_id': raw.product_id.id,

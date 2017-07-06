@@ -254,6 +254,7 @@ class kg_primecost_view(osv.osv):
 			if data_rec.line_ids_a:
 				for item in data_rec.line_ids_a:
 					moc_id = ''
+					ch_ms_vals = []
 					ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
 					if ms_obj:
 						ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
@@ -265,7 +266,6 @@ class kg_primecost_view(osv.osv):
 									ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 									moc_id = ms_line_rec.moc_id.id
 						if ms_rec.line_ids:
-							ch_ms_vals = []
 							for raw in ms_rec.line_ids:
 								ch_ms_vals.append([0, 0,{
 										'product_id': raw.product_id.id,
