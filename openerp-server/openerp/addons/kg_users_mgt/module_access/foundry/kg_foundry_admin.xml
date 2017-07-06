@@ -796,6 +796,26 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<record id="m_ch_ch_coupling_config" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_coupling_config"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Coupling Mapping</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="m_ch_accessories_config" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_accessories_config"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Accessories Mapping</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
 		<!-- VO Mapping END -->
 		
 		<!-- Mechanical Properties Start -->
