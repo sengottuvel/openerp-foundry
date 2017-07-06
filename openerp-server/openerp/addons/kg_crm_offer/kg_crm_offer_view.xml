@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
-
+	
 	<!-- Form View Start -->
-
+		
 		<record id="t_form_v_crm_offer" model="ir.ui.view">
 			<field name="name">Offer Entry Form</field>
 			<field name="model">kg.crm.offer</field>
@@ -50,6 +50,8 @@
 								<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="del_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="segment" readonly="1"/>	
+								<field name="del_term" attrs="{'invisible':[('segment','!=','exp')]}"/>	
+								<field name="mode_of_dispatch" attrs="{'invisible':[('segment','!=','exp')]}"/>	
 								<field name="flag_data_bank"/>	
 								<field name="location" required="1"/>	
 								<field name="excise_duty"/>	
@@ -99,6 +101,7 @@
 									</div>
 								</div>
 								<field name="o_customer_discount"/>
+								<field name="o_agent_com"/>
 								<field name="o_tax"/>
 								<label for="o_ed" string="ED" class="append_percentage"/>
 								<div>
@@ -128,6 +131,7 @@
 									<field name="freight"/>
 									<field name="insurance"/>
 									<field name="customer_discount"/>
+									<field name="agent_com"/>
 									<field name="tax"/>
 									<field name="supervision_amount" sum="supervision_amount"/>
 									<field name="tot_price" sum="total_price"/>
@@ -177,6 +181,7 @@
 									<field name="freight"/>
 									<field name="insurance"/>
 									<field name="customer_discount"/>
+									<field name="agent_com"/>
 									<field name="tax"/>
 									<field name="supervision_amount" sum="supervision_amount"/>
 									<field name="tot_price" sum="total_price"/>
@@ -225,6 +230,7 @@
 									<field name="freight"/>
 									<field name="insurance"/>
 									<field name="customer_discount"/>
+									<field name="agent_com"/>
 									<field name="tax"/>
 									<field name="supervision_amount" sum="supervision_amount"/>
 									<field name="tot_price" sum="total_price"/>
@@ -269,6 +275,7 @@
 									<field name="freight"/>
 									<field name="insurance"/>
 									<field name="customer_discount"/>
+									<field name="agent_com"/>
 									<field name="tax"/>
 									<field name="net_amount" sum="net_amount"/>
 								</tree>
@@ -339,6 +346,7 @@
 						<group>
 							<field name="dealer_discount"/>
 							<field name="customer_discount"/>
+							<field name="agent_com"/>
 							<field name="special_discount"/>
 							<field name="tax"/>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
@@ -529,6 +537,7 @@
 						<group>
 							<field name="dealer_discount"/>
 							<field name="customer_discount"/>
+							<field name="agent_com"/>
 							<field name="special_discount"/>
 							<field name="tax"/>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
@@ -680,6 +689,7 @@
 						<group>
 							<field name="dealer_discount"/>
 							<field name="customer_discount"/>
+							<field name="agent_com"/>
 							<field name="special_discount"/>
 							<field name="tax"/>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>

@@ -38,7 +38,6 @@ class kg_crm_offer(osv.osv):
 				'access_net_amount': 0.0,
 				'offer_net_amount': 0.0,
 				'supervision_amount': 0.0,
-			
 			}
 			
 			#~ cur = order.customer_id.property_product_pricelist_purchase.currency_id
@@ -155,10 +154,13 @@ class kg_crm_offer(osv.osv):
 		'o_customer_discount': fields.float('Customer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_tax': fields.float('Tax(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_ed': fields.float('ED(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_agent_com': fields.float('Agent Commission(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'off_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Offer Status',readonly=False,states={'wo_created':[('readonly',True)],'wo_released':[('readonly',True)]}),
 		'dummy_flag': fields.boolean('Dummy Flag'),
 		'annexure_1': fields.html('Annexure 1',readonly=True, states={'draft':[('readonly',False)]}),
 		'prj_name': fields.char('Project Name',readonly=True, states={'draft':[('readonly',False)]}),
+		'del_term': fields.selection([('ex_works','Ex-Works'),('fob','FOB'),('cfr','CFR'),('cif','CIF'),('cpt','CPT')],'Delivery Term',readonly=True, states={'draft':[('readonly',False)]}),
+		'mode_of_dispatch': fields.selection([('sea','Sea Worthy'),('air','Air Worthy')],'Mode Of Dispatch',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		# Pump Offer Fields
 		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -439,6 +441,7 @@ class kg_crm_offer(osv.osv):
 									  'freight':entry.o_freight,
 									  'freight_in_ex':entry.o_freight_in_ex,
 									  'insurance':entry.o_insurance,
+									  'agent_com':entry.o_agent_com,
 									  'insurance_in_ex':entry.o_insurance_in_ex,
 									  'ed_in_ex':entry.o_ed_in_ex,
 									  'customer_discount':entry.o_customer_discount,
@@ -2305,6 +2308,7 @@ class ch_pump_offer(osv.osv):
 		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'ed_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'ED'),
 		'ed': fields.float('ED(%)'),
+		'agent_com': fields.float('Agent Commission(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'works_value': fields.float('Works Value'),
 		'works_value_flag': fields.boolean('Works Value Flag'),
@@ -2539,6 +2543,7 @@ class ch_supervision_offer(osv.osv):
 		'freight': fields.float('Freight(%)'),
 		'insurance': fields.float('Insurance(%)'),
 		'ed': fields.float('ED(%)'),
+		'agent_com': fields.float('Agent Commission(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'wo_line_id': fields.many2one('ch.work.order.details','WO Line'),
 		#~ 'total_price': fields.float('Total Price(%)'),
@@ -2672,6 +2677,7 @@ class ch_spare_offer(osv.osv):
 		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'ed_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'ED'),
 		'ed': fields.float('ED(%)'),
+		'agent_com': fields.float('Agent Commission(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'works_value': fields.float('Works Value'),
 		'works_value_flag': fields.boolean('Works Value Flag'),
@@ -2816,6 +2822,7 @@ class ch_accessories_offer(osv.osv):
 		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'ed_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'ED'),
 		'ed': fields.float('ED(%)'),
+		'agent_com': fields.float('Agent Commission(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'works_value': fields.float('Works Value'),
 		'works_value_flag': fields.boolean('Works Value Flag'),
