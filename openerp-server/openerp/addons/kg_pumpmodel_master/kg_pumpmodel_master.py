@@ -61,6 +61,8 @@ class kg_pumpmodel_master(osv.osv):
 		'line_ids':fields.one2many('ch.vo.mapping', 'header_id', "VO Mapping"),
 		'line_ids_a':fields.one2many('ch.alpha.value', 'header_id', "Alpha Value"),
 		'line_ids_b':fields.one2many('ch.delivery.pipe', 'header_id', "Delivery Pipe"),
+		'line_ids_c':fields.one2many('ch.coupling.config', 'header_id', "Coupling Configuration"),
+		'line_ids_d':fields.one2many('ch.accessories.config', 'header_id', "Accessories Configuration"),
 		
 		'alias_name': fields.char('Alias Name', size=128),
 		'bom': fields.char('BOM', size=128),

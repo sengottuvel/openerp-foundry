@@ -356,6 +356,97 @@ class ch_vo_mapping(osv.osv):
 	
 ch_vo_mapping()
 
+
+class ch_coupling_config(osv.osv):
+	
+	_name = "ch.coupling.config"
+	_description = "Coupling Configuration"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.pumpmodel.master', 'Coupling Configuration', required=True, ondelete='cascade'),	
+		'primemover_id': fields.many2one('kg.primemover.master','Prime Mover',required=True),
+		'power_kw': fields.float('Motor Power',readonly=True),
+		'speed': fields.integer('Motor Speed',readonly=True),
+		'brand_id': fields.many2one('kg.brand.master','Coupling Brand',required=True,domain="[('state','=','approved')]"),
+		'coupling_type_id': fields.many2one('kg.coupling.type','Coupling type ',required=True),
+		'coupling_ser_factor': fields.selection([('1_0','1.0'),('1_2','1.2'),('1_5','1.5'),('2_0','2.0')],'Coupling service factor',required=True),			
+		'coupling_access_id': fields.many2one('kg.accessories.master','Coupling',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','coupling')]"),
+		
+		'remarks':fields.text('Remarks'),	
+		
+	}
+	
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute(""" select primemover_id from ch_coupling_config where primemover_id  = '%s' and power_kw = '%s' and speed = '%s' and brand_id = '%s' and coupling_type_id = '%s' and coupling_ser_factor = '%s' and coupling_access_id = '%s' and header_id = '%s' """ %
+		(entry.primemover_id.id,entry.power_kw,entry.speed,entry.brand_id.id,entry.coupling_type_id.id,entry.coupling_ser_factor,entry.coupling_access_id.id,entry.header_id.id))
+		data = cr.dictfetchall()			
+		if len(data) > 1:		
+			return False
+		return True	
+		
+	_constraints = [		
+		(_check_values, 'Please Check the same Motor Power and Motor Speed not allowed..!!',['Motor Power and Motor Speed']),			
+	   ]
+	
+	def onchange_primee(self, cr, uid, ids, primemover_id, context=None):
+		value = {'power_kw': '','speed':''}
+		if primemover_id:
+			primemover_rec = self.pool.get('kg.primemover.master').browse(cr, uid, primemover_id, context=context)
+			value = {'power_kw': primemover_rec.power_kw,'speed': primemover_rec.speed}
+		return {'value': value}
+	
+ch_coupling_config()
+
+
+
+class ch_accessories_config(osv.osv):
+	
+	_name = "ch.accessories.config"
+	_description = "Accessories Configuration"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.pumpmodel.master', 'Coupling Configuration', required=True, ondelete='cascade'),	
+		'primemover_id': fields.many2one('kg.primemover.master','Prime Mover',required=True),
+		'power_kw': fields.float('Motor Power',readonly=True),
+		'speed': fields.integer('Motor Speed',readonly=True),
+		'framesize': fields.char('Motor Frame size',readonly=True),
+		'pump_speed': fields.integer('Pump Speed',required=True),
+		'pump_pulley_access_id': fields.many2one('kg.accessories.master','Pump Pulley',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','pump_pulley')]"),
+		'motor_pulley_access_id': fields.many2one('kg.accessories.master','Motor Pulley',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','motor_pulley')]"),
+		'slide_rail_access_id': fields.many2one('kg.accessories.master','Slide Rail',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','slide_rail')]"),
+		'belt_access_id': fields.many2one('kg.accessories.master','Belt',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','belt')]"),
+		'belt_guard_access_id': fields.many2one('kg.accessories.master','Belt Guard',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','belt_guard')]"),
+		'remarks':fields.text('Remarks'),	
+		
+	}
+	
+	#~ def _check_values(self, cr, uid, ids, context=None):
+		#~ entry = self.browse(cr,uid,ids[0])
+		#~ cr.execute(""" select primemover_id from ch_coupling_config where primemover_id  = '%s' and power_kw = '%s' and speed = '%s' and brand_id = '%s' and coupling_type_id = '%s' and coupling_ser_factor = '%s' and product_id = '%s' and header_id = '%s' """ %
+		#~ (entry.primemover_id.id,entry.power_kw,entry.speed,entry.brand_id.id,entry.coupling_type_id.id,entry.coupling_ser_factor,entry.product_id.id,entry.header_id.id))
+		#~ data = cr.dictfetchall()			
+		#~ if len(data) > 1:		
+			#~ return False
+		#~ return True	
+		
+	#~ _constraints = [		
+		#~ (_check_values, 'Please Check the same Motor Power and Motor Speed not allowed..!!',['Motor Power and Motor Speed']),			
+	   #~ ]
+	
+	def onchange_primee(self, cr, uid, ids, primemover_id, context=None):
+		value = {'power_kw': '','speed':'','framesize':''}
+		if primemover_id:
+			primemover_rec = self.pool.get('kg.primemover.master').browse(cr, uid, primemover_id, context=context)
+			value = {'power_kw': primemover_rec.power_kw,'speed': primemover_rec.speed,'framesize':primemover_rec.framesize}
+		return {'value': value}
+	
+ch_accessories_config()
+
+
+
 class kg_pumpmodel_master_inherit(osv.osv):
 	
 	_name = "kg.pumpmodel.master"
@@ -363,7 +454,9 @@ class kg_pumpmodel_master_inherit(osv.osv):
 	
 	_columns = {
 			
-		'line_ids':fields.one2many('ch.vo.mapping', 'header_id', "VO Mapping"),		
+		'line_ids':fields.one2many('ch.vo.mapping', 'header_id', "VO Mapping"),
+		'line_ids_c':fields.one2many('ch.coupling.config', 'header_id', "Coupling Configuration"),		
+		'line_ids_d':fields.one2many('ch.accessories.config', 'header_id', "Accessories Configuration"),		
 		
 		
 	}

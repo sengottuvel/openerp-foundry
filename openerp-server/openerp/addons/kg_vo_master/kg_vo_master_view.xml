@@ -288,7 +288,39 @@
 								<field name="remarks" widget="char"/>							
 							</tree>
 						</field>	
-					</page>		
+					</page>	
+					<page string="Coupling Configuration">	
+							<field name="line_ids_c" nolabel="1" >
+								<tree string="Coupling Configuration Tree" editable="top" >									
+									<field name="primemover_id" on_change="onchange_primee(primemover_id)" />										
+									<field name="power_kw" />
+									<field name="speed" />										
+									<field name="brand_id" />										
+									<field name="coupling_type_id" />										
+									<field name="coupling_ser_factor" />										
+									<field name="coupling_access_id" />										
+									<field name="remarks" widget="char"/>														
+								</tree>
+							</field>																								
+						</page>	
+						
+					<page string="Accessories Configuration">	
+							<field name="line_ids_d" nolabel="1" >
+								<tree string="Accessories Configuration Tree" editable="top" >									
+									<field name="primemover_id" on_change="onchange_primee(primemover_id)" />										
+									<field name="power_kw" />
+									<field name="speed" />										
+									<field name="framesize" />										
+									<field name="pump_speed" />										
+									<field name="pump_pulley_access_id" />										
+									<field name="motor_pulley_access_id" />										
+									<field name="slide_rail_access_id" />										
+									<field name="belt_access_id" />										
+									<field name="belt_guard_access_id" />										
+									<field name="remarks" widget="char"/>														
+								</tree>
+							</field>																								
+						</page>	
 				</xpath>
 			</field>
 		</record>

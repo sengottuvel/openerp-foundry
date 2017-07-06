@@ -96,7 +96,8 @@
 									<field name="remarks" widget="char"/>														
 								</tree>
 							</field>																								
-						</page>
+						</page>			
+						
 						<page string="Entry Info">
 								<group>
 									<field name="company_id"/>
