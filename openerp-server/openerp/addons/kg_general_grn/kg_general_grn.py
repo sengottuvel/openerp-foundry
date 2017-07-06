@@ -366,7 +366,7 @@ class kg_general_grn(osv.osv):
 			
 			for line in grn_entry.grn_line:
 				if line.grn_qty > line.recvd_qty:
-					raise osv.except_osv(_('Warning!'),_('Accepted qty should not be greater than Received qty!'))
+					raise osv.except_osv(_('Warning!'),_('%s Accepted qty should not be greater than Received qty!'%(line.product_id.name)))
 				
 				# Depreciation creation process start
 				if line.product_id.is_depreciation == True:
