@@ -1167,14 +1167,14 @@
 		
 	<!-- Karthikeyan Added Fettling Process END-->
 	
-	<record id="t_foundry_ch_wo_spare_bom" model="ir.model.access">
+		<record id="t_foundry_ch_wo_spare_bom" model="ir.model.access">
 			<field name="model_id" ref="kg_work_order.model_ch_wo_spare_bom"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">WO Spare bom</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<record id="t_foundry_ch_wo_spare_foundry" model="ir.model.access">
@@ -1184,7 +1184,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<record id="t_foundry_ch_wo_spare_ms" model="ir.model.access">
@@ -1194,7 +1194,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<record id="t_foundry_ch_wo_spare_bot" model="ir.model.access">
@@ -1204,7 +1204,17 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_ch_wo_ms_raw" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_ms_raw"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">MS RAW</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
     </data>
