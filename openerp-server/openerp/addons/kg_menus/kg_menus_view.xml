@@ -267,7 +267,8 @@
 				
 				<!-- Issue Register Report-->
 				<menuitem name="Issue Register" parent="rpm_warehouse_reports" action="kg_reports.action_dep_issue_register11" id="ram_issue_register_reports" sequence="2"/>
-				
+			<!-- Warehouse Reports Menu -->
+            <menuitem name="CRM" id="rpm_crm_reports" parent = "rpm_reports" sequence="4"/>
 		
 		<!-- Scheduler Menu -->
 		<menuitem id="spm_scheduler" name="Scheduler" sequence="2" />
