@@ -47,7 +47,6 @@
       <lineStyle kind="LINEABOVE" colorName="#000000" start="6,0" stop="6,0"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="6,-1" stop="6,-1"/>
 
-
       <lineStyle kind="LINEBEFORE" colorName="#000000" start="7,0" stop="7,-1"/>
       <lineStyle kind="LINEAFTER" colorName="#000000" start="7,0" stop="7,-1"/>
       <lineStyle kind="LINEABOVE" colorName="#000000" start="7,0" stop="7,0"/>
@@ -72,8 +71,7 @@
       <lineStyle kind="LINEABOVE" colorName="#000000" start="11,0" stop="11,0"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="11,-1" stop="11,-1"/>
               
-      
-    </blockTableStyle>     
+    </blockTableStyle>
     <initialize>
       <paraStyle name="all" alignment="justify"/>
     </initialize>
@@ -116,65 +114,69 @@
   <story>
  <pto>
 	
-	
 	<para style="terp_header_Centre">[[ (data['form']['company']) ]]</para>
     <para style="terp_header_Centre">[[ (data['form']['location']) ]]  Closing Stock As On : [[ (data['form']['date_from_ind']) ]]</para>
     <para style="terp_header_Centre">Product Category : [[ (data['form']['category']) or removeParentNode('para') ]]</para>
-
+	
     <pto_header>
-    <blockTable colWidths="35,195,115,115,115" repeatRows="1" style="Table4">
-      <tr>
-        
-        <td>          <para style="terp_61t">S.No. </para></td>
-        <td>          <para style="terp_61t">Item Name </para></td>
-        <td>          <para style="terp_61t">UOM</para></td>
-        <td>          <para style="terp_61t">Closing Qty</para></td>
-        <td>          <para style="terp_61t">Closing Value</para></td>       
-        
-      </tr>
+	
+    <blockTable colWidths="30,160,60,55,50,60,50,60,50" repeatRows="1" style="Table4">
+		<tr>
+			<td>          <para style="terp_61t">S.No.</para></td>
+			<td>          <para style="terp_61t">Item Name</para></td>
+			<td>          <para style="terp_61t">Brand</para></td>
+			<td>          <para style="terp_61t">MOC</para></td>
+			<td>          <para style="terp_61t">PO UOM</para></td>
+			<td>          <para style="terp_61t">PO UOM Available Qty</para></td>
+			<td>          <para style="terp_61t">Store UOM</para></td>
+			<td>          <para style="terp_61t">Store UOM Available Qty</para></td>
+			<td>          <para style="terp_61t">Closing Value</para></td>       
+		</tr>
     </blockTable>
    </pto_header>
-
-   <blockTable colWidths="35,195,115,115,115" repeatRows="1" style="Table4">
-      <tr>
-		  
-        <td>          <para style="terp_61t">S.No. </para></td>
-        <td>          <para style="terp_61t">Item Name </para></td>
-        <td>          <para style="terp_61t">UOM</para></td>
-        <td>          <para style="terp_61t">Closing Qty</para></td>
-        <td>          <para style="terp_61t">Closing Value</para></td> 
-
-              
-      </tr>
+	
+   <blockTable colWidths="30,160,60,55,50,60,50,60,50" repeatRows="1" style="Table4">
+		<tr>
+			<td>          <para style="terp_61t">S.No.</para></td>
+			<td>          <para style="terp_61t">Item Name</para></td>
+			<td>          <para style="terp_61t">Brand</para></td>
+			<td>          <para style="terp_61t">MOC</para></td>
+			<td>          <para style="terp_61t">PO UOM</para></td>
+			<td>          <para style="terp_61t">PO UOM Available Qty</para></td>
+			<td>          <para style="terp_61t">Store UOM</para></td>
+			<td>          <para style="terp_61t">Store UOM Available Qty</para></td>
+			<td>          <para style="terp_61t">Closing Value</para></td> 
+		</tr>
     </blockTable>
-
+	
 	<para> <seqReset id="prod_serial_no"/> </para>
-
+	
     <section>
     <para style="terp_default_8">[[ repeatIn(get_data(data['form']), 'x') ]]</para>
 
-     <blockTable colWidths="35,195,115,115,115" repeatRows="1" style="Table4">
-      <tr>
-        <td>          <para style="terp_61"> <seq id="prod_serial_no"/> </para>        </td>
-        <td>          <para style="terp_left_61">[[ x['product_name'] ]]</para>        </td>
-        <td>          <para style="terp_left_61">[[ x ['uom'] ]]</para>        </td>
-        <td>          <para style="terp_left_61">[[ x['close_qty'] ]]</para>        </td>
-        <td>          <para style="terp_left_61">[[ locale.format('%.2f', x['closing_value']) ]]</para>        </td>
-        
-      </tr>
+	<blockTable colWidths="30,160,60,55,50,60,50,60,50" repeatRows="1" style="Table4">
+		<tr>
+			<td>          <para style="terp_61"> <seq id="prod_serial_no"/> </para>        </td>
+			<td>          <para style="terp_left_61">[[ x['product_name'] ]]</para>        </td>
+			<td>          <para style="terp_left_61">[[ x['brand'] ]]</para>        </td>
+			<td>          <para style="terp_left_61">[[ x['moc'] ]]</para>        </td>
+			<td>          <para style="terp_left_61">[[ x['po_uom'] ]]</para>        </td>
+			<td>          <para style="terp_left_61">[[ x['po_uom_close_qty'] ]]</para>        </td>
+			<td>          <para style="terp_left_61">[[ x ['uom'] ]]</para>        </td>
+			<td>          <para style="terp_left_61">[[ x['close_qty'] ]]</para>        </td>
+			<td>          <para style="terp_left_61">[[ locale.format('%.2f', x['closing_value']) ]]</para>        </td>
+		</tr>
     </blockTable>    
     </section>
     
-    <blockTable colWidths="460,115" repeatRows="1" style="Table4">
+    <blockTable colWidths="525,50" repeatRows="1" style="Table4">
       <tr>
-        
         <td>
          <para style="terp_61t">Grand Total(RS)</para>
         </td>
         <td>
          <para style="terp_left_61_bold">[[ locale.format('%.2f', x['gr_total']) ]]</para>
         </td>
-       
       </tr>
     </blockTable>
     
