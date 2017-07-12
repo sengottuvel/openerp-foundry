@@ -30,25 +30,25 @@ class jasper_workorder_report_print(JasperDataParser.JasperDataParser):
 	def generate_parameters(self, cr, uid, ids, data, context):
 		val={}
 		
-		print"data...........",data			
-		wiz_id = data['form']['id']									
-		printed = data['form']['printed_by'][1]		
+		#~ print"data...........",data			
+		#~ wiz_id = data['form']['id']									
+		printed = data['form']['user_id'][1]		
 		p_user= str(printed)		
-		printed_date = data['form']['print_date']		
-		date_print =  printed_date.encode('utf-8')		
-		d1 = datetime.strptime(date_print,'%Y-%m-%d %H:%M:%S')	
-		p_date = d1.strftime( '%d-%m-%Y %H:%M:%S')			
-			
 		val['user_id'] = uid		
-		val['printed_by'] = str(printed)	
-		val['print_date'] = p_date		
-		val['wiz_id'] = wiz_id	
+		val['printed_by'] = p_user
+		if data['form']['attachment']:
+			val['attach_1'] = 'attachment_1.png'
+		else:
+			val['attach_1'] = ''
+		if data['form']['attachment_1']:
+			val['attach_2'] = 'attachment_2.png'
+		else:
+			val['attach_2'] = ''
+		print "data['form']['wo_id'][0]]",data['form']['wo_id'][0]
+		## Getting Work Order ids ###
 		
-	
-		
-		print"val['wiz_id']val['wiz_id']",val['wiz_id']	
+		val['wo_line_ids'] = data['form']['wo_id'][0]
 				
-					
 		return val
 
 	def generate_records(self, cr, uid, ids, data, context):		

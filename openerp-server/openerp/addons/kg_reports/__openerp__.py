@@ -26,6 +26,7 @@
 		'warehouse/wizard/grn_register_report_wizard.xml',
 		'warehouse/wizard/dep_issue_register_wizard.xml',
 		'warehouse/wizard/kg_grn_register_wiz_view.xml',
+		'crm/kg_wo_copy_view.xml',
 		
 		'hrms/excel/kg_excel_worker_ctc_report_view.xml',
 		'hrms/excel/kg_excel_pf_report_view.xml',

@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	<!-- Form View Start -->
+
+		<record id="r_form_v_wo_copy" model="ir.ui.view">
+			<field name="name">WO Copy Entry Form</field>
+			<field name="model">kg.wo.copy</field>
+			<field name="arch" type="xml">
+				<form string="WO Copy" version="7.0">
+					<header>
+						<button name="print_wo" type="object" string="Print"  class="oe_highlight" />
+					</header>
+						<group>
+							<group>
+								<field name="name" invisible="1"/>
+								<field name="report_template"/>
+								<field name="wo_id" on_change="onchange_wo(wo_id,report_template)" attrs="{'invisible': [('report_template','=',False)]}"/>
+								<field name="enq_id" readonly="1" attrs="{'invisible': [('wo_id','=',False)]}"/>
+								<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							</group>
+							<group>
+								<field name="entry_date"/>
+								<field name="attachment"/> 	
+								<field name="attachment_1"/> 
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Pump/Spare Details">
+								<group colspan="6" col="6">
+									<field name="line_ids" colspan="4" nolabel="1" mode="tree">
+										<tree string="Items Details" delete="false" create="false">
+											<field name="pump_id" readonly="1"/>
+											<field name="alias_name"/>
+										</tree>	
+										<form string="Items Details">
+											<group string="Item Details" colspan="4">
+												<group> 
+												<field name="report_template" readonly="1" invisible="1"/>
+												<field name="pump_model_type" readonly="1" invisible="1"/>
+													<div name="options"> <field name="equipment_no_flag" invisible="1"/> <label for="equipment_no"/> </div>
+													<div name="options" position="inside"> <field name="equipment_no" readonly="1"/> </div>
+												</group>											
+												<group>
+													<div name="options"> <field name="description_flag" invisible="1"/> <label for="description"/> </div>
+													<div name="options" position="inside"> <field name="description" readonly="1"/> </div>
+													<div name="options"> <field name="wo_line_id_flag" invisible="1"/> <label for="wo_line_id_flag"/> </div>
+													<div name="options" position="inside"> <field name="wo_line_id" readonly="1"/> </div>
+												</group>
+											</group>
+											<group string="Liquid Specifications" colspan="4">
+											<group>
+												<div name="options"> <field name="fluid_id_flag" invisible="1"/> <label for="fluid_id"/> </div>
+												<div name="options" position="inside"> <field name="fluid_id" readonly="1"/> </div>
+												<div name="options"> <field name="solid_concen_flag"/> <label for="solid_concen"/> </div>
+												<div name="options" position="inside"> <field name="solid_concen" readonly="1" /> </div>
+												<div name="options"> <field name="viscosity_flag" invisible="1"/> <label for="viscosity"/> </div>
+												<div name="options" position="inside"> <field name="viscosity" readonly="1" /> </div>
+												<div name="options"> <field name="npsh_avl_flag"/> <label for="npsh_avl"/> </div>
+												<div name="options" position="inside"> <field name="npsh_avl" readonly="1" /> </div>
+												<div name="options"> <field name="capacity_in_liquid_flag" invisible="1"/> <label for="capacity_in_liquid"/> </div>
+												<div name="options" position="inside"> <field name="capacity_in_liquid" readonly="1" /> </div>
+												<div name="options"> <field name="consistency_flag"/> <label for="consistency"/> </div>
+												<div name="options" position="inside"> <field name="consistency" readonly="1" /> </div>
+												<div name="options"> <field name="suction_condition_flag" attrs="{'invisible':[('report_template','not in',('3','4'))]}"/> <label for="suction_condition" attrs="{'invisible':[('report_template','not in',('3','4'))]}"/> </div>
+												<div name="options" position="inside"> <field name="suction_condition" attrs="{'invisible':[('report_template','not in',('3','4'))]}" readonly="1" /> </div>
+											</group>											
+											<group>
+												<div name="options"> <field name="temperature_in_c_flag" invisible="1"/> <label for="temperature_in_c"/> </div>
+												<div name="options" position="inside"> <field name="temperature_in_c" readonly="1"/> </div>
+												<div name="options"> <field name="solid_concen_vol_flag"/> <label for="solid_concen_vol"/> </div>
+												<div name="options" position="inside"> <field name="solid_concen_vol" readonly="1"/> </div>
+												<div name="options"> <field name="specific_gravity_flag" invisible="1"/> <label for="specific_gravity"/> </div>
+												<div name="options" position="inside"> <field name="specific_gravity" readonly="1"/> </div>
+												<div name="options"> <field name="max_particle_size_mm_flag"/> <label for="max_particle_size_mm"/> </div>
+												<div name="options" position="inside"> <field name="max_particle_size_mm" readonly="1"/> </div>
+												<div name="options"> <field name="density_flag"/> <label for="density"/> </div>
+												<div name="options" position="inside"> <field name="density" readonly="1"/> </div>
+												<div name="options"> <field name="head_in_liquid_flag" invisible="1"/> <label for="head_in_liquid"/> </div>
+												<div name="options" position="inside"> <field name="head_in_liquid" readonly="1"/> </div>
+											</group>
+										</group>
+										<group>
+											<field name="liquid_flag" nolabel="0" invisible="1"/>
+											<field name="line_ids_liquid" colspan="4" nolabel="1" widget="one2many_selectable">
+												<tree string="Liquid History" editable="bootom">
+													<field name="label_val" required="1" nolabel="1"/>
+													<field name="content" required="1" nolabel="1"/>
+												</tree>
+											</field>
+										</group>
+										<group string="Duty Parameters" colspan="4">
+											<group>
+												<div name="options"> <field name="capacity_in_flag" invisible="1"/> <label for="capacity_in"/> </div>
+												<div name="options" position="inside"> <field name="capacity_in" readonly="1"/> </div>
+												<div name="options"> <field name="suction_pressure_flag"/> <label for="suction_pressure"/> </div>
+												<div name="options" position="inside"> <field name="suction_pressure" readonly="1"/> </div>
+												<div name="options"> <field name="slurry_correction_in_flag"/> <label for="slurry_correction_in"/> </div>
+												<div name="options" position="inside"> <field name="slurry_correction_in" readonly="1"/> </div>
+												<div name="options"> <field name="suction_pressure_kg_flag"/> <label for="suction_pressure_kg"/> </div>
+												<div name="options" position="inside"> <field name="suction_pressure_kg" readonly="1"/> </div>
+												<div name="options"> <field name="viscosity_crt_factor_flag"/> <label for="viscosity_crt_factor"/> </div>
+												<div name="options" position="inside"> <field name="viscosity_crt_factor" readonly="1"/> </div>
+											</group>
+											<group>
+												<div name="options"> <field name="head_in_flag" invisible="1"/> <label for="head_in"/> </div>
+												<div name="options" position="inside"> <field name="head_in" readonly="1"/> </div>
+												<div name="options"> <field name="differential_pressure_kg_flag"/> <label for="differential_pressure_kg"/> </div>
+												<div name="options" position="inside"> <field name="differential_pressure_kg" readonly="1"/> </div>
+												<div name="options"> <field name="discharge_pressure_kg_flag"/> <label for="discharge_pressure_kg"/> </div>
+												<div name="options" position="inside"> <field name="discharge_pressure_kg" readonly="1"/> </div>
+												<div name="options"> <field name="temperature_flag"/> <label for="temperature"/> </div>
+												<div name="options" position="inside"> <field name="temperature" readonly="1"/> </div>
+											</group>
+										</group>
+										<group colspan="4">
+											<field name="duty_flag" nolabel="0" invisible="1"/>
+											<field name="line_ids_duty" colspan="4" nolabel="1" widget="one2many_selectable">
+												<tree string="Duty History" editable="bootom">
+													<field name="label_val" required="1" nolabel="1"/>
+													<field name="content" required="1" nolabel="1"/>
+												</tree>
+											</field>
+										</group>
+										<group string="Pump Specification">
+											<group>
+												<div name="options"> <field name="pump_id_flag" invisible="1"/> <label for="pump_id"/> </div>
+												<div name="options" position="inside"> <field name="pump_id" readonly="1"/> </div>
+												<div name="options"> <field name="alias_name_flag" invisible="1"/> <label for="alias_name"/> </div>
+												<div name="options" position="inside"> <field name="alias_name" readonly="1"/> </div>
+												<div name="options"> <field name="qty_flag" invisible="1"/> <label for="qty"/> </div>
+												<div name="options" position="inside"> <field name="qty" readonly="1"/> </div>
+												<div name="options"> <field name="pumpseries_id_flag"/> <label for="pumpseries_id"/> </div>
+												<div name="options" position="inside"> <field name="pumpseries_id" readonly="1"/> </div>
+												<div name="options"> <field name="qap_plan_id_flag"/> <label for="qap_plan_id"/> </div>
+												<div name="options" position="inside"> <field name="qap_plan_id" readonly="1"/> </div>
+												<div name="options"> <field name="ph_value_flag" attrs="{'invisible':[('report_template','not in',('2'))]}"/> <label for="ph_value" attrs="{'invisible':[('report_template','not in',('2'))]}"/> </div>
+												<div name="options" position="inside"> <field name="ph_value" attrs="{'invisible':[('report_template','not in',('2'))]}" readonly="1"/> </div>
+												<div name="options"> <field name="motor_power_flag" attrs="{'invisible':[('pump_model_type','!=','vertical')]}"/> <label for="motor_power" attrs="{'invisible':[('pump_model_type','!=','vertical')]}"/> </div>
+												<div name="options" position="inside"> <field name="motor_power" attrs="{'invisible':[('pump_model_type','!=','vertical')]}" readonly="1"/> </div>
+												<div name="options"> <field name="del_pipe_size_flag" invisible="1"/> <label for="del_pipe_size"/> </div>
+												<div name="options" position="inside"> <field name="del_pipe_size" readonly="1"/> </div>
+												<div name="options"> <field name="sump_depth_flag" attrs="{'invisible':[('report_template','not in',('3'))]}"/> <label for="sump_depth" attrs="{'invisible':[('report_template','not in',('3'))]}"/> </div>
+												<div name="options" position="inside"> <field name="sump_depth" attrs="{'invisible':[('report_template','not in',('3'))]}" readonly="1"/> </div>
+												<div name="options"> <field name="pre_suppliy_ref_flag"/> <label for="pre_suppliy_ref"/> </div>
+												<div name="options" position="inside"> <field name="pre_suppliy_ref" readonly="1"/> </div>
+												<div name="options"> <field name="shaft_sealing_flag" invisible="1"/> <label for="shaft_sealing"/> </div>
+												<div name="options" position="inside"> <field name="shaft_sealing" readonly="1"/> </div>
+												<div name="options"> <field name="scope_of_supply_flag"/> <label for="scope_of_supply"/> </div>
+												<div name="options" position="inside"> <field name="scope_of_supply" readonly="1"/> </div>
+												<div name="options"> <field name="number_of_stages_flag"/> <label for="number_of_stages"/> </div>
+												<div name="options" position="inside"> <field name="number_of_stages" readonly="1"/> </div>
+												<div name="options"> <field name="impeller_type_flag"/> <label for="impeller_type"/> </div>
+												<div name="options" position="inside"> <field name="impeller_type" readonly="1"/> </div>
+												<div name="options"> <field name="impeller_dia_min_flag"/> <label for="impeller_dia_min"/> </div>
+												<div name="options" position="inside"> <field name="impeller_dia_min" readonly="1"/> </div>
+												<div name="options"> <field name="size_suctionx_flag"/> <label for="size_suctionx"/> </div>
+												<div name="options" position="inside"> <field name="size_suctionx" readonly="1"/> </div>
+												<div name="options"> <field name="flange_type_flag"/> <label for="flange_type"/> </div>
+												<div name="options" position="inside"> <field name="flange_type" readonly="1"/> </div>
+												<div name="options"> <field name="flange_standard_flag" invisible="1"/> <label for="flange_standard"/> </div>
+												<div name="options" position="inside"> <field name="flange_standard" readonly="1"/> </div>
+												<div name="options"> <field name="efficiency_in_flag" invisible="1"/> <label for="efficiency_in"/> </div>
+												<div name="options" position="inside"> <field name="efficiency_in" readonly="1"/> </div>
+												<div name="options"> <field name="npsh_r_m_flag" attrs="{'invisible':[('report_template','not in',('1','3'))]}"/> <label for="npsh_r_m" attrs="{'invisible':[('report_template','not in',('1','3'))]}"/> </div>
+												<div name="options" position="inside"> <field name="npsh_r_m" attrs="{'invisible':[('report_template','not in',('1','3'))]}" readonly="1"/> </div>
+												<div name="options"> <field name="best_efficiency_flag"/> <label for="best_efficiency"/> </div>
+												<div name="options" position="inside"> <field name="best_efficiency" readonly="1"/> </div>
+												<div name="options"> <field name="bkw_water_flag" invisible="1"/> <label for="bkw_water"/> </div>
+												<div name="options" position="inside"> <field name="bkw_water" readonly="1"/> </div>
+												<div name="options"> <field name="bkw_liq_flag" invisible="1"/> <label for="bkw_liq"/> </div>
+												<div name="options" position="inside"> <field name="bkw_liq" readonly="1"/> </div>
+												<div name="options"> <field name="impeller_dia_rated_flag" attrs="{'invisible':[('report_template','not in',('2'))]}"/> <label for="impeller_dia_rated" attrs="{'invisible':[('report_template','not in',('2'))]}"/> </div>
+												<div name="options" position="inside"> <field name="impeller_dia_rated" attrs="{'invisible':[('report_template','not in',('2'))]}" readonly="1"/> </div>
+												<div name="options"> <field name="impeller_tip_speed_flag"/> <label for="impeller_tip_speed"/> </div>
+												<div name="options" position="inside"> <field name="impeller_tip_speed" readonly="1"/> </div>
+												<div name="options"> <field name="hydrostatic_test_pressure_flag"/> <label for="hydrostatic_test_pressure"/> </div>
+												<div name="options" position="inside"> <field name="hydrostatic_test_pressure" readonly="1"/> </div>
+												<div name="options"> <field name="setting_height_flag" attrs="{'invisible':[('report_template','not in',('3','4'))]}"/> <label for="setting_height" attrs="{'invisible':[('report_template','not in',('3','4'))]}"/> </div>
+												<div name="options" position="inside"> <field name="setting_height" attrs="{'invisible':[('report_template','not in',('3','4'))]}" readonly="1"/> </div>
+												<div name="options"> <field name="full_load_rpm_flag" invisible="1"/> <label for="full_load_rpm"/> </div>
+												<div name="options" position="inside"> <field name="full_load_rpm" readonly="1"/> </div>
+												<div name="options"> <field name="insulation_flag"/> <label for="insulation"/> </div>
+												<div name="options" position="inside"> <field name="insulation" readonly="1"/> </div>
+												<div name="options"> <field name="protection_flag"/> <label for="protection"/> </div>
+												<div name="options" position="inside"> <field name="protection" readonly="1"/> </div>
+												<div name="options"> <field name="voltage_flag"/> <label for="voltage"/> </div>
+												<div name="options" position="inside"> <field name="voltage" readonly="1"/> </div>
+												<div name="options"> <field name="phase_flag"/> <label for="phase"/> </div>
+												<div name="options" position="inside"> <field name="phase" readonly="1"/> </div>
+												<div name="options"> <field name="engine_make_flag"/> <label for="engine_make"/> </div>
+												<div name="options" position="inside"> <field name="engine_make" readonly="1"/> </div>
+												<div name="options"> <field name="engine_type_flag"/> <label for="engine_type_flag"/> </div>
+												<div name="options" position="inside"> <field name="engine_type" readonly="1"/> </div>
+												<div name="options"> <field name="belt_loss_in_kw_flag"/> <label for="belt_loss_in_kw"/> </div>
+												<div name="options" position="inside"> <field name="belt_loss_in_kw" readonly="1"/> </div>
+												<div name="options"> <field name="frequency_flag"/> <label for="frequency"/> </div>
+												<div name="options" position="inside"> <field name="frequency" readonly="1"/> </div>
+												<div name="options"> <field name="motor_kw_flag" invisible="1"/> <label for="motor_kw"/> </div>
+												<div name="options" position="inside"> <field name="motor_kw" readonly="1"/> </div>
+												<div name="options"> <field name="motor_margin_flag"/> <label for="motor_margin"/> </div>
+												<div name="options" position="inside"> <field name="motor_margin" readonly="1"/> </div>
+												<div name="options"> <field name="speed_in_motor_flag"/> <label for="speed_in_motor"/> </div>
+												<div name="options" position="inside"> <field name="speed_in_motor" readonly="1"/> </div>
+												<div name="options"> <field name="engine_rpm_flag"/> <label for="engine_rpm"/> </div>
+												<div name="options" position="inside"> <field name="engine_rpm" readonly="1"/> </div>
+												<div name="options"> <field name="end_of_the_curve_flag"/> <label for="end_of_the_curve"/> </div>
+												<div name="options" position="inside"> <field name="end_of_the_curve" readonly="1"/> </div>
+												<div name="options"> <field name="critical_speed_flag"/> <label for="critical_speed"/> </div>
+												<div name="options" position="inside"> <field name="critical_speed" readonly="1"/> </div>
+												<div name="options"> <field name="engine_kw_flag"/> <label for="engine_kw"/> </div>
+												<div name="options" position="inside"> <field name="engine_kw" readonly="1"/> </div>
+												<div name="options"> <field name="gear_box_loss_rated_flag"/> <label for="gear_box_loss_rated"/> </div>
+												<div name="options" position="inside"> <field name="gear_box_loss_rated" readonly="1"/> </div>
+												<div name="options"> <field name="fluid_coupling_loss_rated_flag"/> <label for="fluid_coupling_loss_rated"/> </div>
+												<div name="options" position="inside"> <field name="fluid_coupling_loss_rated" readonly="1"/> </div>
+												<div name="options"> <field name="mototr_output_power_rated_flag"/> <label for="mototr_output_power_rated"/> </div>
+												<div name="options" position="inside"> <field name="mototr_output_power_rated" readonly="1"/> </div>
+												<div name="options"> <field name="higher_speed_rpm_flag"/> <label for="higher_speed_rpm"/> </div>
+												<div name="options" position="inside"> <field name="higher_speed_rpm" readonly="1"/> </div>
+												<div name="options"> <field name="head_higher_speed_flag"/> <label for="head_higher_speed"/> </div>
+												<div name="options" position="inside"> <field name="head_higher_speed" readonly="1"/> </div>
+												<div name="options"> <field name="effy_high_speed_flag"/> <label for="effy_high_speed"/> </div>
+												<div name="options" position="inside"> <field name="effy_high_speed" readonly="1"/> </div>
+												<div name="options"> <field name="pump_input_higher_speed_flag"/> <label for="pump_input_higher_speed"/> </div>
+												<div name="options" position="inside"> <field name="pump_input_higher_speed" readonly="1"/> </div>
+												<div name="options"> <field name="mech_seal_make_flag" invisible="1"/> <label for="mech_seal_make"/> </div>
+												<div name="options" position="inside"> <field name="mech_seal_make" readonly="1"/> </div>
+												<div name="options"> <field name="seal_type_flag" invisible="1"/> <label for="seal_type"/> </div>
+												<div name="options" position="inside"> <field name="seal_type" readonly="1"/> </div>
+												<div name="options"> <field name="face_combination_flag" invisible="1"/> <label for="face_combination"/> </div>
+												<div name="options" position="inside"> <field name="face_combination" readonly="1"/> </div>
+											</group>
+											<group>
+												<div name="options"> <field name="maximum_allowable_soild_flag"/> <label for="maximum_allowable_soild"/> </div>
+												<div name="options" position="inside"> <field name="maximum_allowable_soild" readonly="1"/> </div>
+												<div name="options"> <field name="impeller_number_flag"/> <label for="impeller_number"/> </div>
+												<div name="options" position="inside"> <field name="impeller_number" readonly="1"/> </div>
+												<div name="options"> <field name="impeller_dia_max_flag"/> <label for="impeller_dia_max"/> </div>
+												<div name="options" position="inside"> <field name="impeller_dia_max" readonly="1"/> </div>
+												<div name="options"> <field name="max_allowable_test_flag"/> <label for="max_allowable_test"/> </div>
+												<div name="options" position="inside"> <field name="max_allowable_test" readonly="1"/> </div>
+												<div name="options"> <field name="crm_type_flag"/> <label for="crm_type"/> </div>
+												<div name="options" position="inside"> <field name="crm_type" readonly="1"/> </div>
+												<div name="options"> <field name="bush_bearing_lubrication_flag"/> <label for="bush_bearing_lubrication"/> </div>
+												<div name="options" position="inside"> <field name="bush_bearing_lubrication" readonly="1"/> </div>
+												<div name="options"> <field name="push_bearing_flag"/> <label for="push_bearing"/> </div>
+												<div name="options" position="inside"> <field name="push_bearing" readonly="1"/> </div>
+												<div name="options"> <field name="suction_size_flag"/> <label for="suction_size"/> </div>
+												<div name="options" position="inside"> <field name="suction_size" readonly="1"/> </div>
+												<div name="options"> <field name="rpm_flag"/> <label for="rpm"/> </div>
+												<div name="options" position="inside"> <field name="rpm" readonly="1"/> </div>
+												<div name="options"> <field name="speed_in_rpm_flag"/> <label for="speed_in_rpm_flag"/> </div>
+												<div name="options" position="inside"> <field name="speed_in_rpm" readonly="1"/> </div>
+												<div name="options"> <field name="casing_design_flag"/> <label for="casing_design"/> </div>
+												<div name="options" position="inside"> <field name="casing_design" readonly="1"/> </div>
+												<div name="options"> <field name="shut_off_head_flag"/> <label for="shut_off_head"/> </div>
+												<div name="options" position="inside"> <field name="shut_off_head" readonly="1"/> </div>
+												<div name="options"> <field name="shut_off_pressure_flag"/> <label for="shut_off_pressure"/> </div>
+												<div name="options" position="inside"> <field name="shut_off_pressure" readonly="1"/> </div>
+												<div name="options"> <field name="minimum_contionuous_flag"/> <label for="minimum_contionuous"/> </div>
+												<div name="options" position="inside"> <field name="minimum_contionuous" readonly="1"/> </div>
+												<div name="options"> <field name="specific_speed_flag"/> <label for="specific_speed"/> </div>
+												<div name="options" position="inside"> <field name="specific_speed" readonly="1"/> </div>
+												<div name="options"> <field name="suction_specific_speed_flag"/> <label for="suction_specific_speed"/> </div>
+												<div name="options" position="inside"> <field name="suction_specific_speed" readonly="1"/> </div>
+												<div name="options"> <field name="sealing_water_pressure_flag"/> <label for="sealing_water_pressure"/> </div>
+												<div name="options" position="inside"> <field name="sealing_water_pressure" readonly="1"/> </div>
+												<div name="options"> <field name="gd_sq_value_flag"/> <label for="gd_sq_value"/> </div>
+												<div name="options" position="inside"> <field name="gd_sq_value" readonly="1"/> </div>
+												<div name="options"> <field name="bearing_make_flag"/> <label for="bearing_make"/> </div>
+												<div name="options" position="inside"> <field name="bearing_make" readonly="1"/> </div>
+												<div name="options"> <field name="bearing_number_nde_flag"/> <label for="bearing_number_nde"/> </div>
+												<div name="options" position="inside"> <field name="bearing_number_nde" readonly="1"/> </div>
+												<div name="options"> <field name="bearing_qty_nde_flag"/> <label for="bearing_qty_nde"/> </div>
+												<div name="options" position="inside"> <field name="bearing_qty_nde" readonly="1"/> </div>
+												<div name="options"> <field name="lubrication_type_flag"/> <label for="lubrication_type"/> </div>
+												<div name="options" position="inside"> <field name="lubrication_type" readonly="1"/> </div>
+												<div name="options"> <field name="primemover_categ_flag"/> <label for="primemover_categ"/> </div>
+												<div name="options" position="inside"> <field name="primemover_categ" readonly="1"/> </div>
+												<div name="options"> <field name="type_of_drive_flag" invisible="1"/> <label for="type_of_drive"/> </div>
+												<div name="options" position="inside"> <field name="type_of_drive" readonly="1"/> </div>
+												<div name="options"> <field name="primemover_id_flag"/> <label for="primemover_id"/> </div>
+												<div name="options" position="inside"> <field name="primemover_id" readonly="1"/> </div>
+												<div name="options"> <field name="framesize_flag" invisible="1"/> <label for="framesize"/> </div>
+												<div name="options" position="inside"> <field name="framesize" readonly="1"/> </div>
+												<div name="options"> <field name="operation_range_flag"/> <label for="operation_range"/> </div>
+												<div name="options" position="inside"> <field name="operation_range" readonly="1"/> </div>
+												<div name="options"> <field name="motor_make_flag" invisible="1"/> <label for="motor_make"/> </div>
+												<div name="options" position="inside"> <field name="motor_make" readonly="1"/> </div>
+												<div name="options"> <field name="motor_type_flag"/> <label for="motor_type"/> </div>
+												<div name="options" position="inside"> <field name="motor_type" readonly="1"/> </div>
+												<div name="options"> <field name="motor_mounting_flag"/> <label for="motor_mounting"/> </div>
+												<div name="options" position="inside"> <field name="motor_mounting" readonly="1"/> </div>
+												<div name="options"> <field name="gear_box_loss_high_speed_flag"/> <label for="gear_box_loss_high_speed"/> </div>
+												<div name="options" position="inside"> <field name="gear_box_loss_high_speed" readonly="1"/> </div>
+												<div name="options"> <field name="fluid_coupling_loss_flag"/> <label for="fluid_coupling_loss"/> </div>
+												<div name="options" position="inside"> <field name="fluid_coupling_loss" readonly="1"/> </div>
+												<div name="options"> <field name="motor_output_power_high_speed_flag"/> <label for="motor_output_power_high_speed"/> </div>
+												<div name="options" position="inside"> <field name="motor_output_power_high_speed" readonly="1"/> </div>
+												<div name="options"> <field name="lower_speed_rpm_flag"/> <label for="lower_speed_rpm"/> </div>
+												<div name="options" position="inside"> <field name="lower_speed_rpm" readonly="1"/> </div>
+												<div name="options"> <field name="head_lower_speed_flag"/> <label for="head_lower_speed"/> </div>
+												<div name="options" position="inside"> <field name="head_lower_speed" readonly="1"/> </div>
+												<div name="options"> <field name="effy_lower_speed_point_flag"/> <label for="effy_lower_speed_point"/> </div>
+												<div name="options" position="inside"> <field name="effy_lower_speed_point" readonly="1"/> </div>
+												<div name="options"> <field name="pump_input_lower_speed_flag"/> <label for="pump_input_lower_speed"/> </div>
+												<div name="options" position="inside"> <field name="pump_input_lower_speed" readonly="1"/> </div>
+												<div name="options"> <field name="gear_box_loss_lower_speed_flag"/> <label for="gear_box_loss_lower_speed"/> </div>
+												<div name="options" position="inside"> <field name="gear_box_loss_lower_speed" readonly="1"/> </div>
+												<div name="options"> <field name="fluid_coupling_loss_lower_speed_flag"/> <label for="fluid_coupling_loss_lower_speed"/> </div>
+												<div name="options" position="inside"> <field name="fluid_coupling_loss_lower_speed" readonly="1"/> </div>
+												<div name="options"> <field name="motor_output_power_lower_speed_flag"/> <label for="motor_output_power_lower_speed"/> </div>
+												<div name="options" position="inside"> <field name="motor_output_power_lower_speed" readonly="1"/> </div>
+												<div name="options"> <field name="gland_plate_flag"/> <label for="gland_plate"/> </div>
+												<div name="options" position="inside"> <field name="gland_plate" readonly="1"/> </div>
+												<div name="options"> <field name="api_plan_flag" invisible="1"/> <label for="api_plan"/> </div>
+												<div name="options" position="inside"> <field name="api_plan" readonly="1"/> </div>
+											</group>
+										</group>
+										</form>
+									</field>
+								</group>
+							</page>
+						
+							<page string="Entry Info">
+								<group>
+									<group>
+										<field name="company_id"/>
+									</group>
+									<group>
+										<field name="active"/>
+									</group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+	
+	<!-- Tree View Start -->
+		
+		<record id="r_tree_v_wo_copy" model="ir.ui.view">
+			<field name="name">WO Copy Entry Tree</field>
+			<field name="model">kg.wo.copy</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';" 
+								toolbar="True" string="WO Copy">					
+					<field name="wo_id"/>
+					<field name="entry_date"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+		
+		<record id="r_search_v_wo_copy" model="ir.ui.view">
+            <field name="name">WO Copy Entry Search</field>
+            <field name="model">kg.wo.copy</field>
+            <field name="arch" type="xml">
+                <search string="WO Copy Entry Search">
+					<field name="name" string="Transaction"  filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'wo_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
+	<!-- Menu Action Start-->
+		
+		<record id="rma_wo_copy" model="ir.actions.act_window">
+			<field name="name">WO Copy</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.wo.copy</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="r_tree_v_wo_copy"/>
+			<field name="search_view_id" ref="r_search_v_wo_copy"/>
+			<field name="context">{}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_wo_copy" model="audittrail.rule">
+            <field name="name">Audit Log WO Copy</field>
+            <field name="object_id" eval="ref('kg_reports.model_kg_wo_copy')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+    <!-- Audit Log Xml Data End-->
+    
+	<!-- Menu Item Start -->
+		
+		<menuitem name="WO Copy" parent="kg_menus.rpm_crm_reports" action="rma_wo_copy" id="kg_wo_copy_reports" sequence="1"/>	
+      
+	<!-- Menu Item End -->
+	
+	</data>
+</openerp>
