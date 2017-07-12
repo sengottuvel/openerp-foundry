@@ -221,7 +221,7 @@ class kg_primecost_view(osv.osv):
 		bot_vals=[]
 		data_rec = ''
 		if load_bom == True and pump_id:
-				bom_obj = self.pool.get('kg.bom').search(cr, uid, [('pump_model_id','=',pump_id),('state','in',('draft','confirmed','approved'))])
+				bom_obj = self.pool.get('kg.bom').search(cr, uid, [('pump_model_id','=',pump_id),('state','in',('draft','confirmed','approved')),('category_type','=','pump_bom')])
 				if bom_obj:
 					data_rec = self.pool.get('kg.bom').browse(cr, uid, bom_obj[0])
 		if data_rec:
@@ -532,7 +532,7 @@ class kg_primecost_view(osv.osv):
 						(
 						select id from kg_bom 
 						where id = (select partlist_id from ch_base_plate
-						where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t'))
+						where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom'))
 						and active='t'
 						)
 						
@@ -722,7 +722,7 @@ class kg_primecost_view(osv.osv):
 								(
 								select id from kg_bom 
 								where id = (select partlist_id from ch_base_plate 
-								where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t') )
+								where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom') )
 								and active='t'
 								)
 								
@@ -1142,7 +1142,7 @@ class kg_primecost_view(osv.osv):
 								(
 								select id from kg_bom 
 								where id = (select partlist_id from ch_base_plate 
-								where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t') )
+								where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom') )
 								and active='t'
 								)
 								
@@ -1265,7 +1265,7 @@ class kg_primecost_view(osv.osv):
 							if bot_item.is_applicable == True:
 								if bot_item.flag_is_bearing == True:
 									if not bot_item.brand_id:
-										raise osv.except_osv(_('Warning!'),_('%s You cannot save without Brand'%(bot_item.bot_id.code)))
+										raise osv.except_osv(_('Warning!'),_('%s You cannot save without Brand'%(bot_item.ms_id.code)))
 								bot_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'bot',0,
 								0,0,bot_item.ms_id.id,entry.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
 								self.pool.get('ch.primecost.view.spare.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost * bot_item.qty})
@@ -1865,7 +1865,7 @@ class ch_primecost_view_spare_bom(osv.osv):
 		ms_vals=[]
 		bot_vals=[]
 		if bom_id:
-			bom_obj = self.pool.get('kg.bom').search(cr,uid,([('id','=',bom_id),('name','=',off_name)]))
+			bom_obj = self.pool.get('kg.bom').search(cr,uid,([('id','=',bom_id),('name','=',off_name),('category_type','=','part_list_bom')]))
 			if bom_obj:
 				bom_rec = self.pool.get('kg.bom').browse(cr,uid,bom_obj[0])
 				moc_name = ''
