@@ -3,7 +3,7 @@
     <data>
 		
 		<!-- Form View Start -->
-        <record id="r_form_v_close_stock_report" model="ir.ui.view">
+        <record id="main_close_stock_report" model="ir.ui.view">
             <field name="name">Main Store Closing Stock</field>
             <field name="model">main.closing.stock.wizard</field>
             <field name="type">form</field>
