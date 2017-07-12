@@ -95,19 +95,19 @@ class kg_wo_copy(osv.osv):
 		if rec.state == 'draft':		
 			rec = self.browse(cr,uid,ids[0])	
 			data = self.read(cr,uid,ids,)[-1]
-			myfile = '/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/planning/images/attachment_1.png'
+			myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/attachment_1.png'
 			if os.path.isfile(myfile) == True:
 				os.remove(myfile)
-			myfile = '/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/planning/images/attachment_2.png'
+			myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/attachment_2.png'
 			if os.path.isfile(myfile) == True:
 				os.remove(myfile)
 			if data['attachment']:
-				myfile = '/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/planning/images/attachment_1.png'
+				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/attachment_1.png'
 				if os.path.isfile(myfile) == True:
 					os.remove(myfile)
 				else:
 					pass
-				filepath = os.path.join('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/planning/images', 'attachment_1.png')
+				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images', 'attachment_1.png')
 				f = open(filepath, "a")
 				f.write(data['attachment'].decode('base64'))
 			else:
@@ -115,12 +115,12 @@ class kg_wo_copy(osv.osv):
 			print "CCCCCCCCCCCCCCCCCCCCCCCCC ================="
 			
 			if data['attachment_1']:
-				myfile = '/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/planning/images/attachment_2.png'
+				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/attachment_2.png'
 				if os.path.isfile(myfile) == True:
 					os.remove(myfile)
 				else:
 					pass
-				filepath = os.path.join('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/planning/images', 'attachment_2.png')
+				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images', 'attachment_2.png')
 				f = open(filepath, "a")
 				f.write(data['attachment_1'].decode('base64'))
 			else:
