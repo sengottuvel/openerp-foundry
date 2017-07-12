@@ -1106,7 +1106,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 				</textField>
 				<image>
 					<reportElement x="126" y="0" width="69" height="28"/>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 				</image>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="63" y="116" width="180" height="21"/>
