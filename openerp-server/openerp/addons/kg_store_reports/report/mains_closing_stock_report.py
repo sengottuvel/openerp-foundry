@@ -9,7 +9,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 	
 	_name = 'mains.closing.stock.report'
 	_inherit='stock.picking'   
-
+	
 	def __init__(self, cr, uid, name, context=None):
 		if context is None:
 			context = {}
@@ -25,7 +25,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 			'locale':locale,
 		})
 		self.context = context
-		
+	
 	def get_data(self,form):
 		res = {}
 		
@@ -40,37 +40,34 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		
 		if where_sql:
 			where_sql = ' and '+' or '.join(where_sql)
-			
 		else:
 			where_sql=''
-			
+		
 		if form['major_name']:
 			majorwise = form['major_name'][0]
 			major.append("pt.categ_id = %s" %(majorwise))
 		
 		if major:
 			major = ' and '+' or '.join(major)
-			
 		else:
 			major=''
-			
+		
 		if form['product']:
 			for ids2 in form['product']:
 				product.append("sm.product_id = %s"%(ids2))	
-				
 		if product:
 			product = ' and '+' or '.join(product)
 		else:
 			product=''
-			
+		
 		if form['product_type']:
-				pro_type.append("prod.type= '%s' "%form['product_type'])
-				
+			pro_type.append("pt.type= '%s' "%form['product_type'])
+		
 		if pro_type:
 			pro_type = ' and '+' or '.join(pro_type)
 		else:
 			pro_type=''
-			
+		
 		print "date............"	, type(form['date'])
 		location_rec = self.pool.get('stock.location').browse(self.cr,self.uid,location)
 		print "location_rec.........................", location_rec, location_rec.location_type
@@ -81,20 +78,18 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 			lo_type = 'out'
 		
 		self.cr.execute('''		
-		
 			   SELECT 
 					sm.product_id as in_pro_id,
 					sum(product_qty) as in_qty
+			   
 			   FROM stock_move sm
 			   
-			   left JOIN product_product prod ON (prod.id=sm.product_id)
 			   left JOIN product_template pt ON (pt.id=sm.product_id)
 			   left JOIN product_category pc ON (pc.id=pt.categ_id)
 			   
 			   where sm.product_qty != 0 and sm.state=%s and sm.move_type =%s and sm.date::date <=%s '''+ where_sql + major + product + pro_type +'''
 			   group by sm.product_id''',('done',lo_type,form['date']))
-				   
-			   
+		
 		data=self.cr.dictfetchall()
 		print "in_data ::::::::::::::=====>>>>", data
 		
@@ -109,19 +104,22 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 					lot_rec = lot_obj.browse(self.cr,self.uid,lot)
 					item['exp_date']=lot_rec.expiry_date
 					item['batch_no']=lot_rec.batch_no
-						
-			if lo_type == 'in':			
+					item['brand']=lot_rec.brand_id.name
+					item['moc']=lot_rec.moc_id.name
+			
+			if lo_type == 'in':
 				product_id = item['in_pro_id']
 				in_qty = item['in_qty']
 				
 				pro_rec = self.pool.get('product.product').browse(self.cr,self.uid,product_id)
 				item['product_name'] = pro_rec.name
-				item['uom'] = pro_rec.uom_id.name				
+				item['po_uom'] = pro_rec.uom_po_id.name
+				item['uom'] = pro_rec.uom_id.name
 				
 				out_date = "'"+form['date']+"'"
 				
 				out_sql = """ select product_id,sum(product_qty) from stock_move where product_id=%s and move_type='out' and state='done' and date::date <=%s and location_id != 8 group by product_id """%(product_id,out_date)
-				self.cr.execute(out_sql)			
+				self.cr.execute(out_sql)
 				out_data = self.cr.dictfetchall()
 				print "out_data...........................", out_data
 				if out_data:
@@ -132,8 +130,9 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 					op_qty = in_qty - out_qty[0]
 					print "cl_qty..............",op_qty
 				else:
-					op_qty = in_qty		
-					
+					op_qty = in_qty
+				
+				item['po_uom_close_qty'] = op_qty * pro_rec.po_uom_coeff
 				item['close_qty'] = op_qty
 				print "op_qty.........yyyyyyyyyyyy.....item['op_qty']..........", item['close_qty']
 				
@@ -154,11 +153,11 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 							pro_qty = pend_qty
 							price=pro_qty*pro_price
 						else:
-							price = 0	
-						
+							price = 0
 						value += price
 					item['closing_value'] =value
 		print "----------------------------->>>>",data
+		
 		data_renew = []
 		val = 0.0
 		val1 = 0.0
@@ -181,22 +180,19 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 	def _get_filter(self, data):
 		if data.get('form', False) and data['form'].get('filter', False):
 			if data['form']['filter'] == 'filter_date':
-				return _('Date')			
+				return _('Date')
 		return _('No Filter')
-		
+	
 	def _get_start_date(self, data):
 		if data.get('form', False) and data['form'].get('date_from', False):
 			return data['form']['date_from']
 		return ''
-		
+	
 	def _get_end_date(self, data):
 		if data.get('form', False) and data['form'].get('date_to', False):
 			return data['form']['date_to']
-		return ''		   
-  
-
+		return ''
+	
 report_sxw.report_sxw('report.mains.closing.stock.report', 'stock.picking', 
 			'addons/kg_store_reports/report/mains_closing_stock_report.rml', 
 			parser=mains_closing_stock_report, header = False)
-			
-			
