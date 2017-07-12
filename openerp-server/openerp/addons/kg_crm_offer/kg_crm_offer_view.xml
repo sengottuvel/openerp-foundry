@@ -102,7 +102,13 @@
 								</div>
 								<field name="o_customer_discount"/>
 								<field name="o_agent_com"/>
-								<field name="o_tax"/>
+								<label for="o_tax" string="Tax" class="append_percentage"/>
+								<div>
+									<div class="address_format">
+										<field name="o_tax" style="width: 21%%"/>
+										<field name="o_tax_in_ex" style="width: 19%%" attrs="{'required': [('o_tax','>',0)]}"/>
+									</div>
+								</div>
 								<label for="o_ed" string="ED" class="append_percentage"/>
 								<div>
 									<div class="address_format">
@@ -348,7 +354,13 @@
 							<field name="customer_discount"/>
 							<field name="agent_com"/>
 							<field name="special_discount"/>
-							<field name="tax"/>
+							<label for="tax" string="Tax" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="tax" style="width: 40%%"/>
+									<field name="tax_in_ex" style="width: 35%%" attrs="{'required': [('tax','>',0)]}"/>
+								</div>
+							</div>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
 							<div>
 								<div class="address_format">
@@ -539,7 +551,13 @@
 							<field name="customer_discount"/>
 							<field name="agent_com"/>
 							<field name="special_discount"/>
-							<field name="tax"/>
+							<label for="tax" string="Tax" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="tax" style="width: 40%%"/>
+									<field name="tax_in_ex" style="width: 35%%" attrs="{'required': [('tax','>',0)]}"/>
+								</div>
+							</div>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
 							<div>
 								<div class="address_format">
@@ -691,7 +709,13 @@
 							<field name="customer_discount"/>
 							<field name="agent_com"/>
 							<field name="special_discount"/>
-							<field name="tax"/>
+							<label for="tax" string="Tax" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="tax" style="width: 40%%"/>
+									<field name="tax_in_ex" style="width: 35%%" attrs="{'required': [('tax','>',0)]}"/>
+								</div>
+							</div>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
 							<div>
 								<div class="address_format">
