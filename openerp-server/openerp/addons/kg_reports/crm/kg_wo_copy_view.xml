@@ -418,9 +418,7 @@
     
 	<!-- Menu Item Start -->
 		
-<!--
 		<menuitem name="WO Copy" parent="kg_menus.rpm_crm_reports" action="rma_wo_copy" id="kg_wo_copy_reports" sequence="1"/>	
--->
       
 	<!-- Menu Item End -->
 	
