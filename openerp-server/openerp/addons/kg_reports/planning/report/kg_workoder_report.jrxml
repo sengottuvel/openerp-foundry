@@ -3759,7 +3759,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 					<reportElement x="1" y="12" width="563" height="770">
 						<printWhenExpression><![CDATA[$P{attach_1} != '']]></printWhenExpression>
 					</reportElement>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/planning/images/"+$P{attach_1}]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons//kg_reports/planning/images/"+$P{attach_1}]]></imageExpression>
 				</image>
 			</band>
 		</groupHeader>
@@ -3773,7 +3773,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 					<reportElement x="1" y="0" width="563" height="782">
 						<printWhenExpression><![CDATA[$P{attach_2} != '']]></printWhenExpression>
 					</reportElement>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/planning/images/"+$P{attach_2}]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons//kg_reports/planning/images/"+$P{attach_2}]]></imageExpression>
 				</image>
 			</band>
 		</groupHeader>
