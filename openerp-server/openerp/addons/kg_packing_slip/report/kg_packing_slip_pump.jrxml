@@ -22,35 +22,35 @@ union
 select *,7 as test from (
 
 
-(select description,qty::char as value,remarks,2 as type from ch_packing_foundry_details where header_id =$P{slip_id} and flag_is_applicable = 't' order by id asc)
+(select off_name as description,qty::char as value,remarks,2 as type from ch_packing_foundry_details where header_id =$P{slip_id} and flag_is_applicable = 't' order by id asc)
 
 union
 
-(select description,qty::char as value,remarks,3 as type from ch_packing_ms_details where header_id = $P{slip_id}  and flag_is_applicable = 't'
+(select off_name as description,qty::char as value,remarks,3 as type from ch_packing_ms_details where header_id = $P{slip_id}  and flag_is_applicable = 't'
 order by id asc)
 
 union
 
-(select description,qty::char as value,remarks,4 as type from ch_packing_bot_details where header_id = $P{slip_id}  and flag_is_applicable = 't'
+(select off_name as description,qty::char as value,remarks,4 as type from ch_packing_bot_details where header_id = $P{slip_id}  and flag_is_applicable = 't'
 order by id asc)
 
 union
 
-(select description,qty::char as value,remarks,5 as type from ch_packing_accessories_foundry
+(select off_name as description,qty::char as value,remarks,5 as type from ch_packing_accessories_foundry
 where header_id in (select id from ch_packing_accessories where header_id = $P{slip_id})
  and flag_is_applicable = 't'
 order by id asc)
 
 union
 
-(select description,qty::char as value,remarks,6 as type from ch_packing_accessories_ms
+(select off_name as description,qty::char as value,remarks,6 as type from ch_packing_accessories_ms
 where header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )
  and flag_is_applicable = 't'
 order by id asc)
 
 union
 
-(select description,qty::char as value,remarks,7 as type from ch_packing_accessories_bot
+(select off_name as description,qty::char as value,remarks,7 as type from ch_packing_accessories_bot
 where header_id in (select id from ch_packing_accessories where header_id =$P{slip_id})
  and flag_is_applicable = 't'
 order by id asc
@@ -330,7 +330,7 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 					<reportElement x="0" y="0" width="751" height="572">
 						<printWhenExpression><![CDATA[(new Boolean(($F{state}.equals("draft"))))]]></printWhenExpression>
 					</reportElement>
-					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_packing_slip/images/Draft.jpg"]]></imageExpression>
+					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_packing_slip/images/Draft.jpg"]]></imageExpression>
 				</image>
 			</frame>
 		</band>
@@ -366,7 +366,7 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</title>

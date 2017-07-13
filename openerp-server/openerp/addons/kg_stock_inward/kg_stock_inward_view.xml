@@ -118,8 +118,8 @@
 					<field name="heat_no" invisible="1"/>
 					<field name="each_wgt"/>
 					<field name="total_wgt"/>
-					<field name="unit_price" invisible="1" />
-					<field name="total_value" invisible="1" />
+					<field name="unit_price" invisible="0" />
+					<field name="total_value" invisible="0" />
 					<field name="stock_mode"/>
 					<field name="stock_location_id"/>
 					<field name="foundry_stock_state"/>

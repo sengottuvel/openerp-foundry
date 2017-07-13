@@ -240,7 +240,7 @@ class kg_packing_slip(osv.osv):
 		cr.execute(''' delete from ch_packing_bot_details where header_id = %s ''',[entry_rec.id])
 		cr.execute(''' delete from ch_packing_accessories where header_id = %s ''',[entry_rec.id])
 		### Loading Foundry Items ###
-		cr.execute(''' select id,pattern_name,moc_id,material_code,qty from ch_order_bom_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
+		cr.execute(''' select id,pattern_name,off_name,moc_id,material_code,qty from ch_order_bom_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
 		foundry_items = cr.dictfetchall()
 		for foundry_item in foundry_items:
 			### Checking the packed qty ###
@@ -257,6 +257,7 @@ class kg_packing_slip(osv.osv):
 					'order_line_id':order_line_id,
 					'order_bom_id':foundry_item['id'],
 					'description': foundry_item['pattern_name'],
+					'off_name': foundry_item['off_name'],
 					'moc_id': foundry_item['moc_id'],
 					'material_code': foundry_item['material_code'] or '',
 					'total_qty': foundry_item['qty'],
@@ -269,13 +270,14 @@ class kg_packing_slip(osv.osv):
 				'order_line_id':order_line_id,
 				'order_bom_id':foundry_item['id'],
 				'description': foundry_item['pattern_name'],
+				'off_name': foundry_item['off_name'],
 				'moc_id': foundry_item['moc_id'],
 				'material_code': foundry_item['material_code'] or '',
 				'total_qty': foundry_item['qty'],
 				})
 		#stop		
 		### Loading MS Items ###
-		cr.execute(''' select id,name,moc_id,material_code,qty from ch_order_machineshop_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
+		cr.execute(''' select id,name,off_name,moc_id,material_code,qty from ch_order_machineshop_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
 		ms_items = cr.dictfetchall()
 		for ms_item in ms_items:
 			### Checking the packed qty ###
@@ -291,6 +293,7 @@ class kg_packing_slip(osv.osv):
 					'order_line_id':order_line_id,
 					'order_bom_id':ms_item['id'],
 					'description': ms_item['name'],
+					'off_name': ms_item['off_name'],
 					'moc_id': ms_item['moc_id'],
 					'material_code': ms_item['material_code'] or '',
 					'total_qty': ms_item['qty'],
@@ -302,12 +305,13 @@ class kg_packing_slip(osv.osv):
 					'order_line_id':order_line_id,
 					'order_bom_id':ms_item['id'],
 					'description': ms_item['name'],
+					'off_name': ms_item['off_name'],
 					'moc_id': ms_item['moc_id'],
 					'material_code': ms_item['material_code'] or '',
 					'total_qty': ms_item['qty'],
 					})
 		### Loading BOT Items ###
-		cr.execute(''' select id,item_name,moc_id,material_code,qty from ch_order_bot_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
+		cr.execute(''' select id,item_name,off_name,moc_id,material_code,qty from ch_order_bot_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
 		bot_items = cr.dictfetchall()
 		for bot_item in bot_items:
 			
@@ -324,6 +328,7 @@ class kg_packing_slip(osv.osv):
 					'order_line_id':order_line_id,
 					'order_bom_id':bot_item['id'],
 					'description': bot_item['item_name'],
+					'off_name': bot_item['off_name'],
 					'moc_id': bot_item['moc_id'],
 					'material_code': bot_item['material_code'] or '',
 					'total_qty': bot_item['qty'],
@@ -337,15 +342,15 @@ class kg_packing_slip(osv.osv):
 					'order_line_id':order_line_id,
 					'order_bom_id':bot_item['id'],
 					'description': bot_item['item_name'],
+					'off_name': bot_item['off_name'],
 					'moc_id': bot_item['moc_id'],
 					'material_code': bot_item['material_code'] or '',
 					'total_qty': bot_item['qty'],
 					
 					})
-		
-		print "order_line_idorder_line_id",order_line_id
+			
 		### Loading Accessories Items ###
-		cr.execute(''' select id,access_id,moc_id,qty from ch_wo_accessories where header_id=%s ''',[order_line_id])
+		cr.execute(''' select id,access_id,off_name,moc_id,qty from ch_wo_accessories where header_id=%s ''',[order_line_id])
 		acc_items = cr.dictfetchall()
 		for acc_item in acc_items:
 			acc_id = self.pool.get('ch.packing.accessories').create(cr,uid,{
@@ -353,6 +358,7 @@ class kg_packing_slip(osv.osv):
 			'order_line_id': order_line_id,
 			'wo_access_id':acc_item['id'],
 			'access_id': acc_item['access_id'],
+			'off_name': acc_item['off_name'],
 			'moc_id': acc_item['moc_id'],
 			'qty': acc_item['qty']
 			})
@@ -360,7 +366,7 @@ class kg_packing_slip(osv.osv):
 			acc_ms_vals = []
 			acc_bot_vals = []
 			### Loading Foundry Items ###
-			cr.execute(''' select id,pattern_name,moc_id,material_code,qty from ch_wo_accessories_foundry where is_applicable = 't' and header_id=%s ''',[acc_item['id']])
+			cr.execute(''' select id,pattern_name,off_name,moc_id,material_code,qty from ch_wo_accessories_foundry where is_applicable = 't' and header_id=%s ''',[acc_item['id']])
 			foundry_items = cr.dictfetchall()
 			for foundry_item in foundry_items:
 				### Checking the packed qty ###
@@ -375,6 +381,7 @@ class kg_packing_slip(osv.osv):
 						'header_id': acc_id,
 						'order_bom_id':foundry_item['id'],
 						'description': foundry_item['pattern_name'],
+						'off_name': foundry_item['off_name'],
 						'moc_id': foundry_item['moc_id'],
 						'material_code': foundry_item['material_code'] or '',
 						'total_qty': foundry_item['qty'],
@@ -385,13 +392,14 @@ class kg_packing_slip(osv.osv):
 						'header_id': acc_id,
 						'order_bom_id':foundry_item['id'],
 						'description': foundry_item['pattern_name'],
+						'off_name': foundry_item['off_name'],
 						'moc_id': foundry_item['moc_id'],
 						'material_code': foundry_item['material_code'] or '',
 						'total_qty': foundry_item['qty'],
 						})
 					
 			### Loading MS Items ###
-			cr.execute('''  select id,name,moc_id,material_code,qty from ch_wo_accessories_ms   where is_applicable = 't' and header_id=%s ''',[acc_item['id']])
+			cr.execute('''  select id,name,off_name,moc_id,material_code,qty from ch_wo_accessories_ms   where is_applicable = 't' and header_id=%s ''',[acc_item['id']])
 			ms_items = cr.dictfetchall()
 			for ms_item in ms_items:
 				### Checking the packed qty ###
@@ -406,6 +414,7 @@ class kg_packing_slip(osv.osv):
 						'header_id': acc_id,
 						'order_bom_id':ms_item['id'],
 						'description': ms_item['name'],
+						'off_name': ms_item['off_name'],
 						'moc_id': ms_item['moc_id'],
 						'material_code': ms_item['material_code'] or '',
 						'total_qty': ms_item['qty'],
@@ -416,12 +425,13 @@ class kg_packing_slip(osv.osv):
 						'header_id': acc_id,
 						'order_bom_id':ms_item['id'],
 						'description': ms_item['name'],
+						'off_name': ms_item['off_name'],
 						'moc_id': ms_item['moc_id'],
 						'material_code': ms_item['material_code'] or '',
 						'total_qty': ms_item['qty'],
 						})
 			### Loading BOT Items ###
-			cr.execute(''' select id,item_name,moc_id,material_code,qty from ch_wo_accessories_bot where is_applicable = 't' and header_id=%s ''',[acc_item['id']])
+			cr.execute(''' select id,item_name,off_name,moc_id,material_code,qty from ch_wo_accessories_bot where is_applicable = 't' and header_id=%s ''',[acc_item['id']])
 			bot_items = cr.dictfetchall()
 			for bot_item in bot_items:
 				### Checking the packed qty ###
@@ -437,6 +447,7 @@ class kg_packing_slip(osv.osv):
 						'header_id': acc_id,
 						'order_bom_id':bot_item['id'],
 						'description': bot_item['item_name'],
+						'off_name': bot_item['off_name'],
 						'moc_id': bot_item['moc_id'],
 						'material_code': bot_item['material_code'] or '',
 						'total_qty': bot_item['qty'],
@@ -447,6 +458,7 @@ class kg_packing_slip(osv.osv):
 						'header_id': acc_id,
 						'order_bom_id':bot_item['id'],
 						'description': bot_item['item_name'],
+						'off_name': bot_item['off_name'],
 						'moc_id': bot_item['moc_id'],
 						'material_code': bot_item['material_code'] or '',
 						'total_qty': bot_item['qty'],
@@ -539,6 +551,7 @@ class ch_packing_foundry_details(osv.osv):
 		'flag_is_applicable': fields.boolean('Is applicable'),
 		'total_qty': fields.integer('Total Qty'),
 		'packed_qty': fields.integer('Packed Qty'),
+		'off_name': fields.char('Offer Name'),
 		
 	
 	}
@@ -598,6 +611,7 @@ class ch_packing_ms_details(osv.osv):
 		'flag_is_applicable': fields.boolean('Is applicable'),
 		'total_qty': fields.integer('Total Qty'),
 		'packed_qty': fields.integer('Packed Qty'),
+		'off_name': fields.char('Offer Name'),
 		
 	
 	}
@@ -656,6 +670,7 @@ class ch_packing_bot_details(osv.osv):
 		'flag_is_applicable': fields.boolean('Is applicable'),
 		'total_qty': fields.integer('Total Qty'),
 		'packed_qty': fields.integer('Packed Qty'),
+		'off_name': fields.char('Offer Name'),
 		
 	
 	}
@@ -717,6 +732,7 @@ class ch_packing_accessories(osv.osv):
 		'line_ids': fields.one2many('ch.packing.accessories.foundry', 'header_id', 'Accessories Foundry'),
 		'line_ids_a': fields.one2many('ch.packing.accessories.ms', 'header_id', 'Accessories MS'),
 		'line_ids_b': fields.one2many('ch.packing.accessories.bot', 'header_id', 'Accessories BOT'),
+		'off_name': fields.char('Offer Name'),
 		
 		
 	}
@@ -752,6 +768,7 @@ class ch_packing_accessories_foundry(osv.osv):
 		'flag_is_applicable': fields.boolean('Is applicable'),
 		'total_qty': fields.integer('Total Qty'),
 		'packed_qty': fields.integer('Packed Qty'),
+		'off_name': fields.char('Offer Name'),
 		
 	
 	}
@@ -807,6 +824,7 @@ class ch_packing_accessories_ms(osv.osv):
 		'flag_is_applicable': fields.boolean('Is applicable'),
 		'total_qty': fields.integer('Total Qty'),
 		'packed_qty': fields.integer('Packed Qty'),
+		'off_name': fields.char('Offer Name'),
 		
 	
 	}
@@ -861,6 +879,7 @@ class ch_packing_accessories_bot(osv.osv):
 		'flag_is_applicable': fields.boolean('Is applicable'),
 		'total_qty': fields.integer('Total Qty'),
 		'packed_qty': fields.integer('Packed Qty'),
+		'off_name': fields.char('Offer Name'),
 		
 	
 	}

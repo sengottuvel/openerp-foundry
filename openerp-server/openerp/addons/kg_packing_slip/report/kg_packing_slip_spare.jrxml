@@ -25,7 +25,7 @@ union
 select *,7 as test from (
 
 
-(select moc.name as moc,pack_foun.description,pack_foun.qty::char as value,pack_foun.material_code,2 as type from ch_packing_foundry_details pack_foun
+(select moc.name as moc,pack_foun.off_name as description,pack_foun.qty::char as value,pack_foun.material_code,2 as type from ch_packing_foundry_details pack_foun
 left join kg_moc_master moc on (moc.id = pack_foun.moc_id)
 
 
@@ -35,7 +35,7 @@ order by pack_foun.id asc)
 
 union
 
-(select moc.name as moc,pack_ms.description,pack_ms.qty::char as value,pack_ms.material_code,3 as type from ch_packing_ms_details pack_ms
+(select moc.name as moc,pack_ms.off_name as description,pack_ms.qty::char as value,pack_ms.material_code,3 as type from ch_packing_ms_details pack_ms
 
 left join kg_moc_master moc on (moc.id = pack_ms.moc_id)
 where pack_ms.header_id = $P{slip_id}  and pack_ms.flag_is_applicable = 't'
@@ -43,14 +43,14 @@ order by pack_ms.id asc)
 
 union
 
-(select moc.name as moc,pack_bot.description,pack_bot.qty::char as value,pack_bot.material_code,4 as type from ch_packing_bot_details pack_bot
+(select moc.name as moc,pack_bot.off_name as description,pack_bot.qty::char as value,pack_bot.material_code,4 as type from ch_packing_bot_details pack_bot
 left join kg_moc_master moc on (moc.id = pack_bot.moc_id)
 where pack_bot.header_id = $P{slip_id}  and pack_bot.flag_is_applicable = 't'
 order by pack_bot.id asc)
 
 union
 
-(select moc.name as moc,acc_foun.description,acc_foun.qty::char as value,acc_foun.material_code,5 as type from ch_packing_accessories_foundry acc_foun
+(select moc.name as moc,acc_foun.off_name as description,acc_foun.qty::char as value,acc_foun.material_code,5 as type from ch_packing_accessories_foundry acc_foun
 
 left join kg_moc_master moc on (moc.id = acc_foun.moc_id)
 where acc_foun.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )  and acc_foun.flag_is_applicable = 't'
@@ -58,14 +58,14 @@ order by acc_foun.id asc)
 
 union
 
-(select moc.name as moc,acc_ms.description,acc_ms.qty::char as value,acc_ms.material_code,6 as type from ch_packing_accessories_ms acc_ms
+(select moc.name as moc,acc_ms.off_name as description,acc_ms.qty::char as value,acc_ms.material_code,6 as type from ch_packing_accessories_ms acc_ms
 left join kg_moc_master moc on (moc.id = acc_ms.moc_id)
 where acc_ms.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )  and acc_ms.flag_is_applicable = 't'
 order by acc_ms.id asc)
 
 union
 
-(select moc.name as moc,acc_bot.description,acc_bot.qty::char as value,acc_bot.material_code,7 as type from ch_packing_accessories_bot acc_bot
+(select moc.name as moc,acc_bot.off_name as description,acc_bot.qty::char as value,acc_bot.material_code,7 as type from ch_packing_accessories_bot acc_bot
 left join kg_moc_master moc on (moc.id = acc_bot.moc_id)
 where acc_bot.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id}) and acc_bot.flag_is_applicable = 't'
 order by acc_bot.id asc
@@ -396,7 +396,7 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 					<reportElement x="0" y="0" width="751" height="572">
 						<printWhenExpression><![CDATA[(new Boolean(($F{state}.equals("draft"))))]]></printWhenExpression>
 					</reportElement>
-					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_packing_slip/images/Draft.jpg"]]></imageExpression>
+					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_packing_slip/images/Draft.jpg"]]></imageExpression>
 				</image>
 			</frame>
 		</band>
@@ -432,7 +432,7 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</title>
