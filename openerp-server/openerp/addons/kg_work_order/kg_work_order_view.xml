@@ -461,7 +461,7 @@
 									<field name="qty" required="1"/>
 									<field name="off_name"/>
 								</tree>
-								<form string="Spare Details Entry Form" create="false" delete="false">
+								<form string="Spare Details Entry Form" create="false">
 									<group colspan="4">
 										<group>
 											<field name="bom_id" required="1" on_change="onchange_spare_off_name(bom_id)"/>
