@@ -1,6 +1,5 @@
 import onscreen_cd_report
 import onscreen_cd_export_report
-import onscreen_offer_export_copy_report
 import onscreen_annexure_1_report
 import onscreen_spare_regular_report
 import onscreen_spare_budgetary_report
