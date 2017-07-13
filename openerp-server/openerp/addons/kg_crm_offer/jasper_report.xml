@@ -62,6 +62,30 @@
 				header="False"
         />
         
+          <!-- Dealer WO ACK Copy -->
+		
+		<report string="Dealer WO ACK Copy"
+				model="kg.crm.offer"
+				auto="True"
+				name="onscreen_dealer_wo_ack_report"
+				rml="kg_crm_offer/report/kg_dealer_wo_ack_copy.jrxml"
+				id="onscreen_dealer_wo_ack_report_menu"
+				menu="True"
+				header="False"
+        />
+        
+        <!-- Customer WO ACK Copy -->
+		
+		<report string="Customer WO ACK Copy"
+				model="kg.crm.offer"
+				auto="True"
+				name="onscreen_customer_wo_ack_report"
+				rml="kg_crm_offer/report/kg_customer_wo_ack_copy.jrxml"
+				id="onscreen_customer_wo_ack_report_menu"
+				menu="True"
+				header="False"
+        />
+        
     </data>
 </openerp>
 
