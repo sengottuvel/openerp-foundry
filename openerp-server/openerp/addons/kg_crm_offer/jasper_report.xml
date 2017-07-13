@@ -9,7 +9,7 @@
 				auto="True"
 				name="onscreen_cd_report"
 				rml="kg_crm_offer/report/crm_cd_report.jrxml"
-				id="cd_jasper_report_menu1"
+				id="cd_jasper_report_menu1" 
 				menu="True"
 				header="False"
         />
@@ -26,18 +26,6 @@
 				header="False"
         />
         
-		<!-- Annexure 1 Print -->
-		
-		<report string="Annexure 1"
-				model="kg.crm.offer"
-				auto="True"
-				name="onscreen_annexure_1_report"
-				rml="kg_crm_offer/report/crm_annexure_1_report.jrxml"
-				id="annexure_1_jasper_report_menu"
-				menu="True"
-				header="False"
-        />
-        
 		<!-- Offer Copy -->
 		
 		<report string="Offer Copy"
@@ -45,12 +33,12 @@
 				auto="True"
 				name="onscreen_offer_copy_report"
 				rml="kg_crm_offer/report/offer_copy_report.jrxml"
-				id="offer_copy_jasper_report_menu"
+				id="offer_copy_jasper_report_menu" 
 				menu="True"
 				header="False"
         />
         
-        <!-- Spare Offer Regular Copy -->
+         <!-- Spare Offer Regular Copy -->
 		
 		<report string="Spare Regular Copy"
 				model="kg.crm.offer"
@@ -74,29 +62,6 @@
 				header="False"
         />
         
-        <!-- Dealer WO ACK Copy -->
-		
-		<report string="Dealer WO ACK Copy"
-				model="kg.crm.offer"
-				auto="True"
-				name="onscreen_dealer_wo_ack_report"
-				rml="kg_crm_offer/report/kg_dealer_wo_ack_copy.jrxml"
-				id="onscreen_dealer_wo_ack_report_menu"
-				menu="True"
-				header="False"
-        />
-        
-        <!-- Customer WO ACK Copy -->
-		
-		<report string="Customer WO ACK Copy"
-				model="kg.crm.offer"
-				auto="True"
-				name="onscreen_customer_wo_ack_report"
-				rml="kg_crm_offer/report/kg_customer_wo_ack_copy.jrxml"
-				id="onscreen_customer_wo_ack_report_menu"
-				menu="True"
-				header="False"
-        />
-        
     </data>
 </openerp>
+
