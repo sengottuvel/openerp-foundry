@@ -1039,7 +1039,7 @@ class kg_work_order(osv.osv):
 								if spare_bot_item.is_applicable == True:
 									spare_bot_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'bot',0,
 									0,0,spare_bot_item.ms_id.id,order_item.moc_construction_id.id,spare_bot_item.moc_id.id,0)
-									self.pool.get('ch.wo.spare.bot').write(cr,uid,acc_bot_item.id,{'wo_prime_cost':spare_bot_prime_cost * spare_bot_item.qty})
+									self.pool.get('ch.wo.spare.bot').write(cr,uid,spare_bot_item.id,{'wo_prime_cost':spare_bot_prime_cost * spare_bot_item.qty})
 								
 						
 				### Total Pump primecost ###
