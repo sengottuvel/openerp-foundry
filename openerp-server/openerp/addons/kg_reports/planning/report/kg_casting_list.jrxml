@@ -75,7 +75,7 @@ work_order.id = $P{order_id} order by ch_work.order_no]]>
 	<parameter name="print_date" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[select distinct work_order.id as order_id,
-sch.name as schedule_no,
+(CASE WHEN sch.name is null THEN '-' ELSE sch.name end) as schedule_no,
 to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_date,
 company.name as company_name,
 to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date
@@ -90,7 +90,7 @@ ch_bom.flag_applicable = True  and
 case
 when (select order_id from m2m_work_order_casting_report_details where foundry_wiz_id =$P{wiz_id}  limit 1) is not null then work_order.id in (select order_id from m2m_work_order_casting_report_details where foundry_wiz_id = $P{wiz_id})
 else
-work_order.id in (select  id from kg_work_order) end ]]>
+work_order.id in (select  id from kg_work_order) end]]>
 	</queryString>
 	<field name="order_id" class="java.lang.Integer"/>
 	<field name="schedule_no" class="java.lang.String"/>
