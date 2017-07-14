@@ -283,7 +283,7 @@
 										<page string="Raw Materials" >
 											<field name="line_ids" colspan="4" nolabel="1">
 												<tree string="Raw Materials Entry Tree" editable="top"  delete="false">					
-													<field name="product_id"/>
+													<field name="product_id" required="1"/>
 													<field name="uom" required="1" readonly="0"/>
 													<field name="uom_conversation_factor" readonly="0"/>
 													<field name="od" invisible="1"/>

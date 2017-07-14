@@ -2663,8 +2663,8 @@ class ch_wo_ms_raw(osv.osv):
 		
 		### Module Requirement
 		
-		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
-		'uom':fields.many2one('product.uom','UOM',size=128 ,required=True),
+		'product_id': fields.many2one('product.product','Raw Material', domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
+		'uom':fields.many2one('product.uom','UOM',size=128 ),
 		'od': fields.float('OD'),
 		'length': fields.float('Length'),
 		'breadth': fields.float('Breadth'),
