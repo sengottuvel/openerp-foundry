@@ -47,7 +47,7 @@
 							<field name="is_pump_acc_flag" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
 							<field name="access_cate_id" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>						
 							<field name="framesize" readonly = "1"/>							
-							<field name="product_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required': [('accessories_type','in',['base_plate','coupling_guard'])]}"/>							
+							<field name="coupling_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required': [('accessories_type','in',['base_plate','coupling_guard'])]}"/>							
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="copy_flag" invisible="1"/>
 							<field name="modify" invisible="1"/>

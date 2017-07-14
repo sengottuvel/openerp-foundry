@@ -95,7 +95,7 @@ class kg_accessories_master(osv.osv):
 		'framesize': fields.char('Framesize'),
 		
 		'pump_id':fields.many2one('kg.pumpmodel.master','Pumpmodel'),
-		'product_id': fields.many2one('product.product','Coupling', required=True, domain="[('product_type','in',['coupling'])]"),			
+		'coupling_id': fields.many2one('kg.accessories.master','Coupling', required=True, domain="[('accessories_type','in',['coupling'])]"),			
 		
 		## Child Tables Declaration	 
 		
