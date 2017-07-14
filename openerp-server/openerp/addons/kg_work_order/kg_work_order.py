@@ -1022,21 +1022,24 @@ class kg_work_order(osv.osv):
 				### For Spare BOM ###
 				if order_item.line_ids_e:
 					for spare_item in order_item.line_ids_e:
-						for spare_foundry_item in spare_item.line_ids:
-							if spare_foundry_item.is_applicable == True:
-								spare_foundry_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'foundry',spare_foundry_item.pattern_id.id,
-								0,0,0,order_item.moc_construction_id.id,spare_foundry_item.moc_id.id,0)
-								self.pool.get('ch_wo_spare_foundry').write(cr,uid,spare_foundry_item.id,{'prime_cost':spare_foundry_prime_cost * spare_foundry_item.qty })
-						for spare_ms_item in spare_item.line_ids_a:
-							if spare_ms_item.is_applicable == True:
-								spare_ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
-								spare_ms_item.ms_id.id,0,0,order_item.moc_construction_id.id,spare_ms_item.moc_id.id,0)
-								self.pool.get('ch.wo.accessories.ms').write(cr,uid,spare_ms_item.id,{'wo_prime_cost':spare_ms_prime_cost * spare_ms_item.qty})
-						for spare_bot_item in spare_item.line_ids_b:
-							if spare_bot_item.is_applicable == True:
-								spare_bot_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'bot',0,
-								0,0,spare_bot_item.ms_id.id,order_item.moc_construction_id.id,spare_bot_item.moc_id.id,0)
-								self.pool.get('ch.wo.accessories.bot').write(cr,uid,acc_bot_item.id,{'wo_prime_cost':spare_bot_prime_cost * spare_bot_item.qty})
+						if spare_item.line_ids:
+							for spare_foundry_item in spare_item.line_ids:
+								if spare_foundry_item.is_applicable == True:
+									spare_foundry_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'foundry',spare_foundry_item.pattern_id.id,
+									0,0,0,order_item.moc_construction_id.id,spare_foundry_item.moc_id.id,0)
+									self.pool.get('ch.wo.spare.foundry').write(cr,uid,spare_foundry_item.id,{'prime_cost':spare_foundry_prime_cost * spare_foundry_item.qty })
+						if spare_item.line_ids_a:
+							for spare_ms_item in spare_item.line_ids_a:
+								if spare_ms_item.is_applicable == True:
+									spare_ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
+									spare_ms_item.ms_id.id,0,0,order_item.moc_construction_id.id,spare_ms_item.moc_id.id,0)
+									self.pool.get('ch.wo.spare.ms').write(cr,uid,spare_ms_item.id,{'wo_prime_cost':spare_ms_prime_cost * spare_ms_item.qty})
+						if spare_item.line_ids_b:
+							for spare_bot_item in spare_item.line_ids_b:
+								if spare_bot_item.is_applicable == True:
+									spare_bot_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'bot',0,
+									0,0,spare_bot_item.ms_id.id,order_item.moc_construction_id.id,spare_bot_item.moc_id.id,0)
+									self.pool.get('ch.wo.spare.bot').write(cr,uid,acc_bot_item.id,{'wo_prime_cost':spare_bot_prime_cost * spare_bot_item.qty})
 								
 						
 				### Total Pump primecost ###
