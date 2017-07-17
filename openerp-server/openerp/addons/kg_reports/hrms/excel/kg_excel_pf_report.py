@@ -79,17 +79,23 @@ class kg_excel_pf_report(osv.osv):
 		
 		
 		sql = """		
+		
 			select 
+			payslip.id,
 
 			contract.uan_no as uan_no,
 			emp.name_related as employee_name,
 			payslip.cross_amt as gross_amt,
-			(select sum(amount) from hr_payslip_line where code in('BASIC','VDA','FDA')) as epf_wages,
-			(select sum(amount) from hr_payslip_line where code in('BASIC','VDA','FDA')) as eps_wages,
-			(select sum(amount) from hr_payslip_line where code in('BASIC','VDA','FDA')) as edli_wages,
-			(select trim(TO_CHAR(((sum(amount)*12.00)/100)::float, '99999999G999G99G99990D99')) from hr_payslip_line where code in('BASIC','VDA','FDA')) as epf_contri,
-			(select trim(TO_CHAR(((sum(amount)*8.33)/100)::float, '99999999G999G99G99990D99')) from hr_payslip_line where code in('BASIC','VDA','FDA')) as eps_contri,
-			(select trim(TO_CHAR((((sum(amount)*12.00)/100)-((sum(amount)*8.33)/100))::float, '99999999G999G99G99990D99')) from hr_payslip_line where code in('BASIC','VDA','FDA')) as epf_eps_diff
+			case when (select sum(amount) from hr_payslip_line where code in('BASIC','VDA','FDA') and slip_id = payslip.id) is null then
+			0.00 else (select sum(amount) from hr_payslip_line where code in('BASIC','VDA','FDA') and slip_id = payslip.id) end as epf_wages,
+			case when (select sum(amount) from hr_payslip_line where code in('BASIC','VDA','FDA') and slip_id = payslip.id) is null then
+			0.00 else (select sum(amount) from hr_payslip_line where code in('BASIC','VDA','FDA') and slip_id = payslip.id) end as eps_wages,
+			case when (select sum(amount) from hr_payslip_line where code in('BASIC','VDA','FDA') and slip_id = payslip.id) is null then
+			0.00 else (select sum(amount) from hr_payslip_line where code in('BASIC','VDA','FDA') and slip_id = payslip.id) end as edli_wages,
+			case when (select round((sum(amount)*12.00)/100,2) from hr_payslip_line where code in('BASIC','VDA','FDA') and slip_id = payslip.id) is null then
+			0.00 else (select round((sum(amount)*12.00)/100,2) from hr_payslip_line where code in('BASIC','VDA','FDA') and slip_id = payslip.id) end as epf_contri,
+			case when (select round((sum(amount)*8.33)/100,2) from hr_payslip_line where code in('BASIC','VDA','FDA') and slip_id = payslip.id) is null then
+			0.00 else (select round((sum(amount)*8.33)/100,2) from hr_payslip_line where code in('BASIC','VDA','FDA') and slip_id = payslip.id) end as eps_contri
 
 
 			from hr_payslip payslip
@@ -98,9 +104,10 @@ class kg_excel_pf_report(osv.osv):
 			left join hr_contract contract on (contract.employee_id = payslip.employee_id)
 			left join hr_payslip_line payslip_line on (payslip_line.slip_id = payslip.id)
 
-			where month="""+month_yr+""" 
+			where month="""+month_yr+"""
 
-			group by 1,2,3"""
+			group by 1,2,3,4"""
+			
 		cr.execute(sql)		
 		data = cr.dictfetchall()
 		
@@ -143,8 +150,10 @@ class kg_excel_pf_report(osv.osv):
 		sheet1.write(s1,9,"NCP_DAYS",style1)
 		sheet1.write(s1,10,"REFUND_OF_ADVANCES",style1)
 		
-
+		epf_esi_diff = 0.00
 		for ele in data:
+			
+			epf_esi_diff = ele['epf_contri'] - ele['eps_contri']
 			
 			sheet1.write(s2,0,ele['uan_no'])
 			sheet1.write(s2,1,ele['employee_name'])
@@ -154,7 +163,7 @@ class kg_excel_pf_report(osv.osv):
 			sheet1.write(s2,5,ele['edli_wages'])
 			sheet1.write(s2,6,float(ele['epf_contri']))
 			sheet1.write(s2,7,float(ele['eps_contri']))
-			sheet1.write(s2,8,float(ele['epf_eps_diff']))
+			sheet1.write(s2,8,float(epf_esi_diff))
 			sheet1.write(s2,9,float(0))
 			sheet1.write(s2,10,float(0))
 			
