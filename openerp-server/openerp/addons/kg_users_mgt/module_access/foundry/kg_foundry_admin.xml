@@ -1412,6 +1412,20 @@
 		
 		<!-- Dispatch Update End -->
 		
+		<!-- HSN Code Masters Start -->
+		
+		<record id="m_foundry_hsn_master" model="ir.model.access">
+			<field name="model_id" ref="kg_hsn_master.model_kg_hsn_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">HSN Code Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- HSN Code Masters End -->
+		
 		
     </data>
 </openerp>
