@@ -38,6 +38,7 @@
 						<group>						
 							<field name="name" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
 							<field name="alias_name" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
+							<field name="hsn_no"/>
 							<field name="box_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>															
 							<field name="csd_code" class="aplhanum_expect"/>		
 							<field name="modify" invisible="1"/>		
@@ -52,7 +53,7 @@
 						<group>
 							<field name="pattern_name" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="make_by" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="code" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+							<field name="code" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>						
 							<field name="making_cost"/>																		
 							<field name="dynamic_length"/>									
 							<field name="length_type" attrs="{'required': [('dynamic_length','=',True)],'invisible': [('dynamic_length','=',False)]}"/>									

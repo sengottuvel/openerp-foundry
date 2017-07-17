@@ -111,7 +111,8 @@ class kg_pattern_master(osv.osv):
 		'need_dynamic_balancing': fields.boolean('Need Dynamic Balancing '),	
 		'need_hydro_test': fields.boolean('Need Hydro Test'),
 		'flag_heat_no': fields.boolean('Heat No. Required'),
-		'painting_cost': fields.float('Painting Cost'),						
+		'painting_cost': fields.float('Painting Cost'),	
+		'hsn_no': fields.many2one('kg.hsn.master', 'HSN No.', domain="[('state','=','approved')]", required=True),					
 		
 		## Child Tables Declaration	
 		

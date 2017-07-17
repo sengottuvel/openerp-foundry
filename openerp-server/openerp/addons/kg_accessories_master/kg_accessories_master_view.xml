@@ -35,7 +35,8 @@
 					
 					<group>
 						<group>						
-							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
+							<field name="hsn_no"/>							
 							<field name="is_coupling_flag" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>										
 							<field name="accessories_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 							<field name="primemover_id" on_change="onchange_framesize(primemover_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required': [('accessories_type','in',['base_plate','coupling_guard'])]}"/>				

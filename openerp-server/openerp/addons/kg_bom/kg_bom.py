@@ -60,6 +60,7 @@ class kg_bom(osv.osv):
 		
 		'source_bom': fields.many2one('kg.bom', 'Source BOM',domain="[('state','=','approved'), ('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),
+		'hsn_no': fields.many2one('kg.hsn.master', 'HSN No.', domain="[('state','=','approved')]"),	
 		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',domain="[('active','=','t')]"),   

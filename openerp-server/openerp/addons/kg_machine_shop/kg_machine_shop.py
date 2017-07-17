@@ -54,6 +54,7 @@ class kg_machine_shop(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'code': fields.char('Code', size=128, required=True),		
 		'uom_id': fields.many2one('product.uom', 'Unit of Measure', domain="[('dummy_state','=','approved'), ('active','=','t')]"),
+		'hsn_no': fields.many2one('kg.hsn.master', 'HSN No.', domain="[('state','=','approved')]", required=True),
 		'active': fields.boolean('Active'),	
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
