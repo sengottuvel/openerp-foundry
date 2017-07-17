@@ -123,7 +123,10 @@
 									<field name="pf_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 									<field name="pf_eff_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('pf_status','=',True)],'invisible':[('pf_status','!=',True)]}"/>							
 									<field name="pf_acc_no" class="numberonly" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('pf_status','=',True)],'invisible':[('pf_status','!=',True)]}"/>
+<!--
 									<field name="uan_no" class="numberonly" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('pf_status','=',True)],'invisible':[('pf_status','!=',True)]}"/>
+-->
+									<field name="uan_no" class="numberonly" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'invisible':[('pf_status','!=',True)]}"/>
 								</group>
 								<group string="ESI">
 									<field name="esi_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
