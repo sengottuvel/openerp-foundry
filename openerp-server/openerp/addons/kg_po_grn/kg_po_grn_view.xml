@@ -95,6 +95,7 @@
 							<tree string="PO GRN Line" create="false">
 								<field name="product_id"/>
 								<field name="brand_id"/>
+								<field name="moc_id_temp"/>
 								<field name="uom_id"/>
 								<field name="order_no"/>
 								<field name="po_grn_qty" string="Accepted Qty"/>

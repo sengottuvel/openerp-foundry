@@ -813,6 +813,7 @@ class kg_crm_offer(osv.osv):
 			'bush_bearing': bush_bearing,
 			'm_power': m_power,
 			'setting_height': setting_height,
+			'suction_spool': suction_spool,
 			'shaft_sealing': shaft_sealing,
 			#~ 'lubrication_type': lubrication_type,
 			'lubrication': lubrication,
@@ -994,6 +995,7 @@ class kg_crm_offer(osv.osv):
 																		   'moc_changed_flag': fou.moc_changed_flag,
 																		   'prime_cost': fou.prime_cost,
 																		   'material_code': fou.material_code,
+																		   'flag_pattern_check': fou.flag_pattern_check,
 																		   'purpose_categ': fou.purpose_categ,
 																		   'spare_offer_line_id': off_line_id,
 																		})
@@ -1070,6 +1072,7 @@ class kg_crm_offer(osv.osv):
 																							'pattern_name': ele.pattern_name,
 																							'off_name': ele.off_name,
 																							'material_code': ele.material_code,
+																							'flag_pattern_check': ele.flag_pattern_check,
 																							'unit_price': ele.prime_cost,
 																							'mar_prime_cost': ele.prime_cost,
 																							'moc_id': ele.moc_id.id,

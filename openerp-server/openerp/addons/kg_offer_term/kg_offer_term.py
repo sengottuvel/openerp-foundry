@@ -128,7 +128,7 @@ class kg_offer_term(osv.osv):
 	
 	def entry_draft(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'cancel':			
+		if rec.state in ('cancel','approved'):			
 			self.write(cr, uid, ids, {'state': 'draft'})
 		else:
 			pass

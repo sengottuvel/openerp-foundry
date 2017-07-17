@@ -55,6 +55,7 @@
 							<tree string="General GRN Line">
 								<field name="product_id"/>
 								<field name="brand_id"/>              
+								<field name="moc_id_temp"/>              
 								<field name="uom_id"/>
 								<field name="grn_qty"/>
 								<field name="price_unit"/>
