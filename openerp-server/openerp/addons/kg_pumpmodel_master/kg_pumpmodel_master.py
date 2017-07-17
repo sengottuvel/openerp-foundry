@@ -119,7 +119,7 @@ class kg_pumpmodel_master(osv.osv):
 		'sealing_water_capacity': fields.float('Sealing Water Capacity - m3/hr'),
 		'gd_sq_value': fields.float('GD SQ value'),
 		'pump_shaft_dia_at': fields.float('Pump Shaft Dia at Coupling End'),
-		#~ 'hsn_no': fields.many2many('kg.hsn.master', 'hsn_no_product', 'pump_id', 'hsn_id', 'HSN No.', domain="[('state','=','approved')]", required=True),
+		'hsn_no': fields.many2many('kg.hsn.master', 'hsn_no_product', 'pump_id', 'hsn_id', 'HSN No.', domain="[('state','=','approved')]", required=True),
 		
 	}
 	
