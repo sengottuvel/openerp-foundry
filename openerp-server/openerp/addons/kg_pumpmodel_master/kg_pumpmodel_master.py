@@ -119,6 +119,7 @@ class kg_pumpmodel_master(osv.osv):
 		'sealing_water_capacity': fields.float('Sealing Water Capacity - m3/hr'),
 		'gd_sq_value': fields.float('GD SQ value'),
 		'pump_shaft_dia_at': fields.float('Pump Shaft Dia at Coupling End'),
+		'hsn_no': fields.many2many('kg.hsn.master', 'hsn_no_product', 'pump_id', 'hsn_id', 'HSN No.', domain="[('state','=','approved')]", required=True),
 		
 	}
 	
@@ -139,6 +140,7 @@ class kg_pumpmodel_master(osv.osv):
 	
 		('name', 'unique(name)', 'Name must be unique per Company !!'),
 		('code', 'unique(code)', 'Code must be unique per Company !!'),
+		('alias_name', 'unique(alias_name)', 'Alias Name must be unique per Company !!'),
 	]
 	
 	"""def _Validation(self, cr, uid, ids, context=None):
@@ -163,6 +165,21 @@ class kg_pumpmodel_master(osv.osv):
 			division_name = rec.name
 			name=division_name.upper()			
 			cr.execute(""" select upper(name) from kg_pumpmodel_master where upper(name)  = '%s' """ %(name))
+			data = cr.dictfetchall()
+			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	def _alias_name_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.alias_name:
+			alias_name = rec.alias_name
+			name=alias_name.upper()			
+			cr.execute(""" select upper(alias_name) from kg_pumpmodel_master where upper(alias_name)  = '%s' """ %(name))
 			data = cr.dictfetchall()
 			
 			if len(data) > 1:
@@ -290,6 +307,7 @@ class kg_pumpmodel_master(osv.osv):
 		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'PumpModel name must be unique !!', ['name']),		
+		(_alias_name_validate, 'PumpModel Alias name must be unique !!', ['alias_name']),		
 		(_code_validate, 'PumpModel code must be unique !!', ['code']),	
 	]
 	

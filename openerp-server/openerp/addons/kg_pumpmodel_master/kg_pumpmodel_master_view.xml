@@ -20,6 +20,9 @@
 					<group>
 						<group>						
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+<!--
+							<field name="hsn_no" widget="many2many_tags"/>
+-->
 							<field name="series_id"/>								
 							<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="type" required = "1"/>															
