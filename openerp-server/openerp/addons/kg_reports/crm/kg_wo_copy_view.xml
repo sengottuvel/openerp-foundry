@@ -24,7 +24,7 @@
 								<field name="entry_date"/>
 								<field name="attachment"/> 	
 								<field name="attachment_1"/> 
-								<field name="state" style="width: 30%%" class="att_state_change"/>
+								<field name="state" style="width: 30%%" class="att_state_change" invisible="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -359,11 +359,10 @@
 			<field name="model">kg.wo.copy</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree colors="blue:state == 'draft';black:state == 'confirmed';" 
-								toolbar="True" string="WO Copy">					
+				<tree toolbar="True" string="WO Copy">					
 					<field name="wo_id"/>
 					<field name="entry_date"/>
-					<field name="state"/>
+					<field name="state" invisible="1"/>
 				</tree>
 			</field>
 		</record>

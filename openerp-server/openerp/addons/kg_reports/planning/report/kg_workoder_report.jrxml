@@ -3516,7 +3516,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 						<bottomPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
-					<textElement markup="html">
+					<textElement markup="html" >
 						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
