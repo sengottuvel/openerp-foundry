@@ -1231,7 +1231,6 @@ class kg_po_grn(osv.osv):
 				# UOM Checking #
 				if grn_entry.grn_type == 'from_po':
 					if line.po_exp_id:
-					   
 						for exp in line.po_exp_id:
 							print exp.product_qty
 						   
@@ -1240,20 +1239,24 @@ class kg_po_grn(osv.osv):
 									product_uom = line.product_id.uom_id.id
 									po_coeff = line.product_id.po_uom_coeff
 									product_qty = exp.product_qty * po_coeff
+									store_pending_qty = exp.product_qty
 									price_unit = line.price_subtotal / product_qty
 								elif line.uom_id.id == line.product_id.uom_id.id:
 									product_uom = line.product_id.uom_id.id
 									product_qty = exp.product_qty
+									store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
 									price_unit = line.price_subtotal / product_qty
 							if line.billing_type == 'free':
 								if line.uom_id.id != line.product_id.uom_id.id:
 									product_uom = line.product_id.uom_id.id
 									po_coeff = line.product_id.po_uom_coeff
 									product_qty = exp.product_qty * po_coeff
+									store_pending_qty = exp.product_qty
 									price_unit = line.price_subtotal / product_qty
 								elif line.uom_id.id == line.product_id.uom_id.id:
 									product_uom = line.product_id.uom_id.id
 									product_qty = exp.product_qty
+									store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
 									price_unit = line.price_subtotal / product_qty
 							lot_obj.create(cr,uid,
 								{
@@ -1264,6 +1267,7 @@ class kg_po_grn(osv.osv):
 								'product_uom':product_uom,
 								'product_qty':product_qty,
 								'pending_qty':product_qty,
+								'store_pending_qty':store_pending_qty,
 								'issue_qty':product_qty,
 								'batch_no':exp.batch_no,
 								'expiry_date':exp.exp_date,
@@ -1274,25 +1278,37 @@ class kg_po_grn(osv.osv):
 							})
 					else:
 						if line.billing_type == 'cost':
+							print"aaaaaa"
 							if line.uom_id.id != line.product_id.uom_id.id:
+								print"aaaaaaaaaaaaaaaaaaaaaaaaa"
 								product_uom = line.product_id.uom_id.id
 								po_coeff = line.product_id.po_uom_coeff
 								product_qty = line.po_grn_qty * po_coeff
+								store_pending_qty = line.po_grn_qty
 								price_unit =  line.po_line_id.price_subtotal / product_qty
 							elif line.uom_id.id == line.product_id.uom_id.id:
+								print"bbbbbbbbbbbbbbbbbbbbbbbbb"
 								product_uom = line.product_id.uom_id.id
 								product_qty = line.po_grn_qty
+								store_pending_qty = line.po_grn_qty / line.product_id.po_uom_coeff
 								price_unit = line.po_line_id.price_subtotal / product_qty
 						if line.billing_type == 'free':
+							print"bbbbb"
 							if line.uom_id.id != line.product_id.uom_id.id:
+								print"aaaaaaaaaaaaaaaaaaaaaaaaa"
 								product_uom = line.product_id.uom_id.id
 								po_coeff = line.product_id.po_uom_coeff
 								product_qty = line.po_grn_qty * po_coeff
+								store_pending_qty = line.po_grn_qty
 								price_unit =  line.price_subtotal / product_qty
 							elif line.uom_id.id == line.product_id.uom_id.id:
+								print"bbbbbbbbbbbbbbbbbbbbbbbbb"
 								product_uom = line.product_id.uom_id.id
 								product_qty = line.po_grn_qty
+								store_pending_qty = line.po_grn_qty / line.product_id.po_uom_coeff
 								price_unit =  line.price_subtotal / product_qty
+						print"product_qtyproduct_qty",product_qty
+						print"store_pending_qtystore_pending_qty",store_pending_qty
 						lot_obj.create(cr,uid,
 							{
 							'grn_no':line.po_grn_id.name,
@@ -1302,6 +1318,8 @@ class kg_po_grn(osv.osv):
 							'product_uom':product_uom,
 							'product_qty':product_qty,
 							'pending_qty':product_qty,
+							'store_pending_qty':store_pending_qty,
+							'store_pending_qty':store_pending_qty,
 							'issue_qty':product_qty,
 							'price_unit':price_unit or 0.0,
 							'po_uom':product_uom,
@@ -1317,20 +1335,24 @@ class kg_po_grn(osv.osv):
 									product_uom = line.product_id.uom_id.id
 									po_coeff = line.product_id.po_uom_coeff
 									product_qty = exp.product_qty * po_coeff
+									store_pending_qty = exp.product_qty
 									price_unit = line.price_unit
 								elif line.uom_id.id == line.product_id.uom_id.id:
 									product_uom = line.product_id.uom_id.id
 									product_qty = exp.product_qty
+									store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
 									price_unit = line.price_unit
 							if line.billing_type == 'free':
 								if line.uom_id.id != line.product_id.uom_id.id:
 									product_uom = line.product_id.uom_id.id
 									po_coeff = line.product_id.po_uom_coeff
 									product_qty = exp.product_qty * po_coeff
+									store_pending_qty = exp.product_qty
 									price_unit =  line.price_unit
 								elif line.uom_id.id == line.product_id.uom_id.id:
 									product_uom = line.product_id.uom_id.id
 									product_qty = exp.product_qty
+									store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
 									price_unit =  line.price_unit
 							lot_obj.create(cr,uid,
 								{
@@ -1341,6 +1363,7 @@ class kg_po_grn(osv.osv):
 								'product_uom':product_uom,
 								'product_qty':product_qty,
 								'pending_qty':product_qty,
+								'store_pending_qty':store_pending_qty,
 								'issue_qty':product_qty,
 								'batch_no':exp.batch_no,
 								'expiry_date':exp.exp_date,
@@ -1355,20 +1378,24 @@ class kg_po_grn(osv.osv):
 								product_uom = line.product_id.uom_id.id
 								po_coeff = line.product_id.po_uom_coeff
 								product_qty = line.po_grn_qty * po_coeff
+								store_pending_qty = line.po_grn_qty
 								price_unit =  line.so_line_id.price_subtotal / product_qty
 							elif line.uom_id.id == line.product_id.uom_id.id:
 								product_uom = line.product_id.uom_id.id
 								product_qty = line.po_grn_qty
+								store_pending_qty = line.po_grn_qty / line.product_id.po_uom_coeff
 								price_unit = line.so_line_id.price_subtotal / product_qty
 						if line.billing_type == 'free':
 							if line.uom_id.id != line.product_id.uom_id.id:
 								product_uom = line.product_id.uom_id.id
 								po_coeff = line.product_id.po_uom_coeff
 								product_qty = line.po_grn_qty * po_coeff
+								store_pending_qty = line.po_grn_qty
 								price_unit =  line.price_subtotal / product_qty
 							elif line.uom_id.id == line.product_id.uom_id.id:
 								product_uom = line.product_id.uom_id.id
 								product_qty = line.po_grn_qty
+								store_pending_qty = line.po_grn_qty / line.product_id.po_uom_coeff
 								price_unit =  line.price_subtotal / product_qty
 						lot_obj.create(cr,uid,
 							{
@@ -1379,6 +1406,7 @@ class kg_po_grn(osv.osv):
 							'product_uom':product_uom,
 							'product_qty':product_qty,
 							'pending_qty':product_qty,
+							'store_pending_qty':store_pending_qty,
 							'issue_qty':product_qty,
 							'price_unit':price_unit or 0.0,
 							'po_uom':product_uom,
@@ -1393,11 +1421,13 @@ class kg_po_grn(osv.osv):
 								product_uom = line.product_id.uom_id.id
 								po_coeff = line.product_id.po_uom_coeff
 								product_qty =  exp.product_qty * po_coeff
+								store_pending_qty = exp.product_qty
 								price_unit =  line.price_unit
 									
 							elif line.uom_id.id == line.product_id.uom_id.id:
 								product_uom = line.product_id.uom_id.id
 								product_qty =  exp.product_qty
+								store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
 								price_unit =  line.price_unit
 							lot_obj.create(cr,uid,
 								{
@@ -1408,6 +1438,7 @@ class kg_po_grn(osv.osv):
 								'product_uom':product_uom,
 								'product_qty':product_qty,
 								'pending_qty':product_qty,
+								'store_pending_qty':store_pending_qty,
 								'issue_qty':product_qty,
 								'batch_no':exp.batch_no,
 								'expiry_date':exp.exp_date,
@@ -1422,10 +1453,12 @@ class kg_po_grn(osv.osv):
 								product_uom = line.product_id.uom_id.id
 								po_coeff = line.product_id.po_uom_coeff
 								product_qty = line.po_grn_qty * po_coeff
+								store_pending_qty = line.po_grn_qty
 								price_unit =  line.price_subtotal / product_qty
 							elif line.uom_id.id == line.product_id.uom_id.id:
 								product_uom = line.product_id.uom_id.id
 								product_qty = line.po_grn_qty
+								store_pending_qty = line.po_grn_qty / line.product_id.po_uom_coeff
 								price_unit =  line.price_subtotal / product_qty
 						lot_obj.create(cr,uid,
 							{
@@ -1436,6 +1469,7 @@ class kg_po_grn(osv.osv):
 							'product_uom':line.product_id.uom_id.id,
 							'product_qty':line.po_grn_qty,
 							'pending_qty':line.po_grn_qty,
+							'store_pending_qty':line.store_pending_qty,
 							'issue_qty':line.po_grn_qty,
 							'price_unit':(line.price_subtotal / line.po_grn_qty) or 0.0,
 							'po_uom':line.product_id.uom_id.id,
