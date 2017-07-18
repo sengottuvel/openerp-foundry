@@ -1932,7 +1932,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		(_check_access,'You cannot save without accessories !',['']),
 		(_check_access_qty,'You cannot save with zero qty !',['Qty']),
 		(_duplicate_removed,'Duplicates removed !',['']),
-		(_template_name_validate,'Template name already exits!',['']),
+		#~ (_template_name_validate,'Template name already exits!',['']),
 		#~ (_check_lineitems, 'System not allow to save with empty Accessories Details !!',['']),
 		#~ (_check_is_applicable,'You cannot save without Is applicable !',['Is Applicable']),
 		
