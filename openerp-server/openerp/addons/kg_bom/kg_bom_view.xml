@@ -38,7 +38,7 @@
 						<group>	
 								
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>	
-							<field name="hsn_no" attrs="{'invisible':[('category_type','=','pump_bom')], 'required': [('category_type','=','part_list_bom')]}"/>								
+							<field name="hsn_no" attrs="{'invisible':[('category_type','=','pump_bom')]}"/>								
 							<field name="category_type" invisible="1"/>															
 							<field name="uom" readonly="1"/>
 							<field name="revision" readonly="1"/>
