@@ -384,102 +384,103 @@ class kg_attendance_device_info(osv.osv):
 						
 						rec=self.browse(cr,uid,ids[0])
 						check_emp = self.pool.get('hr.employee').search(cr,uid,[('att_code','=',att_code[4:8])])
-						check_cont = self.pool.get('hr.contract').search(cr,uid,[('employee_id','=',check_emp)])
-						print "************************************************",check_emp
-						check_emp_1 = self.pool.get('hr.employee').browse(cr,uid,check_emp[0])
-						check_con_1 = self.pool.get('hr.contract').browse(cr,uid,check_cont[0])
-						check_emp_categ = self.pool.get('kg.employee.category').browse(cr,uid,check_emp_1.emp_categ_id.id)
-						check_shift = self.pool.get('kg.shift.master').browse(cr,uid,check_emp_categ.shift_id.id)
-						print "=========================",check_shift.shift_hours
-						print "=========================",check_shift.start_time + check_shift.grace_period
-						print "========tot_hrstot_hrs=================",tot_hrs
+						check_cont = self.pool.get('hr.contract').search(cr,uid,[('employee_id','=',check_emp[0])])
+						if check_cont:
+							print "************************************************",check_emp
+							check_emp_1 = self.pool.get('hr.employee').browse(cr,uid,check_emp[0])
+							check_con_1 = self.pool.get('hr.contract').browse(cr,uid,check_cont[0])
+							check_emp_categ = self.pool.get('kg.employee.category').browse(cr,uid,check_emp_1.emp_categ_id.id)
+							check_shift = self.pool.get('kg.shift.master').browse(cr,uid,check_emp_categ.shift_id.id)
+							print "=========================",check_shift.shift_hours
+							print "=========================",check_shift.start_time + check_shift.grace_period
+							print "========tot_hrstot_hrs=================",tot_hrs
+							
+							line_in1_f = str(line_in1) .replace(':', '.')
 						
-						line_in1_f = str(line_in1) .replace(':', '.')
-					
-						print "------------------------------------------------",float(line_in1_f)
-						ot_hrs=0.00
-						wk_hrs_f = str(wk_hrs) .replace(':', '.')
-						print "sssssssssssssssssssssssssssssssssssssssssss",wk_hrs_f
-						print "sssssssssssssssssssssssssssssssssssssssssss",check_shift.shift_hours
-						print "sssssssssssssssssssssssssssssssssssssssssss",float(line_in1_f)
-						print "sssssssssssssssssssssssssssssssssssssssssss",type(check_shift.start_time + check_shift.grace_period)
-						
-						### Validating Using Shift Hours####
-						
-						### OT hours calculation ###
-						rmks=' '
-						if  wk_hrs_f >= check_shift.shift_hours and  float(line_in1_f) <= check_shift.start_time + check_shift.grace_period:
-							if check_con_1.ot_status is True:
-								print "tot_hrstot_hrstot_hrstot_hrstot_hrstot_hrs",wk_hrs
-								print "check_shift.shift_hourscheck_shift.shift_hours",check_shift.shift_hours
+							print "------------------------------------------------",float(line_in1_f)
+							ot_hrs=0.00
+							wk_hrs_f = str(wk_hrs) .replace(':', '.')
+							print "sssssssssssssssssssssssssssssssssssssssssss",wk_hrs_f
+							print "sssssssssssssssssssssssssssssssssssssssssss",check_shift.shift_hours
+							print "sssssssssssssssssssssssssssssssssssssssssss",float(line_in1_f)
+							print "sssssssssssssssssssssssssssssssssssssssssss",type(check_shift.start_time + check_shift.grace_period)
+							
+							### Validating Using Shift Hours####
+							
+							### OT hours calculation ###
+							rmks=' '
+							if  wk_hrs_f >= check_shift.shift_hours and  float(line_in1_f) <= check_shift.start_time + check_shift.grace_period:
+								if check_con_1.ot_status is True:
+									print "tot_hrstot_hrstot_hrstot_hrstot_hrstot_hrs",wk_hrs
+									print "check_shift.shift_hourscheck_shift.shift_hours",check_shift.shift_hours
+									
+									a = float(wk_hrs_f) - check_shift.shift_hours
+									if a > check_shift.min_ot_hours :
+										b = a - check_shift.min_ot_hours
+										print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",b
+										ot_hrs = b
+										status = 'present'
+									else:
+										ot_hrs = '0.00'
+										status = 'present'
+								else:
+									ot_hrs = '0.00'
+									status = 'present'
 								
-								a = float(wk_hrs_f) - check_shift.shift_hours
-								if a > check_shift.min_ot_hours :
-									b = a - check_shift.min_ot_hours
-									print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",b
-									ot_hrs = b
-									status = 'present'
-								else:
-									ot_hrs = '0.00'
-									status = 'present'
 							else:
-								ot_hrs = '0.00'
-								status = 'present'
-							
-						else:
-							
-							perm_req=self.pool.get('hr.holidays').search(cr,uid,[('from_date','=',yesterday),('employee_id','=',emp_id),('holiday_status_id','=',12),('status','=','approved')])
-							print "permission request --------------------------------------------------->>>>>>>>>>>>>>>>",perm_req
-							if perm_req:
-								perm_req_1=self.pool.get('hr.holidays').browse(cr,uid,perm_req)
-								print "*****************",perm_req_1.permission_hrs
-								total_hrs_1 = (perm_req_1.permission_hrs + wk_hrs_f)/2
-								half_shift=(check_shift.shift_hours)/2
-								if half_shift == total_hrs_1:
-									status='halfday'
-									rmks = 'Permission'+'='+perm_req_1.permission_hrs + wk_hrs_f
+								
+								perm_req=self.pool.get('hr.holidays').search(cr,uid,[('from_date','=',yesterday),('employee_id','=',emp_id),('holiday_status_id','=',12),('status','=','approved')])
+								print "permission request --------------------------------------------------->>>>>>>>>>>>>>>>",perm_req
+								if perm_req:
+									perm_req_1=self.pool.get('hr.holidays').browse(cr,uid,perm_req)
+									print "*****************",perm_req_1.permission_hrs
+									total_hrs_1 = (perm_req_1.permission_hrs + wk_hrs_f)/2
+									half_shift=(check_shift.shift_hours)/2
+									if half_shift == total_hrs_1:
+										status='halfday'
+										rmks = 'Permission'+'='+perm_req_1.permission_hrs + wk_hrs_f
+									else:
+										ot_hrs = '0.00'
+										status='absent'
+										rmks='-'
 								else:
 									ot_hrs = '0.00'
-									status='absent'
+									status = 'absent'
 									rmks='-'
-							else:
-								ot_hrs = '0.00'
-								status = 'absent'
-								rmks='-'
-						
-						### OT hours calculation ###
-						
-						line_vals = {
+							
+							### OT hours calculation ###
+							
+							line_vals = {
 
-								'employee_id':emp_id,
-								'date': device_rec.date,
-								'in_time1': line_in1,
-								'in_time2': line_in2,
-								'in_time3': line_in3,
-								'in_time4': line_in4,
-								'in_time5': line_in5,
-								'in_time6': line_in6,
-								'in_time7': line_in7,
-								'in_time8': line_in8,
-								'out_time1': line_out1,
-								'out_time2': line_out2,
-								'out_time3': line_out3,
-								'out_time4': line_out4,
-								'out_time5': line_out5,
-								'out_time6': line_out6,
-								'out_time7': line_out7,
-								'out_time8': line_out8,
-								'header_id':ele,
-								'tot_hrs': tot_hrs,
-								'wk_time': wk_hrs,
-								'status': status,
-								'cur_day':day_name,
-								'ot_hrs':ot_hrs,
-								'remarks':rmks,
+									'employee_id':emp_id,
+									'date': device_rec.date,
+									'in_time1': line_in1,
+									'in_time2': line_in2,
+									'in_time3': line_in3,
+									'in_time4': line_in4,
+									'in_time5': line_in5,
+									'in_time6': line_in6,
+									'in_time7': line_in7,
+									'in_time8': line_in8,
+									'out_time1': line_out1,
+									'out_time2': line_out2,
+									'out_time3': line_out3,
+									'out_time4': line_out4,
+									'out_time5': line_out5,
+									'out_time6': line_out6,
+									'out_time7': line_out7,
+									'out_time8': line_out8,
+									'header_id':ele,
+									'tot_hrs': tot_hrs,
+									'wk_time': wk_hrs,
+									'status': status,
+									'cur_day':day_name,
+									'ot_hrs':ot_hrs,
+									'remarks':rmks,
 
-								}
+									}
 
-						line_id = line_obj.create(cr,uid,line_vals)
+							line_id = line_obj.create(cr,uid,line_vals)
 					else:
 						if day_name =='Sunday':
 							status = 'weekoff'
