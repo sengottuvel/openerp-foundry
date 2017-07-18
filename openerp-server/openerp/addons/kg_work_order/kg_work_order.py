@@ -1213,6 +1213,7 @@ class ch_work_order_details(osv.osv):
 			('basic_design_c','BASIC DESIGN+C'),('nill','NILL')],' C.C. Drill'),
 		'order_summary': fields.char('Order Summary'),
 		'line_ids_e': fields.one2many('ch.wo.spare.bom', 'header_id', "Spare BOM"),
+		'suction_spool': fields.integer('Suction Pool'),
 		
 	}
 	
