@@ -172,7 +172,9 @@
 			ref('kg_reports.kg_casting_completion_reports'),			   
 			ref('kg_reports.kg_workorder_print_reports'),   
 			ref('kg_reports.kg_pouring_over_reports'),   
-			ref('kg_reports.kg_spare_print_reports'),	 
+			ref('kg_reports.kg_spare_print_reports'),
+			ref('kg_menus.rpm_crm_reports'),
+            ref('kg_reports.kg_wo_copy_reports'), 
 			
 			
 			ref('kg_sale_invoice.menu_kg_sale_root'),
