@@ -111,7 +111,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 					closing_value = 0
 					self.cr.execute('''		
 					   SELECT 
-						line.price_subtotal/line.product_qty  as price
+						line.price_unit as price
 											   
 						FROM purchase_order_line line
 					   

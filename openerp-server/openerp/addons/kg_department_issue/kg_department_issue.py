@@ -729,10 +729,12 @@ class kg_department_issue(osv.osv):
 									store_pending_qty = lot_rec.store_pending_qty - ((line_ids.issue_qty * line_ids.length)*line_ids.product_id.po_uom_coeff)
 								else:
 									if line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
-										store_pending_qty = lot_rec.store_pending_qty - (line_ids.issue_qty/line_ids.product_id.po_uom_coeff)
+										print"///////////////////"
+										store_pending_qty = lot_rec.store_pending_qty - (line_ids.issue_qty*line_ids.product_id.po_uom_coeff)
 									elif line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+										print"*-************************"
 										store_pending_qty = lot_rec.store_pending_qty - line_ids.issue_qty
-										lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty * line_ids.product_id.po_uom_coeff)
+										lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty / line_ids.product_id.po_uom_coeff)
 									else:
 										store_pending_qty = 0
 								print"lot_pending_qtylot_pending_qty",lot_pending_qty
