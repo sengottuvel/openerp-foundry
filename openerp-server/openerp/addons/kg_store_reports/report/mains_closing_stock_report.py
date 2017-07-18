@@ -106,7 +106,26 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 					item['batch_no']=lot_rec.batch_no
 					item['brand']=lot_rec.brand_id.name
 					item['moc']=lot_rec.moc_id.name
-			
+					item['po_price'] = 0
+					item['closing_value'] = 0
+					closing_value = 0
+					self.cr.execute('''		
+					   SELECT 
+						line.price_subtotal/line.product_qty  as price
+											   
+						FROM purchase_order_line line
+					   
+						JOIN purchase_order po ON (po.id=line.order_id)
+					   
+						where po.state='approved' and line.product_id = %s and line.brand_id = %s and line.moc_id = %s
+						order by po.date_order desc limit 1''',(item['in_pro_id'],lot_rec.brand_id.id or 0,lot_rec.moc_id.id or 0))
+					
+					lot_data = self.cr.dictfetchall()
+					if lot_data:
+						
+						print"lot_datalot_datalot_data",lot_data,lot_data[0]['price']
+						closing_value = lot_data[0]['price']
+						item['po_price'] = lot_data[0]['price']
 			if lo_type == 'in':
 				product_id = item['in_pro_id']
 				in_qty = item['in_qty']
@@ -134,10 +153,13 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				
 				item['po_uom_close_qty'] = op_qty * pro_rec.po_uom_coeff
 				item['close_qty'] = op_qty
+				
 				print "op_qty.........yyyyyyyyyyyy.....item['op_qty']..........", item['close_qty']
 				
 				#####
 				if item['close_qty']:
+					item['closing_value'] = item['close_qty'] * closing_value
+					
 					spl_obj=self.pool.get('stock.production.lot')
 					spl_id=spl_obj.search(self.cr,self.uid,[('product_id','=',product_id),('lot_type','=','in')])
 					print "innnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",spl_id
@@ -155,7 +177,8 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 						else:
 							price = 0
 						value += price
-					item['closing_value'] =value
+					
+					#~ item['closing_value'] =value
 		print "----------------------------->>>>",data
 		
 		data_renew = []
@@ -194,5 +217,5 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		return ''
 	
 report_sxw.report_sxw('report.mains.closing.stock.report', 'stock.picking', 
-			'addons/kg_store_reports/report/mains_closing_stock_report.rml', 
+			'addons/kg_reports/warehouse/report/mains_closing_stock_report.rml', 
 			parser=mains_closing_stock_report, header = False)
