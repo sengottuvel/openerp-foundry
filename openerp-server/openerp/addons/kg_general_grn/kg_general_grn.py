@@ -206,28 +206,6 @@ class kg_general_grn(osv.osv):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_general_grn, self).write(cr, uid, ids, vals, context)
 	
-	def onchange_grn_date(self, cr, uid, ids, grn_date):
-		exp_grn_qty = 0
-		line_tot = 0
-		#if grn_entry.name == '':
-		#grn_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.po.grn')
-		#self.write(cr,uid,ids,{'name':grn_no})
-		today_date = today.strftime('%Y-%m-%d')
-		back_list = []
-		today_new = today.date()
-		bk_date = date.today() - timedelta(days=3)
-		back_date = bk_date.strftime('%Y-%m-%d')
-		d1 = today_new
-		d2 = bk_date
-		delta = d1 - d2
-		for i in range(delta.days + 1):
-			bkk_date = d1 - timedelta(days=i)
-			backk_date = bkk_date.strftime('%Y-%m-%d')
-			back_list.append(backk_date)
-		if grn_date <= back_date:
-			raise osv.except_osv(_('Warning'),_('GRN Entry is not allowed for this date!'))
-		return True
-	
 	def onchange_user_id(self, cr, uid, ids, user_id, context=None):
 		value = {'dep_name': ''}
 		if user_id:
@@ -365,8 +343,8 @@ class kg_general_grn(osv.osv):
 																		   })
 			
 			for line in grn_entry.grn_line:
-				if line.grn_qty > line.recvd_qty:
-					raise osv.except_osv(_('Warning!'),_('%s Accepted qty should not be greater than Received qty!'%(line.product_id.name)))
+				#~ if line.grn_qty > line.recvd_qty:
+					#~ raise osv.except_osv(_('Warning!'),_('%s Accepted qty should not be greater than Received qty!'%(line.product_id.name)))
 				
 				# Depreciation creation process start
 				if line.product_id.is_depreciation == True:
@@ -418,17 +396,19 @@ class kg_general_grn(osv.osv):
 				if data1:
 					del_sql1 = """delete from stock_production_lot where lot_type='in' """+ brand +""" and product_id="""+str(line.product_id.id)+""" and grn_no='"""+str(line.grn_id.name)+"""'"""
 					cr.execute(del_sql1)
-
-				if line.uom_id.id != line.product_id.uom_po_id.id:
+				print"line.uom_id.id",line.uom_id.id
+				print"line.product_id.uom_po_id.id",line.product_id.uom_po_id.id
+				if line.uom_id.id != line.product_id.uom_id.id:
+					print"*************************"
 					product_uom = line.product_id.uom_id.id
 					po_coeff = line.product_id.po_uom_coeff
 					product_qty = line.grn_qty * po_coeff
 					price_unit = line.price_subtotal / product_qty or 1
 				elif line.uom_id.id == line.product_id.uom_id.id:
+					print"--------------------------"
 					product_uom = line.product_id.uom_id.id
 					product_qty = line.grn_qty
 					price_unit = line.price_subtotal / product_qty or 1
-				
 				stock_move_obj.create(cr,uid,
 					{
 					'general_grn_id':line.id,
@@ -469,15 +449,20 @@ class kg_general_grn(osv.osv):
 				# This code will create Production lot
 				if line.exp_batch_id:
 					for exp in line.exp_batch_id:
-						if line.uom_id.id != line.product_id.uom_po_id.id:
+						if line.uom_id.id != line.product_id.uom_id.id:
+							print"aaaaaaaaaaaaaaaaaaaaaaaa"
 							product_uom = line.product_id.uom_id.id
 							po_coeff = line.product_id.po_uom_coeff
-							product_qty = exp.product_qty * po_coeff
-							price_unit = line.price_subtotal / product_qty or 1
+							product_qty = exp.product_qty
+							store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
+							price_unit =  line.price_subtotal / product_qty or 1
 						elif line.uom_id.id == line.product_id.uom_id.id:
+							print"bbbbbbbbbbbbbbbbbbbbbbbb"
 							product_uom = line.product_id.uom_id.id
 							product_qty = exp.product_qty
+							store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
 							price_unit = line.price_subtotal / product_qty or 1
+						
 						lot_obj.create(cr,uid,
 							{
 							'grn_no':line.grn_id.name,
@@ -487,44 +472,51 @@ class kg_general_grn(osv.osv):
 							'product_uom':line.uom_id.id,
 							'product_qty':product_qty,
 							'pending_qty':product_qty,
+							'store_pending_qty':store_pending_qty,
 							'issue_qty':product_qty,
 							'batch_no':exp.batch_no,
 							'expiry_date':exp.exp_date,
 							'price_unit':price_unit or 0.0,
-							'po_uom':line.uom_id.id,
+							'po_uom':line.product_id.uom_po_id.id,
 							'grn_type':'material',
 							'reserved_qty': product_qty,
-							'reserved_qty_in_po_uom': exp.product_qty,
 							#'po_qty':move_record.po_to_stock_qty,
 						})
 				else:
-					if line.uom_id.id != line.product_id.uom_po_id.id:
+					if line.uom_id.id != line.product_id.uom_id.id:
+						print"aaaaaaaaaaaaaaaaaaaaaaaa"
 						product_uom = line.product_id.uom_id.id
 						po_coeff = line.product_id.po_uom_coeff
-						product_qty = line.grn_qty * po_coeff
+						product_qty = line.grn_qty
+						store_pending_qty = line.grn_qty / line.product_id.po_uom_coeff
 						price_unit =  line.price_subtotal / product_qty or 1
 					elif line.uom_id.id == line.product_id.uom_id.id:
+						print"bbbbbbbbbbbbbbbbbbbbbbbb"
 						product_uom = line.product_id.uom_id.id
 						product_qty = line.grn_qty
+						store_pending_qty = line.grn_qty / line.product_id.po_uom_coeff
 						price_unit = line.price_subtotal / product_qty or 1
+					print"product_qtyproduct_qty",product_qty
+					print"store_pending_qtystore_pending_qty",store_pending_qty
+					
 					lot_obj.create(cr,uid,
 						{
 						'grn_no':line.grn_id.name,
 						'product_id':line.product_id.id,
 						'brand_id':line.brand_id.id,
 						'moc_id':line.moc_id.id,
-						'product_uom':line.uom_id.id,
+						'product_uom':line.product_id.uom_id.id,
 						'product_qty':product_qty,
 						'pending_qty':product_qty,
+						'store_pending_qty':store_pending_qty,
 						'issue_qty':product_qty,
 						'batch_no':line.grn_id.name,
 						#'expiry_date':exp.exp_date,
 						'price_unit':price_unit or 0.0,
-						'po_uom':line.uom_id.id,
+						'po_uom':line.product_id.uom_po_id.id,
 						'batch_no':line.grn_id.name,
 						'grn_type':'material',
 						'reserved_qty': product_qty,
-						'reserved_qty_in_po_uom': line.grn_qty,
 						#'po_qty':move_record.po_to_stock_qty,
 					})
 				grn_price = line.grn_qty * line.price_unit
@@ -740,6 +732,11 @@ class kg_general_grn(osv.osv):
 		print "called _check_lineqty ___ function"
 		grn = self.browse(cr, uid, ids[0])
 		for line in grn.grn_line:
+			if line.uom_id.id == line.product_id.uom_po_id.id or line.uom_id.id == line.product_id.uom_id.id:
+				pass
+			else:
+				raise osv.except_osv(_('UOM Mismatching Error !'),
+					_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (line.product_id.uom_id.name,line.product_id.uom_po_id.name,line.product_id.name))		
 			if line.grn_qty <= 0:
 				return False
 			else:
@@ -753,22 +750,6 @@ class kg_general_grn(osv.osv):
 				return False
 			else:
 				return True
-	
-	def _grndate_validation(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
-		today = date.today()
-		grn_date = datetime.strptime(rec.grn_date,'%Y-%m-%d').date()
-		if grn_date > today:
-			return False
-		return True
-	
-	def _dcdate_validation(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
-		today = date.today()
-		dc_date = datetime.strptime(rec.dc_date,'%Y-%m-%d').date()
-		if dc_date > today:
-			return False
-		return True
 	
 	def unlink(self, cr, uid, ids, context=None):
 		unlink_ids = []
@@ -804,10 +785,10 @@ class kg_general_grn(osv.osv):
 		return value_data
 	
 	_constraints = [
+		
 		(_check_lineqty, 'You can not save an GRN with 0 product qty!!',['grn_qty']),
 		#(_check_lineprice, 'You can not save an GRN with 0 price_unit!!',['price_unit']),
-		(_grndate_validation, 'GRN date should not be greater than current date !!',['grn_date']),
-		(_dcdate_validation, 'DC date should not be greater than current date !!',['dc_date']),
+		
 		]
 	
 kg_general_grn()
@@ -863,7 +844,6 @@ class kg_general_grn_line(osv.osv):
 		
 		'product_id':fields.many2one('product.product','Item Name',required=True,readonly=False, states={'done':[('readonly',True)],'calcel':[('readonly',True)]}, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
 		'uom_id':fields.many2one('product.uom','Store UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-		'po_uom_id':fields.many2one('product.uom','PO UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'grn_qty':fields.float('GRN Quantity',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'recvd_qty':fields.float('Received Qty'),
 		'reject_qty':fields.float('Rejected Qty'),
@@ -928,18 +908,23 @@ class kg_general_grn_line(osv.osv):
 			value = {'recvd_qty': recvd_qty,'reject_qty': recvd_qty - grn_qty}
 		return {'value': value}
 	
-	def onchange_uom_id(self, cr, uid, ids, product_id, context=None):
-		value = {'uom_id': ''}
-		if product_id:
+	def onchange_uom_id(self, cr, uid, ids, product_id,uom_id, context=None):
+		value = {'price_unit': ''}
+		if product_id and uom_id:
 			pro_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'uom_id': pro_rec.uom_id.id,'po_uom_id': pro_rec.uom_po_id.id,'price_unit':pro_rec.standard_price}
+			if uom_id == pro_rec.uom_id.id or uom_id == pro_rec.uom_po_id.id:
+				pass
+			else:
+				raise osv.except_osv(_('UOM Mismatching Error !'),
+					_('You choosed wrong UOM and you can choose either %s or %s for %s !!') % (pro_rec.uom_id.name,pro_rec.uom_po_id.name,pro_rec.name))
+			value = {'price_unit':pro_rec.standard_price}
 		return {'value': value}
 	
 	def create(self, cr, uid, vals,context=None):
 		if vals.has_key('product_id') and vals['product_id']:
 			product_rec = self.pool.get('product.product').browse(cr,uid,vals['product_id'])
-			if product_rec:
-				vals.update({'uom_id':product_rec.uom_id.id})
+			#~ if product_rec:
+				#~ vals.update({'uom_id':product_rec.uom_id.id})
 		grn_line =  super(kg_general_grn_line, self).create(cr, uid, vals, context=context)
 		return grn_line
 	

@@ -612,9 +612,10 @@
 				<field name="date" string="In Date" readonly="1"/>
 				<field name="expiry_date" readonly="1"/>
 				<field name="product_qty" string="Received Qty" readonly="1"/>
-				<field name="pending_qty" readonly="1"/>
-				<field name="reserved_qty" string="Available Qty" readonly="1"/>
-				<field name="reserved_qty_in_po_uom" string="Available Qty in PO UOM" readonly="1"/>
+				<field name="pending_qty" string="Available Qty in PO UOM" readonly="1"/>
+				<field name="store_pending_qty" string="Available Qty in Store UOM" readonly="1"/>
+				<field name="reserved_qty" invisible="1" readonly="1"/>
+				<field name="reserved_qty_in_po_uom" invisible="1" readonly="1"/>
 			</field>
 		</field>
 	</record>
@@ -632,10 +633,12 @@
 			<field name="date" string="In Date"/>
 			</field>
 			<field name="product_id" position="after">
-			<field name="product_uom"/>
-			<field name="pending_qty" invisible="1"/>
-			<field name="reserved_qty" string="Available Qty"/>
-			<field name="reserved_qty_in_po_uom" string="Available Qty in PO UOM"/>
+			<field name="po_uom" string="PO UOM"/>
+			<field name="product_uom" string="Store UOM"/>
+			<field name="pending_qty" string="Available Qty in PO UOM"/>
+			<field name="store_pending_qty" string="Available Qty in Store UOM"/>
+			<field name="reserved_qty" invisible="1" />
+			<field name="reserved_qty_in_po_uom" invisible="1" />
 			<field name="price_unit" sum="price_unit" invisible="1"/>
 			<field name="product_qty" string="Received Qty" invisible="1"/>
 			<field name="expiry_date" invisible="1"/>

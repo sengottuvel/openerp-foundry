@@ -155,7 +155,7 @@ class kg_depindent(osv.osv):
 							_('Department Indent quantity can not be zero'))
 				for line in t.dep_indent_line:
 					product_record = product_obj.browse(cr,uid,line.product_id.id)
-					cr.execute("""update kg_depindent_line set uom = %s where id = %s"""%(line.product_id.uom_id.id,line.id))
+					cr.execute("""update kg_depindent_line set uom = %s where id = %s"""%(line.product_id.uom_po_id.id,line.id))
 					if line.uom.id != product_record.uom_po_id.id:
 						new_po_qty = line.qty / product_record.po_uom_coeff
 				seq_name = ''

@@ -1271,7 +1271,6 @@ class kg_po_grn(osv.osv):
 								'po_uom':line.uom_id.id,
 								'grn_type':'material',
 								'reserved_qty':product_qty,
-								'reserved_qty_in_po_uom':exp.product_qty,
 							})
 					else:
 						if line.billing_type == 'cost':
@@ -1309,7 +1308,6 @@ class kg_po_grn(osv.osv):
 							'batch_no':line.po_grn_id.name,
 							'grn_type':'material',
 							'reserved_qty':product_qty,
-							'reserved_qty_in_po_uom':line.po_grn_qty,
 						})
 				if grn_entry.grn_type == 'from_so':
 					if line.po_exp_id:
@@ -1350,7 +1348,6 @@ class kg_po_grn(osv.osv):
 								'po_uom':line.uom_id.id,
 								'grn_type':'service',
 								'reserved_qty':product_qty,
-								'reserved_qty_in_po_uom':exp.product_qty,
 							})
 					else:
 						if line.billing_type == 'cost':
@@ -1388,7 +1385,6 @@ class kg_po_grn(osv.osv):
 							'batch_no':line.po_grn_id.name,
 							'grn_type':'service' ,
 							'reserved_qty':product_qty,
-							'reserved_qty_in_po_uom':line.po_grn_qty,
 						})
 				if grn_entry.grn_type == 'from_gp':
 					if line.po_exp_id:
@@ -1419,7 +1415,6 @@ class kg_po_grn(osv.osv):
 								'po_uom':line.uom_id.id,
 								'grn_type':'service',
 								'reserved_qty':po_grn_qty,
-								'reserved_qty_in_po_uom':exp.product_qty,
 							})
 					else:
 						if line.billing_type == 'free':
@@ -1447,7 +1442,6 @@ class kg_po_grn(osv.osv):
 							'batch_no':line.po_grn_id.name,
 							'grn_type':'service',
 							'reserved_qty':po_grn_qty,
-							'reserved_qty_in_po_uom':line.po_grn_qty,
 							
 						})
 				#Write a tax amount in line

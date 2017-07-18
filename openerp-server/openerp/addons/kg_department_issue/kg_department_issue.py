@@ -616,7 +616,7 @@ class kg_department_issue(osv.osv):
 							move_uom = line_ids.uom_id.id
 							if indent_uom != move_uom:
 								if issue_used_qty <= issue_pending_qty:
-									pending_depindent_qty = issue_pending_qty - (issue_used_qty * product_record.po_uom_coeff)
+									pending_depindent_qty = issue_pending_qty - (issue_used_qty / product_record.po_uom_coeff)
 									if issue_record.department_id.name == 'DP2':
 										if bro_record.qty == bro_record.cutting_qty:
 											pending_depindent_qty = pending_depindent_qty
@@ -656,6 +656,7 @@ class kg_department_issue(osv.osv):
 									cr.execute(sql)
 									if remain_qty < 0:
 										break
+					print"pending_depindent_qtypending_depindent_qty",pending_depindent_qty
 					
 					if issue_record.issue_type == 'service':
 						serviceind_line_obj = self.pool.get('kg.service.indent.line')   
@@ -724,10 +725,20 @@ class kg_department_issue(osv.osv):
 								print"lot_pending_qty",lot_pending_qty
 								print"lot_reclot_rec",lot_rec.id
 								if issue_record.department_id.name == 'DP2':
-									reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
+									lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty * line_ids.length)
+									store_pending_qty = lot_rec.store_pending_qty - ((line_ids.issue_qty * line_ids.length)/line_ids.product_id.po_uom_coeff)
 								else:
-									reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
-								lot_rec.write({'pending_qty': lot_pending_qty,'issue_qty': 0.0,'reserved_qty': lot_pending_qty,'reserved_qty_in_po_uom':reserved_qty_in_po_uom})
+									if line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
+										store_pending_qty = lot_rec.store_pending_qty - (line_ids.issue_qty/line_ids.product_id.po_uom_coeff)
+									elif line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+										store_pending_qty = lot_rec.store_pending_qty - line_ids.issue_qty
+										lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty * line_ids.product_id.po_uom_coeff)
+									else:
+										store_pending_qty = 0
+								print"lot_pending_qtylot_pending_qty",lot_pending_qty
+								print"store_pending_qtystore_pending_qty",store_pending_qty
+								
+								lot_rec.write({'pending_qty': lot_pending_qty,'store_pending_qty':store_pending_qty,'issue_qty': 0.0})
 								#### wrting data into kg_issue_details ###
 								lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
 								if lot_issue_qty == 0:
@@ -757,7 +768,7 @@ class kg_department_issue(osv.osv):
 										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
 									else:
 										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
-									lot_rec.write({'pending_qty': 0.0,'reserved_qty': 0.0,'reserved_qty_in_po_uom':reserved_qty_in_po_uom})
+									lot_rec.write({'pending_qty': 0.0,'reserved_qty': 0.0})
 									#### wrting data into kg_issue_details ###
 									lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
 									if lot_issue_qty == 0:
@@ -787,12 +798,13 @@ class kg_department_issue(osv.osv):
 										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
 									else:
 										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
-									lot_rec.write({'reserved_qty': lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty),'reserved_qty_in_po_uom':reserved_qty_in_po_uom})
+									lot_rec.write({'reserved_qty': lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)})
 								else:
 									pass
 							issue_qty = remain_qty
 					else:
 						pass
+		
 		return True
 	
 	def unlink(self, cr, uid, ids, context=None):
@@ -825,7 +837,7 @@ class kg_department_issue_line(osv.osv):
 		
 		'issue_date': fields.related('issue_id','issue_date', type='date', string='Issue Date',store=True),
 		'product_id': fields.many2one('product.product','Product Name',required=True,domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
-		'uom_id': fields.many2one('product.uom','UOM',readonly=True),
+		'uom_id': fields.many2one('product.uom','UOM'),
 		'issue_qty': fields.float('Issue Qty',required=True,readonly=False,states={'done':[('readonly',True)]}),
 		'issue_qty_2': fields.float('Issue Qty 2',required=True),
 		'cutting_qty': fields.float('Cutting Qty'),
