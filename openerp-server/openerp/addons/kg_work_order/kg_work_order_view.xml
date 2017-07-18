@@ -485,6 +485,7 @@
 													<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="off_name"/>
 													<field name="material_code"/>
+													<field name="flag_pattern_check"/>
 													<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 													<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="qty" required="1" />

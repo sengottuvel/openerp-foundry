@@ -3235,6 +3235,7 @@ class ch_wo_spare_foundry(osv.osv):
 		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
 		'material_code': fields.char('Material Code'),
 		'off_name': fields.char('Offer Name'),
+		'flag_pattern_check': fields.boolean('Is Pattern Check'),
 		
 	}
 	
@@ -3242,6 +3243,7 @@ class ch_wo_spare_foundry(osv.osv):
 		
 		'is_applicable': False,
 		'load_bom': False,
+		'flag_pattern_check': False,
 		
 	}
 	
