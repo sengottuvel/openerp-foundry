@@ -14,6 +14,12 @@ case when (ROW_NUMBER()OVER(PARTITION By ch_work.id)=COUNT(ch_work.id)OVER(PARTI
 	 else ''
 	end
  else '' end as brkneed,
+
+ case when (ROW_NUMBER()OVER(PARTITION By ch_work.id)=COUNT(ch_work.id)OVER(PARTITION By ch_work.id)) then
+	 'stop'
+	end
+ as remark_brkneed,
+
 to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_date,
 
 count(*) OVER (),
@@ -51,9 +57,10 @@ ch_bom.flag_applicable = True  and
 case
 when (select order_id from m2m_work_order_casting_report_details where foundry_wiz_id =$P{wiz_id}  limit 1) is not null then work_order.id in (select order_id from m2m_work_order_casting_report_details where foundry_wiz_id = $P{wiz_id})
 else
-work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]>
+work_order.id in (select  id from kg_work_order) end order by ch_work.id]]>
 	</queryString>
 	<field name="brkneed" class="java.lang.String"/>
+	<field name="remark_brkneed" class="java.lang.String"/>
 	<field name="new_date" class="java.lang.String"/>
 	<field name="count" class="java.lang.Long"/>
 	<field name="row_number" class="java.lang.Long"/>
@@ -252,7 +259,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 		</band>
 	</pageHeader>
 	<detail>
-		<band height="52">
+		<band height="81">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="426" y="0" width="39" height="32"/>
 				<box topPadding="0" leftPadding="1" bottomPadding="0" rightPadding="0">
@@ -394,6 +401,21 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="1" y="53" width="269" height="28">
+					<printWhenExpression><![CDATA[$F{remark_brkneed} == 'stop']]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
