@@ -211,8 +211,10 @@
 					<newline/>
 					<group>
 						<group>
-							<field name="flag_load_bom" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id,order_category,flag_standard,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,pump_model_type,flag_offer)"
+							<field name="flag_load_bom" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id,order_category,flag_standard,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,pump_model_type,flag_offer,flag_select_all)"
 								attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
+								
+							<field name="flag_select_all" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id,order_category,flag_standard,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,pump_model_type,flag_offer,flag_select_all)"/>
 						</group>
 						<group></group>
 					</group>

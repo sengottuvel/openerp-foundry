@@ -67,7 +67,7 @@ class kg_work_order(osv.osv):
 		'name': fields.char('WO No.', size=128,select=True),
 		'entry_date': fields.date('WO Date',required=True),
 		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('active','=','t')]"),
-		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location', required=True),
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -1214,6 +1214,7 @@ class ch_work_order_details(osv.osv):
 		'order_summary': fields.char('Order Summary'),
 		'line_ids_e': fields.one2many('ch.wo.spare.bom', 'header_id', "Spare BOM"),
 		'suction_spool': fields.integer('Suction Pool'),
+		'flag_select_all': fields.boolean('Select All'),
 		
 	}
 	
@@ -1226,6 +1227,7 @@ class ch_work_order_details(osv.osv):
 		'flag_load_bom':False,
 		'flag_for_stock':False,
 		'flag_offer':False,
+		'flag_select_all':False,
 		
 	}
 	
@@ -1277,7 +1279,7 @@ class ch_work_order_details(osv.osv):
 		return {'value': {'moc_construction_name': moc_construction_name}}
 		
 	def onchange_bom_details(self, cr, uid, ids, pump_model_id, qty,moc_construction_id, order_category,flag_standard,
-		rpm,setting_height,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,pump_model_type,flag_offer):
+		rpm,setting_height,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,pump_model_type,flag_offer,flag_select_all):
 		
 		
 		bom_vals=[]
@@ -1341,7 +1343,12 @@ class ch_work_order_details(osv.osv):
 							wgt = bom_details['pcs_weight']
 						if moc_rec.weight_type == 'non_ferrous':
 							wgt = bom_details['nonferous_weight']
-						
+							
+							
+					if flag_select_all == True:
+						applicable = True
+					else:
+						applicable = False	
 						
 					bom_vals.append({
 														
@@ -1401,6 +1408,11 @@ class ch_work_order_details(osv.osv):
 					else:
 						moc_id = False
 						
+					if flag_select_all == True:
+						applicable = True
+					else:
+						applicable = False
+						
 					machine_shop_vals.append({
 						
 						'pos_no': bom_ms_details['pos_no'],
@@ -1452,6 +1464,11 @@ class ch_work_order_details(osv.osv):
 							moc_id = False
 					else:
 						moc_id = False
+						
+					if flag_select_all == True:
+						applicable = True
+					else:
+						applicable = False
 						
 						
 					bot_vals.append({
@@ -1748,6 +1765,11 @@ class ch_work_order_details(osv.osv):
 									raise osv.except_osv(_('Warning!'),
 									_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
 								
+								
+								if flag_select_all == True:
+									applicable = True
+								else:
+									applicable = False
 								
 								bom_vals.append({
 																	
@@ -2158,6 +2180,11 @@ class ch_work_order_details(osv.osv):
 							if vertical_ms_details['position_id'] == None:
 								raise osv.except_osv(_('Warning!'),
 								_('Kindly Configure Position No. in MS Items for respective Pump Bom and proceed further !!'))
+							
+							if flag_select_all == True:
+								applicable = True
+							else:
+								applicable = False
 								
 							machine_shop_vals.append({
 								
@@ -2335,6 +2362,12 @@ class ch_work_order_details(osv.osv):
 								
 							bot_obj = self.pool.get('kg.machine.shop')
 							bot_rec = bot_obj.browse(cr, uid, vertical_bot_details['bot_id'])
+							
+							
+							if flag_select_all == True:
+								applicable = True
+							else:
+								applicable = False
 						
 							bot_vals.append({
 								
