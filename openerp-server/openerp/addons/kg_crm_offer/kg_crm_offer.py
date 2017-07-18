@@ -737,6 +737,7 @@ class kg_crm_offer(osv.osv):
 		moc_const_id = m_power = setting_height = 0
 		pump_model_type = speed_in_rpm = rpm = bush_bearing = shaft_sealing = lubrication = lubrication_type = rpm = qap_plan_id = drawing_approval = inspection = ''
 		pump_model_type = item.pump_model_type
+		suction_spool = item.suction_spool
 		if purpose == 'pump':
 			qty = item.qty
 			moc_const_id = item.moc_const_id.id
