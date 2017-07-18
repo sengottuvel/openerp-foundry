@@ -454,13 +454,13 @@ class kg_general_grn(osv.osv):
 							product_uom = line.product_id.uom_id.id
 							po_coeff = line.product_id.po_uom_coeff
 							product_qty = exp.product_qty
-							store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
+							store_pending_qty = exp.product_qty * line.product_id.po_uom_coeff
 							price_unit =  line.price_subtotal / product_qty or 1
 						elif line.uom_id.id == line.product_id.uom_id.id:
 							print"bbbbbbbbbbbbbbbbbbbbbbbb"
 							product_uom = line.product_id.uom_id.id
 							product_qty = exp.product_qty
-							store_pending_qty = exp.product_qty * line.product_id.po_uom_coeff
+							store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
 							price_unit = line.price_subtotal / product_qty or 1
 						
 						lot_obj.create(cr,uid,
@@ -488,13 +488,13 @@ class kg_general_grn(osv.osv):
 						product_uom = line.product_id.uom_id.id
 						po_coeff = line.product_id.po_uom_coeff
 						product_qty = line.grn_qty
-						store_pending_qty = line.grn_qty / line.product_id.po_uom_coeff
+						store_pending_qty = line.grn_qty * line.product_id.po_uom_coeff
 						price_unit =  line.price_subtotal / product_qty or 1
 					elif line.uom_id.id == line.product_id.uom_id.id:
 						print"bbbbbbbbbbbbbbbbbbbbbbbb"
 						product_uom = line.product_id.uom_id.id
 						product_qty = line.grn_qty
-						store_pending_qty = line.grn_qty * line.product_id.po_uom_coeff
+						store_pending_qty = line.grn_qty / line.product_id.po_uom_coeff
 						price_unit = line.price_subtotal / product_qty or 1
 					print"product_qtyproduct_qty",product_qty
 					print"store_pending_qtystore_pending_qty",store_pending_qty
