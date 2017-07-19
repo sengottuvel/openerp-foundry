@@ -383,17 +383,17 @@ class kg_general_grn(osv.osv):
 					brand =  brand+')'
 				else:
 					brand = ''
-				sql = """select * from stock_move where product_id="""+str(line.product_id.id)+""" and move_type='in' """+ brand +""" and general_grn_id="""+str(line.id)+""" """
-				cr.execute(sql)
-				data = cr.dictfetchall()
-				if data:
-					del_sql = """delete from stock_move where product_id="""+str(line.product_id.id)+""" and move_type='in'  """+ brand +"""  and general_grn_id="""+str(line.id)+""" """
-					cr.execute(del_sql)
+				#~ sql = """select * from stock_move where product_id="""+str(line.product_id.id)+""" and move_type='in' """+ brand +""" and general_grn_id="""+str(line.id)+""" """
+				#~ cr.execute(sql)
+				#~ data = cr.dictfetchall()
+				#~ if data:
+					#~ del_sql = """delete from stock_move where product_id="""+str(line.product_id.id)+""" and move_type='in'  """+ brand +"""  and general_grn_id="""+str(line.id)+""" """
+					#~ cr.execute(del_sql)
 				
-				grn_line_ids = self.pool.get('kg.general.grn.line').search(cr,uid,[('product_id','=',line.product_id.id),('brand_id','=',line.brand_id.id),('moc_id','=',line.moc_id.id),('grn_id','=',grn_entry.id)])
-				if len(grn_line_ids) > 1:
-					raise osv.except_osv(_('Warning!'),
-						_('%s already exists with same combination of Brand: %s and MOC: %s'%(line.product_id.name,line.brand_id.name,line.moc_id.name)))
+				#~ grn_line_ids = self.pool.get('kg.general.grn.line').search(cr,uid,[('product_id','=',line.product_id.id),('brand_id','=',line.brand_id.id),('moc_id','=',line.moc_id.id),('grn_id','=',grn_entry.id)])
+				#~ if len(grn_line_ids) > 1:
+					#~ raise osv.except_osv(_('Warning!'),
+						#~ _('%s already exists with same combination of Brand: %s and MOC: %s'%(line.product_id.name,line.brand_id.name,line.moc_id.name)))
 				print"line.uom_id.id",line.uom_id.id
 				print"line.product_id.uom_po_id.id",line.product_id.uom_po_id.id
 				
