@@ -163,7 +163,7 @@
 			<td>          <para style="terp_left_61">[[ x['brand'] ]]</para>        </td>
 			<td>          <para style="terp_left_61">[[ x['moc'] ]]</para>        </td>
 			<td>          <para style="terp_left_61">[[ x ['po_uom'] ]]</para>        </td>
-			<td>          <para style="terp_left_61">[[ locale.format('%.2f', x['po_uom_close_qty']) ]] </para>        </td>
+			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['po_uom_close_qty']) ]] </para>        </td>
 			<td>          <para style="terp_left_61">[[ x ['uom'] ]]</para>        </td>
 			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['po_price']) ]] </para>        </td>
 			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['close_qty']) ]] </para>        </td>
