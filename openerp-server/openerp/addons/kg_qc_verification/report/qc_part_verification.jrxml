@@ -30,7 +30,9 @@ qc.each_weight as each_weight,
 qc.qty as accepted_qty,
 qc.reject_qty as reject_qty,
 qc.remark as remark,
-stock.name as physical_location
+stock.name as physical_location,
+(moc.rate * qc.each_weight) as each_value,
+((qc.allocated_qty * qc.each_weight) * moc.rate) as total_value
 
 from kg_qc_verification qc
 
@@ -58,6 +60,8 @@ order by stock.name]]>
 	<field name="reject_qty" class="java.lang.Integer"/>
 	<field name="remark" class="java.lang.String"/>
 	<field name="physical_location" class="java.lang.String"/>
+	<field name="each_value" class="java.lang.Double"/>
+	<field name="total_value" class="java.lang.Double"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -102,7 +106,7 @@ order by stock.name]]>
 	<columnHeader>
 		<band height="22" splitType="Stretch">
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="73" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="50" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -115,7 +119,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["Allocated Date"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="73" y="0" width="48" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="50" y="0" width="48" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2" rightPadding="0">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -128,7 +132,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["Location"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="121" y="0" width="66" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="98" y="0" width="66" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -141,7 +145,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["WO.No"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="187" y="0" width="71" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="164" y="0" width="56" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -154,7 +158,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["Pattern Number"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="258" y="0" width="73" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="220" y="0" width="58" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -167,7 +171,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["Pattern Name"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="645" y="0" width="54" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="638" y="0" width="60" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -193,20 +197,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["Remarks"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="399" y="0" width="33" height="22"/>
-				<box topPadding="3" leftPadding="2" bottomPadding="2">
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font size="10" isBold="true" isStrikeThrough="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Stock Qty"]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="331" y="0" width="68" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="278" y="0" width="68" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -219,7 +210,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["MOC"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="520" y="0" width="53" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="443" y="0" width="47" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -232,7 +223,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["Total Weight"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="432" y="0" width="46" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="346" y="0" width="59" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -245,7 +236,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["Allocated Qty"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="699" y="0" width="47" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="698" y="0" width="48" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -258,7 +249,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["Rejected Qty"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="573" y="0" width="72" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="581" y="0" width="57" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -271,7 +262,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA["Physical Location"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="478" y="0" width="42" height="22"/>
+				<reportElement stretchType="RelativeToTallestObject" x="405" y="0" width="38" height="22"/>
 				<box topPadding="3" leftPadding="2" bottomPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -283,12 +274,38 @@ order by stock.name]]>
 				</textElement>
 				<textFieldExpression><![CDATA["Each Weight"]]></textFieldExpression>
 			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToTallestObject" x="490" y="0" width="47" height="22"/>
+				<box topPadding="3" leftPadding="2" bottomPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Each Value"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToTallestObject" x="537" y="0" width="44" height="22"/>
+				<box topPadding="3" leftPadding="2" bottomPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Total Value"]]></textFieldExpression>
+			</textField>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="31" splitType="Stretch">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="73" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="50" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -299,7 +316,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA[$F{allocated_date}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="73" y="0" width="48" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="50" y="0" width="48" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -310,7 +327,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA[$F{location}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="121" y="0" width="66" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="98" y="0" width="66" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -321,7 +338,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA[$F{wo_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="187" y="0" width="71" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="164" y="0" width="56" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -332,7 +349,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA[$F{pattern_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="258" y="0" width="73" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="220" y="0" width="58" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -343,7 +360,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA[$F{pattern_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="331" y="0" width="68" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="278" y="0" width="68" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -354,18 +371,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="399" y="0" width="33" height="31"/>
-				<box topPadding="3" leftPadding="0" rightPadding="2">
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Right"/>
-				<textFieldExpression><![CDATA[$F{stock_qty}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="432" y="0" width="46" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="346" y="0" width="59" height="31"/>
 				<box topPadding="3" leftPadding="0" rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -376,7 +382,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA[$F{allocated_qty}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="478" y="0" width="42" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="405" y="0" width="38" height="31"/>
 				<box topPadding="3" leftPadding="0" rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -387,7 +393,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA[$F{each_weight}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="520" y="0" width="53" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="443" y="0" width="47" height="31"/>
 				<box topPadding="3" leftPadding="0" rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -398,7 +404,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA[$F{total_weight}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="645" y="0" width="54" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="638" y="0" width="61" height="31"/>
 				<box topPadding="3" leftPadding="0" rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -429,7 +435,7 @@ order by stock.name]]>
 				<textFieldExpression><![CDATA[$F{remark}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="573" y="0" width="72" height="31"/>
+				<reportElement stretchType="RelativeToTallestObject" x="581" y="0" width="57" height="31"/>
 				<box topPadding="3" leftPadding="2" rightPadding="0">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -438,6 +444,28 @@ order by stock.name]]>
 				</box>
 				<textElement textAlignment="Left"/>
 				<textFieldExpression><![CDATA[$F{physical_location}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="490" y="0" width="47" height="31"/>
+				<box topPadding="3" leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{each_value}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="537" y="0" width="44" height="31"/>
+				<box topPadding="3" leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{total_value}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

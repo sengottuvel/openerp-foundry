@@ -6,7 +6,7 @@
 	<subDataset name="dataset1">
 		<parameter name="enquiry_line_id" class="java.lang.Integer"/>
 		<queryString>
-			<![CDATA[select material_code,pattern_no,off_name,moc_name,qty,unit,type,
+			<![CDATA[select material_code,pattern_no,off_name,moc_name,qty,unit,type,hsn_code,tax_per,
 trim(TO_CHAR((coalesce(each_price,0.00)), '999G999G99G999G99G99G990D99')) as each_price_txt,
 trim(TO_CHAR((coalesce(total_price,0.00)), '999G999G99G999G99G99G990D99')) as total_price_txt
 
@@ -20,12 +20,16 @@ foundry.qty as qty,
 'No' as unit,
 'A' as type,
 foundry.prime_cost / foundry.qty as each_price,
+coalesce(hsn.name::text,'-') as hsn_code,
+coalesce(tax.description,'-') as tax_per,
 foundry.prime_cost as total_price
 
 from
 ch_kg_crm_pumpmodel enquiry
 left join ch_kg_crm_foundry_item foundry on(foundry.header_id = enquiry.id)
 left join kg_pattern_master pattern on (pattern.id = foundry.pattern_id)
+left join kg_hsn_master hsn on (hsn.id = pattern.hsn_no)
+left join account_tax tax on (tax.id = hsn.igst_id)
 left join kg_moc_master moc on (moc.id = foundry.moc_id)
 where enquiry.id=$P{enquiry_line_id} and foundry.is_applicable = 't'
 
@@ -40,12 +44,16 @@ ms.qty as qty,
 'No' as unit,
 'B' as type,
 ms.prime_cost / ms.qty as each_price,
+coalesce(hsn.name::text,'-') as hsn_code,
+coalesce(tax.description,'-') as tax_per,
 ms.prime_cost as total_price
 
 from
 ch_kg_crm_pumpmodel enquiry
 left join ch_kg_crm_machineshop_item ms on(ms.header_id = enquiry.id)
 left join kg_machine_shop machine on (machine.id = ms.ms_id)
+left join kg_hsn_master hsn on (hsn.id = machine.hsn_no)
+left join account_tax tax on (tax.id = hsn.igst_id)
 left join kg_moc_master moc on (moc.id = ms.moc_id)
 where enquiry.id=$P{enquiry_line_id} and ms.is_applicable = 't'
 
@@ -60,12 +68,16 @@ bot.qty as qty,
 'No' as unit,
 'C' as type,
 bot.prime_cost / bot.qty as each_price,
+coalesce(hsn.name::text,'-') as hsn_code,
+coalesce(tax.description,'-') as tax_per,
 bot.prime_cost as total_price
 
 from
 ch_kg_crm_pumpmodel enquiry
 left join ch_kg_crm_bot bot on(bot.header_id = enquiry.id)
 left join kg_machine_shop machine on (machine.id = bot.ms_id)
+left join kg_hsn_master hsn on (hsn.id = machine.hsn_no)
+left join account_tax tax on (tax.id = hsn.igst_id)
 left join kg_moc_master moc on (moc.id = bot.moc_id)
 where enquiry.id=$P{enquiry_line_id} and bot.is_applicable = 't'
 ) as sublist order by type]]>
@@ -77,6 +89,8 @@ where enquiry.id=$P{enquiry_line_id} and bot.is_applicable = 't'
 		<field name="qty" class="java.lang.Integer"/>
 		<field name="unit" class="java.lang.String"/>
 		<field name="type" class="java.lang.String"/>
+		<field name="hsn_code" class="java.lang.String"/>
+		<field name="tax_per" class="java.lang.String"/>
 		<field name="each_price_txt" class="java.lang.String"/>
 		<field name="total_price_txt" class="java.lang.String"/>
 	</subDataset>
@@ -185,7 +199,7 @@ where offer.id=$P{offer_id} and offer.state != 'draft' and spare.enquiry_line_id
 		<groupHeader>
 			<band height="178">
 				<staticText>
-					<reportElement mode="Transparent" x="360" y="155" width="27" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="381" y="155" width="27" height="23" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -212,7 +226,7 @@ where offer.id=$P{offer_id} and offer.state != 'draft' and spare.enquiry_line_id
 EACH IN Rs.]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="47" y="155" width="79" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="32" y="155" width="54" height="23" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -238,7 +252,7 @@ EACH IN Rs.]]></text>
 					<text><![CDATA[TOTAL PRICE]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="387" y="155" width="52" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="408" y="155" width="31" height="23" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -251,7 +265,7 @@ EACH IN Rs.]]></text>
 					<text><![CDATA[UNIT]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="126" y="155" width="133" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="176" y="155" width="123" height="23" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -264,7 +278,7 @@ EACH IN Rs.]]></text>
 					<text><![CDATA[PART NAME / PART NO]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="259" y="155" width="101" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="299" y="155" width="82" height="23" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -286,7 +300,7 @@ EACH IN Rs.]]></text>
 				</textField>
 				<image>
 					<reportElement x="126" y="0" width="69" height="46"/>
-					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
 				</image>
 				<textField isBlankWhenNull="true">
 					<reportElement mode="Transparent" x="0" y="46" width="387" height="40"/>
@@ -328,7 +342,7 @@ EACH IN Rs.]]></text>
 					<textFieldExpression><![CDATA["OFFER REF :"+$F{offer_ref}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="109" width="259" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="109" width="299" height="23" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -341,7 +355,7 @@ EACH IN Rs.]]></text>
 					<text><![CDATA[PUMP MODEL:]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="132" width="259" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="132" width="299" height="23" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -354,7 +368,7 @@ EACH IN Rs.]]></text>
 					<text><![CDATA[EARLIER PUMP SERIAL NO: ]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="259" y="86" width="296" height="23"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="299" y="86" width="256" height="23"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -367,7 +381,7 @@ EACH IN Rs.]]></text>
 					<textFieldExpression><![CDATA[$F{customer}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="259" y="109" width="296" height="23"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="299" y="109" width="256" height="23"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -380,7 +394,7 @@ EACH IN Rs.]]></text>
 					<textFieldExpression><![CDATA[$F{pump_name}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="259" y="132" width="296" height="23"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="299" y="132" width="256" height="23"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -393,7 +407,7 @@ EACH IN Rs.]]></text>
 					<textFieldExpression><![CDATA[$F{serial_no}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="155" width="47" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="155" width="32" height="23" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -406,7 +420,7 @@ EACH IN Rs.]]></text>
 					<text><![CDATA[ITEM NO]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="86" width="259" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="86" width="299" height="23" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -418,12 +432,38 @@ EACH IN Rs.]]></text>
 					</textElement>
 					<text><![CDATA[CUSTOMER : ]]></text>
 				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="86" y="155" width="53" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[HSN Code]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="139" y="155" width="37" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[GST %]]></text>
+				</staticText>
 			</band>
 		</groupHeader>
 		<groupFooter>
 			<band height="149">
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="360" y="0" width="133" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="381" y="0" width="112" height="21"/>
 					<box topPadding="0" bottomPadding="0">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -518,7 +558,7 @@ EACH IN Rs.]]></text>
 					</datasetRun>
 					<jr:listContents height="21" width="555">
 						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="47" height="21"/>
+							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="32" height="21"/>
 							<box topPadding="0" leftPadding="1" bottomPadding="0">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
@@ -531,7 +571,7 @@ EACH IN Rs.]]></text>
 							<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 						</textField>
 						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="47" y="0" width="79" height="21"/>
+							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="32" y="0" width="54" height="21"/>
 							<box topPadding="0" leftPadding="2" bottomPadding="0">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
@@ -544,7 +584,7 @@ EACH IN Rs.]]></text>
 							<textFieldExpression><![CDATA[$F{material_code}]]></textFieldExpression>
 						</textField>
 						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="126" y="0" width="133" height="21"/>
+							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="176" y="0" width="123" height="21"/>
 							<box topPadding="0" leftPadding="2" bottomPadding="0">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
@@ -557,7 +597,7 @@ EACH IN Rs.]]></text>
 							<textFieldExpression><![CDATA[$F{off_name}]]></textFieldExpression>
 						</textField>
 						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="259" y="0" width="101" height="21"/>
+							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="299" y="0" width="82" height="21"/>
 							<box topPadding="0" leftPadding="2" bottomPadding="0">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
@@ -570,7 +610,7 @@ EACH IN Rs.]]></text>
 							<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
 						</textField>
 						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="360" y="0" width="27" height="21"/>
+							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="381" y="0" width="27" height="21"/>
 							<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="2">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
@@ -583,7 +623,7 @@ EACH IN Rs.]]></text>
 							<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 						</textField>
 						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="387" y="0" width="52" height="21"/>
+							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="408" y="0" width="31" height="21"/>
 							<box topPadding="0" leftPadding="2" bottomPadding="0">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
@@ -620,6 +660,32 @@ EACH IN Rs.]]></text>
 								<font size="8"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{each_price_txt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="86" y="0" width="53" height="21"/>
+							<box topPadding="0" leftPadding="2" bottomPadding="0">
+								<topPen lineWidth="0.75"/>
+								<leftPen lineWidth="0.75"/>
+								<bottomPen lineWidth="0.75"/>
+								<rightPen lineWidth="0.75"/>
+							</box>
+							<textElement verticalAlignment="Middle">
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{hsn_code}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="139" y="0" width="37" height="21"/>
+							<box topPadding="0" leftPadding="2" bottomPadding="0">
+								<topPen lineWidth="0.75"/>
+								<leftPen lineWidth="0.75"/>
+								<bottomPen lineWidth="0.75"/>
+								<rightPen lineWidth="0.75"/>
+							</box>
+							<textElement verticalAlignment="Middle">
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{tax_per}]]></textFieldExpression>
 						</textField>
 					</jr:listContents>
 				</jr:list>
