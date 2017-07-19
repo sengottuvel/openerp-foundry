@@ -578,9 +578,9 @@ class kg_schedule(osv.osv):
 									stk_ids = cr.dictfetchall();
 									
 									if stk_ids:
-									
+										
 										for stk_item in stk_ids:
-											
+											allocated_qty = 0
 											### Qty Updation in Stock Inward ###
 										
 											inward_line_obj = self.pool.get('ch.stock.inward.details')
