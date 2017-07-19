@@ -389,15 +389,14 @@ class kg_general_grn(osv.osv):
 				if data:
 					del_sql = """delete from stock_move where product_id="""+str(line.product_id.id)+""" and move_type='in'  """+ brand +"""  and general_grn_id="""+str(line.id)+""" """
 					cr.execute(del_sql)
-
-				sql1 = """select * from stock_production_lot where lot_type='in' """+ brand +""" and product_id="""+str(line.product_id.id)+""" and grn_no='"""+str(line.grn_id.name)+"""'"""
-				cr.execute(sql1)
-				data1 = cr.dictfetchall()
-				if data1:
-					del_sql1 = """delete from stock_production_lot where lot_type='in' """+ brand +""" and product_id="""+str(line.product_id.id)+""" and grn_no='"""+str(line.grn_id.name)+"""'"""
-					cr.execute(del_sql1)
+				
+				grn_line_ids = self.pool.get('kg.general.grn.line').search(cr,uid,[('product_id','=',line.product_id.id),('brand_id','=',line.brand_id.id),('moc_id','=',line.moc_id.id),('grn_id','=',grn_entry.id)])
+				if len(grn_line_ids) > 1:
+					raise osv.except_osv(_('Warning!'),
+						_('%s already exists with same combination of Brand: %s and MOC: %s'%(line.product_id.name,line.brand_id.name,line.moc_id.name)))
 				print"line.uom_id.id",line.uom_id.id
 				print"line.product_id.uom_po_id.id",line.product_id.uom_po_id.id
+				
 				if line.uom_id.id != line.product_id.uom_id.id:
 					print"*************************"
 					product_uom = line.product_id.uom_id.id
@@ -463,7 +462,7 @@ class kg_general_grn(osv.osv):
 							store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
 							price_unit = line.price_subtotal / product_qty or 1
 						
-						lot_obj.create(cr,uid,
+						lot_id = lot_obj.create(cr,uid,
 							{
 							'grn_no':line.grn_id.name,
 							'product_id':line.product_id.id,
@@ -499,7 +498,7 @@ class kg_general_grn(osv.osv):
 					print"product_qtyproduct_qty",product_qty
 					print"store_pending_qtystore_pending_qty",store_pending_qty
 					
-					lot_obj.create(cr,uid,
+					lot_id = lot_obj.create(cr,uid,
 						{
 						'grn_no':line.grn_id.name,
 						'product_id':line.product_id.id,
@@ -519,6 +518,7 @@ class kg_general_grn(osv.osv):
 						'reserved_qty': product_qty,
 						#'po_qty':move_record.po_to_stock_qty,
 					})
+					print"lot_idlot_idlot_idlot_idlot_id",lot_id
 				grn_price = line.grn_qty * line.price_unit
 				line.write({'line_total':grn_price})
 				line_tot += grn_price
