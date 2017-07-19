@@ -66,6 +66,7 @@ class kg_product(osv.osv):
 		'sleeve_dia': fields.char('Sleeve dia(MM)'),
 		'coupling_make': fields.many2one('kg.brand.master','Coupling Make'),
 		'is_depreciation': fields.boolean('Is Depreciation'),
+		'hsn_no': fields.many2one('kg.hsn.master','HSN No.',domain="[('state','=','approved')]",readonly=False,states={'approved':[('readonly',True)]}),
 		
 		## Child 
 		
