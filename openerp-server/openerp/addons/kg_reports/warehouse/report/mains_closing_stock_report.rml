@@ -120,7 +120,7 @@
 	
 	<pto_header>
 	
-	<blockTable colWidths="30,150,55,55,50,50,50,40,50,50" repeatRows="1" style="Table4">
+	<blockTable colWidths="30,150,55,55,45,50,50,40,50,50" repeatRows="1" style="Table4">
 		<tr>
 			<td>          <para style="terp_61t">S.No.</para></td>
 			<td>          <para style="terp_61t">Item Name</para></td>
@@ -136,7 +136,7 @@
 	</blockTable>
 	</pto_header>
 	
-	<blockTable colWidths="30,150,55,55,50,50,50,40,50,50" repeatRows="1" style="Table4">
+	<blockTable colWidths="30,150,55,55,45,50,50,40,50,50" repeatRows="1" style="Table4">
 		<tr>
 			<td>          <para style="terp_61t">S.No.</para></td>
 			<td>          <para style="terp_61t">Item Name</para></td>
@@ -156,20 +156,20 @@
 	<section>
 	<para style="terp_default_8">[[ repeatIn(get_data(data['form']), 'x') ]]</para>
 	
-	<blockTable colWidths="30,150,55,55,50,50,50,40,50,50" repeatRows="1" style="Table4">
+	<blockTable colWidths="30,150,55,55,45,50,50,40,50,50" repeatRows="1" style="Table4">
 		<tr>
 			<td>          <para style="terp_61"> <seq id="prod_serial_no"/> </para>        </td>
 			<td>          <para style="terp_left_61">[[ x['product_name'] ]]</para>        </td>
 			<td>          <para style="terp_left_61">[[ x['brand'] ]]</para>        </td>
 			<td>          <para style="terp_left_61">[[ x['moc'] ]]</para>        </td>
 			<td>          <para style="terp_left_61">[[ x ['po_uom'] ]]</para>        </td>
-			<td>          <para style="terp_left_61">[[ x ['po_uom_close_qty'] ]]</para>        </td>
+			<td>          <para style="terp_left_61">[[ locale.format('%.2f', x['po_uom_close_qty']) ]] </para>        </td>
 			<td>          <para style="terp_left_61">[[ x ['uom'] ]]</para>        </td>
-			<td>          <para style="terp_left_61" alignment="right">[[ x['po_price'] ]]</para>        </td>
-			<td>          <para style="terp_left_61" alignment="right">[[ x['close_qty'] ]]</para>        </td>
+			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['po_price']) ]] </para>        </td>
+			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['close_qty']) ]] </para>        </td>
 			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['closing_value']) ]]</para>        </td>
 		</tr>
-	</blockTable>    
+	</blockTable>
 	</section>
     
 	<blockTable colWidths="525,50" repeatRows="1" style="Table4">
