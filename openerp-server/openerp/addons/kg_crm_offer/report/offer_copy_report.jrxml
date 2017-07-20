@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="offer_copy_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000059"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="528"/>
+	<property name="ireport.y" value="1055"/>
 	<subDataset name="dataset2">
 		<parameter name="enq_line_id" class="java.lang.Integer"/>
 		<queryString>
@@ -95,13 +95,15 @@ where enq_line.id = $P{enq_line_id}]]>
 		<queryString>
 			<![CDATA[select
 
-pump_offer.tot_price as tot_price
+pump_offer.tot_price ||' ('|| tax.name||')' as tot_price
 
 from ch_pump_offer pump_offer
 
+left join account_tax tax on(tax.id=pump_offer.gst)
+
 where pump_offer.enquiry_line_id = $P{enq_line_id}]]>
 		</queryString>
-		<field name="tot_price" class="java.math.BigDecimal"/>
+		<field name="tot_price" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="access_detail">
 		<parameter name="enq_line_id" class="java.lang.Integer"/>
@@ -116,6 +118,7 @@ from ch_accessories_offer access_offer
 
 left join kg_accessories_master acc on(acc.id=access_offer.access_id)
 left join kg_accessories_category categ on(categ.id=acc.access_cate_id)
+left join account_tax tax on(tax.id=access_offer.gst)
 
 where access_offer.enquiry_line_id = $P{enq_line_id}]]>
 		</queryString>
@@ -130,21 +133,22 @@ where access_offer.enquiry_line_id = $P{enq_line_id}]]>
 
 spare_offer.item_name as spare_name,
 pmm.name as pump_name,
-spare_offer.net_amount as net_amount
+spare_offer.net_amount ||' ('|| tax.name||')' as net_amount
 
 from ch_spare_offer spare_offer
 
 left join kg_pumpmodel_master pmm on(pmm.id=spare_offer.pump_id)
+left join account_tax tax on(tax.id=spare_offer.gst)
 where spare_offer.enquiry_line_id = $P{enq_line_id}]]>
 		</queryString>
 		<field name="spare_name" class="java.lang.String"/>
 		<field name="pump_name" class="java.lang.String"/>
-		<field name="net_amount" class="java.math.BigDecimal"/>
+		<field name="net_amount" class="java.lang.String"/>
 	</subDataset>
 	<parameter name="offer_id" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[select  enq_line_id,offer_id,off_no,enquiry_no,revision,revision_remarks,company,comp_street,comp_street2,comp_city,comp_state,comp_zip,comp_fax,comp_phone,
-customer,offer_date,del_date,equipment_no,description,qty,pre_suppliy_ref,liquid_name,temperature_in_c,solid_concen,solid_concen_vol,consistency,
+customer,offer_date,del_date,equipment_no,order_summary,description,qty,pre_suppliy_ref,liquid_name,temperature_in_c,solid_concen,solid_concen_vol,consistency,
 specific_gravity,density,viscosity,viscosity_crt_factor,max_particle_size_mm,npsh_avl,capacity_in_liquid,head_in_liquid,pump_type,suction_condition,pump_name,ph_value,
 motor_power,framesize,del_pipe_size,shaft_sealing,scope_of_supply,number_of_stages,impeller_type,impeller_dia_min,size_suctionx,flange_standard,efficiency_in,
 npsh_r_m,best_efficiency,bkw_water,bkw_liq,impeller_dia_rated,impeller_tip_speed,hydrostatic_test_pressure,setting_height,suction_spool,speed_in_rpm,full_load_rpm,
@@ -181,6 +185,7 @@ to_char(off.del_date, 'dd/mm/yyyy') as del_date,
 -- Item Details Pump
 
 enq_line.equipment_no as equipment_no,
+enq_line.order_summary as order_summary,
 enq_line.description as description,
 enq_line.qty as qty,
 enq_line.pre_suppliy_ref as pre_suppliy_ref,
@@ -334,6 +339,7 @@ to_char(off.del_date, 'dd/mm/yyyy') as del_date,
 -- Item Details Spare
 
 enq_line.equipment_no as equipment_no,
+enq_line.order_summary as order_summary,
 enq_line.description as description,
 enq_line.qty as qty,
 enq_line.pre_suppliy_ref as pre_suppliy_ref,
@@ -486,6 +492,7 @@ to_char(off.del_date, 'dd/mm/yyyy') as del_date,
 -- Item Details Spare
 
 enq_line.equipment_no as equipment_no,
+enq_line.order_summary as order_summary,
 enq_line.description as description,
 enq_line.qty as qty,
 enq_line.pre_suppliy_ref as pre_suppliy_ref,
@@ -627,6 +634,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 	<field name="offer_date" class="java.lang.String"/>
 	<field name="del_date" class="java.lang.String"/>
 	<field name="equipment_no" class="java.lang.String"/>
+	<field name="order_summary" class="java.lang.String"/>
 	<field name="description" class="java.lang.String"/>
 	<field name="qty" class="java.lang.Integer"/>
 	<field name="pre_suppliy_ref" class="java.lang.String"/>
@@ -2758,7 +2766,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					</jr:list>
 				</componentElement>
 				<textField>
-					<reportElement x="0" y="0" width="169" height="14"/>
+					<reportElement x="0" y="0" width="277" height="14"/>
 					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
@@ -2768,15 +2776,6 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 						<font size="10" isBold="true" isUnderline="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Material of construction:"]]></textFieldExpression>
-				</textField>
-				<textField>
-					<reportElement x="169" y="0" width="386" height="14"/>
-					<box>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
 				<line>
 					<reportElement x="-1" y="14" width="1" height="12"/>
@@ -2790,6 +2789,16 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 						<pen lineWidth="0.5"/>
 					</graphicElement>
 				</line>
+				<textField isBlankWhenNull="true">
+					<reportElement x="277" y="0" width="278" height="14"/>
+					<box topPadding="2" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA[$F{order_summary}]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 	</group>
@@ -3250,7 +3259,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 						<jr:listContents height="12" width="555">
 							<textField isBlankWhenNull="true">
 								<reportElement x="277" y="0" width="278" height="12" isRemoveLineWhenBlank="true">
-									<printWhenExpression><![CDATA[$F{tot_price} > 0]]></printWhenExpression>
+									<printWhenExpression><![CDATA[!($F{tot_price}.equals(null ))]]></printWhenExpression>
 								</reportElement>
 								<box topPadding="0" leftPadding="2">
 									<pen lineWidth="0.0"/>
@@ -3353,9 +3362,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 								<textFieldExpression><![CDATA[$F{access_name}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="277" y="0" width="277" height="12" isRemoveLineWhenBlank="true">
-									<printWhenExpression><![CDATA[$F{net_amount} > 0]]></printWhenExpression>
-								</reportElement>
+								<reportElement x="277" y="0" width="277" height="12" isRemoveLineWhenBlank="true"/>
 								<box topPadding="0" leftPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -3439,7 +3446,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="277" y="0" width="278" height="12" isRemoveLineWhenBlank="true">
-									<printWhenExpression><![CDATA[$F{net_amount} > 0]]></printWhenExpression>
+									<printWhenExpression><![CDATA[!($F{net_amount}.equals(null ))]]></printWhenExpression>
 								</reportElement>
 								<box topPadding="0" leftPadding="2">
 									<pen lineWidth="0.5"/>
