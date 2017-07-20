@@ -1338,12 +1338,12 @@ class kg_crm_offer(osv.osv):
 		style8 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz centre;''borders: left thin, right thin, top thin, bottom thin') 
 		
 		
-		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
+		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
 		r, g, b, a = img.split()
 		img = Image.merge("RGB", (r, g, b))
-		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
-		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
-		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
+		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
+		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
+		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
 		
 		#~ r, g, b, a = img.split()
 		#~ img = Image.merge("RGB", (r, g, b))
@@ -1432,8 +1432,8 @@ class kg_crm_offer(osv.osv):
 				logo_size = 120
 			elif len_col >= 4:
 				logo_size = 100
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
+			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
 			#~ print"col_1",col_1
 			#~ sheet1.write(s1,col_no,str(col_1),style1)
 			col_no = col_no + 1
@@ -2246,7 +2246,7 @@ class ch_pump_offer(osv.osv):
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			m_tot = k_tot + spl_discount_tot
 			print"m_totm_tot",m_tot
-			tax_tot = (m_tot / 100) * (line.gst.amount*100) or 0
+			tax_tot = (m_tot / 100) * (line.gst.amount or 0 *100)
 			print"tax_tottax_tot",tax_tot
 			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
 			print"p_f_totp_f_tot",p_f_tot
@@ -2647,7 +2647,7 @@ class ch_spare_offer(osv.osv):
 			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			m_tot = k_tot + spl_discount_tot
-			tax_tot = (m_tot / 100) * (line.gst.amount*100) or 0
+			tax_tot = (m_tot / 100) * (line.gst.amount or 0 * 100)
 			print"tax_tottax_tot",tax_tot
 			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
 			print"p_f_totp_f_tot",p_f_tot
@@ -2801,7 +2801,7 @@ class ch_accessories_offer(osv.osv):
 			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			m_tot = k_tot + spl_discount_tot
-			tax_tot = (m_tot / 100) * (line.gst.amount*100) or 0
+			tax_tot = (m_tot / 100) * (line.gst.amount or 0 * 00)
 			print"tax_tottax_tot",tax_tot
 			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
 			print"p_f_totp_f_tot",p_f_tot
