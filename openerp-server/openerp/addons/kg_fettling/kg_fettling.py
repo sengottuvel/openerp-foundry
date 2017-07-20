@@ -568,6 +568,10 @@ class kg_fettling(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
 			ms_name = cr.fetchone();
 			
+			print "entry_rec.order_bomline_id",entry_rec.order_bomline_id
+			print "entry_rec.entry_rec.order_no",entry_rec.order_no
+			print "entry_rec.entry_rec.order_line_id",entry_rec.order_line_id
+			print "entry_rec.entry_rec.entry_rec.pattern_name",entry_rec.pattern_name
 			ms_vals = {
 			'name': ms_name[0],
 			'location':entry_rec.location,
