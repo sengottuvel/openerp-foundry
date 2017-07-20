@@ -574,8 +574,7 @@ class kg_fettling(osv.osv):
 			print "entry_rec.entry_rec.entry_rec.pattern_name",entry_rec.pattern_name
 			print "entry_rec.order_bomline_id.position_id------------------",entry_rec.order_bomline_id.position_id
 			if entry_rec.order_bomline_id.position_id == None:
-				raise osv.except_osv(_('Warning!'),
-					_('Position No. is not mapped in WO for this item !!'))
+				raise osv.except_osv(_('Warning !'), _('Position No. is not mapped in WO for item %s !!')%(entry_rec.pattern_code))
 			ms_vals = {
 			'name': ms_name[0],
 			'location':entry_rec.location,
