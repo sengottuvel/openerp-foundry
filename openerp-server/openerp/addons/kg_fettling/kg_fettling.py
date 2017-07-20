@@ -572,7 +572,7 @@ class kg_fettling(osv.osv):
 			print "entry_rec.entry_rec.order_no",entry_rec.order_no
 			print "entry_rec.entry_rec.order_line_id",entry_rec.order_line_id
 			print "entry_rec.entry_rec.entry_rec.pattern_name",entry_rec.pattern_name
-			print "entry_rec.order_bomline_id.position_id",entry_rec.order_bomline_id.position_id
+			print "entry_rec.order_bomline_id.position_id------------------",entry_rec.order_bomline_id.position_id
 			ms_vals = {
 			'name': ms_name[0],
 			'location':entry_rec.location,
