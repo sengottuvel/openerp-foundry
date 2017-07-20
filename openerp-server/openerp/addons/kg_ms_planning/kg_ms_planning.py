@@ -180,7 +180,7 @@ class kg_ms_daily_planning(osv.osv):
 				ms_obj.write(cr, uid, line_item.ms_id.id,{'ms_plan_qty':line_item.ms_id.ms_plan_qty + (line_item.inhouse_qty + line_item.sc_qty)})
 				
 				
-				if (line_item.inhouse_qty + line_item.sc_qty) >= line_item.schedule_qty:
+				#~ if (line_item.inhouse_qty + line_item.sc_qty) >= line_item.schedule_qty:
 				
 					#~ ms_obj.write(cr, uid, line_item.ms_id.id,{'ms_state':'op_progress'})		
 					
