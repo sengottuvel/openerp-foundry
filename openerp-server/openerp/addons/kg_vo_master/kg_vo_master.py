@@ -368,7 +368,7 @@ class ch_coupling_config(osv.osv):
 		'primemover_id': fields.many2one('kg.primemover.master','Prime Mover',required=True),
 		'power_kw': fields.float('Motor Power',readonly=True),
 		'speed': fields.integer('Motor Speed',readonly=True),
-		'brand_id': fields.many2one('kg.brand.master','Coupling Brand',required=True,domain="[('state','=','approved')]"),
+		'brand_id': fields.many2one('kg.brand.master','Coupling Brand',required=True),
 		'coupling_type_id': fields.many2one('kg.coupling.type','Coupling type ',required=True),
 		'coupling_ser_factor': fields.selection([('1_0','1.0'),('1_2','1.2'),('1_5','1.5'),('2_0','2.0')],'Coupling service factor',required=True),			
 		'coupling_access_id': fields.many2one('kg.accessories.master','Coupling',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','coupling')]"),
