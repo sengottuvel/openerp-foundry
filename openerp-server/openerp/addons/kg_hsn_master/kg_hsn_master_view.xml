@@ -94,7 +94,7 @@
             <field name="model">kg.hsn.master</field>
             <field name="arch" type="xml">
                 <search string="HSN Master Template">
-					<field name="name" string="HSN Code" />
+					<field name="name" string="HSN Code" filter_domain="[('name','ilike',self)]"/>
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
