@@ -448,7 +448,7 @@ class kg_general_grn(osv.osv):
 				# This code will create Production lot
 				
 				if not line.product_id.po_uom_coeff or line.product_id.po_uom_coeff == 0:
-					raise osv.except_osv(_('Warning!'),_('%s Kindly configure PO coeff in Product Master'%(item.product_id.name)))
+					raise osv.except_osv(_('Warning!'),_('%s Kindly configure PO coeff in Product Master'%(line.product_id.name)))
 				
 				if line.exp_batch_id:
 					for exp in line.exp_batch_id:
