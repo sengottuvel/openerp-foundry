@@ -2245,7 +2245,8 @@ class ch_pump_offer(osv.osv):
 			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			m_tot = k_tot + spl_discount_tot
-			tax_tot = (m_tot / 100) * line.tax
+			print"m_totm_tot",m_tot
+			tax_tot = (m_tot / 100) * (line.gst.amount*100) or 0
 			print"tax_tottax_tot",tax_tot
 			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
 			print"p_f_totp_f_tot",p_f_tot
@@ -2288,9 +2289,12 @@ class ch_pump_offer(osv.osv):
 		
 		## Module Requirement Fields
 		
-		'offer_id':fields.many2one('kg.crm.offer', 'Offer'),
+		'offer_id':fields.many2one('kg.crm.offer','Offer'),
+		'customer_id':fields.many2one('res.partner','Customer Name'),
 		'qty':fields.integer('Quantity'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
+		'hsn_no': fields.many2one('kg.hsn.master','HSN No.'),
+		'gst': fields.many2one('account.tax','GST Tax'),
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
 		'moc_const_id': fields.many2one('kg.moc.construction','MOC'),
 		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval'),
@@ -2362,6 +2366,37 @@ class ch_pump_offer(osv.osv):
 		elif sam_ratio_flag == True and sam_ratio:
 			value = {'works_value': prime_cost * sam_ratio}
 		return {'value': value}
+	
+	#~ def onchange_gst(self, cr, uid, ids, pump_id,hsn_no, gst, context=None):
+		#~ value = {'hsn_no': '','gst': ''}
+		#~ pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr,uid,pump_id)
+#~ 
+		#~ sql_check = """ select hsn_id from hsn_no_product where hsn_id = %s and pump_id = %s""" %(hsn_no,pump_id)
+		#~ cr.execute(sql_check)
+		#~ data = cr.dictfetchall()
+		#~ print"datadata",data
+		#~ if data:
+			#~ pass
+		#~ else:
+			#~ sql_check_1 = """ select hsn_id from hsn_no_product where hsn_id != %s and pump_id = %s""" %(hsn_no,pump_id)
+			#~ cr.execute(sql_check_1)
+			#~ data_1 = cr.dictfetchall()
+			#~ print"data_1data_1",data_1
+			#~ hsn = ''
+			#~ for item in data_1:
+				#~ print"item['hsn_id']",item['hsn_id']
+				#~ hsn_rec = self.pool.get('kg.hsn.master').browse(cr,uid,item['hsn_id'])
+				#~ hsn = hsn + ',' +str(hsn_rec.name)
+				#~ print"hsnhsnhsn**********",hsn
+			#~ raise osv.except_osv(_('Warning!'),_('You can choose only HSN %s'%(hsn)))
+			#~ if hsn_no:
+				#~ hsn_rec = self.pool.get('kg.hsn.master').browse(cr,uid,hsn_no)
+				#~ if gst == hsn_rec.igst_id.id:
+					#~ pass
+				#~ else:
+					#~ raise osv.except_osv(_('Warning!'),_('You can choose only %s '%(hsn_rec.igst_id.name)))
+				#~ value = {'gst': hsn_rec.igst_id.id}
+		#~ return {'value': value}
 	
 ch_pump_offer()
 
@@ -2612,7 +2647,7 @@ class ch_spare_offer(osv.osv):
 			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			m_tot = k_tot + spl_discount_tot
-			tax_tot = (m_tot / 100) * line.tax
+			tax_tot = (m_tot / 100) * (line.gst.amount*100) or 0
 			print"tax_tottax_tot",tax_tot
 			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
 			print"p_f_totp_f_tot",p_f_tot
@@ -2659,6 +2694,9 @@ class ch_spare_offer(osv.osv):
 		'qty':fields.integer('Quantity'),
 		'item_code': fields.char('Item Code'),
 		'item_name': fields.char('Item Name'),
+		'hsn_no': fields.many2one('kg.hsn.master','HSN No.'),
+		'gst': fields.many2one('account.tax','GST Tax'),
+		'customer_id':fields.many2one('res.partner','Customer Name'),
 		'moc_id': fields.many2one('kg.moc.master','MOC Name'),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
 		'ms_id': fields.many2one('kg.machine.shop','MS Name'),
@@ -2763,7 +2801,7 @@ class ch_accessories_offer(osv.osv):
 			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			m_tot = k_tot + spl_discount_tot
-			tax_tot = (m_tot / 100) * line.tax
+			tax_tot = (m_tot / 100) * (line.gst.amount*100) or 0
 			print"tax_tottax_tot",tax_tot
 			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
 			print"p_f_totp_f_tot",p_f_tot
@@ -2809,6 +2847,9 @@ class ch_accessories_offer(osv.osv):
 		'offer_id':fields.many2one('kg.crm.offer', 'Offer'),
 		'enquiry_line_id': fields.many2one('ch.kg.crm.pumpmodel','Enquiry Line'),
 		'access_id':fields.many2one('kg.accessories.master', 'Item Name'),
+		'hsn_no': fields.many2one('kg.hsn.master','HSN No.'),
+		'gst': fields.many2one('account.tax','GST Tax'),
+		'customer_id':fields.many2one('res.partner','Customer Name'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
 		'moc_id':fields.many2one('kg.moc.master', 'MOC'),
 		'qty':fields.integer('Quantity'),
@@ -2898,7 +2939,6 @@ class ch_term_offer(osv.osv):
 				term_rec = self.pool.get('kg.offer.term').browse(cr,uid,term_obj[0])
 				value = {'term': term_rec.term}
 		return {'value': value}
-	
 	
 ch_term_offer()
 

@@ -102,20 +102,6 @@
 								</div>
 								<field name="o_customer_discount"/>
 								<field name="o_agent_com"/>
-								<label for="o_tax" string="Tax" class="append_percentage"/>
-								<div>
-									<div class="address_format">
-										<field name="o_tax" style="width: 21%%"/>
-										<field name="o_tax_in_ex" style="width: 19%%" attrs="{'required': [('o_tax','>',0)]}"/>
-									</div>
-								</div>
-								<label for="o_ed" string="ED" class="append_percentage"/>
-								<div>
-									<div class="address_format">
-										<field name="o_ed" style="width: 21%%"/>
-										<field name="o_ed_in_ex" style="width: 19%%" attrs="{'required': [('o_ed','>',0)]}"/>
-									</div>
-								</div>
 							</group>
 							<button name="update_percentage" type="object" string="Update" states="draft" class="oe_highlight"/>
 						</group>
@@ -138,7 +124,7 @@
 									<field name="insurance"/>
 									<field name="customer_discount"/>
 									<field name="agent_com"/>
-									<field name="tax"/>
+									<field name="gst"/>
 									<field name="supervision_amount" sum="supervision_amount"/>
 									<field name="tot_price" sum="total_price"/>
 									<field name="net_amount" sum="net_amount"/>
@@ -188,7 +174,7 @@
 									<field name="insurance"/>
 									<field name="customer_discount"/>
 									<field name="agent_com"/>
-									<field name="tax"/>
+									<field name="gst"/>
 									<field name="supervision_amount" sum="supervision_amount"/>
 									<field name="tot_price" sum="total_price"/>
 									<field name="net_amount" sum="net_amount"/>
@@ -237,7 +223,7 @@
 									<field name="insurance"/>
 									<field name="customer_discount"/>
 									<field name="agent_com"/>
-									<field name="tax"/>
+									<field name="gst"/>
 									<field name="supervision_amount" sum="supervision_amount"/>
 									<field name="tot_price" sum="total_price"/>
 									<field name="net_amount" sum="net_amount"/>
@@ -326,6 +312,9 @@
 						<group>
 							<field name="pumpseries_id" required="1" readonly="1"/>
 							<field name="pump_id" required="1" readonly="1"/>
+							<field name="hsn_no" />
+							<field name="gst" />
+							<field name="customer_id" invisible="1"/>
 							<field name="moc_const_id" readonly="1"/>
 							<field name="drawing_approval"/>
 							<field name="inspection"/>
@@ -354,13 +343,6 @@
 							<field name="customer_discount"/>
 							<field name="agent_com"/>
 							<field name="special_discount"/>
-							<label for="tax" string="Tax" class="append_percentage"/>
-							<div>
-								<div class="address_format">
-									<field name="tax" style="width: 40%%"/>
-									<field name="tax_in_ex" style="width: 35%%" attrs="{'required': [('tax','>',0)]}"/>
-								</div>
-							</div>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
 							<div>
 								<div class="address_format">
@@ -380,13 +362,6 @@
 								<div class="address_format">
 									<field name="insurance" style="width: 40%%"/>
 									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
-								</div>
-							</div>
-							<label for="ed" string="ED" class="append_percentage"/>
-							<div>
-								<div class="address_format">
-									<field name="ed" style="width: 40%%"/>
-									<field name="ed_in_ex" style="width: 35%%" attrs="{'required': [('ed','>',0)]}"/>
 								</div>
 							</div>
 							<field name="supervision_amount"/>
@@ -521,6 +496,9 @@
 							<field name="pump_id" required="1" readonly="1"/>
 							<field name="item_code" required="1" readonly="1"/>
 							<field name="item_name" required="1" readonly="1"/>
+							<field name="hsn_no" attrs="{'readonly':[('hsn_no','!=',False)]}"/>
+							<field name="gst"/>
+							<field name="customer_id" invisible="1"/>
 							<field name="off_name" readonly="1"/>
 							<field name="moc_id" required="1" readonly="1"/>
 							<field name="moc_changed_flag" readonly="1"/>
@@ -551,13 +529,6 @@
 							<field name="customer_discount"/>
 							<field name="agent_com"/>
 							<field name="special_discount"/>
-							<label for="tax" string="Tax" class="append_percentage"/>
-							<div>
-								<div class="address_format">
-									<field name="tax" style="width: 40%%"/>
-									<field name="tax_in_ex" style="width: 35%%" attrs="{'required': [('tax','>',0)]}"/>
-								</div>
-							</div>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
 							<div>
 								<div class="address_format">
@@ -577,13 +548,6 @@
 								<div class="address_format">
 									<field name="insurance" style="width: 40%%"/>
 									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
-								</div>
-							</div>
-							<label for="ed" string="ED" class="append_percentage"/>
-							<div>
-								<div class="address_format">
-									<field name="ed" style="width: 40%%"/>
-									<field name="ed_in_ex" style="width: 35%%" attrs="{'required': [('ed','>',0)]}"/>
 								</div>
 							</div>
 							<field name="supervision_amount"/>
@@ -681,6 +645,9 @@
 					<group string="Accessories Offer Details">
 						<group>
 							<field name="access_id" required="1" readonly="1"/>
+							<field name="hsn_no" />
+							<field name="gst" />
+							<field name="customer_id" invisible="1"/>
 							<field name="off_name" readonly="1"/>
 							<field name="moc_id" required="1" readonly="1"/>
 							<field name="moc_changed_flag" readonly="1"/>
@@ -709,13 +676,6 @@
 							<field name="customer_discount"/>
 							<field name="agent_com"/>
 							<field name="special_discount"/>
-							<label for="tax" string="Tax" class="append_percentage"/>
-							<div>
-								<div class="address_format">
-									<field name="tax" style="width: 40%%"/>
-									<field name="tax_in_ex" style="width: 35%%" attrs="{'required': [('tax','>',0)]}"/>
-								</div>
-							</div>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
 							<div>
 								<div class="address_format">
@@ -735,13 +695,6 @@
 								<div class="address_format">
 									<field name="insurance" style="width: 40%%"/>
 									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
-								</div>
-							</div>
-							<label for="ed" string="ED" class="append_percentage"/>
-							<div>
-								<div class="address_format">
-									<field name="ed" style="width: 40%%"/>
-									<field name="ed_in_ex" style="width: 35%%" attrs="{'required': [('ed','>',0)]}"/>
 								</div>
 							</div>
 							<field name="supervision_amount"/>
