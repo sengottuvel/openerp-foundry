@@ -2647,7 +2647,7 @@ class ch_spare_offer(osv.osv):
 			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			m_tot = k_tot + spl_discount_tot
-			tax_tot = (m_tot / 100) * (line.gst.amount or 0 * 100)
+			tax_tot = (m_tot / 100) * (line.gst.amount or 0 *100)
 			print"tax_tottax_tot",tax_tot
 			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
 			print"p_f_totp_f_tot",p_f_tot
@@ -2801,7 +2801,7 @@ class ch_accessories_offer(osv.osv):
 			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			m_tot = k_tot + spl_discount_tot
-			tax_tot = (m_tot / 100) * (line.gst.amount or 0 * 00)
+			tax_tot = (m_tot / 100) * (line.gst.amount or 0 *100)
 			print"tax_tottax_tot",tax_tot
 			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
 			print"p_f_totp_f_tot",p_f_tot
