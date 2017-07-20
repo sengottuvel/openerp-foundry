@@ -150,8 +150,11 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 					print "cl_qty..............",op_qty
 				else:
 					op_qty = in_qty
-				
-				item['po_uom_close_qty'] = op_qty / pro_rec.po_uom_coeff
+				if not pro_rec.po_uom_coeff or pro_rec.po_uom_coeff == 0.00:
+					po_uom_coeff = 1
+				else:
+					po_uom_coeff = pro_rec.po_uom_coeff
+				item['po_uom_close_qty'] = op_qty / po_uom_coeff
 				item['close_qty'] = op_qty
 				
 				print "op_qty.........yyyyyyyyyyyy.....item['op_qty']..........", item['close_qty']
