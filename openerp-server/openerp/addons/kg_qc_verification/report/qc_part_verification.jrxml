@@ -31,7 +31,7 @@ qc.qty as accepted_qty,
 qc.reject_qty as reject_qty,
 qc.remark as remark,
 stock.name as physical_location,
-(moc.rate * qc.each_weight) as each_value,
+moc.rate  as each_value,
 ((qc.allocated_qty * qc.each_weight) * moc.rate) as total_value
 
 from kg_qc_verification qc
