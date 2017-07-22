@@ -846,7 +846,7 @@ class kg_general_grn_line(osv.osv):
 		
 		## Module Requirement Fields
 		
-		'product_id':fields.many2one('product.product','Item Name',required=True,readonly=False, states={'done':[('readonly',True)],'calcel':[('readonly',True)]}),
+		'product_id':fields.many2one('product.product','Item Name',required=True,readonly=False, states={'done':[('readonly',True)],'calcel':[('readonly',True)]}, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
 		'uom_id':fields.many2one('product.uom','Store UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'grn_qty':fields.float('GRN Quantity',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'recvd_qty':fields.float('Received Qty'),
@@ -962,10 +962,10 @@ class kg_exp_batch(osv.osv):
 		
 	}
 	
-	_sql_constraints = [
-		
-		('batch_no', 'unique(batch_no)', 'S/N must be unique per Item !!'),
-	]
+	#~ _sql_constraints = [
+		#~ 
+		#~ ('batch_no', 'unique(batch_no)', 'S/N must be unique per Item !!'),
+	#~ ]
 
 
 kg_exp_batch()
