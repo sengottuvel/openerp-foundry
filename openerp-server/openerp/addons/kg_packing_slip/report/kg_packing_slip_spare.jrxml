@@ -432,7 +432,7 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</title>
