@@ -123,6 +123,7 @@ class kg_qc_verification(osv.osv):
 		'order_ms_line_id': fields.many2one('ch.order.machineshop.details','Machine shop Line Id'),
 		'acc_ms_line_id': fields.many2one('ch.wo.accessories.ms','Acc Machine shop Line Id'),
 		'heat_no': fields.char('Heat No', size=128),
+		'inward_remark': fields.related('stock_inward_id','remarks', type='char', string='Remarks', store=True, readonly=True),
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),

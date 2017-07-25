@@ -77,6 +77,7 @@
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Prodution Entry Tree" create="false">
 					<field name="order_delivery_date" string="Date"/>
+					<field name="schedule_id"/>
 					<field name="order_no"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
@@ -124,6 +125,7 @@
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Schedule No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
 						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>

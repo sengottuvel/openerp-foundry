@@ -214,6 +214,7 @@ class ch_stock_inward_details(osv.osv):
 		'order_id': fields.integer('Work Order No.'),
 		'ms_finish_qty': fields.integer('MS Finish Qty'),
 		'position_id':fields.many2one('kg.position.number','Position No.'),
+		'remarks': fields.text('Remarks'),
 	
 	}
 	
