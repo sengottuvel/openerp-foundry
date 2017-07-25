@@ -262,10 +262,11 @@ class kg_general_grn(osv.osv):
 					if not line.exp_batch_id:
 						raise osv.except_osv(_('Warning!'),_('You should specify Expiry date and batch no for this item!!'))
 				if line.exp_batch_id:
+					exp_grn_qty = 0
 					for exp_line in line.exp_batch_id:
 						exp_grn_qty += exp_line.product_qty
 						if exp_grn_qty > line.grn_qty:
-							raise osv.except_osv(_('Please Check!'),_('Quantity should not exceed than GRN Quantity !!'))
+							raise osv.except_osv(_('Please Check!'),_('%s Quantity should not exceed than GRN Quantity !!'%(line.product_id.name)))
 				line.write({'state':'confirmed'})
 			for line in grn_entry.grn_line:
 				product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
