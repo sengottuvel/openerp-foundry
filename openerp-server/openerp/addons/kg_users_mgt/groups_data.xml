@@ -35,7 +35,7 @@
 			ref('kg_rate_revision.mam_rate_revision_master'),
 			ref('kg_accessories_category.mam_accessories_category'),
 			ref('kg_position_number.mam_position_number_master_root'),
-		  
+			ref('kg_brandmoc_rate.mam_brandmocrate_purchase_master'),
 			
 			 ref('kg_stock_inward.tpm_transactions'),
 			ref('kg_stock_inward.tpm_planning_transactions'),
