@@ -269,7 +269,7 @@
 			ref('kg_partners.kg_state_master'),
 			ref('kg_partners.mam_city_master'),
 			ref('kg_transport.mam_transport_master'),
-			ref('kg_brandmoc_rate.mam_brandmocrate_purchase_master'),
+			
 			ref('kg_expense_master.mam_expense_master'),
 			ref('kg_dispatch_master.mam_dispatch_master'),
 			ref('kg_item_quality.mam_item_quality_master'),
@@ -322,7 +322,7 @@
 			ref('kg_partners.kg_state_master'),
 			ref('kg_partners.mam_city_master'),
 			ref('kg_transport.mam_transport_master'),
-			ref('kg_brandmoc_rate.mam_brandmocrate_purchase_master'),
+			
 			ref('kg_expense_master.mam_expense_master'),
 			ref('kg_dispatch_master.mam_dispatch_master'),
 			ref('kg_item_quality.mam_item_quality_master'),
