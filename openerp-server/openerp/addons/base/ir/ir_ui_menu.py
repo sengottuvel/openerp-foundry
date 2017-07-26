@@ -113,7 +113,7 @@ class ir_ui_menu(osv.osv):
 			context = {}
 			
 		### Added by Sangeetha ###
-		#~ menus_ids = self.pool.get('res.users').read(cr, uid, uid, ['user_menu_access'])
+		menus_ids = self.pool.get('res.users').read(cr, uid, uid, ['user_menu_access'])
 		### Ends Here ### 
 
 		ids = super(ir_ui_menu, self).search(cr, uid, args, offset=0,
@@ -129,9 +129,9 @@ class ir_ui_menu(osv.osv):
 			result = ids
 		else:
 			### Added by Sangeetha ###
-			#~ if uid!=1:
-				#~ ids = super(ir_ui_menu, self).search(cr, uid, [('id', 'in', menus_ids['user_menu_access'])]+args, offset=0,
-				#~ limit=None, order=order, context=context, count=False)
+			if uid!=1:
+				ids = super(ir_ui_menu, self).search(cr, uid, [('id', 'in', menus_ids['user_menu_access'])]+args, offset=0,
+				limit=None, order=order, context=context, count=False)
 			### Ends Here ###
 			result = self._filter_visible_menus(cr, uid, ids, context=context)
 
