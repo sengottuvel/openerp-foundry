@@ -245,6 +245,9 @@
 			<!-- Planning Reports Menu -->
             <menuitem name="Planning Reports" id="rpm_planning_reports" parent = "rpm_reports" sequence="0"/>
             
+            <!-- Planning Excel Reports Menu -->
+            <menuitem name="Planning Excel Reports" id="rpm_planning_excel_reports" parent = "rpm_reports" sequence="0"/>
+            
 				<!-- Dashboard Menu -->
 				<menuitem name="Dashboard" parent="rpm_planning_reports" action="board.open_board_my_dash_action" id="kg_dash_board" sequence="0"/>
 				

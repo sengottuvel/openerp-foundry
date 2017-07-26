@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_kg_machine_list_excel_form" model="ir.ui.view">
+            <field name="name">Machine List Rpt</field>
+            <field name="model">kg.machine.list.excel</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+			<form string="Machine List Report" version="7.0">             			 
+				<header>
+					<button name="produce_xls" states="draft" string="Generate" type="object" class="oe_highlight"/>
+				</header>
+				<group>
+					<group>
+					 <field name="order_category" attrs="{'readonly':[('state','=','done')]}"/>
+					 <field name="order_id" attrs="{'readonly':[('state','=','done')]}"/>
+					</group>
+					<group>
+					 
+					 <field name="name"/> 
+					 <field name="state" invisible="1"/>
+					 <field name="rep_data" nolabel="1" readonly="1" width="100" filename="name"/>
+					</group>
+				</group>
+			</form>
+            </field>
+        </record>
+        
+        <record id="view_kg_machine_list_excel_tree_view" model="ir.ui.view">
+            <field name="name">Machine List Rpt</field>
+            <field name="model">kg.machine.list.excel</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+             <tree string="Machine List Rpt">				 
+				 <field name="date"/>				 
+				 <field name="order_id"/>				 
+				 <field name="order_category"/>				 
+				 <field name="name"/>               
+				<field name="rep_data"/>
+				<field name="state"/>                
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_kg_machine_list_excel" model="ir.actions.act_window">
+			<field name="name">Machine List Rpt</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.machine.list.excel</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="view_kg_machine_list_excel_tree_view"/>
+	</record>
+	
+	
+	<menuitem name="Machine List" parent="kg_menus.rpm_planning_excel_reports" action="action_kg_machine_list_excel" id="kg_machine_list_print_reports_excel" sequence="0"/>	
+            
+
+    </data>
+</openerp>
