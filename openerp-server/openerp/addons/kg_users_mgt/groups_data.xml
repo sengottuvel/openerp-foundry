@@ -259,7 +259,7 @@
 			
 			ref('kg_menus.ppm_master_menu'),
 			ref('kg_partners.mam_supplier_master'),
-			
+			ref('kg_product.mam_product_master'),
 			ref('kg_product.kg_product_catg_master'),
 			ref('kg_product.mam_uom_master'),
 			ref('kg_po_masters.mam_payment_master'),
@@ -269,7 +269,7 @@
 			ref('kg_partners.kg_state_master'),
 			ref('kg_partners.mam_city_master'),
 			ref('kg_transport.mam_transport_master'),
-			
+			ref('kg_brandmoc_rate.mam_brandmocrate_purchase_master'),
 			ref('kg_expense_master.mam_expense_master'),
 			ref('kg_dispatch_master.mam_dispatch_master'),
 			ref('kg_item_quality.mam_item_quality_master'),
@@ -312,7 +312,7 @@
 			
 			ref('kg_menus.ppm_master_menu'),
 			ref('kg_partners.mam_supplier_master'),
-			
+			ref('kg_product.mam_product_master'),
 			ref('kg_product.kg_product_catg_master'),
 			ref('kg_product.mam_uom_master'),
 			ref('kg_po_masters.mam_payment_master'),
@@ -322,7 +322,7 @@
 			ref('kg_partners.kg_state_master'),
 			ref('kg_partners.mam_city_master'),
 			ref('kg_transport.mam_transport_master'),
-			
+			ref('kg_brandmoc_rate.mam_brandmocrate_purchase_master'),
 			ref('kg_expense_master.mam_expense_master'),
 			ref('kg_dispatch_master.mam_dispatch_master'),
 			ref('kg_item_quality.mam_item_quality_master'),
