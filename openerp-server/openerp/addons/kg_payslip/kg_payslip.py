@@ -641,18 +641,34 @@ class kg_payslip(osv.osv):
 											incent_amt = ((turn_over_per)/calculation_days)*inc_worked_days
 										else:
 											incent_amt = ((inc_ids.incentive_value)/calculation_days)*inc_worked_days
-										self.pool.get('hr.payslip.line').create(cr,uid,
-												{
-													'name':'Incentive',
-													'code':'INC',
-													'category_id':7,
-													'quantity':1,
-													'amount':incent_amt,
-													'salary_rule_id':1,
-													'employee_id':emp_id,
-													'contract_id':con_ids[0],
-													'slip_id':slip_rec.id,
-												},context = None)
+										inc_id  =  self.pool.get('hr.salary.rule').search(cr,uid,[('name','=','Incentive'),('code','=','INC')])
+										inc_rec = self.pool.get('hr.salary.rule').browse(cr,uid,inc_id[0])
+										if inc_rec.appears_on_payslip is True:
+											self.pool.get('hr.payslip.line').create(cr,uid,
+													{
+														'name':'Incentive',
+														'code':'INC',
+														'category_id':7,
+														'quantity':1,
+														'amount':incent_amt,
+														'salary_rule_id':1,
+														'employee_id':emp_id,
+														'contract_id':con_ids[0],
+														'slip_id':slip_rec.id,
+													},context = None)
+										else:
+											self.pool.get('ch.other.salary.comp').create(cr,uid,
+													{
+														'name':'Incentive',
+														'code':'INC',
+														'category_id':7,
+														'quantity':1,
+														'amount':incent_amt,
+														'salary_rule_id':1,
+														'employee_id':emp_id,
+														'contract_id':con_ids[0],
+														'slip_id':slip_rec.id,
+													},context = None)
 					else:
 						raise osv.except_osv(_('Warning'),
 							_('Turn Over is not fixed for last month for Incentive Calculation !!'))
