@@ -331,6 +331,7 @@ class kg_purchase_indent_line(osv.osv):
 	'cancel_remark': fields.text('Cancel Remarks'),
 	'draft_flag':fields.boolean('Draft Flag'),
 	'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode'),
+	'po_flag':fields.boolean('PO Flag'),
 	'src_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI'),('fromquote', 'From Quotation')], 'Soruce Type'),
 	
 	}
