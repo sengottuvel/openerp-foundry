@@ -783,13 +783,13 @@
         </record>
         
         <!-- Store Issue Transaction Menu -->
-		<menuitem action="action_kg_department_issue" id="gam_dept_issue" name="Store Issue - General" parent="kg_menus.gpm_grn_issue_menu" sequence="10"/>
+		<menuitem action="action_kg_department_issue" id="gam_dept_issue" name="Store Issue - General" parent="kg_menus.tpm_store_issue" sequence="3"/>
         
         <!-- Store Issue MS Transaction Menu -->
-		<menuitem action="tma_ms_store_issue" id="tam_ms_store_issue" name="Store Issue - MS" parent="kg_menus.gpm_grn_issue_menu" sequence="9"/>
+		<menuitem action="tma_ms_store_issue" id="tam_ms_store_issue" name="Store Issue - MS" parent="kg_menus.tpm_store_issue" sequence="2"/>
         
         <!-- Store Issue FOU Transaction Menu -->
-		<menuitem action="tma_fou_store_issue" id="tam_fou_store_issue" name="Store Issue - Foundry" parent="kg_menus.gpm_grn_issue_menu" sequence="8"/>
+		<menuitem action="tma_fou_store_issue" id="tam_fou_store_issue" name="Store Issue - Foundry" parent="kg_menus.tpm_store_issue" sequence="1"/>
         
         <!-- MS Store Inward Transaction Menu -->
 		<menuitem action="tma_ms_issue_line" id="tam_ms_issue_line" name="MS Store Inward" parent="kg_machineshop.tpm_ms_process" sequence="19"/>
