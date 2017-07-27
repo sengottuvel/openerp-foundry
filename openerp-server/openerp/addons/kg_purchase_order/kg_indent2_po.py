@@ -13,15 +13,15 @@ class kg_indent2_po(osv.osv):
 	
 	_name = "purchase.order"
 	_inherit = "purchase.order"
-
-	_columns = {
 	
+	_columns = {
+		
 		'kg_poindent_lines':fields.many2many('purchase.requisition.line','kg_poindent_po_line' , 'po_order_id', 'piline_id','POIndent Lines',
 			domain="[('pending_qty','>','0'), '&',('line_state','=','process'), '&',('draft_flag','=', False)]", 
 			readonly=True, states={'draft': [('readonly', False)]}),
-			
+		
 		}
-
+	
 	def update_poline(self,cr,uid,ids,context=False):
 		logger.info('[KG OpenERP] Class: kg_indent2_po, Method: update_poline called...')
 		"""
@@ -45,7 +45,7 @@ class kg_indent2_po(osv.osv):
 			
 			del_sql = """ delete from purchase_order_line where order_id=%s """ %(ids[0])
 			cr.execute(del_sql)
-			
+		
 		if obj.kg_poindent_lines:
 			poindent_line_ids = map(lambda x:x.id,obj.kg_poindent_lines)
 			poindent_line_browse = poindent_line_obj.browse(cr,uid,poindent_line_ids)
@@ -102,7 +102,18 @@ class kg_indent2_po(osv.osv):
 					recent_val = recent_data[0]['price_unit']
 				else:
 					recent_val = 0
-										
+				tax = []
+				if prod_browse.hsn_no.id and obj.partner_id.id:
+					if obj.partner_id.state_id.id:
+						if obj.partner_id.state_id.code == 'TN':
+							if prod_browse.hsn_no.cgst_id.id and prod_browse.hsn_no.sgst_id.id:
+								tax = [prod_browse.hsn_no.cgst_id.id,prod_browse.hsn_no.sgst_id.id]
+						elif obj.partner_id.state_id.code != 'TN':
+							if prod_browse.hsn_no.igst_id.id:
+								tax = [prod_browse.hsn_no.igst_id.id] 
+					elif not obj.partner_id.state_id.id:
+						tax = []
+				
 				vals = {
 				
 				'order_id': obj.id,
@@ -137,15 +148,16 @@ class kg_indent2_po(osv.osv):
 				'uom_conversation_factor':prod_browse.uom_conversation_factor,
 				'delivery_date': obj.delivery_date,
 				'po_type': obj.po_type,
+				'taxes_id': [(6, 0, tax)],
 				
 				}
-				poindent_line_obj.write(cr,uid,po_pi_id,{'line_state' : 'process','draft_flag':True})
+				poindent_line_obj.write(cr,uid,po_pi_id,{'line_state' : 'process','draft_flag':True,'po_flag':True})
 				if ids:
 					#~ self.write(cr,uid,ids[0],{'order_line':[(0,0,vals)]})
 					line_id = self.pool.get('purchase.order.line').create(cr,uid,vals)
 					for wo in group[0].line_ids:
 						self.pool.get('ch.purchase.wo').create(cr,uid,{'header_id':line_id,'wo_id':wo.wo_id,'w_order_id':wo.w_order_id.id,'qty':wo.qty})
-						
+			
 			if ids:
 				if obj.order_line:
 					order_line = map(lambda x:x.id,obj.order_line)
@@ -154,9 +166,9 @@ class kg_indent2_po(osv.osv):
 		self.write(cr,uid,ids,res)
 		
 		return True
-		
+	
 	def update_product_pending_qty(self,cr,uid,ids,line,context=None):
-			
+		
 		print "update_product_pending_qty called @@@@@@@@@@@@@@@@@@@@", line
 		po_rec = self.browse(cr, uid, ids[0])
 		line_obj = self.pool.get('purchase.order.line')
@@ -180,7 +192,6 @@ class kg_indent2_po(osv.osv):
 				cr.execute(sql)
 				pi_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
 				break
-			
 			else:
 				pending_qty = bro_record.pending_qty
 				remain_qty = po_used_qty - pending_qty
@@ -193,5 +204,5 @@ class kg_indent2_po(osv.osv):
 					break
 		
 		return True
-		
+	
 kg_indent2_po()

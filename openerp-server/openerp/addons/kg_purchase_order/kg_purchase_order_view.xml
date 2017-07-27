@@ -2,7 +2,7 @@
 <openerp>
     <data>
 		
-		<!-- Purchase order form inherit -->
+	<!-- Purchase order form inherit -->
 		
 	<record model="ir.ui.view" id="kg_purchase_order_form_inherit">
         <field name="name">kg.purchase.order.form.inherit</field>
@@ -21,7 +21,6 @@
 			<field name="term_freight" on_change="onchange_frieght_flag(term_freight)" />
 			<field name="insurance"/>
 			<field name="excise_duty"/>
-			
 			<field name="item_quality_term_id" widget="many2many_tags"/>
 			<field name="purpose" required="1"/>
 			<field name="mode_of_dispatch"/>
@@ -63,12 +62,13 @@
 		</button>
 		<button name="purchase_confirm" states="draft" string="Confirm Order" position="replace">
 			<button name="entry_reject" string="Reject" confirm="Are you sure to proceed ?" type="object" states="confirmed" />
-			<button name="purchase_confirm" states="confirmed" string="Approve" confirm="Are you sure to proceed ?" />
+			<button name="purchase_confirm" states="verified" string="Approve" confirm="Are you sure to proceed ?" />
 			<button name="action_cancel" string="Cancel" confirm="Are you sure to proceed ?" type="object" states="approved"/>
 			<button name="action_set_to_draft" string="Set To Draft" type="object" states="reject"/>
 		</button>
-		<button name="purchase_confirm" states="confirmed" string="Approve" position="after">
+		<button name="purchase_confirm" states="verified" string="Approve" position="after">
 			<button name="confirm_po" states="draft" string="Confirm" type="object" confirm="Are you sure to proceed ?"/>
+			<button name="verify_po" states="confirmed" string="Verify" type="object" confirm="Are you sure to proceed ?"/>
 		</button>
 		<field name="origin" position="replace">
 			<field name="bill_type" invisible="1"/>
@@ -77,7 +77,7 @@
 		</field>
 		
 		<field name="bill_type" position="replace">
-			 <field name="date_order" required="1"  on_change="onchange_date_order(date_order)"/>
+			 <field name="date_order" required="1" options="{'datepicker':{'minDate': -1,'maxDate': null,}}"/>
 			 <field name="quotation_date" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
 			 <field name="delivery_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 			 <field name="quot_ref_no" />
@@ -216,7 +216,7 @@
 				</group>
 			</page>
 		</xpath>
-
+		
 		</field>
 	</record>
 	
@@ -281,7 +281,7 @@
 				<field name="price_unit" position="replace">
 					<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
 				</field>
-
+				
 				<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" position="after">
                 <field name="cancel_qty" readonly="1" attrs="{'invisible': [('cancel_qty','=',0)]}"/>				
 				<field name="received_qty" readonly="1"	attrs="{'invisible': [('received_qty','=',0)]}" />
@@ -315,7 +315,7 @@
 						</field>
 					</page>
 				</xpath>        
-				 
+				
 				<xpath expr = "//page[@string='PO History']" position="after">
 					<page string="Specifiation" invisible="1">
 						<field name="po_specification" nolabel="1"/>
@@ -344,7 +344,6 @@
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="purchase.purchase_order_tree"/>
         <field name="arch" type="xml">
-			
 			<field name="name" position="replace">
 			<field name="name" string="PO.No."/>
 			</field>
@@ -473,7 +472,7 @@
 		<field name="context">{'search_default_group_order_id':1}</field>
 		<field name="search_view_id" ref="pol_search_view"/>
 	</record>
-
+	
 	<record id="po_line_new_tree" model="ir.actions.act_window.view">
 		<field eval="1" name="sequence"/>
 		<field name="view_mode">tree</field>
@@ -486,8 +485,8 @@
 	<!-- Special Approval PO -->
 	<menuitem action="purchase.purchase_rfq_spl_approval" id="pam_purchase_order_spl_approvals" name="Special Approval PO" parent="purchase.menu_procurement_management" sequence="2"/>
 	
-	<!-- PO Item Details  --> 
+	<!-- PO Item Details  -->
 	<menuitem action="kg_poline_confirmed_action" id="pam_purchase_order_line" name="PO Item Details" parent="purchase.menu_procurement_management" sequence="9"/>
-
+	
     </data>
 </openerp>

@@ -17,9 +17,8 @@ today = datetime.now()
 a = datetime.now()
 dt_time = a.strftime('%m/%d/%Y %H:%M:%S')
 
-
 class kg_users(osv.osv):
-
+	
 	_name = "res.users"
 	_inherit = "res.users"
 	_description = "User Managment"
@@ -38,13 +37,16 @@ class kg_users(osv.osv):
 	'copy_user_id':fields.many2one('res.users','User'),
 	'user_menu_access': fields.many2many('ir.ui.menu', 'ir_ui_menu_user_rel', 'user_id', 'menu_id', 'Access Menu', domain = [('name','!=','')]),
 	'groups_id': fields.many2many('res.groups', 'res_groups_users_rel', 'uid', 'gid', 'Groups'),
+	'signature': fields.binary('Signature'),
+	
 	}
 	
 	_defaults = {
 	
 	'user_id': lambda obj, cr, uid, context: uid,
-	'crt_date':fields.datetime.now,
+	'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 	'entry_mode': 'manual',
+	
 	 }
 	
 	def copy_menus_user_id(self,cr,uid,ids,context=None):
@@ -58,7 +60,7 @@ class kg_users(osv.osv):
 		data1 = cr.dictfetchall()
 		for j in data1:cr.execute("""insert into res_groups_users_rel values(%s,%s)"""%(ids[0],j['gid']))
 		return True
-
+	
 	def _validate_login(self, cr, uid,ids, context=None):
 		print "validation is called"
 		rec = self.browse(cr,uid,ids[0])
@@ -66,7 +68,7 @@ class kg_users(osv.osv):
 			if re.match(r'[0-9!#$%^~*{}?+=]+', rec.login[i]) or ' ' in rec.login:
 				raise osv.except_osv('Invalid User Name', 'Special characters,Numbers and Spaces are not allowed for Login name')
 		return True
-		
+	
 	def _validate_name(self, cr, uid,ids, context=None):
 		print "validation is called"
 		rec = self.browse(cr,uid,ids[0])
@@ -74,7 +76,7 @@ class kg_users(osv.osv):
 			if re.match(r'[!#@$%^~*{}?+=]+', rec.name[i]):
 				raise osv.except_osv('Invalid Character', 'Special characters and Numbers are not allowed in Name')
 		return True
-		
+	
 	def  _validate_email(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0]) 
 		if rec.email==False:
@@ -84,11 +86,11 @@ class kg_users(osv.osv):
 				return True
 			else:
 				raise osv.except_osv('Invalid Email', 'Please enter a valid email address')  
-				
+	
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_users, self).write(cr, uid, ids, vals, context)
-		
+	
 	_constraints = [
 			(_validate_login, 'invalid Login name  !!', ['login']),
 			(_validate_name, 'invalid Name  !!', ['name']),

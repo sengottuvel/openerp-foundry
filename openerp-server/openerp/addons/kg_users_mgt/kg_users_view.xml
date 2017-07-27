@@ -2,22 +2,21 @@
 <openerp>
     <data>
 		
-		
 		<record model="ir.ui.view" id="kg_users_form_view">
-        <field name="name">kg_users_form_view</field>
-        <field name="model">res.users</field>
-        <field name="inherit_id" ref="base.view_users_form"/>
-        <field name="arch" type="xml">	
-        	
-		<field name="company_id" position="after">
-		<field name="dep_name"/>
-		</field>		
-		<field name="active" position="after">
-		<field name="special_approval"/>
-		</field>		
-		
-		</field>
-	</record>
+			<field name="name">kg_users_form_view</field>
+			<field name="model">res.users</field>
+			<field name="inherit_id" ref="base.view_users_form"/>
+			<field name="arch" type="xml">
+			
+			<field name="company_id" position="after">
+			<field name="dep_name"/>
+			</field>
+			<field name="active" position="after">
+			<field name="special_approval"/>
+			</field>
+			
+			</field>
+		</record>
 		
 		<!-- Form view starts -->
 		
@@ -37,6 +36,7 @@
 							<group>
 								<field name="login" string="Login Name"/>
 								<field name="email" string="Email"/>
+								<field name="signature" string="Signature" />
 							</group>
 							<group>
 								<field name="password" string="Password" required='1' password="True"/>
@@ -45,16 +45,14 @@
                             <group>
                                 <field name="copy_menus"/>
                             </group>
-                            <group> 
+                            <group>
 								<field name="copy_user_id" attrs="{'invisible':[('copy_menus','!=',True)],'required':[('copy_menus','=',True)]}" />
                             </group>
                             <group>
 								<button string="Load User Rights" type="object" name="copy_menus_user_id" help="Press the Button to load the menus of the user" attrs="{'invisible':[('copy_menus','!=',True)]}"/>
                             </group>
                         </group>
-
                         <notebook>
-                           
                             <page string="Access Rights">
                                 <group >
                                     <field name="groups_id" domain="[('custom_group','=','t')]"  nolabel="1"/>
@@ -67,20 +65,20 @@
                             </page>
                             <page string="Entry Info">								
 								<group>
-										<field name="company_id" readonly='1' context="{'user_preference': 0}"/>
+									<field name="company_id" readonly='1' context="{'user_preference': 0}"/>
 								</group>
 								<group>
 									<group>
-										<field name="user_id"/>								
+										<field name="user_id"/>
 										<field name="update_user_id"/>
 										<field name='active' />
 									</group>
 									<group>
-										<field name="crt_date"/>																		
-										<field name="update_date"/>	
+										<field name="crt_date"/>
+										<field name="update_date"/>
 									</group>
 								</group>
-							</page>	
+							</page>
                         </notebook>
                     </sheet>
                 </form>
@@ -88,7 +86,7 @@
         </record>
         
         <!-- Form view ends -->
-
+		
         <!-- Tree view starts -->
         
         <record id="m_tree_view_users" model="ir.ui.view">
@@ -106,7 +104,7 @@
         <!-- Tree view ends -->
         
 		<!-- Search view starts -->
-
+		
         <record id="m_search_view_users" model="ir.ui.view">
             <field name="name">Users Search View</field>
             <field name="model">res.users</field>
@@ -118,10 +116,10 @@
             </field>
         </record>
         
-		 <!-- Search view ends -->
-		 
-         <!-- action menu starts -->
-
+		<!-- Search view ends -->
+		
+		<!-- action menu starts -->
+		
         <record id="mma_res_users_new" model="ir.actions.act_window">
             <field name="name">Users</field>
             <field name="type">ir.actions.act_window</field>
@@ -132,21 +130,21 @@
             <field name="help">Create and manage users that will connect to the system. Users can be deactivated should there be a period of time during which they will/should not connect to the system. You can assign them groups in order to give them specific access to the applications they need to use in the system.</field>
         </record>
         
-         <!-- action menu ends -->
-         
-         <!-- action menu-tree starts -->
-
-       <record id="res_user_new_tree" model="ir.actions.act_window.view">
+		<!-- action menu ends -->
+		
+		<!-- action menu-tree starts -->
+		
+		<record id="res_user_new_tree" model="ir.actions.act_window.view">
             <field eval="1" name="sequence"/>
             <field name="view_mode">tree</field>
             <field name="view_id" ref="m_tree_view_users"/>
             <field name="act_window_id" ref="mma_res_users_new"/>
         </record>
         
-         <!-- action menu-tree ends -->
+		<!-- action menu-tree ends -->
          
-         <!-- action menu-form starts -->
-
+		<!-- action menu-form starts -->
+		
         <record id="res_user_new_form" model="ir.actions.act_window.view">
             <field eval="2" name="sequence"/>
             <field name="view_mode">form</field>
@@ -154,16 +152,14 @@
             <field name="act_window_id" ref="mma_res_users_new"/>
         </record>
         
-         <!-- action menu-form ends -->
-
-	<!--Menu item starts -->
-
-
-		 <menuitem name="Users Rights" id="mam_user_rights_form_new" parent = "kg_pumpmodel_master.mpm_masters" sequence="5" />
+		<!-- action menu-form ends -->
+		
+		<!--Menu item starts -->
+		
+		<menuitem name="Users Rights" id="mam_user_rights_form_new" parent = "kg_pumpmodel_master.mpm_masters" sequence="5" />
         <menuitem action="mma_res_users_new" name="Users" id="mam_res_usres_form_new" parent="mam_user_rights_form_new" sequence="0" />
-
-
-	<!--Menu item ends -->      
-
+		
+		<!--Menu item ends -->      
+	
     </data>
 </openerp>

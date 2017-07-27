@@ -159,6 +159,7 @@ class purchase_order(osv.osv):
 		('draft', 'Draft'),
 		('sent', 'RFQ Sent'),
 		('confirmed', 'WFA'),
+		('verified', 'Verified'),
 		('approved', 'Approved'),
 		('except_picking', 'Shipping Exception'),
 		('except_invoice', 'Invoice Exception'),
@@ -978,11 +979,11 @@ class purchase_order_line(osv.osv):
 		"""
 		if context is None:
 			context = {}
-
+		
 		res = {'value': {'price_unit': price_unit or 0.0, 'name': name or '', 'product_uom' : uom_id or False}}
 		if not product_id:
 			return res
-
+		
 		product_product = self.pool.get('product.product')
 		product_uom = self.pool.get('product.uom')
 		res_partner = self.pool.get('res.partner')
@@ -1002,27 +1003,26 @@ class purchase_order_line(osv.osv):
 		if product.description_purchase:
 			name += '\n' + product.description_purchase
 		res['value'].update({'name': name})
-
+		
 		# - set a domain on product_uom
 		res['domain'] = {'product_uom': [('category_id','=',product.uom_id.category_id.id)]}
-
+		
 		# - check that uom and product uom belong to the same category
 		product_uom_po_id = product.uom_po_id.id
 		if not uom_id:
 			uom_id = product_uom_po_id
-
+		
 		if product.uom_id.category_id.id != product_uom.browse(cr, uid, uom_id, context=context).category_id.id:
 			#~ if self._check_product_uom_group(cr, uid, context=context):
 				#~ res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
 			uom_id = product_uom_po_id
-
+		
 		res['value'].update({'product_uom': uom_id})
-
+		
 		# - determine product_qty and date_planned based on seller info
 		if not date_order:
 			date_order = fields.date.context_today(self,cr,uid,context=context)
-
-
+		
 		supplierinfo = False
 		for supplier in product.seller_ids:
 			if partner_id and (supplier.name.id == partner_id):
@@ -1066,9 +1066,24 @@ class purchase_order_line(osv.osv):
 		res['value'].update({'price_unit': price, 'taxes_id': taxes_ids})
 		res['value'].update({'brand_id': '', 'moc_id_temp':'', 'moc_id':''})
 		res['value'].update({'delivery_date': str(fmt_del_date)})
-
+		tax = []
+		if product.hsn_no.id and partner_id:
+			partner_rec = res_partner.browse(cr,uid,partner_id)
+			if partner_rec.state_id.id:
+				if partner_rec.state_id.code == 'TN':
+					if product.hsn_no.cgst_id.id and product.hsn_no.sgst_id.id:
+						tax = [product.hsn_no.cgst_id.id,product.hsn_no.sgst_id.id]
+				elif partner_rec.state_id.code != 'TN':
+					if product.hsn_no.igst_id.id:
+						tax = [product.hsn_no.igst_id.id] 
+			elif not partner_rec.state_id.id:
+				tax = []
+			else:
+				pass
+		res['value'].update({'taxes_id':[(6, 0, tax)]})
+		
 		return res
-
+	
 	product_id_change = onchange_product_id
 	product_uom_change = onchange_product_uom
 

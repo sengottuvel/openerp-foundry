@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.1000000000000072"/>
+	<property name="ireport.zoom" value="1.0000000000000064"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="319"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -10,6 +10,7 @@
 distinct on (line.id) line.id as line_id,
 ROW_NUMBER() OVER(ORDER BY line.id) as seq_no,
 prod.name_template as product,
+hsn.name as hsn_no,
 trim(TO_CHAR((line.product_qty)::float, '999G999G99G999G99G99G990D99')) as product_qty,
 uom.name as uom,
 trim(TO_CHAR((line.price_unit)::float, '999G999G99G999G99G99G990D99')) as price,
@@ -60,8 +61,38 @@ line.price_type = 'per_kg' and line.quantity is null then
 else
 ' ' end as weight,
 del.name as delivery_mode,
-STRING_AGG(wo.wo_id, ', ' ORDER BY wo.wo_id) wo_no
+STRING_AGG(wo.wo_id, ', ' ORDER BY wo.wo_id) wo_no,
+
+(select
+cgst_tax.description as cgst
+from purchase_order_line sub_line
+left join res_partner partner on(partner.id=sub_line.partner_id)
+left join res_country_state state on(state.id=partner.state_id)
+left join product_product sub_prod on(sub_prod.id=sub_line.product_id)
+left join kg_hsn_master cgst on(cgst.id=sub_prod.hsn_no)
+left join account_tax cgst_tax on(cgst_tax.id=cgst.cgst_id)
+where sub_line.id = line.id and state.code = 'TN') as cgst,
+(select
+sgst_tax.description as sgst
+from purchase_order_line sub_line
+left join res_partner partner on(partner.id=sub_line.partner_id)
+left join res_country_state state on(state.id=partner.state_id)
+left join product_product sub_prod on(sub_prod.id=sub_line.product_id)
+left join kg_hsn_master sgst on(sgst.id=sub_prod.hsn_no)
+left join account_tax sgst_tax on(sgst_tax.id=sgst.sgst_id)
+where sub_line.id = line.id and state.code = 'TN') as sgst,
+(select
+igst_tax.description as igst
+from purchase_order_line sub_line
+left join res_partner partner on(partner.id=sub_line.partner_id)
+left join res_country_state state on(state.id=partner.state_id)
+left join product_product sub_prod on(sub_prod.id=sub_line.product_id)
+left join kg_hsn_master igst on(igst.id=sub_prod.hsn_no)
+left join account_tax igst_tax on(igst_tax.id=igst.igst_id)
+where sub_line.id = line.id and state.code != 'TN') as igst
+
 from
+
 purchase_order_line line
 left join product_product prod on(prod.id=line.product_id)
 left join product_uom uom on(uom.id=line.product_uom)
@@ -70,12 +101,14 @@ left join kg_brand_master brand on(brand.id=line.brand_id)
 left join ch_purchase_wo wo on(wo.header_id=line.id)
 left join purchase_order po on(po.id=line.order_id)
 left join kg_delivery_master del on(del.id=po.delivery_mode)
+left join kg_hsn_master hsn on(hsn.id=prod.hsn_no)
 where line.order_id = $P{po_id}
-group by 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]]>
+group by 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]]>
 		</queryString>
 		<field name="line_id" class="java.lang.Integer"/>
 		<field name="seq_no" class="java.lang.Long"/>
 		<field name="product" class="java.lang.String"/>
+		<field name="hsn_no" class="java.lang.Integer"/>
 		<field name="product_qty" class="java.lang.String"/>
 		<field name="uom" class="java.lang.String"/>
 		<field name="price" class="java.lang.String"/>
@@ -87,9 +120,13 @@ group by 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]]>
 		<field name="brdth" class="java.lang.String"/>
 		<field name="length" class="java.lang.String"/>
 		<field name="breadth" class="java.lang.String"/>
+		<field name="wt" class="java.lang.String"/>
 		<field name="weight" class="java.lang.String"/>
 		<field name="delivery_mode" class="java.lang.String"/>
 		<field name="wo_no" class="java.lang.String"/>
+		<field name="cgst" class="java.lang.String"/>
+		<field name="sgst" class="java.lang.String"/>
+		<field name="igst" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="Tax">
 		<parameter name="po_id" class="java.lang.Integer"/>
@@ -126,12 +163,14 @@ THEN 'Nil'
 ELSE ''
 end ) as excise_duty,
 trim(TO_CHAR((po.amount_total)::float, '999G999G99G999G99G99G990D99')) as amount,
+trim(TO_CHAR((po.amount_tax)::float, '999G999G99G999G99G99G990D99')) as amount_tax,
 trim(TO_CHAR((po.amount_total)::float, '999G999G99G999G99G99G990D99')) as amount_total,
 partner.name as partner_name,
 partner.code as partner_code,
 partner.street as street1,
 partner.street2 as street2,
 city.name as city,
+(case when partner.gs_tin_no is not null then 'GSTIN   : '||partner.gs_tin_no else 'GSTIN   : ' end)as gs_tin_no,
 po.name as po_no,
 to_char(po.date_order,'dd/mm/yyyy') as po_date,
 po.quot_ref_no as ref_no,
@@ -142,11 +181,15 @@ del.name as delivery_mode,
 po.state as status,
 compart.tin_no as tin_no,
 compart.cst_no as cst_no,
+(case when compart.gs_tin_no is not null then 'GSTIN   : '||compart.gs_tin_no else 'GSTIN   : ' end)as compart_gs_tin_no,
 case when po.id is not null then
 (SELECT CAST(string_agg(name, ',') AS text)
 FROM kg_item_quality_master where id in (select term_id from general_term where po_id=po.id))
 end as general_term,
-po.revision as revision
+po.revision as revision,
+confirmed_users.signature as confirmed_signature,
+verified_users.signature as verified_signature,
+po.approved_by as approved_by
 
 from
 purchase_order po
@@ -157,18 +200,23 @@ left join kg_delivery_master del on(del.id=po.delivery_mode)
 left join kg_dispatch_master dis on(dis.id=po.mode_of_dispatch)
 left join res_company company on(company.id=po.company_id)
 left join res_partner compart on(compart.id=company.partner_id)
+left join res_users confirmed_users on(confirmed_users.id=po.confirmed_by)
+left join res_users verified_users on(verified_users.id=po.verified_by)
+left join res_users approved_users on(approved_users.id=po.approved_by)
 
 where po.id = $P{po_id}]]>
 	</queryString>
 	<field name="insurance" class="java.lang.String"/>
 	<field name="excise_duty" class="java.lang.String"/>
 	<field name="amount" class="java.lang.String"/>
+	<field name="amount_tax" class="java.lang.String"/>
 	<field name="amount_total" class="java.lang.String"/>
 	<field name="partner_name" class="java.lang.String"/>
 	<field name="partner_code" class="java.lang.String"/>
 	<field name="street1" class="java.lang.String"/>
 	<field name="street2" class="java.lang.String"/>
 	<field name="city" class="java.lang.String"/>
+	<field name="gs_tin_no" class="java.lang.String"/>
 	<field name="po_no" class="java.lang.String"/>
 	<field name="po_date" class="java.lang.String"/>
 	<field name="ref_no" class="java.lang.String"/>
@@ -179,8 +227,12 @@ where po.id = $P{po_id}]]>
 	<field name="status" class="java.lang.String"/>
 	<field name="tin_no" class="java.lang.String"/>
 	<field name="cst_no" class="java.lang.String"/>
+	<field name="compart_gs_tin_no" class="java.lang.String"/>
 	<field name="general_term" class="java.lang.String"/>
 	<field name="revision" class="java.lang.Integer"/>
+	<field name="confirmed_signature" class="java.lang.Object"/>
+	<field name="verified_signature" class="java.lang.Object"/>
+	<field name="approved_by" class="java.lang.Integer"/>
 	<group name="PO Group">
 		<groupExpression><![CDATA[$F{amount}]]></groupExpression>
 		<groupHeader>
@@ -205,7 +257,7 @@ where po.id = $P{po_id}]]>
 								<textFieldExpression><![CDATA[$F{seq_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToTallestObject" x="38" y="0" width="330" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="38" y="0" width="269" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -250,15 +302,6 @@ where po.id = $P{po_id}]]>
 								<textFieldExpression><![CDATA[$F{amount}+" "]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="624" y="0" width="113" height="20" isPrintWhenDetailOverflows="true"/>
-								<box topPadding="2">
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-								</box>
-								<textElement textAlignment="Center"/>
-								<textFieldExpression><![CDATA[$F{delivery_mode}]]></textFieldExpression>
-							</textField>
-							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 								<reportElement x="737" y="0" width="64" height="20"/>
 								<box topPadding="2" leftPadding="2">
 									<leftPen lineWidth="0.5"/>
@@ -269,6 +312,49 @@ where po.id = $P{po_id}]]>
 									<font size="7"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{wo_no}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" x="307" y="0" width="61" height="20" isPrintWhenDetailOverflows="true"/>
+								<box topPadding="2">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{hsn_no}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" x="624" y="0" width="37" height="20" isPrintWhenDetailOverflows="true"/>
+								<box topPadding="4">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{cgst}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" x="661" y="0" width="37" height="20" isPrintWhenDetailOverflows="true"/>
+								<box topPadding="4">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{sgst}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" x="698" y="0" width="39" height="20" isPrintWhenDetailOverflows="true"/>
+								<box topPadding="4">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{igst}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
@@ -282,7 +368,7 @@ where po.id = $P{po_id}]]>
 				<reportElement x="1" y="0" width="800" height="539">
 					<printWhenExpression><![CDATA[(new Boolean(($F{status}.equals("draft"))) || new Boolean(($F{status}.equals("confirmed"))))]]></printWhenExpression>
 				</reportElement>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
 			</image>
 			<frame>
 				<reportElement x="0" y="0" width="801" height="539"/>
@@ -294,9 +380,9 @@ where po.id = $P{po_id}]]>
 		</band>
 	</background>
 	<title>
-		<band height="104" splitType="Stretch">
+		<band height="113" splitType="Stretch">
 			<line>
-				<reportElement x="736" y="0" width="1" height="91"/>
+				<reportElement x="736" y="0" width="1" height="100"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
@@ -327,7 +413,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" VENDOR CODE"]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="338" y="0" width="1" height="91"/>
+				<reportElement x="338" y="0" width="1" height="100"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
@@ -367,13 +453,13 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" M/s."]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="492" y="0" width="1" height="90"/>
+				<reportElement x="492" y="0" width="1" height="100"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="0" y="91" width="801" height="1"/>
+				<reportElement x="0" y="100" width="801" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
@@ -431,7 +517,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{city}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="91" width="801" height="13"/>
+				<reportElement x="0" y="100" width="801" height="13"/>
 				<box topPadding="1">
 					<leftPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -447,7 +533,7 @@ where po.id = $P{po_id}]]>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="338" y="20" width="53" height="13"/>
@@ -477,7 +563,7 @@ where po.id = $P{po_id}]]>
 			</textField>
 			<image>
 				<reportElement x="1" y="3" width="64" height="71"/>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="338" y="46" width="53" height="14"/>
@@ -492,6 +578,13 @@ where po.id = $P{po_id}]]>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{revision}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="503" y="86" width="234" height="15"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{gs_tin_no}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -518,14 +611,14 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["RATE"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="624" y="0" width="113" height="15"/>
+				<reportElement x="624" y="0" width="37" height="15"/>
 				<box topPadding="2">
 					<leftPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center">
 					<font isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["DLY.SCHEDULE"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["CGST"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="428" y="0" width="60" height="15"/>
@@ -564,7 +657,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["W.O.No"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="38" y="0" width="330" height="16"/>
+				<reportElement x="38" y="0" width="269" height="16"/>
 				<box topPadding="2">
 					<leftPen lineWidth="0.5"/>
 				</box>
@@ -582,6 +675,36 @@ where po.id = $P{po_id}]]>
 					<font isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["QTY"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="307" y="0" width="61" height="16"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["HSN.No"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="661" y="0" width="37" height="15"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["SGST"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="698" y="0" width="39" height="15"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["IGST"]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>
@@ -704,70 +827,34 @@ where po.id = $P{po_id}]]>
 		</band>
 	</pageFooter>
 	<lastPageFooter>
-		<band height="157">
+		<band height="195">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="489" y="54" width="136" height="13"/>
-				<box topPadding="1" leftPadding="4" rightPadding="4">
-					<leftPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.5"/>
+				<reportElement stretchType="RelativeToBandHeight" x="625" y="46" width="175" height="23"/>
+				<box topPadding="2" leftPadding="2" rightPadding="4">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
 				</box>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA["PAN NO    : AAECSO282M"]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="625" y="30" width="53" height="12"/>
-				<box topPadding="1"/>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[" CST No: "]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="625" y="42" width="42" height="12"/>
-				<box topPadding="1"/>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[" CODE  : "]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="489" y="42" width="136" height="12"/>
-				<box leftPadding="4" rightPadding="4">
-					<leftPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["DIVISION  : IV,COIMBATORE "]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="489" y="30" width="136" height="12"/>
-				<box topPadding="1" leftPadding="4" rightPadding="4">
-					<leftPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA["RANGE   : IV A "]]></textFieldExpression>
+				<textFieldExpression><![CDATA["PAN NO : AAECSO282M"]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="197" y="19" width="1" height="110"/>
+				<reportElement x="197" y="16" width="1" height="113"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="489" y="19" width="1" height="110"/>
+				<reportElement x="489" y="69" width="1" height="60"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="343" y="19" width="1" height="49"/>
+				<reportElement x="343" y="16" width="1" height="52"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
@@ -830,17 +917,12 @@ where po.id = $P{po_id}]]>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
-			<line>
-				<reportElement x="-1" y="30" width="490" height="1"/>
-				<graphicElement>
-					<pen lineWidth="0.5"/>
-				</graphicElement>
-			</line>
 			<textField>
 				<reportElement x="-1" y="16" width="198" height="15"/>
 				<box topPadding="1">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.0"/>
 				</box>
 				<textElement textAlignment="Center"/>
@@ -852,61 +934,6 @@ where po.id = $P{po_id}]]>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
-			<textField isBlankWhenNull="true">
-				<reportElement x="678" y="29" width="63" height="12"/>
-				<box topPadding="1"/>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{cst_no}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="667" y="42" width="11" height="12"/>
-				<box topPadding="1">
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["1"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="678" y="42" width="13" height="12"/>
-				<box topPadding="1">
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="691" y="42" width="13" height="12"/>
-				<box topPadding="1">
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["8"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="741" y="29" width="59" height="12"/>
-				<box topPadding="1"/>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["DT.19/01/95."]]></textFieldExpression>
-			</textField>
 			<textField>
 				<reportElement x="0" y="130" width="800" height="15"/>
 				<textElement>
@@ -923,14 +950,6 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{insurance}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="198" y="41" width="145" height="20"/>
-				<box topPadding="2"/>
-				<textElement textAlignment="Center">
-					<font isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" x="0" y="41" width="197" height="20"/>
 				<box topPadding="2"/>
 				<textElement textAlignment="Center">
@@ -938,68 +957,39 @@ where po.id = $P{po_id}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{mode_of_dispatch}]]></textFieldExpression>
 			</textField>
-			<componentElement>
-				<reportElement x="344" y="41" width="143" height="28"/>
-				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
-					<datasetRun subDataset="Tax">
-						<datasetParameter name="po_id">
-							<datasetParameterExpression><![CDATA[$P{po_id}]]></datasetParameterExpression>
-						</datasetParameter>
-						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-					</datasetRun>
-					<jr:listContents height="28" width="143">
-						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement x="0" y="1" width="143" height="20"/>
-							<box topPadding="2"/>
-							<textElement textAlignment="Center">
-								<font isBold="true"/>
-							</textElement>
-							<textFieldExpression><![CDATA[$F{tax_name}]]></textFieldExpression>
-						</textField>
-					</jr:listContents>
-				</jr:list>
-			</componentElement>
 			<textField>
 				<reportElement x="197" y="16" width="146" height="15"/>
 				<box topPadding="1">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.0"/>
 				</box>
 				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA["EXCISE DUTY"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["GST"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="343" y="16" width="146" height="16"/>
+				<reportElement x="343" y="16" width="282" height="15"/>
 				<box topPadding="1">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.0"/>
 				</box>
 				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA["SALES TAX"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["DLY.SCHEDULE"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="625" y="16" width="176" height="14"/>
-				<box topPadding="1">
+				<reportElement stretchType="RelativeToBandHeight" x="625" y="16" width="176" height="15"/>
+				<box topPadding="1" leftPadding="1">
 					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" TIN       : "+$F{tin_no}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="489" y="16" width="136" height="14"/>
-				<box topPadding="2" leftPadding="4" rightPadding="4">
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["ECC No    : AAECSO282MXM005"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="1" y="0" width="44" height="16"/>
@@ -1024,6 +1014,7 @@ where po.id = $P{po_id}]]>
 			<textField>
 				<reportElement x="491" y="0" width="61" height="16"/>
 				<box topPadding="2">
+					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement>
@@ -1033,7 +1024,8 @@ where po.id = $P{po_id}]]>
 			</textField>
 			<textField>
 				<reportElement x="552" y="0" width="73" height="16"/>
-				<box topPadding="2" rightPadding="1">
+				<box topPadding="2">
+					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right">
@@ -1050,18 +1042,109 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="333" y="145" width="80" height="12"/>
+				<reportElement x="338" y="183" width="80" height="12"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="413" y="145" width="40" height="12"/>
+				<reportElement x="418" y="183" width="40" height="12"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="343" y="32" width="282" height="36"/>
+				<box topPadding="2"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{delivery_mode}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="198" y="41" width="145" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{amount_tax}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="625" y="32" width="175" height="14" isPrintWhenDetailOverflows="true"/>
+				<box topPadding="2" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{compart_gs_tin_no}]]></textFieldExpression>
+			</textField>
+			<image hAlign="Center" vAlign="Middle">
+				<reportElement x="500" y="89" width="154" height="25">
+					<printWhenExpression><![CDATA[$F{approved_by}]]></printWhenExpression>
+				</reportElement>
+				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/MD.jpg"]]></imageExpression>
+			</image>
+			<image hAlign="Center" vAlign="Middle">
+				<reportElement x="0" y="145" width="166" height="30">
+					<printWhenExpression><![CDATA[$F{confirmed_signature}]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg"]]></imageExpression>
+			</image>
+			<image hAlign="Center" vAlign="Middle">
+				<reportElement x="604" y="146" width="197" height="29">
+					<printWhenExpression><![CDATA[$F{verified_signature}]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg"]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="0" y="175" width="166" height="20"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Confirmed By"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="604" y="175" width="197" height="20"/>
+				<box topPadding="2">
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Verified By"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="166" y="175" width="172" height="20"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="458" y="175" width="146" height="20"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
 		</band>
 	</lastPageFooter>

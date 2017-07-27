@@ -32,28 +32,96 @@ from osv.orm import browse_record, browse_null
 import os
 
 class onscreen_ppd_purchase_order_report(JasperDataParser.JasperDataParser):
+	
 	def __init__(self, cr, uid, ids, data, context):
-		
 		super(onscreen_ppd_purchase_order_report, self).__init__(cr, uid, ids, data, context)
-
+	
 	def generate_data_source(self, cr, uid, ids, data, context):
 		return 'records'
-
-
+	
 	def generate_ids(self, cr, uid, ids, data, context):
 		return {}
-
+	
 	def generate_properties(self, cr, uid, ids, data, context):
 		return {}
-		
+	
 	def generate_parameters(self, cr, uid, ids, data, context):
-		val={}		
+		val={}
+		print "uid....................",uid
+		rec = self.pool.get('purchase.order').browse(cr,uid,ids[0])
+		print"rererere",rec.id
+		
+		if rec.state == 'confirmed':
+			if rec.confirmed_by.signature:
+				confirmed_signature = rec.confirmed_by.signature
+				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg'
+				if os.path.isfile(myfile) == True:
+					os.remove(myfile)
+				else:
+					pass
+				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','Confirmed.jpg')
+				f = open(filepath, "a")
+				f.write(confirmed_signature.decode('base64'))
+			else:
+				pass
+		elif rec.state == 'verified':
+			if rec.confirmed_by.signature:
+				confirmed_signature = rec.confirmed_by.signature
+				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg'
+				if os.path.isfile(myfile) == True:
+					os.remove(myfile)
+				else:
+					pass
+				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','Confirmed.jpg')
+				f = open(filepath, "a")
+				f.write(confirmed_signature.decode('base64'))
+			else:
+				pass
+			if rec.verified_by.signature:
+				verified_signature = rec.verified_by.signature
+				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg'
+				if os.path.isfile(myfile) == True:
+					os.remove(myfile)
+				else:
+					pass
+				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','Verified.jpg')
+				f = open(filepath, "a")
+				f.write(verified_signature.decode('base64'))
+			else:
+				pass
+		elif rec.state == 'approved':
+			if rec.confirmed_by.signature:
+				confirmed_signature = rec.confirmed_by.signature
+				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg'
+				if os.path.isfile(myfile) == True:
+					os.remove(myfile)
+				else:
+					pass
+				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','Confirmed.jpg')
+				f = open(filepath, "a")
+				f.write(confirmed_signature.decode('base64'))
+			else:
+				pass
+			if rec.verified_by.signature:
+				verified_signature = rec.verified_by.signature
+				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg'
+				if os.path.isfile(myfile) == True:
+					os.remove(myfile)
+				else:
+					pass
+				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','Verified.jpg')
+				f = open(filepath, "a")
+				f.write(verified_signature.decode('base64'))
+			else:
+				pass
+		
 		val['po_id'] = ids[0]
-		print "val....................", val		
+		print "val....................",val
+		
 		return val
-
+		
 	def generate_records(self, cr, uid, ids, data, context):
 		pool= pooler.get_pool(cr.dbname)		
 		return {}
-
+	
 jasper_report.report_jasper('report.onscreen_ppd_purchase_order_report', 'purchase.order', parser=onscreen_ppd_purchase_order_report)
