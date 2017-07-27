@@ -132,7 +132,7 @@
 				<!-- Stock Locations Master  --> 
 				<menuitem action="stock.action_location_form" name="Stock Locations" id="mam_inventory_master" parent="mpm_store_master" sequence="5"/>
 				
-		        <!-- GRN AND ISSUE -->
+		        <!-- GRN -->
 				<menuitem id="gpm_grn_issue_menu" name="GRN" parent="stock.menu_stock_root" sequence="1"/>
 				
 				<!-- Store Issue -->
