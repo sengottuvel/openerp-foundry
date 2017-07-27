@@ -75,8 +75,7 @@
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Subcontract List Tree" create="false">					
 					<field name="name" invisible="1"/>
-					<field name="order_no"/>
-					<field name="contractor_id"/>
+					<field name="order_no"/>					
 					<field name="order_delivery_date"/>
 					<field name="order_category" invisible="1"/>
 					<field name="order_priority" string="Category"/>
@@ -685,6 +684,34 @@
 		
 	<!-- Tree View End -->
 	
+	
+	<!-- DC Line Pending Tree View Start -->
+		
+		<record id="t_tree_v_sc_dc_line_pending" model="ir.ui.view">
+			<field name="name">Subcontract DC Line Tree</field>
+			<field name="model">ch.subcontract.dc.line</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Subcontract DC Line Tree">				
+					<field name="contractor_id"/>
+					<field name="order_id"/>
+					<field name="order_delivery_date"/>					
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>					
+					<field name="item_code" />
+					<field name="item_name"/>
+					<field name="moc_id"/>					
+					<field name="entry_type" invisible="1"/>					
+					<field name="actual_qty" sum="Total SC Qty"/>
+					<field name="pending_qty" sum="Total pending Qty"/>
+					<field name="oth_spec" widget="char"/>
+					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- DC Line Pending Tree View End -->
+	
 	<!-- Search View Start -->
 
 		<record id="t_search_v_sc_dc" model="ir.ui.view">
@@ -712,7 +739,22 @@
 			</field>
 		</record>
 		
-	<!-- Search View End -->		
+	<!-- Search View End -->	
+	
+	 <record id="dc_line_search_view" model="ir.ui.view">
+		<field name="name">DC Line</field>
+		<field name="model">ch.subcontract.dc.line</field>
+		<field name="arch" type="xml">
+			<search string="DC Line">				
+				<field name="contractor_id" string="Contractor Name" filter_domain="[('contractor_id','ilike',self)]"/>		
+			<separator/> 
+			<group expand="0" string="Group By...">
+				<filter string="Contractor Name" name="group_contractor_id" icon="terp-personal" domain="[]" context="{'group_by':'contractor_id'}"/>
+				
+			</group>                   
+			</search>
+		</field>
+	</record>	
 			
 		
 		<!-- Menu Action Start -->
@@ -739,6 +781,28 @@
             <field name="view_id" ref="t_form_v_sc_dc"/>
             <field name="act_window_id" ref="tma_sc_dc"/>
         </record>
+        
+        
+        
+    <!-- DC Line Menu Action -->
+			<record id="tma_sc_dc_line_pending" model="ir.actions.act_window">
+				<field name="name">SC Pending List</field>
+				<field name="type">ir.actions.act_window</field>
+				<field name="res_model">ch.subcontract.dc.line</field>
+				<field name="view_type">form</field>
+				<field name="view_mode">tree</field>
+				<field name="domain">[('pending_qty','!=',0)]</field>
+				<field name="context">{'search_default_group_contractor_id':1}</field>
+				<field name="search_view_id" ref="dc_line_search_view"/>
+			</record>
+
+			<record id="tma_sc_dc_line_tree_view" model="ir.actions.act_window.view">
+				<field eval="1" name="sequence"/>
+				<field name="view_mode">tree</field>
+				<field name="view_id" ref="t_tree_v_sc_dc_line_pending"/>
+				<field name="act_window_id" ref="tma_sc_dc_line_pending"/>
+			</record>
+		
 		
 	<!-- Menu Action End-->
 
@@ -767,6 +831,9 @@
 	  <field name="prefix">DC/%(year)s/%(month)s/</field>
 	  <field name="reset_sequence">fiscal_reset</field>
 	</record>
+	
+	
+	
 	
 	<!-- Sequence Number Setting Ends Here -->	
 	
@@ -904,6 +971,26 @@
 				</tree>
 			</field>
 		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Inward Line Tree View Start -->
+		
+	<record id="t_tree_v_subcontract_inward_line" model="ir.ui.view">
+		<field name="name">Subcontract Inward Line Tree</field>
+		<field name="model">ch.subcontract.inward.line</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">
+			<tree toolbar="True" string="Subcontract Inward Line Tree">				
+				<field name="order_id"/>
+				<field name="pump_model_id"/>					
+				<field name="pattern_id"/>
+				<field name="moc_id"/>								
+				<field name="qty" sum="Total SC Qty"/>
+				<field name="pending_qty" sum="Total SC Qty"/>						
+			</tree>
+		</field>
+	</record>
 		
 	<!-- Tree View End -->
 	
@@ -1223,6 +1310,7 @@
 		<menuitem action="tma_sc_dc" id="tam_sc_dc" parent="tpm_sc_process" sequence="3" />
 		<menuitem action="tma_sc_inward" id="tam_sc_inward" parent="tpm_sc_process" sequence="4" />
 		<menuitem action="tma_sc_inspection_new" id="tam_sc_inspection" parent="tpm_sc_process" sequence="4" />	
+		<menuitem action="tma_sc_dc_line_pending" id="tam_sc_dc_line" parent="tpm_sc_process" sequence="0" />	
 		
 	
 	</data>

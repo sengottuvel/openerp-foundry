@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_kg_foundry_partlist_excel_form" model="ir.ui.view">
+            <field name="name">Foundry Partlist</field>
+            <field name="model">kg.foundry.partlist.excel</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+			<form string="Foundry Partlist Report" version="7.0">             			 
+				<header>
+					<button name="produce_xls" states="draft" string="Generate" type="object" class="oe_highlight"/>
+				</header>
+				<group>
+					<group>
+						<field name="order_type" attrs="{'readonly':[('state','=','done')]}"/>						   				     
+						<field name="order_id" attrs="{'required': [('order_type','=','wo_wise')],'invisible':[('order_type','=','schedule_wise')],'readonly':[('state','=','done')]}"/>						   				     
+						<field name="schedule_id" attrs="{'required': [('order_type','=','schedule_wise')],'invisible':[('order_type','=','wo_wise')],'readonly':[('state','=','done')]}"/>	
+					</group>
+					<group>
+					 
+					 <field name="name"/> 
+					 <field name="state" invisible="1"/>
+					 <field name="rep_data" nolabel="1" readonly="1" width="100" filename="name"/>
+					</group>
+				</group>
+			</form>
+            </field>
+        </record>
+        
+        <record id="view_kg_foundry_partlist_excel_tree_view" model="ir.ui.view">
+            <field name="name">Foundry Partlist</field>
+            <field name="model">kg.foundry.partlist.excel</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+             <tree string="Foundry Partlist Rpt">				 
+				 <field name="date"/>				 
+				 <field name="order_type"/>				 
+				 <field name="order_id"/>				 
+				 <field name="schedule_id"/>				 
+				 <field name="name"/>               
+				<field name="rep_data"/>
+				<field name="state"/>                
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_kg_foundry_partlist_excel" model="ir.actions.act_window">
+			<field name="name">Foundry Partlist</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.foundry.partlist.excel</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="view_kg_foundry_partlist_excel_tree_view"/>
+	</record>
+	
+	
+	<menuitem name="Foundry Partlist" parent="kg_menus.rpm_planning_excel_reports" action="action_kg_foundry_partlist_excel" id="kg_foundry_partlist_print_reports_excel" sequence="1"/>	
+            
+
+    </data>
+</openerp>

@@ -162,7 +162,7 @@ class kg_subcontract_wo(osv.osv):
 		'wo_value': fields.function(_get_order_value, string='Sub Contractor WO Value', method=True, store=True, type='float'),
 		'billing_type': fields.selection([('applicable','Applicable'),('not_applicable','Not Applicable')],'Billing Type'),
 		'sc_line_ids': fields.many2many('kg.subcontract.process','m2m_sc_details' , 'order_id', 'sc_id', 'SC Items',
-			domain="[('wo_state','in',('pending','partial')),('wo_process_state','=','allow'),('contractor_id','=',contractor_id)]"),
+			domain="[('wo_state','in',('pending','partial')),('wo_process_state','=','allow')]"),
 		'line_ids': fields.one2many('ch.subcontract.wo.line','header_id','Subcontract WO Line'),   
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approved','Approved'),('approved_dc','Approved & DC'),('cancel','Cancelled')],'Status', readonly=True),
 		'flag_order': fields.boolean('Flag Order'),
