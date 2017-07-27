@@ -1757,12 +1757,12 @@ class kg_stock_production_lot(osv.osv):
     _rec_name = 'batch_no'
     
     _columns = {
-    
+		
 		'grn_move':fields.many2one('stock.move','GRN Move'),
 		'grn_no':fields.char('GRN NO', char=128),
 		'product_qty':fields.float('Quantity'),
-		'pending_qty':fields.float('PO UOM Pending Qty'),
-		'store_pending_qty':fields.float('Store UOM Pending Qty'),
+		'pending_qty':fields.float('PO UOM Pending Qty',digits=(16,4)),
+		'store_pending_qty':fields.float('Store UOM Pending Qty',digits=(16,4)),
 		'issue_qty':fields.float('Issue Qty'),
 		'product_uom':fields.many2one('product.uom', 'UOM'),
 		'expiry_date':fields.date('Expiry Date'),
@@ -1776,7 +1776,8 @@ class kg_stock_production_lot(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC Name'),
 		'reserved_qty': fields.float('Reserved Qty'),
 		'reserved_qty_in_po_uom': fields.float('Reserved Qty'),
-    
+		'location_id': fields.many2one('stock.location','Location'),
+		
     }   
     
     def name_get(self, cr, uid, ids, context={}):

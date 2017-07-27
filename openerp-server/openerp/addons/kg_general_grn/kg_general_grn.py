@@ -169,6 +169,7 @@ class kg_general_grn(osv.osv):
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'vehicle_details':fields.char('Vehicle Details', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'insp_ref_no':fields.char('Insp.Ref.No.', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'location_dest_id': fields.many2one('stock.location','Location',domain="[('location_type','=','main')]"),
 		
 		## Child Tables Declaration
 		
@@ -411,22 +412,23 @@ class kg_general_grn(osv.osv):
 					price_unit = line.price_subtotal / product_qty or 1
 				stock_move_obj.create(cr,uid,
 					{
-					'general_grn_id':line.id,
+					'general_grn_id': line.id,
 					'product_id': line.product_id.id,
-					'brand_id':line.brand_id.id,
-					'moc_id':line.moc_id.id,
-					'name':line.product_id.name,
+					'brand_id': line.brand_id.id,
+					'moc_id': line.moc_id.id,
+					'name': line.product_id.name,
 					'product_qty': product_qty,
 					'po_to_stock_qty':product_qty,
-					'stock_uom':line.uom_id.id,
+					'stock_uom': line.uom_id.id,
 					'product_uom': line.uom_id.id,
 					'location_id': grn_entry.supplier_id.property_stock_supplier.id,
-					'location_dest_id': dest_location_id,
+					#~ 'location_dest_id': dest_location_id,
+					'location_dest_id': line.location_dest_id.id,
 					'move_type': 'in',
 					'state': 'done',
 					'price_unit': price_unit or 0.0,
-					'origin':'General GRN',
-					'stock_rate':line.price_unit or 0.0,
+					'origin': 'General GRN',
+					'stock_rate': line.price_unit or 0.0,
 					})
 				if grn_entry.grn_dc == 'dc_invoice' and grn_entry.bill == 'applicable':
 						pi_gen_grn_obj.create(cr,uid,
@@ -473,7 +475,8 @@ class kg_general_grn(osv.osv):
 							'product_id':line.product_id.id,
 							'brand_id':line.brand_id.id,
 							'moc_id':line.moc_id.id,
-							'product_uom':line.uom_id.id,
+							'location_id':line.location_dest_id.id,
+							'product_uom':line.product_id.uom_id.id,
 							'product_qty':product_qty,
 							'pending_qty':product_qty,
 							'store_pending_qty':store_pending_qty,
@@ -509,6 +512,7 @@ class kg_general_grn(osv.osv):
 						'product_id':line.product_id.id,
 						'brand_id':line.brand_id.id,
 						'moc_id':line.moc_id.id,
+						'location_id':line.location_dest_id.id,
 						'product_uom':line.product_id.uom_id.id,
 						'product_qty':product_qty,
 						'pending_qty':product_qty,
@@ -847,15 +851,15 @@ class kg_general_grn_line(osv.osv):
 		
 		## Module Requirement Fields
 		
-		'product_id':fields.many2one('product.product','Item Name',required=True,readonly=False, states={'done':[('readonly',True)],'calcel':[('readonly',True)]}, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
-		'uom_id':fields.many2one('product.uom','Store UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-		'grn_qty':fields.float('GRN Quantity',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-		'recvd_qty':fields.float('Received Qty'),
-		'reject_qty':fields.float('Rejected Qty'),
-		'price_unit':fields.float('Unit Price',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'product_id': fields.many2one('product.product','Item Name',required=True,readonly=False, states={'done':[('readonly',True)],'calcel':[('readonly',True)]}, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
+		'uom_id': fields.many2one('product.uom','Store UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'grn_qty': fields.float('GRN Quantity',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'recvd_qty': fields.float('Received Qty'),
+		'reject_qty': fields.float('Rejected Qty'),
+		'price_unit': fields.float('Unit Price',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'price_subtotal': fields.function(_amount_line, string='Line Total', digits_compute= dp.get_precision('Account'),store=True),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
-		'cancel_remark':fields.text('Cancel Remarks'),
+		'cancel_remark': fields.text('Cancel Remarks'),
 		'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
 		'kg_discount': fields.float('Discount Amount'),
 		'grn_tax_ids': fields.many2many('account.tax', 'po_gen_grn_tax', 'order_id', 'taxes_id', 'Taxes'),
@@ -863,13 +867,14 @@ class kg_general_grn_line(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type'),
-		'product_tax_amt':fields.float('Tax Amount'),
+		'product_tax_amt': fields.float('Tax Amount'),
 		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
 		'weight': fields.float('Weight',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'location_dest_id': fields.many2one('stock.location','Location',domain="[('location_type','=','main')]"),
 		
 		## Child Tables Declaration
 		
-		'exp_batch_id':fields.one2many('kg.exp.batch','grn_line_id','Exp Batch No',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'exp_batch_id':fields.one2many('kg.exp.batch','grn_line_id','Exp Batch No',readonly=True,states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		
 	}
 	
@@ -963,10 +968,10 @@ class kg_exp_batch(osv.osv):
 		
 	}
 	
-	#~ _sql_constraints = [
-		#~ 
-		#~ ('batch_no', 'unique(batch_no)', 'S/N must be unique per Item !!'),
-	#~ ]
+	_sql_constraints = [
+		
+		('batch_no', 'unique(batch_no)', 'S/N must be unique per Item !!'),
+	]
 
 
 kg_exp_batch()

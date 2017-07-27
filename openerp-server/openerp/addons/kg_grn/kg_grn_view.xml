@@ -614,6 +614,7 @@
 				<field name="product_qty" string="Received Qty" readonly="1"/>
 				<field name="pending_qty" string="Available Qty in PO UOM" readonly="1"/>
 				<field name="store_pending_qty" string="Available Qty in Store UOM" readonly="1"/>
+				<field name="location_id" invisible="1" readonly="1"/>
 				<field name="reserved_qty" invisible="1" readonly="1"/>
 				<field name="reserved_qty_in_po_uom" invisible="1" readonly="1"/>
 			</field>
@@ -643,6 +644,7 @@
 			<field name="product_qty" string="Received Qty" invisible="1"/>
 			<field name="expiry_date" invisible="1"/>
 			<field name="grn_type" invisible="1"/>
+			<field name="location_id" invisible="1"/>
 			</field>
 		</field>
 	</record>

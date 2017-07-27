@@ -33,6 +33,7 @@
 						</group>
 						<group> 
 							<field name="issue_date"/>
+							<field name="location_id" required="1"/>
 							<field name="outward_type" invisible="1"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="building" invisible="1"/>
@@ -49,7 +50,7 @@
 					</group>
 					<notebook>
 						<page string="Products" autofocus="True" attrs="{'invisible': [('products_flag','=',False)]}" >
-						<field name="issue_line_ids" colspan="4" nolabel="1" context="{'issue_type':issue_type,'dep_issue_type':dep_issue_type,'wo_state':'accept','state':'draft'}">
+						<field name="issue_line_ids" colspan="4" nolabel="1" context="{'issue_type':issue_type,'dep_issue_type':dep_issue_type,'wo_state':'accept','state':'draft','location_id':location_id}">
 							<form string="Entry Tree">					
 								<group string="Product Details" colspan="4">
 									<group>
@@ -61,7 +62,7 @@
 										<field name="traceability_no"/>
 										<field name="remark_id"/>
 										<field name="dep_issue_type" invisible="1"/>
-										<field name="location_id" invisible="1"/>
+										<field name="location_id" required="1"/>
 										<field name="state" invisible="1"/>
 										<field name="wo_state" attrs="{'readonly':[('state','in',('draft','confirmed'))]}" invisible="1"/>
 									</group> 
@@ -305,19 +306,19 @@
 			</field>
 		</record>
 	
-        <!--
-        =====================
-        Form Action
-        ===================== -->
-    
+		<!--
+        =================================
+        Store Issue - General Form Action
+        ================================= -->
+		
 		<record id="action_kg_department_issue" model="ir.actions.act_window">
-			<field name="name">Store Issue</field>
+			<field name="name">Store Issue - General</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.department.issue</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="domain">[('state','!=','approve')]</field>
-			<field name="context">{'search_default_issue_type':1, }</field>
+			<field name="domain">[('state','!=','approve'),(('location_id','=',35))]</field>
+			<field name="context">{'search_default_issue_type':1,'default_location_id':35 }</field>
 			<field name="search_view_id" ref="t_search_v_department_issue"/>
 		</record>
 		
@@ -333,6 +334,66 @@
             <field name="view_mode">form</field>
             <field name="view_id" ref="kg_department_issue_form"/>
             <field name="act_window_id" ref="action_kg_department_issue"/>
+        </record>
+        
+		<!--
+        =================================
+        Store Issue - MS Form Action
+        ================================= -->
+		
+		<record id="tma_ms_store_issue" model="ir.actions.act_window">
+			<field name="name">Store Issue - MS</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.department.issue</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('state','!=','approve'),(('location_id','=',13))]</field>
+			<field name="context">{'search_default_issue_type':1,'default_location_id':13 }</field>
+			<field name="search_view_id" ref="t_search_v_department_issue"/>
+		</record>
+		
+		<record id="tma_ms_store_issue_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kg_department_issue_tree"/>
+            <field name="act_window_id" ref="tma_ms_store_issue"/>
+        </record>
+		
+		<record id="tma_ms_store_issue_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kg_department_issue_form"/>
+            <field name="act_window_id" ref="tma_ms_store_issue"/>
+        </record>
+        
+		<!--
+        =================================
+        Store Issue - FOU Form Action
+        ================================= -->
+		
+		<record id="tma_fou_store_issue" model="ir.actions.act_window">
+			<field name="name">Store Issue - Foundry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.department.issue</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('state','!=','approve'),(('location_id','=',33))]</field>
+			<field name="context">{'search_default_issue_type':1,'default_location_id':33 }</field>
+			<field name="search_view_id" ref="t_search_v_department_issue"/>
+		</record>
+		
+		<record id="tma_fou_store_issue_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kg_department_issue_tree"/>
+            <field name="act_window_id" ref="tma_fou_store_issue"/>
+        </record>
+		
+		<record id="tma_fou_store_issue_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kg_department_issue_form"/>
+            <field name="act_window_id" ref="tma_fou_store_issue"/>
         </record>
         
 		<record forcecreate="1" id="seq_store_issue" model="ir.sequence.type">	
@@ -722,7 +783,13 @@
         </record>
         
         <!-- Store Issue Transaction Menu -->
-		<menuitem action="action_kg_department_issue" id="gam_dept_issue" name="Store Issue" parent="kg_menus.gpm_grn_issue_menu" sequence="5"/>
+		<menuitem action="action_kg_department_issue" id="gam_dept_issue" name="Store Issue - General" parent="kg_menus.gpm_grn_issue_menu" sequence="10"/>
+        
+        <!-- Store Issue MS Transaction Menu -->
+		<menuitem action="tma_ms_store_issue" id="tam_ms_store_issue" name="Store Issue - MS" parent="kg_menus.gpm_grn_issue_menu" sequence="9"/>
+        
+        <!-- Store Issue FOU Transaction Menu -->
+		<menuitem action="tma_fou_store_issue" id="tam_fou_store_issue" name="Store Issue - Foundry" parent="kg_menus.gpm_grn_issue_menu" sequence="8"/>
         
         <!-- MS Store Inward Transaction Menu -->
 		<menuitem action="tma_ms_issue_line" id="tam_ms_issue_line" name="MS Store Inward" parent="kg_machineshop.tpm_ms_process" sequence="19"/>

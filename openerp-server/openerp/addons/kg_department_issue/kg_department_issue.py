@@ -71,6 +71,7 @@ class kg_department_issue(osv.osv):
 		'dep_issue_type':fields.selection([('from_indent','From Indent'),('direct','Direct')],'Issue Mode',required=True,
 					readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'wo_line_id': fields.many2one('ch.work.order.details','WO No.',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'location_id': fields.many2one('stock.location', 'Source Location'),
 		
 		## Child Tables Declaration
 		
@@ -268,7 +269,8 @@ class kg_department_issue(osv.osv):
 					else:
 						wo_id = False
 					dep_stock_location = depindent_obj.dest_location_id.id
-					main_location = depindent_obj.src_location_id.id
+					#~ main_location = depindent_obj.src_location_id.id
+					main_location = obj.location_id.id
 					
 					vals = {
 					
@@ -342,8 +344,9 @@ class kg_department_issue(osv.osv):
 					uom = group[0].uom.id or False
 					serviceindent_obj = self.pool.get('kg.service.indent').browse(cr, uid, indent.id)
 					dep_stock_location = serviceindent_obj.dep_name.stock_location.id
-					main_location = serviceindent_obj.dep_name.main_location.id
-										
+					#~ main_location = serviceindent_obj.dep_name.main_location.id
+					main_location = obj.location_id.id
+					
 					vals = {
 					
 						'product_id':prod_browse.id,
@@ -511,7 +514,8 @@ class kg_department_issue(osv.osv):
 					indent_id = line_ids.indent_line_id.indent_id.id
 					depindent_obj = self.pool.get('kg.depindent').browse(cr, uid, indent_id)
 					dep_stock_location = depindent_obj.dest_location_id.id
-					main_location = depindent_obj.src_location_id.id
+					#~ main_location = depindent_obj.src_location_id.id
+					main_location = issue_record.location_id.id
 				else:
 					stock_main_store = self.pool.get('stock.location').search(cr,uid,[('custom','=',True),('location_type','=','main')])
 					main_location = stock_main_store[0]
@@ -522,7 +526,8 @@ class kg_department_issue(osv.osv):
 					indent_id = line_ids.service_indent_line_id.service_id.id
 					depindent_obj = self.pool.get('kg.service.indent').browse(cr, uid, indent_id)
 					dep_stock_location = depindent_obj.dep_name.stock_location.id
-					main_location = depindent_obj.dep_name.main_location.id
+					#~ main_location = depindent_obj.dep_name.main_location.id
+					main_location = issue_record.location_id.id
 				else:
 					stock_main_store = self.pool.get('stock.location').search(cr,uid,[('custom','=',True),('location_type','=','main')])
 					main_location = stock_main_store[0]
@@ -857,7 +862,7 @@ class kg_department_issue_line(osv.osv):
 		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type'),
 		'dep_issue_type': fields.selection([('from_indent','From Indent'),('direct','Direct')], string='Issue Type'),
 		'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry',
-					domain="[('product_id','=',product_id),'&',('grn_type','=',issue_type),'&', ('reserved_qty','>',0), '&', ('lot_type','!=','out')]",
+					domain="[('product_id','=',product_id),'&',('grn_type','=',issue_type),'&',('pending_qty','>',0),'&',('store_pending_qty','>',0),'&',('lot_type','!=','out'),'&',('moc_id','=',wo_moc_id),'&',('location_id','=',location_id)]",
 					),
 		#'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry'),
 		'brand_id': fields.many2one('kg.brand.master','Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),

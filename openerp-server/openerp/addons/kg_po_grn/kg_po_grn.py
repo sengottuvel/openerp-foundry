@@ -24,7 +24,7 @@ UOM_CONVERSATION = [
 ]
 
 class kg_po_grn(osv.osv):
-
+	
 	def _amount_line_tax(self, cr, uid, line, context=None):
 		val = 0.0
 		
@@ -104,7 +104,7 @@ class kg_po_grn(osv.osv):
 			res[order.id]['discount'] = val3
 			res[order.id]['amount_total'] = res[order.id]['amount_untaxed'] - res[order.id]['discount'] + res[order.id]['amount_tax'] + res[order.id]['other_charge']
 			print"res[order.id]['amount_total']",res[order.id]['amount_total']
-			
+		
 		return res
 	
 	def _get_order(self, cr, uid, ids, context=None):
@@ -112,14 +112,14 @@ class kg_po_grn(osv.osv):
 		for line in self.pool.get('po.grn.line').browse(cr, uid, ids, context=context):
 			result[line.po_grn_id.id] = True
 		return result.keys()
-		
+	
 	def button_dummy(self, cr, uid, ids, context=None):
 		return True 
 	
 	_name = "kg.po.grn"
 	_description = "PO GRN"
 	_order = "grn_date desc,name desc"
-
+	
 	_columns = {
 		
 		## Basic Info
@@ -211,6 +211,7 @@ class kg_po_grn(osv.osv):
 		'vehicle_details':fields.char('Vehicle Details', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'insp_ref_no':fields.char('Insp.Ref.No.', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division',readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'location_dest_id': fields.many2one('stock.location', 'Destination Location'),
 		
 		## Child Tables Declaration
 		
@@ -260,13 +261,13 @@ class kg_po_grn(osv.osv):
 		if grn_date > today:
 			return False
 		return True
-		
-	_constraints = [
 	
+	_constraints = [
+		
 		(_grndate_validation, 'GRN date should not be greater than current date !!',['grn_date']),
 		
 		]
-				
+	
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_po_grn, self).write(cr, uid, ids, vals, context)
@@ -277,7 +278,7 @@ class kg_po_grn(osv.osv):
 			user = self.pool.get('res.users').browse(cr, uid, created_by, context=context)
 			value = {'department_id': user.dep_name.id}
 		return {'value': value}	
-			
+	
 	def onchange_grn_date(self, cr, uid, ids, grn_date):
 		today_date = today.strftime('%Y-%m-%d')
 		back_list = []
@@ -326,9 +327,9 @@ class kg_po_grn(osv.osv):
 					so_id.write(cr, uid, line.so_line_id.service_id.id, {'grn_flag' : False})   
 			
 		return True
-
+	
 	# Delete Method #
-
+	
 	def unlink(self, cr, uid, ids, context=None):
 		unlink_ids = []		  
 		rec = self.browse(cr, uid, ids[0])
@@ -345,9 +346,9 @@ class kg_po_grn(osv.osv):
 						so_id.write(cr, uid, line.so_line_id.service_id.id, {'grn_flag' : False})   
 			unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
+	
 	# GRN LINE Creation #
-		
+	
 	def update_potogrn(self,cr,uid,ids,picking_id=False,context={}):
 		grn_entry_obj = self.browse(cr,uid,ids[0])
 		print"grn_entry_objgrn_entry_obj",grn_entry_obj.state
@@ -422,7 +423,7 @@ class kg_po_grn(osv.osv):
 								'uom_id': order_line.product_uom.id,
 								'po_id': order_line.order_id.id,
 								'location_id': po_record.partner_id.property_stock_supplier.id,
-								'location_dest_id': po_record.location_id.id,
+								'location_dest_id': grn_entry_obj.location_dest_id.id,
 								'po_grn_id': po_grn_id,
 								'state': 'confirmed',
 								'po_line_id': order_line.id,
@@ -452,11 +453,11 @@ class kg_po_grn(osv.osv):
 										wo_id = self.pool.get('ch.po.grn.wo').create(cr,uid,{'header_id':po_grn_line,'qty':wo_rec.qty,'w_order_id':wo_rec.w_order_id.id,'wo_id':wo_rec.wo_id})
 						else:
 							print "NO Qty or Cancel"
-				
-			if grn_entry_obj.grn_type == 'from_so':  
-					
-				### SO TO GRN ####
 			
+			if grn_entry_obj.grn_type == 'from_so':  
+				
+				### SO TO GRN ####
+				
 				so_id = False
 				
 				cr.execute(""" select so_id from multiple_so where grn_id = %s """ %(grn_entry_obj.id))
@@ -535,7 +536,7 @@ class kg_po_grn(osv.osv):
 							
 						else:
 							print "NO Qty or Cancel"
-							
+			
 			if grn_entry_obj.grn_type == 'from_gp':  
 				
 				cr.execute(""" select gp_id from multiple_gate where grn_id = %s """ %(grn_entry_obj.id))
@@ -600,11 +601,11 @@ class kg_po_grn(osv.osv):
 							})
 						else:
 							print "NO Qty or Cancel"								
-
+		
 		return True
 	
 	# PO GRN Confirm #
-		
+	
 	def entry_confirm(self, cr, uid, ids,context=None):
 		grn_entry = self.browse(cr, uid, ids[0])
 		if grn_entry.state == 'draft':
@@ -626,12 +627,11 @@ class kg_po_grn(osv.osv):
 			d1 = today_new
 			d2 = bk_date
 			delta = d1 - d2
-
+			
 			for i in range(delta.days + 1):
 				bkk_date = d1 - timedelta(days=i)
 				backk_date = bkk_date.strftime('%Y-%m-%d')
 				back_list.append(backk_date)
-			
 			po_qty = 0	
 			total = 0	
 			for i in range(len(grn_entry.line_ids)):
@@ -649,7 +649,6 @@ class kg_po_grn(osv.osv):
 								_('%s This WO No. repeated'%(wo['wo_name'])))
 						else:
 							pass
-							
 			if grn_entry.dc_date and grn_entry.dc_date > grn_entry.grn_date:
 				raise osv.except_osv(_('DC Date Error!'),_('DC Date Should Be Less Than GRN Date.'))			
 			if not grn_entry.line_ids:
@@ -738,11 +737,11 @@ class kg_po_grn(osv.osv):
 									  'confirmed_by':uid,
 									  'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 									   })
-			
+		
 		return True
-		
-		# PO GRN APPROVE #
-		
+	
+	# PO GRN APPROVE #
+	
 	def entry_approve(self, cr, uid, ids,context=None):
 		grn_entry = self.browse(cr, uid, ids[0])
 		if grn_entry.state == 'confirmed':
@@ -763,7 +762,7 @@ class kg_po_grn(osv.osv):
 			dep_id = user_id.dep_name.id
 			dep_record = dep_obj.browse(cr,uid,dep_id)
 			dest_location_id = dep_record.main_location.id 
-			line_tot = 0			
+			line_tot = 0
 			line_id_list = []
 			
 			po_qty = 0	
@@ -884,19 +883,19 @@ class kg_po_grn(osv.osv):
 					brand =  brand+')'
 				else:
 					brand = ''
-				sql = """select * from stock_move where product_id="""+str(line.product_id.id)+""" and move_type='in' """+ brand +""" and po_grn_line_id="""+str(line.id)+"""  """
-				cr.execute(sql)
-				data = cr.dictfetchall()
-				if data:
-					del_sql = """delete from stock_move where product_id="""+str(line.product_id.id)+""" and move_type='in'  """+ brand +"""  and po_grn_line_id="""+str(line.id)+""" """
-					cr.execute(del_sql)
-				sql1 = """select * from stock_production_lot where lot_type='in' """+ brand +""" and product_id="""+str(line.product_id.id)+""" and grn_no='"""+str(line.po_grn_id.name)+"""' """
-				cr.execute(sql1)
-				data1 = cr.dictfetchall()
-				if data1:
-					del_sql1 = """delete from stock_production_lot where lot_type='in' """+ brand +""" and product_id="""+str(line.product_id.id)+""" and grn_no='"""+str(line.po_grn_id.name)+"""'"""
-					cr.execute(del_sql1)
-				print data1
+				#~ sql = """select * from stock_move where product_id="""+str(line.product_id.id)+""" and move_type='in' """+ brand +""" and po_grn_line_id="""+str(line.id)+"""  """
+				#~ cr.execute(sql)
+				#~ data = cr.dictfetchall()
+				#~ if data:
+					#~ del_sql = """delete from stock_move where product_id="""+str(line.product_id.id)+""" and move_type='in'  """+ brand +"""  and po_grn_line_id="""+str(line.id)+""" """
+					#~ cr.execute(del_sql)
+				#~ sql1 = """select * from stock_production_lot where lot_type='in' """+ brand +""" and product_id="""+str(line.product_id.id)+""" and grn_no='"""+str(line.po_grn_id.name)+"""' """
+				#~ cr.execute(sql1)
+				#~ data1 = cr.dictfetchall()
+				#~ if data1:
+					#~ del_sql1 = """delete from stock_production_lot where lot_type='in' """+ brand +""" and product_id="""+str(line.product_id.id)+""" and grn_no='"""+str(line.po_grn_id.name)+"""'"""
+					#~ cr.execute(del_sql1)
+				#~ print data1
 								
 				if grn_entry.grn_type == 'from_po':
 					#po_obj.write(cr,uid,po_id, {'grn_flag':False})
@@ -1076,7 +1075,8 @@ class kg_po_grn(osv.osv):
 						'stock_uom':product_uom,
 						'product_uom': product_uom,
 						'location_id': grn_entry.supplier_id.property_stock_supplier.id,
-						'location_dest_id': dest_location_id,
+						#~ 'location_dest_id': dest_location_id,
+						'location_dest_id': line.location_dest_id.id,
 						'move_type': 'in',
 						'state': 'done',
 						'price_unit': price_unit or 0.0,
@@ -1156,7 +1156,8 @@ class kg_po_grn(osv.osv):
 						'stock_uom':product_uom,
 						'product_uom': product_uom,
 						'location_id': grn_entry.supplier_id.property_stock_supplier.id,
-						'location_dest_id': dest_location_id,
+						#~ 'location_dest_id': dest_location_id,
+						'location_dest_id': line.location_dest_id.id,
 						'move_type': 'in',
 						'state': 'done',
 						'price_unit': price_unit or 0.0,
@@ -1219,7 +1220,8 @@ class kg_po_grn(osv.osv):
 						'stock_uom':line.product_id.uom_id.id,
 						'product_uom': line.product_id.uom_id.id,
 						'location_id': grn_entry.supplier_id.property_stock_supplier.id,
-						'location_dest_id': dest_location_id,
+						#~ 'location_dest_id': dest_location_id,
+						'location_dest_id': line.location_dest_id.id,
 						'move_type': 'in',
 						'state': 'done',
 						'price_unit': (line.price_subtotal / line.po_grn_qty) or 0.0,
@@ -1264,7 +1266,8 @@ class kg_po_grn(osv.osv):
 								'product_id':line.product_id.id,
 								'brand_id':line.brand_id.id,
 								'moc_id':line.moc_id.id,
-								'product_uom':product_uom,
+								'location_id':line.location_dest_id.id,
+								'product_uom':line.product_id.uom_id.id,
 								'product_qty':product_qty,
 								'pending_qty':product_qty,
 								'store_pending_qty':store_pending_qty,
@@ -1272,7 +1275,7 @@ class kg_po_grn(osv.osv):
 								'batch_no':exp.batch_no,
 								'expiry_date':exp.exp_date,
 								'price_unit':price_unit or 0.0,
-								'po_uom':line.uom_id.id,
+								'po_uom':line.product_id.uom_po_id.id,
 								'grn_type':'material',
 								'reserved_qty':product_qty,
 							})
@@ -1309,20 +1312,23 @@ class kg_po_grn(osv.osv):
 								price_unit =  line.price_subtotal / product_qty
 						print"product_qtyproduct_qty",product_qty
 						print"store_pending_qtystore_pending_qty",store_pending_qty
+						print"product_uomproduct_uom",product_uom
+						
 						lot_obj.create(cr,uid,
 							{
 							'grn_no':line.po_grn_id.name,
 							'product_id':line.product_id.id,
 							'brand_id':line.brand_id.id,
 							'moc_id':line.moc_id.id,
-							'product_uom':product_uom,
+							'location_id':line.location_dest_id.id,
+							'product_uom':line.product_id.uom_id.id,
 							'product_qty':product_qty,
 							'pending_qty':product_qty,
 							'store_pending_qty':store_pending_qty,
 							'store_pending_qty':store_pending_qty,
 							'issue_qty':product_qty,
 							'price_unit':price_unit or 0.0,
-							'po_uom':product_uom,
+							'po_uom':line.product_id.uom_po_id.id,
 							'batch_no':line.po_grn_id.name,
 							'grn_type':'material',
 							'reserved_qty':product_qty,
@@ -1360,7 +1366,8 @@ class kg_po_grn(osv.osv):
 								'product_id':line.product_id.id,
 								'brand_id':line.brand_id.id,
 								'moc_id':line.moc_id.id,
-								'product_uom':product_uom,
+								'location_id':line.location_dest_id.id,
+								'product_uom':line.product_id.uom_id.id,
 								'product_qty':product_qty,
 								'pending_qty':product_qty,
 								'store_pending_qty':store_pending_qty,
@@ -1368,7 +1375,7 @@ class kg_po_grn(osv.osv):
 								'batch_no':exp.batch_no,
 								'expiry_date':exp.exp_date,
 								'price_unit':price_unit or 0.0,
-								'po_uom':line.uom_id.id,
+								'po_uom':line.product_id.uom_po_id.id,
 								'grn_type':'service',
 								'reserved_qty':product_qty,
 							})
@@ -1403,13 +1410,14 @@ class kg_po_grn(osv.osv):
 							'product_id':line.product_id.id,
 							'brand_id':line.brand_id.id,
 							'moc_id':line.moc_id.id,
-							'product_uom':product_uom,
+							'location_id':line.location_dest_id.id,
+							'product_uom':line.product_id.uom_id.id,
 							'product_qty':product_qty,
 							'pending_qty':product_qty,
 							'store_pending_qty':store_pending_qty,
 							'issue_qty':product_qty,
 							'price_unit':price_unit or 0.0,
-							'po_uom':product_uom,
+							'po_uom':line.product_id.uom_po_id.id,
 							'batch_no':line.po_grn_id.name,
 							'grn_type':'service' ,
 							'reserved_qty':product_qty,
@@ -1435,7 +1443,8 @@ class kg_po_grn(osv.osv):
 								'product_id':line.product_id.id,
 								'brand_id':line.brand_id.id,
 								'moc_id':line.moc_id.id,
-								'product_uom':product_uom,
+								'location_id':line.location_dest_id.id,
+								'product_uom':line.product_id.uom_id.id,
 								'product_qty':product_qty,
 								'pending_qty':product_qty,
 								'store_pending_qty':store_pending_qty,
@@ -1443,7 +1452,7 @@ class kg_po_grn(osv.osv):
 								'batch_no':exp.batch_no,
 								'expiry_date':exp.exp_date,
 								'price_unit':price_unit or 0.0,
-								'po_uom':line.uom_id.id,
+								'po_uom':line.product_id.uom_po_id.id,
 								'grn_type':'service',
 								'reserved_qty':po_grn_qty,
 							})
@@ -1466,13 +1475,14 @@ class kg_po_grn(osv.osv):
 							'product_id':line.product_id.id,
 							'brand_id':line.brand_id.id,
 							'moc_id':line.moc_id.id,
+							'location_id':line.location_dest_id.id,
 							'product_uom':line.product_id.uom_id.id,
 							'product_qty':line.po_grn_qty,
 							'pending_qty':line.po_grn_qty,
 							'store_pending_qty':line.store_pending_qty,
 							'issue_qty':line.po_grn_qty,
 							'price_unit':(line.price_subtotal / line.po_grn_qty) or 0.0,
-							'po_uom':line.product_id.uom_id.id,
+							'po_uom':line.product_id.uom_po_id.id,
 							'batch_no':line.po_grn_id.name,
 							'grn_type':'service',
 							'reserved_qty':po_grn_qty,
@@ -1515,7 +1525,7 @@ class kg_po_grn(osv.osv):
 kg_po_grn()
 
 class po_grn_line(osv.osv):
-
+	
 	_name = "po.grn.line"
 	_description = "PO GRN Line"
 	
@@ -1564,7 +1574,7 @@ class po_grn_line(osv.osv):
 			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total_included'])
 			
 		return res
-		
+	
 	_columns = {
 		
 		## Basic Info
@@ -1674,13 +1684,13 @@ class po_grn_line(osv.osv):
 		if rec.weight < 0.00:
 			return False					
 		return True
-		
-	_constraints = [
 	
+	_constraints = [
+		
 		(_check_weight,'You cannot save with negative weight !',['Weight']),
 		
 		]
-		
+	
 po_grn_line()
 
 class kg_po_exp_batch(osv.osv):
@@ -1702,15 +1712,15 @@ class kg_po_exp_batch(osv.osv):
 		
 	}
 	_sql_constraints = [
-	
+		
 		('batch_no', 'unique(batch_no)', 'S/N must be unique per Item !!'),
-	]   
+	]
 	
 	
 kg_po_exp_batch()
 
 class kg_po_grn_expense_track(osv.osv):
-
+	
 	_name = "kg.po.grn.expense.track"
 	_description = "kg expense track"
 	
@@ -1734,7 +1744,7 @@ class kg_po_grn_expense_track(osv.osv):
 		
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.po.grn.expense.track', context=c),
 		'date' : lambda * a: time.strftime('%Y-%m-%d'),
-	
+		
 		}
 	
 kg_po_grn_expense_track()
@@ -1765,14 +1775,14 @@ class ch_po_grn_wo(osv.osv):
 			wo_rec = self.pool.get('ch.work.order.details').browse(cr,uid,w_order_line_id)
 			value = {'wo_id':wo_rec.order_no}
 		return {'value':value}
-		
+	
 	def _check_qty(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 			
 		if rec.qty <= 0.00:
 			return False					
 		return True
-		
+	
 	_constraints = [
 		
 		(_check_qty,'You cannot save with zero qty !',['Qty']),
