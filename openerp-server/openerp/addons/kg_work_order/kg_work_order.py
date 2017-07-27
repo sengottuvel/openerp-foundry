@@ -1215,6 +1215,7 @@ class ch_work_order_details(osv.osv):
 		'line_ids_e': fields.one2many('ch.wo.spare.bom', 'header_id', "Spare BOM"),
 		'suction_spool': fields.integer('Suction Spool'),
 		'flag_select_all': fields.boolean('Select All'),
+		'pumpseries_id': fields.many2one('kg.pumpseries.master', 'Pump Series'),
 		
 	}
 	
