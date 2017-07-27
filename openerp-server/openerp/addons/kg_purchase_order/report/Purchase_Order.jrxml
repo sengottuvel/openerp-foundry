@@ -386,7 +386,7 @@ where po.id = $P{po_id}]]>
 					<reportElement x="2" y="0" width="799" height="524">
 						<printWhenExpression><![CDATA[(new Boolean(($F{status}.equals("draft"))) || new Boolean(($F{status}.equals("confirmed"))))]]></printWhenExpression>
 					</reportElement>
-					<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
 				</image>
 			</frame>
 		</band>
@@ -533,7 +533,7 @@ where po.id = $P{po_id}]]>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="363" y="20" width="52" height="13"/>
@@ -563,7 +563,7 @@ where po.id = $P{po_id}]]>
 			</textField>
 			<image>
 				<reportElement x="1" y="4" width="71" height="82"/>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="364" y="46" width="52" height="11"/>
@@ -1116,7 +1116,7 @@ where po.id = $P{po_id}]]>
 				<reportElement x="490" y="82" width="154" height="30">
 					<printWhenExpression><![CDATA[$F{approved_by}]]></printWhenExpression>
 				</reportElement>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/MD.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/MD.jpg"]]></imageExpression>
 			</image>
 			<image hAlign="Center" vAlign="Middle">
 				<reportElement x="-1" y="144" width="162" height="30">
@@ -1125,7 +1125,7 @@ where po.id = $P{po_id}]]>
 				<box>
 					<leftPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg"]]></imageExpression>
 			</image>
 			<image hAlign="Center" vAlign="Middle">
 				<reportElement x="624" y="144" width="177" height="30">
@@ -1134,7 +1134,7 @@ where po.id = $P{po_id}]]>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="0" y="174" width="161" height="20"/>
