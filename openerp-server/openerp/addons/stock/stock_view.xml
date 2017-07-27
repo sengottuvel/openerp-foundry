@@ -438,16 +438,14 @@
         </record>
 
         <record id="action_production_lot_form" model="ir.actions.act_window">
-<!--
-            <field name="name">Serial Number</field>
--->
-            <field name="name">Stock List</field>
+<!--    <field name="name">Serial Number</field>-->
+            <field name="name">Stock List - General</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">stock.production.lot</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[('pending_qty','>',0)]</field>
-            <field name="context">{'search_default_group_product_id':1}</field>
+            <field name="domain">[('pending_qty','>',0),('location_id','=',76)]</field>
+            <field name="context">{'search_default_group_product_id':1,'default_location_id':76}</field>
             <field name="search_view_id" ref="search_product_lot_filter"/>
             <field name="view_id" ref="view_production_lot_tree"/>
             <field name="help" type="html">
@@ -466,7 +464,7 @@
         </record>
         <menuitem action="action_production_lot_form" id="menu_action_production_lot_form"
             parent="menu_traceability" groups="stock.group_production_lot"
-            sequence="1"/> 
+            sequence="1"/>
 
         #
         # Lot composition (history)

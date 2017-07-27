@@ -228,7 +228,7 @@
             name="Issue Return"
             id="menu_mrp_bom_form_action1"
             parent="base.menu_mrp_root"
-            sequence="1"/>
+            sequence="12"/>
         
 	
     </data>

@@ -154,7 +154,7 @@
 	<!-- Menu Item Start -->
 		
 		<!-- Depreciation Details-->
-		<menuitem action="tma_depreciation" id="tam_depreciation" name="Depreciation" parent="kg_menus.gpm_grn_issue_menu" sequence="4"/>
+		<menuitem action="tma_depreciation" id="tam_depreciation" name="Depreciation" parent="kg_menus.gpm_grn_issue_menu" sequence="7"/>
 		
 	<!-- Menu Item End -->
 	
