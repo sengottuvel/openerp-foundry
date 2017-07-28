@@ -71,6 +71,7 @@ class kg_packing_slip(osv.osv):
 		'line_ids_c': fields.one2many('ch.packing.bot.details', 'header_id', "BOT Details"),
 		'line_ids_d': fields.one2many('ch.packing.accessories', 'header_id', "Accessories Details"),
 		'line_ids_e': fields.one2many('ch.packing.checklist', 'header_id', "Checklist Details"),
+		'line_ids_f': fields.one2many('ch.packing.spare.bom', 'header_id', "Spare BOM"),
 		
 		### Packing slip details ###
 		'packing_type': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Type'),
@@ -239,6 +240,107 @@ class kg_packing_slip(osv.osv):
 		cr.execute(''' delete from ch_packing_ms_details where header_id = %s ''',[entry_rec.id])
 		cr.execute(''' delete from ch_packing_bot_details where header_id = %s ''',[entry_rec.id])
 		cr.execute(''' delete from ch_packing_accessories where header_id = %s ''',[entry_rec.id])
+		cr.execute(''' delete from ch_wo_spare_bom where header_id = %s ''',[entry_rec.id])
+		
+		#### Loading Spare BOM TAB ###
+		cr.execute(''' select id,pump_id,moc_const_id,bom_id,qty,off_name
+		 from ch_wo_spare_bom where header_id=%s ''',[order_line_id])
+		spare_wo_items = cr.dictfetchall()
+		for spare_item in spare_wo_items:
+			### Checking the packed qty ###
+			cr.execute(''' select sum(pack_spare.qty) as packed_qty from ch_packing_spare_bom pack_spare
+			left join kg_packing_slip slip on slip.id =  pack_spare.header_id
+			where slip.order_line_id = %s and pack_spare.header_id != %s ''',[order_line_id,entry_rec.id])
+			packed_qty = cr.fetchone()
+			print "packed_qty",packed_qty
+			if packed_qty[0] != None:
+				if packed_qty[0] < spare_item['qty']:
+					total_qty = spare_item['qty']
+					packed_qty = packed_qty[0]
+			if packed_qty[0] == None:
+				total_qty = spare_item['qty']
+				packed_qty = 0
+			
+			spare_bom_rec = self.pool.get('ch.wo.spare.bom').browse(cr,uid,spare_item['id'])
+			#### Header Creation ###
+			spare_header_id = self.pool.get('ch.packing.spare.bom').create(cr,uid,{
+					'header_id': entry_rec.id,
+					'pump_id': spare_item['pump_id'],
+					'moc_const_id': spare_item['moc_const_id'],
+					'bom_id': spare_item['bom_id'],
+					'off_name': spare_item['off_name'],
+					'total_qty': total_qty,
+					'packed_qty': packed_qty 
+					})
+					
+			if spare_bom_rec.line_ids:
+				for spare_foundry in spare_bom_rec.line_ids:
+					if spare_foundry.is_applicable == True:
+						self.pool.get('ch.packing.spare.foundry').create(cr,uid,{
+							'header_id': spare_header_id,
+							'qty': spare_foundry.qty,
+							'oth_spec': spare_foundry.oth_spec,
+							'position_id': spare_foundry.position_id.id,
+							'csd_no': spare_foundry.csd_no,
+							'pattern_name': spare_foundry.pattern_name,
+							'pattern_id': spare_foundry.pattern_id.id,
+							'is_applicable': spare_foundry.is_applicable,
+							'moc_id': spare_foundry.moc_id.id,
+							'moc_name': spare_foundry.moc_name,
+							'prime_cost': spare_foundry.prime_cost,
+							'order_category': spare_foundry.order_category,
+							'material_code': spare_foundry.material_code,
+							'off_name': spare_foundry.off_name,
+							})
+							
+			if spare_bom_rec.line_ids_a:
+				for spare_ms in spare_bom_rec.line_ids_a:
+					if spare_ms.is_applicable == True:
+						self.pool.get('ch.packing.spare.ms').create(cr,uid,{
+							'header_id': spare_header_id,
+							'qty': spare_ms.qty,
+							
+							'position_id': spare_ms.position_id.id,
+							'csd_no': spare_ms.csd_no,
+							'bom_id': spare_ms.bom_id.id,
+							'ms_id': spare_ms.ms_id.id,
+							'name': spare_ms.name,
+							'is_applicable': spare_ms.is_applicable,
+							'moc_id': spare_ms.moc_id.id,
+							'moc_name': spare_ms.moc_name,
+							'prime_cost': spare_ms.prime_cost,
+							'order_category': spare_ms.order_category,
+							'material_code': spare_ms.material_code,
+							'off_name': spare_ms.off_name,
+							})
+							
+			if spare_bom_rec.line_ids_b:
+				for spare_bot in spare_bom_rec.line_ids_b:
+					if spare_bot.is_applicable == True:
+						self.pool.get('ch.packing.spare.bot').create(cr,uid,{
+							'header_id': spare_header_id,
+							'qty': spare_bot.qty,
+							
+							'position_id': spare_bot.position_id.id,
+							
+							'item_name': spare_bot.item_name,
+							'ms_id': spare_bot.ms_id.id,
+							'bom_id': spare_bot.bom_id.id,
+							'brand_id': spare_bot.brand_id.id,
+							'is_applicable': spare_bot.is_applicable,
+							'moc_id': spare_bot.moc_id.id,
+							'moc_name': spare_bot.moc_name,
+							'prime_cost': spare_bot.prime_cost,
+							'order_category': spare_bot.order_category,
+							'material_code': spare_bot.material_code,
+							'off_name': spare_bot.off_name,
+							})
+					
+						
+				
+					
+		
+		
 		### Loading Foundry Items ###
 		cr.execute(''' select id,pattern_name,off_name,moc_id,material_code,qty from ch_order_bom_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
 		foundry_items = cr.dictfetchall()
@@ -275,7 +377,7 @@ class kg_packing_slip(osv.osv):
 				'material_code': foundry_item['material_code'] or '',
 				'total_qty': foundry_item['qty'],
 				})
-		#stop		
+		
 		### Loading MS Items ###
 		cr.execute(''' select id,name,off_name,moc_id,material_code,qty from ch_order_machineshop_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
 		ms_items = cr.dictfetchall()
@@ -941,3 +1043,214 @@ class ch_packing_checklist(osv.osv):
 	}
 	
 ch_packing_checklist()
+
+
+
+class ch_packing_spare_bom(osv.osv):
+	
+	_name = "ch.packing.spare.bom"
+	_description = "Spare Item Details"
+	_rec_name = "off_name"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('kg.packing.slip', 'Header Id', ondelete='cascade'),
+		'remarks': fields.char('Remarks'),
+		
+		## Module Requirement Fields
+		
+		'pump_id':fields.many2one('kg.pumpmodel.master','Pumpmodel'),
+		'moc_const_id':fields.many2one('kg.moc.construction','MOC Construction'),
+		'bom_id':fields.many2one('kg.bom','BOM Name',domain="[('pump_model_id','=',parent.pump_model_id),('category_type','=','part_list_bom')]"),
+		'qty':fields.integer('Value/Qty'),
+		'off_name':fields.char('Offer Name'),
+		'total_qty': fields.integer('Total Qty'),
+		'packed_qty': fields.integer('Packed Qty'),
+		'flag_is_applicable': fields.boolean('Is applicable'),
+		
+		
+		## Child Tables Declaration
+		
+		'line_ids': fields.one2many('ch.packing.spare.foundry', 'header_id', "FOU"),
+		'line_ids_a': fields.one2many('ch.packing.spare.ms', 'header_id', "MS"),
+		'line_ids_b': fields.one2many('ch.packing.spare.bot', 'header_id', "BOT"),
+		
+		}
+	
+	
+	
+	def default_get(self, cr, uid, fields, context=None):
+		print"contextcontextcontext",context
+		return context
+		
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == True:
+			if rec.qty <= 0.00:
+				return False
+			if rec.qty > rec.total_qty:
+				return False
+			
+		return True
+		
+	def _check_flag_applicable(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == False and rec.qty > 0.00:
+			return False
+			
+		return True
+	
+	_constraints = [
+	
+		(_check_qty,'Kindly check the qty in Foundry Details !',['Qty']),
+		(_check_flag_applicable,'Kindly Check Is applicable provision for qty greater than zero !',['Qty']),
+		
+	]
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_packing_spare_bom, self).write(cr, uid, ids, vals, context)
+	
+ch_packing_spare_bom()
+
+class ch_packing_spare_foundry(osv.osv):
+	
+	_name = "ch.packing.spare.foundry"
+	_description = "Spare Foundry Item Details"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.packing.spare.bom', 'Header Id', ondelete='cascade'),
+		'remarks': fields.char('Remarks'),
+		
+		## Module Requirement Fields
+		
+		'qty':fields.integer('Quantity'),
+		'oth_spec':fields.char('Other Specification'),
+		'position_id': fields.many2one('kg.position.number','Position No.'),
+		'csd_no': fields.char('CSD No.', size=128),
+		'pattern_name': fields.char('Pattern Name'),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No.'),
+		'is_applicable': fields.boolean('Is Applicable'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'prime_cost': fields.float('Prime Cost'),
+		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'material_code': fields.char('Material Code'),
+		'off_name': fields.char('Offer Name'),
+		
+	}
+	
+	_defaults = {
+		
+		'is_applicable': False,
+		
+		
+	}
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_packing_spare_foundry, self).write(cr, uid, ids, vals, context)
+	
+	
+ch_packing_spare_foundry()
+
+class ch_packing_spare_ms(osv.osv):
+	
+	_name = "ch.packing.spare.ms"
+	_description = "Macine Shop Item Details"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.packing.spare.bom', 'Header Id', ondelete='cascade'),
+		'remarks':fields.text('Remarks'),
+		
+		## Module Requirement Fields
+		
+		'pos_no': fields.related('position_id','name', type='char', string='Position No.', store=True),
+		'position_id': fields.many2one('kg.position.number','Position No.'),
+		'csd_no': fields.char('CSD No.'),
+		'bom_id': fields.many2one('kg.bom','BOM'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
+		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
+		#~ 'ms_line_id':fields.many2one('ch.machineshop.details', 'Item Name'),
+		'qty': fields.integer('Qty', required=True),
+		'flag_applicable': fields.boolean('Is Applicable'),
+		#'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
+		'is_applicable': fields.boolean('Is Applicable'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'prime_cost': fields.float('Prime Cost'),
+		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'length': fields.float('Length'),
+		'material_code': fields.char('Material Code'),
+		'off_name': fields.char('Offer Name'),
+		
+		## Child Tables Declaration 
+		
+		#~ 'line_ids': fields.one2many('ch.kg.crm.ms.raw', 'header_id', "Raw Details"),
+		
+	}
+	
+	_defaults = {
+		
+		'is_applicable': False,
+		
+	}
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_packing_spare_ms, self).write(cr, uid, ids, vals, context)
+	
+	
+ch_packing_spare_ms()
+
+class ch_packing_spare_bot(osv.osv):
+	
+	_name = "ch.packing.spare.bot"
+	_description = "BOT Details"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.packing.spare.bom', 'Header Id', ondelete='cascade'),
+		'remarks':fields.text('Remarks'),
+		
+		## Module Requirement Fields
+		
+		
+		'position_id': fields.many2one('kg.position.number','Position No.'),
+		'bom_id': fields.many2one('kg.bom','BOM'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot')], ondelete='cascade',required=True),
+		'item_name': fields.related('ms_id','name', type='char', size=128, string='Item Name', store=True, readonly=True),
+		'code':fields.char('Item Code', size=128),	  
+		'qty': fields.integer('Qty', required=True),
+		'flag_applicable': fields.boolean('Is Applicable'),
+		'is_applicable': fields.boolean('Is Applicable'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'prime_cost': fields.float('Prime Cost'),
+		'brand_id': fields.many2one('kg.brand.master','Brand '),
+		'flag_is_bearing': fields.boolean('Is Bearing'),
+		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'material_code': fields.char('Material Code'),
+		'off_name': fields.char('Offer Name'),
+		
+	}
+	
+	_defaults = {
+		
+		'is_applicable': False,
+		
+		
+	}
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_packing_spare_bot, self).write(cr, uid, ids, vals, context)
+	
+	
+ch_packing_spare_bot()

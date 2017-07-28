@@ -1143,6 +1143,7 @@ class kg_spare_assembly(osv.osv):
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),		
 		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		
+		'spare_bom_id': fields.many2one('ch.wo.spare.bom','Spare BOM',domain="[('header_id','=',order_line_id)]"),
 		## Child Tables Declaration	
 			
 		'line_ids': fields.one2many('ch.spare.assembly.details','header_id','Spare Assembly details'),  	
@@ -1178,40 +1179,79 @@ class kg_spare_assembly(osv.osv):
 	def update_list(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		
-		### Checking bot items completed for that WO ##
-		
-		cr.execute(""" select id from kg_ms_stores where ms_type = 'bot_item'
-
-			and order_line_id = %s and state = 'in_store' and accept_state = 'pending' """%(entry.order_line_id.id))
-		bot_item = cr.fetchone()
-		print "bot_itembot_item",bot_item
-		if bot_item != None:
-			raise osv.except_osv(_('Warning!'),
-						_('BOT item Issue is pending to receive !!'))
-						
-		else:
-			### Load finished Items ###
-			cr.execute(""" delete from ch_spare_assembly_details where header_id = %s """%(ids[0]))
+		if entry.spare_bom_id == False:
+			### Checking bot items completed for that WO ##
 			
-			cr.execute(""" select id,ms_type,position_id,moc_id,item_code,item_name,qty,oth_spec from kg_ms_stores where
-				order_line_id = %s and state = 'in_store' and accept_state = 'received'
-				order by ms_type """%(entry.order_line_id.id))
-			finished_items = cr.dictfetchall()
-			for item in finished_items:
+			cr.execute(""" select id from kg_ms_stores where ms_type = 'bot_item'
+
+				and order_line_id = %s and state = 'in_store' and accept_state = 'pending' """%(entry.order_line_id.id))
+			bot_item = cr.fetchone()
+			print "bot_itembot_item",bot_item
+			if bot_item != None:
+				raise osv.except_osv(_('Warning!'),
+							_('BOT item Issue is pending to receive !!'))
+							
+			else:
+				### Load finished Items ###
+				cr.execute(""" delete from ch_spare_assembly_details where header_id = %s """%(ids[0]))
 				
-				spare_ass_vals = {
-					'header_id': entry.id,
-					'ms_type': item['ms_type'],
-					'ms_store_id': item['id'],
-					'position_id': item['position_id'] or False,
-					'moc_id': item['moc_id'],
-					'item_code':item['item_code'],
-					'item_name':item['item_name'],				
-					'qty': item['qty'],		
-					'add_spec': item['oth_spec'],			
-				}
-				ass_line_obj = self.pool.get('ch.spare.assembly.details')
-				ass_line_id = ass_line_obj.create(cr, uid, spare_ass_vals)
+				cr.execute(""" select id,ms_type,position_id,moc_id,item_code,item_name,qty,oth_spec from kg_ms_stores where
+					order_line_id = %s and state = 'in_store' and accept_state = 'received'
+					order by ms_type """%(entry.order_line_id.id))
+				finished_items = cr.dictfetchall()
+				for item in finished_items:
+					
+					spare_ass_vals = {
+						'header_id': entry.id,
+						'ms_type': item['ms_type'],
+						'ms_store_id': item['id'],
+						'position_id': item['position_id'] or False,
+						'moc_id': item['moc_id'],
+						'item_code':item['item_code'],
+						'item_name':item['item_name'],				
+						'qty': item['qty'],		
+						'add_spec': item['oth_spec'],			
+					}
+					ass_line_obj = self.pool.get('ch.spare.assembly.details')
+					ass_line_id = ass_line_obj.create(cr, uid, spare_ass_vals)
+		else:
+			### Checking bot items completed for that WO ##
+			
+			cr.execute(""" select id from kg_ms_stores where ms_type = 'bot_item'
+
+				and order_line_id = %s and state = 'in_store' and accept_state = 'pending' 
+				and bom_type = 'spare' and spare_id = %s """%(entry.order_line_id.id,entry.spare_bom_id.id))
+			bot_item = cr.fetchone()
+			print "bot_itembot_item",bot_item
+			if bot_item != None:
+				raise osv.except_osv(_('Warning!'),
+							_('BOT item Issue is pending to receive !!'))
+							
+			else:
+				### Load finished Items ###
+				cr.execute(""" delete from ch_spare_assembly_details where header_id = %s """%(ids[0]))
+				
+				cr.execute(""" select id,ms_type,position_id,moc_id,item_code,item_name,qty,oth_spec from kg_ms_stores where
+					order_line_id = %s and state = 'in_store' and accept_state = 'received' and bom_type = 'spare' and spare_id = %s
+					order by ms_type """%(entry.order_line_id.id,entry.spare_bom_id.id))
+				finished_items = cr.dictfetchall()
+				for item in finished_items:
+					
+					spare_ass_vals = {
+						'header_id': entry.id,
+						'ms_type': item['ms_type'],
+						'ms_store_id': item['id'],
+						'position_id': item['position_id'] or False,
+						'moc_id': item['moc_id'],
+						'item_code':item['item_code'],
+						'item_name':item['item_name'],				
+						'qty': item['qty'],		
+						'add_spec': item['oth_spec'],			
+					}
+					ass_line_obj = self.pool.get('ch.spare.assembly.details')
+					ass_line_id = ass_line_obj.create(cr, uid, spare_ass_vals)
+			
+				
 												
 		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 							
@@ -1319,7 +1359,7 @@ class kg_spare_assembly(osv.osv):
 					'moc_construction_id': entry.order_line_id.moc_construction_id.id,
 					'test_state':'di',
 					'di_state': 'pending',
-					'spare_assembly_id': ids[0]
+					'assembly_id': ids[0]
 				}
 				print "pump_qap_header_vals",pump_qap_header_vals
 				pump_qap_id = self.pool.get('kg.pump.qap').create(cr, uid, pump_qap_header_vals)

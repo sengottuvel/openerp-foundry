@@ -311,12 +311,14 @@
 					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
 					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
 					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
-					
+				
 					<filter icon="terp-check" name="in_plan" string="Planning In Progress" domain="[('ms_state','=','in_plan')]"/>
-					<filter icon="terp-check" name="op_progress" string="Operation In Progress" domain="[('ms_state','=','op_progress')]"/>
-					<filter icon="terp-check" name="op_completed" string="Operations Completed" domain="[('ms_state','=','op_completed')]"/>	
+					<filter icon="terp-check" name="sent_to_sc" string="In SC List" domain="[('ms_state','=','sent_to_sc')]"/>
+					<filter icon="terp-check" name="inhouse_1" string="In House -1" domain="[('ms_state','=','inhouse_1')]"/>
+					<filter icon="terp-check" name="inhouse_2" string="In House -2" domain="[('ms_state','=','inhouse_2')]"/>	
+					<filter icon="terp-check" name="op_in_sc" string="Operations Completed" domain="[('ms_state','=','op_in_sc')]"/>	
 					<filter icon="terp-check" name="op_rejected" string="Operation Rejected" domain="[('ms_state','=','op_rejected')]"/>	
-					<filter icon="terp-check" name="sent_to_store" string="Sent to MS Store" domain="[('ms_state','=','sent_to_store')]"/>	
+					<filter icon="terp-check" name="sent_to_store" string="In F.P store" domain="[('ms_state','=','sent_to_store')]"/>	
 					
 							
 					<separator/>
@@ -329,6 +331,7 @@
 						<filter string="Item Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_name'}"/>
 						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
 						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'ms_state'}"/>
+						<filter name="group_wo" string="WO" icon="terp-partner" context="{'group_by':'order_no'}"/>
 					</group>
                 </search>
 			</field>
@@ -361,6 +364,34 @@
             <field name="view_mode">form</field>
             <field name="view_id" ref="t_form_v_ms_sch_list"/>
             <field name="act_window_id" ref="tma_ms_sch_list"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- MS Unscheduled list Menu Action Start -->
+		
+		
+		<record id="tma_ms_unsch_list" model="ir.actions.act_window">
+			<field name="name">MS Unschedule List</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.machineshop</field>
+			<field name="view_type">form</field>
+			<field name="domain">[('state','=','accept'),('ms_plan_rem_qty','>', 0)]</field>
+			<field name="search_view_id" ref="t_search_v_ms_sch_list"/>
+			<field name="context">{'search_default_group_wo': 1}</field>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_ms_unsch_list_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_ms_sch_list"/>
+            <field name="act_window_id" ref="tma_ms_unsch_list"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_ms_unsch_list_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_ms_sch_list"/>
+            <field name="act_window_id" ref="tma_ms_unsch_list"/>
         </record>
 		
 	<!-- Menu Action End-->
@@ -678,7 +709,7 @@
 					<field name="painting_status"/>
 					<field name="rfd_date"/>					
 					<field name="despatch_date"/>					
-					<field name="state" invisible="1"/>	
+					<field name="state" invisible="1"/>					
 				</tree>
 			</field>
 		</record>
@@ -879,6 +910,7 @@
 		<menuitem action="kg_qc_verification.tma_ms_qc_verification" id="tam_ms_qc_verif" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="3" />
 		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="4" />
+		<menuitem action="tma_ms_unsch_list" id="tam_ms_unsch_list" parent="tpm_ms_process" sequence="5" />
 		
 		
 	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="4"/>

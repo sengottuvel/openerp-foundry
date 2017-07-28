@@ -351,6 +351,95 @@ class kg_work_order(osv.osv):
 		if entry.state in ('design_approved'):
 			order_line_ids = []
 			
+			### Spare BOM Tab Data Creation ###
+			for order_line_item in entry.line_ids: 
+				if order_line_item.line_ids_e:
+					for spare_item in order_line_item.line_ids_e:
+						for spare_foundry_item in spare_item.line_ids:
+							if spare_foundry_item.is_applicable == True:
+								foundry_spare_vals = {
+									
+									'header_id': order_line_item.id,				
+									#~ 'bom_id': bom_details['header_id'],
+									#~ 'bom_line_id': bom_details['id'],
+									'pattern_id': spare_foundry_item.pattern_id.id,
+									'pattern_name': spare_foundry_item.pattern_name,						
+									'off_name': spare_foundry_item.off_name,						
+									'weight': 0.00,								  
+									#~ 'pos_no': bom_details['pos_no'],
+									'position_id': spare_foundry_item.position_id.id,				  
+									'qty' : spare_foundry_item.qty,				   
+									'schedule_qty' : spare_foundry_item.qty,				  
+									'production_qty' : 0,				   
+									'flag_applicable' : True,
+									'order_category': order_line_item.order_category,
+									'moc_id': spare_foundry_item.moc_id.id,
+									'flag_standard':order_line_item.flag_standard,
+									'entry_mode':'auto'	,
+									'bom_type': 'spare',
+									'spare_bom_id': spare_foundry_item.id,
+									'spare_id': spare_item.id,
+									'flag_pattern_check': spare_foundry_item.flag_pattern_check
+									}
+								new_foundry_item_id = self.pool.get('ch.order.bom.details').create(cr,uid,foundry_spare_vals)
+								
+								
+								
+						for spare_ms_item in spare_item.line_ids_a:
+							if spare_ms_item.is_applicable == True:
+								spare_machine_shop_vals = {
+									
+									'header_id': order_line_item.id,
+									#~ 'pos_no': bom_ms_details['pos_no'],
+									'position_id': spare_ms_item.position_id.id,
+									#~ 'bom_id': bom_ms_details['bom_id'],
+									'ms_id': spare_ms_item.ms_id.id,
+									'name': spare_ms_item.name,
+									'off_name': spare_ms_item.off_name,
+									'qty': spare_ms_item.qty,
+									'indent_qty':spare_ms_item.qty,
+									'flag_applicable' : True,
+									'flag_standard':order_line_item.flag_standard,
+									'entry_mode':'auto',
+									'order_category': order_line_item.order_category,
+									'moc_id': spare_ms_item.moc_id.id,
+									'bom_type': 'spare',
+									'spare_bom_id': spare_ms_item.id,
+									'spare_id': spare_item.id, 
+											  
+									}
+									
+								new_ms_item_id = self.pool.get('ch.order.machineshop.details').create(cr,uid,spare_machine_shop_vals)
+	
+						for spare_bot_item in spare_item.line_ids_b:
+							if spare_bot_item.is_applicable == True:
+								spare_bot_vals = {
+									
+									'header_id': order_line_item.id,
+									#~ 'bot_line_id': bom_bot_details['id'],
+									#~ 'bom_id': bom_bot_details['bom_id'],							
+									'position_id': spare_bot_item.position_id.id,							
+									'bot_id': spare_bot_item.ms_id.id,
+									'item_name': spare_bot_item.item_name,
+									'off_name': spare_bot_item.off_name,
+									'qty': spare_bot_item.qty,
+									'flag_applicable' : True,
+									'flag_standard':order_line_item.flag_standard,
+									'entry_mode':'auto',
+									'order_category':order_line_item.order_category,
+									#~ 'flag_is_bearing': bot_rec.is_bearing,
+									'moc_id': spare_bot_item.moc_id.id,
+									'bom_type': 'spare',
+									'spare_bom_id': spare_bot_item.id,
+									'spare_id': spare_item.id,
+											  
+									}
+									
+								new_bot_item_id = self.pool.get('ch.order.bot.details').create(cr,uid,spare_bot_vals)
+								
+			
+			
+			
 			if entry.flag_data_bank == False:
 							
 				#~ number = 1
@@ -734,8 +823,8 @@ class kg_work_order(osv.osv):
 												'order_id': entry.id,
 												'order_line_id': item.id,
 												'qty' : qc_qty,
-												'stock_qty': qc_qty,                   
-												'allocated_qty':qc_qty,                 
+												'stock_qty': qc_qty,				   
+												'allocated_qty':qc_qty,				 
 												'state' : 'draft',
 												'order_category':entry.order_category,
 												'order_priority':priority,
@@ -1022,24 +1111,21 @@ class kg_work_order(osv.osv):
 				### For Spare BOM ###
 				if order_item.line_ids_e:
 					for spare_item in order_item.line_ids_e:
-						if spare_item.line_ids:
-							for spare_foundry_item in spare_item.line_ids:
-								if spare_foundry_item.is_applicable == True:
-									spare_foundry_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'foundry',spare_foundry_item.pattern_id.id,
-									0,0,0,order_item.moc_construction_id.id,spare_foundry_item.moc_id.id,0)
-									self.pool.get('ch.wo.spare.foundry').write(cr,uid,spare_foundry_item.id,{'prime_cost':spare_foundry_prime_cost * spare_foundry_item.qty })
-						if spare_item.line_ids_a:
-							for spare_ms_item in spare_item.line_ids_a:
-								if spare_ms_item.is_applicable == True:
-									spare_ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
-									spare_ms_item.ms_id.id,0,0,order_item.moc_construction_id.id,spare_ms_item.moc_id.id,0)
-									self.pool.get('ch.wo.spare.ms').write(cr,uid,spare_ms_item.id,{'wo_prime_cost':spare_ms_prime_cost * spare_ms_item.qty})
-						if spare_item.line_ids_b:
-							for spare_bot_item in spare_item.line_ids_b:
-								if spare_bot_item.is_applicable == True:
-									spare_bot_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'bot',0,
-									0,0,spare_bot_item.ms_id.id,order_item.moc_construction_id.id,spare_bot_item.moc_id.id,0)
-									self.pool.get('ch.wo.spare.bot').write(cr,uid,spare_bot_item.id,{'wo_prime_cost':spare_bot_prime_cost * spare_bot_item.qty})
+						for spare_foundry_item in spare_item.line_ids:
+							if spare_foundry_item.is_applicable == True:
+								spare_foundry_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'foundry',spare_foundry_item.pattern_id.id,
+								0,0,0,order_item.moc_construction_id.id,spare_foundry_item.moc_id.id,0)
+								self.pool.get('ch.wo.spare.foundry').write(cr,uid,spare_foundry_item.id,{'prime_cost':spare_foundry_prime_cost * spare_foundry_item.qty })
+						for spare_ms_item in spare_item.line_ids_a:
+							if spare_ms_item.is_applicable == True:
+								spare_ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
+								spare_ms_item.ms_id.id,0,0,order_item.moc_construction_id.id,spare_ms_item.moc_id.id,0)
+								self.pool.get('ch.wo.spare.ms').write(cr,uid,spare_ms_item.id,{'wo_prime_cost':spare_ms_prime_cost * spare_ms_item.qty})
+						for spare_bot_item in spare_item.line_ids_b:
+							if spare_bot_item.is_applicable == True:
+								spare_bot_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'bot',0,
+								0,0,spare_bot_item.ms_id.id,order_item.moc_construction_id.id,spare_bot_item.moc_id.id,0)
+								self.pool.get('ch.wo.spare.bot').write(cr,uid,spare_bot_item.id,{'wo_prime_cost':spare_bot_prime_cost * spare_bot_item.qty})
 								
 						
 				### Total Pump primecost ###
@@ -1239,8 +1325,8 @@ class ch_work_order_details(osv.osv):
 			#~ print "line_dict",line_dict
 			#~ print "line_dict.get('order_no'),",line_dict.get('order_no'),type(line_dict.get('order_no')),str(line_dict.get('order_no'))
 			#~ context.update({
-                #~ 'order_no': 'test',
-            #~ })
+				#~ 'order_no': 'test',
+			#~ })
 		return context
 		
 	def onchange_delivery_date(self, cr, uid, ids, delivery_date):
@@ -1299,7 +1385,7 @@ class ch_work_order_details(osv.osv):
 				cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,bom.position_id,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
 						from ch_bom_line as bom
 						LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
-						where bom.header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom' ) ''',[pump_model_id])
+						where bom.header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom') ''',[pump_model_id])
 				bom_details = cr.dictfetchall()
 				
 				
@@ -1349,15 +1435,17 @@ class ch_work_order_details(osv.osv):
 					if flag_select_all == True:
 						applicable = True
 					else:
-						applicable = False	
+						applicable = False
+						
+						
 						
 					bom_vals.append({
 														
 						'bom_id': bom_details['header_id'],
 						'bom_line_id': bom_details['id'],
 						'pattern_id': bom_details['pattern_id'],
-						'pattern_name': bom_details['pattern_name'],
-						'off_name': bom_details['pattern_name'],					
+						'pattern_name': bom_details['pattern_name'],						
+						'off_name': bom_details['pattern_name'],						
 						'weight': wgt or 0.00,								  
 						'pos_no': bom_details['pos_no'],
 						'position_id': bom_details['position_id'],				  
@@ -1470,7 +1558,6 @@ class ch_work_order_details(osv.osv):
 						applicable = True
 					else:
 						applicable = False
-						
 						
 					bot_vals.append({
 						
@@ -1712,7 +1799,7 @@ class ch_work_order_details(osv.osv):
 							(
 							select id from kg_bom 
 							where id = (select partlist_id from ch_base_plate
-							where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom' ))
+							where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom'))
 							and active='t'
 							) 
 
@@ -1766,19 +1853,18 @@ class ch_work_order_details(osv.osv):
 									raise osv.except_osv(_('Warning!'),
 									_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
 								
-								
 								if flag_select_all == True:
 									applicable = True
 								else:
 									applicable = False
-								
+									
 								bom_vals.append({
 																	
 									'bom_id': vertical_foundry['header_id'],
 									'bom_line_id': vertical_foundry['id'],
 									'pattern_id': vertical_foundry['pattern_id'],
-									'pattern_name': vertical_foundry['pattern_name'],
-									'off_name': vertical_foundry['pattern_name'],					
+									'pattern_name': vertical_foundry['pattern_name'],						
+									'off_name': vertical_foundry['pattern_name'],						
 									'weight': wgt or 0.00,								  
 									'pos_no': vertical_foundry['pos_no'],
 									'position_id': vertical_foundry['position_id'],			  
@@ -2181,12 +2267,15 @@ class ch_work_order_details(osv.osv):
 							if vertical_ms_details['position_id'] == None:
 								raise osv.except_osv(_('Warning!'),
 								_('Kindly Configure Position No. in MS Items for respective Pump Bom and proceed further !!'))
+								
 							
 							if flag_select_all == True:
 								applicable = True
 							else:
 								applicable = False
-								
+							
+							
+							
 							machine_shop_vals.append({
 								
 								'pos_no':pos_no,
@@ -2369,7 +2458,7 @@ class ch_work_order_details(osv.osv):
 								applicable = True
 							else:
 								applicable = False
-						
+							
 							bot_vals.append({
 								
 								'bot_line_id': vertical_bot_details['id'],
@@ -2534,6 +2623,9 @@ class ch_order_bom_details(osv.osv):
 		'flag_standard': fields.boolean('Non Standard'),
 		'flag_pattern_check': fields.boolean('Is Pattern Check'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		'bom_type': fields.selection([('pump','Pump'),('spare','Spare')],'BOM Type'),
+		'spare_bom_id': fields.many2one('ch.wo.spare.foundry','Spare Foundry Id'),
+		'spare_id': fields.many2one('ch.wo.spare.bom','Spare Foundry Id'),
 		
 		### Offer Details ###
 		'spare_offer_line_id': fields.integer('Spare Offer'),
@@ -2667,6 +2759,9 @@ class ch_order_machineshop_details(osv.osv):
 		'sequence_no': fields.integer('Sequence No.'),
 		'line_ids': fields.one2many('ch.wo.ms.raw', 'header_id', 'MS Raw'),
 		'off_name': fields.char('Offer Name'),
+		'bom_type': fields.selection([('pump','Pump'),('spare','Spare')],'BOM Type'),
+		'spare_bom_id': fields.many2one('ch.wo.spare.ms','Spare MS Id'),
+		'spare_id': fields.many2one('ch.wo.spare.bom','Spare  Id'),
 	
 	}  
 	
@@ -2709,7 +2804,7 @@ class ch_wo_ms_raw(osv.osv):
 		
 		### Module Requirement
 		
-		'product_id': fields.many2one('product.product','Raw Material', domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
+		'product_id': fields.many2one('product.product','Raw Material',domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
 		'uom':fields.many2one('product.uom','UOM',size=128 ),
 		'od': fields.float('OD'),
 		'length': fields.float('Length'),
@@ -2795,6 +2890,10 @@ class ch_order_bot_details(osv.osv):
 		
 		'sequence_no': fields.integer('Sequence No.'),
 		'off_name': fields.char('Offer Name'),
+		
+		'bom_type': fields.selection([('pump','Pump'),('spare','Spare')],'BOM Type'),
+		'spare_bom_id': fields.many2one('ch.wo.spare.bot','Spare BOT Id'),
+		'spare_id': fields.many2one('ch.wo.spare.bom','Spare  Id'),
 		
 	
 	}
@@ -3065,6 +3164,7 @@ class ch_wo_spare_bom(osv.osv):
 	
 	_name = "ch.wo.spare.bom"
 	_description = "Spare Item Details"
+	_rec_name = "off_name"
 	
 	_columns = {
 		
@@ -3153,8 +3253,8 @@ class ch_wo_spare_bom(osv.osv):
 						fou_vals.append({
 									'position_id': item.position_id.id,
 									'pattern_id': item.pattern_id.id,
-									'pattern_name': item.pattern_id.pattern_name,
-									'off_name': item.pattern_id.pattern_name,
+									'pattern_name': item.pattern_id.name,
+									'off_name': item.pattern_id.name,
 									'moc_id': moc_id,
 									'moc_name': moc_name,
 									'moc_changed_flag': moc_changed_flag,

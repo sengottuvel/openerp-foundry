@@ -797,6 +797,7 @@ class kg_ms_operations(osv.osv):
 	def operation1_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+
 		
 		if entry_rec.op1_state == 'pending':
 			if entry_rec.op1_flag_sc != True:
@@ -1228,8 +1229,8 @@ class kg_ms_operations(osv.osv):
 									### MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:	
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								if entry_rec.stock_inward_id.id > 0:
@@ -1451,7 +1452,7 @@ class kg_ms_operations(osv.osv):
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
-			
+		
 		### MS State updation ##
 		
 		self.pool.get('kg.ms.daily.planning').op_status_update(cr, uid, 0, entry_rec.ms_id.id,entry_rec.id)
@@ -1922,8 +1923,8 @@ class kg_ms_operations(osv.osv):
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								if entry_rec.stock_inward_id.id > 0:
@@ -2606,8 +2607,8 @@ class kg_ms_operations(osv.osv):
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								print "entry_reccccccccccccccccc",entry_rec.stock_inward_id.id
@@ -3294,8 +3295,8 @@ class kg_ms_operations(osv.osv):
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								if entry_rec.stock_inward_id.id > 0:
@@ -3980,8 +3981,8 @@ class kg_ms_operations(osv.osv):
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								if entry_rec.stock_inward_id.id > 0:
@@ -4665,8 +4666,8 @@ class kg_ms_operations(osv.osv):
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								if entry_rec.stock_inward_id.id > 0:
@@ -5350,8 +5351,8 @@ class kg_ms_operations(osv.osv):
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								if entry_rec.stock_inward_id.id > 0:
@@ -6035,8 +6036,8 @@ class kg_ms_operations(osv.osv):
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								if entry_rec.stock_inward_id.id > 0:
@@ -6722,8 +6723,8 @@ class kg_ms_operations(osv.osv):
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 									
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 							else:
 								if entry_rec.stock_inward_id.id > 0:
 									stock_obj = self.pool.get('ch.stock.inward.details')
@@ -7410,8 +7411,8 @@ class kg_ms_operations(osv.osv):
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								if entry_rec.stock_inward_id.id > 0:
@@ -8096,8 +8097,8 @@ class kg_ms_operations(osv.osv):
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								if entry_rec.stock_inward_id.id > 0:
@@ -8774,8 +8775,8 @@ class kg_ms_operations(osv.osv):
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
 								if entry_rec.ms_id:
-									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									if (entry_rec.ms_id.ms_completed_qty + (entry_rec.ms_id.ms_rejected_qty or 0)) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
 								if entry_rec.stock_inward_id.id > 0:

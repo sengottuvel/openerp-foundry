@@ -403,7 +403,6 @@ class kg_fettling(osv.osv):
 		
 		'ms_state': fields.selection([('created','Created'),('not_created','Not Created')],'MS Status'),
 		'flag_sub_order': fields.boolean('Sub Work Order'),
-
 		
 	
 		### Entry Info ####
@@ -499,6 +498,7 @@ class kg_fettling(osv.osv):
 		'flag_allocated': False,
 		'allocation_user_id':lambda obj, cr, uid, context: uid,
 		'ms_state': 'not_created',
+		'flag_sub_order': False,
 		
 		
 		
@@ -568,13 +568,6 @@ class kg_fettling(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
 			ms_name = cr.fetchone();
 			
-			print "entry_rec.order_bomline_id",entry_rec.order_bomline_id
-			print "entry_rec.entry_rec.order_no",entry_rec.order_no
-			print "entry_rec.entry_rec.order_line_id",entry_rec.order_line_id
-			print "entry_rec.entry_rec.entry_rec.pattern_name",entry_rec.pattern_name
-			print "entry_rec.order_bomline_id.position_id------------------",entry_rec.order_bomline_id.position_id
-			if entry_rec.order_bomline_id.position_id == None:
-				raise osv.except_osv(_('Warning !'), _('Position No. is not mapped in WO for item %s !!')%(entry_rec.pattern_code))
 			ms_vals = {
 			'name': ms_name[0],
 			'location':entry_rec.location,
@@ -605,7 +598,9 @@ class kg_fettling(osv.osv):
 			'item_name': entry_rec.pattern_name,
 			'position_id': entry_rec.order_bomline_id.position_id.id,
 			'oth_spec': entry_rec.order_bomline_id.add_spec,
-			'flag_trimming_dia': entry_rec.order_bomline_id.flag_trimming_dia
+			'flag_trimming_dia': entry_rec.order_bomline_id.flag_trimming_dia,
+			'bom_type': entry_rec.order_bomline_id.bom_type,
+			'spare_id': entry_rec.order_bomline_id.spare_id.id,
 			
 			}
 			

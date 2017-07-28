@@ -125,6 +125,7 @@ class kg_qc_verification(osv.osv):
 		'heat_no': fields.char('Heat No', size=128),
 		'inward_remark': fields.related('stock_inward_id','remarks', type='char', string='Remarks', store=True, readonly=True),
 		
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		

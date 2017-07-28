@@ -814,7 +814,9 @@
 							<field name="order_line_id" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"
 								on_change="onchange_order_line_id(order_line_id)"/>					
 							<field name="order_category" readonly="1" required="1"/>	
-							<field name="qap_plan_id" readonly="1" required="1"/>		
+							<field name="qap_plan_id" readonly="1" required="1"/>
+							<field name="spare_bom_id" />
+									
 									
 						</group>											
 						<group>

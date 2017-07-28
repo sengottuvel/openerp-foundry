@@ -154,10 +154,14 @@ class kg_machineshop(osv.osv):
 		'ms_completed_qty': fields.integer('MS Operation Completed Qty'),
 		'ms_rejected_qty': fields.integer('MS Operation Rejected Qty'),
 		'ms_plan_qty': fields.integer('Planning Completed Qty'),
+		'ms_plan_rem_qty': fields.integer('Planning Remaining Qty'),
 		'assembly_id': fields.integer('Assembly Inward', readonly=True),
 		'assembly_line_id': fields.integer('Assembly Inward Line', readonly=True),
 		'flag_planning': fields.boolean('Selected in planning'),
 		'flag_trimming_dia': fields.boolean('Trimming Dia'),
+		
+		'bom_type': fields.selection([('pump','Pump'),('spare','Spare')],'BOM Type'),
+		'spare_id': fields.many2one('ch.wo.spare.bom','Spare  Id'),
 		
 
 		### Entry Info ####
@@ -306,8 +310,13 @@ class kg_machineshop(osv.osv):
 					and order_line_id = %s and reject_state = 'not_received' and ms_type = 'foundry_item'
 					and pattern_id = %s and moc_id = %s limit 1) """%(entry_rec.order_line_id.id,entry_rec.pattern_id.id,entry_rec.moc_id.id))
 			
-			self.write(cr,uid, ids,{'state':'accept','ms_state':'in_plan','ms_sch_qty':entry_rec.inward_accept_qty,'inward_reject_qty':reject_qty,
-			'accept_date':today})
+			self.write(cr,uid, ids,{
+				'state':'accept',
+				'ms_state':'in_plan',
+				'ms_sch_qty':entry_rec.inward_accept_qty,
+				'ms_plan_rem_qty':entry_rec.inward_accept_qty,
+				'inward_reject_qty':reject_qty,
+				'accept_date':today})
 		else:
 			pass
 		return True

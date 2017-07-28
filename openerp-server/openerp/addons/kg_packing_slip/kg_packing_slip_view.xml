@@ -15,6 +15,7 @@
 					<group>
 						<group>
 							<field name="name" invisible="1" readonly="1"/>
+							<field name="order_category" invisible="1"/>
 							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="assembly_id" attrs="{'readonly': [('state','not in',['draft'])],'required': [('packing_type','=','pump')]}"
 								on_change="onchange_assembly_id(assembly_id)"/>
@@ -162,6 +163,93 @@
 
 							</field>
 						</page>
+						<page string = "Spare BOM" attrs="{'invisible':[('order_category','!=','spare')]}">
+							<field name="line_ids_f">
+								<tree string="BOM Tree" delete="false">
+									<field name="flag_is_applicable"/>
+									<field name="bom_id" readonly="1"/>
+									<field name="off_name" readonly="1"/>
+									<field name="total_qty" readonly="1"/>
+									<field name="packed_qty" readonly="1"/>
+									<field name="qty" required="1"/>
+									
+								</tree>
+								<form string="Spare Details Entry Form" create="false">
+									<group colspan="4">
+										<group>
+											<field name="bom_id" required="1" readonly="1"/>
+											<field name="total_qty" readonly="1"/>
+											<field name="qty" required="1"/>
+										</group>
+										<group>
+											<field name="off_name" readonly="1"/>
+											<field name="packed_qty" readonly="1"/>
+											<field name="moc_const_id" invisible="1"/>
+											<field name="flag_is_applicable"/>
+										</group>
+									</group>
+									
+									<notebook>
+										<page string="Foundry">
+											<field name="line_ids" nolabel="1" readonly="1">
+												<tree string="Foundry Item Tree" editable="top" create="false">
+													<field name="is_applicable"/>
+													<field name="position_id" />
+													<field name="pattern_id"/>
+													<field name="pattern_name"/>
+													<field name="off_name"/>
+													<field name="material_code"/>
+													<field name="moc_id" />
+													<field name="csd_no"/>
+													<field name="qty" />
+													<field name="remarks"/>
+												</tree>
+											</field>
+										</page>
+										<page string="MS">
+											<field name="line_ids_a" nolabel="1" readonly="1">
+												<tree string="MS Item Tree" editable="top" create="false">
+													<field name="is_applicable"/>
+													<field name="position_id" />
+													<field name="ms_id"/>
+													<field name="name"/>
+													<field name="off_name"/>
+													<field name="material_code"/>
+													<field name="moc_id"/>
+													<field name="length"/>
+													<field name="csd_no" />
+													<field name="qty"/>
+													
+													<field name="remarks"/>
+													
+												</tree>
+											</field>
+										</page>
+										<page string="BOT">
+											<field name="line_ids_b" nolabel="1" readonly="1">
+												<tree string="BOT Item Tree" editable="top" create="false">
+													<field name="is_applicable"/>
+													<field name="position_id" />
+													<field name="ms_id" />
+													<field name="item_name" />
+													<field name="off_name"/>
+													<field name="material_code"/>
+													<field name="moc_id" />
+													<field name="brand_id" />
+													<field name="qty" required="1" />
+													<field name="remarks" />
+													
+												</tree>
+											</field>
+										</page>
+									</notebook>
+								</form>
+							</field>
+						</page>
+						
+						
+						
+						
 						<page string="Other Checklist">
 							<field name="line_ids_e" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
 								<tree string="Checklist Items" editable="top">

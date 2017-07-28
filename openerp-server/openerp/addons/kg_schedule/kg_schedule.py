@@ -38,7 +38,7 @@ class kg_schedule(osv.osv):
 		### Header Details ####
 		'name': fields.char('Schedule No', size=128,select=True,required=True),
 		'entry_date': fields.date('Schedule Date',required=True),
-		'division_id': fields.many2one('kg.division.master','Division',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location',required=True),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
@@ -392,7 +392,120 @@ class kg_schedule(osv.osv):
 									sch_qty = sch_qty
 								schedule_line_obj.write(cr, uid, schedule_line_id, {'stock_qty':tot_stock,'line_status':line_status,'qty':sch_qty})
 								
-								allocation_id = allocation_line_obj.create(cr, uid, allocation_item_vals)			
+								allocation_id = allocation_line_obj.create(cr, uid, allocation_item_vals)
+								
+				### Creating Schedule items for Spare BOM ###
+				#~ for spare_item in order_item.line_ids_e:
+					#~ for spare_bom_item in spare_item.line_ids:
+						#~ 
+						#~ if spare_bom_item.is_applicable == True:
+							#~ spare_schedule_item_vals = {
+														#~ 
+								#~ 'header_id': entry.id,
+								#~ 'order_id': order_item.header_id.id,
+								#~ 'order_line_id': order_item.id,																							
+								#~ 'spare_bomline_id': spare_bom_item.id,									
+								#~ 'qty' : spare_bom_item.qty,
+								#~ 'order_qty' : spare_bom_item.qty,
+								#~ 'stock_qty' : 0,
+								#~ 'line_status': 'schedule',
+								#~ 'order_priority': order_item.order_priority,
+								#~ 'order_category': order_item.order_category,
+								#~ 'order_no':	order_item.order_no,
+								#~ 'pattern_id': spare_bom_item.pattern_id.id,
+								#~ 'moc_id': spare_bom_item.moc_id.id,
+								#~ }
+							#~ print "spare_schedule_item_vals",spare_schedule_item_vals
+							#~ schedule_line_id = schedule_line_obj.create(cr, uid, spare_schedule_item_vals)
+							#~ self.write(cr, uid, ids, {'flag_schedule':True})
+							#~ order_line_obj.write(cr, uid, order_item.id, {'schedule_status':'not_allow'})	
+							#~ tot_stock = 0
+							### Checking stock exists for corresponding pattern ###
+							#~ cr.execute(''' select sum(available_qty) as stock_qty
+								#~ from ch_stock_inward_details  
+								#~ where pattern_id = %s and moc_id = %s
+								#~ and available_qty > 0 and stock_type = 'pattern'
+							#~ 
+							#~ ''',[spare_bom_item.pattern_id.id
+								#~ ,spare_bom_item.moc_id.id])
+							#~ result_stock_qty = cr.fetchone()
+							#~ print "result_stock_qty[0]",result_stock_qty[0]
+							#~ schedule_rec = schedule_line_obj.browse(cr, uid, schedule_line_id)
+						#~ 
+							#~ if result_stock_qty[0] == None:
+								#~ stock_qty = 0
+								#~ if schedule_rec.line_status == 'schedule':
+									#~ line_status = 'schedule'
+								#~ else:
+									#~ line_status = 'schedule_alloc'
+							#~ if result_stock_qty[0] != None:
+								#~ if result_stock_qty[0] > 0:
+									#~ stock_qty = result_stock_qty[0]
+									#~ if schedule_rec.line_status == 'schedule':
+										#~ line_status = 'schedule_alloc'
+									#~ else:
+										#~ line_status = 'schedule_alloc'
+								#~ if result_stock_qty[0] == 0:
+									#~ stock_qty = 0
+									#~ if schedule_rec.line_status == 'schedule':
+										#~ line_status = 'schedule_alloc'
+									#~ else:
+										#~ line_status = 'schedule_alloc'
+									
+							#### Allocation Creation When stock exists ####
+							
+							#~ tot_stock += stock_qty
+							#~ 
+#~ 
+							#~ if stock_qty > 0:
+								#~ 
+								#~ if schedule_rec.qty == stock_qty:
+									#~ alloc_qty = schedule_rec.qty
+								#~ if schedule_rec.qty > stock_qty:
+									#~ alloc_qty = stock_qty
+								#~ if schedule_rec.qty < stock_qty:
+									#~ alloc_qty = schedule_rec.qty
+#~ 
+								#~ if schedule_rec.order_priority == 'emergency' and order_item.header_id.order_category == 'project':
+									#~ flag_allocate = False
+									#~ flag_manual = True
+									#~ allocation_qty = 0
+								#~ else:
+									#~ flag_allocate = True
+									#~ flag_manual = False
+									#~ allocation_qty = alloc_qty
+								#~ if acc_bom_item.pattern_id.pattern_state != 'active':
+									#~ flag_allocate = False
+									#~ flag_manual = True
+									#~ allocation_qty = 0
+								#~ else:
+									#~ flag_allocate = True
+									#~ flag_manual = False
+									#~ allocation_qty = alloc_qty
+								#~ 
+									#~ 
+								#~ 
+								#~ allocation_item_vals = {
+														#~ 
+									#~ 'header_id': schedule_line_id,
+									#~ 'order_id': order_item.header_id.id,
+									#~ 'order_line_id': order_item.id,
+									#~ 'schedule_qty' : spare_bom_item.qty,										
+									#~ 'qty' : allocation_qty,											
+									#~ 'stock_qty' : stock_qty,
+									#~ 'flag_allocate' : flag_allocate,			
+									#~ 'flag_manual' : flag_manual,			
+								#~ }
+								#~ 
+								#~ sch_qty = spare_bom_item.qty - tot_stock
+								#~ if sch_qty < 0:
+									#~ sch_qty = 0
+								#~ else:
+									#~ sch_qty = sch_qty
+								#~ schedule_line_obj.write(cr, uid, schedule_line_id, {'stock_qty':tot_stock,'line_status':line_status,'qty':sch_qty})
+								#~ 
+								#~ allocation_id = allocation_line_obj.create(cr, uid, allocation_item_vals)				
+									
 						
 		return True
 	   
@@ -578,9 +691,9 @@ class kg_schedule(osv.osv):
 									stk_ids = cr.dictfetchall();
 									
 									if stk_ids:
-										
+									
 										for stk_item in stk_ids:
-											allocated_qty = 0
+											
 											### Qty Updation in Stock Inward ###
 										
 											inward_line_obj = self.pool.get('ch.stock.inward.details')
@@ -1268,14 +1381,22 @@ class kg_schedule(osv.osv):
 									if order_ms_line_id != False:
 										order_ms_rec = self.pool.get('ch.order.machineshop.details').browse(cr, uid, order_ms_line_id)
 										oth_spec = order_ms_rec.remarks
+										bom_type = order_ms_rec.bom_type
+										spare_id = order_ms_rec.spare_id.id
 									else:
 										oth_spec = ''
+										bom_type = ''
+										spare_id = False
 								if ms_item['purpose'] == 'acc':
 									if order_ms_line_id != False:
 										order_ms_rec = self.pool.get('ch.wo.accessories.ms').browse(cr, uid, order_ms_line_id)
 										oth_spec = order_ms_rec.remarks
+										bom_type = ''
+										spare_id = False
 									else:
 										oth_spec = ''
+										bom_type = ''
+										spare_id = False
 								
 								
 								### Checking MS Stock list and creating ms qc verification ###
@@ -1427,7 +1548,9 @@ class kg_schedule(osv.osv):
 									'position_id': ms_item['position_id'],
 									'item_code': ms_rec.code,
 									'item_name': ms_item['item_name' ],
-									'oth_spec': oth_spec
+									'oth_spec': oth_spec,
+									'bom_type': bom_type,
+									'spare_id': spare_id,
 									
 									}
 									
@@ -1475,14 +1598,22 @@ class kg_schedule(osv.osv):
 								if order_bot_item['order_bot_line_id'] != False:
 									order_bot_rec = self.pool.get('ch.order.bot.details').browse(cr, uid, order_bot_item['order_bot_line_id'])
 									oth_spec = order_bot_rec.remarks
+									bom_type = order_bot_rec.bom_type
+									spare_id = order_bot_rec.spare_id.id
 								else:
 									oth_spec = ''
+									bom_type = ''
+									spare_id = False
 							if order_bot_item['purpose'] == 'acc':
 								if order_bot_item['order_bot_line_id'] != False:
 									order_bot_rec = self.pool.get('ch.wo.accessories.bot').browse(cr, uid, order_bot_item['order_bot_line_id'])
 									oth_spec = order_bot_rec.remarks
+									bom_type = ''
+									spare_id = False
 								else:
 									oth_spec = ''
+									bom_type = ''
+									spare_id = False
 									
 							
 							bot_obj = self.pool.get('kg.machine.shop')
@@ -1504,6 +1635,8 @@ class kg_schedule(osv.osv):
 								'qty': order_bot_item['bot_qty'],
 								'state': 'in_store',
 								'accept_state': 'pending',
+								'bom_type': bom_type,
+								'spare_id': spare_id,
 
 							}
 							bot_store_id = self.pool.get('kg.ms.stores').create(cr, uid, bot_store_vals)
@@ -1805,9 +1938,6 @@ class kg_schedule(osv.osv):
 											pending_qty = indent_qty/order_line_rec.qty
 											issue_pending_qty = indent_qty/order_line_rec.qty
 											flag_dynamic_length = False
-											
-										if cutting_qty > 0:
-											cutting_qty = cutting_qty/order_line_rec.qty
 									
 										ms_dep_indent_line_vals = {
 											'indent_id':indent_id,
@@ -1825,7 +1955,7 @@ class kg_schedule(osv.osv):
 											'length': length,
 											'breadth': ms_raw_rec.breadth,
 											'flag_dynamic_length': flag_dynamic_length,
-											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor
+											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
 										}
 
 										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
@@ -2132,6 +2262,7 @@ class ch_schedule_details(osv.osv):
 		'remarks': fields.related('order_bomline_id','add_spec',type='text',string='WO Remarks',store=True,readonly=True),
 		'active': fields.boolean('Active'),
 		'acc_bomline_id': fields.many2one('ch.wo.accessories.foundry','Acc Foundry Item'),
+		'spare_bomline_id': fields.many2one('ch.wo.spare.foundry','Spare Foundry Item'),
 		
 	
 	}

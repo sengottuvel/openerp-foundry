@@ -47,7 +47,7 @@ class kg_ms_daily_planning(osv.osv):
 		'line_ids': fields.one2many('ch.ms.daily.planning.details', 'header_id', "Planning Details"),
 		
 		'ms_line_ids':fields.many2many('kg.machineshop','m2m_ms_planning_details' , 'planning_id', 'ms_id', 'MS Details',
-			domain="[('state','=','accept'),'&',('ms_state','=','in_plan'),'&',('flag_planning','=', False),'&',('flag_trimming_dia','=', False)]"),
+			domain="[('state','=','accept'),'&',('ms_plan_rem_qty','>',0),'&',('flag_trimming_dia','=', False)]"),
 		'flag_planning': fields.boolean('Schedule'),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -110,7 +110,7 @@ class kg_ms_daily_planning(osv.osv):
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
-				ms_obj.write(cr, uid, item.id, {'flag_planning': True})
+				#~ ms_obj.write(cr, uid, item.id, {'flag_planning': True})
 				
 			self.write(cr, uid, ids, {'flag_planning': True})
 			
@@ -121,23 +121,30 @@ class kg_ms_daily_planning(osv.osv):
 		ms_obj = self.pool.get('kg.machineshop')
 		
 		ms_operation_rec = ms_operation_obj.browse(cr,uid,operation_id)
-	
+		
+		
+		print "inhouse_1",ms_operation_rec.op1_state == 'pending' or ms_operation_rec.op2_state == 'pending'  or ms_operation_rec.op3_state  == 'pending'  or ms_operation_rec.op4_state  == 'pending' or ms_operation_rec.op5_state == 'pending'
+		print "ddddddddd",ms_operation_rec.op6_state in ('pending','done') or ms_operation_rec.op7_state  in ('pending','done') or ms_operation_rec.op8_state  in ('pending','done')  or ms_operation_rec.op9_state  in ('pending','done')  or ms_operation_rec.op10_state  in ('pending','done')  or ms_operation_rec.op11_state  in ('pending','done')  or  ms_operation_rec.op12_state in ('pending','done')
+		
+		print "inhouse_2",ms_operation_rec.op1_state == 'done' and ms_operation_rec.op2_state == 'done' and ms_operation_rec.op3_state == 'done' and ms_operation_rec.op4_state == 'done' and ms_operation_rec.op5_state == 'done'
+		print "sssssssssssss",ms_operation_rec.op6_state == 'pending' or ms_operation_rec.op7_state == 'pending' or ms_operation_rec.op8_state == 'pending' or ms_operation_rec.op9_state == 'pending' or ms_operation_rec.op10_state == 'pending' or ms_operation_rec.op11_state == 'pending' or ms_operation_rec.op12_state == 'pending'
 		
 		if (ms_operation_rec.op1_state == 'pending' or ms_operation_rec.op2_state == 'pending'  or ms_operation_rec.op3_state  == 'pending' or
 			ms_operation_rec.op4_state  == 'pending' or ms_operation_rec.op5_state == 'pending' ) and (ms_operation_rec.op6_state in ('pending','done') or ms_operation_rec.op7_state  in ('pending','done') or 
 			ms_operation_rec.op8_state  in ('pending','done')  or ms_operation_rec.op9_state  in ('pending','done')  or ms_operation_rec.op10_state  in ('pending','done')  or ms_operation_rec.op11_state  in ('pending','done')  or 
 			ms_operation_rec.op12_state in ('pending','done') ) :
-			
+			print "111111111111111111111111111111111111"
 			ms_obj.write(cr,uid,ms_id,{'ms_state': 'inhouse_1'})
 		if (ms_operation_rec.op1_state in ('','done') and ms_operation_rec.op2_state in ('','done') and ms_operation_rec.op3_state in ('','done') and
 			ms_operation_rec.op4_state in ('','done')  and ms_operation_rec.op5_state in ('','done') ) and (ms_operation_rec.op6_state == 'pending' or ms_operation_rec.op7_state == 'pending' or 
 			ms_operation_rec.op8_state == 'pending' or ms_operation_rec.op9_state == 'pending' or ms_operation_rec.op10_state == 'pending' or ms_operation_rec.op11_state == 'pending' or 
 			ms_operation_rec.op12_state == 'pending'):
-			
+			print "2222222222222222222222222222222222222"
 			ms_obj.write(cr,uid,ms_id,{'ms_state': 'inhouse_2'})
 		
 		
 		return True
+		
 		
 	def entry_confirm(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr,uid,ids[0])
@@ -177,11 +184,14 @@ class kg_ms_daily_planning(osv.osv):
 								_('In house qty and sc qty should not be more than Required Qty !!! '))
 								
 								
-				ms_obj.write(cr, uid, line_item.ms_id.id,{'ms_plan_qty':line_item.ms_id.ms_plan_qty + (line_item.inhouse_qty + line_item.sc_qty)})
+				ms_obj.write(cr, uid, line_item.ms_id.id,{
+					'ms_plan_qty':line_item.ms_id.ms_plan_qty + (line_item.inhouse_qty + line_item.sc_qty),
+					'ms_plan_rem_qty': line_item.ms_id.ms_plan_rem_qty - (line_item.inhouse_qty + line_item.sc_qty)
+					})
 				
 				
 				#~ if (line_item.inhouse_qty + line_item.sc_qty) >= line_item.schedule_qty:
-				
+				#~ 
 					#~ ms_obj.write(cr, uid, line_item.ms_id.id,{'ms_state':'op_progress'})		
 					
 				
