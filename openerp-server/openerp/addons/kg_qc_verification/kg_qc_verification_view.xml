@@ -131,6 +131,7 @@
 					<field name="oth_spec"/>
 					<field name="remark"/>
 					<field name="state"/>
+					<field name="schedule_date" invisible="1"/>
 				</tree>
 			</field>
 		</record>
