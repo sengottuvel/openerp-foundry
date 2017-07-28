@@ -909,8 +909,9 @@
 		<menuitem action="kg_stock_inward.tma_ms_stock_details" id="tam_ms_stock_list" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="kg_qc_verification.tma_ms_qc_verification" id="tam_ms_qc_verif" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="3" />
+		<menuitem action="tma_ms_unsch_list" id="tam_ms_unsch_list" parent="tpm_ms_process" sequence="3" />
 		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="4" />
-		<menuitem action="tma_ms_unsch_list" id="tam_ms_unsch_list" parent="tpm_ms_process" sequence="5" />
+		
 		
 		
 	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="4"/>

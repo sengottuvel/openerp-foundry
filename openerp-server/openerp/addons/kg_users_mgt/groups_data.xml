@@ -109,6 +109,8 @@
 			
 			ref('kg_machineshop.tpm_ms_process'),
 			ref('kg_machineshop.tam_ms_inward'),
+			ref('kg_machineshop.tam_ms_sch_list'),
+            ref('kg_machineshop.tam_ms_unsch_list'),
 			ref('kg_machineshop.tam_ms_stock_list'),
 			ref('kg_machineshop.tam_trimming_dia'),
 			ref('kg_machineshop.tam_ms_id_commitment'),

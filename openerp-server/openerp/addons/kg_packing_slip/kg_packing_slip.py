@@ -1104,7 +1104,7 @@ class ch_packing_spare_bom(osv.osv):
 	
 	_constraints = [
 	
-		(_check_qty,'Kindly check the qty in Foundry Details !',['Qty']),
+		(_check_qty,'Kindly check the qty in Spare BOM !',['Qty']),
 		(_check_flag_applicable,'Kindly Check Is applicable provision for qty greater than zero !',['Qty']),
 		
 	]

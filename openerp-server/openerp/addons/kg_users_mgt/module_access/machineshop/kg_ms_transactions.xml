@@ -860,5 +860,45 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<record id="t_ms_ch_packing_spare_bom" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_spare_bom"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Spare BOM details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_spare_foundry" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_spare_foundry"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Spare Foundry details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_spare_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_spare_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Spare MS details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_spare_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_spare_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Spare BOT details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
