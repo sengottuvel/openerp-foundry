@@ -415,7 +415,7 @@
         <!--<menuitem action="purchase_rfq" id="menu_purchase_rfq"
             parent="menu_procurement_management"
 				sequence="0"/>-->
-`
+
         <record id="purchase_form_action" model="ir.actions.act_window">
             <field name="name">Approved POS</field>
             <field name="type">ir.actions.act_window</field>

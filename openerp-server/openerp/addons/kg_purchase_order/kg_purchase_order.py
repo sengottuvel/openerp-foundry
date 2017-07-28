@@ -442,7 +442,7 @@ class kg_purchase_order(osv.osv):
 	def wkf_approve_order(self, cr, uid, ids, context=None):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: wkf_approve_order called...')
 		obj = self.browse(cr,uid,ids[0])
-		if obj.state == 'confirmed':
+		if obj.state == 'verified':
 			user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
 			if user_obj:
 				user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
