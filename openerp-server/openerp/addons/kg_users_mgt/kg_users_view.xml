@@ -41,6 +41,7 @@
 							<group>
 								<field name="password" string="Password" required='1' password="True"/>
 								<field name="dep_name"/>
+								<field name="special_approval"/>
 							</group>
                             <group>
                                 <field name="copy_menus"/>
