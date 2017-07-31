@@ -113,7 +113,7 @@ class onscreen_ppd_purchase_order_report(JasperDataParser.JasperDataParser):
 				f = open(filepath, "a")
 				f.write(verified_signature.decode('base64'))
 			else:
-				#~ pass
+				pass
 			#~ if rec.approved_by.signature:
 				#~ approved_signature = rec.approved_by.signature
 				#~ myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/MD.jpg'
