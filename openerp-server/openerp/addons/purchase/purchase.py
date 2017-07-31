@@ -428,6 +428,7 @@ class purchase_order(osv.osv):
 		return action
 
 	def wkf_approve_order(self, cr, uid, ids, context=None):
+		stop
 		self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context)})
 		return True
 
