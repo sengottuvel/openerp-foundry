@@ -1172,6 +1172,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
 		</record>
 		
+		<record id="t_crm_ch_off_attachments" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_offer.model_ch_crm_off_attachments"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch crm off attachments</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
