@@ -114,18 +114,18 @@ class onscreen_purchase_order_report(JasperDataParser.JasperDataParser):
 				f.write(verified_signature.decode('base64'))
 			else:
 				pass
-			if rec.approved_by.signature:
-				approved_signature = rec.approved_by.signature
-				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/MD.jpg'
-				if os.path.isfile(myfile) == True:
-					os.remove(myfile)
-				else:
-					pass
-				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images','MD.jpg')
-				f = open(filepath, "a")
-				f.write(approved_signature.decode('base64'))
-			else:
-				pass
+			#~ if rec.approved_by.signature:
+				#~ approved_signature = rec.approved_by.signature
+				#~ myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/MD.jpg'
+				#~ if os.path.isfile(myfile) == True:
+					#~ os.remove(myfile)
+				#~ else:
+					#~ pass
+				#~ filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images','MD.jpg')
+				#~ f = open(filepath, "a")
+				#~ f.write(approved_signature.decode('base64'))
+			#~ else:
+				#~ pass
 		
 		val['po_id'] = ids[0]
 		print "val....................",val
