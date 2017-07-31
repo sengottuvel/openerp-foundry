@@ -793,9 +793,26 @@ class kg_general_grn(osv.osv):
 				value_data.append(rep)
 		return value_data
 	
+	def _check_serial(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.grn_line:
+			for item in rec.grn_line:
+				for ele in item.exp_batch_id:
+					sql = """ 
+							select exp.batch_no from kg_exp_batch exp
+							left join kg_general_grn_line line on(line.id=exp.grn_line_id)
+							where exp.batch_no = '%s' and exp.grn_line_id = %s and line.product_id=%s and line.brand_id = %s and line.moc_id = %s """%(ele.batch_no,item.id,item.product_id.id,item.brand_id.id,item.moc_id.id)
+					cr.execute(sql)		
+					data = cr.dictfetchall()
+					if data:
+						if len(data) > 1:
+							raise osv.except_osv(_('Warning!'), _('%s S/N must be unique per Item') %(item.product_id.name))
+		return True
+	
 	_constraints = [
 		
 		(_check_lineqty, 'You can not save an GRN with 0 product qty!!',['grn_qty']),
+		(_check_serial,'S/N must be unique per Item !',['']),
 		#(_check_lineprice, 'You can not save an GRN with 0 price_unit!!',['price_unit']),
 		
 		]
@@ -968,12 +985,11 @@ class kg_exp_batch(osv.osv):
 		
 	}
 	
-	_sql_constraints = [
-		
-		('batch_no', 'unique(batch_no)', 'S/N must be unique per Item !!'),
-	]
-
-
+	#~ _sql_constraints = [
+		#~ 
+		#~ ('batch_no', 'unique(batch_no)', 'S/N must be unique per Item !!'),
+	#~ ]
+	
 kg_exp_batch()
 
 
