@@ -207,6 +207,7 @@ class kg_crm_offer(osv.osv):
 		'line_supervision_ids': fields.one2many('ch.supervision.offer', 'header_id', "Supervision Charge"),
 		'line_term_ids': fields.one2many('ch.term.offer', 'header_id', "Term Offer"),
 		'line_remark_ids': fields.one2many('ch.crm.off.remark', 'header_id', "Remarks",readonly=True, states={'draft':[('readonly',False)]}),
+		'line_attach_ids': fields.one2many('ch.crm.off.attachments', 'header_id', "Attachments",readonly=True, states={'draft':[('readonly',False)]}),
 		
 		## Entry Info
 		
@@ -3022,3 +3023,20 @@ class ch_crm_off_remark(osv.osv):
 	}
 	
 ch_crm_off_remark()
+
+class ch_crm_off_attachments(osv.osv):
+	
+	_name = "ch.crm.off.attachments"
+	_description = "Ch CRM Off Attachments"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id': fields.many2one('kg.crm.offer', 'Offer No.', ondelete='cascade'),
+		'description': fields.char('Description'),
+		'file': fields.binary('File'),
+		
+	}
+	
+ch_crm_off_attachments()

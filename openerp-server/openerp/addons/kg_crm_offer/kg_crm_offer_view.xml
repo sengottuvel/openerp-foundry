@@ -295,6 +295,24 @@
 								</tree>
 							</field>
 						</group>
+						<group string="Attachments">
+							<field name="line_attach_ids" colspan="4" nolabel="1" widget="one2many_selectable">
+								<tree string="Attachments" >
+									<field name="description" attrs="{'required':[('file','!=',False)]}"/>
+									<field name="file"/>
+								</tree>
+								<form string="Attachments" >
+									<group>
+										<group>
+											<field name="description" attrs="{'required':[('file','!=',False)]}"/>
+										</group>
+										<group>
+											<field name="file"/>
+										</group>
+									</group>
+								</form>
+							</field>
+						</group>
 						<group string="Annexure 1">
 							<field name="annexure_1" nolabel="1" colspan="4"/>
 						</group>
