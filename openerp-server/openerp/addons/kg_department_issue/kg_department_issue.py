@@ -549,7 +549,7 @@ class kg_department_issue(osv.osv):
 							ms_obj = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',line_ids.w_order_line_id.id),('ms_id','=',line_ids.ms_bot_id.id),('state','=','raw_pending')])
 							if ms_obj:
 								ms_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_obj[0])
-								self.pool.get('kg.machineshop').write(cr,uid,ms_rec.id,{'state':'accept'})
+								self.pool.get('kg.machineshop').write(cr,uid,ms_rec.id,{'state':'accept','ms_plan_rem_qty':line_ids.cutting_qty})
 							cr.execute(""" update kg_ms_operations set reject_state = 'issued' where id in (
 								select id from kg_ms_operations where state = 'reject' 
 								and order_line_id = %s and reject_state = 'not_issued' and ms_type = 'ms_item'

@@ -863,7 +863,7 @@ class kg_general_grn_line(osv.osv):
 		'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
 		'kg_discount': fields.float('Discount Amount'),
 		'grn_tax_ids': fields.many2many('account.tax', 'po_gen_grn_tax', 'order_id', 'taxes_id', 'Taxes'),
-		'brand_id':fields.many2one('kg.brand.master','Brand'),
+		'brand_id':fields.many2one('kg.brand.master','Brand',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type'),
