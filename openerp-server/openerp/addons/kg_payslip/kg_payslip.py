@@ -427,6 +427,7 @@ class kg_payslip(osv.osv):
 							_('Turn Over is not fixed for last month for VDA Calculation !!'))				
 				else:
 					acc_vda_value = 0.00
+					vda_for_att_bon = 0.00
 					pass
 					
 					
