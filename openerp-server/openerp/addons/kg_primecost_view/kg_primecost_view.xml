@@ -24,7 +24,7 @@
 								<field name="setting_height" attrs="{'required': [('pump_model_type','=','vertical')],'invisible': [('pump_model_type','!=','vertical')]}"/>
 								<field name="shaft_sealing" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
 								<field name="bush_bearing_lubrication" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
-								<field name="qty" attrs="{'readonly': [('load_bom','=',True)]}" required="1"/>
+								<field name="qty" readonly="1" required="1"/>
 								<field name="purpose_categ" attrs="{'readonly': [('load_bom','=',True)]}" required="1"/>
 								<field name="pump_cost" readonly="1"/>
 								<field name="load_bom" on_change="onchange_bom(load_bom,pump_id,moc_const_id,qty,speed_in_rpm,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,del_pipe_size,bush_bearing_lubrication,purpose_categ)" attrs="{'invisible': [('moc_const_id','=',False)]}" />

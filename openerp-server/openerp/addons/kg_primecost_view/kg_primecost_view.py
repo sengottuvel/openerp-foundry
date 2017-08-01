@@ -57,7 +57,7 @@ class kg_primecost_view(osv.osv):
 		'flag_email': fields.boolean('Email Notification'),
 		'flag_spl_approve': fields.boolean('Special Approval'),
 		
-		### Entry Info ####
+		## Entry Info
 		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
 		'active': fields.boolean('Active'),	
@@ -116,6 +116,7 @@ class kg_primecost_view(osv.osv):
 		'flag_sms': False,
 		'flag_email': False,
 		'flag_spl_approve': False,
+		'qty': 1,
 		
 	}
 	
