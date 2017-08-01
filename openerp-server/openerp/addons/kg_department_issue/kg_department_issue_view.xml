@@ -68,8 +68,9 @@
 									</group> 
 									<group>
 										<field name="wo_pump_model_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
-										<field name="brand_id"/>
-										<field name="wo_moc_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+										<field name="brand_id" required="1"/>
+										<field name="wo_moc_id" required="1"/>
+<!--									<field name="wo_moc_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>-->
 										<field name="uom_id" required="1"/>
 										<field name="issue_qty" on_change="onchange_issue_qty_2(issue_qty)"/>
 										<field name="length" attrs="{'invisible': ['|',('dep_code','!=','DP2'),('uom_conversation_factor','=',False)]}"/>
