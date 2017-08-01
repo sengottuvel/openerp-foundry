@@ -313,6 +313,8 @@ class kg_purchase_order(osv.osv):
 	def verify_po(self,cr,uid,ids, context=None):
 		obj = self.browse(cr,uid,ids[0])
 		if obj.state == 'confirmed':
+			if obj.confirmed_by.id == uid:
+				raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
 			back_list = []
 			approval = ''
 			for item in obj.order_line:
@@ -443,7 +445,12 @@ class kg_purchase_order(osv.osv):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: wkf_approve_order called...')
 		obj = self.browse(cr,uid,ids[0])
 		if obj.state == 'confirmed':
-			print"aaaaaaaaaaaaAA"
+			if obj.confirmed_by.id == uid:
+				raise osv.except_osv(_('Warning'),_('Approve cannot be done by Confirmed user'))
+			elif obj.verified_by.id == uid:
+				raise osv.except_osv(_('Warning'),_('Approve cannot be done by Verified user'))
+			else:
+				pass
 			user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
 			if user_obj:
 				user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
@@ -694,7 +701,6 @@ class kg_purchase_order(osv.osv):
 	def action_cancel(self, cr, uid, ids, context=None):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: action_cancel called...')
 		wf_service = netsvc.LocalService("workflow")
-		
 		purchase = self.browse(cr, uid, ids[0], context=context)
 		if purchase.state == 'approved':
 			product_obj = self.pool.get('product.product')
@@ -704,7 +710,7 @@ class kg_purchase_order(osv.osv):
 				raise osv.except_osv(_('Remarks Needed !!'),_('Enter Remark in Remarks Tab....'))
 			
 			if purchase.po_type == 'frompi':
-				if purchase.state in ('draft','confirmed'):
+				if purchase.state in ('draft','confirmed','verified'):
 					for line in purchase.order_line:
 						sql = """ update purchase_requisition_line set draft_flag=False where line_state = 'process' and id = %s """%(line.pi_line_id.id)
 						cr.execute(sql)
@@ -768,15 +774,28 @@ class kg_purchase_order(osv.osv):
 		return True			
 	
 	def entry_reject(self, cr, uid, ids, context=None):
-		purchase = self.browse(cr, uid, ids[0], context=context)
-		if purchase.state == 'confirmed':
+		rec = self.browse(cr, uid, ids[0], context=context)
+		if rec.state == 'confirmed':
+			if rec.confirmed_by.id == uid:
+				raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
 			pi_line_obj = self.pool.get('purchase.requisition.line')
-			for line in purchase.order_line:
+			for line in rec.order_line:
 				pi_line_obj.write(cr,uid,line.pi_line_id.id,{'line_state' : 'noprocess'})	
-			if not purchase.reject_remark:
-				raise osv.except_osv(_('Remarks Needed !!'),_('Enter Remark in Remarks Tab....'))
+			if not rec.reject_remark:
+				raise osv.except_osv(_('Remarks Needed !!'),_('Enter Remark in Reject Remarks'))
 			else:
 				self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': dt_time})
+		return True
+	
+	def entry_cancel(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0], context=context)
+		if rec.state == 'verified':
+			if rec.verified_by.id == uid:
+				raise osv.except_osv(_('Warning'),_('Cancel cannot be done by Confirmed user'))
+			if not rec.can_remark:
+				raise osv.except_osv(_('Remarks Needed !!'),_('Enter Remark in Cancel Remarks'))
+			else:
+				self.write(cr,uid,ids,{'state': 'confirmed','cancel_user_id': uid,'cancel_date': dt_time})
 		return True
 	
 	def action_set_to_draft(self, cr, uid, ids, context=None):
@@ -948,7 +967,7 @@ class kg_purchase_order_line(osv.osv):
 		'uom_conversation_factor': fields.related('product_id','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True,required=True),
 		'length': fields.float('Length',digits=(16,4)),
 		'breadth': fields.float('Breadth',digits=(16,4)),
-		'quantity': fields.float("Weight(Kg's)"),
+		'quantity': fields.float("Qty/Weight(Kg's)"),
 		'rate_revise': fields.selection([('yes','Yes'),('no','No')],'Rate Revise'),
 		'approval_flag': fields.boolean('Spl Approval'),
 		'test_cert_flag': fields.boolean('Test Certificate'),

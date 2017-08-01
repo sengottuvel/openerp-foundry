@@ -207,8 +207,8 @@
 				</group>
 				<group string='Remarks' attrs="{'invisible':[('state','in',('draft'))]}">
 					<group>	
-						<field name="can_remark" attrs="{'invisible':[('state','not in',('approved','cancel'))], 'readonly': [('state','in',['cancel','reject'])]}"/>
-						<field name="reject_remark" attrs="{'invisible':[('state','not in',['confirmed'])], 'readonly': [('state','in',['cancel','reject'])]}"/>	
+						<field name="can_remark" attrs="{'invisible':[('state','not in',('verified','approved','cancel'))],'readonly':[('state','in',['cancel','reject'])]}"/>
+						<field name="reject_remark" attrs="{'invisible':[('state','not in',['confirmed'])],'readonly':[('state','in',['cancel','reject'])]}"/>	
 					</group>
 					<group>												
 					</group>
@@ -372,7 +372,7 @@
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
             <field name="context">{}</field>
-            <field name="domain">[('state','in',('draft','confirmed','verified')),('approval_flag','=',False)]</field>
+            <field name="domain">[('state','=','draft'),('approval_flag','=',False)]</field>
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
             <field name="view_id" ref="purchase_order_tree"/>
@@ -390,15 +390,37 @@
             </field>
         </record>
         
+        <record id="tma_verify_po" model="ir.actions.act_window">
+            <field name="name">Verify PO</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.order</field>
+            <field name="context">{}</field>
+            <field name="domain">[('state','=','confirmed')]</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_purchase_order_filter"/>
+            <field name="view_id" ref="purchase_order_spl_tree"/>
+        </record>
+        
+        <record id="tma_wfamd_po" model="ir.actions.act_window">
+            <field name="name">WFAMD PO</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.order</field>
+            <field name="context">{}</field>
+            <field name="domain">[('state','=','verified'),('approval_flag','=',False)]</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_purchase_order_filter"/>
+            <field name="view_id" ref="purchase_order_spl_tree"/>
+        </record>
+        
         <record id="purchase_rfq_spl_approval" model="ir.actions.act_window">
             <field name="name">Special Approval</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
             <field name="context">{}</field>
-            <field name="domain">[('state','in',('confirmed','verified')),('approval_flag','=',True)]</field>
+            <field name="domain">[('state','=','verified'),('approval_flag','=',True)]</field>
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
-             <field name="view_id" ref="purchase_order_spl_tree"/>
+            <field name="view_id" ref="purchase_order_spl_tree"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to create a request for quotation.

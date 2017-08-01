@@ -62,6 +62,7 @@
 		</button>
 		<button name="purchase_confirm" states="draft" string="Confirm Order" position="replace">
 			<button name="entry_reject" string="Reject" confirm="Are you sure to proceed ?" type="object" states="confirmed" />
+			<button name="entry_cancel" string="Cancel" confirm="Are you sure to proceed ?" type="object" states="verified" />
 			<button name="purchase_confirm" states="verified" string="Approve" confirm="Are you sure to proceed ?" />
 			<button name="action_cancel" string="Cancel" confirm="Are you sure to proceed ?" type="object" states="approved"/>
 			<button name="action_set_to_draft" string="Set To Draft" type="object" states="reject"/>
@@ -257,7 +258,7 @@
 			<field name="product_uom"
 						on_change="onchange_product_uom(parent.pricelist_id,product_id,product_qty,product_uom,
 							parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)" 
-							class="oe_inline"/>
+							class="oe_inline" string="PO UOM"/>
 			</field>
 			<field name="date_planned" position="replace">
 			<field name="date_planned" attrs="{'readonly': [('cancel_flag','=', True)]}" invisible="1"/>
@@ -291,7 +292,7 @@
 				<field name="price_type" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" required="1"/>
                 </field>
 				<field name="product_uom" position="after">
-				<field name = "cancel_flag" invisible="1"/>
+				<field name="cancel_flag" invisible="1"/>
 				<field name="delivery_date"/>
 				<field name="po_type" invisible="1"/>
 				<field name="test_cert_flag"/>
@@ -482,10 +483,17 @@
 		<field name="act_window_id" ref="kg_poline_confirmed_action"/>
 	</record>
     
+    <!-- Generate PO -->
     <menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
 	
+    <!-- Verify PO -->
+    <menuitem action="purchase.tma_verify_po" id="tam_verify_po" name="Verify PO" parent="purchase.menu_procurement_management" sequence="2"/>
+	
 	<!-- Special Approval PO -->
-	<menuitem action="purchase.purchase_rfq_spl_approval" id="pam_purchase_order_spl_approvals" name="Special Approval PO" parent="purchase.menu_procurement_management" sequence="2"/>
+	<menuitem action="purchase.purchase_rfq_spl_approval" id="pam_purchase_order_spl_approvals" name="Special Approval PO" parent="purchase.menu_procurement_management" sequence="3"/>
+	
+	<!-- WFAMD PO -->
+    <menuitem action="purchase.tma_wfamd_po" id="tam_wfamd_po" name="WFAMD PO" parent="purchase.menu_procurement_management" sequence="4"/>
 	
 	<!-- PO Item Details  -->
 	<menuitem action="kg_poline_confirmed_action" id="pam_purchase_order_line" name="PO Item Details" parent="purchase.menu_procurement_management" sequence="9"/>
