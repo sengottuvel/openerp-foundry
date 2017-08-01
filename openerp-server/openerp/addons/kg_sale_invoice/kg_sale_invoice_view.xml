@@ -35,7 +35,7 @@
 								<field name="invoice_date" attrs="{'invisible': [('state','in',['draft','confirmed','approved'])]}" required="1"/>						
 								<field name="billing_address"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" required="1"/>
 								<field name="del_address"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>	
-								<field name="state" />	
+								<field name="state" style="width: 30%%" class="att_state_change"/>	
 							</group>	
 						</group>
 							
@@ -50,7 +50,8 @@
 									<field name="dealer_discount" sum="dealer_discount"/>
 									<field name="customer_discount" sum="customer_discount"/>
 									<field name="special_discount" sum="special_discount"/>
-									<field name="tax" sum="tax"/>
+									<field name="hsn_no" />
+									<field name="tax_id" widget="many2many_tags"/>
 									<field name="p_f" sum="p_f"/>
 									<field name="freight" sum="freight"/>
 									<field name="insurance" sum="insurance"/>									
@@ -74,7 +75,8 @@
 									<field name="dealer_discount" sum="dealer_discount"/>
 									<field name="customer_discount" sum="customer_discount"/>
 									<field name="special_discount" sum="special_discount"/>
-									<field name="tax" sum="tax"/>
+									<field name="hsn_no" />
+									<field name="tax_id" widget="many2many_tags"/>
 									<field name="p_f" sum="p_f"/>
 									<field name="freight" sum="freight"/>
 									<field name="insurance" sum="insurance"/>
@@ -98,7 +100,8 @@
 									<field name="dealer_discount" sum="dealer_discount"/>
 									<field name="customer_discount" sum="customer_discount"/>
 									<field name="special_discount" sum="special_discount"/>
-									<field name="tax" sum="tax"/>
+									<field name="hsn_no" />
+									<field name="tax_id" widget="many2many_tags"/>
 									<field name="p_f" sum="p_f"/>
 									<field name="freight" sum="freight"/>
 									<field name="insurance" sum="insurance"/>
@@ -121,7 +124,7 @@
 							</field>
 						</group>
 						
-						<button name="load_advance" string="Load Advance" type="object"  attrs="{'invisible':[('state','=','draft')]}"/>
+						<button name="load_advance" string="Load Advance" type="object"  attrs="{'invisible':[('state','in',['draft','invoice'])]}"/>
 							    <group string = "Advance Adjustment Details" attrs="{'invisible':[('state','=','draft')]}">
 								   <group>
 									 <field name="line_ids_d" nolabel="1" attrs="{'readonly': [('state','in',['approved','invoice','cancel'])],'invisible':[('state','=','draft')]}" >
@@ -139,7 +142,7 @@
 								  </group>
 							    </group>
 							   	
-						<button name="update_actual_values" string="Update Actual Values" type="object" />	
+						<button name="update_actual_values" string="Update Actual Values" type="object" attrs="{'invisible':[('state','=','invoice')]}"/>	
 						
 					<group class="oe_subtotal_footer oe_right" colspan="2">							
 						
