@@ -418,12 +418,14 @@ class kg_department_issue(osv.osv):
 									else:
 										cutting_qty = 0
 							dep_issue_line_rec.write({'price_unit': lot_browse.price_unit or 0.0,'confirm_qty':dep_issue_line_rec.issue_qty,'cutting_qty': cutting_qty})
+							tot = 0
 							for i in val:
 								lot_rec = lot_obj.browse(cr, uid, i)
 								stock_tot += lot_rec.reserved_qty
 								po_tot += lot_rec.po_qty
 								uom = lot_rec.product_uom.name
-							if stock_tot < dep_issue_line_rec.issue_qty:
+								tot += lot_rec.pending_qty
+							if tot < dep_issue_line_rec.issue_qty:
 								raise osv.except_osv(_('Stock not available !!'),
 									_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(item.product_id.name)))
 							
