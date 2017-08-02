@@ -541,7 +541,8 @@ class kg_id_commitment(osv.osv):
 		'schedule_id':fields.many2one('kg.schedule', 'Schedule No.', required=True),
 		
 		'pouring_date': fields.date('Pouring Over date'),
-		'cc_date': fields.date('CC Date'),
+		'cc_date': fields.date('Full CC Date'),
+		'part_cc_date': fields.date('Part CC Date'),
 		'ms_material_date': fields.date('MS Item Material Commitment'),		
 		'id_commitment_date': fields.date('ID Commitment'),
 		'id_date': fields.date('ID Date'),

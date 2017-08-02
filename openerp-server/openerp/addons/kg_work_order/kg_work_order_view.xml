@@ -55,7 +55,7 @@
 						<page string="Work Order Details" >
 							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" widget="one2many_list"
 								context="{'order_category':order_category,'delivery_date':delivery_date,'line_ids': line_ids,'order_no':name,
-								 'drawing_approval':drawing_approval,'inspection':inspection}">
+								 'drawing_approval':drawing_approval,'inspection':inspection,'flag_select_all':True}">
 								<tree string = "Work Order Items">
 									<field name="order_no"/>
 									<field name="order_category" />

@@ -51,6 +51,8 @@ class kg_ms_daily_planning(osv.osv):
 		'flag_planning': fields.boolean('Schedule'),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'cancel_remark': fields.text('Cancel Remarks'),
+		'flag_swap_inhouse': fields.boolean('Swap Inhouse qty flag'),
+		'flag_swap_sc': fields.boolean('Swap SC qty flag'),
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -79,10 +81,26 @@ class kg_ms_daily_planning(osv.osv):
 		'state': 'draft',	
 		'active': True,
 		'flag_planning': False,
+		'flag_swap_inhouse': False,
+		'flag_swap_sc': False,
 		
 
 	}
 	
+	def swap_inhouseqty(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		update_sql = """ update ch_ms_daily_planning_details set sc_qty = inhouse_qty,inhouse_qty = 0 where header_id=%s """ %(ids[0])
+		cr.execute(update_sql)
+		self.write(cr, uid, ids, {'flag_swap_sc': True,'flag_swap_inhouse': False})
+		return True
+		
+	def swap_scqty(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		update_sql = """ update ch_ms_daily_planning_details set inhouse_qty = sc_qty,sc_qty = 0 where header_id=%s """ %(ids[0])
+		cr.execute(update_sql)
+		self.write(cr, uid, ids, {'flag_swap_inhouse': True,'flag_swap_sc': False})
+		return True
+		
 	def update_line_items(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])		
 		ms_obj = self.pool.get('kg.machineshop')
@@ -107,12 +125,13 @@ class kg_ms_daily_planning(osv.osv):
 					'ms_id': item.id,
 					'csd_no': csd_no,
 					'schedule_qty': item.ms_sch_qty - item.ms_plan_qty,
+					'inhouse_qty': item.ms_sch_qty - item.ms_plan_qty,
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
 				#~ ms_obj.write(cr, uid, item.id, {'flag_planning': True})
 				
-			self.write(cr, uid, ids, {'flag_planning': True})
+			self.write(cr, uid, ids, {'flag_planning': True,'flag_swap_inhouse':True})
 			
 		return True
 		
@@ -156,30 +175,29 @@ class kg_ms_daily_planning(osv.osv):
 		if entry_rec.state == 'draft':
 			for line_item in entry_rec.line_ids:
 				
-				cr.execute(""" select sum(sc_qty)
-					from ch_ms_sc_qty_details  
-					where header_id = %s """%(line_item.id))
+				#~ cr.execute(""" select sum(sc_qty)
+					#~ from ch_ms_sc_qty_details  
+					#~ where header_id = %s """%(line_item.id))
 					
-				total_sc_qty = cr.fetchone();
+				#~ total_sc_qty = cr.fetchone();
 				
-				line_obj.write(cr, uid, line_item.id, {'sc_qty':total_sc_qty[0]})
+				#~ line_obj.write(cr, uid, line_item.id, {'sc_qty':total_sc_qty[0]})
 				
 				if line_item.inhouse_qty < 0 or line_item.sc_qty < 0:
 					raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative values !!'))
 				
 				
-				if total_sc_qty[0] <= 0:
-					if line_item.inhouse_qty == 0 and line_item.sc_qty == 0:
-						raise osv.except_osv(_('Warning!'),
-									_('System not allow to save Zero values !!'))
+				if line_item.inhouse_qty == 0 and line_item.sc_qty == 0:
+					raise osv.except_osv(_('Warning!'),
+								_('System not allow to save Zero values !!'))
 				
-				if total_sc_qty[0] > 0:
-					total_sc_qty = total_sc_qty[0]
-				else:
-					total_sc_qty = 0
+				#~ if total_sc_qty[0] > 0:
+					#~ total_sc_qty = total_sc_qty[0]
+				#~ else:
+					#~ total_sc_qty = 0
 				
-				if (line_item.inhouse_qty + total_sc_qty) > line_item.schedule_qty:
+				if (line_item.inhouse_qty + line_item.sc_qty) > line_item.schedule_qty:
 					raise osv.except_osv(_('Warning!'),
 								_('In house qty and sc qty should not be more than Required Qty !!! '))
 								
@@ -1116,109 +1134,100 @@ class kg_ms_daily_planning(osv.osv):
 												
 												op12_ms_dimension_id = ms_dimension_obj.create(cr, uid,op12_dimen_vals)
 											
-				print "total_sc_qty",total_sc_qty		
-				header_sc_qty = total_sc_qty
+				#~ print "total_sc_qty",total_sc_qty		
+				header_sc_qty = line_item.sc_qty
+				print "header_sc_qty",header_sc_qty
+				
 				if header_sc_qty > 0:
 					
 					
-					sc_excess_qty = (actual_qty + header_sc_qty) - line_item.schedule_qty
+					#~ sc_excess_qty = (actual_qty + header_sc_qty) - line_item.schedule_qty
+					#~ 
+					#~ if not line_item.line_ids:
+						#~ raise osv.except_osv(_('Warning!'),
+							#~ _('Kindly give SC Qty Split Ups !!'))
+							
+					#~ if line_item.line_ids:
+						
+					ms_obj.write(cr, uid, line_item.ms_id.id,{'ms_state':'sent_to_sc'})
 					
-					if not line_item.line_ids:
-						raise osv.except_osv(_('Warning!'),
-							_('Kindly give SC Qty Split Ups !!'))
-							
-					if line_item.line_ids:
+					pending_sc_qty = 0.00
+					sc_actual_qty = 0.00
+					total_sc_qty = 0.00
+					pending_sc_qty = line_item.schedule_qty - line_item.inhouse_qty
+					
 						
-						ms_obj.write(cr, uid, line_item.ms_id.id,{'ms_state':'sent_to_sc'})
+					sc_obj = self.pool.get('kg.subcontract.process')				
+					sc_name = ''	
+					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+					sc_name = cr.fetchone();
+					
+					
+					sc_vals = {
+						'name': sc_name[0],
+						'ms_plan_id': entry_rec.id,
+						'ms_plan_line_id': line_item.id,
+						'total_qty': header_sc_qty,
+						'pending_qty': header_sc_qty,
+						'actual_qty': header_sc_qty,
+						#~ 'contractor_id': sc_item.contractor_id.id,
 						
-						pending_sc_qty = 0.00
-						sc_actual_qty = 0.00
-						total_sc_qty = 0.00
-						pending_sc_qty = line_item.schedule_qty - line_item.inhouse_qty
+					}
+					
+					sc_id = sc_obj.create(cr, uid,sc_vals)
+					
+					print "sc_id",sc_id
+					
+					#~ pending_sc_qty = pending_sc_qty - sc_actual_qty
 						
-						for sc_item in line_item.line_ids:
-							total_sc_qty += sc_item.sc_qty
-							
-							sc_obj = self.pool.get('kg.subcontract.process')				
-							sc_name = ''	
-							sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-							sc_name = cr.fetchone();
-							
-							
-							if header_sc_qty > 0:
-								
-								if pending_sc_qty <= 0:
-									sc_actual_qty = 0
-								elif pending_sc_qty > sc_item.sc_qty:
-									sc_actual_qty = sc_item.sc_qty
-								else:
-									sc_actual_qty = pending_sc_qty
-									
-									
-							
-							sc_vals = {
-								'name': sc_name[0],
-								'ms_plan_id': entry_rec.id,
-								'ms_plan_line_id': line_item.id,
-								'total_qty': sc_item.sc_qty,
-								'pending_qty': sc_item.sc_qty,
-								'actual_qty': sc_actual_qty,
-								'contractor_id': sc_item.contractor_id.id,
-								
-							}
-							
-							sc_id = sc_obj.create(cr, uid,sc_vals)
-							
-							pending_sc_qty = pending_sc_qty - sc_actual_qty
-							
+					
+					### Updatind Total Sc Qty ###
+					
+					
+					self.pool.get('ch.ms.daily.planning.details').write(cr, uid, line_item.id, {'sc_qty':line_item.sc_qty})
+					
+					inhouse_pending_qty = line_item.schedule_qty - line_item.inhouse_qty
+					
+					if inhouse_pending_qty > 0:
+						sc_excess_qty = line_item.sc_qty - inhouse_pending_qty
+					else:
+						sc_excess_qty = line_item.sc_qty
+					print "sc_excess_qty",sc_excess_qty
+					if sc_excess_qty > 0:
 						
-						### Updatind Total Sc Qty ###
+						### Stock Inward Creation ###
+						inward_obj = self.pool.get('kg.stock.inward')
+						inward_line_obj = self.pool.get('ch.stock.inward.details')
 						
+						inward_vals = {
+							'location': line_item.order_id.location
+						}
 						
-						self.pool.get('ch.ms.daily.planning.details').write(cr, uid, line_item.id, {'sc_qty':total_sc_qty})
+						inward_id = inward_obj.create(cr, uid, inward_vals)
 						
-						inhouse_pending_qty = line_item.schedule_qty - line_item.inhouse_qty
+						inward_line_vals = {
+							'header_id': inward_id,
+							'location': line_item.order_id.location,
+							'stock_type': 'pump',
+							'pump_model_id': line_item.pump_model_id.id,
+							'pattern_id': line_item.pattern_id.id,
+							'pattern_name': line_item.pattern_name,
+							'item_code': line_item.item_code,
+							'item_name': line_item.item_name,
+							'moc_id': line_item.moc_id.id,
+							'qty': sc_excess_qty,
+							'available_qty': sc_excess_qty,
+							'each_wgt': 0,
+							'total_weight': 0,
+							'unit_price': 0,
+							'stock_mode': 'excess',
+							'ms_stock_state': 'operation_inprogress',
+							'stock_item': 'ms_item',
+						}
 						
-						if inhouse_pending_qty > 0:
-							sc_excess_qty = total_sc_qty - inhouse_pending_qty
-						else:
-							sc_excess_qty = total_sc_qty
-						
-						if sc_excess_qty > 0:
-							
-							### Stock Inward Creation ###
-							inward_obj = self.pool.get('kg.stock.inward')
-							inward_line_obj = self.pool.get('ch.stock.inward.details')
-							
-							inward_vals = {
-								'location': line_item.order_id.location
-							}
-							
-							inward_id = inward_obj.create(cr, uid, inward_vals)
-							
-							inward_line_vals = {
-								'header_id': inward_id,
-								'location': line_item.order_id.location,
-								'stock_type': 'pump',
-								'pump_model_id': line_item.pump_model_id.id,
-								'pattern_id': line_item.pattern_id.id,
-								'pattern_name': line_item.pattern_name,
-								'item_code': line_item.item_code,
-								'item_name': line_item.item_name,
-								'moc_id': line_item.moc_id.id,
-								'qty': sc_excess_qty,
-								'available_qty': sc_excess_qty,
-								'each_wgt': 0,
-								'total_weight': 0,
-								'unit_price': 0,
-								'stock_mode': 'excess',
-								'ms_stock_state': 'operation_inprogress',
-								'stock_item': 'ms_item',
-							}
-							
-							inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)					
+						inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)					
 						
 						
 			
@@ -1227,7 +1236,8 @@ class kg_ms_daily_planning(osv.osv):
 			plan_seq_rec = self.pool.get('ir.sequence').browse(cr,uid,plan_seq_id[0])
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(plan_seq_id[0],plan_seq_rec.code))
 			plan_name = cr.fetchone();	
-			self.write(cr, uid, ids, {'name':plan_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			self.write(cr, uid, ids, {'name':plan_name[0],'state': 'confirmed','flag_swap_inhouse':False,'flag_swap_sc':False,
+			'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass				
 			

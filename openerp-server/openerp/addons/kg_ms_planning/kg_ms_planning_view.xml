@@ -11,12 +11,17 @@
 				<form string="Daily Planning" version="7.0">
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						
 					</header>
 					<group>
 						<group>
 							<field name="name"/>
 							<field name="remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="flag_planning" invisible="1"/>
+							<field name="flag_swap_inhouse" invisible="1"/>
+							<field name="flag_swap_sc" invisible="1"/>
+							<button name="swap_inhouseqty" type="object" string="Swap In house Qty" attrs="{'invisible': [('flag_swap_inhouse','!=',True)]}" class="oe_highlight"/>
+							<button name="swap_scqty" type="object" string="Swap SC Qty" attrs="{'invisible': [('flag_swap_sc','!=',True)]}" class="oe_highlight"/>
 						</group>											
 						<group>
 							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
@@ -27,7 +32,7 @@
 						<page string="Planning Details" attrs="{'invisible': [('flag_planning','!=',True)]}">
 							<group>
 								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
-									<tree string="Planning Details Tree">					
+									<tree string="Planning Details Tree" editable="bottom">					
 										<field name="order_no"/>
 										<field name="position_id"/>
 										<field name="item_code"/>

@@ -1327,6 +1327,11 @@ class ch_work_order_details(osv.osv):
 			#~ context.update({
 				#~ 'order_no': 'test',
 			#~ })
+			
+		if context['order_category'] == 'pump':
+			context['flag_select_all'] = True
+		if context['order_category'] == 'spare':
+			context['flag_select_all'] = False
 		return context
 		
 	def onchange_delivery_date(self, cr, uid, ids, delivery_date):
@@ -1374,10 +1379,20 @@ class ch_work_order_details(osv.osv):
 		bot_vals=[]
 		consu_vals=[]
 		moc_obj = self.pool.get('kg.moc.master')
+		flag_select_all_val = flag_select_all
 		if flag_offer != True:
 			if pump_model_id != False:
 				
 				pump_model_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_model_id)
+				
+				flag_select_all_val = flag_select_all
+				
+				if order_category == 'pump':
+					flag_select_all_val = True
+				if flag_select_all == True:
+					flag_select_all_val = True
+				if order_category == 'pump' and flag_select_all == False:
+					flag_select_all_val = False
 					
 				#### Loading Foundry Items
 				
@@ -1394,10 +1409,6 @@ class ch_work_order_details(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 						_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
 					
-					if order_category == 'pump' :
-						applicable = True
-					if order_category in ('spare','pump_spare'):
-						applicable = False
 						
 					if qty == 0:
 						bom_qty = bom_details['qty']
@@ -1432,9 +1443,10 @@ class ch_work_order_details(osv.osv):
 							wgt = bom_details['nonferous_weight']
 							
 							
-					if flag_select_all == True:
+					if flag_select_all_val == True:
 						applicable = True
 					else:
+						flag_select_all_val = False
 						applicable = False
 						
 						
@@ -1497,9 +1509,10 @@ class ch_work_order_details(osv.osv):
 					else:
 						moc_id = False
 						
-					if flag_select_all == True:
+					if flag_select_all_val == True:
 						applicable = True
 					else:
+						flag_select_all_val = False
 						applicable = False
 						
 					machine_shop_vals.append({
@@ -1554,9 +1567,10 @@ class ch_work_order_details(osv.osv):
 					else:
 						moc_id = False
 						
-					if flag_select_all == True:
+					if flag_select_all_val == True:
 						applicable = True
 					else:
+						flag_select_all_val = False
 						applicable = False
 						
 					bot_vals.append({
@@ -2269,9 +2283,10 @@ class ch_work_order_details(osv.osv):
 								_('Kindly Configure Position No. in MS Items for respective Pump Bom and proceed further !!'))
 								
 							
-							if flag_select_all == True:
+							if flag_select_all_val == True:
 								applicable = True
 							else:
+								flag_select_all_val = False
 								applicable = False
 							
 							
@@ -2454,9 +2469,10 @@ class ch_work_order_details(osv.osv):
 							bot_rec = bot_obj.browse(cr, uid, vertical_bot_details['bot_id'])
 							
 							
-							if flag_select_all == True:
+							if flag_select_all_val == True:
 								applicable = True
 							else:
+								flag_select_all_val = False
 								applicable = False
 							
 							bot_vals.append({
@@ -2481,7 +2497,7 @@ class ch_work_order_details(osv.osv):
 				header_qty = 1
 			else:
 				header_qty = qty
-			return {'value': {'qty':header_qty,'line_ids': bom_vals,'line_ids_a':machine_shop_vals,'line_ids_b':bot_vals,'line_ids_c':consu_vals}}
+			return {'value': {'qty':header_qty,'flag_select_all':flag_select_all_val,'line_ids': bom_vals,'line_ids_a':machine_shop_vals,'line_ids_b':bot_vals,'line_ids_c':consu_vals}}
 		else:
 			return True
 	

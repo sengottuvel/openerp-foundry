@@ -298,6 +298,36 @@
 		
 	<!-- Tree View End -->
 	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_ms_unsch_list" model="ir.ui.view">
+			<field name="name">MS Unschedule List Tree</field>
+			<field name="model">kg.machineshop</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="MS Unschedule List Tree" create="false">					
+					<field name="name" invisible="1"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_category" invisible="1"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id" invisible="1"/>
+					<field name="pattern_name" invisible="1"/>
+					<field name="item_code" />
+					<field name="item_name"/>
+					<field name="moc_id"/>
+					<field name="location" invisible="1"/>
+					<field name="ms_sch_qty" string="Un schedule Qty" sum="Total Schedule Qty"/>
+					<field name="oth_spec"/>
+					<field name="ms_state" invisible="1"/>
+					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
 	<!-- Search View Start -->
 
 		<record id="t_search_v_ms_sch_list" model="ir.ui.view">
@@ -384,7 +414,7 @@
 		 <record model="ir.actions.act_window.view" id="tma_ms_unsch_list_tree_view">
             <field name="sequence" eval="1"/>
             <field name="view_mode">tree</field>
-            <field name="view_id" ref="t_tree_v_ms_sch_list"/>
+            <field name="view_id" ref="t_tree_v_ms_unsch_list"/>
             <field name="act_window_id" ref="tma_ms_unsch_list"/>
         </record>
         <record model="ir.actions.act_window.view" id="tma_ms_unsch_list_form_view">
@@ -600,6 +630,7 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="inspection" readonly="1"/>
 							<field name="cc_date" readonly="1"/>
+							<field name="part_cc_date"/>
 							<field name="rm_date" readonly="1"/>							
 							<field name="ms_material_date"/>
 							<field name="in_house_date" />
@@ -684,6 +715,7 @@
 					<field name="delivery_date"/>
 					<field name="order_value"/>
 					<field name="cc_date"/>
+					<field name="part_cc_date"/>
 					<field name="location"/>
 					<field name="schedule_id"/>
 					<field name="order_category"/>
@@ -909,7 +941,7 @@
 		<menuitem action="kg_stock_inward.tma_ms_stock_details" id="tam_ms_stock_list" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="kg_qc_verification.tma_ms_qc_verification" id="tam_ms_qc_verif" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="tma_ms_unsch_list" id="tam_ms_unsch_list" parent="tpm_ms_process" sequence="3" />
-		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="3" />
+		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="4" />
 		
 		
