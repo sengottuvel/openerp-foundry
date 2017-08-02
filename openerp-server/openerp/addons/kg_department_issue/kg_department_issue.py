@@ -665,7 +665,6 @@ class kg_department_issue(osv.osv):
 									cr.execute(sql)
 									if remain_qty < 0:
 										break
-					print"pending_depindent_qtypending_depindent_qty",pending_depindent_qty
 					
 					if issue_record.issue_type == 'service':
 						serviceind_line_obj = self.pool.get('kg.service.indent.line')   
