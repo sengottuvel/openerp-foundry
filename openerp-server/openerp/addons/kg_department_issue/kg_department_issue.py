@@ -576,7 +576,7 @@ class kg_department_issue(osv.osv):
 				'product_qty': line_ids.issue_qty,
 				'po_to_stock_qty':line_ids.issue_qty,
 				'stock_uom':line_ids.product_id.uom_id.id,
-				'product_uom': line_ids.uom_po_id.id,
+				'product_uom': line_ids.product_id.uom_po_id.id,
 				#~ 'location_id': main_location,
 				#~ 'location_dest_id': dep_stock_location,
 				'location_id': line_ids.location_id.id,
