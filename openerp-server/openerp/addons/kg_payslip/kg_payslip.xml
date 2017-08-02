@@ -300,7 +300,7 @@
 					  <filter icon="terp-document-new" string="AC ACK Pending" name="approved" domain="[('state','=','approved')]"/>
 				 </filter>
 				<filter string="Employees" icon="terp-personal" name="employee_id" context="{'group_by':'employee_id'}" position="before">
-					<filter string="Month" icon="terp-personal" name="date_from" context="{'group_by':'date_from'}"/>					
+					<filter string="Month" icon="terp-personal" name="month" context="{'group_by':'month'}"/>					
 				</filter>
 			</field>
 		</record>
