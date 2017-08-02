@@ -925,21 +925,22 @@ class kg_payslip(osv.osv):
 								print "+++++++++++++++++++++++++++++++++++++",basic_amt
 								print "+++++++++++++++++++++++++++++++++++++",fda_amt
 							tot_mon_amt = (basic_amt + fda_amt + vda_amt)/calulation_days
-							if (absent+leave_days) <= 1.5:
-								self.pool.get('hr.payslip.line').create(cr,uid,
-									{
-										'name':'Attendance Bonus',
-										'code':'ATTB',
-										'category_id':8,
-										'quantity':1,
-										'amount':(tot_mon_amt * emp_categ_rec.no_of_days_wage),
-										'salary_rule_id':1,
-										'employee_id':emp_id,
-										'contract_id':con_ids[0],
-										'slip_id':slip_rec.id,
-									},context = None)
-							else:
-								pass
+							if worked_days > 0.00:
+								if (absent+leave_days) <= 1.5:
+									self.pool.get('hr.payslip.line').create(cr,uid,
+										{
+											'name':'Attendance Bonus',
+											'code':'ATTB',
+											'category_id':8,
+											'quantity':1,
+											'amount':(tot_mon_amt * emp_categ_rec.no_of_days_wage),
+											'salary_rule_id':1,
+											'employee_id':emp_id,
+											'contract_id':con_ids[0],
+											'slip_id':slip_rec.id,
+										},context = None)
+								else:
+									pass
 								
 					if salary_days >= calulation_days:
 						emp_categ_ids = self.pool.get('kg.employee.category').search(cr,uid,[('id','=',con_ids_1.emp_categ_id.id),('state','=','approved')])
@@ -1032,18 +1033,20 @@ class kg_payslip(osv.osv):
 				serc_coff_allow_othr	= self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','COFFEE ALL')])
 				if serc_coff_allow:
 					serc_coff_rec = self.pool.get('hr.payslip.line').browse(cr,uid,serc_coff_allow[0])
-					self.pool.get('hr.payslip.line').write(cr,uid,serc_coff_rec.id,
-											{
-												
-												'amount':coffe_allow,
-											})
+					if worked_days > 0.00:
+						self.pool.get('hr.payslip.line').write(cr,uid,serc_coff_rec.id,
+												{
+													
+													'amount':coffe_allow,
+												})
 				elif serc_coff_allow_othr:
 					serc_coff_rec_othr = self.pool.get('ch.other.salary.comp').browse(cr,uid,serc_coff_allow_othr[0])
-					self.pool.get('ch.other.salary.comp').write(cr,uid,serc_coff_rec_othr.id,
-											{
-												
-												'amount':coffe_allow,
-											})
+					if worked_days > 0.00:
+						self.pool.get('ch.other.salary.comp').write(cr,uid,serc_coff_rec_othr.id,
+												{
+													
+													'amount':coffe_allow,
+												})
 				
 				#### Creation of Coffee Allowance per month for the employee ####
 				
