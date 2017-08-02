@@ -318,7 +318,7 @@
 			<field name="res_model">kg.department.issue</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="domain">[('state','!=','approve'),(('location_id','=',76))]</field>
+			<field name="domain">[(('location_id','=',76))]</field>
 			<field name="context">{'search_default_issue_type':1,'default_location_id':76 }</field>
 			<field name="search_view_id" ref="t_search_v_department_issue"/>
 		</record>
@@ -348,7 +348,7 @@
 			<field name="res_model">kg.department.issue</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="domain">[('state','!=','approve'),(('location_id','=',75))]</field>
+			<field name="domain">[(('location_id','=',75))]</field>
 			<field name="context">{'search_default_issue_type':1,'default_location_id':75 }</field>
 			<field name="search_view_id" ref="t_search_v_department_issue"/>
 		</record>
@@ -378,7 +378,7 @@
 			<field name="res_model">kg.department.issue</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="domain">[('state','!=','approve'),(('location_id','=',14))]</field>
+			<field name="domain">[(('location_id','=',14))]</field>
 			<field name="context">{'search_default_issue_type':1,'default_location_id':14 }</field>
 			<field name="search_view_id" ref="t_search_v_department_issue"/>
 		</record>
