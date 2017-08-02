@@ -1327,11 +1327,11 @@ class ch_work_order_details(osv.osv):
 			#~ context.update({
 				#~ 'order_no': 'test',
 			#~ })
-			
-		if context['order_category'] == 'pump':
-			context['flag_select_all'] = True
-		if context['order_category'] == 'spare':
-			context['flag_select_all'] = False
+		if len(context)>5:
+			if context['order_category'] == 'pump':
+				context['flag_select_all'] = True
+			if context['order_category'] == 'spare':
+				context['flag_select_all'] = False
 		return context
 		
 	def onchange_delivery_date(self, cr, uid, ids, delivery_date):
