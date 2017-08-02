@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="offer_copy_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.100000000000008"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1132"/>
+	<property name="ireport.y" value="1123"/>
 	<subDataset name="dataset2">
 		<parameter name="enq_line_id" class="java.lang.Integer"/>
 		<queryString>
@@ -800,7 +800,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 	<group name="Pump_Detail" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{enq_line_id}]]></groupExpression>
 		<groupHeader>
-			<band height="711">
+			<band height="703">
 				<textField>
 					<reportElement x="0" y="0" width="97" height="14"/>
 					<box topPadding="0" leftPadding="1">
@@ -1386,7 +1386,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA["BKW Liq"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="679" width="277" height="20" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="679" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[$F{setting_height} > 0]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="0" leftPadding="1">
@@ -1600,7 +1600,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA[$F{bkw_liq}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="277" y="679" width="278" height="20" isRemoveLineWhenBlank="true">
+					<reportElement x="277" y="679" width="278" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[$F{setting_height} > 0]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="0" leftPadding="2">
@@ -2273,7 +2273,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA[$F{best_efficiency}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="277" y="699" width="278" height="12" isRemoveLineWhenBlank="true">
+					<reportElement x="277" y="691" width="278" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{sump_depth}.equals(null ))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2284,7 +2284,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA[$F{sump_depth}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="699" width="277" height="12" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="691" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{sump_depth}.equals(null ))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="1">
@@ -2294,6 +2294,34 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					</box>
 					<textElement/>
 					<textFieldExpression><![CDATA["Sump Depth"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="655" width="277" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[$F{npsh_r_m} > 0]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="0" leftPadding="1">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA["NPSH R - M"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="583" width="277" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{motor_make}.equals(null ))]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="0" leftPadding="1">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Motor Make"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -2306,7 +2334,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<reportElement x="0" y="120" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{bearing_make}.equals(null ))]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="0">
+					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2320,7 +2348,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<reportElement x="0" y="108" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[$F{gd_sq_value} > 0]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="0">
+					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2334,7 +2362,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<reportElement x="0" y="181" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[$F{sealing_water_capacity} > 0]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="0">
+					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2348,7 +2376,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<reportElement x="0" y="144" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[$F{bearing_qty_nde} > 0]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="0">
+					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2362,7 +2390,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<reportElement x="0" y="156" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{lubrication_type} == ' ')]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="0">
+					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2376,7 +2404,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<reportElement x="0" y="132" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{bearing_number_nde}.equals(null ))]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="0">
+					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2390,7 +2418,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<reportElement x="0" y="241" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{primemover_categ} == ' ')]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="0">
+					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2495,7 +2523,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<reportElement x="0" y="169" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[$F{sealing_water_pressure} > 0]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="0">
+					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2522,7 +2550,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<reportElement x="0" y="84" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[$F{specific_speed} > 0]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="0">
+					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2536,7 +2564,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<reportElement x="0" y="96" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[$F{suction_specific_speed} > 0]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="0">
+					<box topPadding="0" leftPadding="1">
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2695,20 +2723,6 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA["Maximum Allowable Soild Size - MM"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="-128" width="277" height="12" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{motor_make}.equals(null ))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="0" leftPadding="1">
-						<leftPen lineWidth="0.5"/>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement>
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA["Motor Make"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
 					<reportElement x="277" y="48" width="278" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{shaft_sealing} == ' ')]]></printWhenExpression>
 					</reportElement>
@@ -2720,20 +2734,6 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{shaft_sealing}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="-56" width="277" height="12" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[$F{npsh_r_m} > 0]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="0" leftPadding="1">
-						<leftPen lineWidth="0.5"/>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement>
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA["NPSH R - M"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement x="0" y="48" width="277" height="12" isRemoveLineWhenBlank="true">
@@ -3008,7 +3008,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA["Material of construction:"]]></textFieldExpression>
 				</textField>
 				<line>
-					<reportElement x="-1" y="14" width="1" height="12"/>
+					<reportElement x="0" y="14" width="1" height="12"/>
 					<graphicElement>
 						<pen lineWidth="0.5"/>
 					</graphicElement>
@@ -3442,7 +3442,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
 				<line>
-					<reportElement x="-1" y="14" width="1" height="12"/>
+					<reportElement x="0" y="14" width="1" height="12"/>
 					<graphicElement>
 						<pen lineWidth="0.5"/>
 					</graphicElement>
@@ -3527,7 +3527,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
 				<line>
-					<reportElement x="-1" y="14" width="1" height="12"/>
+					<reportElement x="0" y="14" width="1" height="12"/>
 					<graphicElement>
 						<pen lineWidth="0.5"/>
 					</graphicElement>
