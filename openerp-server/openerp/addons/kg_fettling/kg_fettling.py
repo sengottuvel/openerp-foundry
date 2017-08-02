@@ -15,7 +15,7 @@ today = datetime.strptime(today, '%Y-%m-%d')
 
 ORDER_PRIORITY = [
    ('1','MS NC'),
-   ('2','NC'),
+   ('2','FDY-NC'),
    ('3','Service'),
    ('4','Emergency'),
    ('5','Spare'),

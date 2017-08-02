@@ -10,7 +10,7 @@ dt_time = lambda * a: time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
    ('1','MS NC'),
-   ('2','NC'),
+   ('2','FDY-NC'),
    ('3','Service'),
    ('4','Emergency'),
    ('5','Spare'),
@@ -32,7 +32,7 @@ class kg_production(osv.osv):
 
 	_name = "kg.production"
 	_description = "Production Updation"
-	_order = "order_priority,order_no asc"
+	_order = "schedule_date,order_priority,order_no asc"
 	_rec_name = "pattern_code"
 	
 	def _get_default_division(self, cr, uid, context=None):

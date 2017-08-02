@@ -12,7 +12,7 @@ dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
    ('1','MS NC'),
-   ('2','NC'),
+   ('2','FDY-NC'),
    ('3','Service'),
    ('4','Emergency'),
    ('5','Spare'),
