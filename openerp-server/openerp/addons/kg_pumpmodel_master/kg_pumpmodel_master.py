@@ -63,6 +63,7 @@ class kg_pumpmodel_master(osv.osv):
 		'line_ids_b':fields.one2many('ch.delivery.pipe', 'header_id', "Delivery Pipe"),
 		'line_ids_c':fields.one2many('ch.coupling.config', 'header_id', "Coupling Configuration"),
 		'line_ids_d':fields.one2many('ch.accessories.config', 'header_id', "Accessories Configuration"),
+		'line_ids_e':fields.one2many('ch.csd.drawing', 'header_id', "CSD Drawing Attachment"),
 		
 		'alias_name': fields.char('Alias Name', size=128),
 		'bom': fields.char('BOM', size=128),
@@ -119,7 +120,10 @@ class kg_pumpmodel_master(osv.osv):
 		'sealing_water_capacity': fields.float('Sealing Water Capacity - m3/hr'),
 		'gd_sq_value': fields.float('GD SQ value'),
 		'pump_shaft_dia_at': fields.float('Pump Shaft Dia at Coupling End'),
-		'hsn_no': fields.many2many('kg.hsn.master', 'hsn_no_product', 'pump_id', 'hsn_id', 'HSN No.', domain="[('state','=','approved')]"),
+		'hsn_no': fields.many2many('kg.hsn.master', 'hsn_no_product', 'pump_id', 'hsn_id', 'HSN No.', domain="[('state','=','approved')]", required=True),
+		
+		'attach_oad': fields.binary('OAD Drawing'),
+		
 		
 	}
 	

@@ -290,19 +290,43 @@
 						</field>	
 					</page>	
 					<page string="Coupling Configuration">	
-							<field name="line_ids_c" nolabel="1" >
-								<tree string="Coupling Configuration Tree" editable="top" >									
-									<field name="primemover_id" on_change="onchange_primee(primemover_id)" />										
-									<field name="power_kw" />
-									<field name="speed" />										
-									<field name="brand_id" />										
-									<field name="coupling_type_id" />										
-									<field name="coupling_ser_factor" />										
-									<field name="coupling_access_id" />										
-									<field name="remarks" widget="char"/>														
-								</tree>
-							</field>																								
-						</page>	
+							<field name="line_ids_c" nolabel="1" >								
+							<tree string="Coupling Configuration Tree" >
+								<field name="primemover_id" on_change="onchange_primee(primemover_id)" />										
+								<field name="power_kw" />
+								<field name="speed" />										
+								<field name="brand_id" />										
+								<field name="coupling_type_id" />										
+								<field name="coupling_ser_factor" />										
+								<field name="coupling_access_id" />										
+								<field name="baseplate_id" />										
+								<field name="foundation_bolt_id" />										
+								<field name="coupling_guard_id" />																		
+								<field name="remarks" widget="char"/>
+							</tree>
+							<form string="Coupling Configuration" >
+								<group>
+								<group>
+									<field name="primemover_id" on_change="onchange_primee(primemover_id)" />
+									<field name="power_kw" />	
+									<field name="coupling_type_id" />	
+									<field name="coupling_ser_factor" />	
+									<field name="coupling_access_id" />	
+									<field name="coupling_guard_id" />	
+								</group>
+								<group>
+									<field name="speed"/>
+									<field name="brand_id"/>
+									<field name="baseplate_id"/>
+									<field name="foundation_bolt_id"/>
+									<field name="flag_attach_gad"/>
+									<field name="remarks"/>
+								</group>
+								</group>
+							</form>							
+								
+						</field>																								
+					</page>	
 						
 					<page string="Accessories Configuration">	
 							<field name="line_ids_d" nolabel="1" >
@@ -321,6 +345,27 @@
 								</tree>
 							</field>																								
 						</page>	
+						
+						
+					<page string="CSD Drawing Attachments">	
+						<field name="line_ids_e" nolabel="1" >
+							<tree string="CSD Drawing Attachments" >
+								<field name="moc_const_id"/>									
+								<field name="remarks"/>
+							</tree>
+							<form string="Attachments" >
+								<group>
+									<group>
+										<field name="moc_const_id"/>
+										<field name="remarks" />
+									</group>
+									<group>
+										<field name="flag_attach_gad"/>
+									</group>
+								</group>
+							</form>
+						</field>																								
+					</page>	
 				</xpath>
 			</field>
 		</record>

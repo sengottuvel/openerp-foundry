@@ -64,6 +64,7 @@
 							<field name="pump_shaft_dia_at" />		
 							<field name="painting_cost" />		
 							<field name="bom" readonly="1" />		
+							<field name="attach_oad" />		
 							<field name="companion_flange" invisible="1"/>		
 							<field name="max_solid_size" invisible="1"/>									
 							<field name="state" style="width: 30%%" class="att_state_change"/>									

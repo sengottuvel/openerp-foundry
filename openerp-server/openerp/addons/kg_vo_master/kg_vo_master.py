@@ -368,11 +368,15 @@ class ch_coupling_config(osv.osv):
 		'primemover_id': fields.many2one('kg.primemover.master','Prime Mover',required=True),
 		'power_kw': fields.float('Motor Power',readonly=True),
 		'speed': fields.integer('Motor Speed',readonly=True),
-		'brand_id': fields.many2one('kg.brand.master','Coupling Brand',required=True),
+		'brand_id': fields.many2one('kg.brand.master','Coupling Brand',required=True,domain="[('state','=','approved')]"),
 		'coupling_type_id': fields.many2one('kg.coupling.type','Coupling type ',required=True),
 		'coupling_ser_factor': fields.selection([('1_0','1.0'),('1_2','1.2'),('1_5','1.5'),('2_0','2.0')],'Coupling service factor',required=True),			
 		'coupling_access_id': fields.many2one('kg.accessories.master','Coupling',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','coupling')]"),
+		'baseplate_id': fields.many2one('kg.accessories.master','Baseplate',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','base_plate')]"),
+		'foundation_bolt_id': fields.many2one('kg.accessories.master','Foundation Bolt',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','foundation_bolt')]"),
+		'coupling_guard_id': fields.many2one('kg.accessories.master','Coupling guard',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','coupling_guard')]"),
 		
+		'flag_attach_gad': fields.binary('GAD Drawing'),
 		'remarks':fields.text('Remarks'),	
 		
 	}
@@ -446,6 +450,37 @@ class ch_accessories_config(osv.osv):
 ch_accessories_config()
 
 
+class ch_csd_drawing(osv.osv):
+	
+	_name = "ch.csd.drawing"
+	_description = "CSD Drawing Attachment"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.pumpmodel.master', 'CSD Drawing Attachment', required=True, ondelete='cascade'),	
+		'moc_const_id': fields.many2one('kg.moc.construction','MOC Construction'),
+		'flag_attach_gad': fields.binary('CSD Drawing'),
+		'remarks':fields.text('Remarks'),	
+		
+	}	
+	
+	
+	def _check_attach_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+			
+				
+		if entry.moc_const_id:			
+			if entry.flag_attach_gad is False:
+				return False			
+		return True	
+		
+	_constraints = [		
+			  
+		(_check_attach_values, 'Check the CSD Drawing Empty values not allowed..!!',['CSD Drawing']),	
+		
+	   ]
+	
+ch_csd_drawing()
 
 class kg_pumpmodel_master_inherit(osv.osv):
 	
@@ -457,7 +492,7 @@ class kg_pumpmodel_master_inherit(osv.osv):
 		'line_ids':fields.one2many('ch.vo.mapping', 'header_id', "VO Mapping"),
 		'line_ids_c':fields.one2many('ch.coupling.config', 'header_id', "Coupling Configuration"),		
 		'line_ids_d':fields.one2many('ch.accessories.config', 'header_id', "Accessories Configuration"),		
-		
+		'line_ids_e':fields.one2many('ch.csd.drawing', 'header_id', "CSD Drawing Attachment"),
 		
 	}
 	
