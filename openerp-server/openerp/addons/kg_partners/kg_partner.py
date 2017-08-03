@@ -459,7 +459,7 @@ class kg_partner(osv.osv):
 	_constraints = [
 	
 		(_check_zip,'ZIP should contain 6-8 digit numerics. Else system not allow to save.',['ZIP']),
-		(_check_tin,'TIN No. should contain 11 digit numerics. Else system not allow to save.',['TIN']),
+		#~ (_check_tin,'TIN No. should contain 11 digit numerics. Else system not allow to save.',['TIN']),
 		(_check_cst,'CST No. should contain 11 digit numerics. Else system not allow to save.',['CST']),
 		(_check_vat,'VAT No. should contain 15 letters. Else system not allow to save.',['VAT']),
 		(_validate_email,'Check Email !',['']),
@@ -469,7 +469,7 @@ class kg_partner(osv.osv):
 		(_check_acc_no,'A/C No. should contain 6-18 digit numerics. Else system not allow to save.',['A/C No.']),
 		(_check_mobile_no,'Mobile No. should contain 10-12 digit numerics. Else system not allow to save.',['Mobile']),
 		(_name_validate, 'Name must be unique !!', ['Name']),		
-		(_unique_tin, 'TIN must be unique !!', ['TIN']),
+		#~ (_unique_tin, 'TIN must be unique !!', ['TIN']),
 		(_spl_name, 'Special Character Not Allowed!', ['']),
 		]
 	
