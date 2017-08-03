@@ -39,16 +39,17 @@
 							<field name="hsn_no"/>							
 							<field name="is_coupling_flag" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>										
 							<field name="accessories_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
-							<field name="primemover_id" on_change="onchange_framesize(primemover_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required': [('accessories_type','in',['base_plate','coupling_guard'])]}"/>				
-							<field name="pump_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required': [('accessories_type','in',['base_plate','coupling_guard'])]}"/>				
+							<field name="primemover_id" invisible="1"/>				
+							<field name="pump_id" invisible="1"/>				
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 						</group>
 						<group>
 							<field name="code" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 							<field name="is_pump_acc_flag" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
+							<field name="flag_fabrication" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
 							<field name="access_cate_id" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>						
-							<field name="framesize" readonly = "1"/>							
-							<field name="coupling_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required': [('accessories_type','in',['base_plate','coupling_guard'])]}"/>							
+							<field name="framesize" invisible="1"/>							
+							<field name="coupling_id" invisible="1"/>							
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="copy_flag" invisible="1"/>
 							<field name="modify" invisible="1"/>
@@ -103,7 +104,7 @@
 							</tree>
 							</field>
 						</page>
-						<page string="Foundation Bolt Configuration" attrs="{'invisible':[('accessories_type','in',['foundation_bolt','coupling_guard','others','pump_pulley','motor_pulley','slide_rail','belt','belt_guard','coupling'])]}">
+						<page string="Foundation Bolt Configuration" invisible="1">
 							<field colspan="4" mode="tree" name="line_ids_c" nolabel="1" widget="one2many_list">
 							<tree string="Foundation Bolt Configuration" editable="top"> 								
 								<field name="access_id"/>

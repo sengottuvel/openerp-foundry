@@ -91,13 +91,17 @@ class kg_accessories_master(osv.osv):
 		('foundation_bolt','Foundation Bolt'),
 		('pump_pulley','Pump Pulley'),('motor_pulley','Motor Pulley'),('slide_rail','Slide Rail'),('belt','Belt'),('belt_guard','Belt Guard'),('others','Others')],'Accessories type',required=True),				
 		
+		##Invisible fields ticket no:4947 start
 		'primemover_id': fields.many2one('kg.primemover.master','Prime Mover'),
-		'framesize': fields.char('Framesize'),
-		
+		'framesize': fields.char('Framesize'),		
 		'pump_id':fields.many2one('kg.pumpmodel.master','Pumpmodel'),
-		'coupling_id': fields.many2one('kg.accessories.master','Coupling', required=True, domain="[('accessories_type','in',['coupling'])]"),			
-		'hsn_no': fields.many2one('kg.hsn.master', 'HSN No.', domain="[('state','=','approved')]"),		
+		'coupling_id': fields.many2one('kg.accessories.master','Coupling',  domain="[('accessories_type','in',['coupling'])]"),	
+		##Invisible fields ticket no:4947 End
 		
+				
+		'hsn_no': fields.many2one('kg.hsn.master', 'HSN No.', domain="[('state','=','approved')]", required=True),		
+		
+		'flag_fabrication': fields.boolean('Is Fabrication'),
 		## Child Tables Declaration	 
 		
 		'line_ids': fields.one2many('ch.kg.accessories.master','header_id','BOT Line Details',readonly=False,states={'approved':[('readonly',True)]}),
@@ -151,12 +155,7 @@ class kg_accessories_master(osv.osv):
 	
 	## Basic Needs
 	
-	def onchange_framesize(self, cr, uid, ids, primemover_id, context=None):
-		value = {'framesize': ''}
-		if primemover_id:
-			primemover_rec = self.pool.get('kg.primemover.master').browse(cr, uid, primemover_id, context=context)
-			value = {'framesize': primemover_rec.framesize}
-		return {'value': value}	
+	
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -619,7 +618,7 @@ class ch_foundation_bolt(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.accessories.master', 'Foundation Bolt Configuration', ondelete='cascade',required=True),
-		'access_id': fields.many2one('kg.accessories.master','Foundation Bolt',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','foundation_bolt')]"),
+		'access_id': fields.many2one('kg.accessories.master','Foundation Bolt',domain="[('state','not in',('reject','cancel')),('accessories_type','=','foundation_bolt')]"),
 		'remarks':fields.text('Remarks'),   
 	
 	}
