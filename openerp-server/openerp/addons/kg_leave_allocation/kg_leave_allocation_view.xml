@@ -21,7 +21,7 @@
 								<field name="employee_id"  attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>																
 								<field name="emp_categ_id"  attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>																
 								<field name="modify" invisible = "1"/>
-								<field name="valid_from" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>
+								<field name="valid_from" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
