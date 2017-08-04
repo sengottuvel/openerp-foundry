@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-
-<!-- Product Master form view -->
+	
+	<!-- Product Master form view -->
 
 	<record model="ir.ui.view" id="kg_product_form_inherit">
         <field name="name">kg.product.form.inherit</field>
@@ -47,7 +47,11 @@
 		<field name="product_type"/>
 		<field name="uom_conversation_factor"/>
 		</field>
-
+		
+		<field name="uom_conversation_factor" position="after">
+		<field name="primemover_id" attrs="{'invisible':[('product_type','not in',['primemover'])]}"/>
+		</field>
+		
 		<field name="stock_in_hand" position="after">
 		<field name="length" invisible="1"/>
 		<field name="breadth" invisible="1"/>
@@ -60,7 +64,7 @@
 		<field name="po_uom_coeff" placeholder="UOM * PO Coeff = 1 POM" attrs="{'readonly':[('state','=','approved')]}"/>
 		<field name="po_uom_in_kgs"/>
 		</field>
-			
+		
 		<field name="list_price" position="replace">
 		</field>
 		
@@ -80,7 +84,7 @@
 			<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirm','reject','approved'])]}"/>
 			<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>				
 		</field>
-						
+		
         <field name="is_accessories" invisible="1" position="after">
 			<field name="remark" attrs="{'invisible':[('state','not in',('confirm','reject'))], 'readonly': [('state','in',['approved','reject'])]}"/>
 			<field name="cancel_remark" invisible="1"/>
@@ -150,7 +154,7 @@
 		<field name="price_margin" invisible="1"/>
 		</field>
 		</group>
-
+		
 		</field>
 	</record>
 	
@@ -166,7 +170,7 @@
 			
 		</field>
 	</record>
-			
+	
 	<!-- Product Master Template form view  
 	
 	<record model="ir.ui.view" id="kg_product_template_form_inherit">
@@ -174,7 +178,7 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
-			
+		
 		</field>
 	</record>
 -->
@@ -230,6 +234,6 @@
 	
 	<!-- Units of Measure Master  -->
 	<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="kg_menus.ppm_master_menu" sequence="5"/>
-				
+	
 	</data>
 </openerp>

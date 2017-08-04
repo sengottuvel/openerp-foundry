@@ -37,7 +37,7 @@ class kg_product(osv.osv):
 		'po_uom_coeff': fields.float('PO Coeff', digits=(16,10), required=True, help="One Purchase Unit of Measure = Value of(PO Coeff)UOM"),
 		'product_type': fields.selection([('raw','Foundry Raw Materials'),('ms','MS Item'),('bot','BOT'),('consu', 'Consumables'),
 											('capital','Capitals and Asset'),('service','Service Items'),('coupling','Coupling'),
-											('mechanical_seal','Mechanical Seal')], 'Product Type',required=True),
+											('mechanical_seal','Mechanical Seal'),('primemover','Prime mover')], 'Product Type',required=True),
 		'remark': fields.text('Approve/Reject Remarks',readonly=False,states={'approved':[('readonly',True)]}),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		#'moc_id': fields.many2one('kg.moc.master','MOC'),
@@ -67,6 +67,7 @@ class kg_product(osv.osv):
 		'coupling_make': fields.many2one('kg.brand.master','Coupling Make'),
 		'is_depreciation': fields.boolean('Is Depreciation'),
 		'hsn_no': fields.many2one('kg.hsn.master','HSN No.',domain="[('state','=','approved')]",readonly=False,states={'approved':[('readonly',True)]}),
+		'primemover_id': fields.many2one('kg.primemover.master','Prime mover',readonly=False,states={'approved':[('readonly',True)]}),
 		
 		## Child 
 		
