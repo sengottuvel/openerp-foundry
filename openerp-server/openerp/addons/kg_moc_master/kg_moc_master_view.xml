@@ -80,8 +80,9 @@
 						<page string="Fettling Process Cycle">	
 							<field name="line_ids_c" nolabel="1" >
 								<tree string="Fettling Process Cycle Tree" editable="top" >									
-									<field name="stage_id"/>								
+									<field name="stage_id" on_change="onchange_stage_name(stage_id)"/>								
 									<field name="seq_no"/>
+									<field name="name" invisible="1"/>
 									<field name="flag_ms"/>
 									<field name="remarks" widget="char"/>																																								
 								</tree>

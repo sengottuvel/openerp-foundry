@@ -404,7 +404,8 @@ class ch_fettling_process(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.moc.master', 'Fettling Entry', required=True, ondelete='cascade'),							
-		'stage_id': fields.many2one('kg.stage.master','Name', required=True,domain="[('active','=','t')]"),	
+		'stage_id': fields.many2one('kg.stage.master','Name', required=True,domain="[('active','=','t')]"),			
+		'name':fields.char('Stage Name'),
 		'seq_no':fields.integer('Sequence',required=True),
 		'remarks':fields.text('Remarks'),
 		'flag_ms':fields.boolean('Simultaneously create MS'),
@@ -412,6 +413,11 @@ class ch_fettling_process(osv.osv):
 	}
 	
 	
+	def onchange_stage_name(self, cr, uid, ids, stage_id, context=None):		
+		if stage_id:			
+			stage_rec = self.pool.get('kg.stage.master').browse(cr,uid,stage_id)			
+			name = stage_rec.name		
+		return {'value': {'name': name}}
 	
 	def _seq_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
