@@ -449,6 +449,9 @@ class kg_purchase_order(osv.osv):
 			raise osv.except_osv(_('Warning'),_('Approve cannot be done by Verified user'))
 		else:
 			pass
+		user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
+		if user_obj:
+			user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
 		for item in obj.order_line:
 			price_sql = """ 
 						select line.price_unit
