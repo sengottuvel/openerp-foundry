@@ -1,0 +1,23 @@
+-
+  I check that Initially customer invoice state is "Draft"
+-
+  !assert {model: kg.ms.stores, id: kg_dep_issue_wiz}:
+    - accept_state == 'waiting'
+-
+  I called the "Confirm Draft Invoices" wizard
+-
+  !record {model: kg.ms.partlist.wiz, id: kg_ms_partlist_wiz_0}:
+    {}
+-
+  I clicked on Confirm Invoices Button
+-
+  !python {model: kg.dep.issue.wiz}: |
+    self.ms_received_confirm(cr, uid, [ref("kg_ms_partlist_wiz_0")], {"lang": 'en_US',
+      "tz": False, "active_model": "kg.ms.stores", "active_ids": [ref("kg_ms_partlist_wiz")],
+      "type": "out_invoice", "active_id": ref("kg_ms_partlist_wiz"), })
+-
+  I check that customer invoice state is "Open"
+-
+  !assert {model: kg.ms.stores, id: kg_ms_partlist_wiz}:
+    - accept_state == 'received'
+

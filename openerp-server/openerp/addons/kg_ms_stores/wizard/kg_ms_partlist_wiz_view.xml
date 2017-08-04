@@ -1,0 +1,33 @@
+<openerp>
+    <data>
+
+        <record id="kg_ms_batch_accept_view" model="ir.ui.view">
+            <field name="name">ms.accept.form</field>
+            <field name="model">kg.ms.partlist.wiz</field>
+            <field name="arch" type="xml">
+                <form string="MS Accept" version="7.0">
+<!--
+					<label for="remark"></label>
+					<field name="remark"/>
+-->
+                    <p>
+                        Once Waiting for Acceptance entries are accepted, you will not be able
+                        to modify them. 
+                    </p>
+                    <footer>
+                        <button string="Accept" name="ms_received_confirm" type="object" default_focus="1" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="action_kg_ms_partlist_wiz"
+            multi="True"
+            key2="client_action_multi" name="Batch Accept"
+            res_model="kg.ms.partlist.wiz" src_model="kg.ms.stores"
+            view_mode="form" target="new" view_type="form" />
+
+    </data>
+</openerp>
