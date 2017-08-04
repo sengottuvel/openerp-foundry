@@ -124,7 +124,7 @@ class kg_po_grn(osv.osv):
 		
 		## Basic Info
 		
-		'name': fields.char('GRN NO',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'name': fields.char('GRN NO',readonly=True),
 		'grn_date':fields.date('Date',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'state': fields.selection([('item_load','Draft'),('draft', 'Draft'), ('confirmed', 'WFA'), ('done', 'Approved'), ('inv', 'Invoiced'), ('cancel', 'Cancelled'),('reject','Rejected')], 'Status',readonly=True),
 		'can_remark':fields.text('Cancel Remarks'),
@@ -616,6 +616,17 @@ class kg_po_grn(osv.osv):
 				#po_obj.write(cr,uid,grn_entry.po_id.id, {'grn_flag': True})
 			#if grn_entry.grn_type == 'from_so':	
 				#so_obj.write(cr,uid,grn_entry.so_id.id, {'grn_flag': True})
+			if not grn_entry.name:
+				if grn_entry.location_dest_id.id == 14:
+					seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn.fou')])
+				elif grn_entry.location_dest_id.id == 75:
+					seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn.ms')])
+				elif grn_entry.location_dest_id.id == 76:
+					seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn.gen')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.creation_date))
+				seq_name = cr.fetchone();
+				self.write(cr,uid,ids[0],{'name':seq_name[0]})
 			exp_grn_qty = 0
 			grn_date = grn_entry.grn_date
 			today_date = today.strftime('%Y-%m-%d')

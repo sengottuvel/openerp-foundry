@@ -199,12 +199,12 @@
 							string="General GRN" toolbar="1" >
 					<field name="name"/>
 					<field name="grn_date"/>
-					 <field name="supplier_id"/>
+					<field name="supplier_id"/>
                     <field name="inward_type"/>
 					<field name="dc_date"/>
 					<field name="dc_no"/>
                     <field name="state"/>
-                </tree> 
+                </tree>
             </field>
         </record>
         
@@ -549,6 +549,49 @@
             <field name="act_window_id" ref="tma_general_grn_qc"/>
         </record>
         
+		<!-- Sequence Number Setting Starts Here -->
+	
+		<record forcecreate="1" id="seq_gen_grn_fou" model="ir.sequence.type">	
+			<field name="name">Gen GRN Fou</field>
+			<field name="code">kg.gen.grn.fou</field>
+		</record>
+
+		<record forcecreate="1" id="gen_grn_fou" model="ir.sequence">
+			<field name="name">Gen GRN Fou</field>
+			<field name="code">kg.gen.grn.fou</field>
+			<field name="padding" eval="4"/>
+			<field name="prefix">GRN/%(year)s/F</field>
+			<field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+		<record forcecreate="1" id="seq_gen_grn_ms" model="ir.sequence.type">	
+			<field name="name">Gen GRN Ms</field>
+			<field name="code">kg.gen.grn.ms</field>
+		</record>
+
+		<record forcecreate="1" id="gen_grn_ms" model="ir.sequence">
+			<field name="name">Gen GRN Ms</field>
+			<field name="code">kg.gen.grn.ms</field>
+			<field name="padding" eval="4"/>
+			<field name="prefix">GRN/%(year)s/M</field>
+			<field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+		<record forcecreate="1" id="seq_gen_grn_gen" model="ir.sequence.type">	
+			<field name="name">Gen GRN Gen</field>
+			<field name="code">kg.gen.grn.gen</field>
+		</record>
+
+		<record forcecreate="1" id="gen_grn_gen" model="ir.sequence">
+			<field name="name">Gen GRN Gen</field>
+			<field name="code">kg.gen.grn.gen</field>
+			<field name="padding" eval="4"/>
+			<field name="prefix">GRN/%(year)s/G</field>
+			<field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+		<!-- Sequence Number Setting Ends Here -->
+		
 		<!-- GRN - General Menu -->
 		<menuitem action="action_kg_general_grn" id="gam_general_grn" name="GRN - General" parent="kg_menus.gpm_grn_issue_menu" sequence="3"/>
 		

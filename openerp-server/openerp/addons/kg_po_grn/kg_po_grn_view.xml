@@ -733,10 +733,8 @@
             <field name="act_window_id" ref="tma_grn_qc"/>
         </record>
         
-        <!--
-        =======================
-        GRN Sequence Generation
-        ======================= -->
+       <!-- Sequence Number Setting Starts Here -->
+       
 		<record forcecreate="1" id="seq_po_grn" model="ir.sequence.type">	
 			<field name="name">PO GRN</field>
 			<field name="code">kg.po.grn</field>
@@ -749,6 +747,47 @@
 			<field name="prefix">POGRN/%(year)s/</field>
 			<field name="reset_sequence">fiscal_reset</field>
 		</record>
+		
+		<record forcecreate="1" id="seq_po_grn_fou" model="ir.sequence.type">	
+			<field name="name">PO GRN Fou</field>
+			<field name="code">kg.po.grn.fou</field>
+		</record>
+
+		<record forcecreate="1" id="po_grn_fou" model="ir.sequence">
+			<field name="name">PO GRN Fou</field>
+			<field name="code">kg.po.grn.fou</field>
+			<field name="padding" eval="4"/>
+			<field name="prefix">PO/SO GRN/%(year)s/F</field>
+			<field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+		<record forcecreate="1" id="seq_po_grn_ms" model="ir.sequence.type">	
+			<field name="name">PO GRN Ms</field>
+			<field name="code">kg.po.grn.ms</field>
+		</record>
+
+		<record forcecreate="1" id="po_grn_ms" model="ir.sequence">
+			<field name="name">PO GRN Ms</field>
+			<field name="code">kg.po.grn.ms</field>
+			<field name="padding" eval="4"/>
+			<field name="prefix">PO/SO GRN/%(year)s/M</field>
+			<field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+		<record forcecreate="1" id="seq_po_grn_gen" model="ir.sequence.type">	
+			<field name="name">PO GRN Gen</field>
+			<field name="code">kg.po.grn.gen</field>
+		</record>
+
+		<record forcecreate="1" id="po_grn_gen" model="ir.sequence">
+			<field name="name">PO GRN Gen</field>
+			<field name="code">kg.po.grn.gen</field>
+			<field name="padding" eval="4"/>
+			<field name="prefix">PO/SO GRN/%(year)s/G</field>
+			<field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+		<!-- Sequence Number Setting Ends Here -->
 		
 		<!-- GRN - General Transaction Menu -->
 		<menuitem action="tma_po_grn" id="gam_po_grn" name="PO/SO GRN - General" parent="kg_menus.gpm_grn_issue_menu" sequence="6"/>
