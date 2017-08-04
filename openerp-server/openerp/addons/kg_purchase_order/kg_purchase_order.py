@@ -313,8 +313,8 @@ class kg_purchase_order(osv.osv):
 	def verify_po(self,cr,uid,ids, context=None):
 		obj = self.browse(cr,uid,ids[0])
 		if obj.state == 'confirmed':
-			if obj.confirmed_by.id == uid:
-				raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
+			#~ if obj.confirmed_by.id == uid:
+				#~ raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
 			back_list = []
 			approval = ''
 			for item in obj.order_line:
@@ -441,6 +441,189 @@ class kg_purchase_order(osv.osv):
 		
 		return True
 	
+	def entry_approve(self, cr, uid, ids, context=None):
+		obj = self.browse(cr, uid, ids[0], context=context)
+		if obj.confirmed_by.id == uid:
+			raise osv.except_osv(_('Warning'),_('Approve cannot be done by Confirmed user'))
+		elif obj.verified_by.id == uid:
+			raise osv.except_osv(_('Warning'),_('Approve cannot be done by Verified user'))
+		else:
+			pass
+		for item in obj.order_line:
+			price_sql = """ 
+						select line.price_unit
+						from purchase_order_line line
+						left join purchase_order po on (po.id = line.order_id)
+						where line.product_id = %s and line.order_id != %s and line.brand_id = %s and line.moc_id = %s
+						and po.state in ('approved')
+						order by po.approved_date desc limit 1"""%(item.product_id.id,obj.id,item.brand_id.id,item.moc_id.id)
+			cr.execute(price_sql)
+			price_data = cr.dictfetchall()
+			if price_data:
+				if price_data[0]['price_unit'] < item.price_unit:
+					if user_rec.special_approval == True:
+						pass
+					else:
+						raise osv.except_osv(_('Warning'),
+							_('%s price is exceeding last purchase price. It should be approved by special approver'%(item.product_id.name)))
+			else:
+				# When raised the first po for the product
+				price_sql = """ 
+						select line.price_unit
+						from purchase_order_line line
+						left join purchase_order po on (po.id=line.order_id)
+						join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
+						join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+						where po.state = 'approved' and rate.state in ('approved')
+						and line.product_id = %s and line.order_id != %s and line.brand_id = %s
+						and line.moc_id = %s
+						order by po.approved_date desc limit 1
+						"""%(item.product_id.id,obj.id,item.brand_id.id,item.moc_id.id)
+				cr.execute(price_sql)		
+				price_data = cr.dictfetchall()
+				if not price_data:
+					if user_rec.special_approval == True:
+						pass
+					else:
+						raise osv.except_osv(_('Warning'),
+							_('%s price is exceeding last purchase price. It should be approved by special approver'%(item.product_id.name)))
+				# Po price exceeds design rate
+				prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id),('state','=','approved')])
+				if prod_obj:
+					prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
+					for ele in prod_rec.line_ids:
+						if item.brand_id.id == ele.brand_id.id and item.moc_id.id == ele.moc_id.id:
+							latest_rate = 0
+							if ele.rate < item.price_unit:
+								if user_rec.special_approval == True:
+									pass
+								else:
+									raise osv.except_osv(_('Warning'),
+										_('%s price is exceeding design price. It should be approved by special approver'%(item.product_id.name)))
+								#~ latest_rate = item.price_unit + ((item.price_unit/100) * 5)
+								#~ self.pool.get('ch.brandmoc.rate.details').write(cr,uid,ele.id,{'rate':latest_rate})
+				else:
+					raise osv.except_osv(_('Warning!'),_('%s Please Check for this item in Brand/Moc/Rate master !'%(item.product_id.name)))	
+			if item.price_type == 'per_kg':
+				if item.product_id.uom_conversation_factor == 'two_dimension':
+					if item.product_id.po_uom_in_kgs > 0:
+						qty = item.product_qty * item.product_id.po_uom_in_kgs * item.length * item.breadth
+				elif item.product_id.uom_conversation_factor == 'one_dimension':
+					if item.product_id.po_uom_in_kgs > 0:
+						qty = item.product_qty * item.product_id.po_uom_in_kgs
+					else:
+						qty = item.product_qty
+				else:
+					qty = item.product_qty
+			else:
+				qty = item.product_qty
+			self.pool.get('purchase.order.line').write(cr,uid,item.id,{'quantity':qty})	
+		
+		#~ if obj.bill_type == 'advance':
+			#~ self.advance_creation(cr,uid,obj)
+		
+		if obj.payment_mode.term_category == 'advance':
+			cr.execute("""select * from kg_supplier_advance where state='confirmed' and po_id = %s"""  %(str(ids[0])))
+			data = cr.dictfetchall()
+			if not data:
+				raise osv.except_osv(_('Warning'),_('Advance is mandate for this PO'))
+			else:
+				pass		
+		text_amount = number_to_text_convert_india.amount_to_text_india(obj.amount_total,"INR:")
+		self.write(cr,uid,ids[0],{'text_amt':text_amount})
+		line_obj = self.pool.get('purchase.order.line')
+		line_rec = line_obj.search(cr, uid, [('order_id','=',obj.id)])
+		for order_line in line_rec:
+			order_line_rec = line_obj.browse(cr, uid, order_line)
+			product_tax_amt = self._amount_line_tax(cr, uid, order_line_rec, context=context)
+			cr.execute("""update purchase_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,order_line_rec.id))
+		#~ for order_line in obj.order_line:
+			#~ product_tax_amt = self._amount_line_stax(cr, uid, order_line, context=context)			
+			#~ cr.execute("""update purchase_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,order_line.id))
+			line_obj.write(cr,uid,order_line,{'cancel_flag':'True','line_flag':'True'})
+		
+		self.write(cr, uid, ids, {
+								  'state': 'approved', 
+								  'date_approve': time.strftime('%Y-%m-%d'),
+								  'order_line.line_state' : 'confirm',
+								  'approved_by': uid,
+								  'approved_date': dt_time})
+		po_id=obj.id
+		po_lines = obj.order_line
+		cr.execute("""select piline_id from kg_poindent_po_line where po_order_id = %s"""  %(str(ids[0])))
+		data = cr.dictfetchall()
+		val = [d['piline_id'] for d in data if 'piline_id' in d] # Get a values form list of dict if the dict have with empty values
+		for i in range(len(po_lines)):
+			po_qty=po_lines[i].product_qty
+			if po_lines[i].line_id:
+				total = sum(wo.qty for wo in po_lines[i].line_id)
+				if total <= po_qty:
+					pass
+				else:
+					raise osv.except_osv(_('Warning!'),_('Please Check WO Qty'))
+				wo_sql = """ select count(wo_id) as wo_tot,wo_id as wo_name from ch_purchase_wo where header_id = %s group by wo_id"""%(po_lines[i].id)
+				cr.execute(wo_sql)		
+				wo_data = cr.dictfetchall()
+				
+				for wo in wo_data:
+					if wo['wo_tot'] > 1:
+						raise osv.except_osv(_('Warning!'),_('%s This WO No. repeated'%(wo['wo_name'])))
+					else:
+						pass
+			if obj.po_type == 'frompi':
+				if po_lines[i].pi_line_id and po_lines[i].group_flag == False:
+					pi_line_id=po_lines[i].pi_line_id
+					product = po_lines[i].product_id.name
+					po_qty=po_lines[i].product_qty
+					po_pending_qty=po_lines[i].pi_qty
+					pi_pending_qty= po_pending_qty - po_qty
+					if po_qty > po_pending_qty:
+						raise osv.except_osv(_('If PO from Purchase Indent'),
+							_('PO Qty should not be greater than purchase indent Qty. You can raise this PO Qty upto %s --FOR-- %s.'
+									%(po_pending_qty, product)))
+					
+					pi_obj=self.pool.get('purchase.requisition.line')
+					pi_line_obj=pi_obj.search(cr, uid, [('id','=',val[i])])
+					pi_obj.write(cr,uid,pi_line_id.id,{'draft_flag' : False})
+					sql = """ update purchase_requisition_line set pending_qty=%s where id = %s"""%(pi_pending_qty,pi_line_id.id)
+					cr.execute(sql)
+					
+					if pi_pending_qty == 0:
+						pi_obj.write(cr,uid,pi_line_id.id,{'line_state' : 'noprocess'})
+					
+					if po_lines[i].group_flag == True:
+							self.update_product_pending_qty(cr,uid,ids,line=po_lines[i])
+					else:
+						print "All are correct Values and working fine"
+			else:
+				line_obj.write(cr,uid,po_lines[i].id,{'pending_qty':po_lines[i].product_qty})
+			
+			prod_obj = self.pool.get('product.product')
+			prod_obj.write(cr,uid,po_lines[i].product_id.id,{'latest_price' : po_lines[i].price_unit})
+			
+			bmr_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',po_lines[i].product_id.id),('state','=','approved')])
+			if bmr_obj:
+				bmr_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,bmr_obj[0])
+				for item in bmr_rec.line_ids:
+					if item.brand_id.id == po_lines[i].brand_id.id and item.moc_id.id == po_lines[i].moc_id.id and po_lines[i].rate_revise == 'yes':
+						self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
+						
+						## Design Rate update process start
+						
+						design_rate = 0
+						if item.rate <= po_lines[i].price_unit:
+							design_rate = ((po_lines[i].price_unit/100.00) * 5) + po_lines[i].price_unit
+							self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'rate' : design_rate})
+						elif (item.rate - ((item.rate/100.00) * 5)) >= po_lines[i].price_unit:
+							design_rate = ((po_lines[i].price_unit/100.00)*5) + po_lines[i].price_unit
+							self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'rate' : design_rate})
+						else:
+							pass
+						## Design Rate update process end
+					else:
+						pass
+		return True
+	
 	def wkf_approve_order(self, cr, uid, ids, context=None):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: wkf_approve_order called...')
 		obj = self.browse(cr,uid,ids[0])
@@ -462,7 +645,7 @@ class kg_purchase_order(osv.osv):
 							where line.product_id = %s and line.order_id != %s and line.brand_id = %s and line.moc_id = %s
 							and po.state in ('approved')
 							order by po.approved_date desc limit 1"""%(item.product_id.id,obj.id,item.brand_id.id,item.moc_id.id)
-				cr.execute(price_sql)		
+				cr.execute(price_sql)
 				price_data = cr.dictfetchall()
 				if price_data:
 					if price_data[0]['price_unit'] < item.price_unit:
@@ -474,14 +657,14 @@ class kg_purchase_order(osv.osv):
 				else:
 					# When raised the first po for the product
 					price_sql = """ 
-							select line.price_unit 
-							from purchase_order_line line 
+							select line.price_unit
+							from purchase_order_line line
 							left join purchase_order po on (po.id=line.order_id)
 							join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
 							join ch_brandmoc_rate_details det on (det.header_id=rate.id)
 							where po.state = 'approved' and rate.state in ('approved')
-							and line.product_id = %s and line.order_id != %s and line.brand_id = %s 
-							and line.moc_id = %s 
+							and line.product_id = %s and line.order_id != %s and line.brand_id = %s
+							and line.moc_id = %s
 							order by po.approved_date desc limit 1
 							"""%(item.product_id.id,obj.id,item.brand_id.id,item.moc_id.id)
 					cr.execute(price_sql)		

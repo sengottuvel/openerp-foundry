@@ -63,13 +63,14 @@
 		<button name="purchase_confirm" states="draft" string="Confirm Order" position="replace">
 			<button name="entry_reject" string="Reject" confirm="Are you sure to proceed ?" type="object" states="confirmed" />
 			<button name="entry_cancel" string="Cancel" confirm="Are you sure to proceed ?" type="object" states="verified" />
-			<button name="purchase_confirm" states="verified" string="Approve" confirm="Are you sure to proceed ?" />
+			<button name="purchase_confirm" states="verified" string="Approve" confirm="Are you sure to proceed ?" invisible="1"/>
 			<button name="action_cancel" string="Cancel" confirm="Are you sure to proceed ?" type="object" states="approved"/>
 			<button name="action_set_to_draft" string="Set To Draft" type="object" states="reject"/>
 		</button>
-		<button name="purchase_confirm" states="verified" string="Approve" position="after">
+		<button name="purchase_confirm" states="verified" string="Approve" position="after" invisible="1">
 			<button name="confirm_po" states="draft" string="Confirm" type="object" confirm="Are you sure to proceed ?"/>
 			<button name="verify_po" states="confirmed" string="Verify" type="object" confirm="Are you sure to proceed ?"/>
+			<button name="entry_approve" states="verified" string="Approve" type="object" confirm="Are you sure to proceed ?"/>
 		</button>
 		<field name="origin" position="replace">
 			<field name="bill_type" invisible="1"/>
