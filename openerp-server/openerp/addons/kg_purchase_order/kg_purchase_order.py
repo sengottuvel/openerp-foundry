@@ -313,8 +313,8 @@ class kg_purchase_order(osv.osv):
 	def verify_po(self,cr,uid,ids, context=None):
 		obj = self.browse(cr,uid,ids[0])
 		if obj.state == 'confirmed':
-			#~ if obj.confirmed_by.id == uid:
-				#~ raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
+			if obj.confirmed_by.id == uid:
+				raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
 			back_list = []
 			approval = ''
 			for item in obj.order_line:
