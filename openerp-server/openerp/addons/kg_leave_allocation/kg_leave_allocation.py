@@ -6,6 +6,9 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import re
 import math
+from dateutil import relativedelta
+from dateutil import relativedelta as rdelta
+today = datetime.now()
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_leave_allocation(osv.osv):
@@ -200,6 +203,30 @@ class kg_leave_allocation(osv.osv):
 	
 	
 	## Module Requirement
+	
+	def _validate_valid_from(self, cr, uid, ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today_date = str(today.year)+'-'+str(today.month)+'-'+str(today.day)
+		d1 =  datetime.strptime(rec.valid_from, "%Y-%m-%d")
+		d2 =  datetime.strptime(today_date, "%Y-%m-%d")
+		rd = rdelta.relativedelta(d2,d1)
+		delta = d2 - d1
+		no_of_days= delta.days
+		print "no_of_daysno_of_daysno_of_daysno_of_days",no_of_days
+		if no_of_days > 35:
+			raise osv.except_osv(_('Warning!'),
+						_('Only 35 days back can be selected !!'))
+		if rec.valid_from > rec.valid_to:
+			raise osv.except_osv(_('Warning!'),
+						_('Valid From date should be greater than Valid Till date !!'))
+		return True
+	
+	_constraints = [        
+              
+            (_validate_valid_from, 'System not allow to save with empty Concrete Details !!',['']),
+       
+        
+       ]
 	
 	
 	
