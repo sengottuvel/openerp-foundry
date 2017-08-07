@@ -67,7 +67,7 @@ class kg_work_order(osv.osv):
 		'name': fields.char('WO No.', size=128,select=True),
 		'entry_date': fields.date('WO Date',required=True),
 		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('active','=','t')]"),
-		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
