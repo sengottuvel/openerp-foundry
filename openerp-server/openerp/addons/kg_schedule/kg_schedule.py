@@ -680,6 +680,8 @@ class kg_schedule(osv.osv):
 							if stock_inward_qty:
 								if stock_inward_qty[0] != None:
 									
+									allocated_qty = 0
+									
 									rem_qty = reject_rem_qty
 									
 									### Checking STK WO ##
