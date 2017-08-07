@@ -14,7 +14,7 @@
 <!--					<button name="entry_wfa_md" type="object" string="WFA MD" states="moved_to_offer" class="oe_highlight"/>
 						<button name="entry_approved_md" type="object" string="Approve MD" states="wfa_md" class="oe_highlight"/>-->
 						<button name="entry_reject_md" type="object" string="Reject" states="wfa_md" class="oe_highlight"/>
-						<button name="wo_creation" type="object" string="WO Creation" attrs="{'invisible':['|',('state','!=','approved_md'),('purpose','=','in_development')]}" class="oe_highlight"/>
+						<button name="wo_creation" type="object" string="WO Creation" attrs="{'invisible':['|',('state','!=','moved_to_offer'),('purpose','=','in_development')]}" class="oe_highlight"/>
 						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible':['|',('state','!=','wo_created'),('is_zero_offer','!=',True)]}" class="oe_highlight"/>
 						<button name="offer_copy" type="object" states="moved_to_offer,approved_md,wo_created" string="Offer Copy" class="oe_highlight"/>
 						<button name="term_copy" type="object" states="moved_to_offer,approved_md,wo_created" string="Terms Copy" class="oe_highlight"/>
