@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-		
+	
 	<!-- Purchase order form inherit -->
-		
+	
 	<record model="ir.ui.view" id="kg_purchase_order_form_inherit">
         <field name="name">kg.purchase.order.form.inherit</field>
         <field name="model">purchase.order</field>
@@ -53,16 +53,15 @@
 		</button>
 		
 		<button name="wkf_send_rfq" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" 
-									class="oe_highlight" position="replace">
+								class="oe_highlight" position="replace">
 		<button name="wkf_send_rfq" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" 
-					class="oe_highlight" invisible="1"/>
+								class="oe_highlight" invisible="1"/>
 		</button>
 		<button name="wkf_send_rfq" states="sent" string="Send by Email" type="object" context="{'send_rfq':True}" position="replace">
 		<button name="wkf_send_rfq" states="approved" string="Send by Email" type="object" context="{'send_rfq':True}" invisible="1"/>
 		</button>
 		<button name="purchase_confirm" states="draft" string="Confirm Order" position="replace">
-			<button name="entry_reject" string="Reject" confirm="Are you sure to proceed ?" type="object" states="confirmed" />
-			<button name="entry_cancel" string="Cancel" confirm="Are you sure to proceed ?" type="object" states="verified" />
+			<button name="entry_reject" string="Reject" confirm="Are you sure to proceed ?" type="object" states="confirmed,verified" />
 			<button name="purchase_confirm" states="verified" string="Approve" confirm="Are you sure to proceed ?" invisible="1"/>
 			<button name="action_cancel" string="Cancel" confirm="Are you sure to proceed ?" type="object" states="approved"/>
 			<button name="action_set_to_draft" string="Set To Draft" type="object" states="reject"/>
@@ -250,7 +249,7 @@
 			</field>
 			<field name="product_qty" position="replace">
 			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" on_change="onchange_qty(product_qty,pending_qty,pi_line_id,pi_qty,uom_conversation_factor,length,breadth,price_type,product_id)"/>
-
+			
 			</field>
 			<field name="product_uom" 
 						on_change="onchange_product_uom(parent.pricelist_id,product_id,product_qty,product_uom,
@@ -318,7 +317,7 @@
 							</tree>
 						</field>
 					</page>
-				</xpath>        
+				</xpath>
 				
 				<xpath expr = "//page[@string='PO History']" position="after">
 					<page string="Specifiation" invisible="1">
@@ -496,7 +495,13 @@
 	<!-- WFAMD PO -->
     <menuitem action="purchase.tma_wfamd_po" id="tam_wfamd_po" name="WFAMD PO" parent="purchase.menu_procurement_management" sequence="4"/>
 	
-	<!-- PO Item Details  -->
+	<!-- Cancelled PO -->
+    <menuitem action="purchase.tma_cancelled_po" id="tam_cancelled_po" name="Cancelled PO" parent="purchase.menu_procurement_management" sequence="6"/>
+	
+	<!-- Status PO -->
+    <menuitem action="purchase.tma_status_po" id="tam_status_po" name="POS" parent="purchase.menu_procurement_management" sequence="7"/>
+	
+	<!-- PO Item Details -->
 	<menuitem action="kg_poline_confirmed_action" id="pam_purchase_order_line" name="PO Item Details" parent="purchase.menu_procurement_management" sequence="9"/>
 	
     </data>

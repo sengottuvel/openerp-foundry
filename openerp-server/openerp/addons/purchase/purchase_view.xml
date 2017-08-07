@@ -207,8 +207,8 @@
 				</group>
 				<group string='Remarks' attrs="{'invisible':[('state','in',('draft'))]}">
 					<group>	
-						<field name="can_remark" attrs="{'invisible':[('state','not in',('verified','approved','cancel'))],'readonly':[('state','in',['cancel','reject'])]}"/>
-						<field name="reject_remark" attrs="{'invisible':[('state','not in',['confirmed'])],'readonly':[('state','in',['cancel','reject'])]}"/>	
+						<field name="can_remark" attrs="{'invisible':[('state','not in',('approved','cancel'))],'readonly':[('state','in',['cancel','reject'])]}"/>
+						<field name="reject_remark" attrs="{'invisible':[('state','not in',['confirmed','verified'])],'readonly':[('state','in',['cancel','reject'])]}"/>	
 					</group>
 					<group>												
 					</group>
@@ -372,7 +372,7 @@
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
             <field name="context">{}</field>
-            <field name="domain">[('state','=','draft'),('approval_flag','=',False)]</field>
+            <field name="domain">[('state','=','draft')]</field>
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
             <field name="view_id" ref="purchase_order_tree"/>
@@ -408,6 +408,28 @@
             <field name="context">{}</field>
             <field name="domain">[('state','=','verified'),('approval_flag','=',False)]</field>
             <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_purchase_order_filter"/>
+            <field name="view_id" ref="purchase_order_spl_tree"/>
+        </record>
+        
+        <record id="tma_cancelled_po" model="ir.actions.act_window">
+            <field name="name">Cancelled PO</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.order</field>
+            <field name="context">{}</field>
+            <field name="domain">[('state','=','cancel')]</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_purchase_order_filter"/>
+            <field name="view_id" ref="purchase_order_spl_tree"/>
+        </record>
+        
+        <record id="tma_status_po" model="ir.actions.act_window">
+            <field name="name">POS</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.order</field>
+            <field name="context">{}</field>
+            <field name="domain">[('state','!=','approved')]</field>
+            <field name="view_mode">tree</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
             <field name="view_id" ref="purchase_order_spl_tree"/>
         </record>

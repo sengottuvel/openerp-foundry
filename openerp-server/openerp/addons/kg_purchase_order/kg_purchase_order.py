@@ -307,14 +307,6 @@ class kg_purchase_order(osv.osv):
 					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj.date_order))
 				seq_name = cr.fetchone();
 				self.write(cr,uid,ids,{'name':seq_name[0]})
-			self.write(cr, uid, ids, {'state':'confirmed','confirmed_by':uid,'confirmed_date':dt_time})
-		return True
-	
-	def verify_po(self,cr,uid,ids, context=None):
-		obj = self.browse(cr,uid,ids[0])
-		if obj.state == 'confirmed':
-			if obj.confirmed_by.id == uid:
-				raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
 			back_list = []
 			approval = ''
 			for item in obj.order_line:
@@ -434,10 +426,19 @@ class kg_purchase_order(osv.osv):
 			for order_line in obj.order_line:
 				product_tax_amt = self._amount_line_tax(cr, uid, order_line, context=context)			
 				cr.execute("""update purchase_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,order_line.id))
-			self.write(cr, uid, ids, {'state':'verified','verified_by':uid,'verified_date':dt_time})
 			if approval == 'yes' and obj.sent_mail_flag == False:
 				self.spl_po_apl_mail(cr,uid,ids,obj,context)
-				self.write(cr,uid,ids,{'sent_mail_flag':True,'approval_flag':True})
+				self.write(cr,uid,ids,{'sent_mail_flag':True,'approval_flag':True,'state':'confirmed','confirmed_by':uid,'confirmed_date':dt_time})
+			if approval != 'yes':
+				self.write(cr,uid,ids,{'state':'verified','confirmed_by':uid,'confirmed_date':dt_time,'verified_by':uid,'verified_date':dt_time,'approval_flag':False})
+		return True
+	
+	def verify_po(self,cr,uid,ids, context=None):
+		obj = self.browse(cr,uid,ids[0])
+		if obj.state == 'confirmed':
+			if obj.confirmed_by.id == uid:
+				raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
+			self.write(cr,uid,ids,{'state':'verified','verified_by':uid,'verified_date':dt_time,'approval_flag':True})
 		
 		return True
 	
@@ -961,27 +962,28 @@ class kg_purchase_order(osv.osv):
 	
 	def entry_reject(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0], context=context)
-		if rec.state == 'confirmed':
-			if rec.confirmed_by.id == uid:
-				raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
+		if rec.state in ('confirmed','verified'):
 			pi_line_obj = self.pool.get('purchase.requisition.line')
 			for line in rec.order_line:
-				pi_line_obj.write(cr,uid,line.pi_line_id.id,{'line_state' : 'noprocess'})	
+				if line.pi_line_id.id:
+					pi_line_obj.write(cr,uid,line.pi_line_id.id,{'line_state' : 'noprocess'})	
 			if not rec.reject_remark:
 				raise osv.except_osv(_('Remarks Needed !!'),_('Enter Remark in Reject Remarks'))
 			else:
-				self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': dt_time})
-		return True
-	
-	def entry_cancel(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0], context=context)
-		if rec.state == 'verified':
-			if rec.verified_by.id == uid:
-				raise osv.except_osv(_('Warning'),_('Cancel cannot be done by Confirmed user'))
-			if not rec.can_remark:
-				raise osv.except_osv(_('Remarks Needed !!'),_('Enter Remark in Cancel Remarks'))
-			else:
-				self.write(cr,uid,ids,{'state': 'confirmed','cancel_user_id': uid,'cancel_date': dt_time})
+				if rec.approval_flag == True and rec.state == 'verified':
+					if rec.confirmed_by.id == uid:
+						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
+					if rec.verified_by.id == uid:
+						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Verified user'))
+					self.write(cr,uid,ids,{'state': 'confirmed','rej_user_id': uid,'reject_date': dt_time})
+				elif rec.approval_flag == True and rec.state == 'confirmed':
+					if rec.confirmed_by.id == uid:
+						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
+					self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': dt_time})
+				if rec.approval_flag != True:
+					if rec.confirmed_by.id == uid:
+						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
+					self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': dt_time})
 		return True
 	
 	def action_set_to_draft(self, cr, uid, ids, context=None):
