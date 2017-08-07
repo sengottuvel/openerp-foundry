@@ -194,7 +194,7 @@ class kg_primecost_view(osv.osv):
 			(_check_is_applicable, 'Kindly select anyone is appli !!',['']),
 			#~ (_check_lineitems, 'System not allow to save with empty Details !!',['']),
 			(_duplicate_removed, 'Duplicates removed !',['']),
-			(_ms_raw_length_validate,'Length mismatched !',['']),
+			#~ (_ms_raw_length_validate,'Length mismatched !',['']),
        ]
 	
 	def onchange_moc_const(self, cr, uid, ids, moc_const_id):
