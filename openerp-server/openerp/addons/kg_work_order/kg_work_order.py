@@ -26,6 +26,9 @@ ORDER_CATEGORY = [
    
 ]
 
+def roundPartial (value, resolution):
+	return round (value / resolution) * resolution
+
 
 class kg_work_order(osv.osv):
 
@@ -2176,18 +2179,92 @@ class ch_work_order_details(osv.osv):
 										#ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5
 										###
 										length = h_value + bp + setting_height - a_value - b_value - 1.5
+										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+										number_dec = str(length-int(length))[1:]
+										if number_dec >= 0.25:
+											length = roundPartial (length, 0.50)
+										else:
+											length = length
 										
 									if star_value == 1:
 										### Formula ###
 										#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-3)/2
 										###
 										length = (h_value + bp + setting_height - a_value - b_value - 3)/2
+										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+										number_dec = str(length-int(length))[1:]
+										if number_dec >= 0.25:
+											length = roundPartial (length, 0.50)
+										else:
+											length = length
 										
 									if star_value > 1:
 										### Formula ###
 										#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5)-(NO OF STAR SUPPORT*1.5)/NO OF STAR SUPPORT+1
 										###
 										length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
+										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+										number_dec = str(length-int(length))[1:]
+										if number_dec >= 0.25:
+											length = roundPartial (length, 0.50)
+										else:
+											length = length
+										
+								if ms_rec.length_type == 'delivery_pipe_middle':
+									if star_value == 0.0:
+										### Formula ###
+										#ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5
+										###
+										length = h_value + bp + setting_height - a_value - b_value - 1.5
+										number_dec = str(length-int(length))[1:]
+										if number_dec >= 0.25 and number_dec <= 0.75:
+											length = round(length, 0)
+										if number_dec >= 0.75:
+											length = round(length, 0)
+											frac, whole = math.modf(length)
+											if frac >= 0.5:
+												length = (whole+0.5)
+											elif frac < 0.5:
+												length = (whole+0.0)
+										else:
+											length = length
+										
+									if star_value == 1:
+										### Formula ###
+										#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-3)/2
+										###
+										length = (h_value + bp + setting_height - a_value - b_value - 3)/2
+										number_dec = str(length-int(length))[1:]
+										if number_dec >= 0.25 and number_dec <= 0.75:
+											length = round(length, 0)
+										if number_dec >= 0.75:
+											length = round(length, 0)
+											frac, whole = math.modf(length)
+											if frac >= 0.5:
+												length = (whole+0.5)
+											elif frac < 0.5:
+												length = (whole+0.0)
+										else:
+											length = length
+										
+									if star_value > 1:
+										### Formula ###
+										#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5)-(NO OF STAR SUPPORT*1.5)/NO OF STAR SUPPORT+1
+										###
+										length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
+										number_dec = str(length-int(length))[1:]
+										if number_dec >= 0.25 and number_dec <= 0.75:
+											length = round(length, 0)
+										if number_dec >= 0.75:
+											length = round(length, 0)
+											frac, whole = math.modf(length)
+											if frac >= 0.5:
+												length = (whole+0.5)
+											elif frac < 0.5:
+												length = (whole+0.0)
+										else:
+											length = length
+										
 										
 								if ms_rec.length_type == 'drive_column_pipe':
 									
@@ -2196,6 +2273,11 @@ class ch_work_order_details(osv.osv):
 										#(3.5+bp+setting height-a1-no of star support)/2
 										###
 										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+										number_dec = str(length-int(length))[1:]
+										if number_dec >= 0.25:
+											length = roundPartial (length, 0.50)
+										else:
+											length = length
 										
 										
 									if star_value > 1:
@@ -2206,6 +2288,11 @@ class ch_work_order_details(osv.osv):
 										### Formula = Standard Length ###
 										line_column_pipe = vo_star_value['lcp']
 										length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
+										number_dec = str(length-int(length))[1:]
+										if number_dec >= 0.25:
+											length = roundPartial (length, 0.50)
+										else:
+											length = length
 										
 										
 								if ms_rec.length_type == 'pump_column_pipe':
@@ -2215,6 +2302,18 @@ class ch_work_order_details(osv.osv):
 										#(3.5+bp+setting height-a1-no of star support)/2
 										###
 										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+										number_dec = str(length-int(length))[1:]
+										if number_dec >= 0.25 and number_dec <= 0.75:
+											length = round(length, 0)
+										if number_dec >= 0.75:
+											length = round(length, 0)
+											frac, whole = math.modf(length)
+											if frac >= 0.5:
+												length = (whole+0.5)
+											elif frac < 0.5:
+												length = (whole+0.0)
+										else:
+											length = length
 										
 										
 									if star_value > 1:
@@ -2225,6 +2324,18 @@ class ch_work_order_details(osv.osv):
 										### Formula = Standard Length ###
 										line_column_pipe = vo_star_value['lcp']
 										length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
+										number_dec = str(length-int(length))[1:]
+										if number_dec >= 0.25 and number_dec <= 0.75:
+											length = round(length, 0)
+										if number_dec >= 0.75:
+											length = round(length, 0)
+											frac, whole = math.modf(length)
+											if frac >= 0.5:
+												length = (whole+0.5)
+											elif frac < 0.5:
+												length = (whole+0.0)
+										else:
+											length = length
 										
 										
 								if ms_rec.length_type == 'pump_shaft':
