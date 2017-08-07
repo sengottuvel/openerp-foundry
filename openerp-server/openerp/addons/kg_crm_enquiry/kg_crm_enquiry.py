@@ -236,9 +236,10 @@ class kg_crm_enquiry(osv.osv):
 							else:
 								applicable_b='no'
 						if applicable == 'no' and applicable_a == 'no' and applicable_b == 'no':
-							if rec.purpose_categ == 'spare':
-								raise osv.except_osv(_('Warning!'),_('Spare %s You cannot save without Component'%(rec.pump_id.name)))
-							elif rec.purpose_categ == 'pump':
+							#~ if rec.purpose_categ == 'spare':
+								#~ raise osv.except_osv(_('Warning!'),_('Spare %s You cannot save without Component'%(rec.pump_id.name)))
+							#~ elif rec.purpose_categ == 'pump':
+							if rec.purpose_categ == 'pump':
 								raise osv.except_osv(_('Warning!'),_('Pump %s You cannot save without Component'%(rec.pump_id.name)))
 		return True
 	
