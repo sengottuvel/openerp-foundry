@@ -1436,6 +1436,30 @@
 		
 		<!-- HSN Code Masters End -->
 		
+		<!-- WO Copy Reports Start -->
+		
+		<record id="m_foundry_wo_copy_reports" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_wo_copy"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO Copy Reports</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="m_foundry_wo_copy_reports_inherit" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_ch_kg_crm_pumpmodel_inherit"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO Copy Reports In</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- WO Copy Reports End -->
+		
 		
     </data>
 </openerp>
