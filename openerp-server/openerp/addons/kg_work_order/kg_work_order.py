@@ -1615,6 +1615,8 @@ class ch_work_order_details(osv.osv):
 							base_limitation = 'upto_2999'
 						if setting_height >= 3000:
 							base_limitation = 'above_3000'
+							
+						print "limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id"
 
 						sql = cr.execute('''
 						
