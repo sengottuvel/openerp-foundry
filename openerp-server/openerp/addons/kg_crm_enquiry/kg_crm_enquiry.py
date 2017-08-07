@@ -426,12 +426,32 @@ class kg_crm_enquiry(osv.osv):
 		### Prime cost calculation for MS item ###
 		elif item_type == 'ms':
 			if moc_id > 0:
-				#~ ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_id)
-				#~ if ms_rec.line_ids:
-					#~ for raw_line in ms_rec.line_ids:
-				print"ms_rawms_rawms_raw",ms_raw
-				
-				if ms_raw > 0:
+				if ms_raw == 1:
+					ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_id)
+					if ms_rec.line_ids:
+						for raw_line in ms_rec.line_ids:
+							design_rate = 0
+							brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id),('state','=','approved')])
+							if brandmoc_obj:
+								brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
+								brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
+								cr.execute(brandmoc_line_sql)
+								brandmoc_line_data = cr.dictfetchall()
+								if brandmoc_line_data:
+									design_rate = brandmoc_line_data[0]['rate']
+								if raw_line.product_id.uom_conversation_factor == 'one_dimension':
+									if raw_line.uom.id == brandmoc_rec.uom_id.id:
+										qty = raw_line.qty
+									elif raw_line.uom.id != brandmoc_rec.uom_id.id:
+										qty = raw_line.weight
+								elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
+									qty = raw_line.weight
+								price = design_rate * qty
+							else:
+								qty = design_rate = price = 0
+							tot_price += price
+							prime_cost = tot_price
+				elif ms_raw > 0:
 					if ms_raw.line_ids:
 						for raw_line in ms_raw.line_ids:
 							design_rate = 0
@@ -621,7 +641,7 @@ class kg_crm_enquiry(osv.osv):
 								for ms_item in orde_item.line_ids_a:
 									if ms_item.is_applicable == True:
 										ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
-										ms_item.ms_id.id,0,0,orde_item.moc_const_id.id,ms_item.moc_id.id,0)
+										ms_item.ms_id.id,1,0,orde_item.moc_const_id.id,ms_item.moc_id.id,0)
 										self.pool.get('ch.kg.crm.spare.ms').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost * ms_item.qty})
 										prime_cost += ms_prime_cost * ms_item.qty
 										print "ms_prime_cost",prime_cost
