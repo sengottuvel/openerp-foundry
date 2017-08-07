@@ -215,16 +215,16 @@ class kg_crm_enquiry(osv.osv):
 								applicable='yes'
 							else:
 								applicable='no'
-						if rec.line_ids_a:
-							for ele in rec.line_ids_a:
-								if ele.is_applicable == True and not ele.moc_id:
-									raise osv.except_osv(_('Warning!'),
-										_('Spare %s You cannot save without Component'%(rec.pump_id.name)))
-							ms_data = [x for x in rec.line_ids_a if x.is_applicable == True]
-							if ms_data:
-								applicable_a='yes'
-							else:
-								applicable_a='no'
+						#~ if rec.line_ids_a:
+							#~ for ele in rec.line_ids_a:
+								#~ if ele.is_applicable == True and not ele.moc_id:
+									#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Spare %s You cannot save without Component'%(rec.pump_id.name)))
+							#~ ms_data = [x for x in rec.line_ids_a if x.is_applicable == True]
+							#~ if ms_data:
+								#~ applicable_a='yes'
+							#~ else:
+								#~ applicable_a='no'
 						if rec.line_ids_b:
 							for ele in rec.line_ids_b:
 								if ele.is_applicable == True and not ele.moc_id:
