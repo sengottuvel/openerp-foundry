@@ -1616,7 +1616,7 @@ class ch_work_order_details(osv.osv):
 						if setting_height >= 3000:
 							base_limitation = 'above_3000'
 
-						cr.execute('''
+						sql = cr.execute('''
 						
 							
 							-- Bed Assembly ----
@@ -1824,6 +1824,9 @@ class ch_work_order_details(osv.osv):
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
 							  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
+							  
+						print sql
+						stop
 						vertical_foundry_details = cr.dictfetchall()
 						
 						if order_category in ('pump','spare') :
