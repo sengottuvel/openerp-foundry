@@ -136,7 +136,7 @@ class kg_crm_enquiry(osv.osv):
 			return False
 		else:
 			raise osv.except_osv(_('Warning!'),_('System should allow only past date !!'))
-				
+	
 	def onchange_del_date(self,cr,uid,ids,del_date,context=None):
 		today = date.today()
 		today = str(today)
@@ -438,7 +438,7 @@ class kg_crm_enquiry(osv.osv):
 							if brandmoc_obj:
 								brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
 								brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
-								cr.execute(brandmoc_line_sql)  
+								cr.execute(brandmoc_line_sql)
 								brandmoc_line_data = cr.dictfetchall()
 								if brandmoc_line_data:
 									design_rate = brandmoc_line_data[0]['rate']
@@ -651,15 +651,16 @@ class kg_crm_enquiry(osv.osv):
 					print"order_item.pump_id.hsn_noorder_item.pump_id.hsn_no",order_item.pump_id.hsn_no
 					gst = ''
 					hsn = ''
-					if order_item.pump_id.id and order_item.pump_id.hsn_no:
-						if len(order_item.pump_id.hsn_no) > 1:
-							hsn_no = ''
-						else:
-							hsn_no = [x.id for x in order_item.pump_id.hsn_no][0]
-							print"hsn_nohsn_no",hsn_no
-							if hsn_no:
-								hsn_rec = self.pool.get('kg.hsn.master').browse(cr,uid,hsn_no)
-								gst = hsn_rec.igst_id.id
+					if entry.segment == 'dom':
+						if order_item.pump_id.id and order_item.pump_id.hsn_no:
+							if len(order_item.pump_id.hsn_no) > 1:
+								hsn_no = ''
+							else:
+								hsn_no = [x.id for x in order_item.pump_id.hsn_no][0]
+								print"hsn_nohsn_no",hsn_no
+								if hsn_no:
+									hsn_rec = self.pool.get('kg.hsn.master').browse(cr,uid,hsn_no)
+									gst = hsn_rec.igst_id.id
 					print"gstgst",gst
 					if order_item.purpose_categ == 'pump':
 						print"pump_prime_cost",pump_prime_cost
@@ -775,6 +776,11 @@ class kg_crm_enquiry(osv.osv):
 							print "bot_prime_cost_access",prime_cost
 							moc_changed_flag = acc_bot_item.moc_changed_flag
 				self.pool.get('ch.kg.crm.accessories').write(cr,uid,foundry_item.id,{'prime_cost':prime_cost})
+				hsn_no = ''
+				gst = ''
+				if foundry_item.header_id.header_id.segment == 'dom':
+					hsn_no = foundry_item.access_id.hsn_no.id
+					gst = foundry_item.access_id.hsn_no.igst_id.id
 				access_id = self.pool.get('ch.accessories.offer').create(cr,uid,{
 															'header_id': offer_id,
 															'access_id': foundry_item.access_id.id,
@@ -786,9 +792,11 @@ class kg_crm_enquiry(osv.osv):
 															'per_access_prime_cost': prime_cost / foundry_item.qty,
 															'enquiry_line_access_id': foundry_item.id,
 															'enquiry_line_id': order_item.id,
+															'hsn_no': hsn_no,
+															'gst': gst,
 															})
 		return True
-		
+	
   	def spare_bom_creation(self,cr,uid,offer_id,orde_item,spare_bom_prime_cost,context=None):
 		spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{'header_id': offer_id,
 															  'pumpseries_id': orde_item.header_id.pumpseries_id.id,
@@ -798,7 +806,7 @@ class kg_crm_enquiry(osv.osv):
 															  'prime_cost': spare_bom_prime_cost * orde_item.qty,
 															  'enquiry_line_id': orde_item.header_id.id,
 															  'item_code': '',
-															  'item_name': orde_item.off_name,
+															  'item_name': orde_item.bom_id.name,
 															  'off_name': orde_item.off_name,
 															  'pattern_id': '',
 															  'ms_id': '',
@@ -815,6 +823,8 @@ class kg_crm_enquiry(osv.osv):
 		
   	def spare_creation(self,cr,uid,offer_id,order_item,bom_item,prime_cost,item_type,context=None):
 		moc_changed_flag = False
+		hsn = ''
+		gst = ''
 		if item_type == 'foundry':
 			item_code = bom_item.pattern_id.name
 			item_name = bom_item.pattern_id.pattern_name
@@ -824,7 +834,10 @@ class kg_crm_enquiry(osv.osv):
 			moc_id = bom_item.moc_id.id
 			qty = bom_item.qty
 			moc_changed_flag = bom_item.moc_changed_flag
-		elif item_type == 'ms' :
+			if bom_item.header_id.header_id.segment == 'dom':
+				hsn = bom_item.pattern_id.hsn_no.id
+				gst = bom_item.pattern_id.hsn_no.igst_id.id
+		elif item_type == 'ms':
 			item_code = bom_item.ms_id.code
 			item_name = bom_item.ms_id.name
 			pattern_id = False
@@ -833,6 +846,9 @@ class kg_crm_enquiry(osv.osv):
 			moc_id = bom_item.moc_id.id
 			qty = bom_item.qty
 			moc_changed_flag = bom_item.moc_changed_flag
+			if bom_item.header_id.header_id.segment == 'dom':
+				hsn = bom_item.ms_id.hsn_no.id
+				gst = bom_item.ms_id.hsn_no.igst_id.id
 		elif item_type == 'bot':
 			item_code = bom_item.ms_id.code
 			item_name = bom_item.ms_id.name
@@ -842,6 +858,9 @@ class kg_crm_enquiry(osv.osv):
 			moc_id = bom_item.moc_id.id
 			qty = bom_item.qty
 			moc_changed_flag = bom_item.moc_changed_flag
+			if bom_item.header_id.header_id.segment == 'dom':
+				hsn = bom_item.ms_id.hsn_no.id
+				gst = bom_item.ms_id.hsn_no.igst_id.id
 		spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{'header_id': offer_id,
 															  'pumpseries_id': order_item.pumpseries_id.id,
 															  'pump_id': order_item.pump_id.id,
@@ -858,6 +877,8 @@ class kg_crm_enquiry(osv.osv):
 															  'moc_id': moc_id,
 															  'moc_changed_flag': moc_changed_flag,
 															  'qty': qty,
+															  'hsn_no': hsn,
+															  'gst': gst,
 															   })
 		
 		spare_rec = self.pool.get('ch.spare.offer').browse(cr,uid,spare_id)
@@ -1678,7 +1699,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				print"service_factorservice_factor",service_factor
 				
 				## Coupling portion starts
-				cr.execute('''select 
+				cr.execute('''select
 				line.coupling_access_id as access_id,am.access_cate_id as access_cate_id,
 				am.accessories_type as accessories_type,am.name as offer_name
 				from kg_pumpmodel_master pump
@@ -1700,76 +1721,85 @@ class ch_kg_crm_pumpmodel(osv.osv):
 											'qty':1,'accessories_type':coupling_accessories_type,'off_name':coupling_offer_name,}
 						access_vals.append(coupling_value)
 						#~ value = {'line_ids_access_a': access_vals}
-				## Coupling portion start ends
-				## Baseplate portion start starts
-						cr.execute('''select 
-						access.id as access_id,am.access_cate_id as access_cate_id,
+				else:
+					raise osv.except_osv(_('Warning!'),
+						_('Given config not avail in master for Coupling,Base plate,Coupling guard and Foundation bolt!'))
+				## Coupling portion ends
+				## Baseplate portion starts
+				cr.execute('''select
+						line.baseplate_id as access_id,am.access_cate_id as access_cate_id,
 						am.accessories_type as accessories_type,am.name as offer_name
-						from kg_accessories_master access
-						left join kg_accessories_master am on(am.id=access.id)
-						where access.coupling_id = %s and access.pump_id = %s and access.framesize = %s and access.accessories_type = 'base_plate'
-						''',[coupling_access_id,pump_id,str(framesize)])
-						
-						base_plate_data = cr.dictfetchall()
-						print"base_plate_database_plate_data",base_plate_data
-						if base_plate_data:
-							for base_data in base_plate_data:
-								base_access_id = base_data['access_id']
-								base_access_cate_id = base_data['access_cate_id']
-								base_accessories_type = base_data['accessories_type']
-								base_offer_name = base_data['offer_name']
-								base_value = {'access_id':base_access_id,'access_categ_id':base_access_cate_id,
-											'qty':1,'accessories_type':base_accessories_type,'off_name':base_offer_name,}
-								access_vals.append(base_value)
-								#~ value = {'line_ids_access_a': access_vals}
-				## Baseplate portion start ends
-				## Coupling Guard portion start starts
-						cr.execute('''select 
-						access.id as access_id,am.access_cate_id as access_cate_id,
+						from kg_pumpmodel_master pump
+						join ch_coupling_config line on(line.header_id=pump.id)
+						left join kg_accessories_master am on(am.id=line.coupling_access_id)
+						where pump.id = %s and line.power_kw = %s and line.speed = %s and line.brand_id = %s and line.coupling_type_id = %s
+						and line.coupling_ser_factor = %s
+						''',[pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,str(service_factor)])
+				
+				base_plate_data = cr.dictfetchall()
+				print"base_plate_database_plate_data",base_plate_data
+				if base_plate_data:
+					for base_data in base_plate_data:
+						base_access_id = base_data['access_id']
+						base_access_cate_id = base_data['access_cate_id']
+						base_accessories_type = base_data['accessories_type']
+						base_offer_name = base_data['offer_name']
+						base_value = {'access_id':base_access_id,'access_categ_id':base_access_cate_id,
+									'qty':1,'accessories_type':base_accessories_type,'off_name':base_offer_name,}
+						access_vals.append(base_value)
+						#~ value = {'line_ids_access_a': access_vals}
+				## Baseplate portion ends
+				## Coupling Guard portion starts
+				cr.execute('''select
+						line.coupling_guard_id as access_id,am.access_cate_id as access_cate_id,
 						am.accessories_type as accessories_type,am.name as offer_name
-						from kg_accessories_master access
-						left join kg_accessories_master am on(am.id=access.id)
-						where access.coupling_id = %s and access.pump_id = %s and access.framesize = %s and access.accessories_type = 'coupling_guard'
-						''',[coupling_access_id,pump_id,str(framesize)])
-						
-						coup_guard_data = cr.dictfetchall()
-						print"coup_guard_datacoup_guard_data",coup_guard_data
-						if coup_guard_data:
-							for guard_data in coup_guard_data:
-								guard_access_id = guard_data['access_id']
-								guard_access_cate_id = guard_data['access_cate_id']
-								guard_accessories_type = guard_data['accessories_type']
-								guard_offer_name = guard_data['offer_name']
-								guard_value = {'access_id':guard_access_id,'access_categ_id':guard_access_cate_id,
-											'qty':1,'accessories_type':guard_accessories_type,'off_name':guard_offer_name,}
-								access_vals.append(guard_value)
-								#~ value = {'line_ids_access_a': access_vals}
-				## Coupling Guard portion start ends
-				## Foundation Bolt portion start starts
-						if base_access_id:
-							cr.execute('''select 
-							line.access_id as access_id,am.access_cate_id as access_cate_id,
-							am.accessories_type as accessories_type,am.name as offer_name
-							from kg_accessories_master access
-							join ch_foundation_bolt line on(line.header_id=access.id)
-							left join kg_accessories_master am on(am.id=line.access_id)
-							where access.id = %s and access.accessories_type = 'base_plate' limit 1
-							''',[base_access_id])
-							
-							foundation_data = cr.dictfetchall()
-							print"foundation_datafoundation_data",foundation_data
-							if foundation_data:
-								for found_data in foundation_data:
-									found_access_id = found_data['access_id']
-									found_access_cate_id = found_data['access_cate_id']
-									found_accessories_type = found_data['accessories_type']
-									found_offer_name = found_data['offer_name']
-									found_value = {'access_id':found_access_id,'access_categ_id':found_access_cate_id,
-											'qty':1,'accessories_type':found_accessories_type,'off_name':found_offer_name,}
-									access_vals.append(found_value)
-									#~ value = {'line_ids_access_a': access_vals}
-				## Foundation Bolt portion start ends
-				## Pump Pulley portion start starts
+						from kg_pumpmodel_master pump
+						join ch_coupling_config line on(line.header_id=pump.id)
+						left join kg_accessories_master am on(am.id=line.coupling_access_id)
+						where pump.id = %s and line.power_kw = %s and line.speed = %s and line.brand_id = %s and line.coupling_type_id = %s
+						and line.coupling_ser_factor = %s
+						''',[pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,str(service_factor)])
+				
+				coup_guard_data = cr.dictfetchall()
+				print"coup_guard_datacoup_guard_data",coup_guard_data
+				if coup_guard_data:
+					for guard_data in coup_guard_data:
+						guard_access_id = guard_data['access_id']
+						guard_access_cate_id = guard_data['access_cate_id']
+						guard_accessories_type = guard_data['accessories_type']
+						guard_offer_name = guard_data['offer_name']
+						guard_value = {'access_id':guard_access_id,'access_categ_id':guard_access_cate_id,
+									'qty':1,'accessories_type':guard_accessories_type,'off_name':guard_offer_name,}
+						access_vals.append(guard_value)
+						#~ value = {'line_ids_access_a': access_vals}
+				## Coupling Guard portion ends
+				## Foundation Bolt portion starts
+				if base_access_id:
+					cr.execute('''select
+						line.foundation_bolt_id as access_id,am.access_cate_id as access_cate_id,
+						am.accessories_type as accessories_type,am.name as offer_name
+						from kg_pumpmodel_master pump
+						join ch_coupling_config line on(line.header_id=pump.id)
+						left join kg_accessories_master am on(am.id=line.coupling_access_id)
+						where pump.id = %s and line.power_kw = %s and line.speed = %s and line.brand_id = %s and line.coupling_type_id = %s
+						and line.coupling_ser_factor = %s
+						''',[pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,str(service_factor)])
+					
+					foundation_data = cr.dictfetchall()
+					print"foundation_datafoundation_data",foundation_data
+					if foundation_data:
+						for found_data in foundation_data:
+							found_access_id = found_data['access_id']
+							found_access_cate_id = found_data['access_cate_id']
+							found_accessories_type = found_data['accessories_type']
+							found_offer_name = found_data['offer_name']
+							found_value = {'access_id':found_access_id,'access_categ_id':found_access_cate_id,
+									'qty':1,'accessories_type':found_accessories_type,'off_name':found_offer_name,}
+							access_vals.append(found_value)
+							#~ value = {'line_ids_access_a': access_vals}
+				## Foundation Bolt portion ends
+			if pump_id and motor_kw and speed_in_motor and speed_in_rpm and framesize:
+				## Pump Pulley portion starts
 				cr.execute('''select 
 							line.pump_pulley_access_id as pump_pulley_access_id,
 							line.motor_pulley_access_id as motor_pulley_access_id,
@@ -1839,6 +1869,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							access_vals.append(pump_pulley_value)
 							loop_count = loop_count + 1
 							print"loop_countloop_count",loop_count
+				else:
+					raise osv.except_osv(_('Warning!'),
+						_('Given config not avail in master for Pump pully,Motor pully,Slide rail,Belt and Belt guard!'))
 		value = {'line_ids_access_a': access_vals}
 		
 		return {'value': value}
@@ -1986,12 +2019,24 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				raise osv.except_osv(_('Warning!'),_('%s this template name already exits'%(rec.template_name)))
 		return True
 	
+	def _ms_raw_length_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.line_ids_a and rec.pump_model_type == 'vertical':
+			for item in rec.line_ids_a:
+				length = 0
+				if item.line_ids:
+					length = sum(ele.length for ele in item.line_ids)
+					if item.length < length:
+						raise osv.except_osv(_('Warning!'),_('%s %s Mapped raw material length exceeds'%(rec.pump_id.name,item.name)))
+		return True
+	
 	_constraints = [
 		
 		(_check_qty,'You cannot save with zero qty !',['Qty']),
 		(_check_access,'You cannot save without accessories !',['']),
 		(_check_access_qty,'You cannot save with zero qty !',['Qty']),
 		(_duplicate_removed,'Duplicates removed !',['']),
+		(_ms_raw_length_validate,'Length mismatched !',['']),
 		#~ (_template_name_validate,'Template name already exits!',['']),
 		#~ (_check_lineitems, 'System not allow to save with empty Accessories Details !!',['']),
 		#~ (_check_is_applicable,'You cannot save without Is applicable !',['Is Applicable']),
@@ -2299,10 +2344,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 												'length': raw.length,
 												'breadth': raw.breadth,
 												'thickness': raw.thickness,
-												'weight': raw.weight,
+												'weight': raw.weight * item.qty * qty,
 												'uom_conversation_factor': raw.uom_conversation_factor,
-												'temp_qty': raw.temp_qty,
-												'qty': raw.qty,
+												'temp_qty': raw.temp_qty * item.qty * qty,
+												'qty': raw.qty * item.qty * qty,
 												'remarks': raw.remarks,
 												}])
 						if moc_id:
@@ -2443,10 +2488,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 											'length': raw.length,
 											'breadth': raw.breadth,
 											'thickness': raw.thickness,
-											'weight': raw.weight,
+											'weight': raw.weight * item.qty * qty,
 											'uom_conversation_factor': raw.uom_conversation_factor,
-											'temp_qty': raw.temp_qty,
-											'qty': raw.qty,
+											'temp_qty': raw.temp_qty * item.qty * qty,
+											'qty': raw.qty * item.qty * qty,
 											'remarks': raw.remarks,
 											}])
 						if moc_id:
@@ -3176,7 +3221,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							#~ vertical_ms_qty = vertical_ms_details['qty']
 						#~ if qty > 0
 						vertical_ms_qty = ms_bom_qty
-							
+						
 						print "vertical_ms_qty---------------------------->>>>",vertical_ms_qty
 						
 						if vertical_ms_details['position_id'] == None:
@@ -3185,6 +3230,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						
 						if vertical_ms_details['ms_id']:
 							ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,vertical_ms_details['ms_id'])
+							ms_raw_rec = self.pool.get('ch.machineshop.details').browse(cr,uid,vertical_ms_details['id'])
 							if ms_rec.line_ids_a:
 								if ms_rec.line_ids:
 									ch_ms_vals = []
@@ -3196,10 +3242,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 												'length': raw.length,
 												'breadth': raw.breadth,
 												'thickness': raw.thickness,
-												'weight': raw.weight,
+												'weight': raw.weight * ms_raw_rec.qty * qty,
 												'uom_conversation_factor': raw.uom_conversation_factor,
-												'temp_qty': raw.temp_qty,
-												'qty': raw.qty,
+												'temp_qty': raw.temp_qty * ms_raw_rec.qty * qty,
+												'qty': raw.qty * ms_raw_rec.qty * qty,
 												'remarks': raw.remarks,
 												}])
 						if moc_id:
@@ -3240,11 +3286,11 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							#~ 'flag_standard':flag_standard,
 							#~ 'entry_mode':'auto',
 							#~ 'order_category':order_category,
-									  
+							
 							})
 							
 							#~ 'moc_id': moc_id,
-							
+					
 					#### Load BOT Items ####
 					
 					bom_bot_obj = self.pool.get('ch.machineshop.details')
@@ -3371,7 +3417,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 					for vertical_bot_details in vertical_bot_details:
 						
 						### Loading MOC from MOC Construction
-				
+						
 						if moc_construction_id != False:
 							
 							cr.execute(''' select bot_moc.moc_id
@@ -3428,7 +3474,6 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							'moc_changed_flag': moc_changed_flag,
 							
 							})
-			
 		
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
 	
@@ -3973,6 +4018,23 @@ class ch_kg_crm_ms_raw(osv.osv):
 		'active': True,
 		
 	}
+	
+	def onchange_length(self, cr, uid, ids, length,breadth,qty,temp_qty,uom_conversation_factor,product_id, context=None):		
+		value = {'qty':0,'weight':0}
+		qty = 0
+		weight = 0
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		if uom_conversation_factor:
+			if uom_conversation_factor == 'one_dimension':
+				qty = length * temp_qty
+				if length == 0.00:
+					qty = temp_qty
+				weight = qty * prod_rec.po_uom_in_kgs
+			if uom_conversation_factor == 'two_dimension':
+				qty = length * breadth * temp_qty				
+				weight = qty * prod_rec.po_uom_in_kgs
+		value = {'qty': qty,'weight': weight}			
+		return {'value': value}
 	
 	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
 		value = {'qty': '','weight': '',}

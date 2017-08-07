@@ -11,8 +11,8 @@
 				<form string="CRM Offer" version="7.0" create="false" delete="false">
 					<header>
 						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
-						<button name="entry_wfa_md" type="object" string="WFA MD" states="moved_to_offer" class="oe_highlight"/>
-						<button name="entry_approved_md" type="object" string="Approve MD" states="wfa_md" class="oe_highlight"/>
+<!--					<button name="entry_wfa_md" type="object" string="WFA MD" states="moved_to_offer" class="oe_highlight"/>
+						<button name="entry_approved_md" type="object" string="Approve MD" states="wfa_md" class="oe_highlight"/>-->
 						<button name="entry_reject_md" type="object" string="Reject" states="wfa_md" class="oe_highlight"/>
 						<button name="wo_creation" type="object" string="WO Creation" attrs="{'invisible':['|',('state','!=','approved_md'),('purpose','=','in_development')]}" class="oe_highlight"/>
 						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible':['|',('state','!=','wo_created'),('is_zero_offer','!=',True)]}" class="oe_highlight"/>
@@ -49,20 +49,20 @@
 								<field name="enquiry_date" readonly="1"/>
 								<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="del_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
-								<field name="segment" readonly="1"/>	
-								<field name="del_term" attrs="{'invisible':[('segment','!=','exp')]}"/>	
-								<field name="mode_of_dispatch" attrs="{'invisible':[('segment','!=','exp')]}"/>	
-								<field name="flag_data_bank"/>	
-								<field name="location" required="1"/>	
-								<field name="excise_duty"/>	
-								<field name="drawing_approval"/>	
-								<field name="l_d_clause"/>	
+								<field name="segment" readonly="1"/>
+								<field name="del_term" attrs="{'invisible':[('segment','!=','exp')]}"/>
+								<field name="mode_of_dispatch" attrs="{'invisible':[('segment','!=','exp')]}"/>
+								<field name="flag_data_bank"/>
+								<field name="location" required="0" invisible="1"/>
+								<field name="excise_duty"/>
+								<field name="drawing_approval"/>
+								<field name="l_d_clause"/>
 								<field name="off_status"/>
 								<field name="reminder_date" attrs="{'invisible': [('off_status','!=','to_be_follow')]}" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
 								<field name="rep_data" readonly="1" width="100" filename="offer_copy"/>
 								<field name="term_data" readonly="1" width="100" filename="term_copy"/>
-							</group>	
+							</group>
 						</group>
 						<group class="oe_subtotal_footer oe_right">
 							<field name="offer_net_amount"/>

@@ -177,13 +177,24 @@ class kg_primecost_view(osv.osv):
 			cr.execute(''' delete from ch_primecost_view_bot where header_id = %s '''%(rec.id))
 		return True
 	
+	def _ms_raw_length_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.line_ids_a and rec.pump_model_type == 'vertical':
+			for item in rec.line_ids_a:
+				length = 0
+				if item.line_ids:
+					length = sum(ele.length for ele in item.line_ids)
+					if item.length < length:
+						raise osv.except_osv(_('Warning!'),_('%s %s Mapped raw material length exceeds'%(rec.pump_id.name,item.ms_name)))
+		return True
+	
 	_constraints = [        
             
 			(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
 			(_check_is_applicable, 'Kindly select anyone is appli !!',['']),
 			#~ (_check_lineitems, 'System not allow to save with empty Details !!',['']),
 			(_duplicate_removed, 'Duplicates removed !',['']),
-			
+			(_ms_raw_length_validate,'Length mismatched !',['']),
        ]
 	
 	def onchange_moc_const(self, cr, uid, ids, moc_const_id):
@@ -272,13 +283,13 @@ class kg_primecost_view(osv.osv):
 										'product_id': raw.product_id.id,
 										'uom': raw.uom.id,
 										'od': raw.od,
-										'length': raw.length,
+										'length': raw.length * item.qty * qty,
 										'breadth': raw.breadth,
 										'thickness': raw.thickness,
 										'weight': raw.weight,
 										'uom_conversation_factor': raw.uom_conversation_factor,
-										'temp_qty': raw.temp_qty,
-										'qty': raw.qty,
+										'temp_qty': raw.temp_qty * item.qty * qty,
+										'qty': raw.qty * item.qty * qty,
 										'remarks': raw.remarks,
 										}])
 							if purpose_categ == 'pump':
@@ -982,6 +993,7 @@ class kg_primecost_view(osv.osv):
 						
 						if vertical_ms_details['ms_id']:
 							ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,vertical_ms_details['ms_id'])
+							ms_raw_rec = self.pool.get('ch.machineshop.details').browse(cr,uid,vertical_ms_details['id'])
 							if ms_rec.line_ids_a:
 								if ms_rec.line_ids:
 									ch_ms_vals = []
@@ -993,10 +1005,10 @@ class kg_primecost_view(osv.osv):
 												'length': raw.length,
 												'breadth': raw.breadth,
 												'thickness': raw.thickness,
-												'weight': raw.weight,
+												'weight': raw.weight * ms_raw_rec.qty * qty,
 												'uom_conversation_factor': raw.uom_conversation_factor,
-												'temp_qty': raw.temp_qty,
-												'qty': raw.qty,
+												'temp_qty': raw.temp_qty * ms_raw_rec.qty * qty,
+												'qty': raw.qty * ms_raw_rec.qty * qty,
 												'remarks': raw.remarks,
 												}])
 						if purpose_categ == 'pump':
@@ -1697,6 +1709,23 @@ class ch_pc_view_ms(osv.osv):
 		'active': True,
 		
 	}
+	
+	def onchange_length(self, cr, uid, ids, length,breadth,qty,temp_qty,uom_conversation_factor,product_id, context=None):		
+		value = {'qty':0,'weight':0}
+		qty = 0
+		weight = 0
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		if uom_conversation_factor:
+			if uom_conversation_factor == 'one_dimension':
+				qty = length * temp_qty
+				if length == 0.00:
+					qty = temp_qty
+				weight = qty * prod_rec.po_uom_in_kgs
+			if uom_conversation_factor == 'two_dimension':
+				qty = length * breadth * temp_qty				
+				weight = qty * prod_rec.po_uom_in_kgs
+		value = {'qty': qty,'weight': weight}			
+		return {'value': value}
 	
 	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
 		value = {'qty': '','weight': '',}

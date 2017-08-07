@@ -97,11 +97,11 @@
 														<field name="uom" required="1" readonly="1"/>
 														<field name="uom_conversation_factor" readonly="1"/>
 														<field name="od" invisible="1"/>
-														<field name="length" readonly="1"/>
+														<field name="length" attrs="{'required':[('length','=',0)],'readonly':[('length','=',0)]}" on_change="onchange_length(length,breadth,qty,temp_qty,uom_conversation_factor,product_id)"/>
 														<field name="breadth" readonly="1"/>
 														<field name="thickness" invisible="1"/>
 														<field name="weight" invisible="1"/>
-														<field name="temp_qty" attrs="{'required':[('length','=',0)],'readonly':[('length','=',0)]}" on_change="onchange_weight(uom_conversation_factor,length,breadth,temp_qty,product_id)"/>
+														<field name="temp_qty" readonly="1" on_change="onchange_weight(uom_conversation_factor,length,breadth,temp_qty,product_id)"/>
 														<field name="qty" readonly="1"/>
 														<field name="weight" readonly="1"/>
 														<field name="remarks" readonly="1"/>

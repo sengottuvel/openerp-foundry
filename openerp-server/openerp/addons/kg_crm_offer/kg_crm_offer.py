@@ -409,22 +409,23 @@ class kg_crm_offer(osv.osv):
 	def update_percentage(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state in ('draft','moved_to_offer'):
-			if entry.pump_per_flag == True:
-				if entry.line_pump_ids:
-					obj = self.pool.get('ch.pump.offer')
-					line_ids = entry.line_pump_ids
-					self.update_to_all(cr,uid,entry,obj,line_ids)
-			if entry.spare_per_flag == True:
-				if entry.line_spare_ids:
-					obj = self.pool.get('ch.spare.offer')
-					line_ids = entry.line_spare_ids
-					self.update_to_all(cr,uid,entry,obj,line_ids)
-			if entry.access_per_flag == True:
-				if entry.line_accessories_ids:
-					obj = self.pool.get('ch.accessories.offer')
-					line_ids = entry.line_accessories_ids
-					self.update_to_all(cr,uid,entry,obj,line_ids)
-			self.write(cr,uid,ids,{'dummy_flag':True})
+			if entry.o_sam_ratio > 0 or entry.o_dealer_discoun > 0 or entry.o_special_discount > 0 or entry.o_p_f > 0 or entry.o_freight > 0 or entry.o_insurance > 0 or entry.o_customer_discount > 0 or entry.o_agent_com > 0:
+				if entry.pump_per_flag == True:
+					if entry.line_pump_ids:
+						obj = self.pool.get('ch.pump.offer')
+						line_ids = entry.line_pump_ids
+						self.update_to_all(cr,uid,entry,obj,line_ids)
+				if entry.spare_per_flag == True:
+					if entry.line_spare_ids:
+						obj = self.pool.get('ch.spare.offer')
+						line_ids = entry.line_spare_ids
+						self.update_to_all(cr,uid,entry,obj,line_ids)
+				if entry.access_per_flag == True:
+					if entry.line_accessories_ids:
+						obj = self.pool.get('ch.accessories.offer')
+						line_ids = entry.line_accessories_ids
+						self.update_to_all(cr,uid,entry,obj,line_ids)
+				self.write(cr,uid,ids,{'dummy_flag':True})
 		return True
 	
 	def update_to_all(self,cr,uid,entry,obj,line_ids,context=None):
@@ -456,6 +457,8 @@ class kg_crm_offer(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
+			if entry.dummy_flag != True:
+				raise osv.except_osv(_('Warning'),_('Kindly update values for Ratio,Discount'))
 			#~ for line in entry.line_pump_ids:
 			if not entry.name:
 				off_no = ''	
@@ -557,7 +560,7 @@ class kg_crm_offer(osv.osv):
 																  'offer_no': entry.name,
 																  'project_name': entry.prj_name,
 																  'division_id': entry.division_id.id,
-																  'location': entry.location,
+																  #~ 'location': entry.location,
 																  'entry_mode': 'auto',
 																  'partner_id': entry.customer_id.id,
 																  'order_value': entry.offer_net_amount,
@@ -827,6 +830,7 @@ class kg_crm_offer(osv.osv):
 			'motor_power': item.motor_power,
 			'flag_standard': item.flag_standard,
 			'framesize': item.motor_power,
+			'pumpseries_id': item.pumpseries_id.id,
 			}
 			
 		return pump_vals
@@ -1339,12 +1343,12 @@ class kg_crm_offer(osv.osv):
 		style8 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz centre;''borders: left thin, right thin, top thin, bottom thin') 
 		
 		
-		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
+		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
 		r, g, b, a = img.split()
 		img = Image.merge("RGB", (r, g, b))
-		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
-		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
-		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
+		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
+		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
+		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
 		
 		#~ r, g, b, a = img.split()
 		#~ img = Image.merge("RGB", (r, g, b))
@@ -1433,8 +1437,8 @@ class kg_crm_offer(osv.osv):
 				logo_size = 120
 			elif len_col >= 4:
 				logo_size = 100
-			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
-			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
+			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
 			#~ print"col_1",col_1
 			#~ sheet1.write(s1,col_no,str(col_1),style1)
 			col_no = col_no + 1
@@ -2402,75 +2406,7 @@ class ch_pump_offer(osv.osv):
 ch_pump_offer()
 
 class ch_pump_offer_development(osv.osv):
-	
-	#~ def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
-		#~ res = {}
-		#~ cur_obj=self.pool.get('res.currency')
-		#~ sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
-		#~ i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = 0
-		#~ for line in self.browse(cr, uid, ids, context=context):
-			#~ print"linelineline",line
-			#~ res[line.id] = {
-				#~ 
-				#~ 'sam_ratio_tot': 0.0,
-				#~ 'dealer_discount_tot': 0.0,
-				#~ 'customer_discount_tot' : 0.0,
-				#~ 'spl_discount_tot' : 0.0,
-				#~ 'tax_tot': 0.0,
-				#~ 'p_f_tot': 0.0,
-				#~ 'freight_tot': 0.0,
-				#~ 'insurance_tot': 0.0,
-				#~ 'pump_price': 0.0,
-				#~ 'tot_price': 0.0,
-				#~ 'prime_cost': 0.0,
-				#~ 
-			#~ }
-			#~ 
-			#~ print"line.prime_cost",line.prime_cost
-			#~ print"line.sam_ratio",line.sam_ratio
-			#~ sam_ratio_tot = line.prime_cost * line.sam_ratio
-			#~ print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
-			#~ dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
-			#~ print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
-			#~ i_tot = sam_ratio_tot + dealer_discount_tot
-			#~ customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
-			#~ print"customer_discount_totcustomer_discount_tot",customer_discount_tot
-			#~ k_tot = i_tot + customer_discount_tot
-			#~ spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
-			#~ print"spl_discount_totspl_discount_tot",spl_discount_tot
-			#~ m_tot = k_tot + spl_discount_tot
-			#~ tax_tot = (m_tot / 100) * line.tax
-			#~ print"tax_tottax_tot",tax_tot
-			#~ p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
-			#~ print"p_f_totp_f_tot",p_f_tot
-			#~ p_tot = m_tot + tax_tot + p_f_tot
-			#~ freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
-			#~ print"freight_totfreight_tot",freight_tot
-			#~ r_tot = p_tot + freight_tot
-			#~ insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
-			#~ print"insurance_totinsurance_tot",insurance_tot
-			#~ pump_price_tot = r_tot + insurance_tot
-			#~ print"pump_price_totpump_price_tot",pump_price_tot
-			#~ tot_price = pump_price_tot / line.qty
-			#~ print"tot_pricetot_price",tot_price
-			#~ net_amount = tot_price * line.qty
-			#~ print"net_amountnet_amount",net_amount
-			#~ 
-			#~ res[line.id]['sam_ratio_tot'] = sam_ratio_tot
-			#~ res[line.id]['dealer_discount_tot'] = dealer_discount_tot
-			#~ res[line.id]['customer_discount_tot'] = customer_discount_tot
-			#~ res[line.id]['spl_discount_tot'] = spl_discount_tot
-			#~ res[line.id]['tax_tot'] = tax_tot
-			#~ res[line.id]['p_f_tot'] = p_f_tot
-			#~ res[line.id]['freight_tot'] = freight_tot
-			#~ res[line.id]['insurance_tot'] = insurance_tot
-			#~ res[line.id]['pump_price_tot'] = pump_price_tot
-			#~ res[line.id]['tot_price'] = tot_price
-			#~ res[line.id]['net_amount'] = net_amount
-			#~ res[line.id]['prime_cost'] = (line.per_pump_prime_cost * line.qty) + line.additional_cost
-			#~ 
-		#~ return res
-	
+		
 	_name = "ch.pump.offer.development"
 	_description = "Ch Pump Offer Development"
 	
