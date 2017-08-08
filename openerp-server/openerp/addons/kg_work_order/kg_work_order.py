@@ -1624,7 +1624,7 @@ class ch_work_order_details(osv.osv):
 
 						cr.execute('''
 						
-							
+							(
 							-- Bed Assembly ----
 							select bom.id,
 							bom.header_id,
@@ -1652,11 +1652,11 @@ class ch_work_order_details(osv.osv):
 							and active='t'
 							) 
 							
-							--order by bom.header_id
+							order by bom.header_id )
 							
 							union all
 
-
+							(
 							--- Motor Assembly ---
 							select bom.id,
 							bom.header_id,
@@ -1684,12 +1684,12 @@ class ch_work_order_details(osv.osv):
 							and active='t'
 							) 
 							
-							--order by bom.header_id
+							order by bom.header_id )
 							
 						
 							union all
 
-
+							(
 							-- Column Pipe ------
 
 							select bom.id,
@@ -1723,12 +1723,12 @@ class ch_work_order_details(osv.osv):
 							where rpm = %s and header_id = %s ))
 							and active='t'
 							)
-							--order by bom.header_id
+							order by bom.header_id )
 							
 					
 							union all
 
-
+							(
 							-- Delivery Pipe ------
 
 							select bom.id,
@@ -1762,12 +1762,12 @@ class ch_work_order_details(osv.osv):
 							where rpm = %s and header_id = %s))
 							and active='t'
 							) 
-							--order by bom.header_id
+							order by bom.header_id )
 							
 						
 							union all
 
-
+							(
 							-- Lubrication ------
 
 							select bom.id,
@@ -1801,10 +1801,11 @@ class ch_work_order_details(osv.osv):
 							where rpm = %s and header_id = %s))
 							and active='t'
 							)
-							--order by bom.header_id
+							order by bom.header_id )
 							
 							union all
 							
+							(
 							-- Base Plate --
 									
 							select bom.id,
@@ -1829,7 +1830,7 @@ class ch_work_order_details(osv.osv):
 							where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom'))
 							and active='t'
 							) 
-							--order by bom.header_id
+							order by bom.header_id )
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
@@ -1918,7 +1919,7 @@ class ch_work_order_details(osv.osv):
 						bom_ms_obj = self.pool.get('ch.machineshop.details')
 						cr.execute(''' 
 									
-									-- Bed Assembly ----
+									(-- Bed Assembly ----
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 									from ch_machineshop_details
 									where header_id = 
@@ -1931,13 +1932,13 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									) 
-									--order by header_id
+									order by header_id )
 									
 								
 
 									union all
 
-
+									(
 									--- Motor Assembly ---
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 									from ch_machineshop_details
@@ -1951,13 +1952,13 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s ))
 									and active='t'
 									) 
-									--order by header_id
+									order by header_id )
 									
 									
 
 									union all
 
-
+									(
 									-- Column Pipe ------
 
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
@@ -1978,13 +1979,13 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									)
-									--order by header_id
+									order by header_id )
 									
 							
 
 									union all
 
-
+									(
 									-- Delivery Pipe ------
 
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
@@ -2005,13 +2006,13 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									) 
-									--order by header_id
+									order by header_id )
 									
 									
 
 									union all
 
-
+									(
 									-- Lubrication ------
 
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
@@ -2032,9 +2033,11 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s ))
 									and active='t'
 									) 
-									--order by header_id
+									order by header_id )
 									
 									union all
+									
+									(
 									-- Base Plate --
 									
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
@@ -2046,7 +2049,7 @@ class ch_work_order_details(osv.osv):
 									where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom') )
 									and active='t'
 									) 
-									--order by header_id
+									order by header_id )
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
@@ -2449,7 +2452,7 @@ class ch_work_order_details(osv.osv):
 						bom_bot_obj = self.pool.get('ch.machineshop.details')
 						cr.execute(''' 
 									
-									-- Bed Assembly ----
+									(-- Bed Assembly ----
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
 									where header_id =
@@ -2462,12 +2465,12 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									)
-									--order by header_id
+									order by header_id )
 									
 									union all
 
 
-									--- Motor Assembly ---
+									(--- Motor Assembly ---
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
 									where header_id =
@@ -2480,12 +2483,12 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									) 
-									--order by header_id
+									order by header_id )
 									
 									union all
 
 
-									-- Column Pipe ------
+									(-- Column Pipe ------
 
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
@@ -2504,12 +2507,12 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									)
-									--order by header_id
+									order by header_id )
 									
 									union all
 
 
-									-- Delivery Pipe ------
+									(-- Delivery Pipe ------
 
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
@@ -2529,12 +2532,12 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									) 
-									--order by header_id
+									order by header_id )
 									
 									union all
 
 
-									-- Lubrication ------
+									(-- Lubrication ------
 
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
@@ -2554,11 +2557,11 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									) 
-									--order by header_id
+									order by header_id )
 									
 									union all
 									
-									-- Base Plate --
+									(-- Base Plate --
 									
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
@@ -2569,7 +2572,7 @@ class ch_work_order_details(osv.osv):
 									where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom') )
 									and active='t'
 									) 
-									--order by header_id
+									order by header_id )
 									
 									
 
