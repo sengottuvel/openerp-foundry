@@ -1652,7 +1652,7 @@ class ch_work_order_details(osv.osv):
 							and active='t'
 							) 
 							
-							order by bom.header_id
+							--order by bom.header_id
 							
 							union all
 
@@ -1684,10 +1684,9 @@ class ch_work_order_details(osv.osv):
 							and active='t'
 							) 
 							
-							order by bom.header_id
+							--order by bom.header_id
 							
-							
-
+						
 							union all
 
 
@@ -1724,10 +1723,9 @@ class ch_work_order_details(osv.osv):
 							where rpm = %s and header_id = %s ))
 							and active='t'
 							)
-							order by bom.header_id
+							--order by bom.header_id
 							
 					
-
 							union all
 
 
@@ -1764,10 +1762,9 @@ class ch_work_order_details(osv.osv):
 							where rpm = %s and header_id = %s))
 							and active='t'
 							) 
-							order by bom.header_id
+							--order by bom.header_id
 							
-							
-
+						
 							union all
 
 
@@ -1804,7 +1801,7 @@ class ch_work_order_details(osv.osv):
 							where rpm = %s and header_id = %s))
 							and active='t'
 							)
-							order by bom.header_id
+							--order by bom.header_id
 							
 							union all
 							
@@ -1832,7 +1829,7 @@ class ch_work_order_details(osv.osv):
 							where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom'))
 							and active='t'
 							) 
-							order by bom.header_id
+							--order by bom.header_id
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
