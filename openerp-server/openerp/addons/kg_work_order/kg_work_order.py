@@ -2251,7 +2251,6 @@ class ch_work_order_details(osv.osv):
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
-											length = round(length, 0)
 											frac, whole = math.modf(length)
 											if frac >= 0.5:
 												length = (whole+0.5)
@@ -2271,7 +2270,6 @@ class ch_work_order_details(osv.osv):
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
-											length = round(length, 0)
 											frac, whole = math.modf(length)
 											if frac >= 0.5:
 												length = (whole+0.5)
@@ -2291,7 +2289,6 @@ class ch_work_order_details(osv.osv):
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
-											length = round(length, 0)
 											frac, whole = math.modf(length)
 											if frac >= 0.5:
 												length = (whole+0.5)
@@ -2347,7 +2344,6 @@ class ch_work_order_details(osv.osv):
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
-											length = round(length, 0)
 											frac, whole = math.modf(length)
 											if frac >= 0.5:
 												length = (whole+0.5)
@@ -2371,7 +2367,6 @@ class ch_work_order_details(osv.osv):
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
-											length = round(length, 0)
 											frac, whole = math.modf(length)
 											if frac >= 0.5:
 												length = (whole+0.5)
