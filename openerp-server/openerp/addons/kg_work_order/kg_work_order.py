@@ -2248,7 +2248,7 @@ class ch_work_order_details(osv.osv):
 										length = h_value + bp + setting_height - a_value - b_value - 1.5
 										print "previousssssssssssss44",length
 										number_dec = str(length-int(length))[1:]
-										if number_dec >= 0.25 and number_dec <= 0.75:
+										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
 											length = round(length, 0)
@@ -2268,7 +2268,7 @@ class ch_work_order_details(osv.osv):
 										length = (h_value + bp + setting_height - a_value - b_value - 3)/2
 										print "previousssssssssssss55",length
 										number_dec = str(length-int(length))[1:]
-										if number_dec >= 0.25 and number_dec <= 0.75:
+										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
 											length = round(length, 0)
@@ -2288,7 +2288,7 @@ class ch_work_order_details(osv.osv):
 										length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
 										print "previousssssssssssss66",length
 										number_dec = str(length-int(length))[1:]
-										if number_dec >= 0.25 and number_dec <= 0.75:
+										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
 											length = round(length, 0)
@@ -2344,7 +2344,7 @@ class ch_work_order_details(osv.osv):
 										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
 										print "previousssssssssssss99",length
 										number_dec = str(length-int(length))[1:]
-										if number_dec >= 0.25 and number_dec <= 0.75:
+										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
 											length = round(length, 0)
@@ -2368,7 +2368,7 @@ class ch_work_order_details(osv.osv):
 										length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
 										print "previousssssssssssss100",length
 										number_dec = str(length-int(length))[1:]
-										if number_dec >= 0.25 and number_dec <= 0.75:
+										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
 											length = round(length, 0)
