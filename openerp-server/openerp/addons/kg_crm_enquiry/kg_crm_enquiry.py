@@ -824,7 +824,7 @@ class kg_crm_enquiry(osv.osv):
 															  'pump_id': orde_item.header_id.pump_id.id,
 															  'moc_const_id': orde_item.moc_const_id.id,
 															  'per_spare_prime_cost': spare_bom_prime_cost,
-															  'prime_cost': spare_bom_prime_cost * orde_item.qty,
+															  'prime_cost': spare_bom_prime_cost,
 															  'enquiry_line_id': orde_item.header_id.id,
 															  'item_code': '',
 															  'item_name': orde_item.bom_id.name,
