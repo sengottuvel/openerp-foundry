@@ -2032,7 +2032,7 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s ))
 									and active='t'
 									) 
-									order by header_id
+									--order by header_id
 									
 									union all
 									-- Base Plate --
