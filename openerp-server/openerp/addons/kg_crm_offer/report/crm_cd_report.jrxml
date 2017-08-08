@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cd_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000008"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="20"/>
 	<subDataset name="dataset1">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
@@ -52,16 +52,16 @@ group by pump.freight_in_ex
 --------------------------------------------
 
 -- GST
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id}) as gst,
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer as gst,
 
 -- Total
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer
-+
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -74,19 +74,23 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) as total,
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) as total,
 
 -- Insurance val
 
 (case when pump.insurance_in_ex = 'inclusive' then
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer
-+
+((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -99,13 +103,16 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end) as insurance_val,
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end) as insurance_val,
 
 -- Dealer val
 
@@ -141,8 +148,9 @@ group by pump.freight_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer -
 (case when pump.insurance_in_ex = 'inclusive' then
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer
-+
+((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -155,13 +163,16 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) as dealer_val,
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) as dealer_val,
 
 -- Les Dealer val
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
@@ -196,8 +207,9 @@ group by pump.freight_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer -
 (case when pump.insurance_in_ex = 'inclusive' then
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer
-+
+((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -210,13 +222,16 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer as les_dealer_val,
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer as les_dealer_val,
 
 -- Works val
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
@@ -251,8 +266,9 @@ group by pump.freight_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer -
 (case when pump.insurance_in_ex = 'inclusive' then
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer
-+
+((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -265,13 +281,16 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) -
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
 ((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
@@ -304,8 +323,9 @@ group by pump.freight_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer -
 (case when pump.insurance_in_ex = 'inclusive' then
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer
-+
+((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -318,13 +338,16 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) as works_val,
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) as works_val,
 
 -- Primecost val
 sum(pump.prime_cost)::integer as prime_cost,
@@ -362,8 +385,9 @@ group by pump.freight_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer -
 (case when pump.insurance_in_ex = 'inclusive' then
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer
-+
+((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -376,13 +400,16 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) -
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
 ((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
@@ -415,8 +442,9 @@ group by pump.freight_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer -
 (case when pump.insurance_in_ex = 'inclusive' then
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer
-+
+((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -429,13 +457,16 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)
 
 /
 
@@ -2671,17 +2702,16 @@ group by pump.p_f_in_ex
 ) as sam where ref_calc != 0),0)::integer as pf_val,
 
 -- GST
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id}) as tax,
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer as tax,
 
 -- Total
 ((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
 ((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-+
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -2694,18 +2724,22 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) as total,
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) as total,
 
 -- Les deal dis
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
 ((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer
+ +
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
 ((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
@@ -2738,8 +2772,9 @@ group by pump.freight_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer -
 (case when pump.insurance_in_ex = 'inclusive' then
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer
-+
+((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -2752,18 +2787,21 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) as les_deal_dis,
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) as les_deal_dis,
 
 -- Nett sam
 ((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
 ((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-+
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -2776,16 +2814,21 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) -
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer)
+ -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
 ((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer
+ +
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
 ((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
@@ -2818,8 +2861,9 @@ group by pump.freight_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer -
 (case when pump.insurance_in_ex = 'inclusive' then
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer
-+
+((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+ +
 COALESCE((select ref_calc from (
 select p_f_in_ex,
 case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
@@ -2832,13 +2876,16 @@ where header_id = $P{offer_id}
 group by pump.p_f_in_ex
 ) as sample
 ) as sam where ref_calc != 0),0)::integer
-+
-(select
-sum((((COALESCE(pump.net_amount,0)::integer*(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)+COALESCE(pump.net_amount,0)::integer) *
-(case when tax.amount is not null then tax.amount else 0 end))::integer
-from ch_pump_offer pump
-left join account_tax tax on(tax.id=pump.gst)
-where pump.header_id = $P{offer_id})) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) as nett_sam
+ +
+(select sum(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer +
+(((COALESCE(pump.net_amount,0)::integer - ((COALESCE(pump.net_amount,0)::integer*COALESCE(pump.customer_discount ,0.00))/100)::integer)::integer *
+(case when pump.p_f_in_ex = 'exclusive' then pump.p_f else 0 end))/100)::integer) * (select (case when pumps.gst is not null then tax.amount else 0 end)from ch_pump_offer pumps
+left join account_tax tax on(tax.id=pumps.gst)
+where pumps.id = pump.id)))::integer
+ +
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
+((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer else 0.00 end)) * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) as nett_sam
 
 from ch_pump_offer pump
 
@@ -6435,7 +6482,7 @@ where off.id = $P{offer_id}]]>
 	<lastPageFooter>
 		<band height="39">
 			<textField>
-				<reportElement x="59" y="25" width="132" height="14"/>
+				<reportElement x="58" y="25" width="132" height="14"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
