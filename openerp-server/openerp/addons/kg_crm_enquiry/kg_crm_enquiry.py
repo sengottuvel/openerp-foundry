@@ -1752,7 +1752,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						am.accessories_type as accessories_type,am.name as offer_name
 						from kg_pumpmodel_master pump
 						join ch_coupling_config line on(line.header_id=pump.id)
-						left join kg_accessories_master am on(am.id=line.coupling_access_id)
+						left join kg_accessories_master am on(am.id=line.baseplate_id)
 						where pump.id = %s and line.power_kw = %s and line.speed = %s and line.brand_id = %s and line.coupling_type_id = %s
 						and line.coupling_ser_factor = %s
 						''',[pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,str(service_factor)])
@@ -1776,7 +1776,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						am.accessories_type as accessories_type,am.name as offer_name
 						from kg_pumpmodel_master pump
 						join ch_coupling_config line on(line.header_id=pump.id)
-						left join kg_accessories_master am on(am.id=line.coupling_access_id)
+						left join kg_accessories_master am on(am.id=line.coupling_guard_id)
 						where pump.id = %s and line.power_kw = %s and line.speed = %s and line.brand_id = %s and line.coupling_type_id = %s
 						and line.coupling_ser_factor = %s
 						''',[pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,str(service_factor)])
@@ -1801,7 +1801,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						am.accessories_type as accessories_type,am.name as offer_name
 						from kg_pumpmodel_master pump
 						join ch_coupling_config line on(line.header_id=pump.id)
-						left join kg_accessories_master am on(am.id=line.coupling_access_id)
+						left join kg_accessories_master am on(am.id=line.foundation_bolt_id)
 						where pump.id = %s and line.power_kw = %s and line.speed = %s and line.brand_id = %s and line.coupling_type_id = %s
 						and line.coupling_ser_factor = %s
 						''',[pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,str(service_factor)])
