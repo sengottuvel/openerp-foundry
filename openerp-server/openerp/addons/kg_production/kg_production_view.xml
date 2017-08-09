@@ -294,7 +294,6 @@
 					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
 					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
 					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
-					
 					<filter icon="terp-check" name="pending" string="Issue Pending" domain="[('issue_state','=','pending')]"/>
 					<filter icon="terp-check" name="partial" string="Issue Partial" domain="[('issue_state','=','partial')]"/>
 					<filter icon="terp-check" name="issued" string="Issue Done" domain="[('issue_state','=','issued')]"/>
