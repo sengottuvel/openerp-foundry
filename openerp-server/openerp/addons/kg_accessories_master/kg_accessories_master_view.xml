@@ -15,7 +15,7 @@
 <!--					<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes')]}" class="oe_highlight" confirm="Are you sure to proceed ?" inivsible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
-						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" groups="kg_users_mgt.group_set_to_draft"/>	
 					</header>
 					<group>
 						<group>
