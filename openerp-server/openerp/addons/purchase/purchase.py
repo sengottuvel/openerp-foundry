@@ -158,8 +158,8 @@ class purchase_order(osv.osv):
 	STATE_SELECTION = [
 		('draft', 'Draft'),
 		('sent', 'RFQ Sent'),
-		('confirmed', 'WFA'),
-		('verified', 'Verified'),
+		('confirmed', 'Verify PO'),
+		('verified', 'WFAMD PO'),
 		('approved', 'Approved'),
 		('except_picking', 'Shipping Exception'),
 		('except_invoice', 'Invoice Exception'),
