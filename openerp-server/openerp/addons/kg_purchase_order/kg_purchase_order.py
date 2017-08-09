@@ -312,7 +312,7 @@ class kg_purchase_order(osv.osv):
 			for item in obj.order_line:
 				prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id),('state','=','approved')])
 				if not prod_obj:
-					raise osv.except_osv(_('Warning!'),_('%s Please Check for this item in Brand/Moc/Rate master !'%(item.product_id.name)))
+					raise osv.except_osv(_('Warning!'),_('Kindly check and approve %s in Brand/Moc/Rate master !'%(item.product_id.name)))
 				price_sql = """ 
 							select line.price_unit 
 							from purchase_order_line line 
@@ -361,7 +361,7 @@ class kg_purchase_order(osv.osv):
 									approval = 'yes'
 									self.pool.get('purchase.order.line').write(cr,uid,item.id,{'approval_flag':True})
 					else:
-						raise osv.except_osv(_('Warning!'),_('%s Please Check for this item in Brand/Moc/Rate master !'%(item.product_id.name)))
+						raise osv.except_osv(_('Warning!'),_('Kindly check and approve %s in Brand/Moc/Rate master !'%(item.product_id.name)))
 				if item.price_type == 'per_kg':
 					if item.product_id.uom_conversation_factor == 'two_dimension':
 						if item.product_id.po_uom_in_kgs > 0:
