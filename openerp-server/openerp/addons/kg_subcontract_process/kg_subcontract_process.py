@@ -11,11 +11,13 @@ dt_time = lambda * a: time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
    ('1','MS NC'),
-   ('2','NC'),
-   ('3','Service'),
-   ('4','Emergency'),
-   ('5','Spare'),
-   ('6','Normal'),
+   ('2','Break down'),
+   ('3','Emergency'),
+   ('4','Service'),
+   ('5','FDY-NC'),
+   ('6','Spare'),
+   ('7','Urgent'),
+   ('8','Normal'),
   
 ]
 
@@ -44,9 +46,9 @@ class kg_subcontract_process(osv.osv):
 		'name': fields.char('Subcontract No', size=128,select=True,readonly=True),
 		'entry_date': fields.date('Subcontract Date',required=True),
 		'division_id': fields.many2one('kg.division.master','Division'),
-		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location',domain="[('state','=','approved')]"),
 		'active': fields.boolean('Active'),
-		'contractor_id': fields.many2one('res.partner','Contractor Name',required=True,domain="[('contractor','=','t')]"),
+		'contractor_id': fields.many2one('res.partner','Contractor Name',required=True,domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		
 		'ms_plan_id': fields.many2one('kg.ms.daily.planning','Planning Id'),
 		'ms_plan_line_id': fields.many2one('ch.ms.daily.planning.details','Planning Line Id'),
@@ -155,7 +157,7 @@ class kg_subcontract_wo(osv.osv):
 		'division_id': fields.many2one('kg.division.master','Division'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'active': fields.boolean('Active'),
-		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t')]"),
+		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'contact_person': fields.char('Contact Person', size=128),	  
 		'phone': fields.char('Phone',size=64),
 		'delivery_date': fields.date('Expected Delivery Date'),
@@ -731,10 +733,10 @@ class ch_wo_operation_details(osv.osv):
 	_columns = {		
 		
 		'header_id':fields.many2one('ch.subcontract.wo.line', 'WO line Details', required=True, ondelete='cascade'),		
-		'position_id': fields.many2one('kg.position.number','Position No'),
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'operation_id': fields.many2one('ch.kg.position.number','Operation',required=True,domain="[('header_id','=',position_id)]"),
-		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','not in',('reject','cancel'))]"), 			
+		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','in',('approved'))]"), 			
 		'op_rate':fields.float('Rate(Rs)',required=True),
 		'flag_read': fields.boolean('Read Flag'),					
 		'remarks':fields.text('Remarks'),		
@@ -820,7 +822,7 @@ class kg_subcontract_dc(osv.osv):
 		'to_division_id': fields.many2one('kg.division.master','To Division'),
 		'transfer_type': fields.selection([('internal','Internal'),('sub_contractor','Sub Contractor')],'Type'),
 		'active': fields.boolean('Active'),
-		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t')]"),	
+		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),	
 		'phone': fields.char('Phone',size=64),
 		'sub_wo_no': fields.char('Sub WO No.'),
 		'contact_person': fields.char('Contact Person', size=128),		
@@ -1258,7 +1260,7 @@ class kg_subcontract_inward(osv.osv):
 		'division_id': fields.many2one('kg.division.master','From Division'),
 		'to_division_id': fields.many2one('kg.division.master','To Division'),
 		'transfer_type': fields.selection([('internal','Internal'),('sub_contractor','Sub Contractor')],'Type'),
-		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t')]"),
+		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'phone': fields.char('Phone',size=64),
 		'contact_person': fields.char('Contact Person', size=128),	
 		

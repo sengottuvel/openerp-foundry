@@ -59,7 +59,7 @@ class kg_subcontract_advance(osv.osv):
 		
 		## Module Requirement Info	
 		
-		'contractor_id': fields.many2one('res.partner', 'Sub Contractor', domain = "['|',('contractor','=',True),('supplier','=',True)]"),		
+		'contractor_id': fields.many2one('res.partner', 'Sub Contractor', domain = "['|',('contractor','=',True),('supplier','=',True),('partner_state','=','approve')]"),		
 		
 		'wo_id':fields.many2one('kg.subcontract.wo','Subcontract WO No',domain="[('contractor_id','=',contractor_id), '&', ('state','!=','draft')]"),
 		'fou_wo_id':fields.many2one('kg.fettling.workorder','Subcontract WO No',domain="[('contractor_id','=',contractor_id), '&', ('state','!=','draft')]"),

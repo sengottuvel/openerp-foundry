@@ -13,12 +13,14 @@ dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 	
 	
 ORDER_PRIORITY = [
-   ('1','MS NC'),
-   ('2','NC'),
-   ('3','Service'),
-   ('4','Emergency'),
-   ('5','Spare'),
-   ('6','Normal'),
+  ('1','MS NC'),
+   ('2','Break down'),
+   ('3','Emergency'),
+   ('4','Service'),
+   ('5','FDY-NC'),
+   ('6','Spare'),
+   ('7','Urgent'),
+   ('8','Normal'),
   
 ]
 
@@ -54,12 +56,14 @@ class kg_subcontract_invoice(osv.osv):
 				'payable_amt':0.0,
 				'additional_charges':0.0,
 			}
-			tax_amt = discount_value = final_other_charges = 0.00
+			tax_amt = discount_value = final_other_charges = advance_net_amt = 0.00
 			total_value_amt = 0.00
 			for line in order.line_ids:
 				total_value_amt += line.total_value
 			for item in order.line_ids_a:				
-				final_other_charges += item.expense_amt			
+				final_other_charges += item.expense_amt
+			for line in order.line_ids_b:
+				advance_net_amt += line.current_adv_amt 				
 			if order.discount > 0:
 				discount = order.discount
 			else:
@@ -82,9 +86,10 @@ class kg_subcontract_invoice(osv.osv):
 			res[order.id]['total_discount'] = discount_value
 			res[order.id]['amount_tax'] = tax_amt
 			res[order.id]['additional_charges'] = final_other_charges
+			res[order.id]['advance_amt'] = advance_net_amt
 			res[order.id]['total_amt'] = final_other_charges + total_value_amt + tax_amt
-			res[order.id]['amount_total'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - discount_value
-			res[order.id]['payable_amt'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - discount_value
+			res[order.id]['amount_total'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - (discount_value + advance_net_amt)
+			res[order.id]['payable_amt'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - (discount_value + advance_net_amt)
 		return res	
 	_columns = {
 	
@@ -124,7 +129,7 @@ class kg_subcontract_invoice(osv.osv):
 		
 		## Module Requirement Info	
 		
-		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True,domain="[('contractor','=','t')]"),		
+		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True,domain="[('contractor','=','t'),('partner_state','=','approve')]"),		
 		'phone': fields.char('Phone',size=64),
 		'contact_person': fields.char('Contact Person', size=128),
 				
@@ -133,7 +138,7 @@ class kg_subcontract_invoice(osv.osv):
 		
 		
 		'flag_invoice': fields.boolean('Flag Invoice'),
-		'division_id': fields.many2one('kg.division.master', 'Division',required=True),	
+		'division_id': fields.many2one('kg.division.master', 'Division',required=True,domain="[('state','=','approved')]"),	
 		
 		## Calculation process Start now 
 		
@@ -157,6 +162,7 @@ class kg_subcontract_invoice(osv.osv):
 		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',store=True,multi="sums",help="Net Amount"),
 		'payable_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Payable Amount',store=True,multi="sums",help="Payable Amount"),
 		'additional_charges': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Additional Charges',store=True,multi="sums",help="Additional Charges"),
+		'advance_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Adjected Advance Amount(-)',multi="sums",store=True ,readonly=True),
 		'round_off_amt': fields.float('Round off(+/-)'),
 				
 		##Accounts Process
@@ -166,6 +172,7 @@ class kg_subcontract_invoice(osv.osv):
 				
 		'line_ids': fields.one2many('ch.subcontract.invoice.line', 'header_id', "Line Details"),
 		'line_ids_a': fields.one2many('ch.subcontract.invoice.expense.track','header_id',"Expense Track"),
+		'line_ids_b': fields.one2many('ch.ms.advance.details','header_id',"Advance Details"),
 				
 	}
 		
@@ -368,6 +375,23 @@ class kg_subcontract_invoice(osv.osv):
 				_('Type is purchase book should be created !!'))		
 		journal_rec = self.pool.get('account.journal').browse(cr,uid,journal_ids[0])
 		if rec.state == 'approved':	
+			## Advance code added start ##
+			adjusted_amt = 0.00
+			balance_amt = 0.00
+			cus_adv_obj = self.pool.get('kg.subcontract.advance')			
+			cus_adv_inv_obj = self.pool.get('ch.ms.advance.details')							
+			for line in rec.line_ids_b:	
+				print"line.order_id",line.order_id
+				adv_ids = self.pool.get('kg.subcontract.advance').search(cr, uid, [('wo_id','=',line.order_id.id)])
+				print"adv_ids",adv_ids							
+				adv_rec = self.pool.get('kg.subcontract.advance').browse(cr, uid,adv_ids[0])				
+				adjusted_amt = adv_rec.adjusted_amt + line.current_adv_amt 
+				balance_amt = line.current_adv_amt - adjusted_amt
+				cus_adv_obj.write(cr, uid, line.sub_advance_id.id, {'adjusted_amt': adjusted_amt,'balance_amt':balance_amt})	
+			
+			## Advance code added end ##
+		
+			
 			total_value_amt = 0.00
 			for line in rec.line_ids:
 				total_value_amt += line.total_value	
@@ -405,26 +429,6 @@ class kg_subcontract_invoice(osv.osv):
 				
 			for expense in rec.line_ids_a:
 				ex_account_id = expense.expense.account_id.id			
-				tax_obj = self.pool.get('account.tax')
-				taxes = tax_obj.compute_all(cr, uid, expense.tax_id, expense.amount, 1, 1, partner=rec.contractor_id)			
-				for tax in taxes['taxes']:
-					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])				
-					credit = 0.00
-					debit = ((tax['amount']))					
-					tax_account = tax['account_collected_id']				
-					if not tax_account:
-						raise osv.except_osv(_('Account Configuration Warning !!'),
-							_('Tax account should be configured !!'))
-					move_line_vals = {
-						'move_id': move_id,
-						'account_id': tax_account,
-						'credit': credit,
-						'debit': debit,					
-						'journal_id': journal_rec.id,						
-						'date': rec.entry_date,
-						'name': rec.name,
-						}
-					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)			
 				if not ex_account_id:
 					raise osv.except_osv(_('Expense Configuration Warning !!'),
 						_('Expense account should be configured !!'))
@@ -441,32 +445,51 @@ class kg_subcontract_invoice(osv.osv):
 				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)		
 			
 			discount = 0.00
-			if rec.tax_id:				
-				if rec.discount > 0:
-					discount = rec.discount
-				else:
-					discount = (total_value_amt * rec.discount_per) / 100			
-				price_amt_val = total_value_amt	- discount			
-				tax_obj = self.pool.get('account.tax')
-				taxes = tax_obj.compute_all(cr, uid, rec.tax_id, price_amt_val, 1, product=rec.contractor_id, partner=rec.contractor_id)			
-				for tax in taxes['taxes']:
-					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])
-					credit = 0.00
-					debit = ((tax['amount']))					
-					tax_account = tax['account_collected_id']				
-					if not tax_account:
-						raise osv.except_osv(_('Account Configuration Warning !!'),
+			tax_sql = """ select sub_query.acc_col_id,sum(sub_query.debit) as debit
+							from (
+							select 
+							ac_tax.account_collected_id as acc_col_id,
+							sum((line_exp.amount * ac_tax.amount)) as debit
+							from 
+							subcontract_invoice_expense_taxe line_tax 
+							left join ch_subcontract_invoice_expense_track line_exp on(line_exp.id=line_tax.invoice_id)
+							left join account_tax ac_tax on(ac_tax.id=line_tax.tax_id)
+							left join kg_subcontract_invoice inv on(inv.id=line_exp.header_id)
+
+							where line_exp.header_id = %s
+							group by 1
+
+							union all
+
+							select 
+							ac_tax.account_collected_id as acc_col_id,
+							sum(((inv.amount_untaxed - inv.total_discount) * ac_tax.amount)) as debit
+							from 
+							subcontract_invoice_taxes line_tax 
+
+							left join kg_subcontract_invoice inv on(inv.id=line_tax.invoice_id)
+							left join account_tax ac_tax on(ac_tax.id=line_tax.tax_id)			
+
+							where inv.id = %s
+							group by 1) as sub_query
+
+							group by 1"""%(rec.id,rec.id)
+			cr.execute(tax_sql)		
+			data = cr.dictfetchall()
+			for vals in data:			
+				if vals['acc_col_id'] is None:
+					raise osv.except_osv(_('Account Configuration Warning !!'),
 							_('Tax account should be configured !!'))
-					move_line_vals = {
-						'move_id': move_id,
-						'account_id': tax_account,
-						'credit': credit,
-						'debit': debit,					
-						'journal_id': journal_rec.id,						
-						'date': rec.entry_date,
-						'name': rec.name,
-						}
-					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+				move_line_vals = {
+					'move_id': move_id,
+					'account_id': vals['acc_col_id'],
+					'credit': 0.00,
+					'debit': vals['debit'],
+					'journal_id': journal_rec.id,	
+					'date': rec.entry_date,
+					'name': rec.name,
+					}
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)		
 			
 			if rec.amount_untaxed > 0:
 				discount = 0.00
@@ -501,6 +524,31 @@ class kg_subcontract_invoice(osv.osv):
 		else:
 			pass	
 		
+	
+	def load_advance(self, cr, uid, ids,context=None):
+		invoice_rec = self.browse(cr,uid,ids[0])
+		cus_adv_obj = self.pool.get('kg.subcontract.advance')		
+		cus_inadv_obj = self.pool.get('ch.ms.advance.details')	
+		del_sql = """delete from ch_ms_advance_details where header_id=%s"""%(ids[0])
+		cr.execute(del_sql)
+		for item in [x.id for x in invoice_rec.inward_subcontract_line_ids]:			
+			work_rec_obj = self.pool.get('ch.subcontract.inward.line').browse(cr,uid,item)							
+			adv_search = self.pool.get('kg.subcontract.advance').search(cr, uid, [('wo_id','=',work_rec_obj.wo_line_id.header_id.id)])
+			cr.execute(""" select * from kg_subcontract_advance where wo_id = %s and balance_amt > 0 and state='confirmed'""" %(work_rec_obj.wo_line_id.header_id.id))
+			adv_data = cr.dictfetchall()			
+			for adv in adv_data:
+				print"adv['order_id']0",adv['wo_id']
+				cus_inadv_obj.create(cr,uid,{
+					'order_id' : adv['wo_id'],
+					'sub_advance_id' : adv['id'],
+					'sub_advance_date' : adv['entry_date'],
+					'tot_advance_amt' : adv['advance_amt'],
+					'balance_amt' : adv['balance_amt'],
+					'current_adv_amt' : 0.0,
+					'header_id' : invoice_rec.id,
+					})
+				
+		return True	
 		
 		
 	def unlink(self,cr,uid,ids,context=None):
@@ -649,4 +697,43 @@ class ch_subcontract_invoice_expense_track(osv.osv):
 		}	
 	
 ch_subcontract_invoice_expense_track()
+
+
+
+class ch_ms_advance_details(osv.osv):
+
+	_name = "ch.ms.advance.details"
+	_description = "MS Subcontract Advance Details"
+	_columns = {
+	
+		'header_id':fields.many2one('kg.subcontract.invoice', 'Invoice advance', ondelete='cascade'),
+		'sub_advance_id' : fields.many2one('kg.subcontract.advance', 'Advance No', readonly=True),
+		'sub_advance_date': fields.date('Advance Date'),
+		'sub_advance_line_id' : fields.many2one('ch.subcontract.advance.line', 'Contractor Advance Line', readonly=True),		
+		'order_id': fields.many2one('kg.subcontract.wo','WO No.'),		
+		'order_amt': fields.float('Order Amount', readonly=True),
+		'tot_advance_amt': fields.float('Advance Amount', readonly=True),
+		'already_adjusted_amt': fields.float('Already Adjusted Advance Amount', readonly=True),
+		'balance_amt': fields.float('Balance Advance', readonly=True),
+		'current_adv_amt': fields.float('Current Adjustment Amount',required=True),
+		
+		
+	}
+	
+	def _current_adv_amt(self,cr,uid,ids,context = None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.current_adv_amt > rec.balance_amt:
+			return False
+		else:
+			return True
+			
+	_constraints = [		
+			  
+		
+		(_current_adv_amt, 'Please Check the Current Adjustment Amount. Balance amount should be less than Current Adjustment Amount!!',['Current Adjustment Amount']),
+
+	   ]
+				
+ch_ms_advance_details()
+
 
