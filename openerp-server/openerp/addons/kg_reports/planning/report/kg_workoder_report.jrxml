@@ -126,7 +126,15 @@ select label_val,content from  ch_crm_duty
 
 where header_id in  (
 
-select enquiry_line_id from ch_work_order_details where id = $P{wo_line_id} )]]>
+select enquiry_line_id from ch_work_order_details where id = $P{wo_line_id} )
+
+union
+
+select label_val,content from  ch_crm_pump
+
+where header_id in  (
+
+select enquiry_line_id from ch_work_order_details where id = $P{wo_line_id} ) ]]>
 		</queryString>
 		<field name="label_val" class="java.lang.String"/>
 		<field name="content" class="java.lang.String"/>
@@ -708,6 +716,14 @@ select enquiry_line_id from ch_work_order_details where id = wo_line.id)
 union
 
 select label_val from  ch_crm_duty
+
+where header_id in  (
+
+select enquiry_line_id from ch_work_order_details where id = wo_line.id )
+
+union
+
+select label_val from  ch_crm_pump
 
 where header_id in  (
 
