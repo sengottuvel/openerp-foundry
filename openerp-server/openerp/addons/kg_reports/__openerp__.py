@@ -18,7 +18,9 @@
 		'planning/wizard/kg_casting_completion_view.xml',		
 		'planning/wizard/kg_pouring_over_view.xml',
 		'planning/wizard/kg_purchase_list_view.xml',
-		'planning/wizard/kg_accessories_list_view.xml',						
+		'planning/wizard/kg_accessories_list_view.xml',
+		'planning/wizard/kg_supplied_order_print_view.xml',
+								
 		'purchase/excel/kg_excel_po_register_view.xml',
 		'purchase/wizard/kg_po_register_wiz.xml',
 		'purchase/wizard/kg_vendor_profile_wiz_view.xml',

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_supplied_order" model="ir.ui.view">
+            <field name="name">kg.supplied.order.form</field>
+            <field name="model">kg.supplied.order.print</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Supplied Order Details Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">										
+							<field name="from_date"/>							
+							<field name="to_date"/>							
+							<field name="customer_id" widget="many2many_tags"/>
+							<field name="order_id" widget="many2many_tags"/>						   				    			     
+						</page>	    
+                                                                         
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>
+        
+        
+        
+        <report string="Supplied Order Details Statement"
+		model="kg.supplied.order.print"
+		auto="True"
+		name="jasper_supplied_order_report"
+		rml="kg_reports/planning/report/kg_supplied_order_report.jrxml"
+		id="suppliedorderdetailsreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_supplied_order" model="ir.actions.act_window">  
+            <field name="name">Supplied Order Details</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.supplied.order.print</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+	<menuitem name="Supplied Order Details" parent="kg_menus.rpm_planning_reports" action="rma_supplied_order" id="kg_supplied_order_details_reports" sequence="10"/>	
+      
+
+    </data>
+</openerp>
