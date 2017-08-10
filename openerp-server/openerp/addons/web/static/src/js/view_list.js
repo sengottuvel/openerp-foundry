@@ -1,3 +1,8 @@
+function pagelimit(){
+	var arr = [ 713 ];
+	return arr
+}
+
 openerp.web.list = function (instance) {
 var _t = instance.web._t,
     _lt = instance.web._lt;
@@ -116,7 +121,13 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                         || (this.getParent().action || {}).limit
                         || 80);
         }
-        return this._limit;
+        var pg = pagelimit();
+		if(this.ViewManager.action && jQuery.inArray( this.ViewManager.action.id, pg ) != -1){ //this.ViewManager.action.id
+			this.$pager.addClass("oe_list_pager_state_hide");
+			return this._limit = "";
+		}else{			
+			return this._limit;
+		}
     },
     /**
      * Set a custom Group construct as the root of the List View.
