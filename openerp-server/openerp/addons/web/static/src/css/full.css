@@ -20,3 +20,7 @@ table.oe_form_group.oe_subtotal_footer.oe_right{
     width: 100% !important;
     min-width: 100% !Important;
 }
+
+.oe_list_pager_state_hide .oe_list_pager_state{
+	display:none;
+}
