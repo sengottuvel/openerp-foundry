@@ -120,7 +120,7 @@
 	
 	<pto_header>
 	
-	<blockTable colWidths="30,150,55,55,45,50,50,50,40,50" repeatRows="1" style="Table4">
+	<blockTable colWidths="28,150,55,55,45,50,50,50,42,50" repeatRows="1" style="Table4">
 		<tr>
 			<td>          <para style="terp_61t">S.No</para></td>
 			<td>          <para style="terp_61t">Item Name</para></td>
@@ -131,12 +131,12 @@
 			<td>          <para style="terp_61t">Store UOM</para></td>
 			<td>          <para style="terp_61t">Store UOM Qty</para></td>
 			<td>          <para style="terp_61t">Latest Price</para></td>
-			<td>          <para style="terp_61t">Closing Value</para></td>       
+			<td>          <para style="terp_61t">Closing Value</para></td>
 		</tr>
 	</blockTable>
 	</pto_header>
 	
-	<blockTable colWidths="30,150,55,55,45,50,50,50,40,50" repeatRows="1" style="Table4">
+	<blockTable colWidths="28,150,55,55,45,50,50,50,42,50" repeatRows="1" style="Table4">
 		<tr>
 			<td>          <para style="terp_61t">S.No</para></td>
 			<td>          <para style="terp_61t">Item Name</para></td>
@@ -147,7 +147,7 @@
 			<td>          <para style="terp_61t">Store UOM</para></td>
 			<td>          <para style="terp_61t">Store UOM Qty</para></td>
 			<td>          <para style="terp_61t">Latest Price</para></td>
-			<td>          <para style="terp_61t">Closing Value</para></td> 
+			<td>          <para style="terp_61t">Closing Value</para></td>
 		</tr>
 	</blockTable>
 	
@@ -156,16 +156,16 @@
 	<section>
 	<para style="terp_default_8">[[ repeatIn(get_data(data['form']), 'x') ]]</para>
 	
-	<blockTable colWidths="30,150,55,55,45,50,50,50,40,50" repeatRows="1" style="Table4">
+	<blockTable colWidths="28,150,55,55,45,50,50,50,42,50" repeatRows="1" style="Table4">
 		<tr>
 			<td>          <para style="terp_61"> <seq id="prod_serial_no"/> </para>        </td>
-			<td>          <para style="terp_left_61">[[ x['product_name'] ]]</para>        </td>
+			<td>          <para style="terp_left_61">[[ x['product'] ]]</para>        </td>
 			<td>          <para style="terp_left_61">[[ x['brand'] ]]</para>        </td>
 			<td>          <para style="terp_left_61">[[ x['moc'] ]]</para>        </td>
-			<td>          <para style="terp_left_61">[[ x ['po_uom'] ]]</para>        </td>
-			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['po_uom_close_qty']) ]] </para>        </td>
-			<td>          <para style="terp_left_61">[[ x ['uom'] ]]</para>        </td>
-			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['close_qty']) ]] </para>        </td>
+			<td>          <para style="terp_left_61">[[ x ['puom'] ]]</para>        </td>
+			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['po_uom_close']) ]] </para>        </td>
+			<td>          <para style="terp_left_61">[[ x ['suom'] ]]</para>        </td>
+			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['stock_uom_close']) ]] </para>        </td>
 			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['po_price']) ]] </para>        </td>
 			<td>          <para style="terp_left_61" alignment="right">[[ locale.format('%.2f', x['closing_value']) ]]</para>        </td>
 		</tr>
@@ -178,7 +178,7 @@
          <para style="terp_61t">Grand Total(RS)</para>
         </td>
         <td>
-         <para style="terp_left_61_bold" alignment="right">[[ locale.format('%.2f', x['gr_total']) ]]</para>
+         <para style="terp_left_61_bold" alignment="right">[[ locale.format('%.2f', x['grand_total']) ]]</para>
         </td>
       </tr>
     </blockTable>

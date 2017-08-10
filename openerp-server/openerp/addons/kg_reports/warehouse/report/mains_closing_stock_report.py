@@ -36,8 +36,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		
 		if form['location_dest_id']:
 			location = form['location_dest_id'][0]
-			where_sql.append("sm.location_dest_id = %s" %(location))
-		
+			where_sql.append("a.location_dest_id = %s" %(location))
 		if where_sql:
 			where_sql = ' and '+' or '.join(where_sql)
 		else:
@@ -46,7 +45,6 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		if form['major_name']:
 			majorwise = form['major_name'][0]
 			major.append("pt.categ_id = %s" %(majorwise))
-		
 		if major:
 			major = ' and '+' or '.join(major)
 		else:
@@ -54,7 +52,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		
 		if form['product']:
 			for ids2 in form['product']:
-				product.append("sm.product_id = %s"%(ids2))	
+				product.append("a.product_id = %s"%(ids2))	
 		if product:
 			product = ' and '+' or '.join(product)
 		else:
@@ -77,131 +75,123 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		else:
 			lo_type = 'out'
 		
+		#~ self.cr.execute('''		
+			   #~ SELECT 
+					#~ sm.product_id as in_pro_id,
+					#~ sum(product_qty) as in_qty
+			   #~ 
+			   #~ FROM stock_move sm
+			   #~ 
+			   #~ left JOIN product_template pt ON (pt.id=sm.product_id)
+			   #~ left JOIN product_category pc ON (pc.id=pt.categ_id)
+			   #~ 
+			   #~ where sm.product_qty != 0 and sm.state=%s and sm.move_type =%s and sm.date::date <=%s '''+ where_sql + major + product + pro_type +'''
+			   #~ group by sm.product_id''',('done',lo_type,form['date']))
+		#~ 
+		#~ data=self.cr.dictfetchall()
 		self.cr.execute('''		
-			   SELECT 
-					sm.product_id as in_pro_id,
-					sum(product_qty) as in_qty
-			   
-			   FROM stock_move sm
-			   
-			   left JOIN product_template pt ON (pt.id=sm.product_id)
-			   left JOIN product_category pc ON (pc.id=pt.categ_id)
-			   
-			   where sm.product_qty != 0 and sm.state=%s and sm.move_type =%s and sm.date::date <=%s '''+ where_sql + major + product + pro_type +'''
-			   group by sm.product_id''',('done',lo_type,form['date']))
+			   select sum(a.product_qty) -
+				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s) as stock_uom_close,
+				(case when a.uom_conversation_factor = 'two_dimension' then
+				(sum(a.product_qty) -
+				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s)) / prod.po_uom_in_kgs / a.length / a.breadth
+				else
+				(sum(a.product_qty) -
+				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s)) / prod.po_uom_coeff
+				end) as po_uom_close,
+				a.product_id as product_id,
+				prod.name_template as product,
+				a.brand_id as brand_id,
+				a.moc_id as moc_id,
+				brand.name as brand,
+				moc.name as moc,
+				a.stock_uom as stock_uom,
+				a.product_uom as product_uom,
+				suom.name as suom,
+				puom.name as puom,
+				a.length as length,
+				a.breadth as breadth,
+				prod.po_uom_in_kgs as po_uom_in_kgs,
+				a.uom_conversation_factor as uom_conversation_factor,
+				prod.po_uom_coeff as po_uom_coeff
+				
+				from stock_move a
+				
+				left join kg_brand_master brand on(brand.id=a.brand_id)
+				left join kg_moc_master moc on(moc.id=a.moc_id)
+				left join product_product prod on(prod.id=a.product_id)
+				left join product_uom suom on(suom.id=a.stock_uom)
+				left join product_uom puom on(puom.id=a.product_uom)
+				left JOIN product_template pt ON (pt.id=a.product_id)
+				left join product_category pc on(pc.id=pt.categ_id)
+				
+			   where a.move_type = 'in' and a.date <= %s and a.state=%s '''+ where_sql + major + product + pro_type +'''
+			   group by 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17''',(form['date'],form['date'],form['date'],form['date'],'done'))
 		
 		data=self.cr.dictfetchall()
 		print "in_data ::::::::::::::=====>>>>", data
-		
+		data_new = []
 		gr_total=0.0
 		gr_total1=0.0
 		for item in data:
-			lot_obj = self.pool.get('stock.production.lot')
-			lot_id = lot_obj.search(self.cr, self.uid,[('product_id','=',item['in_pro_id']),('lot_type','=','in')])
-			print "exp____lot_id",lot_id
-			if lot_id:
-				for lot in lot_id:
-					lot_rec = lot_obj.browse(self.cr,self.uid,lot)
-					item['exp_date']=lot_rec.expiry_date
-					item['batch_no']=lot_rec.batch_no
-					item['brand']=lot_rec.brand_id.name
-					item['moc']=lot_rec.moc_id.name
+			if item['stock_uom_close'] > 0:
+				self.cr.execute('''
+						   SELECT
+							line.price_unit as price,
+							line.price_type as price_type,
+							line.length as length,
+							line.breadth as breadth,
+							line.product_qty as product_qty
+							
+							FROM purchase_order_line line
+							
+							JOIN purchase_order po ON (po.id=line.order_id)
+							
+							where po.state='approved' and line.product_id = %s and line.brand_id = %s and line.moc_id = %s
+							order by po.date_order desc limit 1''',(item['product_id'],item['brand_id'],item['moc_id']))
+				
+				lot_data = self.cr.dictfetchall()
+				print"lot_datalot_datalot_data--------------",lot_data
+				if lot_data:
+					
+					
+					closing_value = lot_data[0]['price']
+					item['po_price'] = lot_data[0]['price']
+					print"item['uom_conversation_factor']",item['uom_conversation_factor']
+					if item['uom_conversation_factor'] == 'two_dimension':
+						print"aaaaaaaaaaaaaa"
+						if lot_data[0]['price_type'] == 'po_uom':
+							print"popopopopopopopo"
+							item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['length'] * lot_data[0]['breadth'] * lot_data[0]['product_qty'] * item['po_uom_in_kgs']))
+						elif lot_data[0]['price_type'] == 'per_kg':
+							print"per_kgper_kgper_kgper_kgper_kg"
+							item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
+					elif item['uom_conversation_factor'] == 'one_dimension':
+						print"bbbbbbbbbbbbbbbbbbbbb"
+						if lot_data[0]['price_type'] == 'po_uom':
+							print"popopopopopopopo"
+							item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['product_qty'] * item['po_uom_coeff']))
+						elif lot_data[0]['price_type'] == 'per_kg':
+							print"per_kgper_kgper_kgper_kgper_kg"
+							item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
+					else:
+						item['closing_value'] = 0
+				else:
 					item['po_price'] = 0
 					item['closing_value'] = 0
-					closing_value = 0
-					self.cr.execute('''		
-					   SELECT 
-						line.price_unit as price
-											   
-						FROM purchase_order_line line
-					   
-						JOIN purchase_order po ON (po.id=line.order_id)
-					   
-						where po.state='approved' and line.product_id = %s and line.brand_id = %s and line.moc_id = %s
-						order by po.date_order desc limit 1''',(item['in_pro_id'],lot_rec.brand_id.id or 0,lot_rec.moc_id.id or 0))
-					
-					lot_data = self.cr.dictfetchall()
-					if lot_data:
-						
-						print"lot_datalot_datalot_data",lot_data,lot_data[0]['price']
-						closing_value = lot_data[0]['price']
-						item['po_price'] = lot_data[0]['price']
-			if lo_type == 'in':
-				product_id = item['in_pro_id']
-				in_qty = item['in_qty']
-				
-				pro_rec = self.pool.get('product.product').browse(self.cr,self.uid,product_id)
-				item['product_name'] = pro_rec.name
-				item['po_uom'] = pro_rec.uom_po_id.name
-				item['uom'] = pro_rec.uom_id.name
-				
-				out_date = "'"+form['date']+"'"
-				
-				out_sql = """ select product_id,sum(product_qty) from stock_move where product_id=%s and move_type='out' and state='done' and date::date <=%s and location_id != 8 group by product_id """%(product_id,out_date)
-				self.cr.execute(out_sql)
-				out_data = self.cr.dictfetchall()
-				print "out_data...........................", out_data
-				if out_data:
-					out_qty = [d['sum'] for d in out_data if 'sum' in d]
-					print "product_id................",product_id
-					print "in_qty.................",in_qty
-					print "out_qty.................",out_qty[0]
-					op_qty = in_qty - out_qty[0]
-					print "cl_qty..............",op_qty
-				else:
-					op_qty = in_qty
-				if not pro_rec.po_uom_coeff or pro_rec.po_uom_coeff == 0.00:
-					po_uom_coeff = 1
-				else:
-					po_uom_coeff = pro_rec.po_uom_coeff
-				item['po_uom_close_qty'] = op_qty / po_uom_coeff
-				item['close_qty'] = op_qty
-				
-				print "op_qty.........yyyyyyyyyyyy.....item['op_qty']..........", item['close_qty']
-				
-				#####
-				if item['close_qty']:
-					item['closing_value'] = item['close_qty'] * closing_value
-					
-					spl_obj=self.pool.get('stock.production.lot')
-					spl_id=spl_obj.search(self.cr,self.uid,[('product_id','=',product_id),('lot_type','=','in')])
-					print "innnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",spl_id
-					value=0
-					qty=0
-					for j in spl_id:
-						spl_rec=spl_obj.browse(self.cr,self.uid,j)
-						pro_name=spl_rec.product_id.name
-						pend_qty=spl_rec.pending_qty
-						product_qty =spl_rec.product_qty
-						pro_price = spl_rec.price_unit
-						if pend_qty > 0:
-							pro_qty = pend_qty
-							price=pro_qty*pro_price
-						else:
-							price = 0
-						value += price
-					
-					#~ item['closing_value'] =value
-		print "----------------------------->>>>",data
+				print"item['po_price']item['po_price']item['po_price']",item['po_price']
+				print"item['closing_value']item['closing_value']item['closing_value']",item['closing_value']
+				gr_total += item['closing_value']
+				item['grand_total'] = gr_total
+				data_new.append(item)
 		
-		data_renew = []
-		val = 0.0
-		val1 = 0.0
-		data.sort(key=lambda data: data['product_name'])
-		for item in data:
-			print "&&***&&&",item
-			if item['close_qty'] > 0.0:
-				val = item['closing_value']
-				gr_total += val
-				print "gr_total1.............",gr_total
-				item['gr_total'] = gr_total
-				data_renew.append(item)
-				print "-----===========data_renew==========>",data_renew
 			else:
 				pass
-		data = data_renew
-		print "=================data============>",data
-		return data
+		print "*******************************************************************************",data_new
+		return data_new
 	
 	def _get_filter(self, data):
 		if data.get('form', False) and data['form'].get('filter', False):
