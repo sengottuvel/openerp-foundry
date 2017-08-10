@@ -4712,7 +4712,9 @@ instance.web.form.AbstractFormPopup = instance.web.Widget.extend({
         var self = this;
         this.renderElement();
         var dialog = new instance.web.Dialog(this, {
-            min_width: '800px',
+            //~ min_width: '800px',
+            min_width: '100%',
+			width:"100%",
             dialogClass: 'oe_act_window',
             close: function() {
                 self.check_exit(true);
