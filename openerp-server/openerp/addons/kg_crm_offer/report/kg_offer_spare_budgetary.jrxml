@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="spare_offer_regular" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.2396694214876032"/>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="spare_offer_budgetary" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.2100000000000002"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="96"/>
 	<subDataset name="dataset1">
 		<parameter name="enquiry_line_id" class="java.lang.Integer"/>
 		<queryString>
@@ -94,16 +94,18 @@ where enquiry.id=$P{enquiry_line_id} and bot.is_applicable = 't'
 		<field name="each_price_txt" class="java.lang.String"/>
 		<field name="total_price_txt" class="java.lang.String"/>
 	</subDataset>
-	<parameter name="offer_id" class="java.lang.Integer"/>
+	<parameter name="offer_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<parameter name="printed_by" class="java.lang.String"/>
 	<queryString>
-		<![CDATA[select enquiry_line_id,
-trim(TO_CHAR((coalesce(line_tot,0.00)), '999G999G99G999G99G99G990D99')) as line_tot_txt,
+		<![CDATA[select offer_ref_id,enquiry_line_id,
+trim(TO_CHAR((coalesce((sum(line_tot) OVER ()),0.00)), '999G999G99G999G99G99G990D99')) as line_tot_txt,
 company_name,to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
 pump_id,offer_ref,offer_date,customer,pump_name,serial_no from (
 select
 distinct spare.enquiry_line_id,
-
+offer.id as offer_ref_id,
 case when spare.enquiry_line_id is not null then
 (select coalesce((sum(coalesce(total_price::numeric,0.00))),0.00) as gnd_tot from (
 select
@@ -184,6 +186,7 @@ left join res_company company on(company.id=offer.company_id)
 where offer.id=$P{offer_id} and offer.state != 'draft' and spare.enquiry_line_id is not Null
 ) as sample]]>
 	</queryString>
+	<field name="offer_ref_id" class="java.lang.Integer"/>
 	<field name="enquiry_line_id" class="java.lang.Integer"/>
 	<field name="line_tot_txt" class="java.lang.String"/>
 	<field name="company_name" class="java.lang.String"/>
@@ -194,71 +197,10 @@ where offer.id=$P{offer_id} and offer.state != 'draft' and spare.enquiry_line_id
 	<field name="customer" class="java.lang.String"/>
 	<field name="pump_name" class="java.lang.String"/>
 	<field name="serial_no" class="java.lang.String"/>
-	<group name="ProjectGroup" isStartNewPage="true">
-		<groupExpression><![CDATA[$F{enquiry_line_id}]]></groupExpression>
+	<group name="HeaderOne">
+		<groupExpression><![CDATA[$F{offer_ref_id}]]></groupExpression>
 		<groupHeader>
-			<band height="178">
-				<staticText>
-					<reportElement mode="Transparent" x="464" y="155" width="91" height="23" isRemoveLineWhenBlank="true"/>
-					<box>
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[PRICE /
-EACH IN Rs.]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="47" y="155" width="79" height="23" isRemoveLineWhenBlank="true"/>
-					<box>
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[MATERIAL CODE]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="216" y="155" width="132" height="23" isRemoveLineWhenBlank="true"/>
-					<box>
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[PART NAME]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="348" y="155" width="116" height="23" isRemoveLineWhenBlank="true"/>
-					<box>
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[MATERIAL]]></text>
-				</staticText>
-				<textField>
-					<reportElement mode="Transparent" x="1" y="0" width="554" height="31"/>
-					<box topPadding="13"/>
-					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
-				</textField>
+			<band height="109">
 				<image>
 					<reportElement x="126" y="0" width="69" height="46"/>
 					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
@@ -277,19 +219,6 @@ EACH IN Rs.]]></text>
 					<textFieldExpression><![CDATA["OFFER FOR SPARES"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="387" y="66" width="168" height="20"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA["DATE:"+$F{offer_date}]]></textFieldExpression>
-				</textField>
-				<textField>
 					<reportElement x="387" y="46" width="168" height="20"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
@@ -302,34 +231,8 @@ EACH IN Rs.]]></text>
 					</textElement>
 					<textFieldExpression><![CDATA["OFFER REF :"+$F{offer_ref}]]></textFieldExpression>
 				</textField>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="109" width="348" height="23" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[PUMP MODEL:]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="132" width="348" height="23" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[EARLIER PUMP SERIAL NO: ]]></text>
-				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="348" y="86" width="207" height="23"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="332" y="86" width="223" height="23"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -341,8 +244,16 @@ EACH IN Rs.]]></text>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{customer}]]></textFieldExpression>
 				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="348" y="109" width="207" height="23"/>
+				<textField>
+					<reportElement mode="Transparent" x="1" y="0" width="554" height="31"/>
+					<box topPadding="13"/>
+					<textElement textAlignment="Center">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="387" y="66" width="168" height="20"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -350,12 +261,45 @@ EACH IN Rs.]]></text>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="8" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{pump_name}]]></textFieldExpression>
+					<textFieldExpression><![CDATA["DATE:"+$F{offer_date}]]></textFieldExpression>
 				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="86" width="332" height="23" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[CUSTOMER : ]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="HeaderTwo">
+		<groupExpression><![CDATA[$F{enquiry_line_id}]]></groupExpression>
+		<groupHeader>
+			<band height="69">
+				<staticText>
+					<reportElement mode="Transparent" x="332" y="46" width="123" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[MATERIAL]]></text>
+				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="348" y="132" width="207" height="23"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="332" y="23" width="223" height="23"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -368,33 +312,7 @@ EACH IN Rs.]]></text>
 					<textFieldExpression><![CDATA[$F{serial_no}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="155" width="47" height="23" isRemoveLineWhenBlank="true"/>
-					<box>
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[ITEM NO]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="86" width="348" height="23" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[CUSTOMER : ]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="179" y="155" width="37" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="139" y="46" width="37" height="23" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -407,7 +325,7 @@ EACH IN Rs.]]></text>
 					<text><![CDATA[GST %]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="126" y="155" width="53" height="23" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="86" y="46" width="53" height="23" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -419,179 +337,225 @@ EACH IN Rs.]]></text>
 					</textElement>
 					<text><![CDATA[HSN Code]]></text>
 				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="455" y="46" width="100" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[PRICE /
+EACH IN Rs.]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="332" y="0" width="223" height="23"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{pump_name}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="176" y="46" width="156" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[PART NAME]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="0" width="332" height="23" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[PUMP MODEL:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="23" width="332" height="23" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[EARLIER PUMP SERIAL NO: ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="32" y="46" width="54" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[MATERIAL CODE]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="46" width="32" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[ITEM NO]]></text>
+				</staticText>
 			</band>
 		</groupHeader>
-		<groupFooter>
-			<band height="149">
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="298" y="41" width="257" height="21"/>
-					<box topPadding="0" bottomPadding="0">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.0"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA["FOR SAM TURBO INDUSTRY PVT LTD"]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="298" y="128" width="257" height="21"/>
-					<box topPadding="0" bottomPadding="0">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.0"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA["MANAGING DIRECTOR"]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="298" y="107" width="257" height="21"/>
-					<box topPadding="0" bottomPadding="0">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.0"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA["S. K. SENTILKUMAR"]]></textFieldExpression>
-				</textField>
+	</group>
+	<group name="Sub Details">
+		<groupExpression><![CDATA[$F{enquiry_line_id}]]></groupExpression>
+		<groupHeader>
+			<band height="21">
+				<componentElement>
+					<reportElement positionType="Float" isPrintRepeatedValues="false" mode="Transparent" x="0" y="0" width="555" height="21"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="dataset1">
+							<datasetParameter name="enquiry_line_id">
+								<datasetParameterExpression><![CDATA[$F{enquiry_line_id}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="21" width="555">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="32" height="21"/>
+								<box topPadding="0" leftPadding="1" bottomPadding="0">
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="32" y="0" width="54" height="21"/>
+								<box topPadding="0" leftPadding="2" bottomPadding="0">
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{material_code}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="176" y="0" width="156" height="21"/>
+								<box topPadding="0" leftPadding="2" bottomPadding="0">
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{off_name}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="332" y="0" width="123" height="21"/>
+								<box topPadding="0" leftPadding="2" bottomPadding="0">
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="455" y="0" width="100" height="21"/>
+								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="2">
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{each_price_txt}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="86" y="0" width="53" height="21"/>
+								<box topPadding="0" leftPadding="2" bottomPadding="0">
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{hsn_code}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="139" y="0" width="37" height="21"/>
+								<box topPadding="0" leftPadding="2" bottomPadding="0">
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{tax_per}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
 			</band>
-		</groupFooter>
+		</groupHeader>
 	</group>
-	<group name="Table Heading">
-		<groupExpression><![CDATA[]]></groupExpression>
+	<group name="FooterOne">
+		<groupExpression><![CDATA[$F{offer_ref_id}]]></groupExpression>
 	</group>
-	<group name="DesignationGroup" isStartNewPage="true">
-		<groupExpression><![CDATA[]]></groupExpression>
-	</group>
-	<group name="Label" isReprintHeaderOnEachPage="true">
-		<groupExpression><![CDATA[$F{company_name}]]></groupExpression>
-	</group>
-	<group name="work_order" isReprintHeaderOnEachPage="true">
-		<groupExpression><![CDATA[]]></groupExpression>
+	<group name="FooterTwo">
+		<groupExpression><![CDATA[$F{offer_ref_id}]]></groupExpression>
 	</group>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<detail>
-		<band height="21">
-			<componentElement>
-				<reportElement x="0" y="0" width="555" height="21"/>
-				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
-					<datasetRun subDataset="dataset1">
-						<datasetParameter name="enquiry_line_id">
-							<datasetParameterExpression><![CDATA[$F{enquiry_line_id}]]></datasetParameterExpression>
-						</datasetParameter>
-						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-					</datasetRun>
-					<jr:listContents height="21" width="555">
-						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="47" height="21"/>
-							<box topPadding="0" leftPadding="1" bottomPadding="0">
-								<topPen lineWidth="0.75"/>
-								<leftPen lineWidth="0.75"/>
-								<bottomPen lineWidth="0.75"/>
-								<rightPen lineWidth="0.75"/>
-							</box>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
-								<font size="8"/>
-							</textElement>
-							<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
-						</textField>
-						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="47" y="0" width="79" height="21"/>
-							<box topPadding="0" leftPadding="2" bottomPadding="0">
-								<topPen lineWidth="0.75"/>
-								<leftPen lineWidth="0.75"/>
-								<bottomPen lineWidth="0.75"/>
-								<rightPen lineWidth="0.75"/>
-							</box>
-							<textElement verticalAlignment="Middle">
-								<font size="8"/>
-							</textElement>
-							<textFieldExpression><![CDATA[$F{material_code}]]></textFieldExpression>
-						</textField>
-						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="216" y="0" width="132" height="21"/>
-							<box topPadding="0" leftPadding="2" bottomPadding="0">
-								<topPen lineWidth="0.75"/>
-								<leftPen lineWidth="0.75"/>
-								<bottomPen lineWidth="0.75"/>
-								<rightPen lineWidth="0.75"/>
-							</box>
-							<textElement verticalAlignment="Middle">
-								<font size="8"/>
-							</textElement>
-							<textFieldExpression><![CDATA[$F{off_name}]]></textFieldExpression>
-						</textField>
-						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="348" y="0" width="116" height="21"/>
-							<box topPadding="0" leftPadding="2" bottomPadding="0">
-								<topPen lineWidth="0.75"/>
-								<leftPen lineWidth="0.75"/>
-								<bottomPen lineWidth="0.75"/>
-								<rightPen lineWidth="0.75"/>
-							</box>
-							<textElement verticalAlignment="Middle">
-								<font size="8"/>
-							</textElement>
-							<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
-						</textField>
-						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="464" y="0" width="91" height="21"/>
-							<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="2">
-								<topPen lineWidth="0.75"/>
-								<leftPen lineWidth="0.75"/>
-								<bottomPen lineWidth="0.75"/>
-								<rightPen lineWidth="0.75"/>
-							</box>
-							<textElement textAlignment="Right" verticalAlignment="Middle">
-								<font size="8"/>
-							</textElement>
-							<textFieldExpression><![CDATA[$F{each_price_txt}]]></textFieldExpression>
-						</textField>
-						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="126" y="0" width="53" height="21"/>
-							<box topPadding="0" leftPadding="2" bottomPadding="0">
-								<topPen lineWidth="0.75"/>
-								<leftPen lineWidth="0.75"/>
-								<bottomPen lineWidth="0.75"/>
-								<rightPen lineWidth="0.75"/>
-							</box>
-							<textElement verticalAlignment="Middle">
-								<font size="8"/>
-							</textElement>
-							<textFieldExpression><![CDATA[$F{hsn_code}]]></textFieldExpression>
-						</textField>
-						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="179" y="0" width="37" height="21"/>
-							<box topPadding="0" leftPadding="2" bottomPadding="0">
-								<topPen lineWidth="0.75"/>
-								<leftPen lineWidth="0.75"/>
-								<bottomPen lineWidth="0.75"/>
-								<rightPen lineWidth="0.75"/>
-							</box>
-							<textElement verticalAlignment="Middle">
-								<font size="8"/>
-							</textElement>
-							<textFieldExpression><![CDATA[$F{tax_per}]]></textFieldExpression>
-						</textField>
-					</jr:listContents>
-				</jr:list>
-			</componentElement>
-		</band>
-	</detail>
 	<pageFooter>
-		<band height="21">
+		<band height="20">
 			<textField>
-				<reportElement x="237" y="0" width="87" height="20"/>
+				<reportElement x="235" y="0" width="87" height="20"/>
 				<box topPadding="0">
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -601,7 +565,7 @@ EACH IN Rs.]]></text>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="324" y="0" width="48" height="20"/>
+				<reportElement x="322" y="0" width="48" height="20"/>
 				<box topPadding="0">
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -611,7 +575,7 @@ EACH IN Rs.]]></text>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2" y="0" width="235" height="20"/>
+				<reportElement x="0" y="0" width="235" height="20"/>
 				<box topPadding="0">
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -621,7 +585,7 @@ EACH IN Rs.]]></text>
 				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$F{new_date}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="371" y="0" width="184" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="369" y="0" width="184" height="20"/>
 				<box topPadding="0">
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -632,13 +596,47 @@ EACH IN Rs.]]></text>
 			</textField>
 		</band>
 	</pageFooter>
-	<noData>
-		<band height="20">
-			<staticText>
-				<reportElement mode="Transparent" x="2" y="0" width="553" height="20"/>
-				<textElement textAlignment="Center"/>
-				<text><![CDATA[No Records Found]]></text>
-			</staticText>
+	<summary>
+		<band height="105">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="298" y="20" width="257" height="21"/>
+				<box topPadding="0" bottomPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["FOR SAM TURBO INDUSTRY PVT LTD"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="296" y="84" width="257" height="21"/>
+				<box topPadding="0" bottomPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["MANAGING DIRECTOR"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="296" y="63" width="257" height="21"/>
+				<box topPadding="0" bottomPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["S. K. SENTILKUMAR"]]></textFieldExpression>
+			</textField>
 		</band>
-	</noData>
+	</summary>
 </jasperReport>
