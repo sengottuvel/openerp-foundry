@@ -48,7 +48,7 @@
             <field name="target">new</field>
         </record>
             
-	<menuitem name="Supplied Order Details" parent="kg_menus.rpm_planning_reports" action="rma_supplied_order" id="kg_supplied_order_details_reports" sequence="10"/>	
+	<menuitem name="Supplied Order Details" parent="kg_menus.rpm_planning_reports" action="rma_supplied_order" id="kg_supplied_order_details_report" sequence="10"/>	
       
 
     </data>

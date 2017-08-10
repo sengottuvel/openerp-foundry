@@ -15,3 +15,8 @@ table.oe_form_group.oe_subtotal_footer.oe_right{
 	margin-bottom: 70px;
 }
 
+
+.ui-dialog.ui-widget .openerp .oe_form_sheet {
+    width: 100% !important;
+    min-width: 100% !Important;
+}
