@@ -474,10 +474,26 @@ class kg_payslip(osv.osv):
 				empr_esi_ids = employee_cont.search(cr , uid ,[('active','=',True),('state','=','approved')])
 				emp_esi_rec = employee_cont.browse(cr,uid,empr_esi_ids[0])
 				if esi_amt_sal:
-					if esi_amt_sal + acc_vda_value < emp_esi_rec.esi_slab:
-						esi_stand_amt = esi_amt_sal + acc_vda_value
+					print "esi_amt_salesi_amt_salesi_amt_sal",esi_amt_sal + acc_vda_value
+					if emp_esi_config.esi_config_flag is False:
+						if esi_amt_sal + acc_vda_value < emp_esi_rec.esi_slab:
+							esi_stand_amt = esi_amt_sal + acc_vda_value
+							print "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+							if slip_rec.month[:-5] == 'April':
+								print "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+								self.pool.get('hr.employee').write(cr,uid,slip_rec.employee_id.id,{'esi_config_flag':True})
+							if slip_rec.month[:-5] == 'October':
+								self.pool.get('hr.employee').write(cr,uid,slip_rec.employee_id.id,{'esi_config_flag':False})
+						else:
+							esi_stand_amt = 0
 					else:
-						esi_stand_amt = 0
+						if slip_rec.month[:-5] == 'October':
+								self.pool.get('hr.employee').write(cr,uid,slip_rec.employee_id.id,{'esi_config_flag':False})
+						esi_stand_amt = esi_amt_sal + acc_vda_value
+					#~ if esi_amt_sal + acc_vda_value < emp_esi_rec.esi_slab:
+						#~ esi_stand_amt = esi_amt_sal + acc_vda_value
+					#~ else:
+						#~ esi_stand_amt = 0
 					if esi_stand_amt > 0:
 						print "*********************************************************************************************",esi_stand_amt
 						empr_esi_line_ids = employee_cont_line.search(cr , uid ,[('cont_heads','=','esi'),('header_id','=',emp_esi_rec.id)])

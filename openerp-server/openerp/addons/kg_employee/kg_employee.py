@@ -144,6 +144,7 @@ class kg_employee(osv.osv):
 		'division_id':fields.many2one('kg.division.master','Division'),
 		'nature_of_job_id':fields.many2one('kg.job.nature','Nature Of Job'),
 		'account_id':fields.many2one('account.account','Account'),
+		'esi_config_flag':fields.boolean('ESI Config Flag'),
 		
 		## Child Tables Declaration	
 			
