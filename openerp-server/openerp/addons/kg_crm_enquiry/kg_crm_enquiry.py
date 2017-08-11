@@ -1761,9 +1761,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 											'qty':1,'accessories_type':coupling_accessories_type,'off_name':coupling_offer_name,}
 						access_vals.append(coupling_value)
 						#~ value = {'line_ids_access_a': access_vals}
-				else:
-					raise osv.except_osv(_('Warning!'),
-						_('Configuration not available in product model for Coupling,Base plate,Coupling guard and Foundation bolt'))
+				#~ else:
+					#~ raise osv.except_osv(_('Warning!'),
+						#~ _('Configuration not available in product model for Coupling,Base plate,Coupling guard and Foundation bolt'))
 				## Coupling portion ends
 				## Baseplate portion starts
 				cr.execute('''select
@@ -1909,9 +1909,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							access_vals.append(pump_pulley_value)
 							loop_count = loop_count + 1
 							print"loop_countloop_count",loop_count
-				else:
-					raise osv.except_osv(_('Warning!'),
-						_('Configuration not available in product model for Pump pulley,Motor pulley,Slide rail,Belt and Belt guard'))
+				#~ else:
+					#~ raise osv.except_osv(_('Warning!'),
+						#~ _('Configuration not available in product model for Pump pulley,Motor pulley,Slide rail,Belt and Belt guard'))
 		value = {'line_ids_access_a': access_vals}
 		
 		return {'value': value}
