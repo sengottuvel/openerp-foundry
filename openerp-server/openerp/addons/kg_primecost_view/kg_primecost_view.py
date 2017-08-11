@@ -1268,7 +1268,7 @@ class kg_primecost_view(osv.osv):
 						for ms_item in item.line_ids_a:
 							if ms_item.is_applicable == True:
 								ms_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'ms',0,
-								ms_item.ms_id.id,1,0,entry.moc_const_id.id,ms_item.moc_id.id,0)
+								ms_item.ms_id.id,0,0,entry.moc_const_id.id,ms_item.moc_id.id,0)
 								self.pool.get('ch.primecost.view.spare.ms').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost * ms_item.qty})
 								prime_cost += ms_prime_cost * ms_item.qty
 						pump_prime_cost += prime_cost
@@ -1872,6 +1872,9 @@ class ch_primecost_view_spare_bom(osv.osv):
 			cr.execute(''' delete from ch_primecost_view_spare_fou where header_id = %s '''%(rec.id))
 			cr.execute(''' delete from ch_primecost_view_spare_ms where header_id = %s '''%(rec.id))
 			cr.execute(''' delete from ch_primecost_view_spare_bot where header_id = %s '''%(rec.id))
+			if rec.line_ids_a:
+				for item in rec.line_ids_a:
+					cr.execute(''' delete from ch_pc_view_spare_ms where header_id = %s '''%(item.id))
 		return True
 	
 	_constraints = [
@@ -1933,6 +1936,7 @@ class ch_primecost_view_spare_bom(osv.osv):
 				
 				if bom_rec.line_ids_a:
 					for item in bom_rec.line_ids_a:
+						ch_ms_vals = []
 						moc_id = ''
 						ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
 						print"ms_objms_obj",ms_obj
@@ -1945,6 +1949,21 @@ class ch_primecost_view_spare_bom(osv.osv):
 								if ms_line_obj:
 									ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 									moc_id = ms_line_rec.moc_id.id
+							if ms_rec.line_ids:
+								for raw in ms_rec.line_ids:
+									ch_ms_vals.append([0, 0,{
+											'product_id': raw.product_id.id,
+											'uom': raw.uom.id,
+											'od': raw.od,
+											'length': raw.length,
+											'breadth': raw.breadth,
+											'thickness': raw.thickness,
+											'weight': raw.weight * item.qty * qty,
+											'uom_conversation_factor': raw.uom_conversation_factor,
+											'temp_qty': raw.temp_qty * item.qty * qty,
+											'qty': raw.qty * item.qty * qty,
+											'remarks': raw.remarks,
+											}])
 						if moc_id:
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
@@ -1960,8 +1979,8 @@ class ch_primecost_view_spare_bom(osv.osv):
 										'qty': item.qty * qty,
 										'load_bom': True,
 										'is_applicable': True,
+										'line_ids': ch_ms_vals,
 										#~ 'purpose_categ': purpose_categ,
-										#~ 'line_ids': ch_ms_vals,
 										#~ 'csd_no': item.csd_no,
 										#~ 'remarks': item.remarks,
 										})
@@ -2118,7 +2137,7 @@ class ch_primecost_view_spare_ms(osv.osv):
 		
 		## Child Tables Declaration 
 		
-		#~ 'line_ids': fields.one2many('ch.kg.crm.ms.raw', 'header_id', "Raw Details"),
+		'line_ids': fields.one2many('ch.pc.view.spare.ms', 'header_id', "Raw Details"),
 		
 	}
 	
@@ -2155,6 +2174,91 @@ class ch_primecost_view_spare_ms(osv.osv):
 		]
 	
 ch_primecost_view_spare_ms()
+
+class ch_pc_view_spare_ms(osv.osv):
+	
+	_name = "ch.pc.view.spare.ms"
+	_description = "Child PC Spare MS Item Details"
+	
+	_columns = {
+		
+		### Basic Info
+		
+		'header_id':fields.many2one('ch.primecost.view.spare.ms','MS',ondelete='cascade'),
+		'remarks': fields.char('Remarks'),
+		'active': fields.boolean('Active'),	
+		
+		### Module Requirement
+		
+		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
+		'uom':fields.many2one('product.uom','UOM',size=128 ,required=True),
+		'od': fields.float('OD'),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
+		'thickness': fields.float('Thickness'),
+		'weight': fields.float('Weight' ,digits=(16,5)),
+		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),		
+		'temp_qty':fields.float('Qty'),
+		'qty':fields.float('Testing Qty',readonly=True),
+		
+	}
+	
+	_defaults = {
+		
+		'active': True,
+		
+	}
+	
+	def onchange_length(self, cr, uid, ids, length,breadth,qty,temp_qty,uom_conversation_factor,product_id, context=None):		
+		value = {'qty':0,'weight':0}
+		qty = 0
+		weight = 0
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		if uom_conversation_factor:
+			if uom_conversation_factor == 'one_dimension':
+				qty = length * temp_qty
+				if length == 0.00:
+					qty = temp_qty
+				weight = qty * prod_rec.po_uom_in_kgs
+			if uom_conversation_factor == 'two_dimension':
+				qty = length * breadth * temp_qty				
+				weight = qty * prod_rec.po_uom_in_kgs
+		value = {'qty': qty,'weight': weight}			
+		return {'value': value}
+	
+	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
+		value = {'qty': '','weight': '',}
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		qty_value = 0.00
+		weight=0.00
+		if uom_conversation_factor == 'one_dimension':	
+			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
+				qty_value = length * temp_qty
+				weight = 0.00
+			if length == 0.00:
+				qty_value = temp_qty
+			else:				
+				qty_value = length * temp_qty			
+				weight = qty_value * prod_rec.po_uom_in_kgs
+		if uom_conversation_factor == 'two_dimension':
+			qty_value = length * breadth * temp_qty				
+			weight = qty_value * prod_rec.po_uom_in_kgs		
+		value = {'qty': qty_value,'weight':weight}			
+		return {'value': value}
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
+	
+	_constraints = [
+		
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+	
+ch_pc_view_spare_ms()
 
 class ch_primecost_view_spare_bot(osv.osv):
 	

@@ -175,7 +175,7 @@
 										</page>
 										<page string="MS">
 										<field name="line_ids_a" nolabel="1">
-											<tree string="MS Item Tree" editable="top" create="false" delete="false">
+											<tree string="MS Item Tree" create="false" delete="false">
 												<field name="is_applicable"/>
 												<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 												<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
@@ -193,6 +193,43 @@
 												<field name="moc_name" invisible="1"/>
 												<field name="moc_changed_flag" invisible="1"/>
 											</tree>
+											<form string="MS Details Entry Tree" create="false" delete="false">					
+												<group colspan="4">
+													<group>
+														<field name="is_applicable"/>
+														<field name="position_id" readonly="1"/>
+														<field name="ms_id" readonly="1"/>
+														<field name="name" readonly="1"/>
+														<field name="material_code"/>
+													</group>
+													<group>
+														<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}"/>
+														<field name="length" readonly="1"/>
+														<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
+														<field name="prime_cost" readonly="1"/>
+													</group>
+												</group>
+												<notebook>
+													<page string="Raw Materials" >
+														<field name="line_ids" colspan="4" nolabel="1">
+															<tree string="Raw Materials Entry Tree" editable="top"  delete="false">					
+																<field name="product_id" readonly="1"/>
+																<field name="uom" required="1" readonly="1"/>
+																<field name="uom_conversation_factor" readonly="1"/>
+																<field name="od" invisible="1"/>
+																<field name="length" attrs="{'required':[('length','=',0)],'readonly':[('length','=',0)]}" on_change="onchange_length(length,breadth,qty,temp_qty,uom_conversation_factor,product_id)"/>
+																<field name="breadth" readonly="1"/>
+																<field name="thickness" invisible="1"/>
+																<field name="weight" invisible="1"/>
+																<field name="temp_qty" readonly="1" on_change="onchange_weight(uom_conversation_factor,length,breadth,temp_qty,product_id)"/>
+																<field name="qty" readonly="1"/>
+																<field name="weight" readonly="1"/>
+																<field name="remarks" readonly="1"/>
+															</tree>
+														</field>
+													</page>
+												</notebook>
+											</form>
 										</field>
 										</page>
 										<page string="BOT">
