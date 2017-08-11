@@ -5739,7 +5739,7 @@ where off.id = $P{offer_id}]]>
 						<rightPen lineWidth="0.5"/>
 					</box>
 					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA["Less (Dealer Cr.Note + Special Discount)"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Less (Dealer + Special Discount)"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="723" y="17" width="90" height="17"/>

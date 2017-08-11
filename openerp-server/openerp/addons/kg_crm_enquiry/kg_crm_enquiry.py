@@ -426,32 +426,32 @@ class kg_crm_enquiry(osv.osv):
 		### Prime cost calculation for MS item ###
 		elif item_type == 'ms':
 			if moc_id > 0:
-				if ms_raw == 1:
-					ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_id)
-					if ms_rec.line_ids:
-						for raw_line in ms_rec.line_ids:
-							design_rate = 0
-							brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id),('state','=','approved')])
-							if brandmoc_obj:
-								brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
-								brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
-								cr.execute(brandmoc_line_sql)
-								brandmoc_line_data = cr.dictfetchall()
-								if brandmoc_line_data:
-									design_rate = brandmoc_line_data[0]['rate']
-								if raw_line.product_id.uom_conversation_factor == 'one_dimension':
-									if raw_line.uom.id == brandmoc_rec.uom_id.id:
-										qty = raw_line.qty
-									elif raw_line.uom.id != brandmoc_rec.uom_id.id:
-										qty = raw_line.weight
-								elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
-									qty = raw_line.weight
-								price = design_rate * qty
-							else:
-								qty = design_rate = price = 0
-							tot_price += price
-							prime_cost = tot_price
-				elif ms_raw > 0:
+				#~ if ms_raw == 1:
+					#~ ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_id)
+					#~ if ms_rec.line_ids:
+						#~ for raw_line in ms_rec.line_ids:
+							#~ design_rate = 0
+							#~ brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id),('state','=','approved')])
+							#~ if brandmoc_obj:
+								#~ brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
+								#~ brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
+								#~ cr.execute(brandmoc_line_sql)
+								#~ brandmoc_line_data = cr.dictfetchall()
+								#~ if brandmoc_line_data:
+									#~ design_rate = brandmoc_line_data[0]['rate']
+								#~ if raw_line.product_id.uom_conversation_factor == 'one_dimension':
+									#~ if raw_line.uom.id == brandmoc_rec.uom_id.id:
+										#~ qty = raw_line.qty
+									#~ elif raw_line.uom.id != brandmoc_rec.uom_id.id:
+										#~ qty = raw_line.weight
+								#~ elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
+									#~ qty = raw_line.weight
+								#~ price = design_rate * qty
+							#~ else:
+								#~ qty = design_rate = price = 0
+							#~ tot_price += price
+							#~ prime_cost = tot_price
+				if ms_raw > 0:
 					if ms_raw.line_ids:
 						for raw_line in ms_raw.line_ids:
 							design_rate = 0
@@ -461,6 +461,20 @@ class kg_crm_enquiry(osv.osv):
 								brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
 								cr.execute(brandmoc_line_sql)
 								brandmoc_line_data = cr.dictfetchall()
+								#~ if brandmoc_line_data:
+									#~ design_rate = brandmoc_line_data[0]['rate']
+								#~ if raw_line.uom_conversation_factor == 'one_dimension':
+									#~ qty = raw_line.qty
+								#~ elif raw_line.uom_conversation_factor == 'two_dimension':
+									#~ qty = raw_line.qty * raw_line.length * raw_line.breadth
+								#~ if raw_line.uom.id == brandmoc_rec.uom_id.id:
+									#~ price = qty * raw_line.qty * design_rate
+								#~ elif raw_line.uom.id != brandmoc_rec.uom_id.id:
+									#~ if brandmoc_rec.uom_id.code == 'Kg':
+										#~ price = raw_line.weight * design_rate
+									#~ elif brandmoc_rec.uom_id.id == raw_line.product_id.uom_po_id.id:
+										#~ price = (design_rate / raw_line.product_id.po_uom_coeff) * qty
+								#~ price = design_rate * qty
 								if brandmoc_line_data:
 									design_rate = brandmoc_line_data[0]['rate']
 								if raw_line.product_id.uom_conversation_factor == 'one_dimension':
@@ -641,7 +655,7 @@ class kg_crm_enquiry(osv.osv):
 								for ms_item in orde_item.line_ids_a:
 									if ms_item.is_applicable == True:
 										ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
-										ms_item.ms_id.id,1,0,orde_item.moc_const_id.id,ms_item.moc_id.id,0)
+										ms_item.ms_id.id,0,0,orde_item.moc_const_id.id,ms_item.moc_id.id,0)
 										self.pool.get('ch.kg.crm.spare.ms').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost * ms_item.qty})
 										prime_cost += ms_prime_cost * ms_item.qty
 										print "ms_prime_cost",prime_cost
@@ -819,6 +833,11 @@ class kg_crm_enquiry(osv.osv):
 		return True
 	
   	def spare_bom_creation(self,cr,uid,offer_id,orde_item,spare_bom_prime_cost,context=None):
+		moc_obj = self.pool.get('kg.moc.master').search(cr,uid,[('name','=','N/A')])
+		if moc_obj:
+			moc_id = moc_obj[0]
+		else:
+			moc_id = ''
 		spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{'header_id': offer_id,
 															  'pumpseries_id': orde_item.header_id.pumpseries_id.id,
 															  'pump_id': orde_item.header_id.pump_id.id,
@@ -826,13 +845,13 @@ class kg_crm_enquiry(osv.osv):
 															  'per_spare_prime_cost': spare_bom_prime_cost,
 															  'prime_cost': spare_bom_prime_cost,
 															  'enquiry_line_id': orde_item.header_id.id,
-															  'item_code': '',
+															  'item_code': orde_item.bom_id.name,
 															  'item_name': orde_item.bom_id.name,
 															  'off_name': orde_item.off_name,
 															  'pattern_id': '',
 															  'ms_id': '',
 															  'bot_id': '',
-															  'moc_id': '',
+															  'moc_id': moc_id,
 															  'moc_changed_flag': '',
 															  'qty': orde_item.qty,
 															   })
@@ -841,7 +860,7 @@ class kg_crm_enquiry(osv.osv):
 		#~ self.pool.get('ch.spare.offer').write(cr,uid,spare_rec.id,{'spare_offer_line_id': spare_id,})
 		
 		return True
-		
+	
   	def spare_creation(self,cr,uid,offer_id,order_item,bom_item,prime_cost,item_type,context=None):
 		moc_changed_flag = False
 		hsn = ''
@@ -1203,7 +1222,7 @@ class kg_crm_enquiry(osv.osv):
 						moc_id = ms_line.moc_id.id
 				else:
 					moc_id = ms_line.moc_id.id
-				if moc_id > 0:	
+				if moc_id > 0:
 					if ms_rec.line_ids:
 						for raw_line in ms_rec.line_ids:
 							brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id),('state','=','approved')])
@@ -1744,7 +1763,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						#~ value = {'line_ids_access_a': access_vals}
 				else:
 					raise osv.except_osv(_('Warning!'),
-						_('Given config not avail in master for Coupling,Base plate,Coupling guard and Foundation bolt!'))
+						_('Configuration not available in product model for Coupling,Base plate,Coupling guard and Foundation bolt'))
 				## Coupling portion ends
 				## Baseplate portion starts
 				cr.execute('''select
@@ -1892,7 +1911,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							print"loop_countloop_count",loop_count
 				else:
 					raise osv.except_osv(_('Warning!'),
-						_('Given config not avail in master for Pump pully,Motor pully,Slide rail,Belt and Belt guard!'))
+						_('Configuration not available in product model for Pump pulley,Motor pulley,Slide rail,Belt and Belt guard'))
 		value = {'line_ids_access_a': access_vals}
 		
 		return {'value': value}
@@ -2026,6 +2045,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			cr.execute(''' delete from ch_kg_crm_spare_fou where header_id = %s '''%(rec.id))
 			cr.execute(''' delete from ch_kg_crm_spare_ms where header_id = %s '''%(rec.id))
 			cr.execute(''' delete from ch_kg_crm_spare_bot where header_id = %s '''%(rec.id))
+			if rec.line_ids_a:
+				for item in rec.line_ids_a:
+					cr.execute(''' delete from ch_kg_crm_spare_ms_raw where header_id = %s '''%(item.id))
 		return True
 	
 	def _template_name_validate(self, cr, uid,ids, context=None):
@@ -2048,7 +2070,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				if item.line_ids:
 					length = sum(ele.length for ele in item.line_ids)
 					if item.length < length:
-						raise osv.except_osv(_('Warning!'),_('%s %s Mapped raw material length exceeds'%(rec.pump_id.name,item.name)))
+						raise osv.except_osv(_('Warning!'),_('%s %s Mapped raw material length exceed'%(rec.pump_id.name,item.name)))
 		return True
 	
 	_constraints = [
@@ -4274,6 +4296,7 @@ class ch_kg_crm_spare_bom(osv.osv):
 				
 				if bom_rec.line_ids_a:
 					for item in bom_rec.line_ids_a:
+						ch_ms_vals = []
 						moc_id = ''
 						ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
 						print"ms_objms_obj",ms_obj
@@ -4286,6 +4309,21 @@ class ch_kg_crm_spare_bom(osv.osv):
 								if ms_line_obj:
 									ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 									moc_id = ms_line_rec.moc_id.id
+							if ms_rec.line_ids:
+								for raw in ms_rec.line_ids:
+									ch_ms_vals.append([0, 0,{
+											'product_id': raw.product_id.id,
+											'uom': raw.uom.id,
+											'od': raw.od,
+											'length': raw.length,
+											'breadth': raw.breadth,
+											'thickness': raw.thickness,
+											'weight': raw.weight * item.qty * qty,
+											'uom_conversation_factor': raw.uom_conversation_factor,
+											'temp_qty': raw.temp_qty * item.qty * qty,
+											'qty': raw.qty * item.qty * qty,
+											'remarks': raw.remarks,
+											}])
 						if moc_id:
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
@@ -4301,12 +4339,12 @@ class ch_kg_crm_spare_bom(osv.osv):
 										'qty': item.qty * qty,
 										'load_bom': True,
 										'is_applicable': True,
+										'line_ids': ch_ms_vals,
 										#~ 'purpose_categ': purpose_categ,
 										#~ 'line_ids': ch_ms_vals,
 										#~ 'csd_no': item.csd_no,
 										#~ 'remarks': item.remarks,
 										})
-				
 				
 				if bom_rec.line_ids_b:
 					for item in bom_rec.line_ids_b:
@@ -4462,7 +4500,7 @@ class ch_kg_crm_spare_ms(osv.osv):
 		
 		## Child Tables Declaration 
 		
-		#~ 'line_ids': fields.one2many('ch.kg.crm.ms.raw', 'header_id', "Raw Details"),
+		'line_ids': fields.one2many('ch.kg.crm.spare.ms.raw', 'header_id', "Raw Details"),
 		
 	}
 	
@@ -4499,6 +4537,91 @@ class ch_kg_crm_spare_ms(osv.osv):
 		]
 	
 ch_kg_crm_spare_ms()
+
+class ch_kg_crm_spare_ms_raw(osv.osv):
+	
+	_name = "ch.kg.crm.spare.ms.raw"
+	_description = "Ch crm spare ms raw Details"
+	
+	_columns = {
+		
+		### Basic Info
+		
+		'header_id':fields.many2one('ch.kg.crm.spare.ms','MS',ondelete='cascade'),
+		'remarks': fields.char('Remarks'),
+		'active': fields.boolean('Active'),	
+		
+		### Module Requirement
+		
+		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
+		'uom':fields.many2one('product.uom','UOM',size=128 ,required=True),
+		'od': fields.float('OD'),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
+		'thickness': fields.float('Thickness'),
+		'weight': fields.float('Weight' ,digits=(16,5)),
+		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),		
+		'temp_qty':fields.float('Qty'),
+		'qty':fields.float('Testing Qty',readonly=True),
+		
+	}
+	
+	_defaults = {
+		
+		'active': True,
+		
+	}
+	
+	def onchange_length(self, cr, uid, ids, length,breadth,qty,temp_qty,uom_conversation_factor,product_id, context=None):		
+		value = {'qty':0,'weight':0}
+		qty = 0
+		weight = 0
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		if uom_conversation_factor:
+			if uom_conversation_factor == 'one_dimension':
+				qty = length * temp_qty
+				if length == 0.00:
+					qty = temp_qty
+				weight = qty * prod_rec.po_uom_in_kgs
+			if uom_conversation_factor == 'two_dimension':
+				qty = length * breadth * temp_qty				
+				weight = qty * prod_rec.po_uom_in_kgs
+		value = {'qty': qty,'weight': weight}			
+		return {'value': value}
+	
+	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
+		value = {'qty': '','weight': '',}
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		qty_value = 0.00
+		weight=0.00
+		if uom_conversation_factor == 'one_dimension':	
+			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
+				qty_value = length * temp_qty
+				weight = 0.00
+			if length == 0.00:
+				qty_value = temp_qty
+			else:				
+				qty_value = length * temp_qty			
+				weight = qty_value * prod_rec.po_uom_in_kgs
+		if uom_conversation_factor == 'two_dimension':
+			qty_value = length * breadth * temp_qty				
+			weight = qty_value * prod_rec.po_uom_in_kgs		
+		value = {'qty': qty_value,'weight':weight}			
+		return {'value': value}
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
+	
+	_constraints = [
+		
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+	
+ch_kg_crm_spare_ms_raw()
 
 class ch_kg_crm_spare_bot(osv.osv):
 	
