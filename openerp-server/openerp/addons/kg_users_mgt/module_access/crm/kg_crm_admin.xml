@@ -1182,6 +1182,26 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
 		</record>
 		
+		<record id="t_crm_ch_kg_crm_spare_ms_raw" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_kg_crm_spare_ms_raw"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch crm spare ms raw</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_pc_view_spare_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_primecost_view.model_ch_pc_view_spare_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch pc spare ms raw</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
