@@ -9,11 +9,13 @@ dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
    ('1','MS NC'),
-   ('2','FDY-NC'),
-   ('3','Service'),
-   ('4','Emergency'),
-   ('5','Spare'),
-   ('6','Normal'),
+   ('2','Break down'),
+   ('3','Emergency'),
+   ('4','Service'),
+   ('5','FDY-NC'),
+   ('6','Spare'),
+   ('7','Urgent'),
+   ('8','Normal'),
   
 ]
 
@@ -215,15 +217,30 @@ class kg_part_qap(osv.osv):
 									
 									### Order Priority ###
 														
+									#~ if entry.order_id.order_category in ('pump','pump_spare','project'):
+										#~ if entry.order_id.order_priority == 'normal':
+											#~ priority = '6'
+										#~ if entry.order_id.order_priority == 'emergency':
+											#~ priority = '4'
+									#~ if entry.order_id.order_category == 'service':
+										#~ priority = '3'
+									#~ if entry.order_id.order_category == 'spare':
+										#~ priority = '5'
+										
 									if entry.order_id.order_category in ('pump','pump_spare','project'):
 										if entry.order_id.order_priority == 'normal':
-											priority = '6'
+											priority = '8'
 										if entry.order_id.order_priority == 'emergency':
-											priority = '4'
+											priority = '3'
+										if entry.order_id.order_priority == 'breakdown':
+											priority = '2'
+										if entry.order_id.order_priority == 'urgent':
+											priority = '7'
 									if entry.order_id.order_category == 'service':
-										priority = '3'
+										priority = '4'
 									if entry.order_id.order_category == 'spare':
-										priority = '5'
+										priority = '6'
+										
 									qc_vals = {
 																	
 										'name': qc_name[0],
@@ -772,7 +789,7 @@ class kg_part_qap(osv.osv):
 								'schedule_qty' : rem_qty,		  
 								'state' : 'issue_done',
 								'order_category':entry.order_category,
-								'order_priority': '2',
+								'order_priority': '5',
 								'pattern_id' : entry.pattern_id.id,
 								'pattern_name' : entry.pattern_id.pattern_name, 
 								'moc_id' : entry.moc_id.id,

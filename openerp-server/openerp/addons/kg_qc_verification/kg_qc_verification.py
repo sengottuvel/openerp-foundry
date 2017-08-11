@@ -10,13 +10,16 @@ dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
    ('1','MS NC'),
-   ('2','FDY-NC'),
-   ('3','Service'),
-   ('4','Emergency'),
-   ('5','Spare'),
-   ('6','Normal'),
+   ('2','Break down'),
+   ('3','Emergency'),
+   ('4','Service'),
+   ('5','FDY-NC'),
+   ('6','Spare'),
+   ('7','Urgent'),
+   ('8','Normal'),
   
 ]
+
 
 ORDER_CATEGORY = [
    ('pump','Pump'),
@@ -859,7 +862,7 @@ class kg_qc_verification(osv.osv):
 									'schedule_qty' : rem_qty,			
 									'state' : 'issue_done',
 									'order_category':entry.order_category,
-									'order_priority': '2',
+									'order_priority': '5',
 									'pattern_id' : entry.pattern_id.id,
 									'pattern_name' : entry.pattern_id.pattern_name, 
 									'moc_id' : entry.moc_id.id,
@@ -2010,7 +2013,7 @@ class kg_qc_verification(osv.osv):
 								'schedule_qty' : rem_qty,			
 								'state' : 'issue_done',
 								'order_category':ref_id.order_category,
-								'order_priority': '2',
+								'order_priority': '5',
 								'pattern_id' : ref_id.pattern_id.id,
 								'pattern_name' : ref_id.pattern_id.pattern_name, 
 								'moc_id' : ref_id.moc_id.id,

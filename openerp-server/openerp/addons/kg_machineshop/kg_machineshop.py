@@ -10,17 +10,21 @@ dt_time = lambda * a: time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
    ('1','MS NC'),
-   ('2','FDY-NC'),
-   ('3','Service'),
-   ('4','Emergency'),
-   ('5','Spare'),
-   ('6','Normal'),
+   ('2','Break down'),
+   ('3','Emergency'),
+   ('4','Service'),
+   ('5','FDY-NC'),
+   ('6','Spare'),
+   ('7','Urgent'),
+   ('8','Normal'),
   
 ]
 
 ORDER_WO_PRIORITY = [
    ('normal','Normal'),
-   ('emergency','Emergency')
+   ('emergency','Emergency'),
+   ('breakdown','Break Down'),
+   ('urgent','Urgent'),
 ]
 
 
@@ -29,7 +33,8 @@ ORDER_CATEGORY = [
    ('spare','Spare'),
    ('pump_spare','Pump and Spare'),
    ('service','Service'),
-   ('project','Project')
+   ('project','Project'),
+   ('access','Accessories')
 ]
 
 
@@ -279,7 +284,7 @@ class kg_machineshop(osv.osv):
 					'schedule_qty' : reject_qty,				  
 					'state' : 'issue_done',
 					'order_category':entry_rec.order_category,
-					'order_priority': '2',
+					'order_priority': '5',
 					'pattern_id' : entry_rec.pattern_id.id,
 					'pattern_name' : entry_rec.pattern_id.pattern_name,	
 					'moc_id' : entry_rec.moc_id.id,

@@ -10,11 +10,13 @@ dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
    ('1','MS NC'),
-   ('2','FDY-NC'),
-   ('3','Service'),
-   ('4','Emergency'),
-   ('5','Spare'),
-   ('6','Normal'),
+   ('2','Break down'),
+   ('3','Emergency'),
+   ('4','Service'),
+   ('5','FDY-NC'),
+   ('6','Spare'),
+   ('7','Urgent'),
+   ('8','Normal'),
   
 ]
 
@@ -24,7 +26,8 @@ ORDER_CATEGORY = [
    ('spare','Spare'),
    ('pump_spare','Pump and Spare'),
    ('service','Service'),
-   ('project','Project')
+   ('project','Project'),
+   ('access','Accessories')
 ]
 
 

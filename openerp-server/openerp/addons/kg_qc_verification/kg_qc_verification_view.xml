@@ -131,7 +131,6 @@
 					<field name="oth_spec"/>
 					<field name="remark"/>
 					<field name="state"/>
-					<field name="schedule_date" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -177,6 +176,9 @@
                     <group expand="0" string="Group By...">
 						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Schedule No" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
+<!--
+						<filter string="Schedule Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_date'}"/>
+-->
 						<filter string="Division" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'division_id'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>

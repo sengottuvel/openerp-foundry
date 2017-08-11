@@ -13,7 +13,9 @@ dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
    ('normal','Normal'),
-   ('emergency','Emergency')
+   ('emergency','Emergency'),
+   ('breakdown','Break Down'),
+   ('urgent','Urgent'),
    
 ]
 
@@ -29,6 +31,7 @@ ORDER_CATEGORY = [
 
 def roundPartial (value, resolution):
 	return round (value / resolution) * resolution
+
 
 
 class kg_work_order(osv.osv):
@@ -414,7 +417,31 @@ class kg_work_order(osv.osv):
 									}
 									
 								new_ms_item_id = self.pool.get('ch.order.machineshop.details').create(cr,uid,spare_machine_shop_vals)
-	
+								
+								### Raw materials Creation ###
+								
+								for spare_raw in spare_ms_item.line_ids:
+								
+									spare_ms_raw_vals = {
+									
+										'header_id': new_ms_item_id,
+										'remarks': spare_raw.remarks,
+										'product_id': spare_raw.product_id.id,			
+										'uom': spare_raw.uom.id,
+										'od': spare_raw.od,
+										'length': spare_raw.length,
+										'breadth': spare_raw.breadth,
+										'thickness': spare_raw.thickness,
+										'weight': spare_raw.weight,
+										'uom_conversation_factor': spare_raw.uom_conversation_factor,		
+										'temp_qty': spare_raw.temp_qty,
+										'qty': spare_raw.qty,
+										'spare_raw_id': spare_raw.id,
+										
+									}
+									new_ms_spare_item_id = self.pool.get('ch.wo.ms.raw').create(cr,uid,spare_ms_raw_vals)
+									
+
 						for spare_bot_item in spare_item.line_ids_b:
 							if spare_bot_item.is_applicable == True:
 								spare_bot_vals = {
@@ -794,15 +821,29 @@ class kg_work_order(osv.osv):
 											
 											### Order Priority ###
 													
-											if entry.order_category in ('pump','pump_spare','project'):
+											#~ if entry.order_category in ('pump','pump_spare','project'):
+												#~ if entry.order_priority == 'normal':
+													#~ priority = '6'
+												#~ if entry.order_priority == 'emergency':
+													#~ priority = '4'
+											#~ if entry.order_category == 'service':
+												#~ priority = '3'
+											#~ if entry.order_category == 'spare':
+												#~ priority = '5'
+												
+											if entry.order_category in ('pump','pump_spare','project','access'):
 												if entry.order_priority == 'normal':
-													priority = '6'
+													priority = '8'
 												if entry.order_priority == 'emergency':
-													priority = '4'
+													priority = '3'
+												if entry.order_priority == 'breakdown':
+													priority = '2'
+												if entry.order_priority == 'urgent':
+													priority = '7'
 											if entry.order_category == 'service':
-												priority = '3'
+												priority = '4'
 											if entry.order_category == 'spare':
-												priority = '5'
+												priority = '6'
 											
 											
 											### Creating QC Verification ###
@@ -895,7 +936,7 @@ class kg_work_order(osv.osv):
 						#~ schedule_obj.entry_confirm(cr, uid, [schedule_id])
 						
 				
-				if entry.order_priority == 'emergency' and entry.order_category in ('pump','spare','pump_spare','service'):
+				if entry.order_priority in ('emergency','breakdown') and entry.order_category in ('pump','spare','pump_spare','service','access'):
 					
 					### Schedule Creation ###
 					
@@ -903,7 +944,7 @@ class kg_work_order(osv.osv):
 													
 						'name': '',
 						'location' : entry.location,
-						'order_priority': 'emergency',
+						'order_priority': entry.order_priority,
 						'delivery_date': entry.delivery_date,
 						'order_line_ids': [(6, 0, order_line_ids)],
 						'state' : 'draft',			   
@@ -924,7 +965,7 @@ class kg_work_order(osv.osv):
 					
 					schedule_obj.entry_confirm(cr, uid, [schedule_id])
 					
-				if entry.order_priority == 'emergency' and entry.order_category in ('project'):
+				if entry.order_priority in ('emergency','breakdown') and entry.order_category in ('project'):
 					
 					### Schedule Creation ###
 					
@@ -932,7 +973,7 @@ class kg_work_order(osv.osv):
 													
 						'name': '',
 						'location' : entry.location,
-						'order_priority': 'emergency',
+						'order_priority': entry.order_priority,
 						'delivery_date': entry.delivery_date,
 						'order_line_ids': [(6, 0, order_line_ids)],
 						'state' : 'draft',
@@ -1329,7 +1370,7 @@ class ch_work_order_details(osv.osv):
 			#~ print "line_dict",line_dict
 			#~ print "line_dict.get('order_no'),",line_dict.get('order_no'),type(line_dict.get('order_no')),str(line_dict.get('order_no'))
 			#~ context.update({
-				#~ 'order_no': 'test',
+				#~ 'order_no': line_dict.get('order_no'),
 			#~ })
 		if len(context)>5:
 			if context['order_category'] == 'pump':
@@ -1397,6 +1438,8 @@ class ch_work_order_details(osv.osv):
 					flag_select_all_val = True
 				if order_category == 'pump' and flag_select_all == False:
 					flag_select_all_val = False
+				
+				
 					
 				#### Loading Foundry Items
 				
@@ -1447,14 +1490,22 @@ class ch_work_order_details(osv.osv):
 						if moc_rec.weight_type == 'non_ferrous':
 							wgt = bom_details['nonferous_weight']
 							
-							
 					if flag_select_all_val == True:
 						applicable = True
 					else:
 						flag_select_all_val = False
-						applicable = False
+						applicable = False	
 						
 						
+					#~ if order_category == 'pump' and flag_select_all != True:
+						#~ aplicable = False
+						#~ flag_select_all_val = False
+					#~ if order_category == 'pump' and flag_select_all == True:
+						#~ aplicable = True
+						#~ flag_select_all_val = True
+					#~ else:
+						#~ aplicable = False
+						#~ flag_select_all_val = False
 						
 					bom_vals.append({
 														
@@ -1521,6 +1572,24 @@ class ch_work_order_details(osv.osv):
 						flag_select_all_val = False
 						applicable = False
 						
+					ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,bom_ms_details['ms_id'])
+					if ms_rec.line_ids:
+						ch_ms_vals = []
+						for raw in ms_rec.line_ids:
+							ch_ms_vals.append([0, 0,{
+									'product_id': raw.product_id.id,
+									'uom': raw.uom.id,
+									'od': raw.od,
+									'length': raw.length,
+									'breadth': raw.breadth,
+									'thickness': raw.thickness,
+									'weight': raw.weight * bom_ms_qty,
+									'uom_conversation_factor': raw.uom_conversation_factor,
+									'temp_qty': raw.temp_qty * bom_ms_qty,
+									'qty': raw.qty * bom_ms_qty,
+									'remarks': raw.remarks,
+									}])
+						
 					machine_shop_vals.append({
 						
 						'pos_no': bom_ms_details['pos_no'],
@@ -1536,6 +1605,7 @@ class ch_work_order_details(osv.osv):
 						'entry_mode':'auto',
 						'order_category':	order_category,
 						'moc_id': moc_id,
+						'line_ids': ch_ms_vals,
 								  
 						})
 						
@@ -1578,7 +1648,7 @@ class ch_work_order_details(osv.osv):
 						applicable = True
 					else:
 						flag_select_all_val = False
-						applicable = False
+						applicable = False	
 						
 					bot_vals.append({
 						
@@ -1619,12 +1689,10 @@ class ch_work_order_details(osv.osv):
 							base_limitation = 'upto_2999'
 						if setting_height >= 3000:
 							base_limitation = 'above_3000'
-							
-						
 
 						cr.execute('''
 						
-							(
+							
 							-- Bed Assembly ----
 							select bom.id,
 							bom.header_id,
@@ -1650,13 +1718,14 @@ class ch_work_order_details(osv.osv):
 							( select vo_id from ch_vo_mapping
 							where rpm = %s and header_id = %s))
 							and active='t'
-							) 
+							)
 							
-							order by bom.header_id )
+							order by bom.header_id
+							 
 							
 							union all
 
-							(
+
 							--- Motor Assembly ---
 							select bom.id,
 							bom.header_id,
@@ -1682,14 +1751,15 @@ class ch_work_order_details(osv.osv):
 							( select vo_id from ch_vo_mapping
 							where rpm = %s and header_id = %s ))
 							and active='t'
-							) 
+							)
 							
-							order by bom.header_id )
+							order by bom.header_id
 							
-						
+							
+
 							union all
 
-							(
+
 							-- Column Pipe ------
 
 							select bom.id,
@@ -1723,12 +1793,14 @@ class ch_work_order_details(osv.osv):
 							where rpm = %s and header_id = %s ))
 							and active='t'
 							)
-							order by bom.header_id )
+							
+							order by bom.header_id
 							
 					
+
 							union all
 
-							(
+
 							-- Delivery Pipe ------
 
 							select bom.id,
@@ -1761,13 +1833,15 @@ class ch_work_order_details(osv.osv):
 							( select vo_id from ch_vo_mapping
 							where rpm = %s and header_id = %s))
 							and active='t'
-							) 
-							order by bom.header_id )
+							)
 							
-						
+							order by bom.header_id
+							
+							
+
 							union all
 
-							(
+
 							-- Lubrication ------
 
 							select bom.id,
@@ -1801,11 +1875,11 @@ class ch_work_order_details(osv.osv):
 							where rpm = %s and header_id = %s))
 							and active='t'
 							)
-							order by bom.header_id )
+							
+							order by bom.header_id
 							
 							union all
 							
-							(
 							-- Base Plate --
 									
 							select bom.id,
@@ -1829,15 +1903,14 @@ class ch_work_order_details(osv.osv):
 							where id = (select partlist_id from ch_base_plate
 							where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom'))
 							and active='t'
-							) 
-							order by bom.header_id )
+							)
+							
+							order by bom.header_id
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
 							  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
-							  
-						
 						vertical_foundry_details = cr.dictfetchall()
 						
 						if order_category in ('pump','spare') :
@@ -1884,10 +1957,11 @@ class ch_work_order_details(osv.osv):
 									raise osv.except_osv(_('Warning!'),
 									_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
 								
-								if flag_select_all == True:
+								if flag_select_all_val == True:
 									applicable = True
 								else:
-									applicable = False
+									flag_select_all_val = False
+									applicable = False	
 									
 								bom_vals.append({
 																	
@@ -1919,7 +1993,7 @@ class ch_work_order_details(osv.osv):
 						bom_ms_obj = self.pool.get('ch.machineshop.details')
 						cr.execute(''' 
 									
-									(-- Bed Assembly ----
+									-- Bed Assembly ----
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 									from ch_machineshop_details
 									where header_id = 
@@ -1932,13 +2006,14 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									) 
-									order by header_id )
+									
+									order by header_id
 									
 								
 
 									union all
 
-									(
+
 									--- Motor Assembly ---
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 									from ch_machineshop_details
@@ -1952,13 +2027,13 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s ))
 									and active='t'
 									) 
-									order by header_id )
 									
+									order by header_id
 									
 
 									union all
 
-									(
+
 									-- Column Pipe ------
 
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
@@ -1979,13 +2054,14 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									)
-									order by header_id )
+									
+									order by header_id
 									
 							
 
 									union all
 
-									(
+
 									-- Delivery Pipe ------
 
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
@@ -2006,13 +2082,13 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									) 
-									order by header_id )
 									
+									order by header_id
 									
 
 									union all
 
-									(
+
 									-- Lubrication ------
 
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
@@ -2033,11 +2109,10 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s ))
 									and active='t'
 									) 
-									order by header_id )
+									
+									order by header_id
 									
 									union all
-									
-									(
 									-- Base Plate --
 									
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
@@ -2049,7 +2124,8 @@ class ch_work_order_details(osv.osv):
 									where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom') )
 									and active='t'
 									) 
-									order by header_id )
+									
+									order by header_id
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
@@ -2203,13 +2279,10 @@ class ch_work_order_details(osv.osv):
 										length = h_value + bp + setting_height - a_value - b_value - 1.5
 										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
 										number_dec = str(length-int(length))[1:]
-										print "previousssssssssssss11",length
 										if number_dec >= 0.25:
 											length = roundPartial (length, 0.50)
 										else:
 											length = length
-											
-										print "roundoffffffffffffff11",length
 										
 									if star_value == 1:
 										### Formula ###
@@ -2217,14 +2290,11 @@ class ch_work_order_details(osv.osv):
 										###
 										length = (h_value + bp + setting_height - a_value - b_value - 3)/2
 										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
-										print "previousssssssssssss12",length
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25:
 											length = roundPartial (length, 0.50)
 										else:
 											length = length
-											
-										print "roundoffffffffffffff22",length
 										
 									if star_value > 1:
 										### Formula ###
@@ -2232,13 +2302,11 @@ class ch_work_order_details(osv.osv):
 										###
 										length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
 										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
-										print "previousssssssssssss33",length
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25:
 											length = roundPartial (length, 0.50)
 										else:
 											length = length
-										print "roundoffffffffffffff33",length
 										
 								if ms_rec.length_type == 'delivery_pipe_middle':
 									if star_value == 0.0:
@@ -2246,11 +2314,11 @@ class ch_work_order_details(osv.osv):
 										#ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5
 										###
 										length = h_value + bp + setting_height - a_value - b_value - 1.5
-										print "previousssssssssssss44",length
 										number_dec = str(length-int(length))[1:]
-										if number_dec >= 0.25 and number_dec < 0.75:
+										if number_dec >= 0.25 and number_dec <= 0.75:
 											length = round(length, 0)
 										if number_dec >= 0.75:
+											length = round(length, 0)
 											frac, whole = math.modf(length)
 											if frac >= 0.5:
 												length = (whole+0.5)
@@ -2258,14 +2326,12 @@ class ch_work_order_details(osv.osv):
 												length = (whole+0.0)
 										else:
 											length = length
-										print "roundoffffffffffffff44",length
 										
 									if star_value == 1:
 										### Formula ###
 										#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-3)/2
 										###
 										length = (h_value + bp + setting_height - a_value - b_value - 3)/2
-										print "previousssssssssssss55",length
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
@@ -2277,14 +2343,12 @@ class ch_work_order_details(osv.osv):
 												length = (whole+0.0)
 										else:
 											length = length
-										print "roundoffffffffffffff55",length
 										
 									if star_value > 1:
 										### Formula ###
 										#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5)-(NO OF STAR SUPPORT*1.5)/NO OF STAR SUPPORT+1
 										###
 										length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
-										print "previousssssssssssss66",length
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
@@ -2296,8 +2360,6 @@ class ch_work_order_details(osv.osv):
 												length = (whole+0.0)
 										else:
 											length = length
-										print "roundoffffffffffffff66",length
-										
 										
 								if ms_rec.length_type == 'drive_column_pipe':
 									
@@ -2306,13 +2368,11 @@ class ch_work_order_details(osv.osv):
 										#(3.5+bp+setting height-a1-no of star support)/2
 										###
 										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
-										print "previousssssssssssss77",length
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25:
 											length = roundPartial (length, 0.50)
 										else:
 											length = length
-										print "roundoffffffffffffff77",length
 										
 										
 									if star_value > 1:
@@ -2323,14 +2383,11 @@ class ch_work_order_details(osv.osv):
 										### Formula = Standard Length ###
 										line_column_pipe = vo_star_value['lcp']
 										length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
-										print "previousssssssssssss88",length
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25:
 											length = roundPartial (length, 0.50)
 										else:
 											length = length
-										print "roundoffffffffffffff88",length
-										
 										
 								if ms_rec.length_type == 'pump_column_pipe':
 									
@@ -2339,7 +2396,6 @@ class ch_work_order_details(osv.osv):
 										#(3.5+bp+setting height-a1-no of star support)/2
 										###
 										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
-										print "previousssssssssssss99",length
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
@@ -2351,7 +2407,6 @@ class ch_work_order_details(osv.osv):
 												length = (whole+0.0)
 										else:
 											length = length
-										print "roundoffffffffffffff99",length
 										
 										
 									if star_value > 1:
@@ -2362,7 +2417,6 @@ class ch_work_order_details(osv.osv):
 										### Formula = Standard Length ###
 										line_column_pipe = vo_star_value['lcp']
 										length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
-										print "previousssssssssssss100",length
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
@@ -2374,7 +2428,6 @@ class ch_work_order_details(osv.osv):
 												length = (whole+0.0)
 										else:
 											length = length
-										print "roundoffffffffffffff100",length
 										
 										
 								if ms_rec.length_type == 'pump_shaft':
@@ -2437,8 +2490,25 @@ class ch_work_order_details(osv.osv):
 								applicable = True
 							else:
 								flag_select_all_val = False
-								applicable = False
+								applicable = False	
 							
+							ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,vertical_ms_details['ms_id'])
+							if ms_rec.line_ids:
+								ch_ms_vals = []
+								for raw in ms_rec.line_ids:
+									ch_ms_vals.append([0, 0,{
+											'product_id': raw.product_id.id,
+											'uom': raw.uom.id,
+											'od': raw.od,
+											'length': raw.length,
+											'breadth': raw.breadth,
+											'thickness': raw.thickness,
+											'weight': raw.weight * qty * vertical_ms_details['qty'],
+											'uom_conversation_factor': raw.uom_conversation_factor,
+											'temp_qty': raw.temp_qty * qty * vertical_ms_details['qty'],
+											'qty': raw.qty * qty * vertical_ms_details['qty'],
+											'remarks': raw.remarks,
+											}])
 							
 							
 							machine_shop_vals.append({
@@ -2469,7 +2539,7 @@ class ch_work_order_details(osv.osv):
 						bom_bot_obj = self.pool.get('ch.machineshop.details')
 						cr.execute(''' 
 									
-									(-- Bed Assembly ----
+									-- Bed Assembly ----
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
 									where header_id =
@@ -2481,13 +2551,13 @@ class ch_work_order_details(osv.osv):
 									( select vo_id from ch_vo_mapping
 									where rpm = %s and header_id = %s))
 									and active='t'
-									)
-									order by header_id )
+									) 
+									order by header_id
 									
 									union all
 
 
-									(--- Motor Assembly ---
+									--- Motor Assembly ---
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
 									where header_id =
@@ -2500,12 +2570,12 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									) 
-									order by header_id )
+									order by header_id
 									
 									union all
 
 
-									(-- Column Pipe ------
+									-- Column Pipe ------
 
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
@@ -2524,12 +2594,12 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									)
-									order by header_id )
+									order by header_id
 									
 									union all
 
 
-									(-- Delivery Pipe ------
+									-- Delivery Pipe ------
 
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
@@ -2549,12 +2619,12 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									) 
-									order by header_id )
+									order by header_id
 									
 									union all
 
 
-									(-- Lubrication ------
+									-- Lubrication ------
 
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
@@ -2574,11 +2644,11 @@ class ch_work_order_details(osv.osv):
 									where rpm = %s and header_id = %s))
 									and active='t'
 									) 
-									order by header_id )
+									order by header_id
 									
 									union all
 									
-									(-- Base Plate --
+									-- Base Plate --
 									
 									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
@@ -2589,8 +2659,7 @@ class ch_work_order_details(osv.osv):
 									where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom') )
 									and active='t'
 									) 
-									order by header_id )
-									
+									order by header_id
 									
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
@@ -2629,7 +2698,7 @@ class ch_work_order_details(osv.osv):
 								applicable = True
 							else:
 								flag_select_all_val = False
-								applicable = False
+								applicable = False	
 							
 							bot_vals.append({
 								
@@ -2656,6 +2725,8 @@ class ch_work_order_details(osv.osv):
 			return {'value': {'qty':header_qty,'flag_select_all':flag_select_all_val,'line_ids': bom_vals,'line_ids_a':machine_shop_vals,'line_ids_b':bot_vals,'line_ids_c':consu_vals}}
 		else:
 			return True
+			
+	
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -2986,6 +3057,7 @@ class ch_wo_ms_raw(osv.osv):
 		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),		
 		'temp_qty':fields.float('Qty'),
 		'qty':fields.float('Testing Qty',readonly=True),
+		'spare_raw_id': fields.many2one('ch.wo.spare.ms.raw','MS Spare'),
 		
 	}
 	
@@ -3452,6 +3524,22 @@ class ch_wo_spare_bom(osv.osv):
 								if ms_line_obj:
 									ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 									moc_id = ms_line_rec.moc_id.id
+									
+							if ms_rec.line_ids:
+								for raw in ms_rec.line_ids:
+									ch_ms_vals.append([0, 0,{
+											'product_id': raw.product_id.id,
+											'uom': raw.uom.id,
+											'od': raw.od,
+											'length': raw.length,
+											'breadth': raw.breadth,
+											'thickness': raw.thickness,
+											'weight': raw.weight * item.qty * qty,
+											'uom_conversation_factor': raw.uom_conversation_factor,
+											'temp_qty': raw.temp_qty * item.qty * qty,
+											'qty': raw.qty * item.qty * qty,
+											'remarks': raw.remarks,
+											}])
 						if moc_id:
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
@@ -3467,6 +3555,7 @@ class ch_wo_spare_bom(osv.osv):
 										'qty': item.qty * qty,
 										'load_bom': True,
 										'is_applicable': True,
+										'line_ids': ch_ms_vals,
 										#~ 'purpose_categ': purpose_categ,
 										#~ 'line_ids': ch_ms_vals,
 										#~ 'csd_no': item.csd_no,
@@ -3623,9 +3712,10 @@ class ch_wo_spare_ms(osv.osv):
 		'material_code': fields.char('Material Code'),
 		'off_name': fields.char('Offer Name'),
 		
-		## Child Tables Declaration 
 		
-		#~ 'line_ids': fields.one2many('ch.kg.crm.ms.raw', 'header_id', "Raw Details"),
+		## Child Tables Declaration
+		'line_ids': fields.one2many('ch.wo.spare.ms.raw', 'header_id', "MS Raw material"),
+		
 		
 	}
 	
@@ -3662,6 +3752,75 @@ class ch_wo_spare_ms(osv.osv):
 		]
 	
 ch_wo_spare_ms()
+
+class ch_wo_spare_ms_raw(osv.osv):
+	
+	_name = "ch.wo.spare.ms.raw"
+	_description = "Ch wo spare raw Details"
+	
+	_columns = {
+		
+		### Basic Info
+		
+		'header_id':fields.many2one('ch.wo.spare.ms', 'Spare MS', ondelete='cascade'),
+		'remarks': fields.char('Remarks'),
+		'active': fields.boolean('Active'),	
+		
+		### Module Requirement
+		
+		'product_id': fields.many2one('product.product','Raw Material',domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
+		'uom':fields.many2one('product.uom','UOM',size=128 ),
+		'od': fields.float('OD'),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
+		'thickness': fields.float('Thickness'),
+		'weight': fields.float('Weight' ,digits=(16,5)),
+		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),		
+		'temp_qty':fields.float('Qty'),
+		'qty':fields.float('Testing Qty',readonly=True),
+	
+		
+	}
+	
+	_defaults = {
+		
+		'active': True,
+		
+	}
+	
+	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
+		value = {'qty': '','weight': '',}
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		qty_value = 0.00
+		weight=0.00
+		if uom_conversation_factor == 'one_dimension':	
+			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
+				qty_value = length * temp_qty
+				weight = 0.00
+			if length == 0.00:
+				qty_value = temp_qty
+			else:				
+				qty_value = length * temp_qty			
+				weight = qty_value * prod_rec.po_uom_in_kgs
+		if uom_conversation_factor == 'two_dimension':
+			qty_value = length * breadth * temp_qty				
+			weight = qty_value * prod_rec.po_uom_in_kgs		
+		value = {'qty': qty_value,'weight':weight}			
+		return {'value': value}
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
+	
+	_constraints = [
+		
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+	
+ch_wo_spare_ms_raw()
 
 class ch_wo_spare_bot(osv.osv):
 	

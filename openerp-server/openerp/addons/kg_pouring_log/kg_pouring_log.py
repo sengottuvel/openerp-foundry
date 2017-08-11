@@ -485,10 +485,19 @@ class kg_pouring_log(osv.osv):
 						
 						allocated_wo = ''   
 						
-						if old_item_rec.allocated_wo == False:
-							allocated_wo = new_item_rec.order_no+'('+str(poured_qty)+')'
+						print "old_item_rec.allocated_wo",old_item_rec.allocated_wo
+						print "new_item_rec.order_no",new_item_rec.order_no
+						print "poured_qty",poured_qty,type(poured_qty)
+						print "str(poured_qty)",str(poured_qty)
+						new_order_no = ''
+						if new_item_rec.order_no != False:
+							new_order_no = new_item_rec.order_no
 						else:
-							allocated_wo = old_item_rec.allocated_wo + ',' +new_item_rec.order_no+'('+str(poured_qty)+')'
+							new_order_no = new_order_no
+						if old_item_rec.allocated_wo == False:
+							allocated_wo = new_order_no+'('+str(poured_qty)+')'
+						else:
+							allocated_wo = old_item_rec.allocated_wo + ',' +new_order_no+'('+str(poured_qty)+')'
 						
 						
 						old_pppp = {
@@ -656,7 +665,7 @@ class kg_pouring_log(osv.osv):
 									'order_line_id': stk_wo_line_id[0],
 									'order_no': 'STK WO',
 									'order_category': 'spare',
-									'order_priority': '6',
+									'order_priority': '8',
 									'pump_model_id':stk_wo_line_rec.pump_model_id.id,
 									'pattern_id':production_rec.pattern_id.id,
 									'pattern_code':production_rec.pattern_code,
@@ -776,9 +785,9 @@ class kg_pouring_log(osv.osv):
 									pour_pending_qty > 0
 									order by id asc
 									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								nc_production_ids = cr.dictfetchall()
-								if nc_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,nc_production_ids,old_item['id'],rem_qty)
+								bd_production_ids = cr.dictfetchall()
+								if bd_production_ids:
+									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,bd_production_ids,old_item['id'],rem_qty)
 											
 							### Third Priority ###
 							if rem_qty > 0:
@@ -795,9 +804,9 @@ class kg_pouring_log(osv.osv):
 									order by id asc
 									
 									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								service_production_ids = cr.dictfetchall()
-								if service_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,service_production_ids,old_item['id'],rem_qty)
+								emer_production_ids = cr.dictfetchall()
+								if emer_production_ids:
+									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,emer_production_ids,old_item['id'],rem_qty)
 									
 									
 									
@@ -815,9 +824,9 @@ class kg_pouring_log(osv.osv):
 									pour_pending_qty > 0
 									order by id asc
 									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								emer_production_ids = cr.dictfetchall()
-								if emer_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,emer_production_ids,old_item['id'],rem_qty)
+								service_production_ids = cr.dictfetchall()
+								if service_production_ids:
+									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,service_production_ids,old_item['id'],rem_qty)
 											
 							### Fifth Priority ###
 							if rem_qty > 0:
@@ -832,9 +841,9 @@ class kg_pouring_log(osv.osv):
 									pour_pending_qty > 0
 									order by id asc
 									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								spare_production_ids = cr.dictfetchall()
-								if spare_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,spare_production_ids,old_item['id'],rem_qty)
+								fdync_production_ids = cr.dictfetchall()
+								if fdync_production_ids:
+									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,fdync_production_ids,old_item['id'],rem_qty)
 											
 							### Sixth Priority ###
 							
@@ -847,6 +856,42 @@ class kg_pouring_log(osv.osv):
 									
 									pour_state in ('pending','partial') and
 									order_priority = '6'and
+									pour_pending_qty > 0
+									order by id asc
+									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
+								spare_production_ids = cr.dictfetchall()
+								if spare_production_ids:
+									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,spare_production_ids,old_item['id'],rem_qty)
+									
+							### Seventh Priority ###
+							
+							if rem_qty > 0:
+								cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
+									
+									where
+									pattern_id = %s and
+									moc_id = %s and
+									
+									pour_state in ('pending','partial') and
+									order_priority = '7'and
+									pour_pending_qty > 0
+									order by id asc
+									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
+								urgent_production_ids = cr.dictfetchall()
+								if urgent_production_ids:
+									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,urgent_production_ids,old_item['id'],rem_qty)
+									
+							### Eighth Priority ###
+							
+							if rem_qty > 0:
+								cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
+									
+									where
+									pattern_id = %s and
+									moc_id = %s and
+									
+									pour_state in ('pending','partial') and
+									order_priority = '8'and
 									pour_pending_qty > 0
 									order by id asc
 									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
@@ -906,7 +951,7 @@ class kg_pouring_log(osv.osv):
 							'order_line_id': stk_wo_line_id[0],
 							'order_no': 'STK WO',
 							'order_category': 'spare',
-							'order_priority': '6',
+							'order_priority': '8',
 							'pump_model_id':stk_wo_line_rec.pump_model_id.id,
 							'pattern_id':production_rec.pattern_id.id,
 							'pattern_code':production_rec.pattern_code,

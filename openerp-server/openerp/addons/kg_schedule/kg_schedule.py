@@ -10,7 +10,9 @@ dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
    ('normal','Normal'),
-   ('emergency','Emergency')
+   ('emergency','Emergency'),
+   ('breakdown','Break Down'),
+   ('urgent','Urgent'),
 ]
 
 ORDER_CATEGORY = [
@@ -47,7 +49,7 @@ class kg_schedule(osv.osv):
 		'line_ids': fields.one2many('ch.schedule.details', 'header_id', "Schedule Details"),
 		
 		'order_line_ids':fields.many2many('ch.work.order.details','m2m_work_order_details' , 'schedule_id', 'order_id', 'Work Order Lines',
-			domain="[('schedule_status','=','allow'),'&',('header_id.order_priority','=','normal'),'&',('header_id.order_category','in',('pump','pump_spare','project','spare','service','access')),'&',('header_id.state','=','confirmed'),'&',('state','=','confirmed'),'&',('header_id.division_id','=',division_id),('header_id.location','=',location)]"),
+			domain="[('schedule_status','=','allow'),'&',('header_id.order_priority','in',('normal','urgent')),'&',('header_id.order_category','in',('pump','pump_spare','project','spare','service','access')),'&',('header_id.state','=','confirmed'),'&',('state','=','confirmed'),'&',('header_id.division_id','=',division_id),('header_id.location','=',location)]"),
 		'flag_schedule': fields.boolean('Schedule'),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -239,7 +241,7 @@ class kg_schedule(osv.osv):
 								if schedule_rec.qty < stock_qty:
 									alloc_qty = schedule_rec.qty
 
-								if schedule_rec.order_priority == 'emergency' and order_item.header_id.order_category == 'project':
+								if schedule_rec.order_priority in ('emergency','breakdown') and order_item.header_id.order_category == 'project':
 									flag_allocate = False
 									flag_manual = True
 									allocation_qty = 0
@@ -354,7 +356,7 @@ class kg_schedule(osv.osv):
 								if schedule_rec.qty < stock_qty:
 									alloc_qty = schedule_rec.qty
 
-								if schedule_rec.order_priority == 'emergency' and order_item.header_id.order_category == 'project':
+								if schedule_rec.order_priority in ('emergency','breakdown') and order_item.header_id.order_category == 'project':
 									flag_allocate = False
 									flag_manual = True
 									allocation_qty = 0
@@ -596,15 +598,29 @@ class kg_schedule(osv.osv):
 											print "qc_qty",qc_qty
 											### Order Priority ###
 													
-											if schedule_item.order_id.order_category in ('pump','pump_spare','project'):
+											#~ if schedule_item.order_id.order_category in ('pump','pump_spare','project'):
+												#~ if schedule_item.order_id.order_priority == 'normal':
+													#~ priority = '6'
+												#~ if schedule_item.order_id.order_priority == 'emergency':
+													#~ priority = '4'
+											#~ if schedule_item.order_id.order_category == 'service':
+												#~ priority = '3'
+											#~ if schedule_item.order_id.order_category == 'spare':
+												#~ priority = '5'
+												
+											if schedule_item.order_id.order_category in ('pump','pump_spare','project','access'):
 												if schedule_item.order_id.order_priority == 'normal':
-													priority = '6'
+													priority = '8'
 												if schedule_item.order_id.order_priority == 'emergency':
-													priority = '4'
+													priority = '3'
+												if schedule_item.order_id.order_priority == 'breakdown':
+													priority = '2'
+												if schedule_item.order_id.order_priority == 'urgent':
+													priority = '7'
 											if schedule_item.order_id.order_category == 'service':
-												priority = '3'
+												priority = '4'
 											if schedule_item.order_id.order_category == 'spare':
-												priority = '5'
+												priority = '6'
 											
 											### Creating QC Verification ###
 											
@@ -731,15 +747,29 @@ class kg_schedule(osv.osv):
 											
 											### Order Priority ###
 											
-											if schedule_item.order_id.order_category in ('pump','pump_spare','project'):
+											#~ if schedule_item.order_id.order_category in ('pump','pump_spare','project'):
+												#~ if schedule_item.order_id.order_priority == 'normal':
+													#~ priority = '6'
+												#~ if schedule_item.order_id.order_priority == 'emergency':
+													#~ priority = '4'
+											#~ if schedule_item.order_id.order_category == 'service':
+												#~ priority = '3'
+											#~ if schedule_item.order_id.order_category == 'spare':
+												#~ priority = '5'
+												
+											if schedule_item.order_id.order_category in ('pump','pump_spare','project','access'):
 												if schedule_item.order_id.order_priority == 'normal':
-													priority = '6'
+													priority = '8'
 												if schedule_item.order_id.order_priority == 'emergency':
-													priority = '4'
+													priority = '3'
+												if schedule_item.order_id.order_priority == 'breakdown':
+													priority = '2'
+												if schedule_item.order_id.order_priority == 'urgent':
+													priority = '7'
 											if schedule_item.order_id.order_category == 'service':
-												priority = '3'
+												priority = '4'
 											if schedule_item.order_id.order_category == 'spare':
-												priority = '5'
+												priority = '6'
 											
 											if rem_qty > 0:
 												### Sequence Number Generation ###
@@ -1192,15 +1222,29 @@ class kg_schedule(osv.osv):
 					schedule_line_obj.write(cr, uid,schedule_item.id,{'qty':schedule_qty})
 					### Production Creation When No Allocation ####
 						
-					if schedule_item.order_id.order_category in ('pump','pump_spare','project'):
+					#~ if schedule_item.order_id.order_category in ('pump','pump_spare','project'):
+						#~ if schedule_item.order_id.order_priority == 'normal':
+							#~ priority = '6'
+						#~ if schedule_item.order_id.order_priority == 'emergency':
+							#~ priority = '4'
+					#~ if schedule_item.order_id.order_category == 'service':
+						#~ priority = '3'
+					#~ if schedule_item.order_id.order_category == 'spare':
+						#~ priority = '5'
+						
+					if schedule_item.order_id.order_category in ('pump','pump_spare','project','access'):
 						if schedule_item.order_id.order_priority == 'normal':
-							priority = '6'
+							priority = '8'
 						if schedule_item.order_id.order_priority == 'emergency':
-							priority = '4'
+							priority = '3'
+						if schedule_item.order_id.order_priority == 'breakdown':
+							priority = '2'
+						if schedule_item.order_id.order_priority == 'urgent':
+							priority = '7'
 					if schedule_item.order_id.order_category == 'service':
-						priority = '3'
+						priority = '4'
 					if schedule_item.order_id.order_category == 'spare':
-						priority = '5'
+						priority = '6'
 					
 					if schedule_item.order_bomline_id.flag_pattern_check == True or schedule_item.pattern_id.pattern_state != 'active':
 						issue_state = 'pending'
@@ -1785,11 +1829,11 @@ class kg_schedule(osv.osv):
 						(
 						select (raw.qty * order_ms.indent_qty) as indent_qty,raw.product_id,wo_line.pump_model_id,
 						order_ms.header_id as order_line_id
-						from ch_ms_raw_material as raw
-						left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.ms_id
+						from ch_wo_ms_raw as raw
+						left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.id
 						left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
-						where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
-						from ch_schedule_details  where header_id = %s
+						where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id
+						from ch_schedule_details where header_id = %s
 						) 
 						
 						union
@@ -1855,12 +1899,11 @@ class kg_schedule(osv.osv):
 										select (raw.qty * order_ms.indent_qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
 										order_ms.header_id as order_line_id, raw.id as ms_item, order_ms.id as order_ms_id,
 										order_ms.position_id as position_id,order_ms.moc_id as moc_id,'foun' as type
-										from ch_ms_raw_material as raw
-										left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.ms_id
+										from ch_wo_ms_raw as raw
+										left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.id
 										left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
 										where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
-										from ch_schedule_details  where header_id = %s
-										)
+										from ch_schedule_details  where header_id = %s)
 										
 										union
 
@@ -1887,11 +1930,12 @@ class kg_schedule(osv.osv):
 									dep_indent_line_obj = self.pool.get('kg.depindent.line')
 									product_rec = self.pool.get('product.product').browse(cr, uid, ms_indent_item['product_id'])
 									
-									ms_raw_obj = self.pool.get('ch.ms.raw.material')
-									ms_raw_rec = ms_raw_obj.browse(cr, uid, ms_indent_item['ms_item'])
-									
-									
 									if ms_indent_item['type'] == 'foun':
+										ms_raw_obj = self.pool.get('ch.wo.ms.raw')
+										ms_raw_rec = ms_raw_obj.browse(cr, uid, ms_indent_item['ms_item'])
+										ms_bot_id = ms_raw_rec.header_id.ms_id.id
+										fns_item_name = ms_raw_rec.header_id.name
+										
 										ms_order_obj = self.pool.get('ch.order.machineshop.details')
 										ms_order_rec = ms_order_obj.browse(cr, uid, ms_indent_item['order_ms_id'])
 										if ms_order_rec.header_id.pump_model_type == 'horizontal':
@@ -1902,6 +1946,10 @@ class kg_schedule(osv.osv):
 												length = ms_raw_rec.length
 										
 									elif ms_indent_item['type'] == 'acc':
+										ms_raw_obj = self.pool.get('ch.ms.raw.material')
+										ms_raw_rec = ms_raw_obj.browse(cr, uid, ms_indent_item['ms_item'])
+										ms_bot_id = ms_raw_rec.header_id.id
+										fns_item_name = ms_raw_rec.header_id.code
 										ms_acc_obj = self.pool.get('ch.wo.accessories.ms')
 										ms_order_rec = ms_acc_obj.browse(cr, uid, ms_indent_item['order_ms_id'])
 										length = ms_raw_rec.length
@@ -1917,11 +1965,11 @@ class kg_schedule(osv.osv):
 												indent_qty = ms_indent_item['indent_qty']
 												cutting_qty = ms_indent_item['indent_qty']
 											else:				
-												indent_qty =  (length * ms_raw_rec.temp_qty) * ms_order_rec.indent_qty
-												cutting_qty = ms_raw_rec.temp_qty  * ms_order_rec.indent_qty
+												indent_qty =  (length * ms_raw_rec.temp_qty)
+												cutting_qty = ms_raw_rec.temp_qty
 										if ms_raw_rec.uom_conversation_factor == 'two_dimension':
-											indent_qty = (length * ms_raw_rec.breadth * ms_raw_rec.temp_qty) * ms_order_rec.indent_qty
-											cutting_qty = ms_raw_rec.temp_qty  * ms_order_rec.indent_qty
+											indent_qty = (length * ms_raw_rec.breadth * ms_raw_rec.temp_qty)
+											cutting_qty = ms_raw_rec.temp_qty
 									else:
 										if ms_indent_item['indent_qty'] == None:
 											indent_qty = 0
@@ -1929,7 +1977,7 @@ class kg_schedule(osv.osv):
 											indent_qty = ms_indent_item['indent_qty']
 										cutting_qty = 0
 									
-									print "sssssssssssssssssssssssssssssssssvvvvvvvvvvvv",indent_qty,ms_order_rec.indent_qty
+									
 									if indent_qty > 0:
 										
 										if ms_order_rec.flag_dynamic_length == True:
@@ -1937,20 +1985,29 @@ class kg_schedule(osv.osv):
 											issue_pending_qty = 0
 											flag_dynamic_length = True
 										else:
-											pending_qty = indent_qty/order_line_rec.qty
-											issue_pending_qty = indent_qty/order_line_rec.qty
+											pending_qty = indent_qty
+											issue_pending_qty = indent_qty
 											flag_dynamic_length = False
-									
+											
+										#~ ### Cutting qty division by qty ###
+										if order_line_rec.order_category in ('pump','access'):
+											cutting_qty = cutting_qty/ms_raw_rec.temp_qty
+											indent_qty = indent_qty/ms_raw_rec.temp_qty
+										else:
+											cutting_qty = cutting_qty
+											indent_qty = indent_qty
+											
+										
 										ms_dep_indent_line_vals = {
 											'indent_id':indent_id,
 											'product_id':ms_indent_item['product_id'],
 											'uom':ms_indent_item['uom'],
-											'qty':indent_qty/order_line_rec.qty,
+											'qty':indent_qty,
 											'pending_qty':pending_qty,
 											'issue_pending_qty':issue_pending_qty,
 											'cutting_qty': cutting_qty,
-											'ms_bot_id':ms_raw_rec.header_id.id,
-											'fns_item_name':ms_raw_rec.header_id.code,
+											'ms_bot_id':ms_bot_id,
+											'fns_item_name':fns_item_name,
 											#~ 'note': 'Each Item ' + str(ms_raw_rec.length),
 											'position_id': ms_indent_item['position_id'],
 											'moc_id': ms_indent_item['moc_id'],
@@ -1959,7 +2016,7 @@ class kg_schedule(osv.osv):
 											'flag_dynamic_length': flag_dynamic_length,
 											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
 										}
-
+										
 										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
 
 				### BOT Items ###
