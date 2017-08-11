@@ -178,7 +178,7 @@
          <para style="terp_61t">Grand Total(RS)</para>
         </td>
         <td>
-         <para style="terp_left_61_bold" alignment="right">[[ locale.format('%.2f', x['gr_total']) ]]</para>
+         <para style="terp_left_61_bold" alignment="right">[[ locale.format('%.2f', x['grand_total']) ]]</para>
         </td>
       </tr>
     </blockTable>
