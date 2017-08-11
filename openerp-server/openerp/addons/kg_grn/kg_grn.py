@@ -1569,6 +1569,7 @@ class kg_stock_move(osv.osv):
     'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
     'length': fields.float('Length'),
 	'breadth': fields.float('Breadth'),
+	'moc_id':fields.many2one('kg.moc.master','MOC Name'),
 	
     # General GRN Line
     
