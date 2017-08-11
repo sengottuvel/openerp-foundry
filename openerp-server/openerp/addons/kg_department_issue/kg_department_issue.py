@@ -71,7 +71,7 @@ class kg_department_issue(osv.osv):
 		'dep_issue_type':fields.selection([('from_indent','From Indent'),('direct','Direct')],'Issue Mode',required=True,
 					readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'wo_line_id': fields.many2one('ch.work.order.details','WO No.',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		'location_id': fields.many2one('stock.location', 'Source Location'),
+		'location_id': fields.many2one('stock.location', 'Source Location',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		
 		## Child Tables Declaration
 		
@@ -292,6 +292,7 @@ class kg_department_issue(osv.osv):
 						'location_dest_id':dep_stock_location,
 						'state' : 'confirmed',
 						'indent_line_id' : group[0].id,
+						'wo_moc_id' : group[0].moc_id.id,
 						'issue_type':'material',
 						'wo_state':'accept',
 						'dep_issue_type':obj.dep_issue_type,
@@ -381,7 +382,7 @@ class kg_department_issue(osv.osv):
 				seq_name = cr.fetchone();
 				issue_name = seq_name[0]
 				obj_rec.write({'name': issue_name})
-				
+			
 			obj_rec.write({'state': 'approve','confirmed_by':uid,'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 			
 			if not obj_rec.issue_line_ids:
@@ -392,11 +393,12 @@ class kg_department_issue(osv.osv):
 						self.pool.get('kg.department.issue.line').write(cr,uid,item.id,{'state':'confirmed'})
 					dep_issue_line_rec = dep_issue_line_obj.browse(cr, uid, item.id)
 					product_id = dep_issue_line_rec.product_id.id
-					product_uom = dep_issue_line_rec.uom_id.id		
+					product_uom = dep_issue_line_rec.uom_id.id
 					product_record = product_obj.browse(cr, uid,product_id)
 					lot_sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(item.id)
 					cr.execute(lot_sql)
 					lot_data = cr.dictfetchall()
+					print"lot_datalot_data",lot_data
 					if not lot_data:
 						raise osv.except_osv(_('No GRN Entry!'), _('There is no GRN reference for this Issue. You must associate GRN entries %s !!' %(item.product_id.name)))
 					else:
@@ -425,10 +427,70 @@ class kg_department_issue(osv.osv):
 								po_tot += lot_rec.po_qty
 								uom = lot_rec.product_uom.name
 								tot += lot_rec.pending_qty
-							if tot < dep_issue_line_rec.issue_qty:
-								raise osv.except_osv(_('Stock not available !!'),
-									_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(item.product_id.name)))
 							
+							## Lot qty check
+							#~ if obj_rec.department_id.name != 'DP2':
+								#~ sql = """ select
+											#~ 
+											#~ sum(lot.pending_qty) - (select sum(line.issue_qty) from kg_department_issue issue 
+											#~ left join kg_department_issue_line line on(line.issue_id=issue.id) where issue.id = %s and line.product_id = %s and line.brand_id = %s) as qty,
+											#~ prod.name_template as product
+											#~ 
+											#~ from
+											#~ 
+											#~ stock_production_lot lot
+											#~ left join product_product prod on(prod.id=lot.product_id)
+											#~ where lot.id in (select lot_id from kg_department_issue_details where grn_id = %s and lot.product_id = %s and lot.brand_id = %s)
+											#~ group by 2
+											#~ """ %(obj_rec.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id,dep_issue_line_rec.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id)
+								#~ cr.execute(sql)
+								#~ lot_datas = cr.dictfetchall()
+								#~ print"dep_issue_line_rec",dep_issue_line_rec.id
+								#~ print"obj_recobj_rec",obj_rec.id
+								#~ print"lot_datas",lot_datas,lot_datas[0]['qty']
+								#~ if lot_datas:
+									#~ if lot_datas[0]['qty'] < 0:
+										#~ raise osv.except_osv(_('Stock not available!'),
+											#~ _('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
+							if obj_rec.department_id.name == 'DP2':
+								sql = """ select
+											
+											sum(lot.pending_qty) - (select sum(line.issue_qty * line.length) from kg_department_issue issue 
+											left join kg_department_issue_line line on(line.issue_id=issue.id) where issue.id = %s and line.product_id = %s and line.brand_id = %s) as qty,
+											prod.name_template as product
+											
+											from
+											
+											stock_production_lot lot
+											left join product_product prod on(prod.id=lot.product_id)
+											where lot.id in (select lot_id from kg_department_issue_details where grn_id = %s and lot.product_id = %s and lot.brand_id = %s)
+											group by 2
+											""" %(obj_rec.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id,dep_issue_line_rec.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id)
+								cr.execute(sql)
+								lot_datas = cr.dictfetchall()
+								print"dep_issue_line_rec",dep_issue_line_rec.id
+								print"obj_recobj_rec",obj_rec.id
+								if lot_datas:
+									if lot_datas[0]['qty'] < 0:
+										raise osv.except_osv(_('Stock not available!'),
+											_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
+							if obj_rec.department_id.name != 'DP2':
+								if dep_issue_line_rec.uom_conversation_factor == 'one_dimension':
+									if dep_issue_line_rec.uom_id.id == lot_rec.po_uom.id:
+										crnt_qty = dep_issue_line_rec.issue_qty
+									elif dep_issue_line_rec.uom_id.id == lot_rec.product_uom.id:
+										crnt_qty = dep_issue_line_rec.issue_qty / dep_issue_line_rec.product_id.po_uom_coeff
+								elif dep_issue_line_rec.uom_conversation_factor == 'two_dimension':
+									if dep_issue_line_rec.uom_id.id == lot_rec.po_uom.id:
+										crnt_qty = dep_issue_line_rec.issue_qty
+									elif line_ids.uom_id.id == lot_rec.product_uom.id:
+										crnt_qty = dep_issue_line_rec.issue_qty / dep_issue_line_rec.product_id.po_uom_in_kgs / dep_issue_line_rec.length / dep_issue_line_rec.breadth
+								print"tottot",tot
+								if tot < crnt_qty:
+									raise osv.except_osv(_('Stock not available!'),
+										_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(item.product_id.name)))
+							
+							## Reserved Qty update process starts
 							sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(item.id)
 							cr.execute(sql)
 							data = cr.dictfetchall()
@@ -453,12 +515,13 @@ class kg_department_issue(osv.osv):
 										else:
 											pass
 									issue_qty = remain_qty
+							## Reserved Qty update process ends
+							
 							else:
 								pass
 					if dep_issue_line_rec.issue_qty == 0:
 						raise osv.except_osv(_('Item Line Qty can not Zero!'),
 							_('You cannot process Issue with Item Line Qty Zero for Product %s.' %(dep_issue_line_rec.product_id.name)))
-		
 		return True
 	
 	def action_process(self, cr, uid, ids, context=None):
@@ -564,18 +627,36 @@ class kg_department_issue(osv.osv):
 							if ms_obj:
 								ms_rec = self.pool.get('kg.ms.stores').browse(cr,uid,ms_obj[0])
 								self.pool.get('kg.ms.stores').write(cr,uid,ms_rec.id,{'accept_state':'waiting'})
-					
+				length = 1
+				breadth = 1
+				if line_ids.uom_conversation_factor == 'one_dimension':
+					if line_ids.uom_id.id != line_ids.product_id.uom_id.id:
+						print"*************************"
+						po_coeff = line_ids.product_id.po_uom_coeff
+						product_qty = line_ids.issue_qty * po_coeff
+					elif line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+						print"--------------------------"
+						product_qty = line_ids.issue_qty
+				elif line_ids.uom_conversation_factor == 'two_dimension':
+					if line_ids.product_id.po_uom_in_kgs > 0:
+						if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+							product_qty = line_ids.issue_qty
+						elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
+							product_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+							length = line_ids.length
+							breadth = line_ids.breadth
+				print"product_qtyproduct_qty",product_qty
 				stock_move_obj.create(cr,uid,
 				{
-				'dept_issue_id':issue_record.id,
-				'dept_issue_line_id':line_ids.id,
+				'dept_issue_id': issue_record.id,
+				'dept_issue_line_id': line_ids.id,
 				'product_id': line_ids.product_id.id,
-				'brand_id':line_ids.brand_id.id,
-				'moc_id':line_ids.wo_moc_id.id,
-				'name':line_ids.product_id.name,
-				'product_qty': line_ids.issue_qty,
-				'po_to_stock_qty':line_ids.issue_qty,
-				'stock_uom':line_ids.product_id.uom_id.id,
+				'brand_id': line_ids.brand_id.id,
+				'moc_id': line_ids.wo_moc_id.id,
+				'name': line_ids.product_id.name,
+				'product_qty': product_qty,
+				'po_to_stock_qty': product_qty,
+				'stock_uom': line_ids.product_id.uom_id.id,
 				'product_uom': line_ids.product_id.uom_po_id.id,
 				#~ 'location_id': main_location,
 				#~ 'location_dest_id': dep_stock_location,
@@ -584,7 +665,10 @@ class kg_department_issue(osv.osv):
 				'move_type': 'out',
 				'state': 'done',
 				'price_unit': line_ids.price_unit or 0.0,
-				'stock_rate':line_ids.price_unit or 0.0,
+				'stock_rate': line_ids.price_unit or 0.0,
+				'uom_conversation_factor': line_ids.uom_conversation_factor,
+				'length': length,
+				'breadth': breadth,
 				
 				})
 				
@@ -596,14 +680,25 @@ class kg_department_issue(osv.osv):
 				else:
 					val = [d['lot_id'] for d in lot_data if 'lot_id' in d]
 					tot = 0.0
+					crnt_qty = 0.0
 					for i in val:
 						lot_rec = lot_obj.browse(cr, uid, i)
 						tot += lot_rec.pending_qty
-					if tot < line_ids.issue_qty:
+					if line_ids.uom_conversation_factor == 'one_dimension':
+						if line_ids.uom_id.id == lot_rec.po_uom.id:
+							crnt_qty = line_ids.issue_qty
+						elif line_ids.uom_id.id == lot_rec.product_uom.id:
+							crnt_qty = line_ids.issue_qty / line_ids.product_id.po_uom_coeff
+					elif line_ids.uom_conversation_factor == 'two_dimension':
+						if line_ids.uom_id.id == lot_rec.po_uom.id:
+							crnt_qty = line_ids.issue_qty
+						elif line_ids.uom_id.id == lot_rec.product_uom.id:
+							crnt_qty = line_ids.issue_qty / line_ids.product_id.po_uom_in_kgs / line_ids.length / line_ids.breadth
+					print"crnt_qtycrnt_qtycrnt_qty",crnt_qty
+					print"tottot",tot
+					if tot < crnt_qty:
 						raise osv.except_osv(_('Stock not available !!'),
 							_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(line_ids.product_id.name)))
-					else:
-						pass
 					### Updation Issue Pending Qty in Department Issue ###
 					if issue_record.issue_type == 'material':
 						dep_line_obj = self.pool.get('kg.depindent.line')   
@@ -633,6 +728,12 @@ class kg_department_issue(osv.osv):
 											pending_depindent_qty = issue_pending_qty - (((bro_record.qty/bro_record.cutting_qty) * issue_qty) * product_record.po_uom_coeff)
 										else:
 											pending_depindent_qty = pending_depindent_qty
+									else:
+										pending_depindent_qty =  0.0
+										if line_ids.uom_conversation_factor == 'two_dimension':
+											pending_depindent_qty = issue_pending_qty - (line_ids.issue_qty / line_ids.length / line_ids.breadth / line_ids.product_id.po_uom_in_kgs)
+										elif line_ids.uom_conversation_factor == 'one_dimension':
+											pending_depindent_qty = issue_pending_qty - (line_ids.issue_qty * product_id.po_uom_coeff)
 									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
 									cr.execute(sql)
 									break
@@ -697,7 +798,7 @@ class kg_department_issue(osv.osv):
 									sql = """ update kg_service_indent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
 									cr.execute(sql)
 									if remain_qty < 0:
-										break		   
+										break
 							else:
 								if issue_used_qty <= issue_pending_qty:
 									pending_depindent_qty =  issue_pending_qty - issue_used_qty
@@ -716,6 +817,8 @@ class kg_department_issue(osv.osv):
 					sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(line_ids.id)
 					cr.execute(sql)
 					data = cr.dictfetchall()
+					print"datadata",data
+					
 					if data:
 						val = [d['lot_id'] for d in data if 'lot_id' in d]
 						print"valvalvalvalval",val
@@ -725,19 +828,20 @@ class kg_department_issue(osv.osv):
 						for i in val:
 							print'aaaaaaaaaaaaaaaaaa'
 							lot_rec = lot_obj.browse(cr,uid,i)
-							move_qty = issue_qty
-							print"move_qty",move_qty
-							print"lot_rec.pending_qty",lot_rec.pending_qty
-							if move_qty > 0 and move_qty <= lot_rec.pending_qty:
-								lot_pending_qty = lot_rec.pending_qty - move_qty
-								print"lot_pending_qty",lot_pending_qty
-								print"lot_reclot_rec",lot_rec.id
-								if issue_record.department_id.name == 'DP2':
-									lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty * line_ids.length)
-									store_pending_qty = lot_rec.store_pending_qty - ((line_ids.issue_qty * line_ids.length)*line_ids.product_id.po_uom_coeff)
-								else:
+							#~ move_qty = issue_qty
+							#~ print"move_qty",move_qty
+							#~ print"lot_rec.pending_qty",lot_rec.pending_qty
+							#~ if move_qty > 0 and move_qty <= lot_rec.pending_qty:
+							#~ lot_pending_qty = lot_rec.pending_qty - move_qty
+							print"lot_reclot_rec",lot_rec.id
+							if issue_record.department_id.name == 'DP2':
+								lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty * line_ids.length)
+								store_pending_qty = lot_rec.store_pending_qty - ((line_ids.issue_qty * line_ids.length)*line_ids.product_id.po_uom_coeff)
+							else:
+								if line_ids.uom_conversation_factor == 'one_dimension':
 									if line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
 										print"///////////////////"
+										lot_pending_qty = lot_rec.pending_qty - line_ids.issue_qty
 										store_pending_qty = lot_rec.store_pending_qty - (line_ids.issue_qty*line_ids.product_id.po_uom_coeff)
 									elif line_ids.uom_id.id == line_ids.product_id.uom_id.id:
 										print"*-************************"
@@ -745,9 +849,18 @@ class kg_department_issue(osv.osv):
 										lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty / line_ids.product_id.po_uom_coeff)
 									else:
 										store_pending_qty = 0
+								elif line_ids.uom_conversation_factor == 'two_dimension':
+									print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA"
+									if line_ids.product_id.po_uom_in_kgs > 0:
+										if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+											store_pending_qty = lot_rec.store_pending_qty - line_ids.issue_qty
+											lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty / line_ids.product_id.po_uom_in_kgs / line_ids.length / line_ids.breadth)
+										elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
+											store_pending_qty = lot_rec.store_pending_qty - (line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth)
+											lot_pending_qty = lot_rec.pending_qty - line_ids.issue_qty
+								
 								print"lot_pending_qtylot_pending_qty",lot_pending_qty
 								print"store_pending_qtystore_pending_qty",store_pending_qty
-								
 								lot_rec.write({'pending_qty': lot_pending_qty,'store_pending_qty':store_pending_qty,'issue_qty': 0.0})
 								#### wrting data into kg_issue_details ###
 								lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
@@ -769,49 +882,49 @@ class kg_department_issue(osv.osv):
 										})
 								##### Ends Here ###
 								#~ break
-							else:
-								if move_qty > 0:								
-									lot_pending_qty = lot_rec.pending_qty
-									remain_qty =  move_qty - lot_pending_qty
-									print'remain_qty',remain_qty
-									if issue_record.department_id.name == 'DP2':
-										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
-									else:
-										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
-									lot_rec.write({'pending_qty': 0.0,'reserved_qty': 0.0})
-									#### wrting data into kg_issue_details ###
-									lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
-									if lot_issue_qty == 0:
-										issue_qty = lot_rec.pending_qty
-									elif lot_issue_qty > 0:
-										issue_qty = lot_issue_qty
-									issue_name = 'OUT'
-									item_issue_obj.create(cr,uid,
-										{
-										'issue_line_id':line_ids.id,
-										'product_id':line_ids.product_id.id,
-										'uom_id':line_ids.uom_id.id,
-										'grn_qty':lot_rec.pending_qty,
-										'issue_qty':issue_qty,
-										'price_unit':lot_rec.price_unit,
-										'expiry_date':lot_rec.expiry_date,
-										'batch_no':lot_rec.batch_no,
-										'lot_id':lot_rec.id,
-										})
-									##### Ends Here ###
-								elif move_qty == 0:
-									print"issue_record.confirm_qty",line_ids.confirm_qty
-									print"issue_record.issue_qty",line_ids.issue_qty
-									print"lot_rec.reserved_qty",lot_rec.reserved_qty
-									print":ffffffffffff",lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)
-									if issue_record.department_id.name == 'DP2':
-										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
-									else:
-										reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
-									lot_rec.write({'reserved_qty': lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)})
-								else:
-									pass
-							issue_qty = remain_qty
+							#~ else:
+								#~ if move_qty > 0:								
+									#~ lot_pending_qty = lot_rec.pending_qty
+									#~ remain_qty =  move_qty - lot_pending_qty
+									#~ print'remain_qty',remain_qty
+									#~ if issue_record.department_id.name == 'DP2':
+										#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
+									#~ else:
+										#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
+									#~ lot_rec.write({'pending_qty': 0.0,'reserved_qty': 0.0})
+									#~ #### wrting data into kg_issue_details ###
+									#~ lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
+									#~ if lot_issue_qty == 0:
+										#~ issue_qty = lot_rec.pending_qty
+									#~ elif lot_issue_qty > 0:
+										#~ issue_qty = lot_issue_qty
+									#~ issue_name = 'OUT'
+									#~ item_issue_obj.create(cr,uid,
+										#~ {
+										#~ 'issue_line_id':line_ids.id,
+										#~ 'product_id':line_ids.product_id.id,
+										#~ 'uom_id':line_ids.uom_id.id,
+										#~ 'grn_qty':lot_rec.pending_qty,
+										#~ 'issue_qty':issue_qty,
+										#~ 'price_unit':lot_rec.price_unit,
+										#~ 'expiry_date':lot_rec.expiry_date,
+										#~ 'batch_no':lot_rec.batch_no,
+										#~ 'lot_id':lot_rec.id,
+										#~ })
+									#~ ##### Ends Here ###
+								#~ elif move_qty == 0:
+									#~ print"issue_record.confirm_qty",line_ids.confirm_qty
+									#~ print"issue_record.issue_qty",line_ids.issue_qty
+									#~ print"lot_rec.reserved_qty",lot_rec.reserved_qty
+									#~ print":ffffffffffff",lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)
+									#~ if issue_record.department_id.name == 'DP2':
+										#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
+									#~ else:
+										#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
+									#~ lot_rec.write({'reserved_qty': lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)})
+								#~ else:
+									#~ pass
+							#~ issue_qty = remain_qty
 					else:
 						pass
 		
@@ -865,7 +978,7 @@ class kg_department_issue_line(osv.osv):
 		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type'),
 		'dep_issue_type': fields.selection([('from_indent','From Indent'),('direct','Direct')], string='Issue Type'),
 		'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry',
-					domain="[('product_id','=',product_id),'&',('grn_type','=',issue_type),'&',('pending_qty','>',0),'&',('store_pending_qty','>',0),'&',('lot_type','!=','out'),'&',('location_id','=',location_id)]",
+					domain="[('product_id','=',product_id),'&',('grn_type','=',issue_type),'&',('pending_qty','>',0),'&',('store_pending_qty','>',0),'&',('lot_type','!=','out'),'&',('moc_id','=',wo_moc_id),'&',('location_id','=',location_id)]",
 					),
 		#'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry'),
 		'brand_id': fields.many2one('kg.brand.master','Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
@@ -882,15 +995,17 @@ class kg_department_issue_line(osv.osv):
 		'wo_id': fields.related('w_order_line_id','header_id', type='many2one',relation='kg.work.order', string='WO No.',store=True),
 		'wo_delivery_date': fields.related('wo_id','delivery_date', type='date', string='Delivery Date',store=True),
 		'wo_pump_model_id': fields.related('w_order_line_id','pump_model_id', type='many2one',relation='kg.pumpmodel.master', string='Pump Model',store=True),
-		'wo_moc_id': fields.related('indent_line_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC',store=True),
+		#~ 'wo_moc_id': fields.related('indent_line_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC',store=True),
+		'wo_moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 		'wo_position_id': fields.related('indent_line_id','position_id', type='many2one',relation='kg.position.number', string='Position No.',store=True),
 		'order_priority': fields.related('wo_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True),
 		'accept_date': fields.date('Accepted Date'),
 		'remark_id': fields.many2one('kg.rejection.master','Rejection Remarks'),
 		'dep_id': fields.related('issue_id','department_id',relation='kg.depmaster',type='many2one',string='Department Name',store=True),
 		'dep_code': fields.related('dep_id','name',type='char',string='Department Code',store=True),
-		'length': fields.float('Length',readonly=True),
-		'breadth': fields.float('Breadth',readonly=True),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
 		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
 		
 		## Child Tables Declaration
@@ -913,10 +1028,29 @@ class kg_department_issue_line(osv.osv):
 		return context
 	
 	def onchange_product_id(self, cr, uid, ids, product_id,context=None):
-		value = {'uom_id': ''}
+		value = {'uom_id': '','uom_conversation_factor':''}
 		if product_id:
 			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'uom_id': prod.uom_id.id}
+			value = {'uom_id': prod.uom_id.id,'uom_conversation_factor':prod.uom_conversation_factor}
+		return {'value': value}
+	
+	def onchange_moc(self, cr, uid, ids, moc_id_temp):
+		value = {'wo_moc_id':''}
+		if moc_id_temp:
+			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
+			value = {'wo_moc_id': rate_rec.moc_id.id}
+		return {'value': value}
+	
+	def onchange_uom_id(self, cr, uid, ids, product_id,uom_id, context=None):
+		value = {'uom_id': ''}
+		if product_id and uom_id:
+			pro_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+			if uom_id == pro_rec.uom_id.id or uom_id == pro_rec.uom_po_id.id:
+				pass
+			else:
+				raise osv.except_osv(_('UOM Mismatching Error !'),
+					_('You choosed wrong UOM and you can choose either %s or %s for %s !!') % (pro_rec.uom_id.name,pro_rec.uom_po_id.name,pro_rec.name))
+			value = {'uom_id':uom_id}
 		return {'value': value}
 	
 	def onchange_issue_qty_2(self, cr, uid, ids, issue_qty,context=None):

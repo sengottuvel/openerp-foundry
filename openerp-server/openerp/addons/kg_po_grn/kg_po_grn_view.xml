@@ -121,16 +121,17 @@
 										<field name="brand_id" attrs="{'readonly': [('billing_type','=','cost')]}"/>
 										<field name="moc_id" invisible="1" readonly="1"/>
 										<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" readonly="1"/>
+										<field name="uom_conversation_factor"/>
 										<field name="uom_id" attrs="{'readonly': [('billing_type','=','cost')]}"/>
 										<field name="location_dest_id" required="1" invisible="1"/>
 										<field name="price_type" readonly="1" invisible="1"/>
 									</group> 
 									<group>
 										<div>
-											<label for="po_grn_qty"  string="Accepted Qty"  attrs="{'required': [('line_state','in',('draft','confirmed'))],'invisible': [('line_state','not in',('draft','done'))],'readonly': [('line_state','=','confirmed')]}"/>
+											<label for="po_grn_qty" string="Accepted Qty" attrs="{'required': [('line_state','in',('draft','confirmed'))],'invisible': [('line_state','not in',('draft','done'))],'readonly': [('line_state','=','confirmed')]}"/>
 											<label for="po_grn_qty" string="Received Qty" attrs="{'required': [('line_state','=',('draft','confirmed'))],'invisible': [('line_state','!=','confirmed')],'readonly': [('line_state','=','draft')]}" />
 										</div>
-										<field name="po_grn_qty" nolabel="1" on_change="onchange_qty(po_grn_qty,recvd_qty,reject_qty,line_state)"/>
+										<field name="po_grn_qty" nolabel="1" on_change="onchange_qty(po_grn_qty,recvd_qty,reject_qty,line_state,length,breadth,uom_conversation_factor,product_id,uom_id)"/>
 										<div>
 											<label for="recvd_qty"  string="Received Qty"  attrs="{'required': [('line_state','in',('draft','confirmed'))],'invisible': [('line_state','not in',('draft','done'))]}"/>
 											<label for="recvd_qty" string="Accepted Qty" attrs="{'required': [('line_state','=',('draft','confirmed'))],'invisible': [('line_state','!=','confirmed')]}"/>
@@ -139,7 +140,9 @@
 								<!--	<field name="po_grn_qty"  string="Accepted Qty" on_change="onchange_qty(po_grn_qty,recvd_qty,reject_qty)"/>
 										<field name="recvd_qty" readonly="1"/>-->
 										<field name="reject_qty" readonly="1"/>
-										<field name="weight"/>
+										<field name="length" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
+										<field name="breadth" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
+										<field name="weight" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')]}"/>
 										<field name="price_unit" attrs="{'readonly': [('billing_type','=','cost')]}" invisible="1"/>
 										<field name="inward_type" required="1"/>
 										<field name="billing_type" invisible = "1"/>
@@ -419,14 +422,17 @@
 										<field name="brand_id" attrs="{'readonly': [('billing_type','=','cost')]}"/>    
 										<field name="moc_id" invisible="1" readonly="1"/>
 										<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" readonly="1"/>
+										<field name="uom_conversation_factor"/>
 										<field name="uom_id" attrs="{'readonly': [('billing_type','=','cost')]}"/>
-										<field name="price_type" readonly="1" invisible="1"/>
+										<field name="price_type" readonly="1" />
 									</group> 
-									<group> 
+									<group>
 										<field name="recvd_qty" string="Accepted Qty" readonly="1"/>
 										<field name="po_grn_qty" string="Received Qty" on_change="onchange_qty(po_grn_qty,recvd_qty,reject_qty,line_state)"/>
 										<field name="reject_qty" readonly="1"/>
-										<field name="weight"/>
+										<field name="length" readonly="1"/>
+										<field name="breadth" readonly="1"/>
+										<field name="weight" readonly="1"/>
 										<field name="price_unit" attrs="{'readonly': [('billing_type','=','cost')]}" invisible="1"/>
 										<field name="inward_type" required="1"/>
 										<field name="billing_type" invisible = "1"/>

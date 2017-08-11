@@ -406,15 +406,23 @@ class kg_general_grn(osv.osv):
 				
 				if line.uom_id.id != line.product_id.uom_id.id:
 					print"*************************"
-					product_uom = line.product_id.uom_id.id
 					po_coeff = line.product_id.po_uom_coeff
 					product_qty = line.grn_qty * po_coeff
 					price_unit = line.price_subtotal / product_qty or 1
 				elif line.uom_id.id == line.product_id.uom_id.id:
 					print"--------------------------"
-					product_uom = line.product_id.uom_id.id
 					product_qty = line.grn_qty
 					price_unit = line.price_subtotal / product_qty or 1
+				length = 1
+				breadth = 1
+				if line.uom_conversation_factor == 'two_dimension':
+					if line.product_id.po_uom_in_kgs > 0:
+						if line.uom_id.id == line.product_id.uom_id.id:
+							product_qty = line.grn_qty
+						elif line.uom_id.id == line.product_id.uom_po_id.id:
+							product_qty = line.grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+							length = line.length
+							breadth = line.breadth
 				stock_move_obj.create(cr,uid,
 					{
 					'general_grn_id': line.id,
@@ -434,6 +442,9 @@ class kg_general_grn(osv.osv):
 					'price_unit': price_unit or 0.0,
 					'origin': 'General GRN',
 					'stock_rate': line.price_unit or 0.0,
+					'uom_conversation_factor': line.uom_conversation_factor,
+					'length': length,
+					'breadth': breadth,
 					})
 				if grn_entry.grn_dc == 'dc_invoice' and grn_entry.bill == 'applicable':
 						pi_gen_grn_obj.create(cr,uid,
@@ -461,19 +472,22 @@ class kg_general_grn(osv.osv):
 				if line.exp_batch_id:
 					for exp in line.exp_batch_id:
 						if line.uom_id.id != line.product_id.uom_id.id:
-							print"aaaaaaaaaaaaaaaaaaaaaaaa"
-							product_uom = line.product_id.uom_id.id
 							po_coeff = line.product_id.po_uom_coeff
 							product_qty = exp.product_qty
 							store_pending_qty = exp.product_qty * line.product_id.po_uom_coeff
 							price_unit =  line.price_subtotal / product_qty or 1
 						elif line.uom_id.id == line.product_id.uom_id.id:
-							print"bbbbbbbbbbbbbbbbbbbbbbbb"
-							product_uom = line.product_id.uom_id.id
 							product_qty = exp.product_qty
 							store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
 							price_unit = line.price_subtotal / product_qty or 1
-						
+						if line.uom_conversation_factor == 'two_dimension':
+							if line.product_id.po_uom_in_kgs > 0:
+								if line.uom_id.id == line.product_id.uom_id.id:
+									store_pending_qty = exp.product_qty
+									product_qty = exp.product_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth
+								elif line.uom_id.id == line.product_id.uom_po_id.id:
+									store_pending_qty = exp.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+									product_qty = exp.product_qty
 						lot_id = lot_obj.create(cr,uid,
 							{
 							'grn_no':line.grn_id.name,
@@ -496,21 +510,24 @@ class kg_general_grn(osv.osv):
 						})
 				else:
 					if line.uom_id.id != line.product_id.uom_id.id:
-						print"aaaaaaaaaaaaaaaaaaaaaaaa"
-						product_uom = line.product_id.uom_id.id
 						po_coeff = line.product_id.po_uom_coeff
 						product_qty = line.grn_qty
 						store_pending_qty = line.grn_qty * line.product_id.po_uom_coeff
 						price_unit =  line.price_subtotal / product_qty or 1
 					elif line.uom_id.id == line.product_id.uom_id.id:
-						print"bbbbbbbbbbbbbbbbbbbbbbbb"
-						product_uom = line.product_id.uom_id.id
 						product_qty = line.grn_qty
 						store_pending_qty = line.grn_qty / line.product_id.po_uom_coeff
 						price_unit = line.price_subtotal / product_qty or 1
 					print"product_qtyproduct_qty",product_qty
 					print"store_pending_qtystore_pending_qty",store_pending_qty
-					
+					if line.uom_conversation_factor == 'two_dimension':
+						if line.product_id.po_uom_in_kgs > 0:
+							if line.uom_id.id == line.product_id.uom_id.id:
+								store_pending_qty = line.grn_qty
+								product_qty = line.grn_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth
+							elif line.uom_id.id == line.product_id.uom_po_id.id:
+								store_pending_qty = line.grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+								product_qty = line.grn_qty
 					lot_id = lot_obj.create(cr,uid,
 						{
 						'grn_no':line.grn_id.name,
@@ -590,7 +607,6 @@ class kg_general_grn(osv.osv):
 	}
 	
 	def _get_invoice_type(self, pick):
-		print "_get_invoice_type called from PICKING^^^^^^^^^^^^^^^^^^^^66"
 		src_usage = dest_usage = None
 		inv_type = None
 		if pick.state == 'done':
@@ -891,8 +907,11 @@ class kg_general_grn_line(osv.osv):
 		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type'),
 		'product_tax_amt': fields.float('Tax Amount'),
 		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
-		'weight': fields.float('Weight',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'weight': fields.float('Weight',readonly=True),
 		'location_dest_id': fields.many2one('stock.location','Location',domain="[('location_type','=','main')]"),
+		'length': fields.float('Length',digits=(16,4)),
+		'breadth': fields.float('Breadth',digits=(16,4)),
+		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor',required=True,readonly=True),
 		
 		## Child Tables Declaration
 		
@@ -922,6 +941,37 @@ class kg_general_grn_line(osv.osv):
 	def default_get(self, cr, uid, fields, context=None):
 		print"contextcontextcontext",context
 		return context
+	
+	def onchange_product_id(self, cr, uid, ids, product_id):
+		value = {'uom_conversation_factor':''}
+		if product_id:
+			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+			value = {'uom_conversation_factor': prod_rec.uom_conversation_factor}
+		return {'value': value}
+	
+	def onchange_weight(self, cr, uid, ids, grn_qty,length,breadth,uom_conversation_factor,product_id,uom_id):
+		value = {'weight':''}
+		weight = 0
+		if grn_qty and length and breadth and uom_conversation_factor and product_id and uom_id:
+			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+			print"grn_qty",grn_qty,prod_rec.po_uom_in_kgs,length,breadth
+			if uom_id == prod_rec.uom_po_id.id:
+				if uom_conversation_factor == 'two_dimension':
+					if prod_rec.po_uom_in_kgs > 0:
+						weight = grn_qty * prod_rec.po_uom_in_kgs * length * breadth
+				#~ elif uom_conversation_factor == 'one_dimension':
+					#~ if prod_rec.po_uom_in_kgs > 0:
+						#~ weight = grn_qty * prod_rec.po_uom_in_kgs
+				#~ else:
+					#~ weight = product_qty
+			elif uom_id == prod_rec.uom_id.id:
+				if uom_conversation_factor == 'two_dimension':
+					if prod_rec.po_uom_in_kgs > 0:
+						weight = grn_qty / prod_rec.po_uom_in_kgs / length / breadth
+				
+			print"weightweight",weight
+			value = {'weight': weight}
+		return {'value': value}
 	
 	def onchange_moc(self, cr, uid, ids, moc_id_temp):
 		value = {'moc_id':''}

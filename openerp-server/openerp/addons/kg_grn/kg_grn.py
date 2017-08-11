@@ -1523,20 +1523,20 @@ class kg_stock_move(osv.osv):
     'cons_qty': fields.float('Available Qty', readonly=True),
     'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),
             required=False, states={'done':[('readonly', True)], 'cancel':[('readonly',True)], 'assigned':[('readonly',False)]}),
-   'product_id': fields.many2one('product.product', 'Product', required=True, select=True, domain=[('type','<>','service')],
+	'product_id': fields.many2one('product.product', 'Product', required=True, select=True, domain=[('type','<>','service')],
         readonly=True, states={'draft':[('readonly', False)]}),
-   'product_uom': fields.many2one('product.uom', 'Unit of Measure',
+	'product_uom': fields.many2one('product.uom', 'Unit of Measure',
         readonly=True, states={'draft':[('readonly', False)]}),
     'name': fields.char('Description', required=True, select=True,
         readonly=True, states={'draft':[('readonly', False)]}),
-   'location_dest_id': fields.many2one('stock.location', 'Destination Location', required=True,
+	'location_dest_id': fields.many2one('stock.location', 'Destination Location', required=True,
         readonly=True, states={'draft':[('readonly', False)]}, 
         select=True, help="Location where the system will stock the finished products."),
     'location_id': fields.many2one('stock.location', 'Source Location', required=True, select=True,
         readonly=True, states={'draft':[('readonly', False)]}),
     'po_to_stock_qty' : fields.float('Quantity'),
     'stock_uom': fields.many2one('product.uom', 'Stock UOM'),
-        
+	
     'state': fields.selection([('draft', 'Draft'),
                                    ('cancel', 'Cancelled'),
                                    ('confirmed', 'Waiting for Confirmation'),
@@ -1566,7 +1566,10 @@ class kg_stock_move(osv.osv):
     'exp_line_id':fields.one2many('kg.grn.exp.batch', 'grn_line_id','Expiry Batch Line'),
     'flag_opening':fields.boolean('Opening Flag'),
     'transaction_type':fields.char('Transaction Type'),
-    
+    'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
+    'length': fields.float('Length'),
+	'breadth': fields.float('Breadth'),
+	
     # General GRN Line
     
     'general_grn_id':fields.many2one('kg.general.grn.line', 'General GRN Line Id'),
