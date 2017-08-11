@@ -3527,6 +3527,7 @@ class ch_wo_spare_bom(osv.osv):
 									moc_id = ms_line_rec.moc_id.id
 									
 							if ms_rec.line_ids:
+								ch_ms_vals = []
 								for raw in ms_rec.line_ids:
 									ch_ms_vals.append([0, 0,{
 											'product_id': raw.product_id.id,
