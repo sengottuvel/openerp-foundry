@@ -103,7 +103,9 @@
 								</tree>
 								
 								<form string="Pumpmodel Details" version="7.0">
+<!--
 								<sheet>
+-->
 									<group>
 										<group>
 											<field name="template_id" on_change="onchange_template(template_id)"/>
@@ -741,7 +743,9 @@
 							</page>
 						</notebook>
 						
+<!--
 					</sheet>
+-->
 					</form>
 								
 								
