@@ -461,30 +461,30 @@ class kg_crm_enquiry(osv.osv):
 								brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
 								cr.execute(brandmoc_line_sql)
 								brandmoc_line_data = cr.dictfetchall()
-								#~ if brandmoc_line_data:
-									#~ design_rate = brandmoc_line_data[0]['rate']
-								#~ if raw_line.uom_conversation_factor == 'one_dimension':
-									#~ qty = raw_line.qty
-								#~ elif raw_line.uom_conversation_factor == 'two_dimension':
-									#~ qty = raw_line.qty * raw_line.length * raw_line.breadth
-								#~ if raw_line.uom.id == brandmoc_rec.uom_id.id:
-									#~ price = qty * raw_line.qty * design_rate
-								#~ elif raw_line.uom.id != brandmoc_rec.uom_id.id:
-									#~ if brandmoc_rec.uom_id.code == 'Kg':
-										#~ price = raw_line.weight * design_rate
-									#~ elif brandmoc_rec.uom_id.id == raw_line.product_id.uom_po_id.id:
-										#~ price = (design_rate / raw_line.product_id.po_uom_coeff) * qty
-								#~ price = design_rate * qty
 								if brandmoc_line_data:
 									design_rate = brandmoc_line_data[0]['rate']
-								if raw_line.product_id.uom_conversation_factor == 'one_dimension':
-									if raw_line.uom.id == brandmoc_rec.uom_id.id:
-										qty = raw_line.qty
-									elif raw_line.uom.id != brandmoc_rec.uom_id.id:
-										qty = raw_line.weight
-								elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
-									qty = raw_line.weight
-								price = design_rate * qty
+								if raw_line.uom_conversation_factor == 'one_dimension':
+									qty = raw_line.qty
+								elif raw_line.uom_conversation_factor == 'two_dimension':
+									qty = raw_line.temp_qty * raw_line.length * raw_line.breadth
+								if raw_line.uom.id == brandmoc_rec.uom_id.id:
+									price = qty * design_rate
+								elif raw_line.uom.id != brandmoc_rec.uom_id.id:
+									if brandmoc_rec.uom_id.code == 'Kg':
+										price = raw_line.weight * design_rate
+									elif brandmoc_rec.uom_id.id == raw_line.product_id.uom_po_id.id:
+										price = (design_rate / raw_line.product_id.po_uom_coeff) * qty
+								#~ price = design_rate * qty
+								#~ if brandmoc_line_data:
+									#~ design_rate = brandmoc_line_data[0]['rate']
+								#~ if raw_line.product_id.uom_conversation_factor == 'one_dimension':
+									#~ if raw_line.uom.id == brandmoc_rec.uom_id.id:
+										#~ qty = raw_line.qty
+									#~ elif raw_line.uom.id != brandmoc_rec.uom_id.id:
+										#~ qty = raw_line.weight
+								#~ elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
+									#~ qty = raw_line.weight
+								#~ price = design_rate * qty
 							else:
 								qty = design_rate = price = 0
 							tot_price += price
@@ -509,19 +509,36 @@ class kg_crm_enquiry(osv.osv):
 							brandmoc_line_data = cr.dictfetchall()
 						if brandmoc_line_data:
 							design_rate = brandmoc_line_data[0]['rate']
-							if raw_line.product_id.uom_conversation_factor == 'one_dimension':
-								if raw_line.uom.id == brandmoc_rec.uom_id.id:
-									qty = raw_line.qty
-								elif raw_line.uom.id != brandmoc_rec.uom_id.id:
-									qty = raw_line.weight
-							elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
-								qty = raw_line.weight
-							price = design_rate * qty
+							#~ if raw_line.product_id.uom_conversation_factor == 'one_dimension':
+								#~ if raw_line.uom.id == brandmoc_rec.uom_id.id:
+									#~ qty = raw_line.qty
+								#~ elif raw_line.uom.id != brandmoc_rec.uom_id.id:
+									#~ qty = raw_line.weight
+							#~ elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
+								#~ qty = raw_line.weight
+							#~ price = design_rate * qty
+							if raw_line.uom_conversation_factor == 'one_dimension':
+								qty = raw_line.qty
+							elif raw_line.uom_conversation_factor == 'two_dimension':
+								qty = raw_line.temp_qty * raw_line.length * raw_line.breadth
+							if raw_line.uom.id == brandmoc_rec.uom_id.id:
+								price = qty * design_rate
+								print"qty",qty
+								print"raw_line.qty",raw_line.qty
+								print"design_rate",design_rate
+								print"pricepriceprice",price
+								
+							elif raw_line.uom.id != brandmoc_rec.uom_id.id:
+								if brandmoc_rec.uom_id.code == 'Kg':
+									price = raw_line.weight * design_rate
+								elif brandmoc_rec.uom_id.id == raw_line.product_id.uom_po_id.id:
+									price = (design_rate / raw_line.product_id.po_uom_coeff) * qty
 						else:
 							qty = design_rate = price = 0
 						tot_price += price
 						prime_cost = tot_price
-					
+						print"prime_costprime_cost",prime_cost
+						
 		return prime_cost
 	
 	def prime_cost_update(self,cr,uid,ids,context=None):
