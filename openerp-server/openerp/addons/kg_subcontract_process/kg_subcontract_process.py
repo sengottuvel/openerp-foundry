@@ -1260,7 +1260,7 @@ class kg_subcontract_inward(osv.osv):
 		'division_id': fields.many2one('kg.division.master','From Division'),
 		'to_division_id': fields.many2one('kg.division.master','To Division'),
 		'transfer_type': fields.selection([('internal','Internal'),('sub_contractor','Sub Contractor')],'Type'),
-		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'contractor_id': fields.many2one('res.partner','Subcontractor', domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'phone': fields.char('Phone',size=64),
 		'contact_person': fields.char('Contact Person', size=128),	
 		
