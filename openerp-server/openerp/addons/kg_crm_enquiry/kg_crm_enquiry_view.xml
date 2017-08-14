@@ -221,15 +221,15 @@
 									<field name="engine_make" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 									<field name="engine_type" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 									<field name="belt_loss_in_kw" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
-									<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
-									<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])],'required':[('pump_model_type','=','vertical')]}"/>
-									<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+									<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','vfd'])]}"/>
+									<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb','vfd'])],'required':[('pump_model_type','=','vertical')]}"/>
+									<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','vfd'])]}"/>
 			<!--
 									<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','in',['motor_direct','fc_gb'])]}"/>
 			-->
-									<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])]}"/>
+									<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb','vfd'])]}"/>
 									<field name="engine_rpm" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
-									<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+									<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','vfd'])]}"/>
 									<field name="critical_speed"/>
 									<field name="engine_kw" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 									<field name="gear_box_loss_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
@@ -1149,15 +1149,15 @@
 					<field name="engine_make" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 					<field name="engine_type" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 					<field name="belt_loss_in_kw" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
-					<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
-					<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])],'required':[('pump_model_type','=','vertical')]}"/>
-					<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+					<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','vfd'])]}"/>
+					<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','=',['belt_drive','motor_direct','fc_gb','vfd'])],'required':[('pump_model_type','=','vertical')]}"/>
+					<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','vfd'])]}"/>
 		<!--
 					<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','in',['motor_direct','fc_gb'])]}"/>
 		-->
-					<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])]}"/>
+					<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb','vfd'])]}"/>
 					<field name="engine_rpm" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
-					<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+					<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','vfd'])]}"/>
 					<field name="critical_speed"/>
 					<field name="engine_kw" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 					<field name="gear_box_loss_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>

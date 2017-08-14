@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000072"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="118"/>
+	<property name="ireport.y" value="358"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -827,7 +827,7 @@ where po.id = $P{po_id}]]>
 		</band>
 	</pageFooter>
 	<lastPageFooter>
-		<band height="162">
+		<band height="163">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToBandHeight" x="625" y="41" width="177" height="13"/>
 				<box topPadding="2" leftPadding="2" rightPadding="4">
@@ -1120,7 +1120,9 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["Confirmed By"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="607" y="148" width="194" height="14"/>
+				<reportElement x="607" y="148" width="194" height="14">
+					<printWhenExpression><![CDATA[$F{verified_signature}]]></printWhenExpression>
+				</reportElement>
 				<box topPadding="2">
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
@@ -1146,6 +1148,18 @@ where po.id = $P{po_id}]]>
 				<textElement/>
 				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
+			<line>
+				<reportElement x="607" y="161" width="194" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="801" y="148" width="1" height="15"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
 		</band>
 	</lastPageFooter>
 </jasperReport>

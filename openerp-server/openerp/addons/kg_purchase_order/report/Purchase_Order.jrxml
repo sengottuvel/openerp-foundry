@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000099"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="326"/>
+	<property name="ireport.y" value="435"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -189,7 +189,8 @@ end as general_term,
 po.revision as revision,
 confirmed_users.signature as confirmed_signature,
 verified_users.signature as verified_signature,
-po.approved_by as approved_by
+po.approved_by as approved_by,
+po.approval_flag as approval_flag
 
 from
 purchase_order po
@@ -233,6 +234,7 @@ where po.id = $P{po_id}]]>
 	<field name="confirmed_signature" class="java.lang.Object"/>
 	<field name="verified_signature" class="java.lang.Object"/>
 	<field name="approved_by" class="java.lang.Integer"/>
+	<field name="approval_flag" class="java.lang.Boolean"/>
 	<group name="PO Group">
 		<groupExpression><![CDATA[$F{amount}]]></groupExpression>
 		<groupHeader>
@@ -840,7 +842,7 @@ where po.id = $P{po_id}]]>
 		</band>
 	</pageFooter>
 	<lastPageFooter>
-		<band height="174">
+		<band height="175">
 			<textField>
 				<reportElement x="197" y="17" width="147" height="13"/>
 				<box topPadding="1">
@@ -1147,8 +1149,10 @@ where po.id = $P{po_id}]]>
 				</textElement>
 				<textFieldExpression><![CDATA["Confirmed By"]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="624" y="160" width="177" height="14"/>
+			<textField isBlankWhenNull="true">
+				<reportElement x="624" y="160" width="177" height="14">
+					<printWhenExpression><![CDATA[$F{verified_signature}]]></printWhenExpression>
+				</reportElement>
 				<box topPadding="2">
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
@@ -1174,6 +1178,18 @@ where po.id = $P{po_id}]]>
 				<textElement/>
 				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
+			<line>
+				<reportElement x="624" y="174" width="177" height="1" forecolor="#000000"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="801" y="160" width="1" height="15" forecolor="#000000"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
 		</band>
 	</lastPageFooter>
 </jasperReport>
