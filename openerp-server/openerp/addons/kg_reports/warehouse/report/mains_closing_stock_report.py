@@ -92,7 +92,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		self.cr.execute('''		
 			   select sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
-				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s and b.location_id = %s) as stock_uom_close,
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s and b.location_id = %s'''+ product +''') as stock_uom_close,
 				(case when a.uom_conversation_factor = 'two_dimension' then
 				(sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
