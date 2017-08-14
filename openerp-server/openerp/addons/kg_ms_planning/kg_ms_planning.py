@@ -1174,7 +1174,7 @@ class kg_ms_daily_planning(osv.osv):
 						'total_qty': header_sc_qty,
 						'pending_qty': header_sc_qty,
 						'actual_qty': header_sc_qty,
-						'contractor_id': sc_item.contractor_id.id or False,
+						'contractor_id': False,
 						
 					}
 					
