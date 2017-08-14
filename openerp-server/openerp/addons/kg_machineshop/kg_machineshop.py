@@ -720,6 +720,9 @@ class kg_trimming_dia(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry_rec = self.browse(cr,uid,ids[0])
 		order_bomline_obj = self.pool.get('ch.order.bom.details')
+		if entry_rec.trimming_dia <= 0:
+			raise osv.except_osv(_('Warning!'),
+					_('Trimming dia should be more than 0 !!'))
 		###  Updating other specification in wo ##
 		if entry_rec.order_bomline_id.add_spec != False:
 			order_add_spec = entry_rec.order_bomline_id.add_spec
