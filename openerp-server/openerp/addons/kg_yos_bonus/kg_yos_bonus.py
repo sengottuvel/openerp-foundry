@@ -83,8 +83,8 @@ class kg_yos_bonus(osv.osv):
 		'from_date':fields.date('From',readonly=True, states={'draft':[('readonly',False)]}),
 		'to_date':fields.date('To',readonly=True, states={'draft':[('readonly',False)]}),
 		'expiry_date':fields.date('Expiry Date'),
-		'fiscal_yr':fields.many2one('account.fiscalyear','Fiscal Year'),
-		'emp_categ_id':fields.many2one('kg.employee.category','Employee Category'),
+		'fiscal_yr':fields.many2one('account.fiscalyear','Fiscal Year',domain=[('state','=','approved')]),
+		'emp_categ_id':fields.many2one('kg.employee.category','Employee Category',domain=[('state','=','approved')]),
 
 		## Child Tables Declaration
 		

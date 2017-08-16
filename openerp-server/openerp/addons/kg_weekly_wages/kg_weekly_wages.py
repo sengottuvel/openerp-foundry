@@ -111,7 +111,7 @@ class kg_weekly_wages(osv.osv):
 		'end_date':fields.date('End Date'),
 		'labour_categ':fields.selection([('individual','Individual'),('contract','Contract')],'Category'),
 		'total_days':fields.float('Total Days'),
-		'contractor_id':fields.many2one('res.partner','Contractor',domain=[('contractor','=',True)]),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain=[('partner_state','=','approved'),('contractor','=',True)]),
 		'tot_val':fields.function(_tot_wage_amt, string='Total Value',multi="sums",store=True),
 		##Child Declaration
 		

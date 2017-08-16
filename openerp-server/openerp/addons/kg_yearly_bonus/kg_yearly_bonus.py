@@ -82,9 +82,9 @@ class kg_yearly_bonus(osv.osv):
 		'from_date':fields.date('From',readonly=True, states={'draft':[('readonly',False)]}),
 		'to_date':fields.date('To',readonly=True, states={'draft':[('readonly',False)]}),
 		'expiry_date':fields.date('Expiry Date'),
-		'fiscal_yr':fields.many2one('account.fiscalyear','Fiscal Year'),
-		'emp_categ_id':fields.many2one('kg.employee.category','Employee Category'),
-		'allow_ded_id':fields.many2many('hr.salary.rule','allow_ded','yr_bns','allow_ids','Bonus Base Components'),
+		'fiscal_yr':fields.many2one('account.fiscalyear','Fiscal Year',domain=[('state','=','approved')]),
+		'emp_categ_id':fields.many2one('kg.employee.category','Employee Category',domain=[('state','=','approved')]),
+		'allow_ded_id':fields.many2many('hr.salary.rule','allow_ded','yr_bns','allow_ids','Bonus Base Components',domain=[('state','=','approved')]),
 		'bonus_per':fields.float('Bonus Percentage'),
 		'gross_sal_per':fields.float('% From Gross'),
 		

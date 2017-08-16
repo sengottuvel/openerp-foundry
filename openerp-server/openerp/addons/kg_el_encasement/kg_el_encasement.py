@@ -81,14 +81,14 @@ class kg_el_encasement(osv.osv):
 		
 		## Module Requirement Info
 		
-		'emp_categ_id':fields.many2one('kg.employee.category','Employee Category'),
+		'emp_categ_id':fields.many2one('kg.employee.category','Employee Category',domain=[('state','=','approved')]),
 		'year':fields.char('Year'),
 		'expiry_date':fields.date('Expiry Date'),
 		'sal_base': fields.selection([('gross','From Gross'),('comp','From Component')],'Salary Base'),
 		'min_el_days':fields.float('Minimum Day Eligible'),
 		'mat_leave_app':fields.boolean('Consider Maternity Leave'),
 		'set_amt_type': fields.selection([('cash','Cash'),('leave','Leave')],'Settlement Mode'),
-		'allow_ded_id':fields.many2many('hr.salary.rule','allow_ded','yr_bns','allow_ids','Bonus Base Components'),
+		'allow_ded_id':fields.many2many('hr.salary.rule','allow_ded','yr_bns','allow_ids','Bonus Base Components',domain=[('state','=','approved')]),
 		
 		## Child Tables Declaration
 		
