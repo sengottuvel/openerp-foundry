@@ -1106,7 +1106,7 @@ where po.id = $P{po_id}]]>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="0" y="148" width="166" height="14"/>
