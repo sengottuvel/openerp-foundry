@@ -1990,7 +1990,7 @@ class kg_schedule(osv.osv):
 											flag_dynamic_length = False
 										
 										#~ ### Cutting qty division by qty ###
-										print "ms_raw_rec",ms_raw_rec
+										print "ms_raw_rec",ms_raw_rec, cutting_qty, ms_raw_rec.temp_qty
 										if order_line_rec.order_category in ('pump','access'):
 											cutting_qty = cutting_qty/ms_raw_rec.temp_qty
 											indent_qty = indent_qty/ms_raw_rec.temp_qty
