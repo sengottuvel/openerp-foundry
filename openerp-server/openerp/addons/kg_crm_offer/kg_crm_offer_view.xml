@@ -330,8 +330,8 @@
 						<group>
 							<field name="pumpseries_id" required="1" readonly="1"/>
 							<field name="pump_id" required="1" readonly="1"/>
-							<field name="hsn_no" />
-							<field name="gst" />
+							<field name="hsn_no" on_change="onchange_gst(hsn_no)"/>
+							<field name="gst" attrs="{'readonly':[('hsn_no','!=',False)]}"/>
 							<field name="customer_id" invisible="1"/>
 							<field name="moc_const_id" readonly="1"/>
 							<field name="drawing_approval"/>
@@ -515,7 +515,7 @@
 							<field name="item_code" required="1" readonly="1"/>
 							<field name="item_name" required="1" readonly="1"/>
 							<field name="hsn_no" attrs="{'readonly':[('hsn_no','!=',False)]}"/>
-							<field name="gst"/>
+							<field name="gst" attrs="{'readonly':[('gst','!=',False)]}"/>
 							<field name="customer_id" invisible="1"/>
 							<field name="off_name" readonly="1"/>
 							<field name="moc_id" required="1" readonly="1"/>
@@ -663,8 +663,8 @@
 					<group string="Accessories Offer Details">
 						<group>
 							<field name="access_id" required="1" readonly="1"/>
-							<field name="hsn_no" />
-							<field name="gst" />
+							<field name="hsn_no" attrs="{'readonly':[('hsn_no','!=',False)]}"/>
+							<field name="gst" attrs="{'readonly':[('gst','!=',False)]}"/>
 							<field name="customer_id" invisible="1"/>
 							<field name="off_name" readonly="1"/>
 							<field name="moc_id" required="1" readonly="1"/>

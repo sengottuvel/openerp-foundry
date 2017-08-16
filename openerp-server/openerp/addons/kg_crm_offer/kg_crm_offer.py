@@ -1007,7 +1007,7 @@ class kg_crm_offer(osv.osv):
 																		})
 					if ele.line_ids_a:
 						for fou in ele.line_ids_a:
-							spare_fou_id = self.pool.get('ch.wo.spare.ms').create(cr,uid,{'header_id': spare_bom_id,
+							spare_ms_id = self.pool.get('ch.wo.spare.ms').create(cr,uid,{'header_id': spare_bom_id,
 																		   'position_id': fou.position_id.id,
 																		   'qty': fou.qty,
 																		   'off_name': fou.off_name,
@@ -1026,9 +1026,24 @@ class kg_crm_offer(osv.osv):
 																		   'length': fou.length,
 																		   'spare_offer_line_id': off_line_id,
 																		})
+							if spare_ms_id:
+								for raw_line in fou.line_ids:
+									ms_raw_line_id = self.pool.get('ch.wo.spare.ms.raw').create(cr,uid,{'header_id': spare_ms_id,
+																				 'remarks': raw_line.remarks,
+																				 'product_id': raw_line.product_id.id,
+																				 'uom': raw_line.uom.id,
+																				 'od': raw_line.od,
+																				 'length': raw_line.length,
+																				 'breadth': raw_line.breadth,
+																				 'thickness': raw_line.thickness,
+																				 'weight': raw_line.weight,
+																				 'uom_conversation_factor': raw_line.uom_conversation_factor,
+																				 'temp_qty': raw_line.temp_qty,
+																				 'qty': raw_line.qty,
+																				 })
 					if ele.line_ids_b:
 						for fou in ele.line_ids_b:
-							spare_fou_id = self.pool.get('ch.wo.spare.bot').create(cr,uid,{'header_id': spare_bom_id,
+							spare_bot_id = self.pool.get('ch.wo.spare.bot').create(cr,uid,{'header_id': spare_bom_id,
 																		   'product_temp_id': fou.product_temp_id.id,
 																		   'position_id': fou.position_id.id,
 																		   'qty': fou.qty,
@@ -2370,6 +2385,13 @@ class ch_pump_offer(osv.osv):
 			value = {'sam_ratio': float(works_value)/float(prime_cost)}
 		elif sam_ratio_flag == True and sam_ratio:
 			value = {'works_value': prime_cost * sam_ratio}
+		return {'value': value}
+	
+	def onchange_gst(self, cr, uid, ids, hsn_no):
+		value = {'gst':''}
+		if hsn_no:
+			hsn_rec = self.pool.get('kg.hsn.master').browse(cr,uid,hsn_no)
+			value = {'gst': hsn_rec.igst_id.id}
 		return {'value': value}
 	
 	#~ def onchange_gst(self, cr, uid, ids, pump_id,hsn_no, gst, context=None):
