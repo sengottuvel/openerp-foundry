@@ -296,6 +296,8 @@ class kg_department_issue(osv.osv):
 						'issue_type':'material',
 						'wo_state':'accept',
 						'dep_issue_type':obj.dep_issue_type,
+						'dep_id':obj.department_id.id,
+						'dep_code':obj.department_id.name,
 						#~ 'state':'draft',
 						}
 						
@@ -630,22 +632,30 @@ class kg_department_issue(osv.osv):
 				length = 1
 				breadth = 1
 				if line_ids.uom_conversation_factor == 'one_dimension':
-					if line_ids.uom_id.id != line_ids.product_id.uom_id.id:
-						print"*************************"
-						po_coeff = line_ids.product_id.po_uom_coeff
-						product_qty = line_ids.issue_qty * po_coeff
-					elif line_ids.uom_id.id == line_ids.product_id.uom_id.id:
-						print"--------------------------"
-						product_qty = line_ids.issue_qty
-				elif line_ids.uom_conversation_factor == 'two_dimension':
-					if line_ids.product_id.po_uom_in_kgs > 0:
+					if line_ids.issue_id.department_id.name == 'DP2':
+						product_qty = line_ids.issue_qty * line_ids.length * line_ids.product_id.po_uom_coeff
+					else:
 						if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+							print"*************************"
 							product_qty = line_ids.issue_qty
 						elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
+							print"--------------------------"
+							po_coeff = line_ids.product_id.po_uom_coeff
+							product_qty = line_ids.issue_qty * po_coeff
+				elif line_ids.uom_conversation_factor == 'two_dimension':
+					if line_ids.product_id.po_uom_in_kgs > 0:
+						if line_ids.issue_id.department_id.name == 'DP2':
 							product_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
-							length = line_ids.length
-							breadth = line_ids.breadth
+						else:
+							if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+								product_qty = line_ids.issue_qty
+							elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
+								product_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+								length = line_ids.length
+								breadth = line_ids.breadth
+						
 				print"product_qtyproduct_qty",product_qty
+				
 				stock_move_obj.create(cr,uid,
 				{
 				'dept_issue_id': issue_record.id,
@@ -1002,8 +1012,10 @@ class kg_department_issue_line(osv.osv):
 		'order_priority': fields.related('wo_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True),
 		'accept_date': fields.date('Accepted Date'),
 		'remark_id': fields.many2one('kg.rejection.master','Rejection Remarks'),
-		'dep_id': fields.related('issue_id','department_id',relation='kg.depmaster',type='many2one',string='Department Name',store=True),
-		'dep_code': fields.related('dep_id','name',type='char',string='Department Code',store=True),
+		#~ 'dep_id': fields.related('issue_id','department_id',relation='kg.depmaster',type='many2one',string='Department Name',store=True),
+		#~ 'dep_code': fields.related('dep_id','name',type='char',string='Department Code',store=True),
+		'dep_id': fields.many2one('kg.depmaster','Department Name'),
+		'dep_code': fields.char('Department Code'),
 		'length': fields.float('Length'),
 		'breadth': fields.float('Breadth'),
 		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
@@ -1024,7 +1036,12 @@ class kg_department_issue_line(osv.osv):
 	
 	def default_get(self, cr, uid, fields, context=None):
 		print"contextcontextcontext",context
-		
+		if len(context)>7:
+			if context['dep_id']:
+				dep_rec = self.pool.get('kg.depmaster').browse(cr,uid,context['dep_id'])
+				context['dep_code'] = dep_rec.name
+			else:
+				raise osv.except_osv(_('Warning!'),_('Without Department you cannot issue the items!!'))
 		return context
 	
 	def onchange_product_id(self, cr, uid, ids, product_id,context=None):
