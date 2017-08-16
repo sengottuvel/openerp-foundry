@@ -168,7 +168,118 @@ class kg_el_encasement(osv.osv):
 
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		import StringIO
+		import base64
+		
+		try:
+			import xlwt
+		except:
+		   raise osv.except_osv('Warning !','Please download python xlwt module from\nhttp://pypi.python.org/packages/source/x/xlwt/xlwt-0.7.2.tar.gz\nand install it')
 		if rec.state == 'confirmed':
+			sql = """		
+
+				select 
+
+				distinct(division.name) as division_name,
+				(select count(employee_id) from ch_el_encasement where emp_division_id=division.id) as no_of_emp,
+				to_char((select sum(encase_amt) from ch_el_encasement where emp_division_id=division.id),'999990D99')as total_amt
+
+
+				from ch_el_encasement encash
+
+				left join kg_division_master division on (division.id=encash.emp_division_id)"""
+
+
+				
+
+			cr.execute(sql)		
+			data = cr.dictfetchall()
+			
+			record={}
+			sno=1
+			wbk = xlwt.Workbook()
+			style1 = xlwt.easyxf('font: bold on,height 240,color_index 0x95;' 'align: horiz left,vertical center;''borders: left thin, right thin, top thin,bottom thin') 
+			style3 = xlwt.easyxf('font: bold off,height 240,color_index 0x95;' 'align: horiz left,vertical center;''borders: left thin, right thin, top thin,bottom thin') 
+			style2 = xlwt.easyxf('font: bold on,height 240,color_index 0x95;' 'align: horiz center,vertical center;''borders: left thin, right thin, top thin ,bottom thin') 
+			s1=0
+			
+			"""adding a worksheet along with name"""
+			
+			sheet1 = wbk.add_sheet('EL_ENCASHMENT_PRINT')
+			s2=6
+			sheet1.col(0).width = 2000
+			sheet1.col(1).width = 3000
+			sheet1.col(2).width = 6000
+			sheet1.col(3).width = 7000
+			sheet1.col(4).width = 4000
+			sheet1.col(5).width = 4000
+			sheet1.col(6).width = 4000
+			sheet1.col(7).width = 4000
+			sheet1.col(8).width = 4000
+			
+			
+			
+			""" writing field headings """
+			#~ date_from=datetime.date_from.strptime('%d-%m-%Y')
+			
+
+			#~ date_from = datetime.strptime(rec.date_from, '%Y-%m-%d').strftime('%d/%m/%Y')
+			#~ date_to = datetime.strptime(rec.date_to, '%Y-%m-%d').strftime('%d/%m/%Y')
+			
+			
+			sheet1.write_merge(0, 3, 0, 3,"SAM TURBO INDUSTRY PRIVATE LIMITED \n Avinashi Road, Neelambur,\n Coimbatore - 641062 \n Tel:3053555, 3053556,Fax : 0422-3053535",style2)
+			sheet1.row(0).height = 450
+			sheet1.write_merge(4, 4, 0, 3,"STAFF EL ENCASHMENT OF "+rec.year,style2)
+			sheet1.write_merge(5, 5, 0, 3,"",style2)
+			#~ sheet1.write_merge(3, 3, 0, 5,"",style2)
+			
+			sheet1.insert_bitmap('/home/sujith/SVN_Projects/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			sheet1.write(s2,0,"S.NO",style1)
+			#~ sheet1.row(s1).height = 490
+			sheet1.write(s2,1,"DIVISION",style1)
+			sheet1.write(s2,2,"NO.OF.STAFF",style1)
+			sheet1.write(s2,3,"EL ENCASHMENT AMT",style1)
+			
+			emp_count = 0
+			grand_total = 0.00
+			
+			for ele in data:
+				#~ print "ele['employee_name']ele['employee_name']ele['employee_name']ele['employee_name']",ele['employee_name']
+				print "ele['total_amt']ele['total_amt']ele['total_amt']",ele['total_amt']
+				if ele['total_amt'] is None:
+					grand_total = 0.00
+				else:
+					grand_total += float(ele['total_amt'])
+				if ele['no_of_emp'] is None:
+					emp_count = 0.00
+				else:
+					emp_count += ele['no_of_emp']
+				s2+=1
+				
+				sheet1.write(s2,0,sno,style3)
+				sheet1.write(s2,1,ele['division_name'],style3)
+				sheet1.write(s2,2,ele['no_of_emp'],style3)
+				sheet1.write(s2,3,ele['total_amt'],style3)
+				
+				
+				
+				sno = sno + 1
+			
+			s2 = s2+1
+			sheet1.write_merge(s2,s2, 0, 1,"Total",style2)
+			sheet1.write(s2,2,emp_count,style3)
+			sheet1.write(s2,3,grand_total,style3)
+			
+				
+			"""Parsing data as string """
+			file_data=StringIO.StringIO()
+			o=wbk.save(file_data)		
+			"""string encode of data in wksheet"""		
+			out=base64.encodestring(file_data.getvalue())
+			"""returning the output xls as binary"""
+			report_name = 'EL_ENCASHMENT_PRINT' + '.' + 'xls'
+		
+			self.write(cr, uid, ids, {'rep_data':out,'report_name':report_name,},context=context)
 			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass

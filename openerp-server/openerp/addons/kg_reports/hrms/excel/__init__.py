@@ -6,3 +6,5 @@ import kg_excel_on_duty_report
 import kg_excel_attendance_report
 import kg_excel_staff_ctc_report
 import kg_excel_advance_report
+import kg_excel_gratuity_report
+import kg_excel_punching_report

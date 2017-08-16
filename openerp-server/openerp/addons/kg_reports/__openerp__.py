@@ -38,6 +38,8 @@
 		'hrms/excel/kg_excel_attendance_report_view.xml',
 		'hrms/excel/kg_excel_staff_ctc_report_view.xml',
 		'hrms/excel/kg_excel_advance_report_view.xml',
+		'hrms/excel/kg_excel_gratuity_report_view.xml',
+		'hrms/excel/kg_excel_punching_report_view.xml',
 		'planning/excel_report/kg_machine_list_excel_view.xml',
 		'planning/excel_report/kg_foundry_partlist_excel_view.xml',
 		],
