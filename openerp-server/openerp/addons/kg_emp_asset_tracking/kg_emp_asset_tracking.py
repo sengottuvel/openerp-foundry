@@ -83,15 +83,15 @@ class kg_emp_asset_tracking(osv.osv):
 		
 		## Module Requirement Info
 		
-		'employee_id':fields.many2one('hr.employee','Employee'),
+		'employee_id':fields.many2one('hr.employee','Employee',domain=[('status','=','approved')]),
 		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
 		'division_id':fields.many2one('kg.division.master','Division'),
-		'issued_by':fields.many2one('hr.employee','Issued By'),
+		'issued_by':fields.many2one('hr.employee','Issued By',domain=[('status','=','approved')]),
 		'received_by':fields.many2one('hr.employee','Hand Over To'),
 		'emp_code':fields.char('Code'),
 		'issue_date':fields.date('Issue Date'),
 		'hand_over_date':fields.date('Hand Over Date'),
-		'asset_id':fields.many2one('product.product','Asset Name'),
+		'asset_id':fields.many2one('product.product','Asset Name',domain=[('state','=','approved')]),
 		'qty':fields.integer('Quantity'),
 		'serial_no':fields.char('Serial No'),
 		

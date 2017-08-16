@@ -81,7 +81,7 @@ class kg_advance_deduction(osv.osv):
 		
 		## Module Requirement Info
 		
-		'employee_id': fields.many2one('hr.employee','Employee', required=True,readonly=True),
+		'employee_id': fields.many2one('hr.employee','Employee',domain=[('status','=','approved')],required=True,readonly=True),
 		'ded_type': fields.selection([('advance', 'Advance'),('loan', 'Loan'),('insurance', 'Insurance'),
 						('tax', 'Tax'),('others','Others'),('cloth','Cloth')], 
 						'Deduction Type'),

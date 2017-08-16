@@ -94,7 +94,7 @@ class kg_monthly_attendance(osv.osv):
 		
 		## Module Requirement Info
 		
-		'employee_id':fields.many2one('hr.employee', 'Employee', readonly=True),
+		'employee_id':fields.many2one('hr.employee', 'Employee',domain=[('status','=','approved')],readonly=True),
 		'start_date': fields.date('Month Start Date'),
 		'end_date': fields.date('Month End Date'),
 		'worked_days':fields.float('Worked Days'),	

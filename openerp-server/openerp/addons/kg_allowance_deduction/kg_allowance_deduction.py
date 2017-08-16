@@ -86,7 +86,7 @@ class kg_allowance_deduction(osv.osv):
 		'start_date': fields.date('Month Start Date'),
 		'end_date': fields.date('Month End Date'),
 		'allow_type':fields.selection([('ALW','Allowance'),('DED','Deduction')], 'Type'),
-		'pay_type':fields.many2one('hr.salary.rule', 'Earning/ Deduction'),
+		'pay_type':fields.many2one('hr.salary.rule', 'Earning/ Deduction',domain=[('state','=','approved')]),
 		#~ 'employee_id': fields.related('ch.kg.allowance.deduction','employee_id', type='many2one', relation='hr.employee', string='Employee' ,store=True),	
 		
 		## Child Tables Declaration		

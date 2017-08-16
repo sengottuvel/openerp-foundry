@@ -17,7 +17,7 @@ class kg_tax(osv.osv):
 		return False
 		
 	_columns = {
-	    'employee_id': fields.many2one('hr.employee', "Employee Name", select=True,required=True),
+	    'employee_id': fields.many2one('hr.employee', "Employee Name",domain=[('status','=','approved')],select=True,required=True),
 		'val_from': fields.date('Valid From', required=True),
 		'val_to': fields.date('Valid To', required=True),
 		'user_id':fields.related('employee_id', 'user_id', type='many2one', relation='res.users', string='User', store=True),

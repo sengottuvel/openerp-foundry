@@ -83,12 +83,12 @@ class kg_emp_transfer(osv.osv):
 		
 		## Module Requirement Info
 		
-		'employee_id':fields.many2one('hr.employee','Employee'),
+		'employee_id':fields.many2one('hr.employee','Employee',domain=[('status','=','approved')]),
 		'emp_code':fields.char('Code'),
 		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
 		'division_id':fields.many2one('kg.division.master','Division'),
 		'from_division_id':fields.many2one('kg.division.master','From Division'),
-		'to_division_id':fields.many2one('kg.division.master','To Division'),
+		'to_division_id':fields.many2one('kg.division.master','To Division',domain=[('state','=','approved')]),
 		'from_date':fields.date('From Date'),
 		'to_date':fields.date('To Date'),
 		

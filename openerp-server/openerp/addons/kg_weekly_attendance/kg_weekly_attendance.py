@@ -94,7 +94,7 @@ class kg_weekly_attendance(osv.osv):
 		
 		'start_date':fields.date('Start Date'),
 		'end_date':fields.date('End Date'),
-		'labour_id':fields.many2one('kg.labour.master','Labour'),
+		'labour_id':fields.many2one('kg.labour.master','Labour',domain=[('state','=','approved')]),
 		'labour_code':fields.char('Code'),
 		'labour_categ':fields.selection([('individual','Individual'),('contract','Contract')],'Category'),
 		'present_days':fields.float('Present Days'),

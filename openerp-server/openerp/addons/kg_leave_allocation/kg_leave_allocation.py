@@ -241,7 +241,7 @@ class ch_leave_allocation(osv.osv):
 	_columns = {
 	
 		'header_id_1': fields.many2one('kg.leave.allocation','Header_id_1'),
-		'leave_type_id': fields.many2one('hr.holidays.status', 'Leave Type'),
+		'leave_type_id': fields.many2one('hr.holidays.status', 'Leave Type',domain=[('state','=','approved')]),
 		'no_of_days': fields.float('No Of Days'),	
 		'used_days': fields.float('Used Days'),	
 		'balc_days': fields.float('Balance Days'),

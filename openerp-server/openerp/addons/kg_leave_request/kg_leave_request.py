@@ -92,7 +92,7 @@ class kg_leave_request(osv.osv):
 		
 		## Module Requirement Info	
 		'description':fields.text('Reason'),
-		'approved_by':fields.many2one('hr.employee','Approved By'),
+		'approved_by':fields.many2one('hr.employee','Approved By',domain=[('status','=','approved')]),
 		'in_time':fields.float('In Time'),
 		'out_time':fields.float('Out Time'),
 		'permission_hrs':fields.float('Permission Hours'),
