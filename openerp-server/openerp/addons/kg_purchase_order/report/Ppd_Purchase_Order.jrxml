@@ -366,7 +366,7 @@ where po.id = $P{po_id}]]>
 		<band height="539">
 			<image>
 				<reportElement x="1" y="0" width="800" height="539">
-					<printWhenExpression><![CDATA[(new Boolean(($F{status}.equals("draft"))) || new Boolean(($F{status}.equals("confirmed"))))]]></printWhenExpression>
+					<printWhenExpression><![CDATA[(new Boolean(($F{status}.equals("draft"))) || new Boolean(($F{status}.equals("confirmed"))) || new Boolean(($F{status}.equals("verified"))))]]></printWhenExpression>
 				</reportElement>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
 			</image>
