@@ -84,7 +84,7 @@ class kg_contract(osv.osv):
 		'increament_type':fields.selection([('yearly','Yearly'),('performance','Performance'),('promotions','Promotion')],'Increment Type'),
 		'increament_amt':fields.float('Increment Amount'),
 		'payment_mode': fields.selection([('cheque','CHEQUE'),('bank','BANK'),('cash','CASH')], 'Payment Mode'),
-		'bank_id': fields.many2one('res.bank','Bank Name'),
+		'bank_id': fields.many2one('res.bank','Bank Name',domain=[('status','=','approved')]),
 		'sal_acc_no': fields.char('Salary Account No', size=32),
 		'ot_status': fields.boolean('OT Eligible'),
 		'pt_status': fields.boolean('PT Applicable'),
@@ -102,13 +102,13 @@ class kg_contract(osv.osv):
 		'emp_categ_id': fields.many2one('kg.employee.category', 'Employee Category'),
 		'rotation':fields.boolean('Rotation Shift Applicable'),
 		'driver_bata_app':fields.boolean('Driver Bata Applicable'),
-		'shift_id': fields.many2one('kg.shift.master', 'Current Shift'),
-		'dep_id':fields.many2one('kg.depmaster','Department'),
+		'shift_id': fields.many2one('kg.shift.master', 'Current Shift',domain=[('state','=','approved')]),
+		'dep_id':fields.many2one('kg.depmaster','Department',domain=[('state','=','approved')]),
 		'vda_status': fields.boolean('VDA Applicable'),
 		'driver_batta': fields.float('Driver Batta(Per Day)'),
 		'rot_interval':fields.selection([('every_monday','Every Monday'),('month_1st','Month 1st')],'Rotational Interval'),
-		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
-		'division_id':fields.many2one('kg.division.master','Division'),
+		'emp_categ_id':fields.many2one('kg.employee.category','Category',domain=[('state','=','approved')]),
+		'division_id':fields.many2one('kg.division.master','Division',domain=[('state','=','approved')]),
 		'account_id':fields.many2one('account.account','Account'),
 		'uan_no':fields.char('UAN No',size=12),
 			
@@ -559,7 +559,7 @@ class ch_contract_shift(osv.osv):
 	
 	_columns = {
 		'header_id_shift':fields.many2one('hr.contract','Header Id Shift',invisible= True),
-		'shift_id':fields.many2one('kg.shift.master','Shift Master'),
+		'shift_id':fields.many2one('kg.shift.master','Shift Master',domain=[('state','=','approved')]),
 		'sequence':fields.integer('kg.shift.master','Shift Master'),
 	}
 	
@@ -580,7 +580,7 @@ class ch_kg_contract_salary(osv.osv):
 	_name = 'ch.kg.contract.salary'
 	_columns = {
 		'header_id_salary':fields.many2one('hr.contract','Header Id Salary',invisible= True),
-		'salary_type':fields.many2one('hr.salary.rule','Salary'),
+		'salary_type':fields.many2one('hr.salary.rule','Salary',domain=[('state','=','approved')]),
 		'amt_type':fields.selection([('fixed','Fixed Amount'),('percentage','Percentage')],'Type'),
 		'salary_amt':fields.float('Amount')
 				}
