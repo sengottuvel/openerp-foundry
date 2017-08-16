@@ -81,7 +81,7 @@ class kg_employee_category(osv.osv):
 		
 		## Module Requirement Info
 		
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain=[('state','=','approved')]),
 		'monthly_per_hrs':fields.float('Monthly Permission hours'),	
 		'max_late_count':fields.integer('Maximum Late in Count'),	
 		'attnd_insentive_male':fields.float('100% Attn. Incentive (Male)'),	
@@ -436,7 +436,7 @@ class ch_salary_policy(osv.osv):
 	_columns = {
 	
 		'header_id_3': fields.many2one('kg.employee.category','Header_id_3'),
-		'allow_deduction_id': fields.many2one('hr.salary.rule', 'Name'),
+		'allow_deduction_id': fields.many2one('hr.salary.rule', 'Name',domain=[('state','=','approved')]),
 		'type': fields.selection([('fixed','Fixed'),('percentage','Percentage')],'Type'),	
 		'value': fields.float('Value'),	
 		}	
@@ -469,7 +469,7 @@ class ch_leave_policy(osv.osv):
 	_columns = {
 	
 		'header_id_4': fields.many2one('kg.employee.category','Header_id_4'),
-		'leave_type_id': fields.many2one('hr.holidays.status', 'Leave Type'),
+		'leave_type_id': fields.many2one('hr.holidays.status', 'Leave Type',domain=[('state','=','approved')]),
 		'no_of_days': fields.float('No Of Days'),	
 		}	
 		
