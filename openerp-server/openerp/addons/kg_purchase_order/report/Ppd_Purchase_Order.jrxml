@@ -189,7 +189,8 @@ end as general_term,
 po.revision as revision,
 confirmed_users.signature as confirmed_signature,
 verified_users.signature as verified_signature,
-po.approved_by as approved_by
+po.approved_by as approved_by,
+po.approval_flag as approval_flag
 
 from
 purchase_order po
@@ -233,6 +234,7 @@ where po.id = $P{po_id}]]>
 	<field name="confirmed_signature" class="java.lang.Object"/>
 	<field name="verified_signature" class="java.lang.Object"/>
 	<field name="approved_by" class="java.lang.Integer"/>
+	<field name="approval_flag" class="java.lang.Boolean"/>
 	<group name="PO Group">
 		<groupExpression><![CDATA[$F{amount}]]></groupExpression>
 		<groupHeader>
@@ -1101,7 +1103,7 @@ where po.id = $P{po_id}]]>
 			</image>
 			<image hAlign="Center" vAlign="Middle">
 				<reportElement x="605" y="123" width="196" height="25">
-					<printWhenExpression><![CDATA[$F{verified_signature}]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{verified_signature} & $F{approval_flag} == True]]></printWhenExpression>
 				</reportElement>
 				<box>
 					<rightPen lineWidth="0.5"/>
@@ -1121,7 +1123,7 @@ where po.id = $P{po_id}]]>
 			</textField>
 			<textField>
 				<reportElement x="607" y="148" width="194" height="14">
-					<printWhenExpression><![CDATA[$F{verified_signature}]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{verified_signature} & $F{approval_flag} == True]]></printWhenExpression>
 				</reportElement>
 				<box topPadding="2">
 					<bottomPen lineWidth="0.5"/>
