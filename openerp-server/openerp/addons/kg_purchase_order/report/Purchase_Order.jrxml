@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000099"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="384"/>
+	<property name="ireport.y" value="723"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -1131,7 +1131,7 @@ where po.id = $P{po_id}]]>
 			</image>
 			<image hAlign="Center" vAlign="Middle">
 				<reportElement x="624" y="136" width="177" height="25">
-					<printWhenExpression><![CDATA[$F{verified_signature} && $F{approval_flag} == True]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{verified_signature}]]></printWhenExpression>
 				</reportElement>
 				<box>
 					<rightPen lineWidth="0.5"/>
@@ -1151,7 +1151,7 @@ where po.id = $P{po_id}]]>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="624" y="160" width="177" height="14">
-					<printWhenExpression><![CDATA[$F{verified_signature} && $F{approval_flag} == True]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{verified_signature}]]></printWhenExpression>
 				</reportElement>
 				<box topPadding="2">
 					<bottomPen lineWidth="0.5"/>
