@@ -54,12 +54,12 @@ class onscreen_purchase_order_report(JasperDataParser.JasperDataParser):
 		if rec.state == 'confirmed':
 			if rec.confirmed_by.signature:
 				confirmed_signature = rec.confirmed_by.signature
-				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg'
+				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg'
 				if os.path.isfile(myfile) == True:
 					os.remove(myfile)
 				else:
 					pass
-				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','Confirmed.jpg')
+				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images','Confirmed.jpg')
 				f = open(filepath, "a")
 				f.write(confirmed_signature.decode('base64'))
 			else:
@@ -67,24 +67,24 @@ class onscreen_purchase_order_report(JasperDataParser.JasperDataParser):
 		elif rec.state == 'verified':
 			if rec.confirmed_by.signature:
 				confirmed_signature = rec.confirmed_by.signature
-				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg'
+				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg'
 				if os.path.isfile(myfile) == True:
 					os.remove(myfile)
 				else:
 					pass
-				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','Confirmed.jpg')
+				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images','Confirmed.jpg')
 				f = open(filepath, "a")
 				f.write(confirmed_signature.decode('base64'))
 			else:
 				pass
 			if rec.verified_by.signature:
 				verified_signature = rec.verified_by.signature
-				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg'
+				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg'
 				if os.path.isfile(myfile) == True:
 					os.remove(myfile)
 				else:
 					pass
-				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','Verified.jpg')
+				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images','Verified.jpg')
 				f = open(filepath, "a")
 				f.write(verified_signature.decode('base64'))
 			else:
@@ -92,36 +92,36 @@ class onscreen_purchase_order_report(JasperDataParser.JasperDataParser):
 		elif rec.state == 'approved':
 			if rec.confirmed_by.signature:
 				confirmed_signature = rec.confirmed_by.signature
-				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg'
+				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Confirmed.jpg'
 				if os.path.isfile(myfile) == True:
 					os.remove(myfile)
 				else:
 					pass
-				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','Confirmed.jpg')
+				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images','Confirmed.jpg')
 				f = open(filepath, "a")
 				f.write(confirmed_signature.decode('base64'))
 			else:
 				pass
 			if rec.verified_by.signature and rec.approval_flag == True:
 				verified_signature = rec.verified_by.signature
-				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg'
+				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Verified.jpg'
 				if os.path.isfile(myfile) == True:
 					os.remove(myfile)
 				else:
 					pass
-				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','Verified.jpg')
+				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images','Verified.jpg')
 				f = open(filepath, "a")
 				f.write(verified_signature.decode('base64'))
 			else:
 				pass
 			if rec.approved_by.signature:
 				approved_signature = rec.approved_by.signature
-				myfile = '/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images/MD.jpg'
+				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/MD.jpg'
 				if os.path.isfile(myfile) == True:
 					os.remove(myfile)
 				else:
 					pass
-				filepath = os.path.join('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_purchase_order/images','MD.jpg')
+				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images','MD.jpg')
 				f = open(filepath, "a")
 				f.write(approved_signature.decode('base64'))
 			else:
