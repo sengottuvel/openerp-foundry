@@ -430,7 +430,7 @@ class kg_purchase_order(osv.osv):
 				self.spl_po_apl_mail(cr,uid,ids,obj,context)
 				self.write(cr,uid,ids,{'sent_mail_flag':True,'approval_flag':True,'state':'confirmed','confirmed_by':uid,'confirmed_date':dt_time})
 			if approval != 'yes':
-				self.write(cr,uid,ids,{'state':'verified','confirmed_by':uid,'confirmed_date':dt_time,'verified_by':uid,'verified_date':dt_time,'approval_flag':False})
+				self.write(cr,uid,ids,{'state':'verified','confirmed_by':uid,'confirmed_date':dt_time,'approval_flag':False})
 		return True
 	
 	def verify_po(self,cr,uid,ids, context=None):
