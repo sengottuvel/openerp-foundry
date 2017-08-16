@@ -772,6 +772,41 @@
 		
 		<!-- Packing Invoice End here -->
 		
+		
+		<!-- SC Packing Invoice Start here -->
+		
+		<record id="t_ms_sc_packing_invoice" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_invoice.model_kg_sc_packing_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">SC Packing Invoice</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_sc_packing_invoice_line" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_invoice.model_ch_sc_packing_invoice_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">SC Packing  Invoice Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_sc_packing_invoice_exp_track" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_invoice.model_ch_sc_packing_invoice_expense_track"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">SC Packing Invoice Exp Track</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- SC Packing Invoice End here -->
+		
 		<!-- Drawing indent -->
 		
 		<record id="t_ms_drawing_indent" model="ir.model.access">
