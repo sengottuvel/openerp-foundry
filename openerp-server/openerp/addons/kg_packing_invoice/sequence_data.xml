@@ -2,6 +2,7 @@
 <openerp>
 	<data>
 	
+	<!-- Packing Invoice Sequence start-->
 		
 	<record forcecreate="1" id="seq_type_packing_invoice" model="ir.sequence.type">	
 		<field name="name">KG Packing Invoice</field>
@@ -15,8 +16,26 @@
 	  <field name="prefix">INVOICE/%(year)s/</field>
 	  <field name="reset_sequence">fiscal_reset</field>
 	</record>
-		
 	
+	
+	<!-- Packing Invoice Sequence End-->
+	
+	<!-- SC Packing Invoice Sequence start-->
+	
+	<record forcecreate="1" id="seq_type_sc_packing_invoice" model="ir.sequence.type">	
+		<field name="name">KG SC Packing Invoice</field>
+		<field name="code">kg.sc.packing.invoice</field>
+	</record>
+
+	<record forcecreate="1" id="seq_sc_packing_invoice" model="ir.sequence">
+	  <field name="name">KG SC Packing Invoice</field>
+	  <field name="code">kg.sc.packing.invoice</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">SC/INVOICE/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+		
+	<!-- SC Packing Invoice Sequence End-->
 		
 </data>
 </openerp>

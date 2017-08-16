@@ -142,7 +142,7 @@ class kg_packing_workorder(osv.osv):
 			dc_obj_line = self.pool.get('ch.packing.dc.line')		
 			dc_id = dc_obj.create(cr,uid,{'sub_wo_no':entry.name,'contractor_id':entry.contractor_id.id,'entry_mode': 'auto'})				
 			for line_item in entry.line_ids:					
-				dc_line = dc_obj_line.create(cr,uid,{'header_id': dc_id,'packing_id':line_item.packing_id.id,													
+				dc_line = dc_obj_line.create(cr,uid,{'header_id': dc_id,'packing_id':line_item.packing_id.id,'rate':line_item.rate,													
 													'qty':line_item.qty,'sub_wo_id':line_item.header_id.id,'sub_wo_line_id':line_item.id,'entry_mode':'auto'})					
 				self.pool.get('ch.packing.wo.line').write(cr,uid,line_item.id,{'entry_mode':'auto','pending_qty':line_item.qty})			
 								
@@ -321,6 +321,7 @@ class kg_packing_dc(osv.osv):
 					'sub_wo_id':item.header_id.id,			
 					'sub_wo_line_id':item.id,					
 					'qty':item.pending_qty,
+					'rate':item.rate,
 					'packing_id':item.packing_id.id				
 					
 				}
@@ -430,7 +431,8 @@ class ch_packing_dc_line(osv.osv):
 		'sub_wo_line_id': fields.many2one('ch.packing.wo.line','SUB Work Line Id'),
 		'contractor_id': fields.related('header_id','contractor_id', type='many2one', relation='res.partner', string='Contractor Name', store=True, readonly=True),
 		'packing_id':fields.many2one('kg.packing.type','Packing Box', domain="[('state','=','approved')]"),		
-		'qty': fields.integer('Quantity'),				
+		'qty': fields.integer('Quantity'),
+		'rate': fields.float('Rate'),				
 		'pending_qty': fields.integer('Pending QTY'),			
 		'remarks': fields.text('Remarks'),		
 		'state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done')],'Status', readonly=True),	
@@ -524,6 +526,8 @@ class kg_packing_inward(osv.osv):
 					'header_id': entry.id,
 					'packing_id':item.packing_id.id,
 					'qty':item.pending_qty,						
+					'rate':item.rate,						
+					'pending_qty':item.pending_qty,						
 					'inward_qty':item.pending_qty,						
 					'sub_dc_id':item.header_id.id,			
 					'sub_dc_line_id':item.id,
@@ -548,7 +552,8 @@ class kg_packing_inward(osv.osv):
 								_('System not allow to save zero and negative values !!'))									
 				if line_item.qty > line_item.sub_dc_line_id.pending_qty:
 					raise osv.except_osv(_('Warning!'),
-								_('System not allow Excess qty !!'))					
+								_('System not allow Excess qty !!'))	
+				self.pool.get('ch.packing.inward.line').write(cr,uid,line_item.id,{'pending_qty':line_item.qty})				
 				self.pool.get('ch.packing.dc.line').write(cr,uid,line_item.sub_dc_line_id.id,{'pending_qty':line_item.sub_dc_line_id.pending_qty - line_item.qty})
 		
 			### Sequence Number Generation  ###		
@@ -617,7 +622,9 @@ class ch_packing_inward_line(osv.osv):
 		'contractor_id': fields.related('header_id','contractor_id', type='many2one', relation='res.partner', string='Contractor Name', store=True, readonly=True),
 		
 		'packing_id':fields.many2one('kg.packing.type','Packing Box', domain="[('state','=','approved')]"),		
-		'qty': fields.integer('Accepted QTY'),				
+		'qty': fields.integer('Accepted QTY'),
+		'rate': fields.float('Rate'),	
+		'pending_qty': fields.integer('Pending QTY'),			
 		'inward_qty': fields.integer('Inward QTY'),	
 		'reject_qty': fields.integer('Rejected QTY'),	
 		'remarks': fields.text('Remarks'),		
@@ -632,8 +639,8 @@ class ch_packing_inward_line(osv.osv):
 		'flag_invoice': False,		
 	}
 	
-	def onchange_qty(self, cr, uid, ids, qty,inward_qty):
-		rejected_qty = 0.00		
+	def onchange_qty(self, cr, uid, ids, qty,inward_qty):		
+		rejected_qty = 0.00
 		if qty:			
 			rejected_qty = inward_qty - qty
 		return {'value': {'reject_qty':rejected_qty}}
