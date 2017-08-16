@@ -230,7 +230,7 @@ class kg_excel_advance_report(osv.osv):
 		sheet1.write_merge(5, 5, 0, 8,"",style2)
 		#~ sheet1.write_merge(3, 3, 0, 5,"",style2)
 		
-		sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/sam.bmp',0,0)
+		sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/img/sam.bmp',0,0)
 		sheet1.write(s2,0,"S.NO",style1)
 		#~ sheet1.row(s1).height = 490
 		sheet1.write(s2,1,"CODE",style1)
