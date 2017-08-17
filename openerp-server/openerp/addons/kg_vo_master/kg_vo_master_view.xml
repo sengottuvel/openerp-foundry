@@ -356,7 +356,7 @@
 							<form string="Attachments" >
 								<group>
 									<group>
-										<field name="moc_const_id"/>
+										<field name="moc_const_id" required ="1"/>
 										<field name="remarks" />
 									</group>
 									<group>

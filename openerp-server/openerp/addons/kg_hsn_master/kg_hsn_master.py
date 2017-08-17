@@ -106,6 +106,19 @@ class kg_hsn_master(osv.osv):
 			else:
 				res = True				
 		return res
+	def _tax_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.name:
+			if rec.cgst_id.id == rec.sgst_id.id:
+				res = False
+			elif rec.sgst_id.id == rec.igst_id.id:
+				res = False
+			elif rec.cgst_id.id == rec.igst_id.id:
+				res = False
+			else:
+				res = True				
+		return res
 			
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
@@ -155,6 +168,7 @@ class kg_hsn_master(osv.osv):
 	_constraints = [
 		
 		(_name_validate, 'HSN name must be unique !!', ['name']),		
+		(_tax_validate, 'Same Tax not allowed in HSN Master !!', ['CGST,SGST,IGST']),		
 		
 		
 	]
