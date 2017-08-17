@@ -123,8 +123,8 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				left join kg_brand_master brand on(brand.id=a.brand_id)
 				left join kg_moc_master moc on(moc.id=a.moc_id)
 				left join product_product prod on(prod.id=a.product_id)
-				left join product_uom suom on(suom.id=a.prod.uom_id)
-				left join product_uom puom on(puom.id=a.prod.uom_po_id)
+				left join product_uom suom on(suom.id=a.stock_uom)
+				left join product_uom puom on(puom.id=a.product_uom)
 				left JOIN product_template pt ON (pt.id=a.product_id)
 				left join product_category pc on(pc.id=pt.categ_id)
 				
@@ -135,59 +135,66 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		print "in_data ::::::::::::::=====>>>>", data
 		data_new = []
 		gr_total=0.0
-		for item in data:
-			if item['stock_uom_close'] > 0:
-				self.cr.execute('''
-						   SELECT
-							line.price_unit as price,
-							line.price_type as price_type,
-							line.length as length,
-							line.breadth as breadth,
-							line.product_qty as product_qty
-							
-							FROM purchase_order_line line
-							
-							JOIN purchase_order po ON (po.id=line.order_id)
-							
-							where po.state='approved' and line.product_id = %s and line.brand_id = %s and line.moc_id = %s
-							order by po.date_order desc limit 1''',(item['product_id'],item['brand_id'],item['moc_id']))
-				
-				lot_data = self.cr.dictfetchall()
-				print"lot_datalot_datalot_data--------------",lot_data
-				if lot_data:
+		if data:
+			for item in data:
+				if item['product_id']:
+					proc_rec = self.pool.get('product.product').browse(self.cr,self.uid,item['product_id'])
+					item['suom'] = proc_rec.uom_id.name
+					item['puom'] = proc_rec.uom_po_id.name
+				if item['stock_uom_close'] > 0:
+					self.cr.execute('''
+							   SELECT
+								line.price_unit as price,
+								line.price_type as price_type,
+								line.length as length,
+								line.breadth as breadth,
+								line.product_qty as product_qty
+								
+								FROM purchase_order_line line
+								
+								JOIN purchase_order po ON (po.id=line.order_id)
+								
+								where po.state='approved' and line.product_id = %s and line.brand_id = %s and line.moc_id = %s
+								order by po.date_order desc limit 1''',(item['product_id'],item['brand_id'],item['moc_id']))
 					
-					
-					closing_value = lot_data[0]['price']
-					item['po_price'] = lot_data[0]['price']
-					print"item['uom_conversation_factor']",item['uom_conversation_factor']
-					if item['uom_conversation_factor'] == 'two_dimension':
-						print"aaaaaaaaaaaaaa"
-						if lot_data[0]['price_type'] == 'po_uom':
-							print"popopopopopopopo"
-							item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['length'] or 1 * lot_data[0]['breadth'] or 1 * lot_data[0]['product_qty'] or 1 * item['po_uom_in_kgs'] or 1))
-						elif lot_data[0]['price_type'] == 'per_kg':
-							print"per_kgper_kgper_kgper_kgper_kg"
-							item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
-					elif item['uom_conversation_factor'] == 'one_dimension':
-						print"bbbbbbbbbbbbbbbbbbbbb"
-						if lot_data[0]['price_type'] == 'po_uom':
-							print"popopopopopopopo"
-							item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['product_qty'] * item['po_uom_coeff']))
-						elif lot_data[0]['price_type'] == 'per_kg':
-							print"per_kgper_kgper_kgper_kgper_kg"
-							item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
+					lot_data = self.cr.dictfetchall()
+					print"lot_datalot_datalot_data--------------",lot_data
+					if lot_data:
+						
+						
+						closing_value = lot_data[0]['price']
+						item['po_price'] = lot_data[0]['price']
+						print"item['uom_conversation_factor']",item['uom_conversation_factor']
+						if item['uom_conversation_factor'] == 'two_dimension':
+							print"aaaaaaaaaaaaaa"
+							if lot_data[0]['price_type'] == 'po_uom':
+								print"popopopopopopopo"
+								item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['length'] or 1 * lot_data[0]['breadth'] or 1 * lot_data[0]['product_qty'] or 1 * item['po_uom_in_kgs'] or 1))
+							elif lot_data[0]['price_type'] == 'per_kg':
+								print"per_kgper_kgper_kgper_kgper_kg"
+								item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
+						elif item['uom_conversation_factor'] == 'one_dimension':
+							print"bbbbbbbbbbbbbbbbbbbbb"
+							if lot_data[0]['price_type'] == 'po_uom':
+								print"popopopopopopopo"
+								item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['product_qty'] * item['po_uom_coeff']))
+							elif lot_data[0]['price_type'] == 'per_kg':
+								print"per_kgper_kgper_kgper_kgper_kg"
+								item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
+						else:
+							item['closing_value'] = 0
 					else:
+						item['po_price'] = 0
 						item['closing_value'] = 0
+					print"item['po_price']item['po_price']item['po_price']",item['po_price']
+					print"item['closing_value']item['closing_value']item['closing_value']",item['closing_value']
+					gr_total += item['closing_value']
+					item['grand_total'] = gr_total
+					data_new.append(item)
+		
 				else:
-					item['po_price'] = 0
-					item['closing_value'] = 0
-				print"item['po_price']item['po_price']item['po_price']",item['po_price']
-				print"item['closing_value']item['closing_value']item['closing_value']",item['closing_value']
-				gr_total += item['closing_value']
-				item['grand_total'] = gr_total
-				data_new.append(item)
-			else:
-				pass
+					pass
+		print "*******************************************************************************",data_new
 		return data_new
 	
 	def _get_filter(self, data):
