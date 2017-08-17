@@ -300,7 +300,7 @@ class kg_department_issue(osv.osv):
 						'indent_qty':qty,
 						'length':group[0].length,
 						'breadth':group[0].breadth,
-						'uom_conversation_factor':group[0].uom_conversation_factor,
+						'uom_conversation_factor':group[0].product_id.uom_conversation_factor,
 						'name':prod_browse.name,
 						'location_id':main_location,
 						'location_dest_id':dep_stock_location,
@@ -499,7 +499,7 @@ class kg_department_issue(osv.osv):
 								elif dep_issue_line_rec.uom_conversation_factor == 'two_dimension':
 									if dep_issue_line_rec.uom_id.id == lot_rec.po_uom.id:
 										crnt_qty = dep_issue_line_rec.issue_qty
-									elif line_ids.uom_id.id == lot_rec.product_uom.id:
+									elif dep_issue_line_rec.uom_id.id == lot_rec.product_uom.id:
 										crnt_qty = dep_issue_line_rec.issue_qty / dep_issue_line_rec.product_id.po_uom_in_kgs / dep_issue_line_rec.length / dep_issue_line_rec.breadth
 								print"tottot",tot
 								if tot < crnt_qty:
