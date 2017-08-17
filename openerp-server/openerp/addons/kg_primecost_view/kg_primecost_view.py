@@ -1367,7 +1367,7 @@ class kg_primecost_view(osv.osv):
 						for ms_item in item.line_ids_a:
 							if ms_item.is_applicable == True:
 								ms_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'ms',0,
-								ms_item.ms_id.id,0,0,entry.moc_const_id.id,ms_item.moc_id.id,0)
+								ms_item.ms_id.id,ms_item,0,entry.moc_const_id.id,ms_item.moc_id.id,0)
 								self.pool.get('ch.primecost.view.spare.ms').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost * ms_item.qty})
 								prime_cost += ms_prime_cost * ms_item.qty
 						pump_prime_cost += prime_cost
