@@ -123,8 +123,8 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				left join kg_brand_master brand on(brand.id=a.brand_id)
 				left join kg_moc_master moc on(moc.id=a.moc_id)
 				left join product_product prod on(prod.id=a.product_id)
-				left join product_uom suom on(suom.id=a.stock_uom)
-				left join product_uom puom on(puom.id=a.product_uom)
+				left join product_uom suom on(suom.id=a.prod.uom_id)
+				left join product_uom puom on(puom.id=a.prod.uom_po_id)
 				left JOIN product_template pt ON (pt.id=a.product_id)
 				left join product_category pc on(pc.id=pt.categ_id)
 				
