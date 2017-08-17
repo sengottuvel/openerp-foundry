@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="683" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="643" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.zoom" value="1.3310000000000006"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="247"/>
 	<import value="org.apache.commons.codec.binary.Base64"/>
 	<subDataset name="dataset1">
 		<parameter name="grn_id" class="java.lang.Integer"/>
@@ -10,11 +10,9 @@
 			<![CDATA[select
 grn_line.id as grn_line_id,
 grn_line.product_id as product_id,
-product.name_template ||
-		(CASE 	WHEN brand.name!=''
-			THEN  ' | ' || brand.name
-			ELSE ''
-		END ) as product_name,
+product.name_template as product_name,
+brand.name as brand,
+moc.name as moc,
 uom.name as uom,
 inward.name as inward_type,
 round((grn_line.grn_qty)::numeric,3) as requested,
@@ -28,12 +26,15 @@ left join product_product product on (grn_line.product_id=product.id)
 left join product_uom uom on (grn_line.uom_id=uom.id)
 left join kg_inwardmaster inward on (grn_line.inward_type=inward.id)
 left join kg_brand_master brand on (grn_line.brand_id=brand.id)
+left join kg_moc_master moc on (grn_line.moc_id=moc.id)
 
 where grn_line.grn_id = $P{grn_id} order by grn_line.id]]>
 		</queryString>
 		<field name="grn_line_id" class="java.lang.Integer"/>
 		<field name="product_id" class="java.lang.Integer"/>
 		<field name="product_name" class="java.lang.String"/>
+		<field name="brand" class="java.lang.String"/>
+		<field name="moc" class="java.lang.String"/>
 		<field name="uom" class="java.lang.String"/>
 		<field name="inward_type" class="java.lang.String"/>
 		<field name="requested" class="java.math.BigDecimal"/>
@@ -130,7 +131,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 		<groupHeader>
 			<band height="50">
 				<textField>
-					<reportElement x="0" y="0" width="39" height="20"/>
+					<reportElement x="0" y="0" width="24" height="20"/>
 					<box topPadding="3" leftPadding="2">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -140,7 +141,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["S. No."]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="39" y="0" width="77" height="20"/>
+					<reportElement x="24" y="0" width="64" height="20"/>
 					<box topPadding="3" leftPadding="2">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -150,7 +151,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["PO/SO No."]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="116" y="0" width="118" height="20"/>
+					<reportElement x="88" y="0" width="124" height="20"/>
 					<box topPadding="3" leftPadding="2">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -160,7 +161,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Product"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="234" y="0" width="48" height="20"/>
+					<reportElement x="325" y="0" width="35" height="20"/>
 					<box topPadding="3" leftPadding="2">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -170,7 +171,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["UOM"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="282" y="0" width="278" height="20"/>
+					<reportElement x="360" y="0" width="200" height="20"/>
 					<box topPadding="3" leftPadding="2">
 						<topPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
@@ -191,7 +192,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Inward Type"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="282" y="20" width="53" height="30"/>
+					<reportElement x="360" y="20" width="50" height="30"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -201,7 +202,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Requested"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="335" y="20" width="63" height="30"/>
+					<reportElement x="410" y="20" width="50" height="30"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -211,7 +212,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Already"+"\n"+"Received"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="398" y="20" width="79" height="30"/>
+					<reportElement x="460" y="20" width="50" height="30"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -221,7 +222,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Current"+"\n"+"Received"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="477" y="20" width="83" height="30"/>
+					<reportElement x="510" y="20" width="50" height="30"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -230,12 +231,32 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					</textElement>
 					<textFieldExpression><![CDATA["Rejected"]]></textFieldExpression>
 				</textField>
+				<textField>
+					<reportElement x="212" y="0" width="60" height="20"/>
+					<box topPadding="3" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Brand"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="272" y="0" width="53" height="20"/>
+					<box topPadding="3" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["MOC"]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 		<groupFooter>
-			<band height="161">
+			<band height="145">
 				<textField>
-					<reportElement x="0" y="51" width="212" height="20"/>
+					<reportElement x="0" y="51" width="148" height="15"/>
 					<box leftPadding="2"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="false"/>
@@ -243,7 +264,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Prepared By "]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="212" y="51" width="197" height="20"/>
+					<reportElement x="300" y="51" width="160" height="15"/>
 					<box leftPadding="2"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="false"/>
@@ -251,23 +272,23 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Inspected By"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="409" y="51" width="234" height="20"/>
+					<reportElement x="460" y="51" width="183" height="15"/>
 					<box leftPadding="2"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Store Officer"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Q.C.M"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="0" y="95" width="62" height="20"/>
+					<reportElement x="0" y="86" width="70" height="20"/>
 					<box topPadding="2" leftPadding="2"/>
-					<textElement textAlignment="Right">
+					<textElement>
 						<font size="8" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["REMARKS :"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement x="62" y="95" width="207" height="20"/>
+					<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="70" y="86" width="573" height="20" isPrintWhenDetailOverflows="true"/>
 					<box topPadding="2" leftPadding="2"/>
 					<textElement>
 						<font size="8" isBold="false"/>
@@ -275,7 +296,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="245" y="141" width="80" height="20"/>
+					<reportElement x="245" y="125" width="80" height="20"/>
 					<box topPadding="2">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -285,7 +306,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 				</textField>
 				<textField evaluationTime="Report">
-					<reportElement x="325" y="141" width="320" height="20"/>
+					<reportElement x="325" y="125" width="318" height="20"/>
 					<box topPadding="2">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -295,7 +316,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement x="2" y="141" width="243" height="20"/>
+					<reportElement x="0" y="125" width="245" height="20"/>
 					<box topPadding="2" leftPadding="2">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -303,6 +324,14 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 						<font size="8" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$P{printed_by}+"/"+$F{new_date}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="148" y="51" width="152" height="15"/>
+					<box leftPadding="2"/>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Stores-incharge"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupFooter>
@@ -322,7 +351,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 						</datasetRun>
 						<jr:listContents height="20" width="643">
 							<textField>
-								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="39" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="24" height="20"/>
 								<box topPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -333,7 +362,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="39" y="0" width="77" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="24" y="0" width="64" height="20"/>
 								<box topPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -344,8 +373,8 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 								<textFieldExpression><![CDATA["-"]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="116" y="0" width="118" height="20"/>
-								<box topPadding="2">
+								<reportElement stretchType="RelativeToTallestObject" x="88" y="0" width="124" height="20" isPrintWhenDetailOverflows="true"/>
+								<box topPadding="2" leftPadding="1">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 								</box>
@@ -355,7 +384,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 								<textFieldExpression><![CDATA[$F{product_name}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="234" y="0" width="48" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="325" y="0" width="35" height="20"/>
 								<box topPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -366,7 +395,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 								<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="335" y="0" width="63" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="410" y="0" width="50" height="20"/>
 								<box topPadding="2" rightPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -377,7 +406,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 								<textFieldExpression><![CDATA["0"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="282" y="0" width="53" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="360" y="0" width="50" height="20"/>
 								<box topPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -388,7 +417,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 								<textFieldExpression><![CDATA[$F{requested}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="398" y="0" width="79" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="460" y="0" width="50" height="20"/>
 								<box topPadding="2" rightPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -409,8 +438,8 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 								</textElement>
 								<textFieldExpression><![CDATA[$F{inward_type}]]></textFieldExpression>
 							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="477" y="0" width="83" height="20" isPrintWhenDetailOverflows="true"/>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="510" y="0" width="50" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -419,6 +448,28 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{reject_qty}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" x="212" y="0" width="60" height="20" isPrintWhenDetailOverflows="true"/>
+								<box topPadding="2">
+									<topPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{brand}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" x="272" y="0" width="53" height="20" isPrintWhenDetailOverflows="true"/>
+								<box topPadding="2">
+									<topPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
@@ -512,7 +563,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 				<textFieldExpression><![CDATA[$F{sup_city}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement mode="Transparent" x="3" y="20" width="642" height="16" isPrintWhenDetailOverflows="true"/>
+				<reportElement mode="Transparent" x="1" y="20" width="642" height="16" isPrintWhenDetailOverflows="true"/>
 				<box leftPadding="2">
 					<bottomPen lineWidth="0.75"/>
 				</box>
