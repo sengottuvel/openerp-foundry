@@ -651,8 +651,8 @@ class kg_department_issue(osv.osv):
 								product_qty = line_ids.issue_qty
 							elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
 								product_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
-								length = line_ids.length
-								breadth = line_ids.breadth
+						length = line_ids.length
+						breadth = line_ids.breadth
 						
 				print"product_qtyproduct_qty",product_qty
 				
