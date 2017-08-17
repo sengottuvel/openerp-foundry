@@ -282,7 +282,7 @@
                 <field name="approval_flag" invisible="1"/>
 				</field>
 				<field name="price_unit" position="replace">
-					<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
+					<field name="price_unit" on_change="onchange_price_exceed_alert(recent_price,price_unit,product_id,brand_id,moc_id)"  attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
 				</field>
 				
 				<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" position="after">

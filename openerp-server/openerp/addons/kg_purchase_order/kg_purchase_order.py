@@ -1247,6 +1247,25 @@ class kg_purchase_order_line(osv.osv):
 			value = {'moc_id': rate_rec.moc_id.id}
 		return {'value': value}
 	
+	def onchange_price_exceed_alert(self, cr, uid, ids, recent_price,price_unit,product_id,brand_id,moc_id):
+		if product_id and brand_id and moc_id:
+			max_sql = """ 
+						select det.rate from kg_brandmoc_rate rate
+						join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+						where rate.state = 'approved' and rate.product_id=%s
+						and det.brand_id = %s and det.moc_id = %s """%(product_id,brand_id,moc_id)
+			cr.execute(max_sql)		
+			max_data = cr.dictfetchall()
+			design_rate = max_data[0]['rate']
+			if design_rate < price_unit and recent_price < price_unit:
+				raise osv.except_osv(_('Warning!'),_("Rate %s exceed from design %s & last PO rate %s"%(price_unit,design_rate,recent_price)))
+			if design_rate < price_unit:
+				raise osv.except_osv(_('Warning!'),_("Rate %s exceed from design rate %s"%(price_unit,design_rate)))
+		if recent_price < price_unit:
+			raise osv.except_osv(_('Warning!'),_("Rate %s exceed from Last PO rate %s"%(price_unit,recent_price)))
+		
+		return True
+	
 	def _check_length(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.order_id.po_type != 'frompi':
