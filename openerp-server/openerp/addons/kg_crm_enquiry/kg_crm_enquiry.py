@@ -675,7 +675,7 @@ class kg_crm_enquiry(osv.osv):
 								for ms_item in orde_item.line_ids_a:
 									if ms_item.is_applicable == True:
 										ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
-										ms_item.ms_id.id,0,0,orde_item.moc_const_id.id,ms_item.moc_id.id,0)
+										ms_item.ms_id.id,ms_item,0,orde_item.moc_const_id.id,ms_item.moc_id.id,0)
 										self.pool.get('ch.kg.crm.spare.ms').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost * ms_item.qty})
 										prime_cost += ms_prime_cost * ms_item.qty
 										print "ms_prime_cost",prime_cost
