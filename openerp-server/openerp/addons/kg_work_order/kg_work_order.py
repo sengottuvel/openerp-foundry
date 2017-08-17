@@ -2279,7 +2279,6 @@ class ch_work_order_details(osv.osv):
 										#ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5
 										###
 										length = h_value + bp + setting_height - a_value - b_value - 1.5
-										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25:
 											length = roundPartial (length, 0.50)
@@ -2291,7 +2290,6 @@ class ch_work_order_details(osv.osv):
 										#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-3)/2
 										###
 										length = (h_value + bp + setting_height - a_value - b_value - 3)/2
-										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25:
 											length = roundPartial (length, 0.50)
@@ -2303,7 +2301,6 @@ class ch_work_order_details(osv.osv):
 										#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5)-(NO OF STAR SUPPORT*1.5)/NO OF STAR SUPPORT+1
 										###
 										length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
-										length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25:
 											length = roundPartial (length, 0.50)
