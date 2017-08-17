@@ -2149,8 +2149,8 @@ class ch_work_order_details(osv.osv):
 							else:
 								pos_no = vertical_ms_details['pos_no']
 								
-							print "sttttttttttttttt"
-							stop
+							print "sttttttttttttttt",ms_rec.dynamic_length,ms_rec.length_type
+							
 							### Dynamic Length Calculation ###
 							length = 0.00
 							a_value = 0.00
