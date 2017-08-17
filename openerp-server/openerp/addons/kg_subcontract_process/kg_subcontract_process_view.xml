@@ -1117,7 +1117,7 @@
 							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string = "Inward Items" >
 									<field name="order_id" readonly="1"/>
-									<field name="contractor_id" readonly="1"/>
+									
 									<field name="item_code" readonly="1"/>
 									<field name="item_name" readonly="1"/>
 									<field name="position_id" readonly="1"/>
