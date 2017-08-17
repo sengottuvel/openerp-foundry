@@ -3092,7 +3092,7 @@ class ch_subcontract_inspection_line(osv.osv):
 		'header_id': fields.many2one('kg.subcontract.inspection','Header Id'),
 		'sub_wo_id': fields.many2one('kg.subcontract.wo','SUB Work Id'),
 		'customer_id': fields.many2one('res.partner','Customer Name'),
-		'contractor_id': fields.related('header_id','contractor_id', type='many2one', relation='res.partner', string='Contractor Name', store=True, readonly=True),
+		
 		'inward_no': fields.related('header_id','name', type='char', string='Inward No', store=True, readonly=True),
 		
 		'sc_id': fields.many2one('kg.subcontract.process','Subcontractor List Id'),
