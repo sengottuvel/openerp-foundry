@@ -2348,6 +2348,8 @@ class ch_work_order_details(osv.osv):
 										#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5)-(NO OF STAR SUPPORT*1.5)/NO OF STAR SUPPORT+1
 										###
 										length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
+										print "vallllllllll",h_value,bp,setting_height,a_value,b_value,star_value
+										print "beforeeeeeeeeeeeeeeeeeeeeeeee",length
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
@@ -2359,6 +2361,7 @@ class ch_work_order_details(osv.osv):
 												length = (whole+0.0)
 										else:
 											length = length
+										print "middddddddddddddddddddddddddddddlength",length
 										
 								if ms_rec.length_type == 'drive_column_pipe':
 									
