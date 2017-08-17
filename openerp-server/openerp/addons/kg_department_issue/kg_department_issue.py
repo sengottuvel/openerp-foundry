@@ -124,6 +124,19 @@ class kg_department_issue(osv.osv):
 			return False
 		return True
 	
+	def _uom_validation(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.issue_line_ids:
+			for item in rec.issue_line_ids:
+				if item.product_id.id and item.uom_id.id:
+					pro_rec = self.pool.get('product.product').browse(cr,uid,item.product_id.id)
+					if item.uom_id.id == pro_rec.uom_id.id or item.uom_id.id == pro_rec.uom_po_id.id:
+						pass
+					else:
+						raise osv.except_osv(_('UOM Mismatching Error !'),
+							_('You choosed wrong UOM and you can choose either %s or %s for %s !!') % (pro_rec.uom_id.name,pro_rec.uom_po_id.name,pro_rec.name))
+		return True
+	
 	def _dp2_qty_validation(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.dep_issue_type == 'from_indent' and rec.department_id.name == 'DP2':
@@ -146,6 +159,7 @@ class kg_department_issue(osv.osv):
 	_constraints = [
 		
 		(_issdate_validation, 'Issue Date should not be greater than current date !!',['issue_date']),
+		(_uom_validation, 'You choosed wrong UOM !!',['']),
 		#~ (_dp2_qty_validation, 'Qty mismatched',['']),
 		
 		]
