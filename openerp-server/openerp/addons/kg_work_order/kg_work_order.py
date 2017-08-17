@@ -275,8 +275,7 @@ class kg_work_order(osv.osv):
 		if entry.state in ('draft','mkt_approved'):
 			delivery_date = str(entry.delivery_date)
 			delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
-			print "delivery_date",delivery_date
-			print "today",today
+			
 			if delivery_date < today:
 				raise osv.except_osv(_('Warning!'),
 							_('Delivery Date should not be less than current date for Order !!'))
@@ -475,7 +474,7 @@ class kg_work_order(osv.osv):
 			if entry.flag_data_bank == False:
 							
 				#~ number = 1
-				print "entry.line_ids",entry.line_ids
+				
 				
 				for item in entry.line_ids:
 					
@@ -519,7 +518,7 @@ class kg_work_order(osv.osv):
 
 						 """%(item.id,item.id,item.id))
 					draw_foundry_items = cr.dictfetchall();
-					print "draw_foundry_items",draw_foundry_items
+					
 					
 					for foundry_indent_item in draw_foundry_items:
 						
@@ -561,9 +560,6 @@ class kg_work_order(osv.osv):
 							
 							draw_indent_line_obj = self.pool.get('ch.drawing.indent.line')
 							
-							print "order_foundry_id",order_foundry_id
-							print "order_foundry_acc_id",order_foundry_acc_id
-							
 							foundry_indent_line_vals = {
 							
 								'header_id': foundry_indent_id,
@@ -599,7 +595,6 @@ class kg_work_order(osv.osv):
 
 						 """%(item.id,item.id))
 					draw_ms_items = cr.dictfetchall();
-					print "draw_ms_items",draw_ms_items
 					
 					for ms_indent_item in draw_ms_items:
 						
@@ -676,7 +671,6 @@ class kg_work_order(osv.osv):
 
 						 """%(item.id,item.id))
 					draw_bot_items = cr.dictfetchall();
-					print "draw_ms_items",draw_bot_items
 					
 					for bot_indent_item in draw_bot_items:
 						
@@ -738,7 +732,7 @@ class kg_work_order(osv.osv):
 							trim_dia_obj = self.pool.get('kg.trimming.dia')
 							enq_line_obj = self.pool.get('ch.kg.crm.pumpmodel')
 							enq_line_rec = enq_line_obj.browse(cr,uid,item.enquiry_line_id)
-							print ":",enq_line_rec.id
+							
 							if enq_line_rec.id > 0:
 								capacity_in = enq_line_rec.capacity_in
 								head_in = enq_line_rec.head_in
@@ -776,7 +770,7 @@ class kg_work_order(osv.osv):
 							self.pool.get('ch.order.bom.details').write(cr,uid,foundry_item.id,{'flag_trimming_dia':True})
 						
 					qc_created = 'no'
-					print "item",item
+					
 					
 					### Work Order Number Generation in Line Details
 					#~ cr.execute(''' select to_char(%s, 'FMRN') ''',[number])	  
@@ -803,7 +797,6 @@ class kg_work_order(osv.osv):
 								and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pump' and stock_mode = 'manual' 
 								order by serial_no """%(item.pump_model_id.id))
 							stock_inward_items = cr.dictfetchall();
-							print "stock_inward_items",stock_inward_items
 							
 							if stock_inward_items:
 								
@@ -883,7 +876,6 @@ class kg_work_order(osv.osv):
 														
 												}
 											
-											print "qc_vals",qc_vals	
 											
 											qc_id = qc_obj.create(cr, uid, qc_vals)
 											qc_created = 'yes'
@@ -893,7 +885,7 @@ class kg_work_order(osv.osv):
 											inward_line_obj = self.pool.get('ch.stock.inward.details')
 											
 											stock_avail_qty = stock_item['stock_qty'] - qc_qty
-											print "stock_avail_qtystock_avail_qty",stock_avail_qty
+											
 											if stock_avail_qty == 0:
 												inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
 											else:
@@ -902,11 +894,10 @@ class kg_work_order(osv.osv):
 									
 					line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})
 					
-					print "qc_created",qc_created
 					if qc_created == 'no': 
 						order_line_ids.append(item.id)
 					
-					print "order_line_ids",order_line_ids
+				
 					#~ if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
 					#~ 
 						#~ ### Schedule Creation ###
@@ -1014,7 +1005,7 @@ class kg_work_order(osv.osv):
 							'flag_data_bank':entry.flag_data_bank
 							}
 						assembly_id = assembly_obj.create(cr, uid, ass_header_values)
-						print "assembly_id//////////////////////////",assembly_id
+						
 						### Assembly Foundry Items Creation ###
 						
 						order_bom_ids = self.pool.get('ch.order.bom.details').search(cr, uid, [('header_id','=',order_item.id)])
@@ -1034,7 +1025,7 @@ class kg_work_order(osv.osv):
 									'entry_mode': 'auto',
 									'state': 'completed'
 									}
-								print "ass_foundry_vals----------------",ass_foundry_vals
+								
 								assembly_foundry_id = assembly_foundry_obj.create(cr, uid, ass_foundry_vals)
 							
 						### Assembly MS Items Creation ###
@@ -1054,7 +1045,7 @@ class kg_work_order(osv.osv):
 									'entry_mode': 'auto',
 									'state': 'completed',
 								}
-								print "ass_ms_vals----------------",ass_ms_vals
+								
 								assembly_ms_id = assembly_ms_obj.create(cr, uid, ass_ms_vals)	
 						
 						### Assembly BOT Items Creation ###
@@ -1074,7 +1065,7 @@ class kg_work_order(osv.osv):
 								'order_bot_qty': order_bot_qty,
 								'state': 'completed',
 								}
-								print "ass_bot_vals----------------",ass_bot_vals
+								
 								assembly_bot_id = assembly_bot_obj.create(cr, uid, ass_bot_vals)
 				
 				
@@ -1152,7 +1143,7 @@ class kg_work_order(osv.osv):
 						
 						### Accessories total primecost updation ###
 						self.pool.get('ch.wo.accessories').write(cr,uid,acc_item.id,{'wo_prime_cost':acc_total_primecost})
-						print "acc_total_primecost640",acc_total_primecost
+						
 				
 				### For Spare BOM ###
 				if order_item.line_ids_e:
@@ -1176,7 +1167,7 @@ class kg_work_order(osv.osv):
 						
 				### Total Pump primecost ###
 				overall_primecost = total_primecost
-				print "overall_primecost",overall_primecost
+				
 				self.pool.get('ch.work.order.details').write(cr,uid,order_item.id,{'wo_prime_cost':overall_primecost})
 		
 		return True
@@ -1481,9 +1472,9 @@ class ch_work_order_details(osv.osv):
 						moc_id = False
 					wgt = 0.00	
 					if moc_id != False:
-						print "moc_id",moc_id
+						
 						moc_rec = moc_obj.browse(cr, uid, moc_id)
-						print "moc_rec",moc_rec
+						
 						if moc_rec.weight_type == 'ci':
 							wgt =  bom_details['ci_weight']
 						if moc_rec.weight_type == 'ss':
@@ -1554,7 +1545,7 @@ class ch_work_order_details(osv.osv):
 					### Loading MOC from MOC Construction
 					
 					if moc_construction_id != False:
-						print "bom_ms_details['ms_id'],moc_construction_id",bom_ms_details['ms_id'],moc_construction_id
+						
 						cr.execute(''' select machine_moc.moc_id
 							from ch_machine_mocwise machine_moc
 							LEFT JOIN kg_moc_construction const on const.id = machine_moc.code
@@ -1953,7 +1944,7 @@ class ch_work_order_details(osv.osv):
 								if qty > 0:
 									bom_qty = qty * vertical_foundry['qty']
 								
-								print "vertical_foundry['header_id']",vertical_foundry['header_id']
+								
 								if vertical_foundry['position_id'] == None:
 									raise osv.except_osv(_('Warning!'),
 									_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
@@ -2158,7 +2149,8 @@ class ch_work_order_details(osv.osv):
 							else:
 								pos_no = vertical_ms_details['pos_no']
 								
-								
+							print "sttttttttttttttt"
+							stop
 							### Dynamic Length Calculation ###
 							length = 0.00
 							a_value = 0.00
