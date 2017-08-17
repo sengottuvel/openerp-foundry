@@ -305,7 +305,7 @@ class kg_depindent_line(osv.osv):
 		value = {'uom': '', 'po_uom': ''}
 		if product_id:
 			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'uom': prod.uom_id.id, 'po_uom' : prod.uom_po_id.id}
+			value = {'uom': prod.uom_id.id, 'po_uom' : prod.uom_po_id.id,'uom_conversation_factor':prod.uom_conversation_factor}
 		return {'value': value}
 	
 	def onchange_product_uom(self, cr, uid, ids, product_id, uom, po_uom,qty, context=None):
