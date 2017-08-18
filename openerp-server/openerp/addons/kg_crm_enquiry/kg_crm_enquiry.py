@@ -3342,6 +3342,17 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									#(STAR SUPPORT/2-1)+PUMP COLOUMN PIPE+A2
 									###
 									pump_column_pipe = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+									number_dec = str(length-int(pump_column_pipe))[1:]
+									if number_dec >= 0.25 and number_dec < 0.75:
+										pump_column_pipe = round(pump_column_pipe, 0)
+									if number_dec >= 0.75:
+										frac, whole = math.modf(pump_column_pipe)
+										if frac >= 0.5:
+											pump_column_pipe = (whole+0.5)
+										elif frac < 0.5:
+											pump_column_pipe = (whole+0.0)
+									else:
+										pump_column_pipe = pump_column_pipe
 									length = (star_value/2-1)+pump_column_pipe+a2_value
 									
 									
@@ -3351,6 +3362,17 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									###
 									line_column_pipe = vo_star_value['lcp']
 									pump_column_pipe = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
+									number_dec = str(length-int(pump_column_pipe))[1:]
+									if number_dec >= 0.25 and number_dec < 0.75:
+										pump_column_pipe = round(pump_column_pipe, 0)
+									if number_dec >= 0.75:
+										frac, whole = math.modf(pump_column_pipe)
+										if frac >= 0.5:
+											pump_column_pipe = (whole+0.5)
+										elif frac < 0.5:
+											pump_column_pipe = (whole+0.0)
+									else:
+										pump_column_pipe = pump_column_pipe
 									length = ((vo_star_value['star']/2)-1)+pump_column_pipe+a2_value
 									
 							if ms_rec.length_type == 'drive_shaft':
@@ -3360,6 +3382,11 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									#(STAR SUPPORT/2-1)+DRIVE COLOUMN PIPE-3.5+SHAFT EXT
 									###
 									drive_col_pipe = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+									number_dec = str(length-int(drive_col_pipe))[1:]
+									if number_dec >= 0.25:
+										drive_col_pipe = roundPartial (drive_col_pipe, 0.50)
+									else:
+										drive_col_pipe = drive_col_pipe
 									length = (star_value/2-1)+drive_col_pipe-3.5+shaft_ext
 									
 								if star_value > 1:
@@ -3368,6 +3395,11 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									###
 									line_column_pipe = vo_star_value['lcp']
 									drive_col_pipe = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
+									number_dec = str(length-int(drive_col_pipe))[1:]
+									if number_dec >= 0.25:
+										drive_col_pipe = roundPartial (drive_col_pipe, 0.50)
+									else:
+										drive_col_pipe = drive_col_pipe
 									length = ((vo_star_value['star']/2)-1)+drive_col_pipe-3.5+shaft_ext
 						
 						print "length---------------------------->>>>",length

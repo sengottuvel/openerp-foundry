@@ -487,7 +487,7 @@
 											<field name="line_ids" nolabel="1">
 												<tree string="Foundry Item Tree" editable="top" create="false">
 													<field name="is_applicable"/>
-													<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="position_id"/>
 													<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="off_name"/>
@@ -497,7 +497,7 @@
 													<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="qty" required="1" />
 													<field name="prime_cost" readonly="1"/>
-													<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="remarks"/>
 													<field name="load_bom" invisible="1"/>
 													<field name="moc_name" invisible="1"/>
 													<field name="moc_changed_flag" invisible="1"/>
@@ -508,7 +508,7 @@
 											<field name="line_ids_a" nolabel="1">
 												<tree string="MS Item Tree" create="false">
 													<field name="is_applicable"/>
-													<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="position_id"/>
 													<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="off_name"/>
@@ -518,7 +518,7 @@
 													<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="qty" required="1" />
 													<field name="prime_cost" readonly="1"/>
-													<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="remarks" />
 													<field name="load_bom" invisible="1"/>
 													<field name="moc_name" invisible="1"/>
 													<field name="moc_changed_flag" invisible="1"/>
@@ -574,7 +574,7 @@
 											<field name="line_ids_b" nolabel="1">
 												<tree string="BOT Item Tree" editable="top" create="false">
 													<field name="is_applicable"/>
-													<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="position_id"/>
 													<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="off_name"/>
@@ -583,7 +583,7 @@
 													<field name="brand_id" attrs="{'required': [('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
 													<field name="qty" required="1" />
 													<field name="prime_cost" readonly="1"/>
-													<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="remarks"/>
 													<field name="load_bom" invisible="1"/>
 													<field name="flag_is_bearing" invisible="1"/>
 													<field name="moc_name" invisible="1"/>
