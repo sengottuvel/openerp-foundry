@@ -7,6 +7,7 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import base64
 import math
+from datetime import timedelta
 
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
@@ -102,6 +103,7 @@ class kg_work_order(osv.osv):
 		'version':fields.char('Version'),
 		'flag_for_stock': fields.boolean('For Stock'),
 		'invoice_flag': fields.boolean('For Invoice'),
+		'delivery_date_flag': fields.boolean('Delivery Date Flag'),
 		'offer_no': fields.char('Offer No.'),
 		'enquiry_no': fields.char('Enquiry No.'),
 		#~'enquiry_id': fields.many2one('kg.crm.enquiry','Enquiry No.'),
@@ -239,6 +241,51 @@ class kg_work_order(osv.osv):
 						_('Delivery Date should not be less than current date!!'))
 		return True
 		
+	def onchange_order_category_delivery_date(self, cr, uid, ids, order_category,order_priority):
+		today = time.strftime('%Y-%m-%d')	
+		value = {'delivery_date': '','delivery_date_flag': ''}
+		if order_category != False and order_priority != False:			
+			if order_category == 'spare' and order_priority == 'normal':					
+				ends_date = date.today()+timedelta(days=56)
+				end_date = ends_date.strftime('%Y-%m-%d')				
+				delivery_date_flag = True
+				value = {'delivery_date': end_date,'delivery_date_flag': delivery_date_flag}			
+			elif order_category == 'pump' and order_priority == 'normal':				
+				ends_date = date.today()+timedelta(days=84)
+				end_date = ends_date.strftime('%Y-%m-%d')	
+				delivery_date_flag = True	
+				value = {'delivery_date': end_date,'delivery_date_flag': delivery_date_flag}			
+			else:				
+				delivery_date_flag = False
+				value = {'delivery_date': today,'delivery_date_flag': delivery_date_flag}		
+				
+			return {'value': value}
+		else:
+			return {'value': value}
+		
+		
+	def onchange_order_priority_delivery_date(self, cr, uid, ids, order_category,order_priority):
+		today = time.strftime('%Y-%m-%d')	
+		value = {'delivery_date': '','delivery_date_flag': ''}
+		if order_category != False and order_priority != False:			
+			if order_category == 'spare' and order_priority == 'normal':					
+				ends_date = date.today()+timedelta(days=56)
+				end_date = ends_date.strftime('%Y-%m-%d')				
+				delivery_date_flag = True
+				value = {'delivery_date': end_date,'delivery_date_flag': delivery_date_flag}			
+			elif order_category == 'pump' and order_priority == 'normal':				
+				ends_date = date.today()+timedelta(days=84)
+				end_date = ends_date.strftime('%Y-%m-%d')	
+				delivery_date_flag = True	
+				value = {'delivery_date': end_date,'delivery_date_flag': delivery_date_flag}			
+			else:				
+				delivery_date_flag = False
+				value = {'delivery_date': today,'delivery_date_flag': delivery_date_flag}		
+				
+			return {'value': value}
+		else:
+			return {'value': value}
+		
 	#~ def mail_test(self,cr,uid,ids,context=None):
 	   #~ ### Mail Testing ###
 		#~ scheduler_obj = self.pool.get('kg.scheduler')
@@ -330,6 +377,17 @@ class kg_work_order(osv.osv):
 						if entry.entry_mode == 'auto':
 							if wo_acc_prime_cost[0] > acc_item.mar_prime_cost: 
 								wo_spc_app_flag = True
+				
+				elif item.order_category == 'service':
+					wo_spc_app_flag = True
+					
+				elif item.order_priority == 'urgent':
+					wo_spc_app_flag = True
+				elif item.order_priority == 'breakdown':
+					wo_spc_app_flag = True
+				elif item.order_priority == 'emergency':
+					wo_spc_app_flag = True
+				
 				if wo_spc_app_flag == True:
 					self.write(cr,uid,ids,{'wo_spc_app_flag':True})
 					

@@ -29,10 +29,10 @@
 							<field name="division_id"/>
 							<field name="drawing_approval" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="inspection" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" />
-							<field name="order_category" string="Purpose" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="order_category" on_change="onchange_order_category_delivery_date(order_category,order_priority)" string="Purpose" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="partner_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="project_name" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': ['|',('state','in',['confirmed','cancel']),('delivery_date_flag','=',True)]}"/>
 							<field name="flag_cancel" invisible="1"/>
 							<field name="entry_mode" invisible="1"/>
 							<field name="wo_spc_app_flag" invisible="1"/>
@@ -45,7 +45,7 @@
 							<field name="excise_duty" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="road_permit" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="l_d_clause" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="order_priority" attrs="{'readonly': [('state','in',['confirmed','cancel'])],'required': [('state','!=','draft')]}"/>
+							<field name="order_priority" on_change="onchange_order_priority_delivery_date(order_category,order_priority)" attrs="{'readonly': [('state','in',['confirmed','cancel'])],'required': [('state','!=','draft')]}"/>
 							<field name="order_value" string="WO Value" readonly="1"/>
 							<field name="state"  style="width: 30%%" class="att_state_change"/>
 							<field name="remarks" string="Remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
