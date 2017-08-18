@@ -633,7 +633,7 @@ class kg_crm_enquiry(osv.osv):
 								ms_item.ms_id.id,ms_item,0,order_item.moc_const_id.id,ms_item.moc_id.id,0)
 								print "ms_item.ms_id",ms_item.ms_id.name
 								self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost })
-								prime_cost += ms_prime_cost * ms_item.qty
+								prime_cost += ms_prime_cost 
 								print "ms_prime_cost",prime_cost
 								if order_item.purpose_categ == 'spare':
 									self.spare_creation(cr,uid,offer_id,order_item,ms_item,ms_prime_cost,'ms')
@@ -652,7 +652,7 @@ class kg_crm_enquiry(osv.osv):
 								self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost })
 								print"bot_prime_costbot_prime_cost",bot_prime_cost
 								print"bot_item.qtybot_item.qty",bot_item.qty
-								prime_cost += bot_prime_cost * bot_item.qty
+								prime_cost += bot_prime_cost 
 								print "bot_prime_cost",prime_cost
 								if order_item.purpose_categ == 'spare':
 									self.spare_creation(cr,uid,offer_id,order_item,bot_item,bot_prime_cost,'bot')
@@ -684,7 +684,7 @@ class kg_crm_enquiry(osv.osv):
 										ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
 										ms_item.ms_id.id,ms_item,0,orde_item.moc_const_id.id,ms_item.moc_id.id,0)
 										self.pool.get('ch.kg.crm.spare.ms').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost })
-										prime_cost += ms_prime_cost * ms_item.qty
+										prime_cost += ms_prime_cost 
 										print "ms_prime_cost",prime_cost
 										#~ if order_item.purpose_categ == 'spare':
 											#~ self.spare_creation(cr,uid,offer_id,orde_item,ms_item,ms_prime_cost,'ms')
@@ -700,7 +700,7 @@ class kg_crm_enquiry(osv.osv):
 										bot_prime_cost = self._prime_cost_calculation(cr,uid,'bot',0,
 										0,0,bot_item.ms_id.id,orde_item.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
 										self.pool.get('ch.kg.crm.spare.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost })
-										prime_cost += bot_prime_cost * bot_item.qty
+										prime_cost += bot_prime_cost 
 										print "bot_prime_cost",prime_cost
 										#~ if order_item.purpose_categ == 'spare':
 											#~ self.spare_creation(cr,uid,offer_id,orde_item,bot_item,bot_prime_cost,'bot')
@@ -802,7 +802,7 @@ class kg_crm_enquiry(osv.osv):
 						ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
 						ms_item.ms_id.id,1,0,order_item.moc_const_id.id,ms_item.moc_id.id,0)
 						self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost })
-						prime_cost += ms_prime_cost * ms_item.qty
+						prime_cost += ms_prime_cost 
 						print "ms_prime_cost",prime_cost
 						if order_item.purpose_categ == 'spare':
 							self.spare_creation(cr,uid,offer_id,order_item,ms_item,ms_prime_cost,'ms')
@@ -818,7 +818,7 @@ class kg_crm_enquiry(osv.osv):
 						bot_prime_cost = self._prime_cost_calculation(cr,uid,'bot',0,
 						0,0,bot_item.ms_id.id,order_item.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
 						self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost })
-						prime_cost += bot_prime_cost * bot_item.qty
+						prime_cost += bot_prime_cost
 						print "bot_prime_cost",prime_cost
 						if order_item.purpose_categ == 'spare':
 							self.spare_creation(cr,uid,offer_id,order_item,bot_item,bot_prime_cost,'bot')
@@ -843,7 +843,7 @@ class kg_crm_enquiry(osv.osv):
 							acc_ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
 							acc_ms_item.ms_id.id,0,0,0,access.moc_id.id,0)
 							#~ self.pool.get('ch.crm.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost * acc_ms_item.qty })
-							prime_cost += acc_ms_prime_cost * acc_ms_item.qty
+							prime_cost += acc_ms_prime_cost 
 							print "ms_prime_cost_access",prime_cost
 							#~ moc_changed_flag = acc_ms_item.moc_changed_flag
 					if access_rec.line_ids:
@@ -851,7 +851,7 @@ class kg_crm_enquiry(osv.osv):
 							acc_bot_prime_cost = self._prime_cost_calculation(cr,uid,'bot',0,
 							0,0,acc_bot_item.ms_id.id,0,access.moc_id.id,0)
 							#~ self.pool.get('ch.crm.access.bot').write(cr,uid,acc_bot_item.id,{'prime_cost':acc_bot_prime_cost * acc_bot_item.qty })
-							prime_cost += acc_bot_prime_cost * acc_bot_item.qty
+							prime_cost += acc_bot_prime_cost 
 							print "bot_prime_cost_access",prime_cost
 							#~ moc_changed_flag = acc_bot_item.moc_changed_flag
 					self.pool.get('ch.crm.component.access').write(cr,uid,access.id,{'prime_cost':prime_cost})
@@ -901,7 +901,7 @@ class kg_crm_enquiry(osv.osv):
 							self.pool.get('ch.crm.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost  })
 							print"acc_ms_prime_cost--------------",acc_ms_prime_cost
 							print"acc_ms_item.qty--------------",acc_ms_item.qty
-							prime_cost += acc_ms_prime_cost * acc_ms_item.qty
+							prime_cost += acc_ms_prime_cost 
 							print "acc_ms_prime_cost",acc_ms_prime_cost
 							print "ms_prime_cost_access",prime_cost
 							moc_changed_flag = acc_ms_item.moc_changed_flag
@@ -914,7 +914,7 @@ class kg_crm_enquiry(osv.osv):
 							self.pool.get('ch.crm.access.bot').write(cr,uid,acc_bot_item.id,{'prime_cost':acc_bot_prime_cost  })
 							print"acc_bot_prime_cost--------------",acc_bot_prime_cost
 							print"acc_bot_item.qty--------------",acc_bot_item.qty
-							prime_cost += acc_bot_prime_cost * acc_bot_item.qty
+							prime_cost += acc_bot_prime_cost 
 							print "acc_bot_prime_cost",acc_bot_prime_cost
 							print "bot_prime_cost_access",prime_cost
 							moc_changed_flag = acc_bot_item.moc_changed_flag

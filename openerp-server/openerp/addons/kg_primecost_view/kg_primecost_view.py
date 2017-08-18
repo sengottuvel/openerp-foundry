@@ -1367,7 +1367,7 @@ class kg_primecost_view(osv.osv):
 						ms_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'ms',0,
 						ms_item.ms_id.id,ms_item,0,entry.moc_const_id.id,ms_item.moc_id.id,0)
 						self.pool.get('ch.primecost.view.ms').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost })
-						prime_cost += ms_prime_cost * ms_item.qty
+						prime_cost += ms_prime_cost 
 						
 			if entry.line_ids_b:
 				prime_cost = 0
@@ -1379,7 +1379,7 @@ class kg_primecost_view(osv.osv):
 						bot_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'bot',0,
 						0,0,bot_item.bot_id.id,entry.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
 						self.pool.get('ch.primecost.view.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost })
-						prime_cost += bot_prime_cost * bot_item.qty
+						prime_cost += bot_prime_cost
 						
 			## Spare BOM primecost start
 			if entry.line_ids_spare_bom:
@@ -1401,7 +1401,7 @@ class kg_primecost_view(osv.osv):
 								ms_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'ms',0,
 								ms_item.ms_id.id,ms_item,0,entry.moc_const_id.id,ms_item.moc_id.id,0)
 								self.pool.get('ch.primecost.view.spare.ms').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost })
-								prime_cost += ms_prime_cost * ms_item.qty
+								prime_cost += ms_prime_cost 
 						pump_prime_cost += prime_cost
 					if item.line_ids_b:
 						prime_cost = 0
@@ -1413,7 +1413,7 @@ class kg_primecost_view(osv.osv):
 								bot_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'bot',0,
 								0,0,bot_item.ms_id.id,entry.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
 								self.pool.get('ch.primecost.view.spare.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost })
-								prime_cost += bot_prime_cost * bot_item.qty
+								prime_cost += bot_prime_cost 
 						pump_prime_cost += prime_cost
 					spare_bom_prime_cost = pump_prime_cost
 					self.pool.get('ch.primecost.view.spare.bom').write(cr,uid,item.id,{'prime_cost':spare_bom_prime_cost})
