@@ -502,6 +502,7 @@ class kg_department_issue(osv.osv):
 									elif dep_issue_line_rec.uom_id.id == lot_rec.product_uom.id:
 										crnt_qty = dep_issue_line_rec.issue_qty / dep_issue_line_rec.product_id.po_uom_in_kgs / dep_issue_line_rec.length / dep_issue_line_rec.breadth
 								print"tottot",tot
+								print"crnt_qty",crnt_qty
 								if tot < crnt_qty:
 									raise osv.except_osv(_('Stock not available!'),
 										_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(item.product_id.name)))
