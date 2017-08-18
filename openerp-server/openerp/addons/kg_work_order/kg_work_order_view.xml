@@ -35,6 +35,7 @@
 							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': ['|',('state','in',['confirmed','cancel']),('delivery_date_flag','=',True)]}"/>
 							<field name="flag_cancel" invisible="1"/>
 							<field name="entry_mode" invisible="1"/>
+							<field name="delivery_date_flag" invisible="1"/>
 							<field name="wo_spc_app_flag" invisible="1"/>
 							<field name="design_flag" invisible="1"/>
 							<field name="flag_data_bank" readonly="1"/>
