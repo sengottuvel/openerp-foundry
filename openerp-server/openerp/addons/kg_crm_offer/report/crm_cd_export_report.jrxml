@@ -3046,6 +3046,7 @@ where header_id = $P{offer_id} and access.is_pump_acc_flag != True
 	<parameter name="offer_id" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[select off.name as off_no,
+(case when wo.name is not null then wo.name else '-' end) as wo_no,
 comp.name as company,
 
 (CASE WHEN comppart.street is null
@@ -3095,10 +3096,12 @@ left join res_city compcity on(compcity.id=comppart.city_id)
 left join res_country_state compstate on(compstate.id=comppart.state_id)
 left join res_country partcountry on(partcountry.id=partner.country_id)
 left join res_country dealcountry on(dealcountry.id=dealer.country_id)
+left join kg_work_order wo on(wo.offer_no=off.name)
 
 where off.id = $P{offer_id} and off.segment = 'exp']]>
 	</queryString>
 	<field name="off_no" class="java.lang.String"/>
+	<field name="wo_no" class="java.lang.String"/>
 	<field name="company" class="java.lang.String"/>
 	<field name="comp_street" class="java.lang.String"/>
 	<field name="comp_street2" class="java.lang.String"/>
@@ -4921,14 +4924,24 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 				<textFieldExpression><![CDATA[$F{cpo_no}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="616" y="56" width="197" height="18"/>
-				<box>
+				<reportElement x="616" y="56" width="54" height="18"/>
+				<box topPadding="2" leftPadding="1">
 					<leftPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA["WO No.:"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="671" y="56" width="142" height="18" isPrintWhenDetailOverflows="true"/>
+				<box topPadding="2" leftPadding="1">
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{wo_no}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
