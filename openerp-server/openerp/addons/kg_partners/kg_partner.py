@@ -273,10 +273,10 @@ class kg_partner(osv.osv):
 			return True
 		return False
 	
-	def _check_tin(self, cr, uid, ids, context=None):		
+	def _check_gs_tin(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
-		if rec.tin_no:
-			if len(str(rec.tin_no)) == 11 and rec.tin_no.isdigit() == True:
+		if rec.gs_tin_no:
+			if len(str(rec.gs_tin_no)) == 15:
 				return True
 		else:
 			return True
@@ -459,7 +459,7 @@ class kg_partner(osv.osv):
 	_constraints = [
 	
 		(_check_zip,'ZIP should contain 6-8 digit numerics. Else system not allow to save.',['ZIP']),
-		#~ (_check_tin,'TIN No. should contain 11 digit numerics. Else system not allow to save.',['TIN']),
+		(_check_gs_tin,'GS TIN No. should contain 15 letters. Else system not allow to save.',['GS TIN']),
 		(_check_cst,'CST No. should contain 11 digit numerics. Else system not allow to save.',['CST']),
 		(_check_vat,'VAT No. should contain 15 letters. Else system not allow to save.',['VAT']),
 		(_validate_email,'Check Email !',['']),
