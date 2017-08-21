@@ -518,7 +518,7 @@
 										<field name="line_ids" nolabel="1">
 											<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
 												<field name="is_applicable"/>
-												<field name="position_id" />
+												<field name="position_id"/>
 												<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 												<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 												<field name="off_name"/>
@@ -540,7 +540,7 @@
 										<field name="line_ids_a" nolabel="1">
 											<tree string="MS Item Tree" create="false" delete="false">
 												<field name="is_applicable"/>
-												<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+												<field name="position_id"/>
 												<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 												<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 												<field name="off_name"/>
@@ -550,7 +550,7 @@
 												<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 												<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
 												<field name="prime_cost" readonly="1"/>
-												<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+												<field name="remarks" />
 												<field name="load_bom" invisible="1"/>
 												<field name="purpose_categ" invisible="1"/>
 												<field name="moc_name" invisible="1"/>
@@ -560,7 +560,7 @@
 												<group colspan="4">
 													<group>
 														<field name="is_applicable"/>
-														<field name="position_id" />
+														<field name="position_id" readonly="1"/>
 														<field name="ms_id" readonly="1"/>
 														<field name="name" readonly="1"/>
 														<field name="off_name"/>
@@ -572,7 +572,7 @@
 														<field name="csd_no"/>
 														<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
 														<field name="prime_cost" readonly="1"/>
-														<field name="remarks" />
+														<field name="remarks" readonly="0"/>
 														<field name="purpose_categ" invisible="1"/>
 														<field name="moc_name" invisible="1"/>
 														<field name="moc_changed_flag" invisible="1"/>
@@ -795,6 +795,92 @@
 								</tree>
 								
 							</field>
+						</group>
+						
+						<group string="Additional Components">
+							<notebook>
+								<page string="Foundry Items">
+									<field name="ch_line_ids_b" colspan="4" nolabel="1">
+									<tree string="Foundry Item Tree" editable="top">
+										<field name="is_applicable"/>
+										<field name="position_id" />
+										<field name="pattern_id"/>
+										<field name="pattern_name" on_change="onchange_offer_name(pattern_name)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="off_name"/>
+										<field name="material_code"/>
+										<field name="flag_pattern_check"/>
+										<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+										<field name="csd_no" />
+										<field name="qty" required="1"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" />
+										<field name="load_bom" invisible="1"/>
+										<field name="purpose_categ" invisible="1"/>
+										<field name="moc_name" invisible="1"/>
+										<field name="moc_changed_flag" invisible="1"/>
+									</tree>
+									</field>
+								</page>
+								<page string = "MS Items">
+								<field name="ch_line_ids_c">
+									<tree string="MS Item Tree" editable="top">
+										<field name="is_applicable"/>
+										<field name="position_id"/>
+										<field name="ms_id" on_change="onchange_offer_name(ms_id)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="name" readonly="1"/>
+										<field name="off_name"/>
+										<field name="material_code"/>
+										<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+										<field name="length"/>
+										<field name="csd_no" />
+										<field name="qty" required="1" />
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" />
+										<field name="load_bom" invisible="1"/>
+										<field name="purpose_categ" invisible="1"/>
+										<field name="moc_name" invisible="1"/>
+										<field name="moc_changed_flag" invisible="1"/>
+									</tree>
+								</field>
+							</page>
+							<page string = "BOT Items">
+								<field name="ch_line_ids_d">
+									<tree string="BOT Item Tree" editable="top">
+										<field name="is_applicable"/>
+										<field name="position_id" />
+										<field name="ms_id" required="1" />
+										<field name="item_name" on_change="onchange_offer_name(item_name)" />
+										<field name="off_name"/>
+										<field name="material_code"/>
+										<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+										<field name="brand_id" attrs="{'required': [('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
+										<field name="qty" required="1" />
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" />
+										<field name="load_bom" invisible="1"/>
+										<field name="flag_is_bearing" invisible="1"/>
+										<field name="purpose_categ" invisible="1"/>
+										<field name="moc_name" invisible="1"/>
+										<field name="moc_changed_flag" invisible="1"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Accessories">
+								<field name="ch_line_ids_e">
+									<tree string="Accessories Entry Tree" editable="top">
+										<field name="access_categ_id" on_change="onchange_access_id(access_categ_id,access_id)" required="1"/>
+										<field name="access_id" attrs="{'readonly':[('access_categ_id','=',False)]}" required="1"/>
+										<field name="accessories_type" required="1"/>
+										<field name="off_name"/>
+										<field name="moc_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="oth_spec"/>
+										<field name="prime_cost"/>
+									</tree>
+									
+								</field>
+							</page>
+							</notebook>
 						</group>
 						
 						<button name="list_details" type="object" string="List" states="draft" class="oe_highlight"/>

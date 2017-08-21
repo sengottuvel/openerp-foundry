@@ -1378,8 +1378,8 @@ class kg_primecost_view(osv.osv):
 								raise osv.except_osv(_('Warning!'),_('%s You cannot save without Brand'%(bot_item.bot_id.code)))
 						bot_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'bot',0,
 						0,0,bot_item.bot_id.id,entry.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
-						self.pool.get('ch.primecost.view.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost })
-						prime_cost += bot_prime_cost
+						self.pool.get('ch.primecost.view.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost * bot_item.qty})
+						prime_cost += bot_prime_cost * bot_item.qty
 						
 			## Spare BOM primecost start
 			if entry.line_ids_spare_bom:
@@ -1412,8 +1412,8 @@ class kg_primecost_view(osv.osv):
 										raise osv.except_osv(_('Warning!'),_('%s You cannot save without Brand'%(bot_item.ms_id.code)))
 								bot_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'bot',0,
 								0,0,bot_item.ms_id.id,entry.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
-								self.pool.get('ch.primecost.view.spare.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost })
-								prime_cost += bot_prime_cost 
+								self.pool.get('ch.primecost.view.spare.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost * bot_item.qty})
+								prime_cost += bot_prime_cost * bot_item.qty
 						pump_prime_cost += prime_cost
 					spare_bom_prime_cost = pump_prime_cost
 					self.pool.get('ch.primecost.view.spare.bom').write(cr,uid,item.id,{'prime_cost':spare_bom_prime_cost})
