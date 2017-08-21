@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+		
+		<!-- Payslip Print -->
+		
+		<report string="Payslip Print"
+				model="hr.payslip"
+				auto="True"
+				name="onscreen_payslip"
+				rml="kg_payslip/report/onscreen_payslip.jrxml"
+				id="cd_jasper_report_payslip_1" 
+				menu="True"
+				header="False"
+        />
+
+        
+    </data>
+</openerp>

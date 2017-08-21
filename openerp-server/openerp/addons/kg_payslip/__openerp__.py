@@ -26,6 +26,7 @@ keep track and order all your purchase orders.
 					],
     'data': [
 			'kg_payslip.xml',
+			'jasper_report.xml',
 			#~ 'wizard/kg_employee_salary_muster.xml',
 			#~ 'wizard/kg_bank_stm.xml',
 			#~ 'wizard/kg_pf_paymuster.xml',

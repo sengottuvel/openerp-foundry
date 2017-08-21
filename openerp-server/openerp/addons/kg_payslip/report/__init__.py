@@ -23,6 +23,7 @@ import kg_emp_payslip_rpt
 import onscreen_salary_muster
 import onscreen_emp_payslip
 import onscreen_all_emp_payslip
+import onscreen_payslip
 
 
 

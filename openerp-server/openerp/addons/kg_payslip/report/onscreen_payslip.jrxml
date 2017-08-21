@@ -1,0 +1,1872 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="onscreen_payslip" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="59"/>
+	<subDataset name="dataset1">
+		<queryString>
+			<![CDATA[select ss.component,ss.amount,ss.actual_amt from (
+
+select
+
+payslip_line.name as component,
+payslip_line.amount as amount,
+0 as actual_amt
+from hr_payslip payslip
+
+join hr_payslip_line payslip_line on (payslip_line.slip_id = payslip.id)
+
+where payslip.id=240
+
+union
+
+select
+
+other_payslip_line.name as component,
+other_payslip_line.amount as amount,
+0 as actual_amt
+
+from hr_payslip payslip
+
+join ch_other_salary_comp other_payslip_line on (other_payslip_line.slip_id = payslip.id)
+
+where payslip.id=240
+
+union
+
+select
+
+salary_comp.name as component,
+0 as amount,
+contract_sal_line.salary_amt as actual_amt
+
+
+from hr_payslip payslip
+
+left join hr_contract contract on (contract.employee_id = payslip.employee_id)
+left join ch_kg_contract_salary contract_sal_line on (contract_sal_line.header_id_salary = contract.id)
+left join hr_salary_rule salary_comp on (salary_comp.id = contract_sal_line.salary_type)
+
+where payslip.id=240) as ss]]>
+		</queryString>
+		<field name="component" class="java.lang.String"/>
+		<field name="amount" class="java.math.BigDecimal"/>
+		<field name="actual_amt" class="java.lang.Double"/>
+	</subDataset>
+	<parameter name="payslip_id" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select to_char((actual_basic_1+actual_hra_1+actual_fda_1+earned_vda_1+actual_ca_1+actual_sa_1+actual_ma_1+actual_att_allow_1),'9G99G990D99') as grand_total,
+to_char((earned_basic_1+earned_vda_1+earned_fda_1+earned_hra_1+earned_ca_1+earned_spl_allow_1+earned_ma_1+earned_att_allow_1),'9G99G990D99') as earned_total,
+to_char((pf_1+esi_1+advance_1+cloth_1),'9G99G990D99') as deduction_total,to_char((earned_basic_1+earned_vda_1+earned_fda_1+earned_hra_1+earned_ca_1+earned_spl_allow_1+earned_ma_1+earned_att_allow_1)-(pf_1+esi_1+advance_1+cloth_1),'9G99G990D99')as total_salary,
+to_char(actual_hra_1,'9G99G990D99') as actual_hra_text,to_char(actual_fda_1,'9G99G990D99') as actual_fda_text,to_char(actual_ca_1,'9G99G990D99') as actual_ca_text,to_char(actual_sa_1,'9G99G990D99') as actual_sa_text,
+to_char(actual_ma_1,'9G99G990D99') as actual_ma_text,to_char(actual_att_allow_1,'9G99G990D99') as actual_att_allow_text,* from (
+select Sum(a.actual_basic) over(partition by emp_name) as actual_basic_1,Sum(actual_hra) over(partition by emp_name) as actual_hra_1,Sum(actual_fda) over(partition by emp_name) as actual_fda_1,
+Sum(actual_ca) over(partition by emp_name) as actual_ca_1,Sum(actual_sa) over(partition by emp_name) as actual_sa_1,Sum(actual_ma) over(partition by emp_name) as actual_ma_1,
+Sum(actual_att_allow) over(partition by emp_name) as actual_att_allow_1,a.earned_basic as earned_basic_1,a.earned_vda as earned_vda_1,a.earned_fda as earned_fda_1,a.pf_salary as pf_salary_1,
+a.earned_hra as earned_hra_1,a.earned_ca as earned_ca_1,a.earned_spl_allow as earned_spl_allow_1,a.earned_ma as earned_ma_1,a.earned_att_allow as earned_att_allow_1,
+a.pf as pf_1,a.esi as esi_1,a.advance as advance_1,a.cloth as cloth_1,* from (select
+
+-----EARNED SALARY STARTS-------
+
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='BASIC'),0.00),'9G99G990D99') as earned_basic_text,
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='VDA'),0.00),'9G99G990D99') as earned_vda_text,
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='FDA'),0.00),'9G99G990D99') as earned_fda_text,
+to_char((COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='BASIC'),0.00) + COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='VDA'),0.00)+
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='FDA'),0.00)),'9G99G990D99') as pf_salary_text,
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='HRA'),0.00),'9G99G990D99') as earned_hra_text,
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='CA'),0.00),'9G99G990D99') as earned_ca_text,
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='SA'),0.00),'9G99G990D99') as earned_spl_allow_text,
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='MA'),0.00),'9G99G990D99') as earned_ma_text,
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='ATTN. ALLO'),0.00),'9G99G990D99') as earned_att_allow_text,
+
+
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='BASIC'),0.00)as earned_basic,
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='VDA'),0.00)as earned_vda,
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='FDA'),0.00)as earned_fda,
+(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='BASIC'),0.00) + COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='VDA'),0.00)+
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='FDA'),0.00)) as pf_salary,
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='HRA'),0.00)as earned_hra,
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='CA'),0.00)as earned_ca,
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='SA'),0.00)as earned_spl_allow,
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='MA'),0.00)as earned_ma,
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='ATTN. ALLO'),0.00)as earned_att_allow,
+
+-----EARNED SALARY ENDS-------
+
+-----DEDUCTION STARTS-------
+
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='PF'),0.00),'9G99G990D99') pf_text,
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='ESI'),0.00),'9G99G990D99') esi_text,
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='ADV'),0.00),'9G99G990D99') advance_text,
+to_char(COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='CLOTH'),0.00),'9G99G990D99') cloth_text,
+
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='PF'),0.00)as pf,
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='ESI'),0.00)as esi,
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='ADV'),0.00)as advance,
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='CLOTH'),0.00)as cloth,
+
+-----DEDUCTION ENDS-------
+
+-----ACTUAL SALARY STARTS-------
+
+case when salary_comp.code ='BASIC' then to_char(contract_line.salary_amt,'9G99G990D99') else '0.00' end actual_basic_text,
+--case when salary_comp.code ='FDA' then to_char(contract_line.salary_amt,'9G99G990D99') else '0.00' end actual_fda_text,
+to_char ((case when salary_comp.code ='BASIC' then contract_line.salary_amt else 0.00 end)+(case when salary_comp.code ='FDA' then contract_line.salary_amt else 0.00 end)+
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='VDA'),0.00),'9G99G990D99') as actual_pf_amt_text,
+--case when salary_comp.code ='HRA' then to_char(contract_line.salary_amt,'9G99G990D99') else '0.00' end actual_hra_text,
+--case when salary_comp.code ='CA' then to_char(contract_line.salary_amt,'9G99G990D99') else '0.00' end actual_ca_text,
+--case when salary_comp.code ='SA' then to_char(contract_line.salary_amt,'9G99G990D99') else '0.00' end actual_sa_text,
+--case when salary_comp.code ='MA' then to_char(contract_line.salary_amt,'9G99G990D99') else '0.00' end actual_ma_text,
+--case when salary_comp.code ='ATTN. ALLO' then to_char(contract_line.salary_amt,'9G99G990D99') else '0.00' end actual_att_allow_text,
+
+
+case when salary_comp.code ='BASIC' then contract_line.salary_amt else 0.00 end actual_basic,
+case when salary_comp.code ='FDA' then contract_line.salary_amt else 0.00 end actual_fda,
+(case when salary_comp.code ='BASIC' then contract_line.salary_amt else 0.00 end)+(case when salary_comp.code ='FDA' then contract_line.salary_amt else 0.00 end)+
+COALESCE( (select amount from hr_payslip_line where slip_id = payslip.id and code='VDA'),0.00) as actual_pf_amt,
+case when salary_comp.code ='HRA' then contract_line.salary_amt else 0.00 end actual_hra,
+case when salary_comp.code ='CA' then contract_line.salary_amt else 0.00 end actual_ca,
+case when salary_comp.code ='SA' then contract_line.salary_amt else 0.00 end actual_sa,
+case when salary_comp.code ='MA' then contract_line.salary_amt else 0.00 end actual_ma,
+case when salary_comp.code ='ATTN. ALLO' then contract_line.salary_amt else 0.00 end actual_att_allow,
+
+-----ACTUAL SALARY ENDS-------
+
+to_char(current_date,'dd/mm/yyyy') as current_date,
+COALESCE(payslip.month,'-') as pay_month,
+employee.name_related as emp_name,
+payslip.emp_name as emp_code,
+to_char(employee.join_date,'dd/mm/yyyy') AS date_of_join,
+department.name as dep_name,
+division.name as div_name,
+designation.name as deg_name,
+COALESCE(contract.pf_acc_no,'-') as pf_no,
+COALESCE(contract.uan_no,'-') as uan_no,
+COALESCE(contract.esi_acc_no,'-') as esi_no,
+COALESCE(employee.pan_no,'-') as pan_no,
+COALESCE(contract.sal_acc_no,'-') as acc_no,
+bank.name as bank_name,
+
+------ATTENDANCE DETAILS -------
+
+to_char(monthly_att.working_days,'99D9') as working_days_text,
+to_char(monthly_att.worked_days,'99D9') as worked_days_text,
+case when monthly_att.sundays = 0.0 then '0.0' else to_char(monthly_att.sundays,'99D9') end as sundays_text,
+case when monthly_att.nat_fes_days = 0.0 then '0.0' else to_char(monthly_att.nat_fes_days,'99D9') end as nat_fes_days_text,
+case when monthly_att.absent_days = 0.0 then '0.0' else to_char(monthly_att.absent_days,'99D9') end as lop_text,
+case when (select count(id) from hr_holidays where from_date >= monthly_att.start_date and to_date <= monthly_att.end_date and holiday_status_id=23 and employee_id=payslip.employee_id) = 0.0 then '0.0'
+else to_char((select count(id) from hr_holidays where from_date >= monthly_att.start_date and to_date <= monthly_att.end_date and holiday_status_id=23 and employee_id=payslip.employee_id),'99D9') end as cl_days_text,
+
+case when (select count(id) from hr_holidays where from_date >= monthly_att.start_date and to_date <= monthly_att.end_date and holiday_status_id=23 and employee_id=payslip.employee_id) = 0.0 then '0.0'
+else to_char((select count(id) from hr_holidays where from_date >= monthly_att.start_date and to_date <= monthly_att.end_date and holiday_status_id=24 and employee_id=payslip.employee_id),'99D9') end as el_days_text,
+
+monthly_att.working_days as working_days,
+monthly_att.worked_days as worked_days,
+monthly_att.sundays as sundays,
+monthly_att.nat_fes_days as nat_fes_days,
+monthly_att.absent_days as lop,
+(select count(id) from hr_holidays where from_date >= monthly_att.start_date and to_date <= monthly_att.end_date and holiday_status_id=23 and employee_id=payslip.employee_id) as cl_days,
+(select count(id) from hr_holidays where from_date >= monthly_att.start_date and to_date <= monthly_att.end_date and holiday_status_id=24 and employee_id=payslip.employee_id) as el_days
+
+------ATTENDANCE DETAILS -------
+
+
+from hr_payslip as payslip
+
+left join hr_employee employee on (employee.id= payslip.employee_id)
+left join hr_contract contract on (contract.employee_id= payslip.employee_id)
+left join ch_kg_contract_salary contract_line on (contract_line.header_id_salary= contract.id)
+left join hr_salary_rule salary_comp on (salary_comp.id= contract_line.salary_type)
+left join kg_depmaster department on (department.id= employee.dep_id)
+left join kg_division_master division on (division.id= employee.division_id)
+left join hr_job designation on (designation.id= employee.job_id)
+left join res_bank bank on (bank.id= contract.bank_id)
+left join kg_monthly_attendance monthly_att on (monthly_att.id = (select id from kg_monthly_attendance where start_date=payslip.date_from and end_date=payslip.date_to and employee_id=payslip.employee_id
+and state='approved' limit 1))
+
+where payslip.id =$P{payslip_id} ) as a limit 1) as b]]>
+	</queryString>
+	<field name="grand_total" class="java.lang.String"/>
+	<field name="earned_total" class="java.lang.String"/>
+	<field name="deduction_total" class="java.lang.String"/>
+	<field name="total_salary" class="java.lang.String"/>
+	<field name="actual_hra_text" class="java.lang.String"/>
+	<field name="actual_fda_text" class="java.lang.String"/>
+	<field name="actual_ca_text" class="java.lang.String"/>
+	<field name="actual_sa_text" class="java.lang.String"/>
+	<field name="actual_ma_text" class="java.lang.String"/>
+	<field name="actual_att_allow_text" class="java.lang.String"/>
+	<field name="actual_basic_1" class="java.lang.Double"/>
+	<field name="actual_hra_1" class="java.lang.Double"/>
+	<field name="actual_fda_1" class="java.lang.Double"/>
+	<field name="actual_ca_1" class="java.lang.Double"/>
+	<field name="actual_sa_1" class="java.lang.Double"/>
+	<field name="actual_ma_1" class="java.lang.Double"/>
+	<field name="actual_att_allow_1" class="java.lang.Double"/>
+	<field name="earned_basic_1" class="java.math.BigDecimal"/>
+	<field name="earned_vda_1" class="java.math.BigDecimal"/>
+	<field name="earned_fda_1" class="java.math.BigDecimal"/>
+	<field name="pf_salary_1" class="java.math.BigDecimal"/>
+	<field name="earned_hra_1" class="java.math.BigDecimal"/>
+	<field name="earned_ca_1" class="java.math.BigDecimal"/>
+	<field name="earned_spl_allow_1" class="java.math.BigDecimal"/>
+	<field name="earned_ma_1" class="java.math.BigDecimal"/>
+	<field name="earned_att_allow_1" class="java.math.BigDecimal"/>
+	<field name="pf_1" class="java.math.BigDecimal"/>
+	<field name="esi_1" class="java.math.BigDecimal"/>
+	<field name="advance_1" class="java.math.BigDecimal"/>
+	<field name="cloth_1" class="java.math.BigDecimal"/>
+	<field name="earned_basic_text" class="java.lang.String"/>
+	<field name="earned_vda_text" class="java.lang.String"/>
+	<field name="earned_fda_text" class="java.lang.String"/>
+	<field name="pf_salary_text" class="java.lang.String"/>
+	<field name="earned_hra_text" class="java.lang.String"/>
+	<field name="earned_ca_text" class="java.lang.String"/>
+	<field name="earned_spl_allow_text" class="java.lang.String"/>
+	<field name="earned_ma_text" class="java.lang.String"/>
+	<field name="earned_att_allow_text" class="java.lang.String"/>
+	<field name="earned_basic" class="java.math.BigDecimal"/>
+	<field name="earned_vda" class="java.math.BigDecimal"/>
+	<field name="earned_fda" class="java.math.BigDecimal"/>
+	<field name="pf_salary" class="java.math.BigDecimal"/>
+	<field name="earned_hra" class="java.math.BigDecimal"/>
+	<field name="earned_ca" class="java.math.BigDecimal"/>
+	<field name="earned_spl_allow" class="java.math.BigDecimal"/>
+	<field name="earned_ma" class="java.math.BigDecimal"/>
+	<field name="earned_att_allow" class="java.math.BigDecimal"/>
+	<field name="pf_text" class="java.lang.String"/>
+	<field name="esi_text" class="java.lang.String"/>
+	<field name="advance_text" class="java.lang.String"/>
+	<field name="cloth_text" class="java.lang.String"/>
+	<field name="pf" class="java.math.BigDecimal"/>
+	<field name="esi" class="java.math.BigDecimal"/>
+	<field name="advance" class="java.math.BigDecimal"/>
+	<field name="cloth" class="java.math.BigDecimal"/>
+	<field name="actual_basic_text" class="java.lang.String"/>
+	<field name="actual_pf_amt_text" class="java.lang.String"/>
+	<field name="actual_basic" class="java.lang.Double"/>
+	<field name="actual_fda" class="java.lang.Double"/>
+	<field name="actual_pf_amt" class="java.lang.Double"/>
+	<field name="actual_hra" class="java.lang.Double"/>
+	<field name="actual_ca" class="java.lang.Double"/>
+	<field name="actual_sa" class="java.lang.Double"/>
+	<field name="actual_ma" class="java.lang.Double"/>
+	<field name="actual_att_allow" class="java.lang.Double"/>
+	<field name="current_date" class="java.lang.String"/>
+	<field name="pay_month" class="java.lang.String"/>
+	<field name="emp_name" class="java.lang.String"/>
+	<field name="emp_code" class="java.lang.String"/>
+	<field name="date_of_join" class="java.lang.String"/>
+	<field name="dep_name" class="java.lang.String"/>
+	<field name="div_name" class="java.lang.String"/>
+	<field name="deg_name" class="java.lang.String"/>
+	<field name="pf_no" class="java.lang.String"/>
+	<field name="uan_no" class="java.lang.String"/>
+	<field name="esi_no" class="java.lang.String"/>
+	<field name="pan_no" class="java.lang.String"/>
+	<field name="acc_no" class="java.lang.String"/>
+	<field name="bank_name" class="java.lang.String"/>
+	<field name="working_days_text" class="java.lang.String"/>
+	<field name="worked_days_text" class="java.lang.String"/>
+	<field name="sundays_text" class="java.lang.String"/>
+	<field name="nat_fes_days_text" class="java.lang.String"/>
+	<field name="lop_text" class="java.lang.String"/>
+	<field name="cl_days_text" class="java.lang.String"/>
+	<field name="el_days_text" class="java.lang.String"/>
+	<field name="working_days" class="java.lang.Double"/>
+	<field name="worked_days" class="java.lang.Double"/>
+	<field name="sundays" class="java.lang.Integer"/>
+	<field name="nat_fes_days" class="java.lang.Integer"/>
+	<field name="lop" class="java.lang.Double"/>
+	<field name="cl_days" class="java.lang.Long"/>
+	<field name="el_days" class="java.lang.Long"/>
+	<group name="allowance_details">
+		<groupExpression><![CDATA[$F{emp_name}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="752" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Payslip of "+$F{pay_month}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="75" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="58" width="752" height="17"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA["Date : "+$F{current_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="752" height="29"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["SAM TURBO INDUSTRY PRIVATE LIMITED"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="29" width="752" height="29"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["AVINASHI ROAD, NEELAMBUR , COIMBATORE -641062."]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="0" y="0" width="752" height="58"/>
+				<box leftPadding="122">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<imageExpression><![CDATA["/home/sujith/SVN_Projects/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="103" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="20" width="107" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{emp_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="162" y="20" width="61" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{date_of_join}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="20" width="53" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dep_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="276" y="20" width="65" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{deg_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="20" width="80" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pf_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="20" width="89" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{uan_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="20" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{esi_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="576" y="20" width="59" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pan_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="635" y="20" width="117" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{bank_name}+$F{acc_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="20" width="55" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{emp_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="60" width="107" height="20"/>
+				<box leftPadding="0" rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{working_days_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="60" width="116" height="20"/>
+				<box leftPadding="0" rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{worked_days_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="60" width="53" height="20"/>
+				<box leftPadding="0" rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sundays_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="276" y="60" width="65" height="20"/>
+				<box leftPadding="0" rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cl_days_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="60" width="80" height="20"/>
+				<box leftPadding="0" rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{el_days_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="60" width="89" height="20"/>
+				<box leftPadding="0" rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nat_fes_days_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="60" width="66" height="20"/>
+				<box leftPadding="0" rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{lop_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="576" y="60" width="176" height="20"/>
+				<box leftPadding="0" rightPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{worked_days}+$F{sundays}+$F{nat_fes_days}+$F{lop}+$F{cl_days}+$F{el_days}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="107" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Name"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="0" width="55" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["EMP NO"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="162" y="0" width="61" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DOJ"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="0" width="53" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DEPT"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="276" y="0" width="65" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DESG."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="0" width="80" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["PF NO."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="0" width="89" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["UAN"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="0" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ESI NO."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="576" y="0" width="59" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["PAN NO."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="635" y="0" width="117" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["BANK NAME/ A/C No."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="40" width="107" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["WORKING DAYS"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="40" width="116" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["WORKED DAYS"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="40" width="53" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["SUNDAYS"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="276" y="40" width="65" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["CL"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="40" width="80" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["EL"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="40" width="89" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["NH"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="40" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["LOP"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="576" y="40" width="176" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TOTAL DAYS"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="80" width="107" height="23"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["COMPONENT"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="80" width="116" height="23"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ACTUAL SALARY"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="80" width="118" height="23"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["EARNED SALARY"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="80" width="169" height="23"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DEDUCTION"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="80" width="66" height="23"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["NET PAY"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="576" y="80" width="176" height="23"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["SIGNATURE"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="220" splitType="Stretch">
+			<textField pattern="#,##0.00;(#,##0.00-)">
+				<reportElement x="107" y="200" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grand_total}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="0" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actual_basic_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="0" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{earned_basic_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="20" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{earned_vda_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="20" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{earned_vda_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="40" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{earned_fda_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="40" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actual_fda_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="60" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pf_salary_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="60" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actual_pf_amt_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="80" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{earned_hra_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="80" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actual_hra_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="100" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="100" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="120" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{earned_ca_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="120" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actual_ca_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="140" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{earned_spl_allow_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="140" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actual_sa_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="160" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{earned_ma_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="160" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actual_ma_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="180" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{earned_att_allow_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="107" y="180" width="116" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actual_att_allow_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="0" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pf_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="20" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{esi_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="40" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{advance_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="60" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cloth_text}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="80" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="100" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="120" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="140" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="160" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="180" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="200" width="89" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{deduction_total}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="0" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="20" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="40" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="60" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="80" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="100" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="120" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="140" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="160" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="180" width="66" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="200" width="118" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{earned_total}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="180" width="80" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="160" width="80" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="140" width="80" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="120" width="80" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="576" y="0" width="176" height="220"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["BASIC"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="20" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["VDA"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="40" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["FDA"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="60" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["PF. SALARY"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="80" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["HRA"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="100" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["CCA"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="120" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["CA"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="140" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["SPL.ALLOW"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="160" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["MA"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="180" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ATTN.ALLOW"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="200" width="107" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["GROSS SALARY"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="0" width="80" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["PF"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="20" width="80" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ESI"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="40" width="80" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ADVANCE"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="60" width="80" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["CLOTH"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="80" width="80" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TDS"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="100" width="80" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["OTHERS"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="200" width="80" height="20"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TOTAL"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="200" width="66" height="20"/>
+				<box rightPadding="1">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_salary}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
