@@ -461,7 +461,7 @@ class kg_crm_enquiry(osv.osv):
 								qty = design_rate = price = 0
 							tot_price += price
 							prime_cost = tot_price
-				if ms_raw > 0:
+				elif ms_raw > 0:
 					if ms_raw.line_ids:
 						for raw_line in ms_raw.line_ids:
 							design_rate = 0
@@ -868,7 +868,7 @@ class kg_crm_enquiry(osv.osv):
 					if access_rec.line_ids_a:
 						for acc_ms_item in access_rec.line_ids_a:
 							acc_ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
-							acc_ms_item.ms_id.id,0,0,0,access.moc_id.id,0)
+							acc_ms_item.ms_id.id,1,0,0,access.moc_id.id,0)
 							#~ self.pool.get('ch.crm.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost * acc_ms_item.qty })
 							prime_cost += acc_ms_prime_cost 
 							print "ms_prime_cost_access",prime_cost
