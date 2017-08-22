@@ -198,6 +198,7 @@ class kg_work_order(osv.osv):
 		
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
+		print "flds.name",flds.name
 		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+=' )
 		if special_char:
 			return False
@@ -3557,6 +3558,7 @@ class ch_wo_spare_bom(osv.osv):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
+		ch_ms_vals = []
 		if bom_id:
 			bom_obj = self.pool.get('kg.bom').search(cr,uid,([('id','=',bom_id),('name','=',off_name)]))
 			if bom_obj:
