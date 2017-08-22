@@ -198,7 +198,6 @@ class kg_work_order(osv.osv):
 		
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
-		print "flds.name",flds.name
 		if flds.name == False:
 			raise osv.except_osv(_('Warning!'),
 				_('Work Order No. is must !!'))

@@ -436,23 +436,31 @@ class kg_purchase_order(osv.osv):
 	def verify_po(self,cr,uid,ids, context=None):
 		obj = self.browse(cr,uid,ids[0])
 		if obj.state == 'confirmed':
-			if obj.confirmed_by.id == uid:
-				raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
+			user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
+			user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
+			if user_rec.special_approval == True:
+				pass
+			else:
+				if obj.confirmed_by.id == uid:
+					raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
 			self.write(cr,uid,ids,{'state':'verified','verified_by':uid,'verified_date':dt_time,'approval_flag':True})
 		
 		return True
 	
 	def entry_approve(self, cr, uid, ids, context=None):
 		obj = self.browse(cr, uid, ids[0], context=context)
-		if obj.confirmed_by.id == uid:
-			raise osv.except_osv(_('Warning'),_('Approve cannot be done by Confirmed user'))
-		elif obj.verified_by.id == uid:
-			raise osv.except_osv(_('Warning'),_('Approve cannot be done by Verified user'))
-		else:
-			pass
 		user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
-		if user_obj:
-			user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
+		user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
+		if user_rec.special_approval == True:
+			pass
+		else:
+			if obj.confirmed_by.id == uid:
+				raise osv.except_osv(_('Warning'),_('Approve cannot be done by Confirmed user'))
+			elif obj.verified_by.id == uid:
+				raise osv.except_osv(_('Warning'),_('Approve cannot be done by Verified user'))
+			else:
+				pass
+		
 		for item in obj.order_line:
 			price_sql = """ 
 						select line.price_unit
@@ -1461,4 +1469,3 @@ class ch_purchase_wo(osv.osv):
 		]
 	
 ch_purchase_wo()
-
