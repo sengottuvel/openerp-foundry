@@ -979,6 +979,7 @@ class kg_mould_batch(osv.osv):
 				print "mould_qty",mould_qty
 				print "item.mould_rem_qty",item.mould_rem_qty
 				print "item.total_mould_qty",item.total_mould_qty
+				
 				vals = {
 				
 					'header_id': entry.id,
