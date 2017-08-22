@@ -94,7 +94,6 @@ class kg_crm_enquiry(osv.osv):
 		'ch_line_ids_c': fields.one2many('ch.crm.component.ms', 'header_id', "MS",readonly=True, states={'draft':[('readonly',False)]}),
 		'ch_line_ids_d': fields.one2many('ch.crm.component.bot', 'header_id', "BOT",readonly=True, states={'draft':[('readonly',False)]}),
 		'ch_line_ids_e': fields.one2many('ch.crm.component.access', 'header_id', "Accessories",readonly=True, states={'draft':[('readonly',False)]}),
-		'ch_line_ids_f': fields.one2many('ch.crm.component.primemover', 'header_id', "Primemover",readonly=True, states={'draft':[('readonly',False)]}),
 		
 		## Entry Info
 		
@@ -549,33 +548,7 @@ class kg_crm_enquiry(osv.osv):
 						tot_price += price
 						prime_cost = tot_price
 						print"prime_costprime_cost",prime_cost
-		elif item_type == 'primemover':
-			if moc_id > 0:
-				design_rate = 0
-				prod_ids = self.pool.get('product.product').search(cr,uid,[('product_type','=','primemover'),('primemover_id','=',bot_id)])
-				if prod_ids:
-					prod_rec = self.pool.get('product.product').browse(cr,uid,prod_ids[0])
-					brnd_moc_rate_ids = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',prod_rec.id),('state','=','approved')])
-					if brnd_moc_rate_ids:
-						brnd_moc_rate_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brnd_moc_rate_ids[0])
-						if brand_id > 0:
-							brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s and brand_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id,brand_id)
-							cr.execute(brandmoc_line_sql)  
-							brandmoc_line_data = cr.dictfetchall()
-						else:
-							brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
-							cr.execute(brandmoc_line_sql)  
-							brandmoc_line_data = cr.dictfetchall()
-						if brandmoc_line_data:
-							design_rate = brandmoc_line_data[0]['rate']
-							if prod_rec.uom_id.id != brandmoc_rec.uom_id.id:
-								price = design_rate
-						else:
-							qty = design_rate = price = 0
-						tot_price += price
-						prime_cost = tot_price
-						print"prime_costprime_cost",prime_cost
-		
+						
 		return prime_cost
 	
 	def prime_cost_update(self,cr,uid,ids,context=None):
@@ -734,8 +707,7 @@ class kg_crm_enquiry(osv.osv):
 								pump_prime_cost += prime_cost
 							spare_bom_prime_cost = pump_prime_cost
 							self.pool.get('ch.kg.crm.spare.bom').write(cr,uid,orde_item.id,{'prime_cost':spare_bom_prime_cost})
-							self.spare_bom_creation(cr,uid,offer_id,orde_item,spare_bom_prime_cost/orde_item.qty)
-							print"spare_bom_prime_costspare_bom_prime_cost",spare_bom_prime_cost
+							self.spare_bom_creation(cr,uid,offer_id,orde_item,spare_bom_prime_cost)
 							
 					## Spare BOM Prime cost end
 					print"order_item.pump_id.hsn_noorder_item.pump_id.hsn_no",order_item.pump_id.hsn_no
@@ -887,17 +859,6 @@ class kg_crm_enquiry(osv.osv):
 					self.spare_component_creation(cr,uid,offer_id,access,prime_cost,'access')
 			## Accessories primecost ends
 			
-			## Primemover primecost starts
-			if entry.ch_line_ids_f:
-				for primemover in entry.ch_line_ids_f:
-					prime_cost = 0
-					primemover_prime_cost = self._prime_cost_calculation(cr,uid,'primemover',0,
-							0,0,primemover.primemover_id.id,0,primemover.moc_id.id,0)
-					prime_cost += primemover_prime_cost * primemover.qty
-				self.pool.get('ch.crm.component.primemover').write(cr,uid,primemover.id,{'prime_cost':prime_cost})
-				self.spare_component_creation(cr,uid,offer_id,primemover,prime_cost,'primemover')
-			## Primemover primecost ends
-			
 			## Additional Components Primecost calculation ends
 			
 			self.write(cr, uid, ids, {
@@ -1026,21 +987,12 @@ class kg_crm_enquiry(osv.osv):
 		elif item_type == 'ms':
 			item_code = order_item.ms_id.code
 			item_name = order_item.ms_id.name
-			hsn = order_item.ms_id.hsn_no.id
-			gst = order_item.ms_id.hsn_no.igst_id.id
 		elif item_type == 'bot':
 			item_code = order_item.ms_id.code
 			item_name = order_item.ms_id.name
-			hsn = order_item.ms_id.hsn_no.id
-			gst = order_item.ms_id.hsn_no.igst_id.id
 		elif item_type == 'access':
 			item_code = order_item.access_id.code
 			item_name = order_item.access_id.name
-			hsn = order_item.access_id.hsn_no.id
-			gst = order_item.access_id.hsn_no.igst_id.id
-		elif item_type == 'primemover':
-			item_code = order_item.primemover.name
-			item_name = order_item.primemover.name
 		moc_changed_flag = False
 		spare_id = self.pool.get('ch.crm.component.offer').create(cr,uid,{'header_id': offer_id,
 															  'per_spare_prime_cost': prime_cost,
@@ -1798,7 +1750,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'belt_loss_in_kw': fields.float('Belt Loss in Kw - 3% of BKW'),
 		'type_make_selection': fields.selection([('base','Base'),('center_line','Center Line')],'Type Make Selection'),
 		'engine_rpm': fields.float('Engine(RPM)'),
-		'shaft_sealing': fields.selection([('gld_packing_tiga','Gland Packing-TIGA'),('gld_packing_ptfe','Gland Packing-PTFE'),('gld_packing_tiwa','Gland Packing-TIWA'),('gld_packing_tiba','Gland Packing-TIBA'),('mc_seal','M/C Seal'),('f_s','Felt Seal'),('dynamic_seal','Dynamic Seal')],'Shaft Sealing'),
+		'shaft_sealing': fields.selection([('gld_packing_tiga','Gland Packing-TIGA'),('gld_packing_ptfe','Gland Packing-PTFE'),('mc_seal','M/C Seal'),('f_s','Felt Seal'),('dynamic_seal','Dynamic Seal')],'Shaft Sealing'),
 		'scope_of_supply': fields.selection([('bare_pump','Bare Pump'),('pump_with_acces','Pump With Accessories'),('pump_with_acces_motor','Pump With Accessories And Motor')],'Scope of Supply'),
 		'drive': fields.selection([('motor','MOTOR'),('vfd','VFD'),('engine','ENGINE')],'Drive'),
 		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type'),
@@ -1851,8 +1803,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										('sc','Single Cartridge'),('dubtb','Double Unbalanced Back to Back'),
 										('dbbtb','Double Balanced Back to Back'),('ts','Tandem Seal'),
 										('dc','Double Cartridge'),('drsu','Dry Running - Single Unbalanced'),
-										('mbi','Metallic Bellow Inside'),('tbs','Teflon Bellow Seal-Outside Mounted Dry Running'),
-										('hydraulic','Hydraulic seal - Dynamic Seal with Expeller')],'Seal Type'),
+										('mbi','Metallic Bellow Inside'),('tbs','Teflon Bellow Seal-Outside Mounted Dry Running')],'Seal Type'),
 		'face_combination': fields.selection([('c_vs_sic','C VS SIC'),('sic_vs_sic','SIC VS SIC'),('c_vs_sic','SIC VS SIC / C VS SIC'),('gft_vs_ceramic','GFT VS CERAMIC'),('corbon_tc','CORBON / TC')],'Face Combination'),
 		'gland_plate': fields.char('Gland Plate'),
 		'api_plan': fields.char('API Plan'),
@@ -4605,8 +4556,8 @@ class ch_kg_crm_spare_bom(osv.osv):
 						fou_vals.append({
 									'position_id': item.position_id.id,
 									'pattern_id': item.pattern_id.id,
-									'pattern_name': item.pattern_id.pattern_name,
-									'off_name': item.pattern_id.pattern_name,
+									'pattern_name': item.pattern_id.name,
+									'off_name': item.pattern_id.name,
 									'moc_id': moc_id,
 									'moc_name': moc_name,
 									'moc_changed_flag': moc_changed_flag,
