@@ -1477,6 +1477,7 @@ class ch_work_order_details(osv.osv):
 		machine_shop_vals=[]
 		bot_vals=[]
 		consu_vals=[]
+		ch_ms_vals = []
 		moc_obj = self.pool.get('kg.moc.master')
 		flag_select_all_val = flag_select_all
 		if flag_offer != True:
