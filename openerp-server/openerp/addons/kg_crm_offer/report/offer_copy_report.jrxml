@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="offer_copy_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.4641000000000206"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1632"/>
+	<property name="ireport.y" value="1586"/>
 	<subDataset name="dataset2">
 		<parameter name="enq_line_id" class="java.lang.Integer"/>
 		<queryString>
@@ -173,6 +173,7 @@ enq_line.motor_power as motor_power,
 enq_line.framesize as framesize,
 enq_line.del_pipe_size as del_pipe_size,
 (CASE WHEN enq_line.shaft_sealing = 'gld_packing_tiga' THEN 'Gland Packing-TIGA' WHEN enq_line.shaft_sealing = 'gld_packing_ptfe' THEN 'Gland Packing-PTFE'
+WHEN enq_line.shaft_sealing = 'gld_packing_tiwa' THEN 'Gland Packing-TIWA' WHEN enq_line.shaft_sealing = 'gld_packing_tiba' THEN 'Gland Packing-TIBA'
 WHEN enq_line.shaft_sealing = 'mc_seal' THEN 'M/C Seal'	WHEN enq_line.shaft_sealing = 'dynamic_seal' THEN 'Dynamic Seal' WHEN enq_line.shaft_sealing = 'f_s' THEN 'Felt Seal' ELSE ' ' end) as shaft_sealing,
 (CASE WHEN enq_line.scope_of_supply = 'bare_pump' THEN 'Bare Pump' WHEN enq_line.scope_of_supply = 'pump_with_acces' THEN 'Pump With Accessories'
 WHEN enq_line.scope_of_supply = 'pump_with_acces_motor' THEN 'Pump With Accessories And Motor' ELSE ' ' end) as scope_of_supply,
@@ -252,6 +253,7 @@ WHEN enq_line.seal_type = 'dc' THEN 'Double Cartridge'
 WHEN enq_line.seal_type = 'drsu' THEN 'Dry Running - Single Unbalanced'
 WHEN enq_line.seal_type = 'mbi' THEN 'Metallic Bellow Inside'
 WHEN enq_line.seal_type = 'tbs' THEN 'Teflon Bellow Seal-Outside Mounted Dry Running'
+WHEN enq_line.seal_type = 'hydraulic' THEN 'Hydraulic seal - Dynamic Seal with Expeller'
 ELSE ' ' end) as seal_type,
 (CASE WHEN enq_line.face_combination = 'c_vs_sic' THEN 'C VS SIC'
 WHEN enq_line.face_combination = 'sic_vs_sic' THEN 'SIC VS SIC'
@@ -371,6 +373,7 @@ enq_line.motor_power as motor_power,
 enq_line.framesize as framesize,
 enq_line.del_pipe_size as del_pipe_size,
 (CASE WHEN enq_line.shaft_sealing = 'gld_packing_tiga' THEN 'Gland Packing-TIGA' WHEN enq_line.shaft_sealing = 'gld_packing_ptfe' THEN 'Gland Packing-PTFE'
+WHEN enq_line.shaft_sealing = 'gld_packing_tiwa' THEN 'Gland Packing-TIWA' WHEN enq_line.shaft_sealing = 'gld_packing_tiba' THEN 'Gland Packing-TIBA'
 WHEN enq_line.shaft_sealing = 'mc_seal' THEN 'M/C Seal'	WHEN enq_line.shaft_sealing = 'dynamic_seal' THEN 'Dynamic Seal' WHEN enq_line.shaft_sealing = 'f_s' THEN 'Felt Seal' ELSE ' ' end) as shaft_sealing,
 (CASE WHEN enq_line.scope_of_supply = 'bare_pump' THEN 'Bare Pump' WHEN enq_line.scope_of_supply = 'pump_with_acces' THEN 'Pump With Accessories'
 WHEN enq_line.scope_of_supply = 'pump_with_acces_motor' THEN 'Pump With Accessories And Motor' ELSE ' ' end) as scope_of_supply,
@@ -450,6 +453,7 @@ WHEN enq_line.seal_type = 'dc' THEN 'Double Cartridge'
 WHEN enq_line.seal_type = 'drsu' THEN 'Dry Running - Single Unbalanced'
 WHEN enq_line.seal_type = 'mbi' THEN 'Metallic Bellow Inside'
 WHEN enq_line.seal_type = 'tbs' THEN 'Teflon Bellow Seal-Outside Mounted Dry Running'
+WHEN enq_line.seal_type = 'hydraulic' THEN 'Hydraulic seal - Dynamic Seal with Expeller'
 ELSE ' ' end) as seal_type,
 (CASE WHEN enq_line.face_combination = 'c_vs_sic' THEN 'C VS SIC'
 WHEN enq_line.face_combination = 'sic_vs_sic' THEN 'SIC VS SIC'
@@ -569,6 +573,7 @@ enq_line.motor_power as motor_power,
 enq_line.framesize as framesize,
 enq_line.del_pipe_size as del_pipe_size,
 (CASE WHEN enq_line.shaft_sealing = 'gld_packing_tiga' THEN 'Gland Packing-TIGA' WHEN enq_line.shaft_sealing = 'gld_packing_ptfe' THEN 'Gland Packing-PTFE'
+WHEN enq_line.shaft_sealing = 'gld_packing_tiwa' THEN 'Gland Packing-TIWA' WHEN enq_line.shaft_sealing = 'gld_packing_tiba' THEN 'Gland Packing-TIBA'
 WHEN enq_line.shaft_sealing = 'mc_seal' THEN 'M/C Seal'	WHEN enq_line.shaft_sealing = 'dynamic_seal' THEN 'Dynamic Seal' WHEN enq_line.shaft_sealing = 'f_s' THEN 'Felt Seal' ELSE ' ' end) as shaft_sealing,
 (CASE WHEN enq_line.scope_of_supply = 'bare_pump' THEN 'Bare Pump' WHEN enq_line.scope_of_supply = 'pump_with_acces' THEN 'Pump With Accessories'
 WHEN enq_line.scope_of_supply = 'pump_with_acces_motor' THEN 'Pump With Accessories And Motor' ELSE ' ' end) as scope_of_supply,
@@ -648,6 +653,7 @@ WHEN enq_line.seal_type = 'dc' THEN 'Double Cartridge'
 WHEN enq_line.seal_type = 'drsu' THEN 'Dry Running - Single Unbalanced'
 WHEN enq_line.seal_type = 'mbi' THEN 'Metallic Bellow Inside'
 WHEN enq_line.seal_type = 'tbs' THEN 'Teflon Bellow Seal-Outside Mounted Dry Running'
+WHEN enq_line.seal_type = 'hydraulic' THEN 'Hydraulic seal - Dynamic Seal with Expeller'
 ELSE ' ' end) as seal_type,
 (CASE WHEN enq_line.face_combination = 'c_vs_sic' THEN 'C VS SIC'
 WHEN enq_line.face_combination = 'sic_vs_sic' THEN 'SIC VS SIC'
@@ -820,6 +826,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 				<textField>
 					<reportElement x="0" y="0" width="97" height="14"/>
 					<box topPadding="0" leftPadding="1">
+						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
 					</box>
