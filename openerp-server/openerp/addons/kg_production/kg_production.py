@@ -63,7 +63,13 @@ class kg_production(osv.osv):
 		result = {}
 		total_weight = 0.00
 		for entry in self.browse(cr, uid, ids, context=context):
-			total_weight = entry.qty * entry.each_weight		
+			if entry.moc_id.weight_type == 'ci':
+				wgt = entry.pattern_id.ci_weight
+			if entry.moc_id.weight_type == 'ss':
+				wgt = entry.pattern_id.pcs_weight
+			if entry.moc_id.weight_type == 'non_ferrous':
+				wgt = entry.pattern_id.nonferous_weight
+			total_weight = entry.qty * wgt
 		result[entry.id]= total_weight
 		return result
 		
