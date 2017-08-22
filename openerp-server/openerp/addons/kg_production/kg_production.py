@@ -972,11 +972,13 @@ class kg_mould_batch(osv.osv):
 		
 		
 		if entry.mould_line_ids:
-		
+			print "entry.mould_line_ids",entry.mould_line_ids
 			for item in entry.mould_line_ids:
-				
+				print "itemitemitemitemitem",item
 				mould_qty = item.qty - item.total_mould_qty
-				
+				print "mould_qty",mould_qty
+				print "item.mould_rem_qty",item.mould_rem_qty
+				print "item.total_mould_qty",item.total_mould_qty
 				vals = {
 				
 					'header_id': entry.id,
