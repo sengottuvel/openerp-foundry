@@ -924,7 +924,7 @@ class kg_crm_enquiry(osv.osv):
 						if acc_ms_item.is_applicable == True:
 							print "fffffffffffffffmsmsmsmsmsfffffffffaccess"
 							acc_ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
-							acc_ms_item.ms_id.id,0,0,order_item.moc_const_id.id,acc_ms_item.moc_id.id,0)
+							acc_ms_item.ms_id.id,1,0,order_item.moc_const_id.id,acc_ms_item.moc_id.id,0)
 							self.pool.get('ch.crm.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost  })
 							print"acc_ms_prime_cost--------------",acc_ms_prime_cost
 							print"acc_ms_item.qty--------------",acc_ms_item.qty
