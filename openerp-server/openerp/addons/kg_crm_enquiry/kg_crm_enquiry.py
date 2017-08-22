@@ -886,17 +886,6 @@ class kg_crm_enquiry(osv.osv):
 					self.spare_component_creation(cr,uid,offer_id,access,prime_cost,'access')
 			## Accessories primecost ends
 			
-			## Primemover primecost starts
-			if entry.ch_line_ids_f:
-				for primemover in entry.ch_line_ids_f:
-					prime_cost = 0
-					primemover_prime_cost = self._prime_cost_calculation(cr,uid,'primemover',0,
-							0,0,primemover.primemover_id.id,0,primemover.moc_id.id,0)
-					prime_cost += primemover_prime_cost * primemover.qty
-				self.pool.get('ch.crm.component.primemover').write(cr,uid,primemover.id,{'prime_cost':prime_cost})
-				self.spare_component_creation(cr,uid,offer_id,primemover,prime_cost,'primemover')
-			## Primemover primecost ends
-			
 			## Additional Components Primecost calculation ends
 			
 			self.write(cr, uid, ids, {
