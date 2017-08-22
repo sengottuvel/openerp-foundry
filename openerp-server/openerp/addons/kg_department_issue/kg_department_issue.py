@@ -758,7 +758,7 @@ class kg_department_issue(osv.osv):
 										if line_ids.uom_conversation_factor == 'two_dimension':
 											pending_depindent_qty = issue_pending_qty - (line_ids.issue_qty / line_ids.length / line_ids.breadth / line_ids.product_id.po_uom_in_kgs)
 										elif line_ids.uom_conversation_factor == 'one_dimension':
-											pending_depindent_qty = issue_pending_qty - (line_ids.issue_qty * product_id.po_uom_coeff)
+											pending_depindent_qty = issue_pending_qty - (line_ids.issue_qty * line_ids.product_id.po_uom_coeff)
 									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
 									cr.execute(sql)
 									break
