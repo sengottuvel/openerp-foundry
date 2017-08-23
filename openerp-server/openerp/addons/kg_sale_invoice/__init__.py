@@ -8,5 +8,5 @@
 
 
 import kg_sale_invoice
-
+import reports
 

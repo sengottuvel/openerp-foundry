@@ -1,0 +1,2187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Customer Invoice Copy" pageWidth="1190" pageHeight="842" orientation="Landscape" columnWidth="1150" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="0.7320500000000003"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="237"/>
+	<subDataset name="dataset1">
+		<parameter name="invoice_id" class="java.lang.Integer"/>
+		<queryString>
+			<![CDATA[select invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
+
+billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
+
+delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
+off_name,prime_cost,hsn_name,qty,tax_per,tax_per_val,cgst_rate,sgst_rate,igst_rate,
+
+trim(TO_CHAR((coalesce(tax_tot,0.00)), '999G999G99G999G99G99G990D99')) as tax_tot,
+trim(TO_CHAR((coalesce(net_amount,0.00)), '999G999G99G999G99G99G990D99')) as net_amount,
+trim(TO_CHAR((coalesce(cgst_tax_val,0.00)), '999G999G99G999G99G99G990D99')) as cgst_tax_val,
+trim(TO_CHAR((coalesce(sgst_tax_val,0.00)), '999G999G99G999G99G99G990D99')) as sgst_tax_val,
+trim(TO_CHAR((coalesce(igst_tax_val,0.00)), '999G999G99G999G99G99G990D99')) as igst_tax_val
+
+from (
+
+select invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
+
+billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
+
+delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
+off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,
+
+case when cgst_tax is not null then
+((qty*prime_cost)*tax_per_val)/100 else 0.00 end as cgst_tax_val,
+case when sgst_tax is not null then
+((qty*prime_cost)*tax_per_val)/100 else 0.00 end as sgst_tax_val,
+case when igst_tax is not null then
+((qty*prime_cost)*tax_per_val)/100 else 0.00 end as igst_tax_val,
+
+case when cgst_tax is not null then
+'9%' end as cgst_rate,
+case when sgst_tax is not null then
+'9%' end as sgst_rate,
+case when igst_tax is not null then
+'18%' end as igst_rate
+
+
+from (
+
+select invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
+
+billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
+
+delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
+off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,
+
+max(cgst_tax) as cgst_tax,
+max(sgst_tax) as sgst_tax,
+max(igst_tax) as igst_tax
+
+
+
+
+from (
+
+
+select invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
+
+billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
+
+delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
+off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,
+
+case when description ilike '%CGST%' then description end as cgst_tax,
+case when description ilike '%SGST%' then description end as sgst_tax,
+case when description ilike '%IGST%' then description end as igst_tax
+
+
+from (
+
+
+select
+
+sale.invoice_no as invoice_no,
+to_char(sale.invoice_date,'dd-mm-yyyy') as invoice_date,
+sale.customer_po_no as customer_po_no,
+to_char(sale.cust_po_date,'dd-mm-yyyy') as cust_po_date,
+billing.name as billing_name,
+billing.street as billing_street,
+billing.street1 as billing_street1,
+billing.landmark as billing_landmark,
+bill_city.name as billing_city,
+bill_state.name as billing_state,
+bill_country.name as billing_country,
+billing.contact_no as billing_contact_no,
+billing.zip as billing_zip,
+
+
+delivery.name as delivery_name,
+delivery.street as delivery_street,
+delivery.street1 as delivery_street1,
+delivery.landmark as delivery_landmark,
+del_city.name as delivery_city,
+del_state.name as delivery_state,
+del_country.name as delivery_country,
+delivery.contact_no as delivery_contact_no,
+delivery.zip as delivery_zip,
+partner.gs_tin_no as gs_tin_no,
+pump_line.prime_cost as prime_cost,
+pump_type.name as off_name,
+hsn.name as hsn_name,
+pump_line.qty as qty,
+pump_line.tax_tot as tax_tot,
+pump_line.net_amount as net_amount,
+
+(pump_acc_tax.amount * 100) as tax_per,
+pump_acc_tax.description as description,
+(pump_acc_tax.amount * 100) as tax_per_val
+
+from
+
+kg_sale_invoice sale
+left join ch_pumpspare_invoice pump_line on (pump_line.header_id = sale.id)
+left join kg_pumpmodel_master pump_type on (pump_type.id = pump_line.pump_model_id)
+left join kg_hsn_master hsn on (hsn.id = pump_line.hsn_no)
+left join res_partner partner on (partner.id = sale.customer_id)
+left join kg_delivery_address delivery on (delivery.src_id = partner.id)
+left join res_city del_city on(del_city.id=delivery.city_id)
+left join res_country_state del_state on(del_state.id=delivery.state_id)
+left join res_country del_country on(del_country.id=delivery.country_id)
+left join kg_billing_address billing on (billing.bill_id = partner.id)
+left join res_city bill_city on(bill_city.id=billing.city_id)
+left join res_country_state bill_state on(bill_state.id=billing.state_id)
+left join res_country bill_country on(bill_country.id=billing.country_id)
+left join pump_invoice_taxes pump_tax on(pump_tax.pump_invoice_id=pump_line.id)
+left join account_tax pump_acc_tax on(pump_acc_tax.id=pump_tax.tax_id)
+left join res_country_state state on(state.id=partner.state_id)
+left join res_company company on (company.id = sale.company_id)
+
+where pump_line.header_id=6
+
+union
+
+select
+sale.invoice_no as invoice_no,
+to_char(sale.invoice_date,'dd-mm-yyyy') as invoice_date,
+sale.customer_po_no as customer_po_no,
+to_char(sale.cust_po_date,'dd-mm-yyyy') as cust_po_date,
+billing.name as billing_name,
+billing.street as billing_street,
+billing.street1 as billing_street1,
+billing.landmark as billing_landmark,
+bill_city.name as billing_city,
+bill_state.name as billing_state,
+bill_country.name as billing_country,
+billing.contact_no as billing_contact_no,
+billing.zip as billing_zip,
+
+
+delivery.name as delivery_name,
+delivery.street as delivery_street,
+delivery.street1 as delivery_street1,
+delivery.landmark as delivery_landmark,
+del_city.name as delivery_city,
+del_state.name as delivery_state,
+del_country.name as delivery_country,
+delivery.contact_no as delivery_contact_no,
+delivery.zip as delivery_zip,
+partner.gs_tin_no as gs_tin_no,
+spare_line.prime_cost as prime_cost,
+spare_line.off_name as off_name,
+hsn.name as hsn_name,
+spare_line.qty as qty,
+spare_line.tax_tot as tax_tot,
+spare_line.net_amount as net_amount,
+
+(spare_acc_tax.amount * 100) as tax_per,
+spare_acc_tax.description as description,
+(spare_acc_tax.amount * 100) as tax_per_val
+
+
+from
+
+kg_sale_invoice sale
+
+left join ch_spare_invoice spare_line on (spare_line.header_id = sale.id)
+left join kg_hsn_master hsn on (hsn.id = spare_line.hsn_no)
+left join res_partner partner on (partner.id = sale.customer_id)
+left join kg_delivery_address delivery on (delivery.src_id = partner.id)
+left join res_city del_city on(del_city.id=delivery.city_id)
+left join res_country_state del_state on(del_state.id=delivery.state_id)
+left join res_country del_country on(del_country.id=delivery.country_id)
+left join kg_billing_address billing on (billing.bill_id = partner.id)
+left join res_city bill_city on(bill_city.id=billing.city_id)
+left join res_country_state bill_state on(bill_state.id=billing.state_id)
+left join res_country bill_country on(bill_country.id=billing.country_id)
+
+left join spare_invoice_taxes spare_tax on(spare_tax.spare_invoice_id=spare_line.id)
+
+
+left join account_tax spare_acc_tax on(spare_acc_tax.id=spare_tax.tax_id)
+
+left join res_country_state state on(state.id=partner.state_id)
+left join res_company company on (company.id = sale.company_id)
+
+where spare_line.header_id=6
+union
+
+select
+
+sale.invoice_no as invoice_no,
+to_char(sale.invoice_date,'dd-mm-yyyy') as invoice_date,
+sale.customer_po_no as customer_po_no,
+to_char(sale.cust_po_date,'dd-mm-yyyy') as cust_po_date,
+billing.name as billing_name,
+billing.street as billing_street,
+billing.street1 as billing_street1,
+billing.landmark as billing_landmark,
+bill_city.name as billing_city,
+bill_state.name as billing_state,
+bill_country.name as billing_country,
+billing.contact_no as billing_contact_no,
+billing.zip as billing_zip,
+
+
+delivery.name as delivery_name,
+delivery.street as delivery_street,
+delivery.street1 as delivery_street1,
+delivery.landmark as delivery_landmark,
+del_city.name as delivery_city,
+del_state.name as delivery_state,
+del_country.name as delivery_country,
+delivery.contact_no as delivery_contact_no,
+delivery.zip as delivery_zip,
+partner.gs_tin_no as gs_tin_no,
+acc_line.prime_cost as prime_cost,
+acc_line.off_name as off_name,
+hsn.name as hsn_name,
+acc_line.qty as qty,
+acc_line.tax_tot as tax_tot,
+acc_line.net_amount as net_amount,
+
+
+(acc_acc_tax.amount * 100) as tax_per,
+acc_acc_tax.description as description,
+(acc_acc_tax.amount * 100) as tax_per_val
+
+from
+
+kg_sale_invoice sale
+
+left join ch_accessories_invoice acc_line on (acc_line.header_id = sale.id)
+left join kg_hsn_master hsn on (hsn.id = acc_line.hsn_no)
+left join res_partner partner on (partner.id = sale.customer_id)
+left join kg_delivery_address delivery on (delivery.src_id = partner.id)
+left join res_city del_city on(del_city.id=delivery.city_id)
+left join res_country_state del_state on(del_state.id=delivery.state_id)
+left join res_country del_country on(del_country.id=delivery.country_id)
+left join kg_billing_address billing on (billing.bill_id = partner.id)
+left join res_city bill_city on(bill_city.id=billing.city_id)
+left join res_country_state bill_state on(bill_state.id=billing.state_id)
+left join res_country bill_country on(bill_country.id=billing.country_id)
+
+left join acc_invoice_taxes acc_tax on(acc_tax.acc_invoice_id=acc_line.id)
+
+left join account_tax acc_acc_tax on(acc_acc_tax.id=acc_tax.tax_id)
+left join res_country_state state on(state.id=partner.state_id)
+left join res_company company on (company.id = sale.company_id)
+
+where acc_line.header_id=6
+
+) as sam
+
+) as sample
+group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+
+) as fin
+
+) as final
+
+
+]]>
+		</queryString>
+		<field name="invoice_no" class="java.lang.String"/>
+		<field name="invoice_date" class="java.lang.String"/>
+		<field name="customer_po_no" class="java.lang.String"/>
+		<field name="cust_po_date" class="java.lang.String"/>
+		<field name="billing_name" class="java.lang.String"/>
+		<field name="billing_street" class="java.lang.String"/>
+		<field name="billing_street1" class="java.lang.String"/>
+		<field name="billing_landmark" class="java.lang.String"/>
+		<field name="billing_city" class="java.lang.String"/>
+		<field name="billing_state" class="java.lang.String"/>
+		<field name="billing_country" class="java.lang.String"/>
+		<field name="billing_contact_no" class="java.lang.String"/>
+		<field name="billing_zip" class="java.lang.String"/>
+		<field name="delivery_name" class="java.lang.String"/>
+		<field name="delivery_street" class="java.lang.String"/>
+		<field name="delivery_street1" class="java.lang.String"/>
+		<field name="delivery_landmark" class="java.lang.String"/>
+		<field name="delivery_city" class="java.lang.String"/>
+		<field name="delivery_state" class="java.lang.String"/>
+		<field name="delivery_country" class="java.lang.String"/>
+		<field name="delivery_contact_no" class="java.lang.String"/>
+		<field name="delivery_zip" class="java.lang.String"/>
+		<field name="gs_tin_no" class="java.lang.String"/>
+		<field name="off_name" class="java.lang.String"/>
+		<field name="prime_cost" class="java.lang.Double"/>
+		<field name="hsn_name" class="java.lang.String"/>
+		<field name="qty" class="java.lang.Integer"/>
+		<field name="tax_per" class="java.math.BigDecimal"/>
+		<field name="tax_per_val" class="java.math.BigDecimal"/>
+		<field name="cgst_rate" class="java.lang.String"/>
+		<field name="sgst_rate" class="java.lang.String"/>
+		<field name="igst_rate" class="java.lang.String"/>
+		<field name="tax_tot" class="java.lang.String"/>
+		<field name="net_amount" class="java.lang.String"/>
+		<field name="cgst_tax_val" class="java.lang.String"/>
+		<field name="sgst_tax_val" class="java.lang.String"/>
+		<field name="igst_tax_val" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="invoice_id" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
+
+billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
+
+delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
+off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,
+
+
+trim(TO_CHAR((coalesce(total_net_amount,0.00)), '999G999G99G999G99G99G990D99')) as total_net_amount,
+trim(TO_CHAR((coalesce(net_amount,0.00)), '999G999G99G999G99G99G990D99')) as net_after_tax,
+trim(TO_CHAR((coalesce(cgst_tax_gnd,0.00)), '999G999G99G999G99G99G990D99')) as cgst_tax_gnd,
+trim(TO_CHAR((coalesce(sgst_tax_gnd,0.00)), '999G999G99G999G99G99G990D99')) as sgst_tax_gnd,
+trim(TO_CHAR((coalesce(igst_tax_gnd,0.00)), '999G999G99G999G99G99G990D99')) as igst_tax_gnd,
+trim(TO_CHAR((coalesce(tax_gnd,0.00)), '999G999G99G999G99G99G990D99')) as tax_gnd,
+trim(TO_CHAR((coalesce((net_amount - tax_gnd ),0.00)), '999G999G99G999G99G99G990D99')) as tot_before_tax,
+
+
+
+case when total_net_amount > 0 then
+(select f_amount_to_words((total_net_amount)::numeric,1)) else '' end as word_total_inv,
+case when cgst_tax_gnd > 0 then
+(select f_amount_to_words((cgst_tax_gnd)::numeric,1)) else '' end as word_cgst_amt,
+case when sgst_tax_gnd > 0 then
+(select f_amount_to_words((sgst_tax_gnd)::numeric,1)) else '' end as word_sgst_amt,
+case when igst_tax_gnd > 0 then
+(select f_amount_to_words((igst_tax_gnd)::numeric,1)) else '' end as word_igst_amt
+
+
+
+from (
+
+select invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
+
+billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
+
+delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
+off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,total_net_amount,
+
+coalesce((sum(cgst_tax_val) OVER ()),0.00) as cgst_tax_gnd,
+coalesce((sum(sgst_tax_val) OVER ()),0.00) as sgst_tax_gnd,
+coalesce((sum(igst_tax_val) OVER ()),0.00) as igst_tax_gnd,
+coalesce((sum(tax_tot) OVER ()),0.00) as tax_gnd
+
+
+
+
+
+from (
+
+select invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
+
+billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
+
+delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
+off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,total_net_amount,
+
+case when cgst_tax is not null then
+((qty*prime_cost)*tax_per_val)/100 else 0.00 end as cgst_tax_val,
+case when sgst_tax is not null then
+((qty*prime_cost)*tax_per_val)/100 else 0.00 end as sgst_tax_val,
+case when igst_tax is not null then
+((qty*prime_cost)*tax_per_val)/100 else 0.00 end as igst_tax_val,
+
+case when cgst_tax is not null then
+'9%' end as cgst_rate,
+case when sgst_tax is not null then
+'9%' end as sgst_rate,
+case when igst_tax is not null then
+'18%' end as igst_rate
+
+
+from (
+
+select invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
+
+billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
+
+delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
+off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,total_net_amount,
+
+max(cgst_tax) as cgst_tax,
+max(sgst_tax) as sgst_tax,
+max(igst_tax) as igst_tax
+
+
+
+
+from (
+
+
+select invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
+
+billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
+
+delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
+off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,total_net_amount,
+
+case when description ilike '%CGST%' then description end as cgst_tax,
+case when description ilike '%SGST%' then description end as sgst_tax,
+case when description ilike '%IGST%' then description end as igst_tax
+
+
+from (
+
+
+select
+sale.id as invoice_id,
+case when sale.invoice_no is not null then
+sale.invoice_no else '' end as invoice_no,
+case when sale.invoice_date is not null then
+to_char(sale.invoice_date,'dd-mm-yyyy') else '' end as invoice_date,
+case when sale.customer_po_no is not null then
+sale.customer_po_no else '' end as customer_po_no,
+case when sale.cust_po_date is not null then
+to_char(sale.cust_po_date,'dd-mm-yyyy') else '' end as cust_po_date,
+
+case when billing.name is not null then
+billing.name else '' end as billing_name,
+case when billing.street is not null then
+billing.street else '' end as billing_street,
+case when billing.street1 is not null then
+billing.street1 else '' end as billing_street1,
+case when billing.landmark is not null then
+billing.landmark else '' end as billing_landmark,
+case when bill_city.name is not null then
+bill_city.name else '' end as billing_city,
+case when bill_state.name is not null then
+bill_state.name else '' end as billing_state,
+case when bill_country.name is not null then
+bill_country.name else '' end as billing_country,
+case when billing.contact_no is not null then
+billing.contact_no else '' end as billing_contact_no,
+case when billing.zip is not null then
+billing.zip else '' end as billing_zip,
+
+case when delivery.name is not null then
+delivery.name else '' end as delivery_name,
+case when delivery.street is not null then
+delivery.street else '' end as delivery_street,
+case when delivery.street1 is not null then
+delivery.street1 else '' end as delivery_street1,
+case when delivery.landmark is not null then
+delivery.landmark else '' end as delivery_landmark,
+case when del_city.name is not null then
+del_city.name else '' end as delivery_city,
+case when del_state.name is not null then
+del_state.name else '' end as delivery_state,
+case when del_country.name is not null then
+del_country.name else '' end as delivery_country,
+case when delivery.contact_no is not null then
+delivery.contact_no else '' end as delivery_contact_no,
+case when delivery.zip is not null then
+delivery.zip else '' end as delivery_zip,
+case when partner.gs_tin_no is not null then
+partner.gs_tin_no else '' end as gs_tin_no,
+pump_line.prime_cost as prime_cost,
+case when pump_type.name is not null then
+pump_type.name else '' end as off_name,
+hsn.name as hsn_name,
+pump_line.qty as qty,
+pump_line.tax_tot as tax_tot,
+pump_line.net_amount as net_amount,
+sale.net_amt as total_net_amount,
+
+(pump_acc_tax.amount * 100) as tax_per,
+pump_acc_tax.description as description,
+(pump_acc_tax.amount * 100) as tax_per_val
+
+from
+
+kg_sale_invoice sale
+left join ch_pumpspare_invoice pump_line on (pump_line.header_id = sale.id)
+left join kg_pumpmodel_master pump_type on (pump_type.id = pump_line.pump_model_id)
+left join kg_hsn_master hsn on (hsn.id = pump_line.hsn_no)
+left join res_partner partner on (partner.id = sale.customer_id)
+left join kg_delivery_address delivery on (delivery.src_id = partner.id)
+left join res_city del_city on(del_city.id=delivery.city_id)
+left join res_country_state del_state on(del_state.id=delivery.state_id)
+left join res_country del_country on(del_country.id=delivery.country_id)
+left join kg_billing_address billing on (billing.bill_id = partner.id)
+left join res_city bill_city on(bill_city.id=billing.city_id)
+left join res_country_state bill_state on(bill_state.id=billing.state_id)
+left join res_country bill_country on(bill_country.id=billing.country_id)
+left join pump_invoice_taxes pump_tax on(pump_tax.pump_invoice_id=pump_line.id)
+left join account_tax pump_acc_tax on(pump_acc_tax.id=pump_tax.tax_id)
+left join res_country_state state on(state.id=partner.state_id)
+left join res_company company on (company.id = sale.company_id)
+
+where sale.state = 'invoice' and pump_line.header_id=$P{invoice_id}
+
+union
+
+select
+sale.id as invoice_id,
+sale.invoice_no as invoice_no,
+to_char(sale.invoice_date,'dd-mm-yyyy') as invoice_date,
+sale.customer_po_no as customer_po_no,
+to_char(sale.cust_po_date,'dd-mm-yyyy') as cust_po_date,
+billing.name as billing_name,
+billing.street as billing_street,
+billing.street1 as billing_street1,
+billing.landmark as billing_landmark,
+bill_city.name as billing_city,
+bill_state.name as billing_state,
+bill_country.name as billing_country,
+billing.contact_no as billing_contact_no,
+billing.zip as billing_zip,
+
+
+delivery.name as delivery_name,
+delivery.street as delivery_street,
+delivery.street1 as delivery_street1,
+delivery.landmark as delivery_landmark,
+del_city.name as delivery_city,
+del_state.name as delivery_state,
+del_country.name as delivery_country,
+delivery.contact_no as delivery_contact_no,
+delivery.zip as delivery_zip,
+partner.gs_tin_no as gs_tin_no,
+spare_line.prime_cost as prime_cost,
+spare_line.off_name as off_name,
+hsn.name as hsn_name,
+spare_line.qty as qty,
+spare_line.tax_tot as tax_tot,
+spare_line.net_amount as net_amount,
+sale.net_amt as total_net_amount,
+
+(spare_acc_tax.amount * 100) as tax_per,
+spare_acc_tax.description as description,
+(spare_acc_tax.amount * 100) as tax_per_val
+
+
+from
+
+kg_sale_invoice sale
+
+left join ch_spare_invoice spare_line on (spare_line.header_id = sale.id)
+left join kg_hsn_master hsn on (hsn.id = spare_line.hsn_no)
+left join res_partner partner on (partner.id = sale.customer_id)
+left join kg_delivery_address delivery on (delivery.src_id = partner.id)
+left join res_city del_city on(del_city.id=delivery.city_id)
+left join res_country_state del_state on(del_state.id=delivery.state_id)
+left join res_country del_country on(del_country.id=delivery.country_id)
+left join kg_billing_address billing on (billing.bill_id = partner.id)
+left join res_city bill_city on(bill_city.id=billing.city_id)
+left join res_country_state bill_state on(bill_state.id=billing.state_id)
+left join res_country bill_country on(bill_country.id=billing.country_id)
+
+left join spare_invoice_taxes spare_tax on(spare_tax.spare_invoice_id=spare_line.id)
+
+
+left join account_tax spare_acc_tax on(spare_acc_tax.id=spare_tax.tax_id)
+
+left join res_country_state state on(state.id=partner.state_id)
+left join res_company company on (company.id = sale.company_id)
+
+where sale.state = 'invoice' and spare_line.header_id=$P{invoice_id}
+
+union
+
+select
+sale.id as invoice_id,
+sale.invoice_no as invoice_no,
+to_char(sale.invoice_date,'dd-mm-yyyy') as invoice_date,
+sale.customer_po_no as customer_po_no,
+to_char(sale.cust_po_date,'dd-mm-yyyy') as cust_po_date,
+billing.name as billing_name,
+billing.street as billing_street,
+billing.street1 as billing_street1,
+billing.landmark as billing_landmark,
+bill_city.name as billing_city,
+bill_state.name as billing_state,
+bill_country.name as billing_country,
+billing.contact_no as billing_contact_no,
+billing.zip as billing_zip,
+
+
+delivery.name as delivery_name,
+delivery.street as delivery_street,
+delivery.street1 as delivery_street1,
+delivery.landmark as delivery_landmark,
+del_city.name as delivery_city,
+del_state.name as delivery_state,
+del_country.name as delivery_country,
+delivery.contact_no as delivery_contact_no,
+delivery.zip as delivery_zip,
+partner.gs_tin_no as gs_tin_no,
+acc_line.prime_cost as prime_cost,
+acc_line.off_name as off_name,
+hsn.name as hsn_name,
+acc_line.qty as qty,
+acc_line.tax_tot as tax_tot,
+acc_line.net_amount as net_amount,
+sale.net_amt as total_net_amount,
+
+
+(acc_acc_tax.amount * 100) as tax_per,
+acc_acc_tax.description as description,
+(acc_acc_tax.amount * 100) as tax_per_val
+
+from
+
+kg_sale_invoice sale
+
+left join ch_accessories_invoice acc_line on (acc_line.header_id = sale.id)
+left join kg_hsn_master hsn on (hsn.id = acc_line.hsn_no)
+left join res_partner partner on (partner.id = sale.customer_id)
+left join kg_delivery_address delivery on (delivery.src_id = partner.id)
+left join res_city del_city on(del_city.id=delivery.city_id)
+left join res_country_state del_state on(del_state.id=delivery.state_id)
+left join res_country del_country on(del_country.id=delivery.country_id)
+left join kg_billing_address billing on (billing.bill_id = partner.id)
+left join res_city bill_city on(bill_city.id=billing.city_id)
+left join res_country_state bill_state on(bill_state.id=billing.state_id)
+left join res_country bill_country on(bill_country.id=billing.country_id)
+
+left join acc_invoice_taxes acc_tax on(acc_tax.acc_invoice_id=acc_line.id)
+
+left join account_tax acc_acc_tax on(acc_acc_tax.id=acc_tax.tax_id)
+left join res_country_state state on(state.id=partner.state_id)
+left join res_company company on (company.id = sale.company_id)
+
+where sale.state = 'invoice' and acc_line.header_id=$P{invoice_id}
+
+) as sam
+
+) as sample
+group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33
+
+) as fin
+
+) as final
+
+) as w_fin limit 1
+
+
+]]>
+	</queryString>
+	<field name="invoice_id" class="java.lang.Integer"/>
+	<field name="invoice_no" class="java.lang.String"/>
+	<field name="invoice_date" class="java.lang.String"/>
+	<field name="customer_po_no" class="java.lang.String"/>
+	<field name="cust_po_date" class="java.lang.String"/>
+	<field name="billing_name" class="java.lang.String"/>
+	<field name="billing_street" class="java.lang.String"/>
+	<field name="billing_street1" class="java.lang.String"/>
+	<field name="billing_landmark" class="java.lang.String"/>
+	<field name="billing_city" class="java.lang.String"/>
+	<field name="billing_state" class="java.lang.String"/>
+	<field name="billing_country" class="java.lang.String"/>
+	<field name="billing_contact_no" class="java.lang.String"/>
+	<field name="billing_zip" class="java.lang.String"/>
+	<field name="delivery_name" class="java.lang.String"/>
+	<field name="delivery_street" class="java.lang.String"/>
+	<field name="delivery_street1" class="java.lang.String"/>
+	<field name="delivery_landmark" class="java.lang.String"/>
+	<field name="delivery_city" class="java.lang.String"/>
+	<field name="delivery_state" class="java.lang.String"/>
+	<field name="delivery_country" class="java.lang.String"/>
+	<field name="delivery_contact_no" class="java.lang.String"/>
+	<field name="delivery_zip" class="java.lang.String"/>
+	<field name="gs_tin_no" class="java.lang.String"/>
+	<field name="off_name" class="java.lang.String"/>
+	<field name="prime_cost" class="java.lang.Double"/>
+	<field name="hsn_name" class="java.lang.String"/>
+	<field name="qty" class="java.lang.Integer"/>
+	<field name="tax_tot" class="java.math.BigDecimal"/>
+	<field name="net_amount" class="java.math.BigDecimal"/>
+	<field name="tax_per" class="java.math.BigDecimal"/>
+	<field name="tax_per_val" class="java.math.BigDecimal"/>
+	<field name="total_net_amount" class="java.lang.String"/>
+	<field name="net_after_tax" class="java.lang.String"/>
+	<field name="cgst_tax_gnd" class="java.lang.String"/>
+	<field name="sgst_tax_gnd" class="java.lang.String"/>
+	<field name="igst_tax_gnd" class="java.lang.String"/>
+	<field name="tax_gnd" class="java.lang.String"/>
+	<field name="tot_before_tax" class="java.lang.String"/>
+	<field name="word_total_inv" class="java.lang.String"/>
+	<field name="word_cgst_amt" class="java.lang.String"/>
+	<field name="word_sgst_amt" class="java.lang.String"/>
+	<field name="word_igst_amt" class="java.lang.String"/>
+	<group name="Sale header">
+		<groupExpression><![CDATA[]]></groupExpression>
+		<groupHeader>
+			<band height="299">
+				<textField>
+					<reportElement x="0" y="0" width="794" height="25"/>
+					<box topPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["SAM TURBO INDUSTRY PRIVATE LIMITED"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="25" width="794" height="20"/>
+					<box topPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["P.B. NO. 7006, DOOR NO. 41 & 42, KAMARAJ STREET, KAVERI NAGER, K.K. PUDUR."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="45" width="794" height="19"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["SRI AVINASHILINGAM HOME SCIENCE COLLEGE (P.O.), COIMBATORE - 641 043, STATE CODE : 33"]]></textFieldExpression>
+				</textField>
+				<image>
+					<reportElement x="0" y="0" width="65" height="83"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
+				</image>
+				<image>
+					<reportElement x="729" y="2" width="65" height="81"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp"]]></imageExpression>
+				</image>
+				<textField>
+					<reportElement x="0" y="64" width="794" height="19"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["GSTIN : 33AAECS0282M1ZA"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="794" y="0" width="356" height="25"/>
+					<box topPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["ORIGINAL FOR BUYER"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="794" y="25" width="356" height="39"/>
+					<box topPadding="2">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="14" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DELIVERY CHALLAN CUM TAX INVOICE"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="794" y="64" width="356" height="19"/>
+					<box topPadding="2">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["(See Sec. 31 of CGST ACT, 2017 read with rule (1) of Invoice Rule)"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="83" width="299" height="19"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Name & ADDRESS OF CUSTOMER / BILLED TO"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="102" width="299" height="115"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{billing_name}+$F{billing_street}+$F{billing_street1}+$F{billing_landmark}+
+$F{billing_city}+$F{billing_state}+$F{billing_country}+
+$F{billing_zip}+"."+
+
+"Contact No."+$F{billing_contact_no}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="217" width="84" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["GSTIN"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="95" y="217" width="204" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{gs_tin_no}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="84" y="217" width="11" height="19"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[":"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="95" y="236" width="204" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["33"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="236" width="84" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["STATE CODE"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="84" y="236" width="11" height="19"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[":"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="299" y="83" width="344" height="19"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Name & ADDRESS OF CONSIGNEE / SHIPPED TO"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="383" y="236" width="11" height="19"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[":"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="394" y="217" width="249" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{gs_tin_no}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="299" y="217" width="84" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["GSTIN"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="299" y="236" width="84" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["STATE CODE"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="394" y="236" width="249" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["33"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="383" y="217" width="11" height="19"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[":"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="299" y="102" width="344" height="115"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{delivery_name}+","+$F{delivery_street}+$F{delivery_street1}+
+$F{delivery_landmark}+$F{delivery_city}+$F{delivery_state}+
+$F{delivery_country}+$F{delivery_zip}+"."+
+
+
+"Contact No."+$F{delivery_contact_no}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" x="643" y="83" width="151" height="19" isPrintWhenDetailOverflows="true"/>
+					<box topPadding="0">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+				</textField>
+				<textField>
+					<reportElement x="794" y="83" width="151" height="19"/>
+					<box topPadding="0">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["SERIAL NO."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="945" y="83" width="205" height="19"/>
+					<box topPadding="0">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DATE"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="643" y="102" width="507" height="39"/>
+					<box topPadding="1" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["YOUR ORDER NO. & DATE :"+$F{invoice_no} +" & " +$F{invoice_date}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="643" y="141" width="302" height="19"/>
+					<box topPadding="1" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["OUR REF.NO. "+$F{customer_po_no}+" & "+$F{cust_po_date}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="945" y="141" width="205" height="19"/>
+					<box topPadding="1" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DOCUMENTS THROUGH - BANK / DIRECT"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="643" y="160" width="181" height="19"/>
+					<box topPadding="1" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DELIVERY DETAILS:"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="643" y="179" width="181" height="19"/>
+					<box topPadding="1" leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["FREIGHT"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="643" y="198" width="181" height="57"/>
+					<box topPadding="1" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TO PAY / PAID"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="824" y="160" width="326" height="19"/>
+					<box topPadding="1" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DETAILS OF PACKAGES:"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="945" y="179" width="205" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+				</textField>
+				<textField>
+					<reportElement x="824" y="179" width="110" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["WOODEN CASES"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="934" y="179" width="11" height="19"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[":"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="945" y="198" width="205" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+				</textField>
+				<textField>
+					<reportElement x="824" y="198" width="110" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["WOODEN CRATE"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="934" y="198" width="11" height="19"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[":"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="945" y="217" width="205" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+				</textField>
+				<textField>
+					<reportElement x="824" y="217" width="110" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["LOOSES"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="934" y="217" width="11" height="19"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[":"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="824" y="236" width="110" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TOTAL PACKAGES"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="945" y="236" width="205" height="19"/>
+					<box topPadding="0" leftPadding="2">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+				</textField>
+				<textField>
+					<reportElement x="934" y="236" width="11" height="19"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[":"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="255" width="29" height="44"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["SL.No."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="29" y="255" width="257" height="44"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DESCRIPTION AND SPECIFICATION OF GOODS / SERVICE"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="286" y="255" width="97" height="44"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["HSN/ACS"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="383" y="255" width="70" height="44"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TOTAL QTY."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="453" y="255" width="69" height="44"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["RATE/UNIT"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="522" y="255" width="89" height="28"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DETAILS OF DEDUCTIONS"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="522" y="283" width="51" height="16"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Rs."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="573" y="283" width="38" height="16"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["P."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="611" y="255" width="80" height="28"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DETAILS OF ADDITIONS"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="668" y="283" width="23" height="16"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["P."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="611" y="283" width="57" height="16"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Rs."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="691" y="255" width="83" height="44"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TAXABLE VALUE PER UNIT"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="774" y="255" width="83" height="44"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TOTAL TAXABLE VALUE"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="897" y="273" width="65" height="26"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["AMOUNT"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="854" y="273" width="43" height="26"/>
+					<box topPadding="1" leftPadding="4">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["RATE %"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="857" y="255" width="105" height="18"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["CGST"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="962" y="255" width="91" height="18"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["SGST"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="962" y="273" width="32" height="26"/>
+					<box topPadding="1" leftPadding="2">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["RATE %"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="994" y="273" width="59" height="26"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["AMOUNT"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1053" y="255" width="97" height="18"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["IGST"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1086" y="273" width="64" height="26"/>
+					<box topPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["AMOUNT"]]></textFieldExpression>
+				</textField>
+				<elementGroup>
+					<textField>
+						<reportElement x="1053" y="273" width="33" height="26"/>
+						<box topPadding="1" leftPadding="2">
+							<leftPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.5"/>
+							<rightPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Center">
+							<font size="10" isBold="true"/>
+						</textElement>
+						<textFieldExpression><![CDATA["RATE %"]]></textFieldExpression>
+					</textField>
+				</elementGroup>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Sale Line">
+		<groupExpression><![CDATA[]]></groupExpression>
+		<groupHeader>
+			<band height="34">
+				<componentElement>
+					<reportElement x="0" y="0" width="1150" height="34"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+						<datasetRun subDataset="dataset1">
+							<datasetParameter name="invoice_id">
+								<datasetParameterExpression><![CDATA[$F{invoice_id}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="34" width="1150">
+							<textField>
+								<reportElement x="0" y="0" width="29" height="34"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="29" y="0" width="257" height="34"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{off_name}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="286" y="0" width="97" height="34"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{hsn_name}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="383" y="0" width="70" height="34"/>
+								<box topPadding="2" leftPadding="0" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="453" y="0" width="69" height="34"/>
+								<box topPadding="2" leftPadding="0" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{prime_cost}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="522" y="0" width="89" height="34"/>
+								<box topPadding="2" leftPadding="0" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA["0.00"]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="611" y="0" width="80" height="34"/>
+								<box topPadding="2" leftPadding="0" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA["0.00"]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="691" y="0" width="83" height="34"/>
+								<box topPadding="2" leftPadding="0" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{tax_tot}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="774" y="0" width="83" height="34"/>
+								<box topPadding="2" leftPadding="0" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{net_amount}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="857" y="0" width="40" height="34"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{cgst_rate}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="897" y="0" width="65" height="34"/>
+								<box topPadding="2" leftPadding="0" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{cgst_tax_val}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="994" y="0" width="59" height="34"/>
+								<box topPadding="2" leftPadding="0" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{sgst_tax_val}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="962" y="0" width="32" height="34"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{sgst_rate}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="1086" y="0" width="64" height="34"/>
+								<box topPadding="2" leftPadding="0" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{igst_tax_val}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="1053" y="0" width="33" height="34"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="10" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{igst_rate}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Bottom Value">
+		<groupExpression><![CDATA[]]></groupExpression>
+		<groupHeader>
+			<band height="320">
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="774" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["PARTS OF POWER DRIVEN PUMPS / POWER DRIVEN PUMPS FOR HANDLING LIQUID OTHER THAN WATER / POWER DRIVEN PUMPS FOR WATER ONLY. CASTING & CAST ARTICLES OF IRON, STEEL, STAINLESS STEEL."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="25" width="573" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["PLACE OF SUPPLY :"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="50" width="774" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DATE & TIME OF ISSUE OF INVOICE"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="75" width="573" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DATE & TIME OF REMOVAL OF GOODS"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="100" width="774" height="61"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{word_total_inv}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="161" width="774" height="18"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["PAYABLE CGST :"+$F{word_cgst_amt}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="179" width="774" height="18"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["                SGST :"+$F{word_sgst_amt}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="197" width="774" height="28"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["                IGST :"+$F{word_igst_amt}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="225" width="774" height="80"/>
+					<box topPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+				</textField>
+				<textField>
+					<reportElement x="774" y="0" width="230" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TOTAL AMOUNT BEFORE TAX"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1004" y="0" width="146" height="25"/>
+					<box topPadding="2" rightPadding="3">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{tot_before_tax}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="774" y="25" width="230" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["ADD : CGST"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1004" y="25" width="146" height="25"/>
+					<box topPadding="2" rightPadding="3">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cgst_tax_gnd}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="573" y="25" width="201" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["REVERSE CHARGES : YES / NO"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="774" y="50" width="230" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["ADD : SGST"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1004" y="50" width="146" height="25"/>
+					<box topPadding="2" rightPadding="3">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{sgst_tax_gnd}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="573" y="75" width="201" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["VEHICLE NUMBER"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="774" y="75" width="230" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["ADD : IGST"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1004" y="75" width="146" height="25"/>
+					<box topPadding="2" rightPadding="3">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{igst_tax_gnd}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="774" y="100" width="230" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TOTAL GST"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1004" y="100" width="146" height="25"/>
+					<box topPadding="2" rightPadding="3">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{tax_gnd}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="774" y="125" width="230" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TOTAL AMOUNT AFTER TAX"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1004" y="125" width="146" height="25"/>
+					<box topPadding="2" rightPadding="3">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{net_after_tax}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="774" y="150" width="230" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["ADD : FREIGHT"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1004" y="150" width="146" height="25"/>
+					<box topPadding="2" rightPadding="3">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["0.00"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="774" y="175" width="230" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["LESS : ADVANCE / PENALTY"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1004" y="175" width="146" height="25"/>
+					<box topPadding="2" rightPadding="3">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["0.00"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="774" y="200" width="230" height="25"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["GRAND TOTAL"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1004" y="200" width="146" height="25"/>
+					<box topPadding="2" rightPadding="3">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{total_net_amount}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="774" y="225" width="376" height="80"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["For SAM TURBO INDUSTRY PRIVATE LIMITED"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<noData>
+		<band height="50">
+			<staticText>
+				<reportElement mode="Transparent" x="0" y="0" width="1150" height="50"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[No Records Found]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>
