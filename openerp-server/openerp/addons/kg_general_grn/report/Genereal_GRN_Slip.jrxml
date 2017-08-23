@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="683" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="643" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.3310000000000006"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="247"/>
+	<property name="ireport.y" value="259"/>
 	<import value="org.apache.commons.codec.binary.Base64"/>
 	<subDataset name="dataset1">
 		<parameter name="grn_id" class="java.lang.Integer"/>
@@ -256,7 +256,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 		<groupFooter>
 			<band height="145">
 				<textField>
-					<reportElement x="0" y="51" width="148" height="15"/>
+					<reportElement x="0" y="51" width="131" height="15"/>
 					<box leftPadding="2"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="false"/>
@@ -264,20 +264,20 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Prepared By "]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="300" y="51" width="160" height="15"/>
+					<reportElement x="321" y="51" width="160" height="15"/>
 					<box leftPadding="2"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Inspected By"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Inspected By / Lab"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="460" y="51" width="183" height="15"/>
+					<reportElement x="481" y="51" width="162" height="15"/>
 					<box leftPadding="2"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Q.C.M"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Q.C.M / Store Officer"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="0" y="86" width="70" height="20"/>
@@ -326,12 +326,12 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA[$P{printed_by}+"/"+$F{new_date}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="148" y="51" width="152" height="15"/>
+					<reportElement x="131" y="51" width="190" height="15"/>
 					<box leftPadding="2"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Stores-incharge"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Stores-incharge / Inspected By"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupFooter>
