@@ -95,6 +95,7 @@ class kg_crm_enquiry(osv.osv):
 		'ch_line_ids_d': fields.one2many('ch.crm.component.bot', 'header_id', "BOT",readonly=True, states={'draft':[('readonly',False)]}),
 		'ch_line_ids_e': fields.one2many('ch.crm.component.access', 'header_id', "Accessories",readonly=True, states={'draft':[('readonly',False)]}),
 		
+		
 		## Entry Info
 		
 		'active': fields.boolean('Active'),
@@ -558,17 +559,17 @@ class kg_crm_enquiry(osv.osv):
 					if brnd_moc_rate_ids:
 						brnd_moc_rate_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brnd_moc_rate_ids[0])
 						if brand_id > 0:
-							brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s and brand_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id,brand_id)
+							brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s and brand_id = %s order by rate desc limit 1"""%(moc_id,brnd_moc_rate_rec.id,brand_id)
 							cr.execute(brandmoc_line_sql)  
 							brandmoc_line_data = cr.dictfetchall()
 						else:
-							brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
+							brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brnd_moc_rate_rec.id)
 							cr.execute(brandmoc_line_sql)  
 							brandmoc_line_data = cr.dictfetchall()
 						if brandmoc_line_data:
 							design_rate = brandmoc_line_data[0]['rate']
-							if prod_rec.uom_id.id != brandmoc_rec.uom_id.id:
-								price = design_rate
+							#~ if prod_rec.uom_id.id != brandmoc_rec.uom_id.id:
+							price = design_rate
 						else:
 							qty = design_rate = price = 0
 						tot_price += price
@@ -662,7 +663,7 @@ class kg_crm_enquiry(osv.osv):
 								prime_cost += ms_prime_cost 
 								print "ms_prime_cost",prime_cost
 								if order_item.purpose_categ == 'spare':
-									self.spare_creation(cr,uid,offer_id,order_item,ms_item,ms_prime_cost/ms_item.qty or 1,'ms')
+									self.spare_creation(cr,uid,offer_id,order_item,ms_item,ms_prime_cost/ms_item.qty,'ms')
 						pump_prime_cost += prime_cost
 					if order_item.line_ids_b:
 						prime_cost = 0
@@ -829,7 +830,7 @@ class kg_crm_enquiry(osv.osv):
 						ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
 						ms_item.ms_id.id,1,0,order_item.moc_const_id.id,ms_item.moc_id.id,0)
 						self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost })
-						prime_cost += ms_prime_cost 
+						prime_cost += ms_prime_cost
 						print "ms_prime_cost",prime_cost
 						if order_item.purpose_categ == 'spare':
 							self.spare_creation(cr,uid,offer_id,order_item,ms_item,ms_prime_cost,'ms')
@@ -885,6 +886,7 @@ class kg_crm_enquiry(osv.osv):
 					
 					self.spare_component_creation(cr,uid,offer_id,access,prime_cost,'access')
 			## Accessories primecost ends
+			
 			
 			## Additional Components Primecost calculation ends
 			
@@ -1008,27 +1010,24 @@ class kg_crm_enquiry(osv.osv):
 		item_name = ''
 		hsn = ''
 		gst = ''
+		if order_item.header_id.segment == 'dom' and item_type != 'primemover':
+			hsn = order_item.ms_id.hsn_no.id
+			gst = order_item.ms_id.hsn_no.igst_id.id
 		if item_type == 'foundry':
 			item_code = order_item.pattern_id.name
 			item_name = order_item.pattern_id.pattern_name
 		elif item_type == 'ms':
 			item_code = order_item.ms_id.code
 			item_name = order_item.ms_id.name
-			hsn = order_item.ms_id.hsn_no.id
-			gst = order_item.ms_id.hsn_no.igst_id.id
 		elif item_type == 'bot':
 			item_code = order_item.ms_id.code
 			item_name = order_item.ms_id.name
-			hsn = order_item.ms_id.hsn_no.id
-			gst = order_item.ms_id.hsn_no.igst_id.id
 		elif item_type == 'access':
 			item_code = order_item.access_id.code
 			item_name = order_item.access_id.name
-			hsn = order_item.access_id.hsn_no.id
-			gst = order_item.access_id.hsn_no.igst_id.id
 		elif item_type == 'primemover':
-			item_code = order_item.primemover.name
-			item_name = order_item.primemover.name
+			item_code = order_item.primemover_id.name
+			item_name = order_item.primemover_id.name
 		moc_changed_flag = False
 		spare_id = self.pool.get('ch.crm.component.offer').create(cr,uid,{'header_id': offer_id,
 															  'per_spare_prime_cost': prime_cost,
@@ -4315,7 +4314,7 @@ class ch_kg_crm_machineshop_item(osv.osv):
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_kg_crm_machineshop_item, self).write(cr, uid, ids, vals, context)
-	
+		
 	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.qty <= 0.00:
@@ -4331,6 +4330,27 @@ class ch_kg_crm_machineshop_item(osv.osv):
 			else:
 				value = {'moc_changed_flag': True}
 		return {'value': value}
+	
+	def onchange_raw_qty(self,cr,uid,ids,ms_id,qty, context=None):
+		raw_vals=[]
+		if ms_id:
+			ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_id)
+			if ms_rec.line_ids:
+				for raw_line in ms_rec.line_ids:
+					raw_vals.append({
+							'product_id': raw_line.product_id.id,
+							'uom': raw_line.uom.id,
+							'od': raw_line.od,
+							'length': raw_line.length,
+							'breadth': raw_line.breadth,
+							'thickness': raw_line.thickness,
+							'weight': raw_line.weight * qty,
+							'uom_conversation_factor': raw_line.uom_conversation_factor,
+							'temp_qty': raw_line.temp_qty * qty,
+							'qty': raw_line.qty * qty,
+							'remarks': raw_line.remarks,
+							})
+		return {'value': {'line_ids': raw_vals}}
 	
 	_constraints = [
 		
@@ -4841,6 +4861,27 @@ class ch_kg_crm_spare_ms(osv.osv):
 			else:
 				value = {'moc_changed_flag': True}
 		return {'value': value}
+	
+	def onchange_raw_qty(self,cr,uid,ids,ms_id,qty, context=None):
+		raw_vals=[]
+		if ms_id:
+			ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_id)
+			if ms_rec.line_ids:
+				for raw_line in ms_rec.line_ids:
+					raw_vals.append({
+							'product_id': raw_line.product_id.id,
+							'uom': raw_line.uom.id,
+							'od': raw_line.od,
+							'length': raw_line.length,
+							'breadth': raw_line.breadth,
+							'thickness': raw_line.thickness,
+							'weight': raw_line.weight * qty,
+							'uom_conversation_factor': raw_line.uom_conversation_factor,
+							'temp_qty': raw_line.temp_qty * qty,
+							'qty': raw_line.qty * qty,
+							'remarks': raw_line.remarks,
+							})
+		return {'value': {'line_ids': raw_vals}}
 	
 	_constraints = [
 		

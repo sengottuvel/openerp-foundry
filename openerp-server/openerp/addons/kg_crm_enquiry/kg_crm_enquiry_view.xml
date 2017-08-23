@@ -438,7 +438,7 @@
 												<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 												<field name="length" readonly="1"/>
 												<field name="csd_no"/>
-												<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
+												<field name="qty" on_change="onchange_raw_qty(ms_id,qty)" attrs="{'readonly':[('purpose_categ','=','pump')],'required': [('is_applicable','=',True)]}"/>
 												<field name="prime_cost" readonly="1"/>
 												<field name="remarks" readonly="0"/>
 												<field name="purpose_categ" invisible="1"/>
@@ -516,7 +516,7 @@
 									<notebook>
 										<page string="Foundry">
 										<field name="line_ids" nolabel="1">
-											<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
+											<tree string="Foundry Item Tree" editable="top" create="false" >
 												<field name="is_applicable"/>
 												<field name="position_id"/>
 												<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
@@ -538,7 +538,7 @@
 										</page>
 										<page string="MS">
 										<field name="line_ids_a" nolabel="1">
-											<tree string="MS Item Tree" create="false" delete="false">
+											<tree string="MS Item Tree" create="false" >
 												<field name="is_applicable"/>
 												<field name="position_id"/>
 												<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
@@ -556,7 +556,7 @@
 												<field name="moc_name" invisible="1"/>
 												<field name="moc_changed_flag" invisible="1"/>
 											</tree>
-											<form string="MS Details Entry Tree" create="false" delete="false">					
+											<form string="MS Details Entry Tree" create="false" >					
 												<group colspan="4">
 													<group>
 														<field name="is_applicable"/>
@@ -570,7 +570,7 @@
 														<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 														<field name="length" readonly="1"/>
 														<field name="csd_no"/>
-														<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
+														<field name="qty" attrs="{'required': [('is_applicable','=',True)]}" on_change="onchange_raw_qty(ms_id,qty)"/>
 														<field name="prime_cost" readonly="1"/>
 														<field name="remarks" readonly="0"/>
 														<field name="purpose_categ" invisible="1"/>
@@ -603,7 +603,7 @@
 										</page>
 										<page string="BOT">
 										<field name="line_ids_b" nolabel="1">
-											<tree string="BOT Item Tree" editable="top" create="false" delete="false">
+											<tree string="BOT Item Tree" editable="top" create="false" >
 												<field name="is_applicable"/>
 												<field name="position_id" />
 												<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
@@ -880,6 +880,7 @@
 									
 								</field>
 							</page>
+							
 							</notebook>
 						</group>
 						
