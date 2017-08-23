@@ -662,7 +662,7 @@ class kg_crm_enquiry(osv.osv):
 								prime_cost += ms_prime_cost 
 								print "ms_prime_cost",prime_cost
 								if order_item.purpose_categ == 'spare':
-									self.spare_creation(cr,uid,offer_id,order_item,ms_item,ms_prime_cost,'ms')
+									self.spare_creation(cr,uid,offer_id,order_item,ms_item,ms_prime_cost/ms_item.qty or 1,'ms')
 						pump_prime_cost += prime_cost
 					if order_item.line_ids_b:
 						prime_cost = 0
