@@ -2620,7 +2620,8 @@ class ch_spare_offer(osv.osv):
 			print"pump_price_totpump_price_tot",pump_price_tot
 			tot_price = pump_price_tot / line.qty
 			print"tot_pricetot_price",tot_price
-			net_amount = tot_price * 1
+			#~ net_amount = tot_price * 1
+			net_amount = tot_price * line.qty
 			print"net_amountnet_amount",net_amount
 			
 			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
