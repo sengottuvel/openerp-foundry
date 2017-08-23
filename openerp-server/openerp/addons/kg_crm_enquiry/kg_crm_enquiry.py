@@ -2593,7 +2593,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'moc_id': moc_id,
 										'moc_name': moc_name,
 										'moc_changed_flag': moc_changed_flag,
-										'qty': item.qty,
+										'qty': item.qty * qty,
 										'load_bom': True,
 										'is_applicable': is_selectable_all,
 										'purpose_categ': purpose_categ,
