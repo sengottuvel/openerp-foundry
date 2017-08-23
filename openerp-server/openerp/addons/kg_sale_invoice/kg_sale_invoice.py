@@ -81,6 +81,10 @@ class kg_sale_invoice(osv.osv):
 	'line_ids_d': fields.one2many('ch.customer.advance.invoice.line', 'header_id', "Invoice Advance Details"),
 	
 	
+	'customer_po_no': fields.char('Customer PO No.',readonly=True),
+	'cust_po_date': fields.date('Customer PO Date',readonly=True),
+	
+	
 	'work_order_ids': fields.many2many('kg.work.order', 'invoice_work_order_ids', 'invoice_id','work_order_id', 'WO No.', delete=False,
 			 domain="[('partner_id','=',customer_id),'&',('invoice_flag','=',False),'&', ('state','!=','draft'),'&', ('entry_mode','=','auto')]"),
 	
@@ -95,6 +99,8 @@ class kg_sale_invoice(osv.osv):
 	'total_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Amount',multi="sums",store=True ,readonly=True),
 	'add_charge': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Additional Charges(+)',multi="sums",store=True ,readonly=True),
 	'advance_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Adjected Advance Amount(-)',multi="sums",store=True ,readonly=True),
+	
+	'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 	}
 
 	_defaults = {
@@ -142,6 +148,11 @@ class kg_sale_invoice(osv.osv):
 				if line.order_category == 'pump':	
 					
 					offer_rec = self.pool.get('ch.pump.offer').browse(cr,uid,line.pump_offer_line_id)
+					offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
+					print"customer_po_no",offer_hea_rec.customer_po_no
+					print"cust_po_date",offer_hea_rec.cust_po_date
+					
+					
 					print"offer_rec",offer_rec.prime_cost
 					print"per_pump_prime_cost",offer_rec.per_pump_prime_cost
 					print"sam_ratio",offer_rec.sam_ratio
@@ -203,11 +214,15 @@ class kg_sale_invoice(osv.osv):
 					   'hsn_no':offer_rec.hsn_no.id,
 					   })
 				
+					
+					self.write(cr, uid, ids, {'customer_po_no':offer_hea_rec.customer_po_no,
+										'cust_po_date': offer_hea_rec.cust_po_date,})
 				
 				if line.order_category == 'spare':					
 					for bom_line in line.line_ids:					
 						print"bom_line.spare_of222222222222222222222222222222222@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2fer_line_id",bom_line.spare_offer_line_id
 						offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,bom_line.spare_offer_line_id)	
+						offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
 						if offer_rec.hsn_no.id is False:
 							raise osv.except_osv(_('Warning!'),
 								_('HSN Code not mapping in Pump Model!!'))
@@ -259,13 +274,14 @@ class kg_sale_invoice(osv.osv):
 						   'insurance':offer_rec.insurance,
 						   'total_price':offer_rec.total_price,	
 						   'tax_id':[(6, 0, [x for x in list_id])],
-						   'hsn_no':offer_rec.hsn_no.id,					  
+						   'hsn_no':offer_rec.hsn_no.id,
+						   'off_name':offer_rec.off_name,				  
 						   })						
 						
 					for machine_shop_line in line.line_ids_a:
 						print"machine_shop_line.spare_offer_line_id",machine_shop_line.spare_offer_line_id	
 						offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,machine_shop_line.spare_offer_line_id)
-						
+						offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
 						if offer_rec.hsn_no.id is False:
 							raise osv.except_osv(_('Warning!'),
 								_('HSN Code not mapping in Pump Model!!'))
@@ -318,11 +334,13 @@ class kg_sale_invoice(osv.osv):
 						   'total_price':offer_rec.total_price,
 						   'tax_id':[(6, 0, [x for x in list_id])],
 						   'hsn_no':offer_rec.hsn_no.id,
+						   'off_name':offer_rec.off_name,	
 						   })
 						   
 					for bot_line in line.line_ids_b:
 						print"bot_line.spare_offer_line_id",bot_line.spare_offer_line_id	
 						offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,bot_line.spare_offer_line_id)
+						offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
 						
 						if offer_rec.hsn_no.id is False:
 							raise osv.except_osv(_('Warning!'),
@@ -376,13 +394,17 @@ class kg_sale_invoice(osv.osv):
 						   'total_price':offer_rec.total_price,
 						   'tax_id':[(6, 0, [x for x in list_id])],
 						   'hsn_no':offer_rec.hsn_no.id,
+						   'off_name':offer_rec.off_name,	
 						   	})
+						   	
+					self.write(cr, uid, ids, {'customer_po_no':offer_hea_rec.customer_po_no,
+										'cust_po_date': offer_hea_rec.cust_po_date,})
 								   
 				if line.order_category == 'access':											
 						
 						for access_line in line.line_ids_d:		
 							offer_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,access_line.access_offer_line_id)
-							
+							offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
 							print"offer_rec.prime_costoffer_rec.prime_cost",offer_rec.prime_cost
 							
 							if offer_rec.hsn_no.id is False:
@@ -436,9 +458,10 @@ class kg_sale_invoice(osv.osv):
 							   'total_price':offer_rec.total_price,
 							   'tax_id':[(6, 0, [x for x in list_id])],
 							   'hsn_no':offer_rec.hsn_no.id,
+							   'off_name':offer_rec.off_name,	
 							   })					   
 															   
-						   
+						self.write(cr, uid, ids, {'customer_po_no':offer_hea_rec.customer_po_no,'cust_po_date': offer_hea_rec.cust_po_date,})	   
 					
 				else:
 					pass
@@ -614,9 +637,11 @@ class ch_pumpspare_invoice(osv.osv):
 			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			m_tot = k_tot + spl_discount_tot
-			
+			print"line.unit_price",line.unit_price
 			for c in self.pool.get('account.tax').compute_all(cr, uid, line.tax_id,
-				line.unit_price, line.qty,1,1)['taxes']:
+				line.prime_cost, line.qty,1,1)['taxes']:
+				print"ccccccc",c
+				
 				val += c.get('amount', 0.0)
 				print"valvalval",val
 				tax_tot = val	
@@ -706,6 +731,7 @@ class ch_pumpspare_invoice(osv.osv):
 		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
 		
 		
+		
 	}
 	
 	
@@ -760,7 +786,7 @@ class ch_spare_invoice(osv.osv):
 			m_tot = k_tot + spl_discount_tot
 			
 			for c in self.pool.get('account.tax').compute_all(cr, uid, line.tax_id,
-				line.unit_price, line.qty,1,1)['taxes']:
+				line.prime_cost, line.qty,1,1)['taxes']:
 				val += c.get('amount', 0.0)
 				print"valvalval",val
 				tax_tot = val	
@@ -889,7 +915,7 @@ class ch_accessories_invoice(osv.osv):
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			m_tot = k_tot + spl_discount_tot
 			for c in self.pool.get('account.tax').compute_all(cr, uid, line.tax_id,
-				line.unit_price, line.qty,1,1)['taxes']:
+				line.prime_cost, line.qty,1,1)['taxes']:
 				val += c.get('amount', 0.0)
 				print"valvalval",val
 				tax_tot = val	

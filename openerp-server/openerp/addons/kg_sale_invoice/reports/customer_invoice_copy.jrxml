@@ -746,7 +746,7 @@ group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27
 						<bottomPen lineWidth="0.0"/>
 						<rightPen lineWidth="0.0"/>
 					</box>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
 				</image>
 				<image>
 					<reportElement x="729" y="2" width="65" height="81"/>
@@ -756,7 +756,7 @@ group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27
 						<bottomPen lineWidth="0.0"/>
 						<rightPen lineWidth="0.0"/>
 					</box>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp"]]></imageExpression>
 				</image>
 				<textField>
 					<reportElement x="0" y="64" width="794" height="19"/>
