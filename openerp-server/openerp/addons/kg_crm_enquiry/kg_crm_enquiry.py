@@ -2542,9 +2542,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										#~ 'remarks': item.remarks,
 										})
 					print"fou_valsfou_vals",fou_vals
+				ch_ms_vals = []
 				if data_rec.line_ids_a:
 					for item in data_rec.line_ids_a:
-						ch_ms_vals = []
 						#~ if item.flag_applicable == True:
 						moc_id = ''
 						if wo_line_id:
@@ -2690,6 +2690,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										#~ 'remarks': item.remarks,
 										})
 						print"fou_valsfou_vals",fou_vals
+				ch_ms_vals = []
 				if data_rec.line_ids_a:
 					for item in data_rec.line_ids_a:
 						moc_id = ''
@@ -2705,7 +2706,6 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 									moc_id = ms_line_rec.moc_id.id
 							if ms_rec.line_ids:
-								ch_ms_vals = []
 								for raw in ms_rec.line_ids:
 									ch_ms_vals.append([0, 0,{
 											'product_id': raw.product_id.id,
@@ -3581,13 +3581,12 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if vertical_ms_details['position_id'] == None:
 							raise osv.except_osv(_('Warning!'),
 							_('Kindly Configure Position No. in MS Items for respective Pump Bom and proceed further !!'))
-						
+						ch_ms_vals = []
 						if vertical_ms_details['ms_id']:
 							ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,vertical_ms_details['ms_id'])
 							ms_raw_rec = self.pool.get('ch.machineshop.details').browse(cr,uid,vertical_ms_details['id'])
 							if ms_rec.line_ids_a:
 								if ms_rec.line_ids:
-									ch_ms_vals = []
 									for raw in ms_rec.line_ids:
 										ch_ms_vals.append([0, 0,{
 												'product_id': raw.product_id.id,
