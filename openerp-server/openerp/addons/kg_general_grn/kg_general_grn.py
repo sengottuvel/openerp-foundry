@@ -423,6 +423,10 @@ class kg_general_grn(osv.osv):
 							product_qty = line.grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
 							length = line.length
 							breadth = line.breadth
+				if length == 0.00:
+					length = 1
+				if breadth == 0.00:
+					breadth = 1
 				stock_move_obj.create(cr,uid,
 					{
 					'general_grn_id': line.id,
@@ -471,23 +475,31 @@ class kg_general_grn(osv.osv):
 				
 				if line.exp_batch_id:
 					for exp in line.exp_batch_id:
-						if line.uom_id.id != line.product_id.uom_id.id:
-							po_coeff = line.product_id.po_uom_coeff
-							product_qty = exp.product_qty
-							store_pending_qty = exp.product_qty * line.product_id.po_uom_coeff
-							price_unit =  line.price_subtotal / product_qty or 1
-						elif line.uom_id.id == line.product_id.uom_id.id:
-							product_qty = exp.product_qty
-							store_pending_qty = exp.product_qty / line.product_id.po_uom_coeff
-							price_unit = line.price_subtotal / product_qty or 1
+						if line.uom_conversation_factor == 'one_dimension':
+							if line.uom_id.id != line.product_id.uom_id.id:
+								po_coeff = line.product_id.po_uom_coeff
+								product_qty = exp.product_qty
+								pending_qty = exp.product_qty
+								store_pending_qty = exp.product_qty * line.product_id.po_uom_coeff
+								price_unit =  line.price_subtotal / product_qty or 1
+							elif line.uom_id.id == line.product_id.uom_id.id:
+								product_qty = exp.product_qty
+								pending_qty = exp.product_qty / line.product_id.po_uom_coeff
+								store_pending_qty = exp.product_qty
+								price_unit = line.price_subtotal / product_qty or 1
 						if line.uom_conversation_factor == 'two_dimension':
 							if line.product_id.po_uom_in_kgs > 0:
 								if line.uom_id.id == line.product_id.uom_id.id:
-									store_pending_qty = exp.product_qty
-									product_qty = exp.product_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth
-								elif line.uom_id.id == line.product_id.uom_po_id.id:
-									store_pending_qty = exp.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
 									product_qty = exp.product_qty
+									pending_qty = exp.product_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth
+									store_pending_qty = exp.product_qty
+								elif line.uom_id.id == line.product_id.uom_po_id.id:
+									product_qty = exp.product_qty
+									pending_qty = exp.product_qty
+									store_pending_qty = exp.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+						print"product_qtyproduct_qty",product_qty
+						print"pending_qtypending_qty",pending_qty
+						print"store_pending_qtystore_pending_qty",store_pending_qty
 						lot_id = lot_obj.create(cr,uid,
 							{
 							'grn_no':line.grn_id.name,
@@ -497,7 +509,7 @@ class kg_general_grn(osv.osv):
 							'location_id':line.location_dest_id.id,
 							'product_uom':line.product_id.uom_id.id,
 							'product_qty':product_qty,
-							'pending_qty':product_qty,
+							'pending_qty':pending_qty,
 							'store_pending_qty':store_pending_qty,
 							'issue_qty':product_qty,
 							'batch_no':exp.batch_no,
@@ -509,25 +521,31 @@ class kg_general_grn(osv.osv):
 							#'po_qty':move_record.po_to_stock_qty,
 						})
 				else:
-					if line.uom_id.id != line.product_id.uom_id.id:
-						po_coeff = line.product_id.po_uom_coeff
-						product_qty = line.grn_qty
-						store_pending_qty = line.grn_qty * line.product_id.po_uom_coeff
-						price_unit =  line.price_subtotal / product_qty or 1
-					elif line.uom_id.id == line.product_id.uom_id.id:
-						product_qty = line.grn_qty
-						store_pending_qty = line.grn_qty / line.product_id.po_uom_coeff
-						price_unit = line.price_subtotal / product_qty or 1
-					print"product_qtyproduct_qty",product_qty
-					print"store_pending_qtystore_pending_qty",store_pending_qty
+					if line.uom_conversation_factor == 'one_dimension':
+						if line.uom_id.id != line.product_id.uom_id.id:
+							po_coeff = line.product_id.po_uom_coeff
+							product_qty = line.grn_qty
+							pending_qty = line.grn_qty
+							store_pending_qty = line.grn_qty * line.product_id.po_uom_coeff
+							price_unit =  line.price_subtotal / product_qty or 1
+						elif line.uom_id.id == line.product_id.uom_id.id:
+							product_qty = line.grn_qty
+							pending_qty = line.grn_qty / line.product_id.po_uom_coeff
+							store_pending_qty = line.grn_qty
+							price_unit = line.price_subtotal / product_qty or 1
 					if line.uom_conversation_factor == 'two_dimension':
 						if line.product_id.po_uom_in_kgs > 0:
 							if line.uom_id.id == line.product_id.uom_id.id:
-								store_pending_qty = line.grn_qty
-								product_qty = line.grn_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth
-							elif line.uom_id.id == line.product_id.uom_po_id.id:
-								store_pending_qty = line.grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
 								product_qty = line.grn_qty
+								pending_qty = line.grn_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth
+								store_pending_qty = line.grn_qty
+							elif line.uom_id.id == line.product_id.uom_po_id.id:
+								product_qty = line.grn_qty
+								pending_qty = line.grn_qty
+								store_pending_qty = line.grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+					print"product_qtyproduct_qty",product_qty
+					print"pending_qtypending_qty",pending_qty
+					print"store_pending_qtystore_pending_qty",store_pending_qty
 					lot_id = lot_obj.create(cr,uid,
 						{
 						'grn_no':line.grn_id.name,
@@ -537,7 +555,7 @@ class kg_general_grn(osv.osv):
 						'location_id':line.location_dest_id.id,
 						'product_uom':line.product_id.uom_id.id,
 						'product_qty':product_qty,
-						'pending_qty':product_qty,
+						'pending_qty':pending_qty,
 						'store_pending_qty':store_pending_qty,
 						'issue_qty':product_qty,
 						'batch_no':line.grn_id.name,
@@ -759,21 +777,29 @@ class kg_general_grn(osv.osv):
 		}
 	
 	def _check_lineqty(self, cr, uid, ids, context=None):
-		print "called _check_lineqty ___ function"
 		grn = self.browse(cr, uid, ids[0])
 		for line in grn.grn_line:
 			if line.uom_id.id == line.product_id.uom_po_id.id or line.uom_id.id == line.product_id.uom_id.id:
 				pass
 			else:
 				raise osv.except_osv(_('UOM Mismatching Error !'),
-					_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (line.product_id.uom_id.name,line.product_id.uom_po_id.name,line.product_id.name))		
+					_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (line.product_id.uom_id.name,line.product_id.uom_po_id.name,line.product_id.name))
 			if line.grn_qty <= 0:
 				return False
 			else:
 				return True
 	
+	def _check_length_breadth(self, cr, uid, ids, context=None):
+		grn = self.browse(cr, uid, ids[0])
+		for line in grn.grn_line:
+			if line.product_id.uom_conversation_factor == 'two_dimension' and line.length == 0.00 and line.breadth == 0.00:
+				raise osv.except_osv(_('Warning!'),
+					_('%s %s %s You cannot proceed without length and breadth')%(line.product_id.name,line.brand_id.name,line.moc_id.name))
+			else:
+				return True
+		return True
+	
 	def _check_lineprice(self, cr, uid, ids, context=None):
-		print "called _check_lineprice ___ function"
 		grn = self.browse(cr, uid, ids[0])
 		for line in grn.grn_line:
 			if line.price_unit <= 0:
@@ -832,8 +858,9 @@ class kg_general_grn(osv.osv):
 	
 	_constraints = [
 		
-		(_check_lineqty, 'You can not save an GRN with 0 product qty!!',['grn_qty']),
-		(_check_serial,'S/N must be unique per Item !',['']),
+		(_check_lineqty, 'You can not save an GRN with 0 product qty!',['grn_qty']),
+		(_check_length_breadth, 'You cannot proceed without length!',['']),
+		(_check_serial,'S/N must be unique per Item!',['']),
 		#(_check_lineprice, 'You can not save an GRN with 0 price_unit!!',['price_unit']),
 		
 		]

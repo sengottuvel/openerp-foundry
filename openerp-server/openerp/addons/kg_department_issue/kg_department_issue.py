@@ -490,6 +490,7 @@ class kg_department_issue(osv.osv):
 									#~ if lot_datas[0]['qty'] < 0:
 										#~ raise osv.except_osv(_('Stock not available!'),
 											#~ _('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
+							
 							if obj_rec.department_id.name != 'DP2':
 								if dep_issue_line_rec.uom_conversation_factor == 'one_dimension':
 									if dep_issue_line_rec.uom_id.id == lot_rec.po_uom.id:
@@ -508,30 +509,30 @@ class kg_department_issue(osv.osv):
 										_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(item.product_id.name)))
 							
 							## Reserved Qty update process starts
-							sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(item.id)
-							cr.execute(sql)
-							data = cr.dictfetchall()
-							if data:
-								val = [d['lot_id'] for d in data if 'lot_id' in d]
-								issue_qty = item.issue_qty
-								remain_qty = 0
-								for i in val:
-									lot_rec = lot_obj.browse(cr,uid,i)
-									move_qty = issue_qty
-									if move_qty > 0 and move_qty <= lot_rec.reserved_qty:
-										lot_reserved_qty = lot_rec.reserved_qty - move_qty
-										lot_rec.write({'reserved_qty': lot_reserved_qty})
-									else:
-										if move_qty > 0:
-											lot_reserved_qty = lot_rec.reserved_qty
-											remain_qty =  move_qty - lot_reserved_qty
-											if remain_qty >= 0:
-												lot_rec.write({'reserved_qty': 0.0})
-											else:
-												pass
-										else:
-											pass
-									issue_qty = remain_qty
+							#~ sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(item.id)
+							#~ cr.execute(sql)
+							#~ data = cr.dictfetchall()
+							#~ if data:
+								#~ val = [d['lot_id'] for d in data if 'lot_id' in d]
+								#~ issue_qty = item.issue_qty
+								#~ remain_qty = 0
+								#~ for i in val:
+									#~ lot_rec = lot_obj.browse(cr,uid,i)
+									#~ move_qty = issue_qty
+									#~ if move_qty > 0 and move_qty <= lot_rec.reserved_qty:
+										#~ lot_reserved_qty = lot_rec.reserved_qty - move_qty
+										#~ lot_rec.write({'reserved_qty': lot_reserved_qty})
+									#~ else:
+										#~ if move_qty > 0:
+											#~ lot_reserved_qty = lot_rec.reserved_qty
+											#~ remain_qty =  move_qty - lot_reserved_qty
+											#~ if remain_qty >= 0:
+												#~ lot_rec.write({'reserved_qty': 0.0})
+											#~ else:
+												#~ pass
+										#~ else:
+											#~ pass
+									#~ issue_qty = remain_qty
 							## Reserved Qty update process ends
 							
 							else:
