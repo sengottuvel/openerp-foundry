@@ -3721,6 +3721,7 @@ class ch_wo_spare_foundry(osv.osv):
 		'material_code': fields.char('Material Code'),
 		'off_name': fields.char('Offer Name'),
 		'flag_pattern_check': fields.boolean('Is Pattern Check'),
+		'sequence_no': fields.integer('Sequence No.'),
 		
 	}
 	
@@ -3801,6 +3802,7 @@ class ch_wo_spare_ms(osv.osv):
 		'length': fields.float('Length'),
 		'material_code': fields.char('Material Code'),
 		'off_name': fields.char('Offer Name'),
+		'sequence_no': fields.integer('Sequence No.'),
 		
 		
 		## Child Tables Declaration
@@ -3947,6 +3949,7 @@ class ch_wo_spare_bot(osv.osv):
 		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
 		'material_code': fields.char('Material Code'),
 		'off_name': fields.char('Offer Name'),
+		'sequence_no': fields.integer('Sequence No.'),
 		
 	}
 	
