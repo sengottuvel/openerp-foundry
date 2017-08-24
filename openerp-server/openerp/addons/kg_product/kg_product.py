@@ -3,7 +3,6 @@
 #
 #   OpenERP, Open Source Management Solution
 #   Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-
 #
 ##############################################################################
 import math
@@ -69,7 +68,7 @@ class kg_product(osv.osv):
 		'hsn_no': fields.many2one('kg.hsn.master','HSN No.',domain="[('state','=','approved')]",readonly=False,states={'approved':[('readonly',True)]}),
 		'primemover_id': fields.many2one('kg.primemover.master','Prime mover',readonly=False,states={'approved':[('readonly',True)]}),
 		
-		## Child 
+		## Child
 		
 		'avg_line_ids':fields.one2many('ch.product.yearly.average.price','product_id','Line Entry'),
 		
@@ -89,7 +88,7 @@ class kg_product(osv.osv):
 	}
 	
 	_defaults = {
-	
+		
 		#~ 'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.product', context=c),
 		'po_uom_coeff': 0.00,
 		'user_id': lambda obj, cr, uid, context: uid,
@@ -100,25 +99,20 @@ class kg_product(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'draft':
 			self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-	   
 		return True
-
+	
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.state == 'confirm':
 			access_obj = self.pool.get('kg.accessories.master')
 			ch_access_obj = self.pool.get('ch.kg.accessories.master')
-			
 			if rec.is_accessories == True:
-				
 				ac_id = access_obj.search(cr,uid,[('product_id','=',rec.id)])
-				
 				if ac_id:
 					old_obj = access_obj.search(cr,uid,[('product_id','=',rec.id),('state','!=','reject')])
 					if old_obj:
 						old_rec = access_obj.browse(cr,uid,old_obj[0])
 						access_obj.write(cr,uid,old_rec.id,{'name':rec.name})
-					
 					old_rej_obj = access_obj.search(cr,uid,[('product_id','=',rec.id),('state','=','reject')])
 					if old_rej_obj:
 						old_rej_rec = access_obj.browse(cr,uid,old_rej_obj[0])
@@ -152,9 +146,9 @@ class kg_product(osv.osv):
 													 'entry_mode': 'auto',
 													})			  
 			self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		   
-		return True
 		
+		return True
+	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'approved':
@@ -164,37 +158,42 @@ class kg_product(osv.osv):
 				raise osv.except_osv(_('Cancel remark is must !!'),
 					_('Enter the remarks in Cancel remarks field !!'))
 		return True
-		
+	
 	def entry_draft(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'approved':
 			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
-		
+	
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirm':
 			if rec.remark:
 				self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 			else:
-				raise osv.except_osv(_('Rejection remark is must !!'),
-					_('Enter rejection remark in remark field !!'))
+				raise osv.except_osv(_('Rejection remark is must!'),_('Enter rejection remark in remark field !!'))
 		return True
 	
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
-					   
 		return res 
+	
+	def _primemover_validation(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.product_type == 'primemover':
+			if rec.uom_conversation_factor != 'one_dimension':
+				raise osv.except_osv(_('Warning!'),_('Kindly Configure One Dimension in UOM Conversation Factor'))
+			if rec.uom_id.code != 'Nos' or rec.uom_po_id.code != 'Nos':
+				raise osv.except_osv(_('Warning!'),_('Kindly Configure Nos in Store UOM and PO UOM'))
+		return True
 	
 	def _spl_name(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.name:
 			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
 			if name_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Name!'))
-			
+				raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in Name!'))
 			return True
 		else:
 			return True
@@ -203,11 +202,17 @@ class kg_product(osv.osv):
 	def _po_coeff(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.uom_id != rec.uom_po_id and rec.po_uom_coeff == 0 and rec.state != 'approved':
-			raise osv.except_osv(_('Warning!'),
-				_('Please check and update PO Coeff for %s in product master !'%(rec.name)))
+			raise osv.except_osv(_('Warning!'),_('Please check and update PO Coeff for %s in product master !'%(rec.name)))
 		if rec.tolerance_applicable == True and rec.tolerance_plus <= 0 and rec.state != 'approved':
-			raise osv.except_osv(_('Warning!'),
-				_('Please check and update tolerance for %s in product master !'%(rec.name)))
+			raise osv.except_osv(_('Warning!'),_('Please check and update tolerance for %s in product master !'%(rec.name)))
+		return True
+	
+	def _po_coeff_value(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.uom_id == rec.uom_po_id:		
+			if rec.po_uom_coeff > 1:
+				raise osv.except_osv(_('Warning!'),
+					_('Please check PO Coeff same UOM but PO Coeff default 1 for %s in product master !'%(rec.name)))		
 		return True
 	
 	#~ def write(self, cr, uid, ids, vals, context=None):
@@ -219,10 +224,12 @@ class kg_product(osv.osv):
 		(_name_validate, 'product name must be unique !!', ['name']),
 		#~ (_spl_name, 'Special Character Not Allowed!', ['']),
 		#~ (_po_coeff, 'System should not be accept zero value!', ['']),
-	   
+		(_po_coeff_value, 'System should not be accept zero and above 1 value!', ['PO Coeff']),
+		(_primemover_validation, 'Kindly Configure Proper configurations', ['']),
 		#(fields_validation, 'Please Enter the valid Format',['Invalid Format']),
+		
 	]	   
-	""" 
+	"""
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []	 
 		for rec in self.browse(cr,uid,ids): 
@@ -232,22 +239,18 @@ class kg_product(osv.osv):
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
 	""" 
 	
 	def write(self,cr,uid,ids,vals,context={}):
 		#if 'default_code' in vals:
 		#	 raise osv.except_osv(_('Warning !'),_('You can not modify Product code'))
-			 
 		#if 'name' in vals:
 		#	 raise osv.except_osv(_('Warning !'),_('You can not modify Product Name'))	
-		
 		if 'tolerance_applicable' in vals:
 			if vals['tolerance_applicable'] == True:
 				if 'tolerance_plus' in vals:
 					if vals['tolerance_plus'] <= 0.00:
-						raise osv.except_osv(_('Check Tolerance(+) Value !!'),
-							_('Please enter greater than zero !!'))	
+						raise osv.except_osv(_('Check Tolerance(+) Value !!'),_('Please enter greater than zero !!'))	
 					else:
 						pass
 				else:
@@ -280,7 +283,6 @@ class kg_product_category(osv.osv):
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.state == 'confirm':
-			
 			## Account master creation process start
 			ac_obj = self.pool.get('account.account')
 			ac_type_ids = self.pool.get('account.account.type').search(cr,uid,[('name','=','Expense')])
@@ -297,7 +299,6 @@ class kg_product_category(osv.osv):
 				account_id = ac_obj.account_creation(cr,uid,rec.name,ac_type,rec.id,'auto','other','New Product Category Added',context=context)
 				self.write(cr, uid, ids, {'account_id':account_id})
 			## Account master creation process end
-			
 			self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	

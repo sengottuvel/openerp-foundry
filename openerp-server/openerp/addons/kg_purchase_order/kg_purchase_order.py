@@ -634,6 +634,7 @@ class kg_purchase_order(osv.osv):
 						## Design Rate update process end
 					else:
 						pass
+		self.approved_po_mail(cr,uid,ids,obj,context)
 		return True
 	
 	def wkf_approve_order(self, cr, uid, ids, context=None):
@@ -852,6 +853,40 @@ class kg_purchase_order(osv.osv):
 	
 	def spl_po_apl_mail(self,cr,uid,ids,obj,context=None):
 		cr.execute("""select trans_po_spl_approval('po spl approval',"""+str(obj.id)+""")""")
+		data = cr.fetchall();
+		if data[0][0] is None:
+			return False
+		if data[0][0] is not None:	
+			maildet = (str(data[0])).rsplit('~');
+			cont = data[0][0].partition('UNWANTED.')		
+			email_from = maildet[1]	
+			if maildet[2]:	
+				email_to = [maildet[2]]
+			else:
+				email_to = ['']			
+			if maildet[3]:
+				email_cc = [maildet[3]]	
+			else:
+				email_cc = ['']		
+			ir_mail_server = self.pool.get('ir.mail_server')
+			if maildet[4] != '':
+				msg = ir_mail_server.build_email(
+					email_from = email_from,
+					email_to = email_to,
+					subject = maildet[4],
+					body = cont[0],
+					email_cc = email_cc,
+					object_id = ids and ('%s-%s' % (ids, 'kg.mail.settings')),
+					subtype = 'html',
+					subtype_alternative = 'plain')
+				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
+			else:
+				pass
+		
+		return True
+	
+	def approved_po_mail(self,cr,uid,ids,obj,context=None):
+		cr.execute("""select trans_po_approved('approved po',"""+str(obj.id)+""")""")
 		data = cr.fetchall();
 		if data[0][0] is None:
 			return False
