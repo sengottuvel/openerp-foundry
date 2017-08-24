@@ -80,6 +80,7 @@
 					<field name="schedule_date"/>
 					<field name="schedule_id"/>
 					<field name="order_no"/>
+					<field name="pump_model_id"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
 					<field name="pattern_name" string="Part Name."/>
@@ -638,7 +639,10 @@
 				<tree toolbar="True" string="Core Log Tree" create="false">					
 					<field name="core_no" invisible="1"/>
 					<field name="core_date"/>
+					<field name="schedule_date"/>
+					<field name="schedule_id"/>
 					<field name="order_no"/>
+					<field name="pump_model_id"/>
 					<field name="order_delivery_date" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id" invisible="1"/>
@@ -671,6 +675,7 @@
 					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
 					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
 					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					<field name="schedule_id" string="Schedule No."  filter_domain="[('schedule_id','ilike',self)]" />
 							
 					<filter icon="terp-check" name="pending" string="Pending" domain="[('core_state','=','pending')]"/>
 					<filter icon="terp-check" name="partial" string="Partial" domain="[('core_state','=','partial')]"/>
@@ -680,6 +685,8 @@
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Schedule Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_date'}"/>
+						<filter string="Schedule No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
 						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
@@ -1039,7 +1046,10 @@
 				<tree toolbar="True" string="Mould Log Tree" create="false">					
 					<field name="mould_no" invisible="1"/>
 					<field name="mould_date"/>
+					<field name="schedule_date"/>
+					<field name="schedule_id"/>
 					<field name="order_no"/>
+					<field name="pump_model_id"/>
 					<field name="order_delivery_date" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id" invisible="1"/>
@@ -1072,6 +1082,7 @@
 					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
 					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
 					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					<field name="schedule_id" string="Schedule No."  filter_domain="[('schedule_id','ilike',self)]" />
 							
 					<filter icon="terp-check" name="pending" string="Pending" domain="[('mould_state','=','pending')]"/>
 					<filter icon="terp-check" name="partial" string="Partial" domain="[('mould_state','=','partial')]"/>
@@ -1081,6 +1092,8 @@
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Schedule Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_date'}"/>
+						<filter string="Schedule No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
 						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
@@ -1366,7 +1379,10 @@
 				<tree toolbar="True" colors="red:difference_qty &lt; 0;green:difference_qty &gt;= 0;" 
 				string="Core/Mould Completed Tree" create="false">
 					<field name="order_delivery_date" string="Date"/>
+					<field name="schedule_date"/>
+					<field name="schedule_id"/>
 					<field name="order_no"/>
+					<field name="pump_model_id"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
 					<field name="pattern_name" string="Part Name."/>
@@ -1397,11 +1413,14 @@
 					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
 					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
 					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					<field name="schedule_id" string="Schedule No."  filter_domain="[('schedule_id','ilike',self)]" />
 
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Schedule Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_date'}"/>
+						<filter string="Schedule No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
 						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
@@ -1600,7 +1619,10 @@
 		<field name="arch" type="xml">
 			<tree toolbar="True" string="Pouring Pending Tree" create="false">
 				<field name="order_delivery_date" string="Delivery Date"/>
+				<field name="schedule_date"/>
+				<field name="schedule_id"/>
 				<field name="order_no"/>
+				<field name="pump_model_id"/>
 				<field name="order_priority" string="Category"/>
 				<field name="pattern_id" string="Part No."/>
 				<field name="pattern_name" string="Part Name."/>
@@ -1634,7 +1656,10 @@
 		<field name="arch" type="xml">
 			<tree toolbar="True" string="Pouring Pending MC" create="false">
 				<field name="order_delivery_date" string="Delivery Date"/>
+				<field name="schedule_date"/>
+				<field name="schedule_id"/>
 				<field name="order_no"/>
+				<field name="pump_model_id"/>
 				<field name="order_priority" string="Category"/>
 				<field name="pattern_id" string="Part No."/>
 				<field name="pattern_name" string="Part Name."/>
@@ -1664,11 +1689,14 @@
 					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
 					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
 					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					<field name="schedule_id" string="Schedule No."  filter_domain="[('schedule_id','ilike',self)]" />
 
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Schedule Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_date'}"/>
+						<filter string="Schedule No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
 						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
@@ -1830,7 +1858,10 @@
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Pouring Completed Tree" create="false">
 					<field name="order_delivery_date" string="Delivery Date"/>
+					<field name="schedule_date"/>
+					<field name="schedule_id"/>
 					<field name="order_no"/>
+					<field name="pump_model_id"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
 					<field name="pattern_name" string="Part Name."/>
@@ -1868,6 +1899,7 @@
 					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
 					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
 					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					<field name="schedule_id" string="Schedule No."  filter_domain="[('schedule_id','ilike',self)]" />
 					
 					<filter icon="terp-check" name="issue_pending" string="Issue Pending" domain="[('state','=','issue_pending')]"/>
 					<filter icon="terp-check" name="issue_done" string="Issue Done" domain="[('state','=','issue_done')]"/>
@@ -1881,6 +1913,8 @@
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Schedule Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_date'}"/>
+						<filter string="Schedule No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
 						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
