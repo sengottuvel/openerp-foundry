@@ -6,6 +6,7 @@ from datetime import date
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import base64
+import math
 
 CALL_TYPE_SELECTION = [
 	('service','Service'),
@@ -5154,6 +5155,12 @@ class ch_kg_crm_accessories(osv.osv):
 		'line_ids': fields.one2many('ch.crm.access.fou', 'header_id', 'Access FOU'),
 		'line_ids_a': fields.one2many('ch.crm.access.ms', 'header_id', 'Access MS'),
 		'line_ids_b': fields.one2many('ch.crm.access.bot', 'header_id', 'Access BOT'),
+		
+	}
+	
+	_defaults = {
+		
+		'is_selectable_all':True,
 		
 	}
 	
