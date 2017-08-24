@@ -2545,6 +2545,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				ch_ms_vals = []
 				if data_rec.line_ids_a:
 					for item in data_rec.line_ids_a:
+						ch_ms_vals = []
 						#~ if item.flag_applicable == True:
 						moc_id = ''
 						if wo_line_id:
@@ -2693,6 +2694,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				ch_ms_vals = []
 				if data_rec.line_ids_a:
 					for item in data_rec.line_ids_a:
+						ch_ms_vals = []
 						moc_id = ''
 						ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
 						print"ms_objms_obj",ms_obj
