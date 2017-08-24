@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="spare_offer_budgetary" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.2100000000000002"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="96"/>
+	<property name="ireport.y" value="48"/>
 	<subDataset name="dataset1">
 		<parameter name="enquiry_line_id" class="java.lang.Integer"/>
 		<queryString>
@@ -75,6 +75,81 @@ bot.prime_cost as total_price
 from
 ch_kg_crm_pumpmodel enquiry
 left join ch_kg_crm_bot bot on(bot.header_id = enquiry.id)
+left join kg_machine_shop machine on (machine.id = bot.ms_id)
+left join kg_hsn_master hsn on (hsn.id = machine.hsn_no)
+left join account_tax tax on (tax.id = hsn.igst_id)
+left join kg_moc_master moc on (moc.id = bot.moc_id)
+where enquiry.id=$P{enquiry_line_id} and bot.is_applicable = 't'
+
+UNION
+
+select
+coalesce(foundry.material_code,'-') as material_code,
+coalesce(foundry.off_name,'-') as off_name,
+pattern.name as pattern_no,
+moc.name as moc_name,
+foundry.qty as qty,
+'No' as unit,
+'A' as type,
+foundry.prime_cost / foundry.qty as each_price,
+coalesce(hsn.name::text,'-') as hsn_code,
+coalesce(tax.description,'-') as tax_per,
+foundry.prime_cost as total_price
+
+from
+ch_kg_crm_pumpmodel enquiry
+left join ch_kg_crm_spare_bom spare_foundry on(spare_foundry.header_id = enquiry.id)
+left join ch_kg_crm_spare_fou foundry on(foundry.header_id = spare_foundry.id)
+left join kg_pattern_master pattern on (pattern.id = foundry.pattern_id)
+left join kg_hsn_master hsn on (hsn.id = pattern.hsn_no)
+left join account_tax tax on (tax.id = hsn.igst_id)
+left join kg_moc_master moc on (moc.id = foundry.moc_id)
+where enquiry.id=$P{enquiry_line_id} and foundry.is_applicable = 't'
+
+UNION
+
+select
+coalesce(ms.material_code,'-') as material_code,
+coalesce(ms.off_name,'-') as off_name,
+machine.code as pattern_no,
+moc.name as moc_name,
+ms.qty as qty,
+'No' as unit,
+'B' as type,
+ms.prime_cost / ms.qty as each_price,
+coalesce(hsn.name::text,'-') as hsn_code,
+coalesce(tax.description,'-') as tax_per,
+ms.prime_cost as total_price
+
+from
+ch_kg_crm_pumpmodel enquiry
+left join ch_kg_crm_spare_bom spare_ms on(spare_ms.header_id = enquiry.id)
+left join ch_kg_crm_spare_ms ms on(ms.header_id = spare_ms.id)
+left join kg_machine_shop machine on (machine.id = ms.ms_id)
+left join kg_hsn_master hsn on (hsn.id = machine.hsn_no)
+left join account_tax tax on (tax.id = hsn.igst_id)
+left join kg_moc_master moc on (moc.id = ms.moc_id)
+where enquiry.id=$P{enquiry_line_id} and ms.is_applicable = 't'
+
+UNION
+
+select
+coalesce(bot.material_code,'-') as material_code,
+coalesce(bot.off_name,'-') as off_name,
+machine.code as pattern_no,
+moc.name as moc_name,
+bot.qty as qty,
+'No' as unit,
+'C' as type,
+bot.prime_cost / bot.qty as each_price,
+coalesce(hsn.name::text,'-') as hsn_code,
+coalesce(tax.description,'-') as tax_per,
+bot.prime_cost as total_price
+
+from
+ch_kg_crm_pumpmodel enquiry
+left join ch_kg_crm_spare_bom spare_bot on(spare_bot.header_id = enquiry.id)
+left join ch_kg_crm_spare_bot bot on(bot.header_id = spare_bot.id)
 left join kg_machine_shop machine on (machine.id = bot.ms_id)
 left join kg_hsn_master hsn on (hsn.id = machine.hsn_no)
 left join account_tax tax on (tax.id = hsn.igst_id)
