@@ -2052,8 +2052,8 @@ class ch_primecost_view_spare_bom(osv.osv):
 						fou_vals.append({
 									'position_id': item.position_id.id,
 									'pattern_id': item.pattern_id.id,
-									'pattern_name': item.pattern_id.name,
-									'off_name': item.pattern_id.name,
+									'pattern_name': item.pattern_id.pattern_name,
+									'off_name': item.pattern_id.pattern_name,
 									'moc_id': moc_id,
 									'moc_name': moc_name,
 									'moc_changed_flag': moc_changed_flag,
