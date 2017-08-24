@@ -927,10 +927,10 @@ class kg_crm_enquiry(osv.osv):
 							print "fffffffffffffffmsmsmsmsmsfffffffffaccess"
 							acc_ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
 							acc_ms_item.ms_id.id,1,0,order_item.moc_const_id.id,acc_ms_item.moc_id.id,0)
-							self.pool.get('ch.crm.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost  })
+							self.pool.get('ch.crm.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost * acc_ms_item.qty })
 							print"acc_ms_prime_cost--------------",acc_ms_prime_cost
 							print"acc_ms_item.qty--------------",acc_ms_item.qty
-							prime_cost += acc_ms_prime_cost 
+							prime_cost += acc_ms_prime_cost * acc_ms_item.qty
 							print "acc_ms_prime_cost",acc_ms_prime_cost
 							print "ms_prime_cost_access",prime_cost
 							moc_changed_flag = acc_ms_item.moc_changed_flag
