@@ -1052,7 +1052,7 @@ class kg_department_issue_line(osv.osv):
 	
 	def default_get(self, cr, uid, fields, context=None):
 		print"contextcontextcontext",context
-		if len(context)>7 and len(context)<10:
+		if len(context)>7:
 			if context['dep_id']:
 				dep_rec = self.pool.get('kg.depmaster').browse(cr,uid,context['dep_id'])
 				context['dep_code'] = dep_rec.name
