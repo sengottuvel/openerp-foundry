@@ -190,7 +190,7 @@ class ch_stock_inward_details(osv.osv):
 		#'part_name_id': fields.many2one('product.product','Part Name', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('active','=','t')]"),
-		'qty': fields.integer('Stock Qty', required=True),
+		'qty': fields.integer('Stock Qty'),
 		'unit_price': fields.float('Material Amount'),
 		'each_wgt': fields.float('Each Weight'),
 		'total_wgt': fields.float('Total Weight'),
@@ -199,6 +199,7 @@ class ch_stock_inward_details(osv.osv):
 		'active': fields.boolean('Active'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'serial_no': fields.char('Serial No', size=128),
+		'stock_no': fields.char('Stock No', size=128),
 		'heat_no': fields.char('Heat No', size=128),
 		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction',domain="[('active','=','t')]"),
 		'stock_mode': fields.selection([('manual','Manual'),('excess','Excess')],'Stock Mode'),
@@ -229,7 +230,7 @@ class ch_stock_inward_details(osv.osv):
 		
 	}
 		
-	def onchange_stock_qty(self, cr, uid, ids, pattern_id,moc_id,qty,each_wgt,unit_price,stock_type, context=None):
+	def onchange_stock_qty(self, cr, uid, ids, pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value, context=None):
 		mat_amt = 0.00
 		pattern_name = False
 		
@@ -246,9 +247,12 @@ class ch_stock_inward_details(osv.osv):
 			mat_amt = moc_rec.rate or 0.00
 		else:
 			mat_amt = unit_price
-			
-		total_weight = stock_qty * each_wgt or 0.00
-		total_value = total_weight * mat_amt
+		if stock_type == 'pattern':				
+			total_weight = stock_qty * each_wgt or 0.00
+			total_value = total_weight * mat_amt
+		else:
+			total_weight = stock_qty * each_wgt or 0.00
+			total_value = total_value 
 		value = {
 		'pattern_name': pattern_name,
 		'unit_price': mat_amt,
@@ -257,6 +261,7 @@ class ch_stock_inward_details(osv.osv):
 		'qty': stock_qty
 		
 		}
+		print"valuevalue",value
 		return {'value': value}
 		
 	def entry_approve(self, cr, uid, ids, context=None):
@@ -295,8 +300,12 @@ class ch_stock_inward_details(osv.osv):
 			mat_amt = vals.get('unit_price') or 0.00
 		qty = vals.get('qty')
 		each_weight = vals.get('each_wgt')
-		total_weight = qty * each_weight
-		total_value = total_weight * mat_amt or 0.00
+		if vals.get('stock_type') == 'pattern':
+			total_weight = qty * each_weight
+			total_value = total_weight * mat_amt or 0.00
+		else:
+			total_weight = qty * each_weight
+			total_value = vals.get('total_value')
 		vals.update({
 		
 		'each_wgt': each_weight,
@@ -344,10 +353,12 @@ class ch_stock_inward_details(osv.osv):
 		else:
 			each_weight = vals.get('each_wgt')
 			
-			
-		total_weight = qty * each_weight
-		total_value = total_weight * mat_amt
-		
+		if entry_rec.stock_type == 'pattern':	
+			total_weight = qty * each_weight
+			total_value = total_weight * mat_amt
+		else:
+			total_weight = qty * each_weight
+			total_value = entry_rec.total_value
 		
 		vals.update({
 		

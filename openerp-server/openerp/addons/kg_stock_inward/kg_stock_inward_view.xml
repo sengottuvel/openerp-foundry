@@ -28,25 +28,50 @@
 					<notebook>
 						<page string="Inward Details" >
 							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-								<tree string="Stock Inward Details Entry Tree" editable="top">					
+								<tree string="Stock Inward Details Entry Tree" >					
 									<field name="location" required="1"/>
-									<field name="stock_type" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type)"/>
+									<field name="stock_type" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)"/>
 									<field name="pump_model_id" attrs="{'required': [('stock_type','=','pump')]}"/>
-									<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type)"/>
+									<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)"/>
 									<field name="pattern_name" readonly="1"/>
-									<field name="moc_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type)"/>
+									<field name="moc_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)"/>
 									<field name="moc_construction_id" attrs="{'required': [('stock_type','=','pump')]}"/>
-									<field name="qty" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type)"/>
+									<field name="qty" required="1" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)" attrs="{'readonly': [('stock_type','=','pump')]}"/>
+									<field name="stock_no"/>
 									<field name="serial_no"  attrs="{'readonly': [('stock_type','=','pattern')],'required': [('stock_type','=','pump')]}"/>
-									<field name="heat_no"  attrs="{'readonly': [('stock_type','=','pump')]}"/>
-									<field name="each_wgt" required="1" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type)"/>
+									<field name="heat_no"  attrs="{'readonly': [('stock_type','=','pump')]}"/>									
+									<field name="each_wgt" required="1" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)"/>
 									<field name="total_wgt" readonly="1" required="1"/>
-									<field name="unit_price" required="1" attrs="{'readonly': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type)"/>
-									<field name="total_value" sum="Grand Total" readonly="1" required="1"/>
+									<field name="unit_price" required="1" attrs="{'readonly': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)"/>
+									<field name="total_value" sum="Grand Total" required="1" readonly = "1" />
 									<field name="stock_location_id"/>
-									<field name="remarks" widget="char"/>
-									
+									<field name="remarks" widget="char"/>									
 								</tree>
+								<form>									
+									<group>
+									   <group>
+											<field name="location" required="1"/>
+											<field name="pump_model_id" attrs="{'required': [('stock_type','=','pump')]}"/>
+											<field name="pattern_name" readonly="1"/>
+											<field name="moc_construction_id" attrs="{'required': [('stock_type','=','pump')]}"/>
+											<field name="stock_no"/>
+											<field name="heat_no"  attrs="{'readonly': [('stock_type','=','pump')]}"/>		
+											<field name="total_wgt" readonly="1" required="1"/>		
+											<field name="total_value" sum="Grand Total" required="1" attrs="{'readonly': [('stock_type','=','pattern')]}" />					
+											<field name="remarks" widget="char"/>										   
+									   </group>
+									   <group>
+											<field name="stock_type" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)"/>
+											<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)"/>
+											<field name="moc_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)"/>
+											<field name="qty" required="1" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)" attrs="{'readonly': [('stock_type','=','pump')]}"/>
+											<field name="serial_no"  attrs="{'readonly': [('stock_type','=','pattern')],'required': [('stock_type','=','pump')]}"/>
+											<field name="each_wgt" required="1" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)"/>
+											<field name="unit_price" required="1" attrs="{'readonly': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price,stock_type,total_value)"/>
+											<field name="stock_location_id"/>
+									   </group>												
+									</group>
+								</form>								
 							</field>
 						</page>
 						<page string="Entry Info">

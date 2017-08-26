@@ -334,6 +334,25 @@ class ch_alpha_value(osv.osv):
 		
 	}
 	
+	def _alpha_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.alpha_type:					
+			cr.execute(""" select alpha_type from ch_alpha_value where alpha_type  = '%s' and header_id =%s """ %(rec.alpha_type,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
+	
+		
+		(_alpha_validate, 'Please Check Alpha Type should be unique!!!',['Alpha Value Tab']),	
+		
+		]
+	
 ch_alpha_value()
 
 
@@ -352,6 +371,25 @@ class ch_delivery_pipe(osv.osv):
 		'remarks':fields.text('Remarks'),	
 		
 	}
+	
+	def _delivery_size_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.delivery_size:					
+			cr.execute(""" select delivery_size from ch_delivery_pipe where delivery_size  = '%s' and header_id =%s """ %(rec.delivery_size,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
+	
+		
+		(_delivery_size_validate, 'Please Check Delivery Size should be unique!!!',['Delivery Pipe Tab']),	
+		
+		]
 	
 ch_delivery_pipe()
 
