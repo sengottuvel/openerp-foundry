@@ -211,9 +211,24 @@ class ch_power_series(osv.osv):
 			return False
 		return True
 		
+	def _minmax_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.min:				
+			cr.execute(""" select min from ch_power_series where star = '%s' and header_id =%s 
+				and %s BETWEEN min AND max and %s <= max
+			""" %(rec.star,rec.header_id.id,rec.min,rec.min))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
 	_constraints = [		
 			  
-		(_check_values, 'Please Check the Min & Max values ,Min value should be less than Max value.!!',['Power Series']),	
+		(_check_values, 'Please Check the Min & Max values ,Min value should be less than Max value.!!',['Power Series']),
+		(_minmax_validate, 'Please Check min and Max value should be unique!!!',['Power Series']),		
 		
 	   ]
 	
@@ -239,6 +254,25 @@ class ch_bed_assembly(osv.osv):
 		'remarks':fields.text('Remarks'),		
 	}
 	
+	def _bed_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.limitation:					
+			cr.execute(""" select limitation from ch_bed_assembly where limitation  = '%s' and packing  = '%s' and header_id =%s """ %(rec.limitation,rec.packing,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
+	
+		
+		(_bed_validate, 'Please Check Limitation and Packing should be unique!!!',['Bed Tab']),	
+		
+		]
+	
 	
 	
 ch_bed_assembly()
@@ -257,6 +291,25 @@ class ch_motor_assembly(osv.osv):
 		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),
 		'remarks':fields.text('Remarks'),		
 	}
+	
+	def _motor_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.value:					
+			cr.execute(""" select value from ch_motor_assembly where value  = '%s' and header_id =%s """ %(rec.value,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
+	
+		
+		(_motor_validate, 'Please Check Motor Frame Size should be unique!!!',['Motor Tab']),	
+		
+		]
 	
 	
 	
@@ -278,6 +331,24 @@ class ch_columnpipe_assembly(osv.osv):
 		'remarks':fields.text('Remarks'),		
 	}
 	
+	def _columnpipe_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.pipe_type:					
+			cr.execute(""" select pipe_type from ch_columnpipe_assembly where pipe_type = '%s' and star = '%s' and header_id =%s """ %(rec.pipe_type,rec.star,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
+	
+		
+		(_columnpipe_validate, 'Please Check Type and Star (in No) should be unique!!!',['Column Pipe Tab']),	
+		
+		]
 	
 	
 ch_columnpipe_assembly()
@@ -298,6 +369,26 @@ class ch_deliverypipe_assembly(osv.osv):
 		'remarks':fields.text('Remarks'),		
 	}
 	
+	def _deliverypipe_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.size:					
+			cr.execute(""" select size from ch_deliverypipe_assembly where size = '%s' and star = '%s' and header_id =%s """ %(rec.size,rec.star,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
+	
+		
+		(_deliverypipe_validate, 'Please Check Size and Star (in No) should be unique!!!',['DeliveryPipe Tab']),	
+		
+		]
+	
+	
 	
 	
 ch_deliverypipe_assembly()
@@ -315,6 +406,25 @@ class ch_casing_assembly(osv.osv):
 		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),		
 		'remarks':fields.text('Remarks'),		
 	}
+	
+	def _casing_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.product_id:					
+			cr.execute(""" select product_id from ch_casing_assembly where product_id = '%s' and header_id =%s """ %(rec.product_id.id,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
+	
+		
+		(_casing_validate, 'Please Check Product model should be unique!!!',['Casing Tab']),	
+		
+		]
 	
 	
 	
@@ -335,7 +445,24 @@ class ch_lubricant(osv.osv):
 		'remarks':fields.text('Remarks'),		
 	}
 	
+	def _lubricant_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.type:					
+			cr.execute(""" select type from ch_lubricant where type = '%s' and star = '%s' and header_id =%s """ %(rec.type,rec.star,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
 	
+		
+		(_lubricant_validate, 'Please Check Type and Star (in No) should be unique!!!',['Lubricant Tab']),	
+		
+		]
 	
 ch_lubricant()
 
@@ -353,6 +480,25 @@ class ch_vo_mapping(osv.osv):
 		'vo_id': fields.many2one('kg.vo.master','VO Name',required=True,domain="[('active','=','t')]"),	
 		'remarks':fields.text('Remarks'),	
 	}
+	
+	def _rpm_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.rpm:					
+			cr.execute(""" select rpm from ch_vo_mapping where rpm  = '%s' and header_id =%s """ %(rec.rpm,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
+	
+		
+		(_rpm_validate, 'Please Check RPM should be unique!!!',['VO Mapping Tab']),	
+		
+		]
 	
 ch_vo_mapping()
 
@@ -383,15 +529,19 @@ class ch_coupling_config(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute(""" select primemover_id from ch_coupling_config where primemover_id  = '%s' and power_kw = '%s' and speed = '%s' and brand_id = '%s' and coupling_type_id = '%s' and coupling_ser_factor = '%s' and coupling_access_id = '%s' and header_id = '%s' """ %
-		(entry.primemover_id.id,entry.power_kw,entry.speed,entry.brand_id.id,entry.coupling_type_id.id,entry.coupling_ser_factor,entry.coupling_access_id.id,entry.header_id.id))
-		data = cr.dictfetchall()			
-		if len(data) > 1:		
-			return False
-		return True	
+		res = True
+		if entry.primemover_id:
+			cr.execute(""" select primemover_id from ch_coupling_config where primemover_id  = '%s' and power_kw = '%s' and speed = '%s' and brand_id = '%s' and coupling_type_id = '%s' and coupling_ser_factor = '%s' and coupling_access_id = '%s' and header_id = '%s' """ %
+			(entry.primemover_id.id,entry.power_kw,entry.speed,entry.brand_id.id,entry.coupling_type_id.id,entry.coupling_ser_factor,entry.coupling_access_id.id,entry.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:		
+				res = False
+			else:
+				res = True
+		return res	
 		
 	_constraints = [		
-		(_check_values, 'Please Check the same Motor Power and Motor Speed not allowed..!!',['Motor Power and Motor Speed']),			
+		(_check_values, 'Please Check the same Motor Power and Motor Speed not allowed..!!',['Coupling Configuration']),			
 	   ]
 	
 	def onchange_primee(self, cr, uid, ids, primemover_id, context=None):
@@ -427,18 +577,22 @@ class ch_accessories_config(osv.osv):
 		
 	}
 	
-	#~ def _check_values(self, cr, uid, ids, context=None):
-		#~ entry = self.browse(cr,uid,ids[0])
-		#~ cr.execute(""" select primemover_id from ch_coupling_config where primemover_id  = '%s' and power_kw = '%s' and speed = '%s' and brand_id = '%s' and coupling_type_id = '%s' and coupling_ser_factor = '%s' and product_id = '%s' and header_id = '%s' """ %
-		#~ (entry.primemover_id.id,entry.power_kw,entry.speed,entry.brand_id.id,entry.coupling_type_id.id,entry.coupling_ser_factor,entry.product_id.id,entry.header_id.id))
-		#~ data = cr.dictfetchall()			
-		#~ if len(data) > 1:		
-			#~ return False
-		#~ return True	
-		
-	#~ _constraints = [		
-		#~ (_check_values, 'Please Check the same Motor Power and Motor Speed not allowed..!!',['Motor Power and Motor Speed']),			
-	   #~ ]
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		res = True
+		if entry.primemover_id:
+			cr.execute(""" select primemover_id from ch_accessories_config where primemover_id  = '%s' and power_kw = '%s' and speed = '%s' and header_id = '%s' """ %
+			(entry.primemover_id.id,entry.power_kw,entry.speed,entry.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:		
+				res = False
+			else:
+				res = True
+		return res	
+
+	_constraints = [		
+		(_check_values, 'Please Check the same Motor Power and Motor Speed not allowed..!!',['Accessories Configuration']),			
+	   ]
 	
 	def onchange_primee(self, cr, uid, ids, primemover_id, context=None):
 		value = {'power_kw': '','speed':'','framesize':''}
@@ -462,13 +616,23 @@ class ch_csd_drawing(osv.osv):
 		'flag_attach_gad': fields.binary('CSD Drawing'),
 		'remarks':fields.text('Remarks'),	
 		
-	}	
+	}
+	
+	def _moc_const_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.moc_const_id:					
+			cr.execute(""" select moc_const_id from ch_csd_drawing where moc_const_id  = '%s' and header_id =%s """ %(rec.moc_const_id.id,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
 	
 	
 	def _check_attach_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
-			
-				
+		entry = self.browse(cr,uid,ids[0])				
 		if entry.moc_const_id:			
 			if entry.flag_attach_gad is False:
 				return False			
@@ -477,6 +641,7 @@ class ch_csd_drawing(osv.osv):
 	_constraints = [		
 			  
 		(_check_attach_values, 'Check the CSD Drawing Empty values not allowed..!!',['CSD Drawing']),	
+		(_moc_const_validate, 'Please Check MOC Construction should be unique!!!',['CSD Drawing Attachment Tab']),	
 		
 	   ]
 	
