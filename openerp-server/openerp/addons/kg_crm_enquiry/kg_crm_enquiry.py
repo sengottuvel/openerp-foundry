@@ -96,7 +96,6 @@ class kg_crm_enquiry(osv.osv):
 		'ch_line_ids_d': fields.one2many('ch.crm.component.bot', 'header_id', "BOT",readonly=True, states={'draft':[('readonly',False)]}),
 		'ch_line_ids_e': fields.one2many('ch.crm.component.access', 'header_id', "Accessories",readonly=True, states={'draft':[('readonly',False)]}),
 		
-		
 		## Entry Info
 		
 		'active': fields.boolean('Active'),
@@ -257,6 +256,65 @@ class kg_crm_enquiry(osv.osv):
 		if entry.entry_mode == 'manual':
 			if not entry.ch_line_ids:
 				return False
+			else:
+				for line in entry.ch_line_ids:
+					if line.load_bom != True and line.purpose_categ in ('pump','spare'):
+						raise osv.except_osv(_('Warning!'),_('%s Kindly enable Load BOM in Pump'%(line.pump_id.name)))
+					## Spare BOM warnings
+					if line.line_ids_spare_bom:
+						for bom in line.line_ids_spare_bom:
+							if bom.load_bom != True:
+								raise osv.except_osv(_('Warning!'),_('%s %%s Kindly enable Load BOM in Spare BOM'%(line.pump_id.name,bom.bom_id.name)))
+							if bom.qty == 0:
+								raise osv.except_osv(_('Warning!'),_('%s %s You cannot save without Qty in Spare BOM'%(line.pump_id.name,bom.bom_id.name)))
+							if bom.line_ids:
+								for fou in bom.line_ids:
+									if fou.is_applicable == True and fou.qty == 0:
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in Spare BOM FOU'%(line.pump_id.name,bom.bom_id.name,fou.pattner_id.pattern_name)))
+							if bom.line_ids_a:
+								for ms in bom.line_ids_a:
+									if not ms.line_ids and ms.is_applicable == True:
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Spare BOM MS Raw materials'%(line.pump_id.name,bom.bom_id.name,ms.name)))
+									if ms.is_applicable == True and ms.qty == 0:
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in Spare BOM MS'%(line.pump_id.name,bom.bom_id.name,ms.name)))
+							if bom.line_ids_b:
+								for bot in bom.line_ids_b:
+									if bot.is_applicable == True and bot.qty == 0:
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in Spare BOM BOT'%(line.pump_id.name,bom.bom_id.name,bot.ms_id.name)))
+					## Pump BOM warnings
+					if line.line_ids:
+						for fou in line.line_ids:
+							if fou.is_applicable == True and fou.qty == 0:
+								raise osv.except_osv(_('Warning!'),_('%s %s You cannot save without Qty in Pump BOM FOU'%(line.pump_id.name,fou.pattner_id.pattern_name)))
+					if line.line_ids_a:
+						for ms in line.line_ids_a:
+							if not ms.line_ids and ms.is_applicable == True:
+								raise osv.except_osv(_('Warning!'),_('%s %s You cannot save without Pump BOM MS Raw materials'%(line.pump_id.name,ms.name)))
+							if ms.is_applicable == True and ms.qty == 0:
+								raise osv.except_osv(_('Warning!'),_('%s %s You cannot save without Qty in Pump BOM MS'%(line.pump_id.name,ms.name)))
+					if line.line_ids_b:
+						for bot in line.line_ids_b:
+							if bot.is_applicable == True and bot.qty == 0:
+								raise osv.except_osv(_('Warning!'),_('%s %s You cannot save without Qty in Pump BOM BOT'%(line.pump_id.name,bot.ms_id.name)))
+					## Accessories warnings
+					if line.acces == 'yes' and line.line_ids_access_a:
+						for access in line.line_ids_access_a:
+							if access.qty == 0:
+								raise osv.except_osv(_('Warning!'),_('%s %s You cannot save without Qty in Accessories'%(line.pump_id.name,access.access_categ_id.name)))
+							if access.load_access != True:
+								raise osv.except_osv(_('Warning!'),_('%s %s Kindly enable Load BOM in Accessories'%(line.pump_id.name,access.access_categ_id.name)))
+							if access.line_ids:
+								for fou in access.line_ids:
+									if fou.is_applicable == True and fou.qty == 0:
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in FOU Accessories'%(line.pump_id.name,access.access_categ_id.name,fou.pattern_id.pattern_name)))
+							if access.line_ids_a:
+								for ms in access.line_ids_a:
+									if ms.is_applicable == True and ms.qty == 0:
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in MS Accessories'%(line.pump_id.name,access.access_categ_id.name,ms.name)))
+							if access.line_ids_b:
+								for bot in access.line_ids_b:
+									if bot.is_applicable == True and bot.qty == 0:
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in BOT Accessories'%(line.pump_id.name,access.access_categ_id.name,bot.ms_id.name)))
 		if entry.enq_status in ('on_hold','closed'):
 			if not entry.ch_line_ids_a:
 				raise osv.except_osv(_('Warning!'),_('You cannot save without Remarks'))
@@ -264,6 +322,7 @@ class kg_crm_enquiry(osv.osv):
 				name_special_char = ''.join(c for c in item.remarks if c in '!@#$%^~*{}?+/=')
 				if name_special_char:
 					raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in Remarks!'))
+		
 		return True
 	
 	def _Validation(self, cr, uid, ids, context=None):
@@ -888,7 +947,6 @@ class kg_crm_enquiry(osv.osv):
 					self.spare_component_creation(cr,uid,offer_id,access,prime_cost,'access')
 			## Accessories primecost ends
 			
-			
 			## Additional Components Primecost calculation ends
 			
 			self.write(cr, uid, ids, {
@@ -928,7 +986,7 @@ class kg_crm_enquiry(osv.osv):
 							print "fffffffffffffffmsmsmsmsmsfffffffffaccess"
 							acc_ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
 							acc_ms_item.ms_id.id,1,0,order_item.moc_const_id.id,acc_ms_item.moc_id.id,0)
-							self.pool.get('ch.crm.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost * acc_ms_item.qty })
+							self.pool.get('ch.crm.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost * acc_ms_item.qty})
 							print"acc_ms_prime_cost--------------",acc_ms_prime_cost
 							print"acc_ms_item.qty--------------",acc_ms_item.qty
 							prime_cost += acc_ms_prime_cost * acc_ms_item.qty
@@ -4591,6 +4649,7 @@ class ch_kg_crm_spare_bom(osv.osv):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
+		ch_ms_vals = []
 		if bom_id:
 			bom_obj = self.pool.get('kg.bom').search(cr,uid,([('id','=',bom_id),('name','=',off_name),('category_type','=','part_list_bom')]))
 			if bom_obj:
@@ -5149,6 +5208,7 @@ class ch_kg_crm_accessories(osv.osv):
 		'accessories_type': fields.selection([('base_plate','Base Plate'),('coupling','Coupling'),('coupling_guard','Coupling Guard'),
 		('foundation_bolt','Foundation Bolt'),('pump_pulley','Pump Pulley'),('motor_pulley','Motor Pulley'),
 		('slide_rail','Slide Rail'),('belt','Belt'),('belt_guard','Belt Guard'),('others','Others')],'Accessories type'),
+		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction'),
 		
 		## Child Tables Declaration
 		
@@ -5163,6 +5223,12 @@ class ch_kg_crm_accessories(osv.osv):
 		'is_selectable_all':True,
 		
 	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		#~ if len(context)>7:
+		if not context['moc_const_id']:
+			raise osv.except_osv(_('Warning!'),_('Kindly Configure MOC Construction !!'))
+		return context
 	
 	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
@@ -5185,34 +5251,47 @@ class ch_kg_crm_accessories(osv.osv):
 			raise osv.except_osv(_('Warning!'),_('System should allow without accessories category!'))
 		return {'value': value}
 	
-	def onchange_load_access(self,cr,uid,ids,load_access,access_id,moc_id,qty,is_selectable_all):
+	def onchange_load_access(self,cr,uid,ids,load_access,access_id,moc_const_id,qty,is_selectable_all):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
 		data_rec = ''
 		moc_changed_flag = False
 		if load_access == True and access_id:
+			if qty == 0:
+				raise osv.except_osv(_('Warning!'),_('Kindly Configure Qty'))
 			access_obj = self.pool.get('kg.accessories.master').search(cr, uid, [('id','=',access_id)])
 			if access_obj:
 				data_rec = self.pool.get('kg.accessories.master').browse(cr, uid, access_obj[0])
 		print"data_recdata_rec",data_rec
 		print"is_selectable_all-------------------------",is_selectable_all
+		moc_id = ''
+		moc_name = ''
 		if data_rec:
 			if data_rec.line_ids_b:
 				for item in data_rec.line_ids_b:
+					pat_obj = self.pool.get('kg.pattern.master').search(cr,uid,[('id','=',item.pattern_id.id)])
+					if pat_obj:
+						pat_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pat_obj[0])
+						if pat_rec.line_ids:
+							pat_line_obj = self.pool.get('ch.mocwise.rate').search(cr,uid,[('code','=',moc_const_id),('header_id','=',pat_rec.id)])
+							if pat_line_obj:
+								pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
+								moc_id = pat_line_rec.moc_id.id
 					if moc_id:
 						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 						moc_changed_flag = True
+						moc_name = moc_rec.name
 					if is_selectable_all == True:
 						is_selectable_all = True
 					else:
-						is_selectable_all = True
+						is_selectable_all = False
 					fou_vals.append({
 									'position_id': item.position_id.id,
 									'pattern_id': item.pattern_id.id,
 									'pattern_name': item.pattern_name,
 									'moc_id': moc_id,
-									'moc_name': moc_rec.name,
+									'moc_name': moc_name,
 									'moc_changed_flag': moc_changed_flag,
 									'qty': item.qty * qty,
 									'load_bom': True,
@@ -5223,19 +5302,29 @@ class ch_kg_crm_accessories(osv.osv):
 				print"fou_valsfou_vals",fou_vals
 			if data_rec.line_ids_a:
 				for item in data_rec.line_ids_a:
+					ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
+					if ms_obj:
+						ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
+						if ms_rec.line_ids_a:
+							cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
+							ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.id),('header_id','=',ms_rec.id)])
+							if ms_line_obj:
+								ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
+								moc_id = ms_line_rec.moc_id.id
 					if moc_id:
 						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 						moc_changed_flag = True
+						moc_name = moc_rec.name
 					if is_selectable_all == True:
 						is_selectable_all = True
 					else:
-						is_selectable_all = True
+						is_selectable_all = False
 					ms_vals.append({
 									'name': item.name,
 									'position_id': item.position_id.id,							
 									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
-									'moc_name': moc_rec.name,
+									'moc_name': moc_name,
 									'moc_changed_flag': moc_changed_flag,
 									'qty': item.qty * qty,
 									'load_bom': True,
@@ -5246,13 +5335,24 @@ class ch_kg_crm_accessories(osv.osv):
 					print"ms_valsms_vals",ms_vals	
 			if data_rec.line_ids:
 				for item in data_rec.line_ids:
+					bot_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
+					if bot_obj:
+						bot_rec = self.pool.get('kg.machine.shop').browse(cr,uid,bot_obj[0])
+						is_bearing = bot_rec.is_bearing
+						if bot_rec.line_ids_a:
+							cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
+							bot_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.id),('header_id','=',bot_rec.id)])
+							if bot_line_obj:
+								bot_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,bot_line_obj[0])
+								moc_id = bot_line_rec.moc_id.id
 					if moc_id:
 						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 						moc_changed_flag = True
+						moc_name = moc_rec.name
 					if is_selectable_all == True:
 						is_selectable_all = True
 					else:
-						is_selectable_all = True
+						is_selectable_all = False
 					bot_vals.append({
 									#~ 'product_id': item.product_id.id,
 									#~ 'brand_id': item.brand_id.id,
@@ -5262,7 +5362,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'position_id': item.position_id.id,							
 									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
-									'moc_name': moc_rec.name,
+									'moc_name': moc_name,
 									'moc_changed_flag': moc_changed_flag,
 									'qty': item.qty * qty,
 									'load_bom': True,

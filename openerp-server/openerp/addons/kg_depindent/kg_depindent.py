@@ -376,8 +376,8 @@ class kg_depindent_line(osv.osv):
 		'ms_bot_id': fields.many2one('kg.machine.shop', 'MS/BOT Item'),
 		'fns_item_name': fields.char('Foundry/MS/BOT', size=128),
 		'position_id': fields.many2one('kg.position.number', string='Position No'),
-		'length': fields.float('Length',readonly=True),
-		'breadth': fields.float('Breadth',readonly=True),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
 		'flag_dynamic_length': fields.boolean('Dynamic Length'),
 		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor',readonly=True),
 		
@@ -395,6 +395,18 @@ class kg_depindent_line(osv.osv):
 		'flag_dynamic_length': False
 		
 	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		print"contextcontextcontext",context
+		if context != {}:
+			if context['dep_id']:
+				dep_rec = self.pool.get('kg.depmaster').browse(cr,uid,context['dep_id'])
+				context['dep_code'] = dep_rec.name
+			else:
+				pass
+		else:
+			pass
+		return context
 	
 	def onchange_moc(self, cr, uid, ids, moc_id_temp):
 		value = {'moc_id':''}

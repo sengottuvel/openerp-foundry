@@ -66,6 +66,7 @@
 						</group>
 						<group class="oe_subtotal_footer oe_right">
 							<field name="offer_net_amount"/>
+							<field name="component_net_amount"/>
 							<field name="supervision_amount"/>
 						</group>
 						<group string="Apply All">
@@ -253,6 +254,57 @@
 								<label for="access_net_amount"/>
 								</div>
 								<field name="access_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							</group>
+-->
+						</group>
+						<group string="Component Offer">
+							<field name="line_component_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
+								<tree string="Component History" create="false" delete="false">
+<!--								<field name="pumpseries_id" required="1"/>
+									<field name="pump_id" required="1"/>-->
+									<field name="item_code" required="1"/>
+									<field name="item_name" required="1"/>
+									<field name="off_name"/>
+									<field name="moc_id"/>
+									<field name="moc_changed_flag" readonly="1"/>
+									<field name="moc_const_id" readonly="1"/>
+									<field name="qty" sum="qty"/>
+									<field name="additional_cost"/>
+									<field name="prime_cost" sum="prime_cost"/>
+									<field name="sam_ratio"/>
+									<field name="sam_ratio_tot" string="Works Value"/>
+									<field name="dealer_discount"/>
+									<field name="special_discount"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="customer_discount"/>
+									<field name="agent_com"/>
+									<field name="gst"/>
+									<field name="supervision_amount" sum="supervision_amount"/>
+									<field name="tot_price" sum="total_price"/>
+									<field name="net_amount" sum="net_amount"/>
+								</tree>
+							</field>
+<!--
+							<group class="oe_subtotal_footer oe_right">
+								<field name="spare_net_amount"/>
+							</group>
+-->
+<!--
+							<group class="oe_subtotal_footer oe_right">
+								<field name="spare_tot_price"/>
+								<field name="spare_sam_ratio"/>
+								<field name="spare_dealer_discount"/>
+								<field name="spare_customer_discount"/>
+								<field name="spare_tax"/>
+								<field name="spare_p_f"/>
+								<field name="spare_freight"/>
+								<field name="spare_insurance"/>
+								<div class="oe_subtotal_footer_separator oe_inline">
+								<label for="spare_net_amount"/>
+								</div>
+								<field name="spare_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 							</group>
 -->
 						</group>
@@ -653,6 +705,158 @@
 			</field>
 		</record>
 		
+		<record id="t_form_v_component_offer" model="ir.ui.view">
+			<field name="name">Component Offer Entry Form</field>
+			<field name="model">ch.crm.component.offer</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Component Offer Details" version="7.0" create="false" delete="false">
+				<sheet>
+					<group string="Component Offer Details">
+						<group>
+<!--						<field name="pumpseries_id" readonly="1"/>
+							<field name="pump_id" readonly="1"/>-->
+							<field name="item_code" required="1" readonly="1"/>
+							<field name="item_name" required="1" readonly="1"/>
+							<field name="hsn_no" attrs="{'readonly':[('hsn_no','!=',False)]}"/>
+							<field name="gst" attrs="{'readonly':[('gst','!=',False)]}"/>
+							<field name="customer_id" invisible="1"/>
+							<field name="off_name" readonly="1"/>
+							<field name="moc_id" required="1" readonly="1"/>
+							<field name="moc_changed_flag" readonly="1"/>
+							<field name="qty" readonly="1"/>
+							<field name="prime_cost" readonly="1"/>
+							<field name="additional_cost"/>
+							<field name="additional_cost_remark" widget="char"/>
+							<label for="sam_ratio" string="Sam Ratio" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="sam_ratio" style="width: 40%%" on_change="onchange_sam_ratio(prime_cost,works_value,works_value_flag,sam_ratio,sam_ratio_flag)" attrs="{'readonly':[('sam_ratio_flag','!=',True)]}"/>
+									<field name="sam_ratio_flag" style="width: 35%%" attrs="{'readonly':[('works_value_flag','=',True)]}"/>
+								</div>
+							</div>
+							<label for="works_value" string="Works Value"/>
+							<div>
+								<div class="address_format">
+									<field name="works_value" style="width: 40%%" on_change="onchange_sam_ratio(prime_cost,works_value,works_value_flag,sam_ratio,sam_ratio_flag)" attrs="{'readonly':[('works_value_flag','!=',True)]}"/>
+									<field name="works_value_flag" style="width: 35%%" attrs="{'readonly':[('sam_ratio_flag','=',True)]}"/>
+								</div>
+							</div>
+							<field name="pattern_id" readonly="1" invisible="1"/>
+							<field name="ms_id" readonly="1" invisible="1"/>
+							<field name="bot_id" readonly="1" invisible="1"/>
+						</group>
+						<group>
+							<field name="dealer_discount"/>
+							<field name="customer_discount"/>
+							<field name="agent_com"/>
+							<field name="special_discount"/>
+							<label for="p_f" string="P&amp;F" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="p_f" style="width: 40%%"/>
+									<field name="p_f_in_ex" style="width: 35%%" attrs="{'required': [('p_f','>',0)]}"/>
+								</div>
+							</div>
+							<label for="freight" string="Freight" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="freight" style="width: 40%%"/>
+									<field name="freight_in_ex" style="width: 35%%" attrs="{'required': [('freight','>',0)]}"/>
+								</div>
+							</div>
+							<label for="insurance" string="Insurance" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="insurance" style="width: 40%%"/>
+									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
+								</div>
+							</div>
+							<field name="supervision_amount"/>
+						</group>					
+					</group>
+<!--
+					<notebook>
+						<page string="Foundry Items">
+							<group colspan="6" col="6">		
+								<field name="off_fou_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="Foundry Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="moc_id" required="1" readonly="1"/>
+										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+						<page string="MS Items">
+							<group colspan="6" col="6">		
+								<field name="off_ms_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="MS Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="moc_id" readonly="1" required="1"/>
+										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+						<page string="BOT Items">
+							<group colspan="6" col="6">		
+								<field name="off_bot_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="BOT Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="moc_id" readonly="1" required="1"/>
+										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+					</notebook>		
+-->
+						<group>
+							<group>
+							</group>
+							<group class="oe_subtotal_footer oe_right">
+								<field name="sam_ratio_tot"/>
+								<field name="dealer_discount_tot"/>
+								<field name="customer_discount_tot"/>
+								<field name="spl_discount_tot"/>
+								<field name="tax_tot"/>
+								<field name="p_f_tot"/>
+								<field name="freight_tot"/>
+								<field name="insurance_tot"/>
+								<field name="pump_price_tot"/>
+						<!--	<field name="tot_price"/>	-->
+								<div class="oe_subtotal_footer_separator oe_inline">
+								<label for="net_amount"/>
+								</div>
+								<field name="net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							</group>
+						</group>
+				</sheet>
+				</form>
+			</field>
+		</record>
+		
 		<record id="t_form_v_accessories_offer" model="ir.ui.view">
 			<field name="name">Accessories Offer Entry Form</field>
 			<field name="model">ch.accessories.offer</field>
@@ -835,7 +1039,8 @@
             <field name="model">kg.crm.offer</field>
             <field name="arch" type="xml">
                 <search string="Offer Entry Search">
-					<field name="name" string="Offer No"  filter_domain="[('name','ilike',self)]" />
+					<field name="name" string="Offer No" filter_domain="[('name','ilike',self)]" />
+					<field name="enquiry_no" string="Enquiry No" filter_domain="[('enquiry_no','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<separator/>
                     <group expand="0" string="Group By...">

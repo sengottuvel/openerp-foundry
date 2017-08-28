@@ -500,7 +500,7 @@
 									<field name="prime_cost" readonly="1"/>
 									<field name="off_name"/>
 								</tree>
-								<form string="MS Details Entry Tree" create="false" delete="false">					
+								<form string="MS Details Entry Tree" create="false">					
 									<group colspan="4">
 										<group>
 											<field name="bom_id" required="1" on_change="onchange_spare_off_name(bom_id)"/>
@@ -645,7 +645,7 @@
 						</group>
 						<notebook attrs="{'invisible': [('acces','!=','yes')]}">
 							<page string="Accessories">
-								<field name="line_ids_access_a">
+								<field name="line_ids_access_a" context="{'moc_const_id':moc_const_id,'is_selectable_all':True}">
 									<tree string="Accessories Entry Tree">
 										<field name="access_categ_id" required="1"/>
 										<field name="access_id" required="1"/>
@@ -662,7 +662,8 @@
 												<field name="access_categ_id" on_change="onchange_access_id(access_categ_id,access_id)" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
 												<field name="access_id" required="1" attrs="{'readonly':['|',('load_access','=',True),('access_categ_id','=',False)]}"/>
 												<field name="accessories_type" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
-												<field name="moc_id" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
+												<field name="moc_const_id" required="1" attrs="{'readonly':[('load_access','=',True)]}" invisible="1"/>
+												<field name="moc_id" invisible="1"/>
 											</group>
 											<group>
 												<field name="qty" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
@@ -672,10 +673,10 @@
 											</group>
 											<group>
 											<group>
-												<field name="load_access" on_change="onchange_load_access(load_access,access_id,moc_id,qty,is_selectable_all)"/>
+												<field name="load_access" on_change="onchange_load_access(load_access,access_id,moc_const_id,qty,is_selectable_all)"/>
 											</group>
 											<group>
-												<field name="is_selectable_all" on_change="onchange_load_access(load_access,access_id,moc_id,qty,is_selectable_all)" attrs="{'invisible':[('load_access','!=',True)]}"/>
+												<field name="is_selectable_all" on_change="onchange_load_access(load_access,access_id,moc_const_id,qty,is_selectable_all)" attrs="{'invisible':[('load_access','!=',True)]}"/>
 											</group>
 											</group>
 										</group>

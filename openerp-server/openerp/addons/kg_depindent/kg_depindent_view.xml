@@ -42,7 +42,7 @@
 				</group>
 				<notebook>
 				<page string="Indent Details">
-					<field colspan="4" mode="tree" name="dep_indent_line" nolabel="1" widget="one2many_list">
+					<field colspan="4" mode="tree" name="dep_indent_line" nolabel="1" widget="one2many_list" context="{'dep_id':dep_name,'line_state':'noprocess','name':'Dep.Indent.Line','line_date':ind_date,'flag_dynamic_length':False,'length':1}">
 						  <tree string="Department Indent Line" > 
 								<field name="product_id" on_change="onchange_product_id(product_id,uom,po_uom)"/>
 								<field name="brand_id"/>
@@ -173,8 +173,8 @@
 							<field name="qty" attrs="{'readonly': [('uom', '=', False)]}"
 								on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
 							<field name="cutting_qty" readonly="1"/>
-							<field name="length" attrs="{'invisible': ['|',('dep_code','!=','DP2'),('uom_conversation_factor','=',False)]}"/>
-							<field name="breadth" attrs="{'invisible': ['|',('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')]}"/>
+							<field name="length" attrs="{'invisible':[('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')],'required':['|',('dep_code','=','DP2'),('uom_conversation_factor','=','two_dimension')]}"/>
+							<field name="breadth" attrs="{'invisible':[('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
 							<field name="dep_code" invisible="1"/>
 							<field name="uom_conversation_factor" invisible="1"/>
 							<field name="po_qty" invisible="1"/>
