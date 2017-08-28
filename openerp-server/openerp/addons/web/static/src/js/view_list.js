@@ -372,8 +372,20 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                 this.$el.find('th[data-id=' + this.dataset._sort[0].split('-')[1] + ']').addClass("sortup");
             }
         }
+        this.keys();
         this.trigger('list_view_loaded', data, this.grouped);
     },
+    keys:function(){
+		var self = this;
+		if(self.ViewManager.active_view == 'list'){
+			document.addEventListener('keydown', function(event){
+			console.log(event.keyCode)
+			  if(event.keyCode == 67 && event.altKey && event.shiftKey){
+				$(self.$buttons).find('.oe_list_add').trigger('click');
+			  }
+			}, false);						
+		}
+	},
     sort_by_column: function (e) {
         e.stopPropagation();
         var $column = $(e.currentTarget);
