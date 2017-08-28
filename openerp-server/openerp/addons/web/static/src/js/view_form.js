@@ -249,6 +249,14 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
 				
 			}			
 		});
+		$(document).on('keydown', null, 'alt+c', function(){
+			var ele = $(self.ViewManager)[0].$el.find('.oe_view_manager_view_form header button span:contains("Confirm"):visible').length;			
+			if(ele != 0){				
+				$(self.ViewManager)[0].$el.find('.oe_view_manager_view_form header button span:contains("Confirm")').parent().trigger('click');
+			}else{
+				
+			}			
+		});
 		$(document).on('keydown', null, 'alt+v', function(){
 			if(self.ViewManager.active_view == 'form'){
 				$(self.ViewManager)[0].$el.find('.oe_view_manager_header .oe_view_manager_switch li:first-child a').trigger('click')
