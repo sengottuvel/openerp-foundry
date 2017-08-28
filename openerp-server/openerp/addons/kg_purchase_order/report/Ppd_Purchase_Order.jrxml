@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000072"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="358"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -189,7 +189,8 @@ end as general_term,
 po.revision as revision,
 confirmed_users.signature as confirmed_signature,
 verified_users.signature as verified_signature,
-po.approved_by as approved_by
+po.approved_by as approved_by,
+po.approval_flag as approval_flag
 
 from
 purchase_order po
@@ -233,6 +234,7 @@ where po.id = $P{po_id}]]>
 	<field name="confirmed_signature" class="java.lang.Object"/>
 	<field name="verified_signature" class="java.lang.Object"/>
 	<field name="approved_by" class="java.lang.Integer"/>
+	<field name="approval_flag" class="java.lang.Boolean"/>
 	<group name="PO Group">
 		<groupExpression><![CDATA[$F{amount}]]></groupExpression>
 		<groupHeader>
@@ -382,7 +384,7 @@ where po.id = $P{po_id}]]>
 	<title>
 		<band height="113" splitType="Stretch">
 			<line>
-				<reportElement x="736" y="0" width="1" height="100"/>
+				<reportElement x="746" y="0" width="1" height="100"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
@@ -496,21 +498,21 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{ref_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="503" y="50" width="233" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="503" y="50" width="244" height="12"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{street1}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="503" y="62" width="233" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="503" y="62" width="244" height="12"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{street2}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="503" y="74" width="233" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="503" y="74" width="244" height="12"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
@@ -529,7 +531,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["Kindly Supply The Following Items Subject To The Terms & Conditions Printed Over Leaf"]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="737" y="8" width="64" height="66"/>
+				<reportElement x="747" y="8" width="54" height="54"/>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
@@ -541,14 +543,14 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" PO No :"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="503" y="35" width="233" height="11"/>
+				<reportElement x="503" y="35" width="244" height="11"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{partner_name}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="607" y="3" width="129" height="17"/>
+				<reportElement x="607" y="3" width="140" height="17"/>
 				<box topPadding="2"/>
 				<textElement>
 					<font isBold="true"/>
@@ -580,7 +582,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{revision}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="503" y="86" width="234" height="15"/>
+				<reportElement stretchType="RelativeToTallestObject" x="503" y="86" width="244" height="15"/>
 				<textElement>
 					<font size="9" isBold="true"/>
 				</textElement>
@@ -1101,7 +1103,7 @@ where po.id = $P{po_id}]]>
 			</image>
 			<image hAlign="Center" vAlign="Middle">
 				<reportElement x="605" y="123" width="196" height="25">
-					<printWhenExpression><![CDATA[$F{verified_signature}]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{verified_signature} && $F{approval_flag} == True]]></printWhenExpression>
 				</reportElement>
 				<box>
 					<rightPen lineWidth="0.5"/>

@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000099"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="723"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -396,7 +396,7 @@ where po.id = $P{po_id}]]>
 	<title>
 		<band height="111" splitType="Stretch">
 			<line>
-				<reportElement x="736" y="0" width="1" height="98"/>
+				<reportElement x="750" y="0" width="1" height="98"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
@@ -498,21 +498,21 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{po_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="503" y="50" width="233" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="503" y="50" width="247" height="12"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{street1}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="503" y="62" width="233" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="503" y="62" width="247" height="12"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{street2}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="503" y="74" width="233" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="503" y="74" width="247" height="12"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
@@ -531,7 +531,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["Kindly Supply The Following Items Subject To The Terms & Conditions Printed Over Leaf"]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="737" y="8" width="64" height="66"/>
+				<reportElement x="751" y="8" width="50" height="54"/>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
@@ -543,14 +543,14 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" PO No :"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="503" y="35" width="233" height="11"/>
+				<reportElement x="503" y="35" width="247" height="11"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{partner_name}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="607" y="3" width="129" height="17"/>
+				<reportElement x="607" y="3" width="143" height="17"/>
 				<box topPadding="2"/>
 				<textElement>
 					<font isBold="true"/>
@@ -594,7 +594,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{ref_no}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="503" y="86" width="233" height="13"/>
+				<reportElement stretchType="RelativeToBandHeight" x="503" y="86" width="247" height="13"/>
 				<textElement>
 					<font size="9" isBold="true"/>
 				</textElement>
