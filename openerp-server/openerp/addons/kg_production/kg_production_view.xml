@@ -643,9 +643,9 @@
 					<field name="schedule_id"/>
 					<field name="order_no"/>
 					<field name="pump_model_id"/>
+					<field name="order_no"/>
 					<field name="order_delivery_date" invisible="1"/>
 					<field name="order_priority" string="Category"/>
-					<field name="pump_model_id" invisible="1"/>
 					<field name="pattern_id" string="Part No."/>
 					<field name="pattern_name"  string="Part Name"/>
 					<field name="moc_id"/>
@@ -966,10 +966,10 @@
 			<field name="name">Mould Log Form</field>
 			<field name="model">kg.production</field>
 			<field name="arch" type="xml">
-				<form string="Mould Log" version="7.0" create="false">
+				<form string="Mould Log" version="7.0" create="false" edit="false">
 					<header>
-						<button name="mould_update" type="object" string="Update" class="oe_highlight"
-						attrs="{'invisible': [('mould_state','in',['done'])]}"/>
+						<!--<button name="mould_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('mould_state','in',['done'])]}"/>-->
 					</header>
 					<group string="Mould Log">
 						<group>
@@ -1043,7 +1043,7 @@
 			<field name="model">kg.production</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="Mould Log Tree" create="false">					
+				<tree toolbar="True" string="Mould Log Tree" create="false" edit="false">					
 					<field name="mould_no" invisible="1"/>
 					<field name="mould_date"/>
 					<field name="schedule_date"/>
@@ -1052,7 +1052,6 @@
 					<field name="pump_model_id"/>
 					<field name="order_delivery_date" invisible="1"/>
 					<field name="order_priority" string="Category"/>
-					<field name="pump_model_id" invisible="1"/>
 					<field name="pattern_id" string="Part No."/>
 					<field name="pattern_name" string="Part Name"/>
 					<field name="moc_id"/>
@@ -1117,6 +1116,7 @@
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.production</field>
 			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
 			<field name="context">{}</field>
 			<field name="domain">[('mould_state','in',('pending','partial'))]</field>
 			<field name="search_view_id" ref="t_search_v_mould_log"/>
@@ -1128,12 +1128,14 @@
             <field name="view_id" ref="t_tree_v_mould_log"/>
             <field name="act_window_id" ref="tma_mould_log"/>
         </record>
+<!--
         <record model="ir.actions.act_window.view" id="tma_mould_log_form_view">
             <field name="sequence" eval="2"/>
             <field name="view_mode">form</field>
             <field name="view_id" ref="t_form_v_mould_log"/>
             <field name="act_window_id" ref="tma_mould_log"/>
         </record>
+-->
 		
 	<!-- Menu Action End-->
 	
@@ -1418,9 +1420,9 @@
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
-						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
 						<filter string="Schedule Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_date'}"/>
 						<filter string="Schedule No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
 						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
@@ -1694,9 +1696,9 @@
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
-						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
 						<filter string="Schedule Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_date'}"/>
 						<filter string="Schedule No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
 						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
@@ -1912,9 +1914,9 @@
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
-						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
 						<filter string="Schedule Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_date'}"/>
 						<filter string="Schedule No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
 						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>

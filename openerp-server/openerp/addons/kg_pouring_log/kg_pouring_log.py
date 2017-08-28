@@ -33,6 +33,22 @@ class kg_pouring_log(osv.osv):
 		'supervisor': fields.char('Supervisor', size=128),
 		'pour_close_team': fields.char('Pouring Closing Team', size=128),
 		
+		'type': fields.selection([('pour','Pour'),('mould','Mould')],'Type'),
+		
+		### For Mould Update ###
+		'mould_date': fields.date('Date'),
+		'mould_shift_id':fields.many2one('kg.shift.master','Shift'),
+		'mould_contractor':fields.many2one('res.partner','Contractor'),
+		'mould_moulder': fields.integer('Moulder'),
+		#~ 'mould_box_id': fields.related('pattern_id','box_id', type='many2one', relation='kg.box.master', string='Box Size', store=True),
+		'mould_helper': fields.integer('Helper'),
+		'mould_operator': fields.many2one('hr.employee','Operator'),
+		'mould_hardness': fields.char('Mould Hardness'),
+		'mould_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'mould_pan_no':fields.char('PAN No.', size=128),
+		'mould_remarks': fields.text('Remarks'),
+		'line_ids_a':fields.one2many('ch.mould.details', 'header_id', "Mould Details"),
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -57,6 +73,7 @@ class kg_pouring_log(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'entry_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'mould_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		'state':'draft'
 		
@@ -70,6 +87,7 @@ class kg_pouring_log(osv.osv):
 			value = {
 			'moc_id': melting_rec.moc_id.id,
 			'entry_date': melting_rec.entry_date,
+			'type': 'pour'
 			
 			} 
 		return {'value': value}
@@ -81,6 +99,11 @@ class kg_pouring_log(osv.osv):
 		entry_date = str(entry_date)
 		entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
 		if entry_date > today:
+			return False
+		mould_date = rec.mould_date
+		mould_date = str(mould_date)
+		mould_date = datetime.strptime(mould_date, '%Y-%m-%d')
+		if mould_date > today:
 			return False
 		return True
 		
@@ -103,49 +126,426 @@ class kg_pouring_log(osv.osv):
 		cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(fettling_seq_id[0],seq_rec.code))
 		fettling_name = cr.fetchone();
 		
+		if pour_qty > 0:
 		
-		fettling_vals = {
-		'name': fettling_name[0],
-		'location':production_rec.location,
-		'schedule_id':production_rec.schedule_id.id,
-		'schedule_date':production_rec.schedule_date,
-		'schedule_line_id':production_rec.schedule_line_id.id,
-		'order_bomline_id':production_rec.order_bomline_id.id,
-		'order_id':production_rec.order_id.id,
-		'order_line_id':production_rec.order_line_id.id,
-		'order_no':production_rec.order_no,
-		'order_delivery_date':production_rec.order_delivery_date,
-		'order_date':production_rec.order_date,
-		'order_category':production_rec.order_category,
-		'order_priority':production_rec.order_priority,
-		'pump_model_id':production_rec.pump_model_id.id,
-		'pattern_id':production_rec.pattern_id.id,
-		'pattern_code':production_rec.pattern_code,
-		'pattern_name':production_rec.pattern_name,
-		'moc_id':production_rec.moc_id.id,
-		'schedule_qty':production_rec.schedule_qty,
-		'production_id':production_rec.id,
-		'pour_qty':pour_qty,
-		'inward_accept_qty':pour_qty,
-		'state':'waiting',
-		'pour_id': pour_id,
-		'pour_line_id': pour_line_id
-		
-		
-		}
-	   
-		fettling_id = fettling_obj.create(cr, uid, fettling_vals)
+			fettling_vals = {
+			'name': fettling_name[0],
+			'location':production_rec.location,
+			'schedule_id':production_rec.schedule_id.id,
+			'schedule_date':production_rec.schedule_date,
+			'schedule_line_id':production_rec.schedule_line_id.id,
+			'order_bomline_id':production_rec.order_bomline_id.id,
+			'order_id':production_rec.order_id.id,
+			'order_line_id':production_rec.order_line_id.id,
+			'order_no':production_rec.order_no,
+			'order_delivery_date':production_rec.order_delivery_date,
+			'order_date':production_rec.order_date,
+			'order_category':production_rec.order_category,
+			'order_priority':production_rec.order_priority,
+			'pump_model_id':production_rec.pump_model_id.id,
+			'pattern_id':production_rec.pattern_id.id,
+			'pattern_code':production_rec.pattern_code,
+			'pattern_name':production_rec.pattern_name,
+			'moc_id':production_rec.moc_id.id,
+			'schedule_qty':production_rec.schedule_qty,
+			'production_id':production_rec.id,
+			'pour_qty':pour_qty,
+			'inward_accept_qty':pour_qty,
+			'state':'waiting',
+			'pour_id': pour_id,
+			'pour_line_id': pour_line_id
+			
+			
+			}
+		   
+			fettling_id = fettling_obj.create(cr, uid, fettling_vals)
 
 		return True
 	
 
-	def entry_confirm(self,cr,uid,ids,context=None):
+	def mould_entry_confirm(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'draft':
+			for line_item in entry.line_ids_a:
+				
+				if line_item.order_line_id and line_item.order_line_id.id != False:
+					### Checking pattern is available for that Work Order ###
+					cr.execute(""" select id from kg_production
+						where
+						order_line_id = %s and mould_state in ('pending','partial') and mould_rem_qty > 0 
+						and pattern_id = %s
+						"""%(line_item.order_line_id.id,line_item.production_id.pattern_id.id))
+					production_id = cr.fetchone();
+					print"production_idproduction_id",production_id
+					if production_id is None:
+						raise osv.except_osv(_('Warning!'),
+								_(' Selected Pattern %s does not assigned for WO No. %s !!')%(line_item.production_id.pattern_code,line_item.order_line_id.order_no))
+					mould_qty = line_item.production_id.mould_rem_qty
+					if mould_qty == 0:
+						raise osv.except_osv(_('Warning!'),
+								_(' There is no Mould Pending qty for pattern %s !!')%(line_item.production_id.pattern_code))
+					
+					#~ if line_item.qty > mould_qty:
+						#~ raise osv.except_osv(_('Warning!'),
+								#~ _('Mould qty should not be exceed than Mould pending qty for pattern  %s, You can mould upto %s qty !!')%(line_item.production_id.pattern_code,mould_qty))
+			
+				else:
+					print "line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id",line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id
+					cr.execute(""" select sum(mould_rem_qty) from kg_production
+						where
+						pattern_id = %s and
+						moc_id = %s and
+						mould_state in ('partial','pending') """%(line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id))
+					tot_mould_qty = cr.fetchone();
+					
+					if tot_mould_qty[0] == 0:
+						raise osv.except_osv(_('Warning!'),
+								_(' There is no Mould Pending qty for pattern %s !!')%(line_item.production_id.pattern_code))
+				
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
+		return True
+			
+	def priority_wise_updation(self,cr,uid,ids,mould_line_item,production_ids,rem_qty,context=None):
+		production_obj = self.pool.get('kg.production')
+		entry = self.browse(cr,uid,ids[0])
+		mould_done_qty = 0
+		print "mould_line_item,production_ids,rem_qty",mould_line_item,production_ids,rem_qty
+		for new_item in production_ids:
+			print "new_item",new_item
+			if rem_qty > 0:
+				### Checking if there is mould pending qty ###
+				if new_item['mould_rem_qty'] > 0:
+					mould_done_qty = new_item['mould_rem_qty'] - rem_qty
+					### Calculating mould pending qty and mould completed qty for that item ###
+					if mould_done_qty <= 0:
+						mould_completed_qty = new_item['mould_rem_qty']
+						mould_pending_qty = 0
+					if mould_done_qty > 0:
+						mould_completed_qty = rem_qty
+						mould_pending_qty = mould_done_qty
+					### Finding the status of that item ###
+					if mould_pending_qty > 0:
+						mould_status = 'partial'
+						produc_state = new_item['state']
+					if mould_pending_qty == 0:
+						mould_status = 'done'
+						produc_state = 'mould_com'
+						
+					### Updating the values to that item ###
+					production_obj.write(cr, uid, [new_item['id']], 
+						{
+						'mould_qty': mould_pending_qty,
+						'total_mould_qty': ( new_item['total_mould_qty'] or 0 ) + mould_completed_qty,
+						'mould_rem_qty': mould_pending_qty,
+						'mould_state': mould_status,
+						'state': produc_state,
+						'mould_date': entry.mould_date,
+						'mould_shift_id': entry.mould_shift_id.id,
+						'mould_contractor': entry.mould_contractor.id,
+						'mould_moulder': entry.mould_moulder,
+						'mould_helper': entry.mould_helper,
+						'mould_operator': entry.mould_operator.id,
+						'mould_hardness': entry.mould_hardness,
+						'mould_remarks': entry.mould_remarks,
+						})
+						
+					## Calculating rem qty for next priority wise update ##
+					if mould_done_qty <= 0:
+						rem_qty = rem_qty - new_item['mould_rem_qty']
+					else:
+						rem_qty = 0
+						
+		print "rem_qty",rem_qty		
+		
+		return rem_qty
+		
+	
+		
+	def mould_entry_approve(self,cr,uid,ids,context=None):
+		production_obj = self.pool.get('kg.production')
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'confirmed':
+			rem_qty = 0
+			for line_item in entry.line_ids_a:
+				#### Pouring Updation When User Gives Work Order ###
+				if line_item.order_line_id and line_item.order_line_id.id != False:
+		
+					rem_qty = line_item.qty
+					
+					cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+						
+						where
+						pattern_id = %s and
+						moc_id = %s and
+						mould_state in ('partial','pending') and
+						order_line_id = %s
+						
+						''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id,line_item.order_line_id.id ])
+					wo_production_ids = cr.dictfetchall()
+					if wo_production_ids:
+						for wo_produc_item in wo_production_ids:
+							if rem_qty > 0:
+								### Checking if there is mould pending qty ###
+								if wo_produc_item['mould_rem_qty'] > 0:
+									mould_done_qty = wo_produc_item['mould_rem_qty'] - rem_qty
+									print "mould_done_qty",mould_done_qty
+									### Calculating mould pending qty and mould completed qty for that item ###
+									if mould_done_qty <= 0:
+										mould_completed_qty = wo_produc_item['mould_rem_qty']
+										mould_pending_qty = 0
+									if mould_done_qty > 0:
+										mould_completed_qty = rem_qty
+										mould_pending_qty = mould_done_qty
+									### Finding the status of that item ###
+									if mould_pending_qty > 0:
+										mould_status = 'partial'
+										produc_state = wo_produc_item['state']
+									if mould_pending_qty == 0:
+										mould_status = 'done'
+										produc_state = 'mould_com'
+									print "mould_pending_qty",mould_pending_qty
+									print "mould_completed_qty",mould_completed_qty
+									print "wo_produc_item['total_mould_qty']",wo_produc_item['total_mould_qty']
+									
+									### Updating the values to that item ###
+									production_obj.write(cr, uid, [wo_produc_item['id']], 
+										{
+										'mould_qty': mould_pending_qty,
+										'total_mould_qty': (wo_produc_item['total_mould_qty'] or 0) + mould_completed_qty,
+										'mould_rem_qty': mould_pending_qty,
+										'mould_state': mould_status,
+										'state': produc_state,
+										'mould_date': entry.mould_date,
+										'mould_shift_id': entry.mould_shift_id.id,
+										'mould_contractor': entry.mould_contractor.id,
+										'mould_moulder': entry.mould_moulder,
+										'mould_helper': entry.mould_helper,
+										'mould_operator': entry.mould_operator.id,
+										'mould_hardness': entry.mould_hardness,
+										'mould_remarks': entry.mould_remarks,
+										})
+							
+								
+				else:
+					
+					#### Getting all production ids for excess qty updation ###
+					cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+							
+							where
+							pattern_id = %s and
+							moc_id = %s and
+							mould_state in ('partial','pending') and
+							mould_rem_qty > 0
+							order by id desc
+							limit 1
+							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
+					excess_production_ids = cr.dictfetchall()
+							
+					rem_qty = line_item.qty
+					### First Priority ###
+					cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+							
+							where
+							pattern_id = %s and
+							moc_id = %s and
+							mould_state in ('partial','pending') and
+							order_priority = '1'and
+							mould_rem_qty > 0
+							order by id asc
+							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
+					msnc_production_ids = cr.dictfetchall()
+					if msnc_production_ids:
+						rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,msnc_production_ids,rem_qty)
+						
+							
+					### Second Priority ###
+					if rem_qty > 0:
+						cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+							
+							where
+							pattern_id = %s and
+							moc_id = %s and
+							mould_state in ('partial','pending') and
+							order_priority = '2' and
+							mould_rem_qty > 0
+							order by id asc
+							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
+						bd_production_ids = cr.dictfetchall()
+						print "bd_production_ids",bd_production_ids
+						
+						if bd_production_ids:
+							rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,bd_production_ids,rem_qty)
+							print "bdrem_qty",rem_qty
+								
+					### Third Priority ###
+					if rem_qty > 0:
+						cr.execute(''' select id,order_priority,pour_pending_qty as qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+							
+							where
+							pattern_id = %s and
+							moc_id = %s and
+							mould_state in ('partial','pending') and
+							order_priority = '3' and
+							mould_rem_qty > 0
+							
+							order by id asc
+							
+							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
+						emer_production_ids = cr.dictfetchall()
+						if emer_production_ids:
+							rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,emer_production_ids,rem_qty)
+							
+								
+					### Fourth Priority ###
+					if rem_qty > 0:
+						cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+							
+							where
+							pattern_id = %s and
+							moc_id = %s and
+							mould_state in ('partial','pending') and
+							order_priority = '4' and
+							mould_rem_qty > 0
+							order by id asc
+							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
+						service_production_ids = cr.dictfetchall()
+						if service_production_ids:
+							rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,service_production_ids,rem_qty)
+									
+					### Fifth Priority ###
+					if rem_qty > 0:
+						cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+							
+							where
+							pattern_id = %s and
+							moc_id = %s and
+							mould_state in ('partial','pending') and
+							order_priority = '5' and
+							mould_rem_qty > 0
+							order by id asc
+							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
+						fdync_production_ids = cr.dictfetchall()
+						if fdync_production_ids:
+							rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,fdync_production_ids,rem_qty)
+									
+					### Sixth Priority ###
+					
+					if rem_qty > 0:
+						cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+							
+							where
+							pattern_id = %s and
+							moc_id = %s and
+							mould_state in ('partial','pending') and
+							order_priority = '6' and
+							mould_rem_qty > 0
+							order by id asc
+							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
+						spare_production_ids = cr.dictfetchall()
+						if spare_production_ids:
+							rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,spare_production_ids,rem_qty)
+							
+					### Seventh Priority ###
+					
+					if rem_qty > 0:
+						cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+							
+							where
+							pattern_id = %s and
+							moc_id = %s and
+							mould_state in ('partial','pending') and
+							order_priority = '7'and
+							mould_rem_qty > 0
+							order by id asc
+							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
+						urgent_production_ids = cr.dictfetchall()
+						if urgent_production_ids:
+							rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,urgent_production_ids,rem_qty)
+							
+					### Eighth Priority ###
+					print rem_qty
+					if rem_qty > 0:
+						cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+							
+							where
+							pattern_id = %s and
+							moc_id = %s and
+							mould_state in ('partial','pending') and
+							order_priority = '8' and
+							mould_rem_qty > 0
+							order by id asc
+							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
+						normal_production_ids = cr.dictfetchall()
+						if normal_production_ids:
+							rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,normal_production_ids,rem_qty)
+						
+						### Excess qty updation ###
+						print "rem_qty",rem_qty
+						if rem_qty > 0:
+							for excess_produc_item in excess_production_ids:
+								print "excess_production_ids",excess_production_ids
+								excess_production_rec = production_obj.browse(cr,uid,excess_produc_item['id'])
+								
+								### Checking if there is mould pending qty ###
+								if excess_produc_item['mould_rem_qty'] > 0:
+									mould_done_qty = excess_produc_item['mould_rem_qty'] - rem_qty
+									### Calculating mould pending qty and mould completed qty for that item ###
+									if mould_done_qty <= 0:
+										mould_completed_qty = excess_produc_item['mould_rem_qty']
+										mould_pending_qty = 0
+									if mould_done_qty > 0:
+										mould_completed_qty = rem_qty
+										mould_pending_qty = mould_done_qty
+									### Finding the status of that item ###
+									if mould_pending_qty > 0:
+										mould_status = 'partial'
+										produc_state = excess_produc_item['state']
+									if mould_pending_qty == 0:
+										mould_status = 'done'
+										produc_state = 'mould_com'
+									print "mould_completed_qty",mould_completed_qty
+									print "mould_pending_qty",mould_pending_qty
+									print "excess_produc_item['total_mould_qty']",excess_produc_item['total_mould_qty']
+									
+									### Updating the values to that item ###
+									production_obj.write(cr, uid, [excess_produc_item['id']], 
+										{
+										'mould_qty': mould_pending_qty,
+										'total_mould_qty': excess_production_rec.total_mould_qty + rem_qty,
+										'mould_rem_qty': mould_pending_qty,
+										'mould_state': mould_status,
+										'state': produc_state,
+										'mould_date': entry.mould_date,
+										'mould_shift_id': entry.mould_shift_id.id,
+										'mould_contractor': entry.mould_contractor.id,
+										'mould_moulder': entry.mould_moulder,
+										'mould_helper': entry.mould_helper,
+										'mould_operator': entry.mould_operator.id,
+										'mould_hardness': entry.mould_hardness,
+										'mould_remarks': entry.mould_remarks,
+										})
+							
+				
+			#~ ### Pour Log Number ###
+			#~ pour_name = ''  
+			#~ pour_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pouring.log')])
+			#~ rec = self.pool.get('ir.sequence').browse(cr,uid,pour_seq_id[0])
+			#~ cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(pour_seq_id[0],rec.code))
+			#~ pour_name = cr.fetchone();
+			self.write(cr, uid, ids, {'state': 'approve','approve_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
+		return True
+		
+	def pour_entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
 			for line_item in entry.line_ids:
 				
 				if line_item.order_line_id and line_item.order_line_id.id != False:
-					pour_qty = line_item.production_id.total_mould_qty - line_item.production_id.pour_qty
+					pour_qty = line_item.production_id.total_mould_qty
 					
 					if pour_qty == 0:
 						raise osv.except_osv(_('Warning!'),
@@ -154,875 +554,97 @@ class kg_pouring_log(osv.osv):
 					if line_item.qty > pour_qty:
 						raise osv.except_osv(_('Warning!'),
 								_('Pouring qty should not be exceed than Mould Qty for pattern  %s, You can pour upto %s qty !!')%(line_item.production_id.pattern_code,pour_qty))
-			
-				else:
-					print "line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id",line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id
-					cr.execute(""" select sum((total_mould_qty - pour_qty)) from kg_production
-						where
-						pattern_id = %s and
-						moc_id = %s and
-						mould_state in ('partial','done') and
-						pour_state in ('pending','partial') """%(line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id))
-					tot_mould_qty = cr.fetchone();
-					
-					if line_item.qty > tot_mould_qty[0]:
-						raise osv.except_osv(_('Warning!'),
-								_('Pouring qty should not be exceed than Mould Qty for pattern  %s, You can pour upto %s qty !!')%(line_item.production_id.pattern_code,tot_mould_qty[0]))
 				
 			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass
 		return True
-			
-	def priority_wise_updation(self,cr,uid,ids,line_item,new_production_ids,old_item,rem_qty,context=None):
-		production_obj = self.pool.get('kg.production')
-		entry = self.browse(cr,uid,ids[0])
 		
-		for new_item in new_production_ids:
-			
-			if rem_qty > 0 and new_item['qty'] > 0:
-				print "old_item",old_item
-				print "new_item['id']",new_item['id']
-				
-				if old_item == new_item['id']:
-					new_item_rec = production_obj.browse(cr, uid, new_item['id'])
-					old_item_rec = production_obj.browse(cr, uid, old_item)
-					if new_item_rec.pour_qty < new_item_rec.qty:
-						
-						print "sssssssssssssssssssss_rem_qty",rem_qty
-						print "sssssssssssssssssssss_new_item['qty']",new_item['qty']
-						print "sssssssssssssssssssss_new_item['pour_qty']",new_item['pour_qty']
-						if new_item['pour_qty'] == None:
-							pour_qty = 0
-						else:
-							pour_qty = new_item['pour_qty']
-						print "sssssssssssssssssssss_pour_qty",pour_qty
-						new_production_qty = new_item['total_mould_qty'] - pour_qty
-						print "sssssssssssssssssssss_new_production_qty",new_production_qty
-						if new_production_qty > rem_qty:
-							pouring_qty = rem_qty
-						else:
-							pouring_qty = new_production_qty
-							
-						print "sssssssssssssssssssss_pouring_qty",pouring_qty
-						tot_pour_qty = pour_qty + pouring_qty
-						print "sssssssssssssssssssss_tot_pour_qty",tot_pour_qty
-						
-						if new_item['mould_rem_qty'] > 0:
-							pour_status = 'partial'
-							status = 'issue_done'
-						if new_item['mould_rem_qty'] == 0:
-						
-							if tot_pour_qty < new_item['total_mould_qty']:
-								pour_status = 'partial'
-								status = 'mould_com'
-							if tot_pour_qty == new_item['total_mould_qty']:
-								pour_status = 'done'
-								status = 'fettling_inprogress'
-						print "pour_status",pour_status
-						print "status",status
-						
-						if pour_status in ('partial','done') and status in ('mould_com','fettling_inprogress','issue_done'):
-							if pour_status == 'partial':
-								production_status = 'pour_pending'
-							if pour_status == 'done':
-								production_status = 'fettling_inprogress' 
-							### Fettling Process Creation ###
-							#~ production_obj.fettling_inward_update(cr, uid, [new_item['id']])
-							
-							real_poured_qty = new_item['qty'] - pour_qty
-							if real_poured_qty > rem_qty:
-								real_poured_qty = rem_qty
-							else:
-								real_poured_qty = real_poured_qty
-							print "real_poured_qty",real_poured_qty
-							
-							if real_poured_qty > 0:
-								self.fettling_inward_update(cr, uid, ids, new_item['id'],entry.id,line_item.id,real_poured_qty)
-								production_obj.write(cr, uid, [new_item['id']], {'state': production_status})
-								
-						production_obj.write(cr, uid, [new_item['id']], 
-						{
-						'pour_qty': real_poured_qty + pour_qty,
-						'pour_heat_id': entry.melting_id.id,
-						'pour_weight': line_item.weight,
-						'pour_state': pour_status,
-						'state':status,
-						'pour_remarks':line_item.remarks,
-						'pour_date':entry.entry_date
-						})
-						
-						print "aaaaaaaaaaaaaaaaaaaaaaaaaa",tot_pour_qty
-						print "aaaaaaaaaaaaaaaaaaaaaaaaaa",new_item_rec.qty
-						if tot_pour_qty > new_item_rec.qty:
-							poured_qty = real_poured_qty
-						else:
-							poured_qty = pouring_qty
-						
-					else:
-						poured_qty = 0
-				
-				
-				if old_item != new_item['id']:
-					
-					new_item_rec = production_obj.browse(cr, uid, new_item['id'])
-					old_item_rec = production_obj.browse(cr, uid, old_item)
-					
-					### Changes in New Item ###
-					
-					### Changes in Core Qty and its Status ###
-					
-					#### Finding the poured Qty ###
-					print "rem_qty---------------------------------------",rem_qty
-					print "new_item_rec.pour_qty---------------------------------------",new_item_rec.pour_qty
-					print "new_item_rec.pour_pending_qty---------------------------------------",new_item_rec.pour_pending_qty
-					if rem_qty < new_item_rec.pour_pending_qty:
-						poured_qty = rem_qty
-					elif rem_qty >= new_item_rec.pour_pending_qty:
-						poured_qty = new_item_rec.pour_pending_qty
-					
-					print "poured_qty---------------------------------------",poured_qty
-					
-					if poured_qty > 0:
-						if new_item_rec.total_core_qty < new_item_rec.qty and new_item_rec.core_state != 'done':
-							new_core_qty = new_item_rec.core_qty - poured_qty
-							new_total_core_qty = new_item_rec.total_core_qty + poured_qty
-							new_core_rem_qty = new_item_rec.qty - new_total_core_qty
-
-							if new_core_rem_qty < 0:
-								new_core_rem_qty = 0
-							else:
-								new_core_rem_qty = new_core_rem_qty
-								
-							if new_total_core_qty >= new_item_rec.qty:
-								new_core_state = 'done'
-							if new_total_core_qty < new_item_rec.qty:
-								new_core_state = 'partial'
-							if new_total_core_qty == 0:
-								new_core_state = 'pending'
-						
-						
-						if new_item_rec.total_core_qty >= new_item_rec.qty and new_item_rec.core_state == 'done':
-							new_core_qty = new_item_rec.core_qty
-							new_total_core_qty = new_item_rec.total_core_qty
-							new_core_rem_qty = new_item_rec.core_rem_qty
-							new_core_state =  new_item_rec.core_state
-						
-						### Changes in Mould Qty and its Status ###
-						
-						if new_item_rec.total_mould_qty < new_item_rec.qty and new_item_rec.mould_state != 'done':
-							new_mould_qty = new_item_rec.mould_qty - poured_qty
-							new_total_mould_qty = new_item_rec.total_mould_qty + poured_qty
-							new_mould_rem_qty = new_item_rec.qty - new_total_mould_qty
-
-							if new_mould_rem_qty < 0:
-								new_mould_rem_qty = 0
-							else:
-								new_mould_rem_qty = new_mould_rem_qty
-								
-							if new_total_mould_qty >= new_item_rec.qty:
-								new_mould_state = 'done'
-							if new_total_mould_qty < new_item_rec.qty:
-								new_mould_state = 'partial'
-							if new_total_mould_qty == 0:
-								new_mould_state = 'pending'
-								
-						if new_item_rec.total_mould_qty >= new_item_rec.qty and new_item_rec.mould_state == 'done':
-							new_mould_qty = new_item_rec.mould_qty
-							new_total_mould_qty = new_item_rec.total_mould_qty
-							new_mould_rem_qty = new_item_rec.mould_rem_qty
-							new_mould_state =  new_item_rec.mould_state
-							
-						### Changes in Pour Qty and its Status ###
-						print "new_item_rec.pour_qty",new_item_rec.pour_qty
-						print "new_total_mould_qty",new_total_mould_qty
-						print "new_mould_rem_qty",new_mould_rem_qty
-						print "new_item_rec.pour_state",new_item_rec.pour_state
-						if new_item_rec.pour_qty < (new_total_mould_qty + new_mould_rem_qty)  and new_item_rec.pour_state != 'done':
-							
-							new_pour_qty = new_item_rec.pour_qty + poured_qty
-							new_pour_pending_qty = new_item_rec.pour_pending_qty - poured_qty
-							print "new_pour_qty",new_pour_qty
-							print "(new_total_mould_qty + new_mould_rem_qty)",(new_total_mould_qty + new_mould_rem_qty)
-							if new_pour_qty == (new_total_mould_qty + new_mould_rem_qty):
-								new_pour_state = 'done'
-							if new_pour_qty < (new_total_mould_qty + new_mould_rem_qty):
-								new_pour_state = 'partial'
-							if new_pour_qty == 0:
-								new_pour_state = 'pending'
-								
-						if new_item_rec.pour_qty == (new_total_mould_qty + new_mould_rem_qty) and new_item_rec.pour_state == 'done':
-							new_pour_qty = new_item_rec.pour_qty
-							new_pour_pending_qty = new_item_rec.pour_pending_qty
-							new_pour_state = new_item_rec.pour_state
-					
-						### Production Status Updation ###
-						if new_pour_state in ('partial','pending'):
-							new_production_status = 'pour_pending'
-						if new_pour_state == 'done':
-							new_production_status = 'fettling_inprogress'
-						print "new_pour_state",new_pour_state
-						
-						new_production_vals = {
-							'core_qty': new_core_qty,
-							'total_core_qty': new_total_core_qty,
-							'core_rem_qty': new_core_rem_qty,
-							'core_state': new_core_state,
-							'mould_qty':new_mould_rem_qty,
-							'total_mould_qty':new_total_mould_qty,
-							'mould_rem_qty': new_mould_rem_qty,
-							'mould_state':new_mould_state,
-							'pour_qty':new_pour_qty,
-							'pour_pending_qty':new_pour_pending_qty,
-							'pour_state':new_pour_state,
-							'state':new_production_status,
-							
-							
-							}
-							
-						print "new_production_vals",new_production_vals
-						
-						
-						   
-						production_obj.write(cr, uid, [new_item['id']], 
-							{
-							'core_qty': new_core_qty,
-							'total_core_qty': new_total_core_qty,
-							'core_rem_qty': new_core_rem_qty,
-							'core_state': new_core_state,
-							'mould_qty':new_mould_rem_qty, 
-							'total_mould_qty':new_total_mould_qty,
-							'mould_rem_qty': new_mould_rem_qty,
-							'mould_state':new_mould_state,
-							'pour_qty':new_pour_qty,
-							'pour_pending_qty':new_pour_pending_qty,
-							'pour_state':new_pour_state,
-							'state':new_production_status,
-							
-							
-							})
-							
-						### Fettling Inward Creation for Poured Qty ###
-						if poured_qty > 0:
-							self.fettling_inward_update(cr, uid, ids, new_item['id'],entry.id,line_item.id,poured_qty)
-							
-						
-						### Changes in Old Item ###
-						
-						### Changes in Core Qty and its Status ###
-						
-						
-						
-						old_total_core_qty = old_item_rec.total_core_qty - poured_qty
-						if old_total_core_qty >= 0:
-							old_total_core_qty = old_total_core_qty
-						else:
-							old_total_core_qty = 0
-						old_core_rem_qty = old_item_rec.qty - old_total_core_qty
-
-						if old_core_rem_qty < 0:
-							old_core_rem_qty = 0
-						else:
-							old_core_rem_qty = old_core_rem_qty
-							
-						if old_total_core_qty >= old_item_rec.qty:
-							old_core_state = 'done'
-						if old_total_core_qty < old_item_rec.qty:
-							old_core_state = 'partial'
-						if old_total_core_qty == 0:
-							old_core_state = 'pending'
-							
-						
-						### Changes in Mould Qty and its Status ###
-						
-						
-						old_total_mould_qty = old_item_rec.total_mould_qty - poured_qty
-						old_mould_rem_qty = old_item_rec.qty - old_total_mould_qty
-					
-						
-						if old_mould_rem_qty < 0:
-							old_mould_rem_qty = 0
-						else:
-							old_mould_rem_qty = old_mould_rem_qty
-							
-						if old_total_mould_qty >= old_item_rec.qty:
-							old_mould_state = 'done'
-						if old_total_mould_qty < old_item_rec.qty:
-							old_mould_state = 'partial'
-						if old_total_mould_qty == 0:
-							old_mould_state = 'pending'
-						
-					
-
-						### Changes in Pour Qty and its Status ###
-						
-						
-						if old_item_rec.pour_qty == 0:
-							old_pour_qty = 0
-						else:
-							old_pour_qty = old_item_rec.pour_qty - rem_qty
-						
-						old_pour_pending_qty = old_item_rec.pour_pending_qty - old_pour_qty
-						
-						if old_pour_qty == (old_total_mould_qty + old_mould_rem_qty):
-							old_pour_state = 'done'
-						if old_pour_qty < (old_total_mould_qty + old_mould_rem_qty):
-							old_pour_state = 'partial'
-						if old_pour_qty == 0:
-							old_pour_state = 'pending'
-						
-						
-						### Production Status Updation ###
-						if old_pour_state == 'pending':
-							if old_mould_state == 'done':
-								old_production_status = 'pour_pending'
-							else:
-								old_production_status = 'issue_done'
-						if old_pour_state == 'partial':
-							old_production_status = 'pour_pending'
-						if old_pour_state == 'done':
-							old_production_status = 'fettling_inprogress'
-						
-						allocated_wo = ''   
-						
-						print "old_item_rec.allocated_wo",old_item_rec.allocated_wo
-						print "new_item_rec.order_no",new_item_rec.order_no
-						print "poured_qty",poured_qty,type(poured_qty)
-						print "str(poured_qty)",str(poured_qty)
-						new_order_no = ''
-						if new_item_rec.order_no != False:
-							new_order_no = new_item_rec.order_no
-						else:
-							new_order_no = new_order_no
-						if old_item_rec.allocated_wo == False:
-							allocated_wo = new_order_no+'('+str(poured_qty)+')'
-						else:
-							allocated_wo = old_item_rec.allocated_wo + ',' +new_order_no+'('+str(poured_qty)+')'
-						
-						
-						old_pppp = {
-							'core_qty': old_core_rem_qty,
-							'total_core_qty': old_total_core_qty,
-							'core_rem_qty': old_core_rem_qty,
-							'core_state': old_core_state,
-							'mould_qty':old_mould_rem_qty,
-							'total_mould_qty':old_total_mould_qty,
-							'mould_rem_qty': old_mould_rem_qty,
-							'mould_state':old_mould_state,
-							'pour_qty':old_pour_qty,
-							'pour_pending_qty':old_pour_pending_qty,
-							'pour_state':old_pour_state,
-							'state':old_production_status,
-							'allocated_wo': allocated_wo
-							
-						}
-							
-						print "old_pppp",old_pppp
-						
-						production_obj.write(cr, uid, [old_item], 
-							{
-							'core_qty': old_core_rem_qty,
-							'total_core_qty': old_total_core_qty,
-							'core_rem_qty': old_core_rem_qty,
-							'core_state': old_core_state,
-							'mould_qty':old_mould_rem_qty,
-							'total_mould_qty':old_total_mould_qty,
-							'mould_rem_qty': old_mould_rem_qty,
-							'mould_state':old_mould_state,
-							'pour_qty':old_pour_qty,
-							'pour_pending_qty':old_pour_pending_qty,
-							'pour_state':old_pour_state,
-							'state':old_production_status,
-							'allocated_wo': allocated_wo
-							
-							})
-					
-				print "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv",rem_qty
-				print "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv",poured_qty
-				rem_qty = rem_qty - poured_qty  
-			
-			
-			
-			
-		return rem_qty
-		
-	
-		
-	def entry_approve(self,cr,uid,ids,context=None):
+	def pour_entry_approve(self,cr,uid,ids,context=None):
 		production_obj = self.pool.get('kg.production')
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'confirmed':
 			rem_qty = 0
 			for line_item in entry.line_ids:
-				#### Pouring Updation When User Gives Work Order ###
-				if line_item.order_line_id and line_item.order_line_id.id != False:
-		
-					rem_qty = line_item.qty
+				production_rec = self.pool.get('kg.production').browse(cr, uid, line_item.production_id.id)
+				### Checking whether it is excess qty ###
+				excess_qty = line_item.production_id.qty - (line_item.production_id.pour_qty + line_item.qty)
+				if excess_qty < 0:
+					excess_qty = (line_item.production_id.pour_qty + line_item.qty) - line_item.production_id.qty
+					### Excess Qty Updation ###
+										
 					
-					cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
-						
-						where
-						pattern_id = %s and
-						moc_id = %s and
-						mould_state in ('partial','done') and
-						pour_state in ('pending','partial') and
-						order_line_id = %s
-						
-						''',[line_item.production_id.pattern_id.id,entry.moc_id.id,line_item.order_line_id.id ])
-					wo_production_ids = cr.dictfetchall()
-					if wo_production_ids:
-						for wo_produc_item in wo_production_ids:
-							
-							if wo_produc_item['pour_qty'] == None:
-								pour_qty = 0
-							else:
-								pour_qty = wo_produc_item['pour_qty']
-								
-							woc_production_qty = wo_produc_item['total_mould_qty'] - pour_qty
-							
-							if woc_production_qty > rem_qty:
-								pouring_qty = rem_qty
-							else:
-								pouring_qty = woc_production_qty
-							
-							tot_pour_qty = pour_qty + pouring_qty
-							
-							
-							if wo_produc_item['mould_rem_qty'] > 0:
-								pour_status = 'partial'
-								status = 'issue_done'
-							if wo_produc_item['mould_rem_qty'] == 0:
-								if tot_pour_qty < wo_produc_item['total_mould_qty']:
-									pour_status = 'partial'
-									status = 'mould_com'
-								if tot_pour_qty == wo_produc_item['total_mould_qty']:
-									pour_status = 'done'
-									status = 'fettling_inprogress'
-							
-							
-							if pour_status in ('partial','done') and status in ('mould_com','fettling_inprogress','issue_done'):
-								if pour_status == 'partial':
-									production_status = 'pour_pending'
-								if pour_status == 'done':
-									production_status = 'fettling_inprogress' 
-								### Fettling Process Creation ###
-								real_poured_qty = wo_produc_item['qty'] - pour_qty
-								if real_poured_qty > rem_qty:
-									real_poured_qty = rem_qty
-								else:
-									real_poured_qty = real_poured_qty
-								
-								self.fettling_inward_update(cr, uid, ids, wo_produc_item['id'],entry.id,line_item.id,real_poured_qty)
-								production_obj.write(cr, uid, [wo_produc_item['id']], {'state': production_status})
-							
-							
-							production_obj.write(cr, uid, [wo_produc_item['id']], 
-							{
-							'pour_qty': real_poured_qty + pour_qty,
-							'pour_heat_id': entry.melting_id.id,
-							'pour_weight': line_item.weight,
-							'pour_state': pour_status,
-							'state':status,
-							'pour_remarks':line_item.remarks,
-							'pour_date':entry.entry_date,
-							})
-							
-							if real_poured_qty > rem_qty:
-								rem_qty = real_poured_qty - rem_qty
-							else:
-								rem_qty = rem_qty - real_poured_qty
-							
-							if rem_qty > 0:
-								
-								### Excess Qty Updation ###
-								
-								
-								production_rec = self.pool.get('kg.production').browse(cr, uid, line_item.production_id.id)
-								### Fettling Process Creation ###
-								fettling_obj = self.pool.get('kg.fettling')
+					### Fettling Process Creation ###
+					fettling_obj = self.pool.get('kg.fettling')
 
-								### Sequence Number Generation ###
-								fettling_name = ''  
-								fettling_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.fettling.inward')])
-								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,fettling_seq_id[0])
-								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(fettling_seq_id[0],seq_rec.code))
-								fettling_name = cr.fetchone();
-								
-								### Getting STK WO ###
-								stk_wo_id = self.pool.get('kg.work.order').search(cr,uid,[('name','=','STK WO'),('flag_for_stock','=',True)])
-								stk_wo_line_id = self.pool.get('ch.work.order.details').search(cr,uid,[('order_no','=','STK WO'),('flag_for_stock','=',True)])
-								
-								stk_wo_rec = self.pool.get('kg.work.order').browse(cr,uid,stk_wo_id[0])
-								stk_wo_line_rec = self.pool.get('ch.work.order.details').browse(cr,uid,stk_wo_line_id[0])
-								
-								fettling_vals = {
-									'name': fettling_name[0],
-									'location':production_rec.location,
-									'schedule_id':production_rec.schedule_id.id,
-									'schedule_date':production_rec.schedule_date,
-									'schedule_line_id':production_rec.schedule_line_id.id,
-									'order_id': stk_wo_id[0],
-									'order_line_id': stk_wo_line_id[0],
-									'order_no': 'STK WO',
-									'order_category': 'spare',
-									'order_priority': '8',
-									'pump_model_id':stk_wo_line_rec.pump_model_id.id,
-									'pattern_id':production_rec.pattern_id.id,
-									'pattern_code':production_rec.pattern_code,
-									'pattern_name':production_rec.pattern_name,
-									'moc_id':production_rec.moc_id.id,
-									'schedule_qty':rem_qty,
-									'production_id':production_rec.id,
-									'pour_qty':rem_qty,
-									'inward_accept_qty':rem_qty,
-									'state':'waiting',
-									'pour_id': entry.id,
-									'pour_line_id': line_item.id
-									
-									
-								}
-									
-								fettling_id = fettling_obj.create(cr, uid, fettling_vals)
-								
-								tot_pour_qty = production_rec.pour_qty + rem_qty
-								if tot_pour_qty < production_rec.total_mould_qty:
-									pour_status = 'partial'
-									status = 'mould_com'
-								if tot_pour_qty == production_rec.total_mould_qty:
-									pour_status = 'done'
-									status = 'fettling_inprogress'
-
-								production_obj.write(cr,uid,production_rec.id,{'pour_qty':tot_pour_qty,'pour_state':pour_status,'state':status})
-								
-								### Stock Inward Creation ###
-								inward_obj = self.pool.get('kg.stock.inward')
-								inward_line_obj = self.pool.get('ch.stock.inward.details')
-								
-								inward_vals = {
-									'location': production_rec.location
-								}
-								
-								inward_id = inward_obj.create(cr, uid, inward_vals)
-								
-								inward_line_vals = {
-									'header_id': inward_id,
-									'location': production_rec.location,
-									'stock_type': 'pattern',
-									'pump_model_id': production_rec.pump_model_id.id,
-									'pattern_id': production_rec.pattern_id.id,
-									'pattern_name': production_rec.pattern_name,
-									'moc_id': production_rec.moc_id.id,
-									#~ 'stage_id': production_rec.stage_id.id,
-									'qty': rem_qty,
-									'available_qty': rem_qty,
-									'each_wgt': production_rec.each_weight,
-									'total_weight': production_rec.total_weight,
-									'stock_mode': 'excess',
-									'foundry_stock_state': 'foundry_inprogress',
-									'stock_item': 'foundry_item',
-									'fettling_id': fettling_id,
-									'heat_no': entry.melting_id.name
-								}
-								
-								inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
-							
+					### Sequence Number Generation ###
+					fettling_name = ''  
+					fettling_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.fettling.inward')])
+					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,fettling_seq_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(fettling_seq_id[0],seq_rec.code))
+					fettling_name = cr.fetchone();
+					
+					### Getting STK WO ###
+					stk_wo_id = self.pool.get('kg.work.order').search(cr,uid,[('name','=','STK WO'),('flag_for_stock','=',True)])
+					stk_wo_line_id = self.pool.get('ch.work.order.details').search(cr,uid,[('order_no','=','STK WO'),('flag_for_stock','=',True)])
+					
+					stk_wo_rec = self.pool.get('kg.work.order').browse(cr,uid,stk_wo_id[0])
+					stk_wo_line_rec = self.pool.get('ch.work.order.details').browse(cr,uid,stk_wo_line_id[0])
+					
+					fettling_vals = {
+						'name': fettling_name[0],
+						'location':production_rec.location,
+						'schedule_id':production_rec.schedule_id.id,
+						'schedule_date':production_rec.schedule_date,
+						'schedule_line_id':production_rec.schedule_line_id.id,
+						'order_id': stk_wo_id[0],
+						'order_line_id': stk_wo_line_id[0],
+						'order_no': 'STK WO',
+						'order_category': 'spare',
+						'order_priority': '8',
+						'pump_model_id':stk_wo_line_rec.pump_model_id.id,
+						'pattern_id':production_rec.pattern_id.id,
+						'pattern_code':production_rec.pattern_code,
+						'pattern_name':production_rec.pattern_name,
+						'moc_id':production_rec.moc_id.id,
+						'schedule_qty':excess_qty,
+						'production_id':production_rec.id,
+						'pour_qty':excess_qty,
+						'inward_accept_qty':excess_qty,
+						'state':'waiting',
+						'pour_id': entry.id,
+						'pour_line_id': line_item.id
+						
+						
+					}
+						
+					fettling_id = fettling_obj.create(cr, uid, fettling_vals)
+					
+					production_obj.write(cr,uid,production_rec.id,{'pour_qty':production_rec.pour_qty + line_item.qty,'pour_state':'done','state':'fettling_inprogress'})
 				
 				else:
+					### Fettling creation for that item ###
+					self.fettling_inward_update(cr, uid, ids, production_rec.id,entry.id,line_item.id,line_item.qty)
+					tot_pour_qty = production_rec.pour_qty + line_item.qty
+					print "tot_pour_qty",tot_pour_qty
+					print "production_rec.total_mould_qty",production_rec.total_mould_qty
+					print "production_rec.pour_pending_qty",production_rec.pour_pending_qty
+					if tot_pour_qty < production_rec.total_mould_qty:
+						pour_status = 'partial'
+						status = 'mould_com'
+					if tot_pour_qty == production_rec.total_mould_qty:
+						pour_status = 'done'
+						status = 'fettling_inprogress'
 					
-					#### Finding the OLD WO ###
-					cr.execute(""" select id,(total_mould_qty - pour_qty) as total_mould_qty from kg_production
-						where
-						pattern_id = %s and
-						moc_id = %s and
-						mould_state in ('partial','done') and
-						pour_state in ('pending','partial') order by id asc """%(line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id))
-					old_sch_list = cr.dictfetchall();
+					production_obj.write(cr,uid,production_rec.id,{'pour_qty':tot_pour_qty,'pour_state':pour_status,'state':status})
 					
-					print "old_sch_list",old_sch_list
-					
-					rem_pour_qty = line_item.qty
-					
-					print "rem_pour_qty",rem_pour_qty
-					
-					for old_item in old_sch_list:
-					
-						if rem_pour_qty > 0:
-						
-							if old_item['total_mould_qty'] < rem_pour_qty:
-								rem_qty = old_item['total_mould_qty']
-							if old_item['total_mould_qty'] >= rem_pour_qty:
-								rem_qty = rem_pour_qty
-							if rem_pour_qty == 0:
-								rem_qty = old_item['total_mould_qty']
-							
-							
-							### First Priority ###
-							cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
-									
-									where
-									pattern_id = %s and
-									moc_id = %s and
-									pour_state in ('pending','partial') and
-									order_priority = '1'and
-									pour_pending_qty > 0
-									order by id asc
-									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-							msnc_production_ids = cr.dictfetchall()
-							if msnc_production_ids:
-								rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,msnc_production_ids,old_item['id'],rem_qty)
-								
-									
-							### Second Priority ###
-							if rem_qty > 0:
-								cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
-									
-									where
-									pattern_id = %s and
-									moc_id = %s and
-								   
-									pour_state in ('pending','partial') and
-									order_priority = '2'and
-									pour_pending_qty > 0
-									order by id asc
-									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								bd_production_ids = cr.dictfetchall()
-								if bd_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,bd_production_ids,old_item['id'],rem_qty)
-											
-							### Third Priority ###
-							if rem_qty > 0:
-								cr.execute(''' select id,order_priority,pour_pending_qty as qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
-									
-									where
-									pattern_id = %s and
-									moc_id = %s and
-								   
-									pour_state in ('pending','partial') and
-									order_priority = '3' and
-									pour_pending_qty > 0
-									
-									order by id asc
-									
-									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								emer_production_ids = cr.dictfetchall()
-								if emer_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,emer_production_ids,old_item['id'],rem_qty)
-									
-									
-									
-										
-							### Fourth Priority ###
-							if rem_qty > 0:
-								cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
-									
-									where
-									pattern_id = %s and
-									moc_id = %s and
-								   
-									pour_state in ('pending','partial') and
-									order_priority = '4'and
-									pour_pending_qty > 0
-									order by id asc
-									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								service_production_ids = cr.dictfetchall()
-								if service_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,service_production_ids,old_item['id'],rem_qty)
-											
-							### Fifth Priority ###
-							if rem_qty > 0:
-								cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
-									
-									where
-									pattern_id = %s and
-									moc_id = %s and
-								   
-									pour_state in ('pending','partial') and
-									order_priority = '5'and
-									pour_pending_qty > 0
-									order by id asc
-									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								fdync_production_ids = cr.dictfetchall()
-								if fdync_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,fdync_production_ids,old_item['id'],rem_qty)
-											
-							### Sixth Priority ###
-							
-							if rem_qty > 0:
-								cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
-									
-									where
-									pattern_id = %s and
-									moc_id = %s and
-									
-									pour_state in ('pending','partial') and
-									order_priority = '6'and
-									pour_pending_qty > 0
-									order by id asc
-									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								spare_production_ids = cr.dictfetchall()
-								if spare_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,spare_production_ids,old_item['id'],rem_qty)
-									
-							### Seventh Priority ###
-							
-							if rem_qty > 0:
-								cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
-									
-									where
-									pattern_id = %s and
-									moc_id = %s and
-									
-									pour_state in ('pending','partial') and
-									order_priority = '7'and
-									pour_pending_qty > 0
-									order by id asc
-									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								urgent_production_ids = cr.dictfetchall()
-								if urgent_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,urgent_production_ids,old_item['id'],rem_qty)
-									
-							### Eighth Priority ###
-							
-							if rem_qty > 0:
-								cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty from kg_production
-									
-									where
-									pattern_id = %s and
-									moc_id = %s and
-									
-									pour_state in ('pending','partial') and
-									order_priority = '8'and
-									pour_pending_qty > 0
-									order by id asc
-									''',[line_item.production_id.pattern_id.id,entry.moc_id.id ])
-								normal_production_ids = cr.dictfetchall()
-								if normal_production_ids:
-									rem_qty = self.priority_wise_updation(cr, uid, ids,line_item,normal_production_ids,old_item['id'],rem_qty)
-							
-							
-							rem_pour_qty = rem_pour_qty - old_item['total_mould_qty']
-					
-					
-					if rem_qty == 0:
-						rem_qty = rem_pour_qty
-					else:
-						rem_qty = rem_qty
-					print "rem_qtyrem_qtyrem_qtyrem_qtyrem_qtyrem_qtyrem_qtyrem_qtyrem_qty",rem_qty
-					
-					production_rec = self.pool.get('kg.production').browse(cr, uid, line_item.production_id.id)
-					print "qty",production_rec.qty
-					print "total_mould_qty",production_rec.total_mould_qty
-					print "pour_qty",production_rec.pour_qty
-					print "pour_pending_qty",production_rec.pour_pending_qty
-					print "pour_state",production_rec.pour_state
-					print "state",production_rec.state
-					
-					if rem_qty > 0 :
-						
-						### Excess Qty Updation ###
-								
-						
-						production_rec = self.pool.get('kg.production').browse(cr, uid, line_item.production_id.id)
-						### Fettling Process Creation ###
-						fettling_obj = self.pool.get('kg.fettling')
-
-						### Sequence Number Generation ###
-						fettling_name = ''  
-						fettling_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.fettling.inward')])
-						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,fettling_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(fettling_seq_id[0],seq_rec.code))
-						fettling_name = cr.fetchone();
-						
-						### Getting STK WO ###
-						stk_wo_id = self.pool.get('kg.work.order').search(cr,uid,[('name','=','STK WO'),('flag_for_stock','=',True)])
-						stk_wo_line_id = self.pool.get('ch.work.order.details').search(cr,uid,[('order_no','=','STK WO'),('flag_for_stock','=',True)])
-						
-						stk_wo_rec = self.pool.get('kg.work.order').browse(cr,uid,stk_wo_id[0])
-						stk_wo_line_rec = self.pool.get('ch.work.order.details').browse(cr,uid,stk_wo_line_id[0])
-						
-						
-						fettling_vals = {
-							'name': fettling_name[0],
-							'location':production_rec.location,
-							'schedule_id':production_rec.schedule_id.id,
-							'schedule_date':production_rec.schedule_date,
-							'schedule_line_id':production_rec.schedule_line_id.id,
-							'order_id': stk_wo_id[0],
-							'order_line_id': stk_wo_line_id[0],
-							'order_no': 'STK WO',
-							'order_category': 'spare',
-							'order_priority': '8',
-							'pump_model_id':stk_wo_line_rec.pump_model_id.id,
-							'pattern_id':production_rec.pattern_id.id,
-							'pattern_code':production_rec.pattern_code,
-							'pattern_name':production_rec.pattern_name,
-							'moc_id':production_rec.moc_id.id,
-							'schedule_qty':rem_qty,
-							'production_id':production_rec.id,
-							'pour_qty':rem_qty,
-							'inward_accept_qty':rem_qty,
-							'state':'waiting',
-							'pour_id': entry.id,
-							'pour_line_id': line_item.id
-							
-							
-						}
-							
-						fettling_id = fettling_obj.create(cr, uid, fettling_vals)
-						tot_pour_qty = production_rec.pour_qty + rem_qty
-						print "production_rec.pour_qty",production_rec.pour_qty
-						print "rem_qty",rem_qty
-						print "tot_pour_qty",tot_pour_qty
-						print "production_rec.total_mould_qty",production_rec.total_mould_qty
-						if tot_pour_qty < production_rec.total_mould_qty:
-							pour_status = 'partial'
-							status = 'mould_com'
-						if tot_pour_qty >= production_rec.total_mould_qty:
-							pour_status = 'done'
-							status = 'fettling_inprogress'
-						print "pour_status",pour_status
-						print "status",status
-						production_obj.write(cr,uid,production_rec.id,{'pour_qty':tot_pour_qty,'pour_state':pour_status,'state':status})
-						
-						### Stock Inward Creation ###
-						inward_obj = self.pool.get('kg.stock.inward')
-						inward_line_obj = self.pool.get('ch.stock.inward.details')
-						
-						inward_vals = {
-							'location': production_rec.location
-						}
-						
-						inward_id = inward_obj.create(cr, uid, inward_vals)
-						
-						inward_line_vals = {
-							'header_id': inward_id,
-							'location': production_rec.location,
-							'stock_type': 'pattern',
-							'pump_model_id': production_rec.pump_model_id.id,
-							'pattern_id': production_rec.pattern_id.id,
-							'pattern_name': production_rec.pattern_name,
-							'moc_id': production_rec.moc_id.id,
-							'qty': rem_qty,
-							'available_qty': rem_qty,
-							'each_wgt': production_rec.each_weight,
-							'total_weight': production_rec.total_weight,
-							'stock_mode': 'excess',
-							'foundry_stock_state': 'foundry_inprogress',
-							'stock_item': 'foundry_item',
-							'fettling_id': fettling_id
-						}
-						
-						inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
-					
-			
-			
-			#~ ### Pour Log Number ###
+			### Pour Log Number ###
 			pour_name = ''  
 			pour_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pouring.log')])
 			rec = self.pool.get('ir.sequence').browse(cr,uid,pour_seq_id[0])
 			cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(pour_seq_id[0],rec.code))
 			pour_name = cr.fetchone();
-			self.write(cr, uid, ids, {'name': pour_name[0],'state': 'approve','approve_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			self.write(cr, uid, ids, {'state': 'approve','approve_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass
 		return True
@@ -1057,7 +679,9 @@ class ch_pouring_details(osv.osv):
 		'moc_id': fields.related('header_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),  
 		### Reference table as kg_production bcoz mould completed pattern only want to display
 		'production_id': fields.many2one('kg.production','Pattern No', required=True,
-		 domain="[('mould_state','in',('partial','done')),('pour_state','in',('pending','partial')),('moc_id','=',moc_id)]"),		  
+		 domain="[('mould_state','in',('partial','done')),('pour_state','in',('pending','partial')),('moc_id','=',moc_id),('pour_pending_qty','>',0)]"),
+		'pattern_id': fields.related('production_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_state': fields.related('pattern_id','pattern_state', type='char', string='Pattern State', store=True, readonly=True),		  
 		'pattern_name':fields.char('Pattern Name'),
 		'qty':fields.integer('Qty'),
 		'weight':fields.float('Weight(Kgs)'),
@@ -1088,16 +712,13 @@ class ch_pouring_details(osv.osv):
 		pour_qty = 0
 		if production_id:
 			production_rec = self.pool.get('kg.production').browse(cr, uid, production_id, context=context)
-			if order_line_id != False:
-				if production_rec.order_line_id.id == order_line_id:
-					pour_qty = production_rec.total_mould_qty - production_rec.pour_qty
-			else:
-				pour_qty = 0
-			value = {'qty':pour_qty,'pattern_name': production_rec.pattern_name}
+			pour_qty = production_rec.pour_pending_qty
+			value = {'qty':pour_qty,'pattern_state':production_rec.pattern_id.pattern_state,'pattern_name': production_rec.pattern_name,'order_line_id': production_rec.order_line_id.id}
 		return {'value': value}
 		
 	def create(self, cr, uid, vals, context=None):
 		production_obj = self.pool.get('kg.production')
+		print "melting_id",vals.get('production_id')
 		if vals.get('production_id'):		
 			production_rec = production_obj.browse(cr, uid, vals.get('production_id') )
 			pattern_name = production_rec.pattern_name
@@ -1113,6 +734,88 @@ class ch_pouring_details(osv.osv):
 		return super(ch_pouring_details, self).write(cr, uid, ids, vals, context)  
 		
 ch_pouring_details()
+
+
+class ch_mould_details(osv.osv):
+	
+	_name = "ch.mould.details"
+	_description = "Mould Log Details"
+	
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.pouring.log', 'Pouring Log', required=True, ondelete='cascade'),
+		'order_line_id':fields.many2one('ch.work.order.details','WO No.',domain="[('state','=','confirmed')]"),
+		### Reference table as kg_production bcoz mould completed pattern only want to display
+		'production_id': fields.many2one('kg.production','Pattern No', required=True,
+		 domain="[('mould_state','in',('partial','pending'))]"),		  
+		'pattern_name':fields.char('Pattern Name'),
+		'qty':fields.integer('Qty'),
+		'weight':fields.float('Weight(Kgs)'),
+		'remarks':fields.text('Remarks'),
+		'flag_pattern_check': fields.boolean('Pattern Check'),
+		
+	}
+	
+	
+	
+	def default_get(self, cr, uid, fields, context=None):
+		return context
+	
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.qty == 0 or entry.qty < 0:
+			return False
+		if entry.weight < 0:
+			return False 
+		return True
+		
+		
+	_constraints = [		
+			  
+		(_check_values, 'System not allow to save with zero and less than zero qty .!!',['Quantity,Weight(Kgs)']),
+		
+	   ]
+	
+	def onchange_pattern_name(self, cr, uid, ids, order_line_id,production_id, context=None):
+		value = {'pattern_name': ''}
+		mould_qty = 0
+		pattern_name = ''
+		flag_pattern_check = False
+		if production_id:
+			production_rec = self.pool.get('kg.production').browse(cr, uid, production_id, context=context)
+			if order_line_id != False:
+				if production_rec.order_line_id.id == order_line_id:
+					mould_qty = production_rec.mould_rem_qty
+					pattern_name = production_rec.pattern_name
+					flag_pattern_check = production_rec.flag_pattern_check
+			else:
+				mould_qty = production_rec.mould_rem_qty
+				pattern_name = production_rec.pattern_name
+				flag_pattern_check = production_rec.flag_pattern_check
+		else:
+			mould_qty = 0
+		value = {'qty':mould_qty,'pattern_name': pattern_name,'flag_pattern_check': flag_pattern_check}
+		
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):
+		production_obj = self.pool.get('kg.production')
+		if vals.get('production_id'):		
+			production_rec = production_obj.browse(cr, uid, vals.get('production_id') )
+			pattern_name = production_rec.pattern_name
+			vals.update({'pattern_name': pattern_name})
+		return super(ch_mould_details, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		production_obj = self.pool.get('kg.production')
+		if vals.get('production_id'):		
+			production_rec = production_obj.browse(cr, uid, vals.get('production_id') )
+			pattern_name = production_rec.pattern_name
+			vals.update({'pattern_name': pattern_name})
+		return super(ch_mould_details, self).write(cr, uid, ids, vals, context)  
+		
+ch_mould_details()
 
 
 

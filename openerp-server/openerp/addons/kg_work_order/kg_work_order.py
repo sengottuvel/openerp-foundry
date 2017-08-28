@@ -49,23 +49,22 @@ class kg_work_order(osv.osv):
 		result = {}
 		
 		for entry in self.browse(cr, uid, ids, context=context):
-			cr.execute(''' select sum(qty * unit_price) from ch_work_order_details where header_id = %s
-			and  order_category = 'pump' ''',[entry.id])
+			cr.execute(''' select sum(unit_price) from ch_work_order_details where header_id = %s ''',[entry.id])
 			pump_wo_value = cr.fetchone()
 			
-			cr.execute(''' select sum(line.qty * header.unit_price) from ch_order_bom_details as line
-				left join ch_work_order_details header on header.id = line.header_id where header.header_id = %s 
-				and header.order_category='spare' ''',[entry.id])
-			spare_wo_value = cr.fetchone()
-			if pump_wo_value[0] == None:
-				pump_value = 0.00
-			else:
-				pump_value= pump_wo_value[0]
-			if spare_wo_value[0] == None:
-				spare_value = 0.00
-			else:
-				spare_value=spare_wo_value[0]
-			wo_value = pump_value + spare_value
+			#~ cr.execute(''' select sum(header.unit_price) from ch_order_bom_details as line
+				#~ left join ch_work_order_details header on header.id = line.header_id where header.header_id = %s 
+				#~ ''',[entry.id])
+			#~ spare_wo_value = cr.fetchone()
+			#~ if pump_wo_value[0] == None:
+				#~ pump_value = 0.00
+			#~ else:
+				#~ pump_value= pump_wo_value[0]
+			#~ if spare_wo_value[0] == None:
+				#~ spare_value = 0.00
+			#~ else:
+				#~ spare_value=spare_wo_value[0]
+			wo_value = pump_wo_value[0]
 			result[entry.id] = wo_value
 		return result
 
@@ -229,17 +228,36 @@ class kg_work_order(osv.osv):
 		(_check_name, 'Work Order No. must be Unique', ['']),
 	   
 		
-	   ]
+	   ]	   
 	   
-	   
-	def onchange_delivery_date(self, cr, uid, ids, delivery_date):
+	def onchange_delivery_date(self, cr, uid, ids, delivery_date,order_category,order_priority):
 		today = date.today()
 		today = str(today)
 		today = datetime.strptime(today, '%Y-%m-%d')
 		if delivery_date:
 			delivery_date = str(delivery_date)
 			delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
-			if delivery_date < today:
+			if order_category == 'spare' and order_priority == 'normal':					
+				ends_date = date.today()+timedelta(days=56)
+				end_date = ends_date.strftime('%Y-%m-%d')				
+				del_date = str(end_date)
+				ex_del_date = datetime.strptime(del_date, '%Y-%m-%d')				
+				if delivery_date < ex_del_date:
+					raise osv.except_osv(_('Warning!'),
+						_('Delivery Date should not be less than 56 days!!'))
+				else:
+					pass
+			elif order_category == 'pump' and order_priority == 'normal':				
+				ends_date = date.today()+timedelta(days=84)
+				end_date = ends_date.strftime('%Y-%m-%d')
+				del_date = str(end_date)
+				ex_del_date = datetime.strptime(del_date, '%Y-%m-%d')	
+				if delivery_date < ex_del_date:
+					raise osv.except_osv(_('Warning!'),
+						_('Delivery Date should not be less than 84 days!!'))
+				else:
+					pass			
+			elif delivery_date < today:
 				raise osv.except_osv(_('Warning!'),
 						_('Delivery Date should not be less than current date!!'))
 		return True
@@ -301,11 +319,32 @@ class kg_work_order(osv.osv):
 	def mkt_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
-			
+			if entry.name:
+				cr.execute(""" select name from kg_work_order where name  = '%s'  """ %(entry.name))
+				data = cr.dictfetchall()			
+				if len(data) > 1:
+					raise osv.except_osv(_('Warning!'),
+						_('Work Order No. must be Unique !!'))
+				else:
+					pass
+			else:
+				pass
+			for line in entry.line_ids:
+				if line.order_no:
+					cr.execute(""" select wo_order.id as order_id from kg_work_order wo_order
+						left join ch_work_order_details ch_work on ch_work.header_id = wo_order.id 
+						where ch_work.order_no  = '%s' and ch_work.header_id not in ('%s')   """ %(line.order_no,line.header_id.id))
+					data = cr.dictfetchall()			
+					if len(data) > 1:
+						raise osv.except_osv(_('Warning!'),
+							_('Line Work Order No. must be Unique !!'))
+					else:
+						pass
+				else:
+					pass
 			# Customer TIN No validation start
 			#~ if entry.partner_id.gs_tin_no:
 				#~ if len(str(entry.partner_id.gs_tin_no)) == 11 and entry.partner_id.gs_tin_no.isdigit() == True:
-				#~ if entry.partner_id.gs_tin_no.isdigit() == True:
 					#~ pass
 				#~ else:
 					#~ raise osv.except_osv(_('Warning!'),_('GS TIN No. should contain 11 digit numerics. Else system not allow to save.!'))
@@ -325,7 +364,8 @@ class kg_work_order(osv.osv):
 		if entry.state in ('draft','mkt_approved'):
 			delivery_date = str(entry.delivery_date)
 			delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
-			
+			print "delivery_date",delivery_date
+			print "today",today
 			if delivery_date < today:
 				raise osv.except_osv(_('Warning!'),
 							_('Delivery Date should not be less than current date for Order !!'))
@@ -380,7 +420,6 @@ class kg_work_order(osv.osv):
 						if entry.entry_mode == 'auto':
 							if wo_acc_prime_cost[0] > acc_item.mar_prime_cost: 
 								wo_spc_app_flag = True
-				
 				elif item.order_category == 'service':
 					wo_spc_app_flag = True
 					
@@ -535,7 +574,7 @@ class kg_work_order(osv.osv):
 			if entry.flag_data_bank == False:
 							
 				#~ number = 1
-				
+				print "entry.line_ids",entry.line_ids
 				
 				for item in entry.line_ids:
 					
@@ -579,7 +618,7 @@ class kg_work_order(osv.osv):
 
 						 """%(item.id,item.id,item.id))
 					draw_foundry_items = cr.dictfetchall();
-					
+					print "draw_foundry_items",draw_foundry_items
 					
 					for foundry_indent_item in draw_foundry_items:
 						
@@ -621,6 +660,9 @@ class kg_work_order(osv.osv):
 							
 							draw_indent_line_obj = self.pool.get('ch.drawing.indent.line')
 							
+							print "order_foundry_id",order_foundry_id
+							print "order_foundry_acc_id",order_foundry_acc_id
+							
 							foundry_indent_line_vals = {
 							
 								'header_id': foundry_indent_id,
@@ -656,6 +698,7 @@ class kg_work_order(osv.osv):
 
 						 """%(item.id,item.id))
 					draw_ms_items = cr.dictfetchall();
+					print "draw_ms_items",draw_ms_items
 					
 					for ms_indent_item in draw_ms_items:
 						
@@ -732,6 +775,7 @@ class kg_work_order(osv.osv):
 
 						 """%(item.id,item.id))
 					draw_bot_items = cr.dictfetchall();
+					print "draw_ms_items",draw_bot_items
 					
 					for bot_indent_item in draw_bot_items:
 						
@@ -793,7 +837,7 @@ class kg_work_order(osv.osv):
 							trim_dia_obj = self.pool.get('kg.trimming.dia')
 							enq_line_obj = self.pool.get('ch.kg.crm.pumpmodel')
 							enq_line_rec = enq_line_obj.browse(cr,uid,item.enquiry_line_id)
-							
+							print ":",enq_line_rec.id
 							if enq_line_rec.id > 0:
 								capacity_in = enq_line_rec.capacity_in
 								head_in = enq_line_rec.head_in
@@ -831,7 +875,7 @@ class kg_work_order(osv.osv):
 							self.pool.get('ch.order.bom.details').write(cr,uid,foundry_item.id,{'flag_trimming_dia':True})
 						
 					qc_created = 'no'
-					
+					print "item",item
 					
 					### Work Order Number Generation in Line Details
 					#~ cr.execute(''' select to_char(%s, 'FMRN') ''',[number])	  
@@ -858,6 +902,7 @@ class kg_work_order(osv.osv):
 								and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pump' and stock_mode = 'manual' 
 								order by serial_no """%(item.pump_model_id.id))
 							stock_inward_items = cr.dictfetchall();
+							print "stock_inward_items",stock_inward_items
 							
 							if stock_inward_items:
 								
@@ -937,6 +982,7 @@ class kg_work_order(osv.osv):
 														
 												}
 											
+											print "qc_vals",qc_vals	
 											
 											qc_id = qc_obj.create(cr, uid, qc_vals)
 											qc_created = 'yes'
@@ -946,7 +992,7 @@ class kg_work_order(osv.osv):
 											inward_line_obj = self.pool.get('ch.stock.inward.details')
 											
 											stock_avail_qty = stock_item['stock_qty'] - qc_qty
-											
+											print "stock_avail_qtystock_avail_qty",stock_avail_qty
 											if stock_avail_qty == 0:
 												inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
 											else:
@@ -955,10 +1001,11 @@ class kg_work_order(osv.osv):
 									
 					line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})
 					
+					print "qc_created",qc_created
 					if qc_created == 'no': 
 						order_line_ids.append(item.id)
 					
-				
+					print "order_line_ids",order_line_ids
 					#~ if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
 					#~ 
 						#~ ### Schedule Creation ###
@@ -1066,7 +1113,7 @@ class kg_work_order(osv.osv):
 							'flag_data_bank':entry.flag_data_bank
 							}
 						assembly_id = assembly_obj.create(cr, uid, ass_header_values)
-						
+						print "assembly_id//////////////////////////",assembly_id
 						### Assembly Foundry Items Creation ###
 						
 						order_bom_ids = self.pool.get('ch.order.bom.details').search(cr, uid, [('header_id','=',order_item.id)])
@@ -1086,7 +1133,7 @@ class kg_work_order(osv.osv):
 									'entry_mode': 'auto',
 									'state': 'completed'
 									}
-								
+								print "ass_foundry_vals----------------",ass_foundry_vals
 								assembly_foundry_id = assembly_foundry_obj.create(cr, uid, ass_foundry_vals)
 							
 						### Assembly MS Items Creation ###
@@ -1106,7 +1153,7 @@ class kg_work_order(osv.osv):
 									'entry_mode': 'auto',
 									'state': 'completed',
 								}
-								
+								print "ass_ms_vals----------------",ass_ms_vals
 								assembly_ms_id = assembly_ms_obj.create(cr, uid, ass_ms_vals)	
 						
 						### Assembly BOT Items Creation ###
@@ -1126,7 +1173,7 @@ class kg_work_order(osv.osv):
 								'order_bot_qty': order_bot_qty,
 								'state': 'completed',
 								}
-								
+								print "ass_bot_vals----------------",ass_bot_vals
 								assembly_bot_id = assembly_bot_obj.create(cr, uid, ass_bot_vals)
 				
 				
@@ -1165,14 +1212,15 @@ class kg_work_order(osv.osv):
 						if ms_item.flag_applicable == True:
 							ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
 							ms_item.ms_id.id,ms_item,0,order_item.moc_construction_id.id,ms_item.moc_id.id,0)
-							self.pool.get('ch.order.machineshop.details').write(cr,uid,ms_item.id,{'wo_prime_cost':ms_prime_cost * ms_item.qty})
-							primecost = ms_prime_cost * ms_item.qty
+							self.pool.get('ch.order.machineshop.details').write(cr,uid,ms_item.id,{'wo_prime_cost':ms_prime_cost})
+							primecost = ms_prime_cost
+							#~ primecost = ms_prime_cost * ms_item.qty
 							total_primecost += primecost
 				if order_item.line_ids_b:
 					for bot_item in order_item.line_ids_b:
 						if bot_item.flag_applicable == True:
 							bot_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'bot',0,
-							0,0,bot_item.bot_id.id,order_item.moc_construction_id.id,bot_item.moc_id.id,0)
+							0,0,bot_item.bot_id.id,order_item.moc_construction_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
 							self.pool.get('ch.order.bot.details').write(cr,uid,bot_item.id,{'wo_prime_cost':bot_prime_cost * bot_item.qty})
 							primecost = bot_prime_cost * bot_item.qty
 							total_primecost += primecost
@@ -1190,8 +1238,9 @@ class kg_work_order(osv.osv):
 							if acc_ms_item.is_applicable == True:
 								acc_ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
 								acc_ms_item.ms_id.id,0,0,order_item.moc_construction_id.id,acc_ms_item.moc_id.id,0)
-								self.pool.get('ch.wo.accessories.ms').write(cr,uid,acc_ms_item.id,{'wo_prime_cost':acc_ms_prime_cost * acc_ms_item.qty})
-								acc_primecost = acc_ms_prime_cost * acc_ms_item.qty
+								self.pool.get('ch.wo.accessories.ms').write(cr,uid,acc_ms_item.id,{'wo_prime_cost':acc_ms_prime_cost})
+								acc_primecost = acc_ms_prime_cost
+								#~ acc_primecost = acc_ms_prime_cost * acc_ms_item.qty
 								acc_total_primecost += acc_primecost 
 						for acc_bot_item in acc_item.line_ids_b:
 							if acc_bot_item.is_applicable == True:
@@ -1204,7 +1253,7 @@ class kg_work_order(osv.osv):
 						
 						### Accessories total primecost updation ###
 						self.pool.get('ch.wo.accessories').write(cr,uid,acc_item.id,{'wo_prime_cost':acc_total_primecost})
-						
+						print "acc_total_primecost640",acc_total_primecost
 				
 				### For Spare BOM ###
 				if order_item.line_ids_e:
@@ -1217,18 +1266,19 @@ class kg_work_order(osv.osv):
 						for spare_ms_item in spare_item.line_ids_a:
 							if spare_ms_item.is_applicable == True:
 								spare_ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
-								spare_ms_item.ms_id.id,0,0,order_item.moc_construction_id.id,spare_ms_item.moc_id.id,0)
-								self.pool.get('ch.wo.spare.ms').write(cr,uid,spare_ms_item.id,{'wo_prime_cost':spare_ms_prime_cost * spare_ms_item.qty})
+								spare_ms_item.ms_id.id,spare_ms_item,0,order_item.moc_construction_id.id,spare_ms_item.moc_id.id,0)
+								self.pool.get('ch.wo.spare.ms').write(cr,uid,spare_ms_item.id,{'wo_prime_cost':spare_ms_prime_cost})
+								#~ self.pool.get('ch.wo.spare.ms').write(cr,uid,spare_ms_item.id,{'wo_prime_cost':spare_ms_prime_cost * spare_ms_item.qty})
 						for spare_bot_item in spare_item.line_ids_b:
 							if spare_bot_item.is_applicable == True:
 								spare_bot_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'bot',0,
-								0,0,spare_bot_item.ms_id.id,order_item.moc_construction_id.id,spare_bot_item.moc_id.id,0)
+								0,0,spare_bot_item.ms_id.id,order_item.moc_construction_id.id,spare_bot_item.moc_id.id,spare_bot_item.brand_id.id)
 								self.pool.get('ch.wo.spare.bot').write(cr,uid,spare_bot_item.id,{'wo_prime_cost':spare_bot_prime_cost * spare_bot_item.qty})
 								
 						
 				### Total Pump primecost ###
 				overall_primecost = total_primecost
-				
+				print "overall_primecost",overall_primecost
 				self.pool.get('ch.work.order.details').write(cr,uid,order_item.id,{'wo_prime_cost':overall_primecost})
 		
 		return True
@@ -1345,7 +1395,7 @@ class ch_work_order_details(osv.osv):
 		'line_ids_c': fields.one2many('ch.order.consu.details', 'header_id', "Consumale Details"),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'flag_standard': fields.boolean('Non Standard'),
-		'unit_price': fields.float('Unit Price',required=True),
+		'unit_price': fields.float('WO Value',required=True),
 		### Used for Schedule Purpose
 		'schedule_status':fields.selection([('allow','Allow to Schedule'),('not_allow','Not Allow to Schedule'),('completed','Schedule Completed')],'Schedule Status', readonly=True),
 		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction Code',domain="[('active','=','t')]"),
@@ -1534,15 +1584,19 @@ class ch_work_order_details(osv.osv):
 						moc_id = False
 					wgt = 0.00	
 					if moc_id != False:
-						
+						print "moc_id",moc_id
 						moc_rec = moc_obj.browse(cr, uid, moc_id)
-						
+						print "moc_rec",moc_rec
 						if moc_rec.weight_type == 'ci':
 							wgt =  bom_details['ci_weight']
 						if moc_rec.weight_type == 'ss':
 							wgt = bom_details['pcs_weight']
 						if moc_rec.weight_type == 'non_ferrous':
 							wgt = bom_details['nonferous_weight']
+						
+						if not moc_rec.line_ids:
+							raise osv.except_osv(_('Warning!'),
+									_('Raw material are not mapped for MOC %s !!')%(moc_rec.name))
 							
 					if flag_select_all_val == True:
 						applicable = True
@@ -1560,6 +1614,7 @@ class ch_work_order_details(osv.osv):
 					#~ else:
 						#~ aplicable = False
 						#~ flag_select_all_val = False
+						
 						
 					bom_vals.append({
 														
@@ -1607,7 +1662,7 @@ class ch_work_order_details(osv.osv):
 					### Loading MOC from MOC Construction
 					
 					if moc_construction_id != False:
-						
+						print "bom_ms_details['ms_id'],moc_construction_id",bom_ms_details['ms_id'],moc_construction_id
 						cr.execute(''' select machine_moc.moc_id
 							from ch_machine_mocwise machine_moc
 							LEFT JOIN kg_moc_construction const on const.id = machine_moc.code
@@ -1643,6 +1698,10 @@ class ch_work_order_details(osv.osv):
 									'qty': raw.qty * bom_ms_qty,
 									'remarks': raw.remarks,
 									}])
+					
+					if ch_ms_vals == []:
+						raise osv.except_osv(_('Warning!'),
+								_('Raw material are not mapped for MS Item %s !!')%(bom_ms_details['name']))
 						
 					machine_shop_vals.append({
 						
@@ -1702,7 +1761,11 @@ class ch_work_order_details(osv.osv):
 						applicable = True
 					else:
 						flag_select_all_val = False
-						applicable = False	
+						applicable = False
+						
+					if not bot_rec.line_ids:
+						raise osv.except_osv(_('Warning!'),
+								_('Raw material are not mapped for BOT Item %s !!')%(bot_rec.name))
 						
 					bot_vals.append({
 						
@@ -2006,7 +2069,7 @@ class ch_work_order_details(osv.osv):
 								if qty > 0:
 									bom_qty = qty * vertical_foundry['qty']
 								
-								
+								print "vertical_foundry['header_id']",vertical_foundry['header_id']
 								if vertical_foundry['position_id'] == None:
 									raise osv.except_osv(_('Warning!'),
 									_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
@@ -2211,8 +2274,7 @@ class ch_work_order_details(osv.osv):
 							else:
 								pos_no = vertical_ms_details['pos_no']
 								
-							print "sttttttttttttttt",ms_rec.dynamic_length,ms_rec.length_type
-							
+								
 							### Dynamic Length Calculation ###
 							length = 0.00
 							a_value = 0.00
@@ -2402,8 +2464,6 @@ class ch_work_order_details(osv.osv):
 										#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5)-(NO OF STAR SUPPORT*1.5)/NO OF STAR SUPPORT+1
 										###
 										length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
-										print "vallllllllll",h_value,bp,setting_height,a_value,b_value,star_value
-										print "beforeeeeeeeeeeeeeeeeeeeeeeee",length
 										number_dec = str(length-int(length))[1:]
 										if number_dec >= 0.25 and number_dec < 0.75:
 											length = round(length, 0)
@@ -2415,7 +2475,6 @@ class ch_work_order_details(osv.osv):
 												length = (whole+0.0)
 										else:
 											length = length
-										print "middddddddddddddddddddddddddddddlength",length
 										
 								if ms_rec.length_type == 'drive_column_pipe':
 									
@@ -2524,6 +2583,7 @@ class ch_work_order_details(osv.osv):
 												pump_column_pipe = (whole+0.0)
 										else:
 											pump_column_pipe = pump_column_pipe
+										
 										length = ((vo_star_value['star']/2)-1)+pump_column_pipe+a2_value
 										
 								if ms_rec.length_type == 'drive_shaft':
@@ -3301,6 +3361,7 @@ class ch_wo_accessories(osv.osv):
 		'header_id':fields.many2one('ch.work.order.details', 'Header Id', ondelete='cascade'),
 		'access_id': fields.many2one('kg.accessories.master','Accessories',domain="[('active','=','t'),('state','not in',('draft','reject','cancal'))]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t'),('state','not in',('reject','cancal'))]"),
+		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction'),
 		'qty': fields.float('Qty'),
 		'oth_spec': fields.char('Other Specification'),
 		'load_access': fields.boolean('Load BOM'),
@@ -3316,7 +3377,11 @@ class ch_wo_accessories(osv.osv):
 		
 	}
 	
-	
+	def default_get(self, cr, uid, fields, context=None):
+		if len(context)>7:
+			if not context['moc_const_id']:
+				raise osv.except_osv(_('Warning!'),_('Kindly Configure MOC Construction !!'))
+		return context
 	
 	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
@@ -3325,25 +3390,36 @@ class ch_wo_accessories(osv.osv):
 		return True
 	
 	_constraints = [
-	
+		
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
-		
-	def onchange_load_access(self, cr, uid, ids, load_access,access_id,moc_id,qty):
+	
+	def onchange_load_access(self, cr, uid, ids, load_access,access_id,moc_const_id,qty):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
 		data_rec = ''
-		
 		if load_access == True and access_id:
+			if qty == 0:
+				raise osv.except_osv(_('Warning!'),_('Kindly Configure Qty'))
 			access_obj = self.pool.get('kg.accessories.master').search(cr, uid, [('id','=',access_id)])
 			if access_obj:
 				data_rec = self.pool.get('kg.accessories.master').browse(cr, uid, access_obj[0])
 		print"data_recdata_rec",data_rec
+		moc_id = ''
+		moc_name = ''
 		if data_rec:
 			if data_rec.line_ids_b:
 				for item in data_rec.line_ids_b:
+					pat_obj = self.pool.get('kg.pattern.master').search(cr,uid,[('id','=',item.pattern_id.id)])
+					if pat_obj:
+						pat_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pat_obj[0])
+						if pat_rec.line_ids:
+							pat_line_obj = self.pool.get('ch.mocwise.rate').search(cr,uid,[('code','=',moc_const_id),('header_id','=',pat_rec.id)])
+							if pat_line_obj:
+								pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
+								moc_id = pat_line_rec.moc_id.id
 					fou_vals.append({
 									'position_id': item.position_id.id,
 									'pattern_id': item.pattern_id.id,
@@ -3356,7 +3432,16 @@ class ch_wo_accessories(osv.osv):
 									})
 				print"fou_valsfou_vals",fou_vals
 			if data_rec.line_ids_a:
-				for item in data_rec.line_ids_a:	
+				for item in data_rec.line_ids_a:
+					ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
+					if ms_obj:
+						ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
+						if ms_rec.line_ids_a:
+							cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
+							ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.id),('header_id','=',ms_rec.id)])
+							if ms_line_obj:
+								ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
+								moc_id = ms_line_rec.moc_id.id
 					ms_vals.append({
 									'name': item.name,
 									'position_id': item.position_id.id,							
@@ -3370,7 +3455,17 @@ class ch_wo_accessories(osv.osv):
 									})
 					print"ms_valsms_vals",ms_vals	
 			if data_rec.line_ids:
-				for item in data_rec.line_ids:	
+				for item in data_rec.line_ids:
+					bot_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
+					if bot_obj:
+						bot_rec = self.pool.get('kg.machine.shop').browse(cr,uid,bot_obj[0])
+						is_bearing = bot_rec.is_bearing
+						if bot_rec.line_ids_a:
+							cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
+							bot_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.id),('header_id','=',bot_rec.id)])
+							if bot_line_obj:
+								bot_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,bot_line_obj[0])
+								moc_id = bot_line_rec.moc_id.id
 					bot_vals.append({
 									'name': item.item_name,
 									'position_id': item.position_id.id,							
@@ -3384,8 +3479,7 @@ class ch_wo_accessories(osv.osv):
 									})
 					print"bot_valsbot_vals",bot_vals	
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
-		
-		
+	
 ch_wo_accessories()
 
 
@@ -3583,11 +3677,16 @@ class ch_wo_spare_bom(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
+	
+							if not moc_rec.line_ids:
+								raise osv.except_osv(_('Warning!'),
+										_('Raw material are not mapped for MOC %s !!')%(moc_name))
+							
 						fou_vals.append({
 									'position_id': item.position_id.id,
 									'pattern_id': item.pattern_id.id,
 									'pattern_name': item.pattern_id.pattern_name,
-									'off_name': item.pattern_id.name,
+									'off_name': item.pattern_id.pattern_name,
 									'moc_id': moc_id,
 									'moc_name': moc_name,
 									'moc_changed_flag': moc_changed_flag,
@@ -3634,6 +3733,10 @@ class ch_wo_spare_bom(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
+						
+						if ch_ms_vals == []:
+							raise osv.except_osv(_('Warning!'),
+									_('Raw material are not mapped for MS Item %s !!')%(item.name))
 						ms_vals.append({
 										'name': item.name,
 										'off_name': item.name,
@@ -3671,6 +3774,9 @@ class ch_wo_spare_bom(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
+						if not bot_rec.line_ids:
+							raise osv.except_osv(_('Warning!'),
+									_('Raw material are not mapped for BOT Item %s !!')%(item_name))
 						bot_vals.append({
 										'item_name': item_name,
 										'off_name': item_name,

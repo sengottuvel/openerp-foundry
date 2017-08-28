@@ -58,6 +58,7 @@ class kg_qc_verification(osv.osv):
 		result = {}
 		total_weight = 0.00
 		for entry in self.browse(cr, uid, ids, context=context):
+			wgt = 0.00
 			if entry.moc_id.weight_type == 'ci':
 				wgt = entry.pattern_id.ci_weight
 			if entry.moc_id.weight_type == 'ss':
@@ -2092,7 +2093,7 @@ class kg_qc_verification(osv.osv):
 								
 			if qc_type == 'ms':
 				
-				reject_rem_qty = entry.reject_qty
+				reject_rem_qty = reject_qty
 				
 				cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
 				from ch_stock_inward_details  
@@ -2226,7 +2227,7 @@ class kg_qc_verification(osv.osv):
 					ms_id = self.pool.get('kg.machineshop').create(cr, uid, ms_vals)
 					
 					### Department Indent creation for rejected qty ###
-					
+					print"ref_id",ref_id
 					if ref_id.order_ms_line_id.id != False:
 						raw_header_id = ref_id.order_ms_line_id.ms_id.id
 					if ref_id.acc_ms_line_id.id != False:

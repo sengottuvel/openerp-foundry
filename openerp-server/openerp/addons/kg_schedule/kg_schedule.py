@@ -1585,6 +1585,7 @@ class kg_schedule(osv.osv):
 									'moc_id':ms_item['moc_id'],
 									'schedule_qty':reject_rem_qty,
 									'ms_sch_qty':reject_rem_qty,
+									'ms_plan_rem_qty':reject_rem_qty,
 									'ms_type': 'ms_item',
 									'ms_state': 'in_plan',
 									'state':'raw_pending',
@@ -1808,6 +1809,9 @@ class kg_schedule(osv.osv):
 								foundry_dep_indent_line_vals = {
 									'indent_id':indent_id,
 									'product_id':foundry_indent_item['product_id'],
+									'dep_id':dep_id[0],
+									'line_state':'noprocess',
+									'line_date':entry.entry_date,
 									'pattern_id':foundry_indent_item['pattern_id'],
 									'uom':product_rec.uom_id.id,
 									'qty': indent_qty,
@@ -1988,9 +1992,8 @@ class kg_schedule(osv.osv):
 											pending_qty = indent_qty
 											issue_pending_qty = indent_qty
 											flag_dynamic_length = False
-										
+											
 										#~ ### Cutting qty division by qty ###
-										print "ms_raw_rec",ms_raw_rec, cutting_qty, ms_raw_rec.temp_qty,indent_qty
 										if order_line_rec.order_category in ('pump','access'):
 											cutting_qty = cutting_qty/ms_raw_rec.temp_qty
 											indent_qty = indent_qty/ms_raw_rec.temp_qty
@@ -2003,6 +2006,9 @@ class kg_schedule(osv.osv):
 											'indent_id':indent_id,
 											'product_id':ms_indent_item['product_id'],
 											'uom':ms_indent_item['uom'],
+											'dep_id':dep_id[0],
+											'line_state':'noprocess',
+											'line_date':entry.entry_date,
 											'qty':indent_qty,
 											'pending_qty':pending_qty,
 											'issue_pending_qty':issue_pending_qty,
@@ -2155,18 +2161,34 @@ class kg_schedule(osv.osv):
 									indent_qty = bot_indent_item['indent_qty']/order_line_rec.qty
 								else:
 									indent_qty = bot_indent_item['indent_qty']
-								print "bot_order_rec",bot_order_rec
+								
+								### Cutting qty calculation for Two dimensional product ###
+								length = 0
+								breadth = 0
+								cutting_qty = 0
+								if ms_raw_rec.uom_conversation_factor == 'two_dimension':
+									length = ms_raw_rec.length
+									breadth = ms_raw_rec.breadth
+									cutting_qty = ms_raw_rec.temp_qty
+								
 								bot_dep_indent_line_vals = {
 									'indent_id':indent_id,
 									'product_id':bot_indent_item['product_id'],
 									'uom':bot_indent_item['uom'],
+									'dep_id':dep_id[0],
+									'line_state':'noprocess',
+									'line_date':entry.entry_date,
 									'qty': indent_qty,
 									'pending_qty': indent_qty,
 									'issue_pending_qty': indent_qty,
 									'ms_bot_id':ms_bot_id,
 									'fns_item_name':fns_item_name,
 									'brand_id':brand_id,
-									'moc_id': bot_indent_item['moc_id']
+									'moc_id': bot_indent_item['moc_id'],
+									'cutting_qty': cutting_qty,
+									'length': length,
+									'breadth': ms_raw_rec.breadth,
+									'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, bot_dep_indent_line_vals)

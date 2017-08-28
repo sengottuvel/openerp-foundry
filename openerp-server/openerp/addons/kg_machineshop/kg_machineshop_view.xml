@@ -298,6 +298,73 @@
 		
 	<!-- Tree View End -->
 	
+	
+	<!--Issue Pending List Tree View Start -->
+		
+		<record id="t_tree_v_ms_issue_pending_list" model="ir.ui.view">
+			<field name="name">Issue Pending List Tree</field>
+			<field name="model">kg.machineshop</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="MS Schedule List Tree" create="false">					
+					<field name="name" invisible="1"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_category" invisible="1"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id" invisible="1"/>
+					<field name="pattern_name" invisible="1"/>
+					<field name="item_code" />
+					<field name="item_name"/>
+					<field name="moc_id"/>
+					<field name="location" invisible="1"/>
+					<field name="ms_sch_qty" sum="Total Schedule Qty"/>
+					<field name="oth_spec"/>
+					
+					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Issue Pending List Tree View End -->
+	
+	<!-- Issue Pending List Search View Start -->
+
+		<record id="t_search_v_ms_issue_pending_list" model="ir.ui.view">
+			<field name="name">Issue Pending List Search</field>
+			<field name="model">kg.machineshop</field>
+			<field name="arch" type="xml">
+				<search string="Daily Planning Entry Search">
+					<field name="order_no" string="Order No."  filter_domain="[('order_no','ilike',self)]" />			
+					<separator/>
+					<group expand="0" string="Group By...">
+						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+		
+	<!-- Issue Pending List Search View End -->	
+	
+	<!-- Issue Pending List Menu Action Start-->
+	
+	<record id="tma_ms_issue_pending_list" model="ir.actions.act_window">
+		<field name="name">Issue Pending List</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">kg.machineshop</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree</field>
+		<field name="context">{}</field>
+		<field name="view_id" ref="t_tree_v_ms_issue_pending_list"/>
+		<field name="search_view_id" ref="t_search_v_ms_issue_pending_list"/>
+		<field name="domain">[('state','=','raw_pending')]</field>
+	</record>
+	
+	<!--Issue Pending List Menu Action Start-->
+	
+	
+	
 	<!-- Tree View Start -->
 		
 		<record id="t_tree_v_ms_unsch_list" model="ir.ui.view">
@@ -823,7 +890,7 @@
 							<field name="head_in" readonly="1"/>
 							<field name="bkw_water" readonly="1"/>
 							<field name="efficiency_in" readonly="1"/>
-							<field name="trimming_dia" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="trimming_dia" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 							<field name="oth_spec"/>
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
 						</group>					
@@ -943,7 +1010,7 @@
 		<menuitem action="tma_ms_unsch_list" id="tam_ms_unsch_list" parent="tpm_ms_process" sequence="3" />
 		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="4" />
-		
+		<menuitem action="tma_ms_issue_pending_list" id="tam_ms_sch_pending_list" parent="tpm_ms_process" sequence="4" />
 		
 		
 	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="4"/>

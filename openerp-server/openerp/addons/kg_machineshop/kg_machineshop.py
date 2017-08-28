@@ -686,7 +686,7 @@ class kg_trimming_dia(osv.osv):
 		'speed_in_rpm': fields.float('Speed in RPM-Pump'),
 		'efficiency_in': fields.float('Efficiency in % Wat'),
 		'motor_kw': fields.float('Motor KW'),
-		'trimming_dia': fields.char('Trimming Dia'),
+		'trimming_dia': fields.float('Trimming Dia'),
 		'old_ref': fields.char('Old reference'),
 		
 		'entry_date': fields.date('Entry Date',required=True),

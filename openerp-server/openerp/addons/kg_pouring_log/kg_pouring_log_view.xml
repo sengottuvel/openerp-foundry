@@ -2,7 +2,7 @@
 <openerp>
 	<data>
 	
-	<!-- Form View Start -->
+	 <!--Form View Start -->
 
 		<record id="t_form_v_pouring_log" model="ir.ui.view">
 			<field name="name">Pouring Log Form</field>
@@ -10,34 +10,36 @@
 			<field name="arch" type="xml">
 				<form string="Pouring Updates" version="7.0">
 					<header>
-						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="pour_entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="pour_entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<group>
 						<group>
 							<field name="name" readonly="1"/>
-							<field name="melting_id" on_change="onchange_melting_id(melting_id)" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-							<field name="shift_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="melting_id" on_change="onchange_melting_id(melting_id)" attrs="{'required':[('type','=','pour')],'readonly': [('state','not in',['draft'])]}"/>
+							<field name="shift_id" attrs="{'required':[('type','=','pour')],'readonly': [('state','not in',['draft'])]}"/>
 							<field name="pour_close_team" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 						</group>											
 						<group>
 							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-							<field name="moc_id" required="1" readonly="1"/>
+							<field name="moc_id"  attrs="{'required':[('type','=','pour')]}" readonly="1"/>
 							<field name="supervisor" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							<field name="type" invisible="1"/>	
 						</group>					
 					</group>
 					<notebook>
 						<page string="Pouring Details">	
 							<field name="line_ids"  context="{'moc_id':moc_id}" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
-								<tree string="Pouring Details Entry Tree" editable="top" >									
-									<field name="order_line_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>																					
-									<field name="production_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>																				
+								<tree string="Pouring Details Entry Tree" editable="top" >																													
+									<field name="production_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>
+									<field name="order_line_id" readonly="1"/>																				
 									<field name="pattern_name" readonly="1"/>				   
 									<field name="qty" required="1"/>
-									<field name="weight"/>
+									<field name="weight" attrs="{'required':[('pattern_state','=','new_develop')]}"/>
 									<field name="remarks" widget="char"/>														
+									<field name="pattern_state" invisible="1"/>														
 								</tree>
 							</field>																								
 						</page>
@@ -115,22 +117,182 @@
 		</record>
 		
 	<!-- Search View End -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_mould_update" model="ir.ui.view">
+			<field name="name">Mould Log Form</field>
+			<field name="model">kg.pouring.log</field>
+			<field name="arch" type="xml">
+				<form string="Mould Update" version="7.0">
+					<header>
+						<button name="mould_entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="mould_entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<group>
+						<group>
+							<field name="mould_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="mould_shift_id" attrs="{'required':[('type','!=','pour')],'readonly': [('state','not in',['draft'])]}"/>
+							<field name="mould_operator" attrs="{'required':[('mould_by','=','comp_employee'),('type','!=','pour')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','not in',['draft'])]}"/>
+							<field name="mould_moulder" string="Moulder Count"  attrs="{'required':[('mould_by','=','comp_employee'),('type','!=','pour')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','not in',['draft'])]}"/>
+							<field name="mould_hardness" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="mould_remarks" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+						</group>											
+						<group>
+							<field name="mould_by" attrs="{'required':[('type','!=','pour')],'readonly': [('state','not in',['draft'])]}"/>
+							<field name="mould_contractor" attrs="{'required':[('mould_by','=','contractor'),('type','!=','pour')],'invisible':[('mould_by','!=','contractor')],'readonly': [('state','not in',['draft'])]}"/>
+							<field name="mould_helper" string="Helper Count" attrs="{'required':[('mould_by','=','comp_employee'),('type','!=','pour')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','not in',['draft'])]}"/>
+<!--
+							<field name="mould_box_id" readonly="1"/>
+-->
+							<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
+							<field name="type" invisible="1"/>	
+						</group>										
+					</group>
+					<notebook>
+						<page string="Mould Details">	
+							<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Mould Details Entry Tree" editable="top" >									
+									<field name="order_line_id" attrs="{'required': [('flag_pattern_check','=', True)]}" 
+										on_change="onchange_pattern_name(order_line_id,production_id)"/>																					
+									<field name="production_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>																				
+									<field name="pattern_name" readonly="1"/>				   
+									<field name="qty" required="1"/>
+									<field name="weight"/>
+									<field name="remarks" widget="char"/>														
+									<field name="flag_pattern_check" invisible="1"/>														
+								</tree>
+							</field>																								
+						</page>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
+									<field name="approve_user_id" attrs="{'invisible':[('state','not in',['approve'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
+									<field name="approve_date" attrs="{'invisible':[('state','not in',['approve'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>	
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_mould_update" model="ir.ui.view">
+			<field name="name">Mould Log Tree</field>
+			<field name="model">kg.pouring.log</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed'"
+				toolbar="True" string="Mould Log">
+					<field name="mould_date"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_mould_update" model="ir.ui.view">
+            <field name="name">Mould Updates</field>
+            <field name="model">kg.pouring.log</field>
+            <field name="arch" type="xml">
+                <search string="Mould Log">
+					<field name="mould_date" string="Mould date"  filter_domain="[('mould_date','ilike',self)]" />
+					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>						
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="mould_date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'mould_date'}"/>
+                   
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
 			
 	
 	<!-- Menu Action Start-->	
 		
+		
+	
 		<record id="tma_pouring_log" model="ir.actions.act_window">
 			<field name="name">Pouring Updates</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.pouring.log</field>
 			<field name="view_type">form</field>
-			<field name="context">{}</field>
-			<field name="view_id" ref="t_form_v_pouring_log"/>
 			<field name="search_view_id" ref="t_search_v_pouring_log"/>
 			<field name="context">{"search_default_draft":1}</field>
+			<field name="domain">[('type','=','pour')]</field>
 		</record>
 		
-	<!-- Menu Action End-->
+		 <record model="ir.actions.act_window.view" id="tma_pouring_log_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_pouring_log"/>
+            <field name="act_window_id" ref="tma_pouring_log"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_pouring_log_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_pouring_log"/>
+            <field name="act_window_id" ref="tma_pouring_log"/>
+        </record>
+        
+    <!-- Menu Action End-->
+    
+	<!-- Menu Action Start-->	
+		
+
+		<record id="tma_mould_update" model="ir.actions.act_window">
+			<field name="name">Mould Updates</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.pouring.log</field>
+			<field name="view_type">form</field>
+			<field name="search_view_id" ref="t_search_v_mould_update"/>
+			<field name="context">{"search_default_draft":1}</field>
+			<field name="domain">[('type','=',False)]</field>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_mould_update_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_mould_update"/>
+            <field name="act_window_id" ref="tma_mould_update"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_mould_update_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_mould_update"/>
+            <field name="act_window_id" ref="tma_mould_update"/>
+        </record>
+        
+    <!-- Menu Action End-->
+	
 	
 	<!-- Sequence Number Setting Starts Here -->
 	
@@ -162,12 +324,19 @@
             <field name="state">subscribed</field>              
         </record>
         
+        <record id="audit_mould_details" model="audittrail.rule">
+            <field name="name">Audit Log Mould Details</field>
+            <field name="object_id" eval="ref('kg_pouring_log.model_ch_mould_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
    <!--  Audit Log Xml Data End-->
 
 	<!-- Menu Item Start -->
 	
 		<!-- Pouring Log  -->
 		<menuitem action="tma_pouring_log" id="tam_pouring_log" parent="kg_stock_inward.tpm_planning_transactions" sequence="12"/>
+		<menuitem action="tma_mould_update" id="tam_mould_update" parent="kg_stock_inward.tpm_planning_transactions" sequence="11"/>
 	
 	<!-- Menu Item End -->
 		
