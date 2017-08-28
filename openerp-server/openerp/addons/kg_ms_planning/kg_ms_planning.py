@@ -49,7 +49,7 @@ class kg_ms_daily_planning(osv.osv):
 		'line_ids': fields.one2many('ch.ms.daily.planning.details', 'header_id', "Planning Details"),
 		
 		'ms_line_ids':fields.many2many('kg.machineshop','m2m_ms_planning_details' , 'planning_id', 'ms_id', 'MS Details',
-			domain="[('state','=','accept'),'&',('ms_plan_rem_qty','>',0),'&',('flag_trimming_dia','=', False)]"),
+			domain="[('state','in',('accept','raw_pending')),'&',('ms_plan_rem_qty','>',0),'&',('flag_trimming_dia','=', False)]"),
 		'flag_planning': fields.boolean('Schedule'),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -166,6 +166,40 @@ class kg_ms_daily_planning(osv.osv):
 		
 		return True
 		
+	def ms_planning_mail(self,cr,uid,ids,obj,context=None):
+		cr.execute("""select ms_daily_planning_confirm('MS Daily Planning',"""+str(obj.id)+""")""")
+		data = cr.fetchall();
+		if data[0][0] is None:
+			return False
+		if data[0][0] is not None:	
+			maildet = (str(data[0])).rsplit('~');
+			cont = data[0][0].partition('UNWANTED.')		
+			email_from = maildet[1]	
+			if maildet[2]:	
+				email_to = [maildet[2]]
+			else:
+				email_to = ['']			
+			if maildet[3]:
+				email_cc = [maildet[3]]	
+			else:
+				email_cc = ['']		
+			ir_mail_server = self.pool.get('ir.mail_server')
+			if maildet[4] != '':
+				msg = ir_mail_server.build_email(
+					email_from = email_from,
+					email_to = email_to,
+					subject = maildet[4],
+					body = cont[0],
+					email_cc = email_cc,
+					object_id = ids and ('%s-%s' % (ids, 'kg.mail.settings')),
+					subtype = 'html',
+					subtype_alternative = 'plain')
+				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
+			else:
+				pass
+		
+		return True
+	
 		
 	def entry_confirm(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr,uid,ids[0])
@@ -1174,7 +1208,7 @@ class kg_ms_daily_planning(osv.osv):
 						'total_qty': header_sc_qty,
 						'pending_qty': header_sc_qty,
 						'actual_qty': header_sc_qty,
-						'contractor_id': False,
+						#~ 'contractor_id': sc_item.contractor_id.id,
 						
 					}
 					
@@ -1240,9 +1274,9 @@ class kg_ms_daily_planning(osv.osv):
 			plan_name = cr.fetchone();	
 			self.write(cr, uid, ids, {'name':plan_name[0],'state': 'confirmed','flag_swap_inhouse':False,'flag_swap_sc':False,
 			'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			self.ms_planning_mail(cr,uid,ids,entry_rec,context)
 		else:
 			pass				
-			
 		
 		return True
 	
