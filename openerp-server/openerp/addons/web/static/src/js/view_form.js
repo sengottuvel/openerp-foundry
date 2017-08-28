@@ -221,8 +221,34 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             }
          });
         this.trigger('form_view_loaded', data);
+        this.keys();
         return $.when();
     },
+    keys:function(){
+		var self = this;
+		$(document).on('keydown', null, 'left', function(){			
+			$(self.$pager).find('.oe_pager_group li:first-child a').trigger('click');
+		});
+		$(document).on('keydown', null, 'right', function(){			
+			$(self.$pager).find('.oe_pager_group li:last-child a').trigger('click');
+		});
+		$(document).on('keydown', null, 'alt+a', function(){
+			var ele = $(self.ViewManager)[0].$el.find('.oe_view_manager_view_form header .dummy_class').hasClass('oe_form_invisible');
+			if(!ele){				
+				$(self.ViewManager)[0].$el.find('.oe_view_manager_view_form header .dummy_class').trigger('click');
+				//$(self.$pager).find('.oe_pager_group li:last-child a').trigger('click');
+			}else{
+				
+			}
+		});
+		$(document).on('keydown', null, 'ctrl+v', function(){
+			if(self.ViewManager.active_view == 'form'){
+				$(self.ViewManager)[0].$el.find('.oe_view_manager_header .oe_view_manager_switch li:first-child a').trigger('click')
+			}else{
+				$(self.ViewManager)[0].$el.find('.oe_view_manager_header .oe_view_manager_switch li:last-child a').trigger('click')
+			}			
+		});		
+	},
     widgetFocused: function() {
         // Clear click flag if used to focus a widget
         this.__clicked_inside = false;

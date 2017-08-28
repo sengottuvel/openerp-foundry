@@ -33,6 +33,7 @@ This module provides the core of the OpenERP Web Client.
         "static/lib/jquery.ui.notify/js/jquery.notify.js",
         "static/lib/jquery.deferred-queue/jquery.deferred-queue.js",
         "static/lib/jquery.scrollTo/jquery.scrollTo-min.js",
+        "static/lib/jquery.hotkeys/jquery.hotkeys.js",
         "static/lib/jquery.tipsy/jquery.tipsy.js",
         "static/lib/jquery.textext/jquery.textext.js",
         "static/lib/jquery.timeago/jquery.timeago.js",
