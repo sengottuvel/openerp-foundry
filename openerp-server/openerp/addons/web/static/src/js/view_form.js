@@ -241,7 +241,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
 				
 			}
 		});
-		$(document).on('keydown', null, 'ctrl+v', function(){
+		$(document).on('keydown', null, 'alt+v', function(){
 			if(self.ViewManager.active_view == 'form'){
 				$(self.ViewManager)[0].$el.find('.oe_view_manager_header .oe_view_manager_switch li:first-child a').trigger('click')
 			}else{
