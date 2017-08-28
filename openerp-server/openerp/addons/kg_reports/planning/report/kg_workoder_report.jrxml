@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="3086"/>
+	<property name="ireport.y" value="48"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -134,7 +134,7 @@ select label_val,content from  ch_crm_pump
 
 where header_id in  (
 
-select enquiry_line_id from ch_work_order_details where id = $P{wo_line_id} ) ]]>
+select enquiry_line_id from ch_work_order_details where id = $P{wo_line_id} )]]>
 		</queryString>
 		<field name="label_val" class="java.lang.String"/>
 		<field name="content" class="java.lang.String"/>
@@ -727,7 +727,9 @@ select label_val from  ch_crm_pump
 
 where header_id in  (
 
-select enquiry_line_id from ch_work_order_details where id = wo_line.id ) limit 1) as extra_field
+select enquiry_line_id from ch_work_order_details where id = wo_line.id )
+
+limit 1) as extra_field
 
 
 from ch_work_order_details wo_line
@@ -750,7 +752,7 @@ left join kg_qap_plan qap on qap.id = pump_crm.qap_plan_id
 left join kg_pumpseries_master pumpseries on pumpseries.id = pump_crm.pumpseries_id
 left join kg_primemover_master primemover on primemover.id = pump_crm.primemover_id
 
-where wo_line.id in (select id from ch_work_order_details where header_id = $P{wo_line_ids} )]]>
+where wo_line.id in (select id from ch_work_order_details where header_id = 1861 )]]>
 	</queryString>
 	<field name="new_date" class="java.lang.String"/>
 	<field name="id" class="java.lang.Integer"/>
@@ -1017,19 +1019,6 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 					<textFieldExpression><![CDATA[$F{order_priority}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="243" y="137" width="75" height="18" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Justified" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[ED Clearance: ]]></text>
-				</staticText>
-				<staticText>
 					<reportElement mode="Transparent" x="243" y="116" width="75" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
@@ -1176,21 +1165,8 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 					</textElement>
 					<textFieldExpression><![CDATA[$F{road_permit}]]></textFieldExpression>
 				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="318" y="137" width="81" height="18"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
-				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="399" y="137" width="54" height="18" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="243" y="137" width="156" height="18" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1203,7 +1179,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 					<text><![CDATA[QAP:]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="453" y="137" width="112" height="18"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="399" y="137" width="166" height="18"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -3251,7 +3227,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 	<group name="End Group">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 	</group>
-	<group name="Spare header group" keepTogether="true">
+	<group name="Spare header group">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
 			<band height="32">
@@ -3324,7 +3300,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 			</band>
 		</groupHeader>
 	</group>
-	<group name="Spare Group" keepTogether="true">
+	<group name="Spare Group">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
 			<band height="15">
@@ -3400,7 +3376,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 			</band>
 		</groupHeader>
 	</group>
-	<group name="Accessories Header Group" keepTogether="true">
+	<group name="Accessories Header Group">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
 			<band height="35">
@@ -3460,7 +3436,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 			</band>
 		</groupHeader>
 	</group>
-	<group name="Accessories Group" keepTogether="true">
+	<group name="Accessories Group">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
 			<band height="15">
@@ -3520,7 +3496,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 			</band>
 		</groupHeader>
 	</group>
-	<group name="Remarks Group" keepTogether="true">
+	<group name="Remarks Group">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
 			<band height="144">
@@ -3532,7 +3508,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id = $P{w
 						<bottomPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
-					<textElement markup="html" >
+					<textElement markup="html">
 						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>

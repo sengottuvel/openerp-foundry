@@ -13,7 +13,15 @@
         header="False"
         />
         
-        
+         <report string="Proforma Invoice Copy"
+        model="kg.sale.invoice"
+        auto="True"
+        name="onscreen_proforma_invoice_report"
+        rml="kg_sale_invoice/reports/kg_proforma_invoice_copy.jrxml"
+        id="proforma_invoice_jasper_report_menu" 
+        menu="True"
+        header="False"
+        />
        
 
 
