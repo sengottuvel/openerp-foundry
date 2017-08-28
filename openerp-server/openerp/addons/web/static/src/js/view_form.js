@@ -232,14 +232,22 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
 		$(document).on('keydown', null, 'right', function(){			
 			$(self.$pager).find('.oe_pager_group li:last-child a').trigger('click');
 		});
+		//~ $(document).on('keydown', null, 'alt+a', function(){
+			//~ var ele = $(self.ViewManager)[0].$el.find('.oe_view_manager_view_form header .dummy_class').hasClass('oe_form_invisible');
+			//~ if(!ele){				
+				//~ $(self.ViewManager)[0].$el.find('.oe_view_manager_view_form header .dummy_class').trigger('click');
+				//~ //$(self.$pager).find('.oe_pager_group li:last-child a').trigger('click');
+			//~ }else{
+				//~ 
+			//~ }
+		//~ });
 		$(document).on('keydown', null, 'alt+a', function(){
-			var ele = $(self.ViewManager)[0].$el.find('.oe_view_manager_view_form header .dummy_class').hasClass('oe_form_invisible');
-			if(!ele){				
-				$(self.ViewManager)[0].$el.find('.oe_view_manager_view_form header .dummy_class').trigger('click');
-				//$(self.$pager).find('.oe_pager_group li:last-child a').trigger('click');
+			var ele = $(self.ViewManager)[0].$el.find('.oe_view_manager_view_form header button span:contains("Approve"):visible').length;			
+			if(ele != 0){				
+				$(self.ViewManager)[0].$el.find('.oe_view_manager_view_form header button span:contains("Approve")').parent().trigger('click');
 			}else{
 				
-			}
+			}			
 		});
 		$(document).on('keydown', null, 'alt+v', function(){
 			if(self.ViewManager.active_view == 'form'){
