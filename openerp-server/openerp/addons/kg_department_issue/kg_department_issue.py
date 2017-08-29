@@ -1053,11 +1053,12 @@ class kg_department_issue_line(osv.osv):
 	def default_get(self, cr, uid, fields, context=None):
 		print"contextcontextcontext",context
 		if len(context)>7:
-			if context['dep_id']:
-				dep_rec = self.pool.get('kg.depmaster').browse(cr,uid,context['dep_id'])
-				context['dep_code'] = dep_rec.name
-			else:
-				raise osv.except_osv(_('Warning!'),_('Without Department you cannot issue the items!!'))
+			if context.get('dep_id'):
+				if context['dep_id']:
+					dep_rec = self.pool.get('kg.depmaster').browse(cr,uid,context['dep_id'])
+					context['dep_code'] = dep_rec.name
+				else:
+					raise osv.except_osv(_('Warning!'),_('Without Department you cannot issue the items!!'))
 		return context
 	
 	def onchange_product_id(self, cr, uid, ids, product_id,context=None):
