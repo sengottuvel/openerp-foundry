@@ -2677,7 +2677,7 @@ from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True)
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null))
 
 )as tot]]>
 		</queryString>
@@ -4044,7 +4044,7 @@ from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True)
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null))
 
 ) as ttaota]]>
 		</queryString>
@@ -4323,7 +4323,7 @@ from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True]]>
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)]]>
 		</queryString>
 		<field name="acc_name" class="java.lang.String"/>
 		<field name="net_amount" class="java.lang.Integer"/>
@@ -4481,7 +4481,7 @@ from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True]]>
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)]]>
 		</queryString>
 		<field name="acc_name" class="java.lang.String"/>
 		<field name="book_val" class="java.lang.Integer"/>

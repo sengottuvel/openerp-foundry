@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cd_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000008"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="48"/>
 	<subDataset name="dataset1">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
@@ -1634,7 +1634,7 @@ from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
 
 )as tot
 )
@@ -2645,7 +2645,7 @@ from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
 
 )as tot
 
@@ -2778,7 +2778,7 @@ from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True]]>
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)]]>
 		</queryString>
 		<field name="acc_name" class="java.lang.String"/>
 		<field name="net_amount" class="java.math.BigDecimal"/>
@@ -2862,7 +2862,7 @@ from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True]]>
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)]]>
 		</queryString>
 		<field name="acc_name" class="java.lang.String"/>
 		<field name="book_val" class="java.lang.Integer"/>
