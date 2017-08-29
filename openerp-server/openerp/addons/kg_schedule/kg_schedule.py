@@ -273,7 +273,7 @@ class kg_schedule(osv.osv):
 								}
 								
 								if flag_allocate == True:
-									sch_qty = bom_item.qty - tot_stock
+									sch_qty = sch_bom_qty - tot_stock
 									if sch_qty < 0:
 										sch_qty = 0
 									else:
@@ -284,6 +284,7 @@ class kg_schedule(osv.osv):
 								
 								allocation_id = allocation_line_obj.create(cr, uid, allocation_item_vals)
 								print "allocation_item_vals",allocation_item_vals
+				
 				### Creating Schedule items for Purpose Accessories ###
 				for acc_item in order_item.line_ids_d:
 					for acc_bom_item in acc_item.line_ids:
@@ -1730,7 +1731,7 @@ class kg_schedule(osv.osv):
 						### Getting Pump Model Qty ###
 						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, foundry_pm_item['order_line_id'])
 						
-						for indent_header in range(order_line_rec.qty): 
+						for indent_header in range(order_line_rec.pump_rem_qty): 
 						
 							### Creation of Department Indent Header ###
 						
@@ -1866,7 +1867,7 @@ class kg_schedule(osv.osv):
 						### Getting Pump Model Qty ###
 						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, ms_pm_item['order_line_id'])
 						
-						for indent_header in range(order_line_rec.qty): 
+						for indent_header in range(order_line_rec.pump_rem_qty): 
 							### Creation of Department Indent Header ###
 							
 							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
@@ -1994,9 +1995,13 @@ class kg_schedule(osv.osv):
 											flag_dynamic_length = False
 											
 										#~ ### Cutting qty division by qty ###
-										if order_line_rec.order_category in ('pump','access'):
-											cutting_qty = cutting_qty/ms_raw_rec.temp_qty
-											indent_qty = indent_qty/ms_raw_rec.temp_qty
+										if ms_indent_item['type'] == 'foun':
+											if order_line_rec.order_category in ('pump','access'):
+												cutting_qty = cutting_qty/order_line_rec.qty
+												indent_qty = indent_qty/order_line_rec.qty
+											else:
+												cutting_qty = cutting_qty
+												indent_qty = indent_qty
 										else:
 											cutting_qty = cutting_qty
 											indent_qty = indent_qty
@@ -2070,7 +2075,7 @@ class kg_schedule(osv.osv):
 						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, bot_pm_item['order_line_id'])
 						
 						print "order_line_rec",order_line_rec
-						for indent_header in range(order_line_rec.qty): 
+						for indent_header in range(order_line_rec.pump_rem_qty): 
 				
 							### Creation of Department Indent Header ###
 							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP3')])
@@ -2430,7 +2435,7 @@ class ch_schedule_details(osv.osv):
 		order_bomline_obj = self.pool.get('ch.order.bom.details')
 		order_line_obj = self.pool.get('ch.work.order.details')
 		for rec in self.browse(cr,uid,ids):	
-			if rec.state != 'draft':			
+			if rec.header_id.state != 'draft':			
 				raise osv.except_osv(_('Warning!'),
 						_('You can not delete Schedule Details after confirmation !!'))
 			else:

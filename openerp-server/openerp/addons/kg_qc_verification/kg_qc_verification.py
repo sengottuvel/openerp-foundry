@@ -2453,6 +2453,7 @@ class kg_qc_verification(osv.osv):
 									}
 								assembly_id = assembly_obj.create(cr, uid, ass_header_values)
 								print "assembly_id//////////////////////////",assembly_id
+								
 								### Assembly Foundry Items Creation ###
 								
 								order_bom_ids = self.pool.get('ch.order.bom.details').search(cr, uid, [('header_id','=',entry.order_line_id.id)])
@@ -2513,7 +2514,7 @@ class kg_qc_verification(osv.osv):
 										assembly_bot_id = assembly_bot_obj.create(cr, uid, ass_bot_vals)
 				
 				
-					
+				print "entry.reject_qtyentry.reject_qty",entry.reject_qty
 				if entry.reject_qty > 0:
 					
 					order_line_ids = []
@@ -2605,8 +2606,7 @@ class kg_qc_verification(osv.osv):
 							elif stock_inward_items == []:
 								
 								print "entry.order_line_id.qty",entry.order_line_id.qty
-								print "reject_qty",reject_qty
-								pump_rem_qty = entry.order_line_id.pump_rem_qty + reject_qty
+								pump_rem_qty = entry.reject_qty
 								print "pump_rem_qty",pump_rem_qty
 								self.pool.get('ch.work.order.details').write(cr, uid, entry.order_line_id.id, {'pump_rem_qty':pump_rem_qty})
 								

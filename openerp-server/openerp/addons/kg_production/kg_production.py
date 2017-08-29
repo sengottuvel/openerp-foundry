@@ -62,6 +62,7 @@ class kg_production(osv.osv):
 	def _get_total_weight(self, cr, uid, ids, field_name, arg, context=None):
 		result = {}
 		total_weight = 0.00
+		wgt = 0.00
 		for entry in self.browse(cr, uid, ids, context=context):
 			if entry.moc_id.weight_type == 'ci':
 				wgt = entry.pattern_id.ci_weight

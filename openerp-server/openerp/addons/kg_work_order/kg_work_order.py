@@ -319,29 +319,36 @@ class kg_work_order(osv.osv):
 	def mkt_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
-			if entry.name:
-				cr.execute(""" select name from kg_work_order where name  = '%s'  """ %(entry.name))
-				data = cr.dictfetchall()			
-				if len(data) > 1:
+			today = time.strftime('%Y-%m-%d')
+			todays_date = str(today)
+			today_date = datetime.strptime(todays_date, '%Y-%m-%d')		
+			delivery_date = str(entry.delivery_date)
+			delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
+			if entry.order_category == 'spare' and entry.order_priority == 'normal':					
+				ends_date = date.today()+timedelta(days=56)
+				end_date = ends_date.strftime('%Y-%m-%d')				
+				del_date = str(end_date)
+				ex_del_date = datetime.strptime(del_date, '%Y-%m-%d')				
+				if delivery_date < ex_del_date:
 					raise osv.except_osv(_('Warning!'),
-						_('Work Order No. must be Unique !!'))
+						_('Delivery Date should not be less than 56 days!!'))
 				else:
 					pass
-			else:
-				pass
-			for line in entry.line_ids:
-				if line.order_no:
-					cr.execute(""" select wo_order.id as order_id from kg_work_order wo_order
-						left join ch_work_order_details ch_work on ch_work.header_id = wo_order.id 
-						where ch_work.order_no  = '%s' and ch_work.header_id not in ('%s')   """ %(line.order_no,line.header_id.id))
-					data = cr.dictfetchall()			
-					if len(data) > 1:
-						raise osv.except_osv(_('Warning!'),
-							_('Line Work Order No. must be Unique !!'))
-					else:
-						pass
+			elif entry.order_category == 'pump' and entry.order_priority == 'normal':				
+				ends_date = date.today()+timedelta(days=84)
+				end_date = ends_date.strftime('%Y-%m-%d')
+				del_date = str(end_date)
+				ex_del_date = datetime.strptime(del_date, '%Y-%m-%d')	
+				if delivery_date < ex_del_date:
+					raise osv.except_osv(_('Warning!'),
+						_('Delivery Date should not be less than 84 days!!'))
 				else:
-					pass
+					pass				
+			elif delivery_date < today_date:
+				raise osv.except_osv(_('Warning!'),
+						_('Delivery Date should not be less than current date!!'))
+			
+			
 			# Customer TIN No validation start
 			#~ if entry.partner_id.gs_tin_no:
 				#~ if len(str(entry.partner_id.gs_tin_no)) == 11 and entry.partner_id.gs_tin_no.isdigit() == True:
@@ -423,11 +430,7 @@ class kg_work_order(osv.osv):
 				elif item.order_category == 'service':
 					wo_spc_app_flag = True
 					
-				elif item.order_priority == 'urgent':
-					wo_spc_app_flag = True
-				elif item.order_priority == 'breakdown':
-					wo_spc_app_flag = True
-				elif item.order_priority == 'emergency':
+				elif item.order_priority in ('urgent','breakdown','emergency'):
 					wo_spc_app_flag = True
 				
 				if wo_spc_app_flag == True:
@@ -456,6 +459,30 @@ class kg_work_order(osv.osv):
 		assembly_bot_obj = self.pool.get('ch.assembly.bot.details')
 		
 		if entry.state in ('design_approved'):
+			if entry.name:
+				cr.execute(""" select name from kg_work_order where name  = '%s'  """ %(entry.name))
+				data = cr.dictfetchall()			
+				if len(data) > 1:
+					raise osv.except_osv(_('Warning!'),
+						_('Work Order No. must be Unique !!'))
+				else:
+					pass
+			else:
+				pass
+			for line in entry.line_ids:
+				if line.order_no:
+					cr.execute(""" select wo_order.id as order_id from kg_work_order wo_order
+						left join ch_work_order_details ch_work on ch_work.header_id = wo_order.id 
+						where ch_work.order_no  = '%s' and ch_work.header_id not in ('%s')   """ %(line.order_no,line.header_id.id))
+					data = cr.dictfetchall()			
+					if len(data) > 1:
+						raise osv.except_osv(_('Warning!'),
+							_('Line Work Order No. must be Unique !!'))
+					else:
+						pass
+				else:
+					pass
+			
 			order_line_ids = []
 			
 			### Spare BOM Tab Data Creation ###
@@ -976,6 +1003,7 @@ class kg_work_order(osv.osv):
 												'pump_model_id' : item.pump_model_id.id,
 												'moc_construction_id' : item.moc_construction_id.id,
 												'stock_type': 'pump',
+												'qc_type': 'foundry',
 												'serial_no': stock_item['serial_no'],
 												'stock_location_id': stock_item['stock_location_id'],
 												'stock_inward_id': stock_item['id']
@@ -1001,11 +1029,13 @@ class kg_work_order(osv.osv):
 									
 					line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})
 					
-					print "qc_created",qc_created
+					print "qc_created",qc_created,rem_qty
 					if qc_created == 'no': 
 						order_line_ids.append(item.id)
-					
+					if qc_created == 'yes' and rem_qty > 0: 
+						order_line_ids.append(item.id)
 					print "order_line_ids",order_line_ids
+					
 					#~ if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
 					#~ 
 						#~ ### Schedule Creation ###
@@ -3359,6 +3389,7 @@ class ch_wo_accessories(osv.osv):
 	
 		
 		'header_id':fields.many2one('ch.work.order.details', 'Header Id', ondelete='cascade'),
+		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'access_id': fields.many2one('kg.accessories.master','Accessories',domain="[('active','=','t'),('state','not in',('draft','reject','cancal'))]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t'),('state','not in',('reject','cancal'))]"),
 		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction'),
@@ -3377,10 +3408,7 @@ class ch_wo_accessories(osv.osv):
 		
 	}
 	
-	def default_get(self, cr, uid, fields, context=None):
-		if len(context)>7:
-			if not context['moc_const_id']:
-				raise osv.except_osv(_('Warning!'),_('Kindly Configure MOC Construction !!'))
+	def default_get(self, cr, uid, fields, context=None):		
 		return context
 	
 	def _check_qty(self, cr, uid, ids, context=None):
@@ -3395,12 +3423,16 @@ class ch_wo_accessories(osv.osv):
 		
 		]
 	
-	def onchange_load_access(self, cr, uid, ids, load_access,access_id,moc_const_id,qty):
+	def onchange_load_access(self, cr, uid, ids, load_access,access_id,moc_const_id,qty,order_category):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
 		data_rec = ''
 		if load_access == True and access_id:
+			if moc_const_id is False:
+				raise osv.except_osv(_('Warning!'),_('Kindly Configure MOC Construction !!'))
+			else:
+				pass
 			if qty == 0:
 				raise osv.except_osv(_('Warning!'),_('Kindly Configure Qty'))
 			access_obj = self.pool.get('kg.accessories.master').search(cr, uid, [('id','=',access_id)])
@@ -3428,6 +3460,8 @@ class ch_wo_accessories(osv.osv):
 									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
+									'entry_mode': 'auto',
+									'order_category': order_category,
 									
 									})
 				print"fou_valsfou_vals",fou_vals
@@ -3451,6 +3485,8 @@ class ch_wo_accessories(osv.osv):
 									'indent_qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
+									'entry_mode': 'auto',
+									'order_category': order_category,
 									
 									})
 					print"ms_valsms_vals",ms_vals	
@@ -3476,6 +3512,8 @@ class ch_wo_accessories(osv.osv):
 									'is_applicable': True,
 									'csd_no': item.csd_no,
 									'remarks': item.remark,
+									'entry_mode': 'auto',
+									'order_category': order_category,
 									})
 					print"bot_valsbot_vals",bot_vals	
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
@@ -3492,7 +3530,7 @@ class ch_wo_accessories_foundry(osv.osv):
 	
 		### Foundry Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
-		
+		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'pump_id':fields.many2one('kg.pumpmodel.master', 'Pump'),
 		'qty':fields.integer('Quantity'),
 		'oth_spec':fields.char('Other Specification'),
@@ -3508,8 +3546,20 @@ class ch_wo_accessories_foundry(osv.osv):
 		'wo_prime_cost': fields.float('WO PC'),
 		'material_code': fields.char('Material Code'),
 		'off_name': fields.char('Offer Name'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
 	}
+	
+	_defaults = {
+		
+		'entry_mode': 'manual',
+		
+	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		
+		context.update({'entry_mode': 'manual'})
+		return context
 	
 ch_wo_accessories_foundry()
 
@@ -3522,7 +3572,7 @@ class ch_wo_accessories_ms(osv.osv):
 	
 		### machineshop Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
-		
+		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'pos_no': fields.related('position_id','name', type='char', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'csd_no': fields.char('CSD No.'),
@@ -3541,6 +3591,7 @@ class ch_wo_accessories_ms(osv.osv):
 		'material_code': fields.char('Material Code'),
 		'flag_dynamic_length': fields.boolean('Dynamic Length'),
 		'off_name': fields.char('Offer Name'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
 	}
 	
@@ -3550,11 +3601,17 @@ class ch_wo_accessories_ms(osv.osv):
 		'is_applicable':False,
 		'load_bom':False,
 		'flag_dynamic_length':False,
+		'entry_mode': 'manual',
 		
 	}
 	
 	def onchange_qty(self, cr, uid, ids, qty):
 		return {'value': {'indent_qty': qty}}
+		
+	def default_get(self, cr, uid, fields, context=None):
+		
+		context.update({'entry_mode': 'manual'})
+		return context
 	
 ch_wo_accessories_ms()
 
@@ -3567,6 +3624,7 @@ class ch_wo_accessories_bot(osv.osv):
 	
 		### BOT Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
+		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'csd_no': fields.char('CSD No.'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot')], ondelete='cascade',required=True),
@@ -3580,8 +3638,20 @@ class ch_wo_accessories_bot(osv.osv):
 		'wo_prime_cost': fields.float('WO PC'),
 		'material_code': fields.char('Material Code'),
 		'off_name': fields.char('Offer Name'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
 	}
+	
+	_defaults = {
+		
+		'entry_mode': 'manual',
+		
+	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		
+		context.update({'entry_mode': 'manual'})
+		return context
 	
 ch_wo_accessories_bot()
 
@@ -3597,6 +3667,7 @@ class ch_wo_spare_bom(osv.osv):
 		## Basic Info
 		
 		'header_id':fields.many2one('ch.work.order.details', 'Header Id', ondelete='cascade'),
+		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks': fields.char('Remarks'),
 		
 		## Module Requirement Fields
@@ -3693,6 +3764,7 @@ class ch_wo_spare_bom(osv.osv):
 									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
+									'entry_mode': 'auto',
 									#~ 'purpose_categ': purpose_categ,
 									#~ 'csd_no': item.csd_no,
 									#~ 'remarks': item.remarks,
@@ -3749,6 +3821,7 @@ class ch_wo_spare_bom(osv.osv):
 										'load_bom': True,
 										'is_applicable': True,
 										'line_ids': ch_ms_vals,
+										'entry_mode': 'auto',
 										#~ 'purpose_categ': purpose_categ,
 										#~ 'line_ids': ch_ms_vals,
 										#~ 'csd_no': item.csd_no,
@@ -3791,6 +3864,7 @@ class ch_wo_spare_bom(osv.osv):
 										#~ 'purpose_categ': purpose_categ,
 										'position_id': item.position_id.id,
 										#~ 'remarks': item.remarks,
+										'entry_mode': 'auto',
 										})
 										
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
@@ -3807,6 +3881,7 @@ class ch_wo_spare_foundry(osv.osv):
 		## Basic Info
 		
 		'header_id':fields.many2one('ch.wo.spare.bom', 'Header Id', ondelete='cascade'),
+		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks': fields.char('Remarks'),
 		
 		## Module Requirement Fields
@@ -3828,6 +3903,7 @@ class ch_wo_spare_foundry(osv.osv):
 		'off_name': fields.char('Offer Name'),
 		'flag_pattern_check': fields.boolean('Is Pattern Check'),
 		'sequence_no': fields.integer('Sequence No.'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
 	}
 	
@@ -3836,8 +3912,14 @@ class ch_wo_spare_foundry(osv.osv):
 		'is_applicable': False,
 		'load_bom': False,
 		'flag_pattern_check': False,
+		'entry_mode': 'manual',
 		
 	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		
+		context.update({'entry_mode': 'manual'})
+		return context
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_wo_spare_foundry, self).write(cr, uid, ids, vals, context)
@@ -3884,6 +3966,7 @@ class ch_wo_spare_ms(osv.osv):
 		## Basic Info
 		
 		'header_id':fields.many2one('ch.wo.spare.bom', 'Header Id', ondelete='cascade'),
+		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'),
 		
 		## Module Requirement Fields
@@ -3909,6 +3992,7 @@ class ch_wo_spare_ms(osv.osv):
 		'material_code': fields.char('Material Code'),
 		'off_name': fields.char('Offer Name'),
 		'sequence_no': fields.integer('Sequence No.'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
 		
 		## Child Tables Declaration
@@ -3921,8 +4005,14 @@ class ch_wo_spare_ms(osv.osv):
 		
 		'is_applicable': False,
 		'load_bom': False,
+		'entry_mode': 'manual',
 		
 	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		
+		context.update({'entry_mode': 'manual'})
+		return context
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_wo_spare_ms, self).write(cr, uid, ids, vals, context)
@@ -3960,7 +4050,7 @@ class ch_wo_spare_ms_raw(osv.osv):
 		
 		### Basic Info
 		
-		'header_id':fields.many2one('ch.wo.spare.ms', 'Spare MS', ondelete='cascade'),
+		'header_id':fields.many2one('ch.wo.spare.ms', 'Spare MS', ondelete='cascade'),		
 		'remarks': fields.char('Remarks'),
 		'active': fields.boolean('Active'),	
 		
@@ -4030,6 +4120,7 @@ class ch_wo_spare_bot(osv.osv):
 		## Basic Info
 		
 		'header_id':fields.many2one('ch.wo.spare.bom', 'Header Id', ondelete='cascade'),
+		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'),
 		
 		## Module Requirement Fields
@@ -4056,6 +4147,7 @@ class ch_wo_spare_bot(osv.osv):
 		'material_code': fields.char('Material Code'),
 		'off_name': fields.char('Offer Name'),
 		'sequence_no': fields.integer('Sequence No.'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
 	}
 	
@@ -4064,8 +4156,14 @@ class ch_wo_spare_bot(osv.osv):
 		'is_applicable': False,
 		'load_bom': False,
 		'flag_is_bearing': False,
+		'entry_mode': 'manual',
 		
 	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		
+		context.update({'entry_mode': 'manual'})
+		return context
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_wo_spare_bot, self).write(cr, uid, ids, vals, context)
