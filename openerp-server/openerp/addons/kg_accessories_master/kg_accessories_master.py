@@ -121,6 +121,7 @@ class kg_accessories_master(osv.osv):
 		'copy_flag' : False,
 		'modify': 'yes',
 		'entry_mode': 'manual',
+		'is_pump_acc_flag': 'False',
 		
 	}
 		
