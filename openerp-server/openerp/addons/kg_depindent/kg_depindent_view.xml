@@ -23,7 +23,7 @@
 				<group>
 					<group>
 						<field name="name"/>
-						<field name="dep_name"/>
+						<field name="dep_name" attrs="{'readonly':[('dep_name','!=',False)]}"/>
 						<field name="division"/>
 						<field name="main_store" groups="kg_menus.group_kg_main_store_user"/>
 						<field name="remarks" attrs="{'invisible': [('state', 'not in', ('confirm','rejected'))]}"/>
@@ -35,7 +35,7 @@
 						<field name="ind_date" required="1"/>
 						<field name="indent_type"/>
 						<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/> 
-						<field name="cancel_remark" attrs="{'invisible': [('state', 'not in', ('approved','cancel'))]}"/>
+						<field name="cancel_remark" attrs="{'invisible':[('state','not in',('approved','cancel'))]}"/>
 						<field name="type" invisible="1"/>
 						<field name="dest_location_id" invisible="1"/>
                     </group>
@@ -172,7 +172,7 @@
 							<field name="po_uom" invisible="1"/>
 							<field name="qty" attrs="{'readonly': [('uom', '=', False)]}"
 								on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
-							<field name="cutting_qty" readonly="1"/>
+							<field name="cutting_qty" readonly="0"/>
 							<field name="length" attrs="{'invisible':[('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')],'required':['|',('dep_code','=','DP2'),('uom_conversation_factor','=','two_dimension')]}"/>
 							<field name="breadth" attrs="{'invisible':[('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
 							<field name="dep_code" invisible="1"/>
