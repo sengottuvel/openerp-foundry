@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="offer_copy_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.331000000000021"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1347"/>
+	<property name="ireport.y" value="1299"/>
 	<subDataset name="dataset2">
 		<parameter name="enq_line_id" class="java.lang.Integer"/>
 		<queryString>
@@ -1989,7 +1989,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 	<group name="Pump_detail_3">
 		<groupExpression><![CDATA[$P{offer_id}]]></groupExpression>
 		<groupHeader>
-			<band height="469">
+			<band height="468">
 				<textField isBlankWhenNull="true">
 					<reportElement x="277" y="252" width="278" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{shaft_sealing} == ' ')]]></printWhenExpression>
@@ -2896,7 +2896,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA["Motor Frame Size"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="277" y="457" width="278" height="12" isRemoveLineWhenBlank="true">
+					<reportElement x="277" y="456" width="278" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{scope_of_supply} == ' ')]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="0" leftPadding="2">
@@ -2949,7 +2949,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA[$F{framesize}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="444" width="277" height="13" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="444" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{primemover_categ} == ' ')]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="0" leftPadding="1">
@@ -2963,7 +2963,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA["Primemover Category"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="277" y="444" width="278" height="13" isRemoveLineWhenBlank="true">
+					<reportElement x="277" y="444" width="278" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{primemover_categ} == ' ')]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="0" leftPadding="2">
@@ -2976,7 +2976,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA[$F{primemover_categ}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="457" width="277" height="12" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="456" width="277" height="12" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{scope_of_supply} == ' ')]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="0" leftPadding="1">
