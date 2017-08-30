@@ -513,7 +513,9 @@ class kg_work_order(osv.osv):
 									'bom_type': 'spare',
 									'spare_bom_id': spare_foundry_item.id,
 									'spare_id': spare_item.id,
-									'flag_pattern_check': spare_foundry_item.flag_pattern_check
+									'flag_pattern_check': spare_foundry_item.flag_pattern_check,
+									'material_code': spare_foundry_item.material_code,
+									'sequence_no': spare_foundry_item.sequence_no,
 									}
 								new_foundry_item_id = self.pool.get('ch.order.bom.details').create(cr,uid,foundry_spare_vals)
 								
@@ -540,6 +542,8 @@ class kg_work_order(osv.osv):
 									'bom_type': 'spare',
 									'spare_bom_id': spare_ms_item.id,
 									'spare_id': spare_item.id, 
+									'material_code': spare_ms_item.material_code,
+									'sequence_no': spare_ms_item.sequence_no,
 											  
 									}
 									
@@ -590,6 +594,8 @@ class kg_work_order(osv.osv):
 									'bom_type': 'spare',
 									'spare_bom_id': spare_bot_item.id,
 									'spare_id': spare_item.id,
+									'material_code': spare_bot_item.material_code,
+									'sequence_no': spare_bot_item.sequence_no,
 											  
 									}
 									

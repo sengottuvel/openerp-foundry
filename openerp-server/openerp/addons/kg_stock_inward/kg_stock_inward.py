@@ -358,7 +358,7 @@ class ch_stock_inward_details(osv.osv):
 			total_value = total_weight * mat_amt
 		else:
 			total_weight = qty * each_weight
-			total_value = entry_rec.total_value
+			total_value = vals.get('total_value')
 		
 		vals.update({
 		
