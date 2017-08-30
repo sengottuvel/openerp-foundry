@@ -798,7 +798,7 @@ class kg_crm_offer(osv.osv):
 		pump_off_ids = self.pool.get('ch.pump.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
 		if pump_off_ids:
 			for ele in pump_off_ids:
-				pump_off_rec = self.pool.get('ch.spare.offer').browse(cr,uid,ele)
+				pump_off_rec = self.pool.get('ch.pump.offer').browse(cr,uid,ele)
 				wrk_val = pump_off_rec.works_value
 				works_value += wrk_val
 		spare_off_ids = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
