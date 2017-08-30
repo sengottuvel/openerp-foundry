@@ -217,38 +217,73 @@ class kg_crm_enquiry(osv.osv):
 							for ele in rec.line_ids:
 								if ele.is_applicable == True and not ele.moc_id:
 									raise osv.except_osv(_('Warning!'),
-										_('Pump %s You cannot save without Component'%(rec.pump_id.name)))
+										_('Pump %s Pattern %s Kindly configure MOC'%(rec.pump_id.name,ele.pattern_id.pattern_name)))
 							fou_data = [x for x in rec.line_ids if x.is_applicable == True]
 							if fou_data:
 								applicable='yes'
 							else:
 								applicable='no'
-						#~ if rec.line_ids_a:
-							#~ for ele in rec.line_ids_a:
-								#~ if ele.is_applicable == True and not ele.moc_id:
-									#~ raise osv.except_osv(_('Warning!'),
-										#~ _('Spare %s You cannot save without Component'%(rec.pump_id.name)))
-							#~ ms_data = [x for x in rec.line_ids_a if x.is_applicable == True]
-							#~ if ms_data:
-								#~ applicable_a='yes'
-							#~ else:
-								#~ applicable_a='no'
+						if rec.line_ids_a:
+							for ele in rec.line_ids_a:
+								if ele.is_applicable == True and not ele.moc_id:
+									raise osv.except_osv(_('Warning!'),
+										_('Pump %s MS %s Kindly configure MOC'%(rec.pump_id.name,ele.ms_id.name)))
+							ms_data = [x for x in rec.line_ids_a if x.is_applicable == True]
+							if ms_data:
+								applicable_a='yes'
+							else:
+								applicable_a='no'
 						if rec.line_ids_b:
 							for ele in rec.line_ids_b:
 								if ele.is_applicable == True and not ele.moc_id:
 									raise osv.except_osv(_('Warning!'),
-										_('Accessories %s You cannot save without Component'%(rec.pump_id.name)))
+										_('Pump %s BOT %s Kindly configure MOC'%(rec.pump_id.name,ele.ms_id.name)))
 							bot_data = [x for x in rec.line_ids_b if x.is_applicable == True]
 							if bot_data:
 								applicable_b='yes'
 							else:
 								applicable_b='no'
 						if applicable == 'no' and applicable_a == 'no' and applicable_b == 'no':
-							#~ if rec.purpose_categ == 'spare':
-								#~ raise osv.except_osv(_('Warning!'),_('Spare %s You cannot save without Component'%(rec.pump_id.name)))
+							if rec.purpose_categ == 'spare':
+								raise osv.except_osv(_('Warning!'),_('Spare %s Kindly choose Is applicable in components'%(rec.pump_id.name)))
 							#~ elif rec.purpose_categ == 'pump':
 							if rec.purpose_categ == 'pump':
-								raise osv.except_osv(_('Warning!'),_('Pump %s You cannot save without Component'%(rec.pump_id.name)))
+								raise osv.except_osv(_('Warning!'),_('Pump %s Kindly choose Is applicable in components'%(rec.pump_id.name)))
+					if rec.purpose_categ == 'access':
+						if rec.line_ids_access_a and rec.acces == 'yes':
+							for line in rec.line_ids_access_a:
+								if line.line_ids:
+									for ele in line.line_ids:
+										if ele.is_applicable == True and not ele.moc_id:
+											raise osv.except_osv(_('Warning!'),
+												_('Pump %s Accesssories %s Pattern %s Kindly configure MOC'%(rec.pump_id.name,line.access_id.name,ele.pattern_id.pattern_name)))
+									fou_data = [x for x in line.line_ids if x.is_applicable == True]
+									if fou_data:
+										applicable='yes'
+									else:
+										applicable='no'
+								if line.line_ids_a:
+									for ele in line.line_ids_a:
+										if ele.is_applicable == True and not ele.moc_id:
+											raise osv.except_osv(_('Warning!'),
+												_('Pump %s Accesssories %s MS %s Kindly configure MOC'%(rec.pump_id.name,line.access_id.name,ele.ms_id.name)))
+									fou_data = [x for x in line.line_ids_a if x.is_applicable == True]
+									if fou_data:
+										applicable_a='yes'
+									else:
+										applicable_a='no'
+								if line.line_ids_b:
+									for ele in line.line_ids_b:
+										if ele.is_applicable == True and not ele.moc_id:
+											raise osv.except_osv(_('Warning!'),
+												_('Pump %s Accesssories %s BOT %s Kindly configure MOC'%(rec.pump_id.name,line.access_id.name,ele.ms_id.name)))
+									fou_data = [x for x in line.line_ids_b if x.is_applicable == True]
+									if fou_data:
+										applicable_b='yes'
+									else:
+										applicable_b='no'
+								if applicable == 'no' and applicable_a == 'no' and applicable_b == 'no':
+									raise osv.except_osv(_('Warning!'),_('Pump %s Accessories %s Kindly choose Is applicable in components'%(rec.pump_id.name,line.access_id.name)))
 		return True
 	
 	def _check_lineitems(self, cr, uid, ids, context=None):
@@ -271,21 +306,27 @@ class kg_crm_enquiry(osv.osv):
 								for fou in bom.line_ids:
 									if fou.is_applicable == True and fou.qty == 0:
 										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in Spare BOM FOU'%(line.pump_id.name,bom.bom_id.name,fou.pattner_id.pattern_name)))
+									if fou.is_applicable == True and not fou.moc_id:
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without MOC in Spare BOM FOU'%(line.pump_id.name,bom.bom_id.name,fou.pattner_id.pattern_name)))
 							if bom.line_ids_a:
 								for ms in bom.line_ids_a:
 									if not ms.line_ids and ms.is_applicable == True:
 										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Spare BOM MS Raw materials'%(line.pump_id.name,bom.bom_id.name,ms.name)))
 									if ms.is_applicable == True and ms.qty == 0:
 										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in Spare BOM MS'%(line.pump_id.name,bom.bom_id.name,ms.name)))
+									if ms.is_applicable == True and not ms.moc_id:
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without MOC in Spare BOM MS'%(line.pump_id.name,bom.bom_id.name,ms.name)))
 							if bom.line_ids_b:
 								for bot in bom.line_ids_b:
 									if bot.is_applicable == True and bot.qty == 0:
 										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in Spare BOM BOT'%(line.pump_id.name,bom.bom_id.name,bot.ms_id.name)))
+									if bot.is_applicable == True and not bot.moc_id:
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without MOC in Spare BOM BOT'%(line.pump_id.name,bom.bom_id.name,bot.ms_id.name)))
 					## Pump BOM warnings
 					if line.line_ids:
 						for fou in line.line_ids:
 							if fou.is_applicable == True and fou.qty == 0:
-								raise osv.except_osv(_('Warning!'),_('%s %s You cannot save without Qty in Pump BOM FOU'%(line.pump_id.name,fou.pattner_id.pattern_name)))
+								raise osv.except_osv(_('Warning!'),_('%s %s You cannot save without Qty in Pump BOM FOU'%(line.pump_id.name,fou.pattern_id.pattern_name)))
 					if line.line_ids_a:
 						for ms in line.line_ids_a:
 							if not ms.line_ids and ms.is_applicable == True:
@@ -946,6 +987,7 @@ class kg_crm_enquiry(osv.osv):
 					
 					self.spare_component_creation(cr,uid,offer_id,access,prime_cost,'access')
 			## Accessories primecost ends
+			
 			
 			## Additional Components Primecost calculation ends
 			
