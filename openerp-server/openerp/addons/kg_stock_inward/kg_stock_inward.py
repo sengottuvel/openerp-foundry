@@ -323,7 +323,7 @@ class ch_stock_inward_details(osv.osv):
 		pattern_name = False
 		pattern_obj = self.pool.get('kg.pattern.master')
 		moc_obj = self.pool.get('kg.moc.master')
-		inward_obj = self.pool.get('kg.stock.inward')
+		inward_obj = self.pool.get('kg.stock.inward')		
 		print "ids----------------------------",ids
 		if type(ids) is list:
 			entry_rec = self.browse(cr, uid, ids[0] )
@@ -353,12 +353,20 @@ class ch_stock_inward_details(osv.osv):
 		else:
 			each_weight = vals.get('each_wgt')
 			
-		if entry_rec.stock_type == 'pattern':	
+		### Added For Karthikeyan Ends Here
+		if entry_rec.stock_type == 'pump':
+			if vals.get('total_value') == None: 
+				total_value = entry_rec.total_value
+				total_weight = qty * each_weight
+			else:
+				total_value = vals.get('total_value')
+				total_weight = qty * each_weight
+		### Added For Karthikeyan Ends Here
+			
+		elif entry_rec.stock_type == 'pattern':	
 			total_weight = qty * each_weight
-			total_value = total_weight * mat_amt
-		else:
-			total_weight = qty * each_weight
-			total_value = vals.get('total_value')
+			total_value = total_weight * mat_amt	
+			
 		
 		vals.update({
 		
@@ -378,7 +386,9 @@ class ch_stock_inward_details(osv.osv):
 			total = inward_total[0]
 		else:
 			total = 0.00
-		inward_obj.write(cr, uid, entry_rec.header_id.id,{'total_value':total + total_value})
+		
+		
+		inward_obj.write(cr, uid, entry_rec.header_id.id,{'total_value':total + total_value })
 		return super(ch_stock_inward_details, self).write(cr, uid, ids, vals, context)
 		
 		
