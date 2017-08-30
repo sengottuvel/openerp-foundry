@@ -890,7 +890,7 @@
 							<field name="head_in" readonly="1"/>
 							<field name="bkw_water" readonly="1"/>
 							<field name="efficiency_in" readonly="1"/>
-							<field name="trimming_dia" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="trimming_dia" required ="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 							<field name="oth_spec"/>
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
 						</group>					
