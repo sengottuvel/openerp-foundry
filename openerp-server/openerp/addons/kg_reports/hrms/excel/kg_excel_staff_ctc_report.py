@@ -156,79 +156,80 @@ class kg_excel_staff_ctc_report(osv.osv):
 				select 
 
 
-				emp.name_related as employee_name,
-				edu_line.ug_degree as qualification,
-				job.name AS designation,
-				to_char(emp.join_date,'dd/mm/yyyy') AS date_of_join,
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and code='BASIC') is null
-				then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and code='BASIC')end as basic_amt,
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and code='VDA') is null
-				then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and code='VDA') end as vda_amt,
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and code='FDA') is null
-				then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and code='FDA') end as fda_amt,
-				case when (select amount from ch_kg_allowance_deduction where header_id=allow_ded.id and employee_id=payslip.employee_id ) is null
-				then 0.00 else (select amount from ch_kg_allowance_deduction where header_id=allow_ded.id and employee_id=payslip.employee_id ) end as allow,
+			emp.name_related as employee_name,
+			--edu_line.ug_degree as qualification,
+			job.name AS designation,
+			to_char(emp.join_date,'dd/mm/yyyy') AS date_of_join,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and code='BASIC') is null
+			then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and code='BASIC')end as basic_amt,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and code='VDA') is null
+			then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and code='VDA') end as vda_amt,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and code='FDA') is null
+			then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and code='FDA') end as fda_amt,
+			case when (select amount from ch_kg_allowance_deduction where header_id=allow_ded.id and employee_id=payslip.employee_id ) is null
+			then 0.00 else (select amount from ch_kg_allowance_deduction where header_id=allow_ded.id and employee_id=payslip.employee_id ) end as allow,
 
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and code='FI') is null
-				then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and code='FI')is null then
-				0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and code='FI') end) else 
-				(select amount from hr_payslip_line where slip_id = payslip.id and code='FI')end as fi_inc_amt,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and code='FI') is null
+			then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and code='FI')is null then
+			0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and code='FI') end) else 
+			(select amount from hr_payslip_line where slip_id = payslip.id and code='FI')end as fi_inc_amt,
 
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive') is null
-				then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive')is null then
-				0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive') end) else 
-				(select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive') end as spi_inc_amt,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive') is null
+			then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive')is null then
+			0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive') end) else 
+			(select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive') end as spi_inc_amt,
 
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 4.01 to 5.0 ) Crs') is null
-				then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 4.01 to 5.0 ) Crs')is null then
-				0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 4.01 to 5.0 ) Crs') end) else 
-				(select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 4.01 to 5.0 ) Crs')
-				end as spi_five_inc_amt,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 4.01 to 5.0 ) Crs') is null
+			then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 4.01 to 5.0 ) Crs')is null then
+			0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 4.01 to 5.0 ) Crs') end) else 
+			(select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 4.01 to 5.0 ) Crs')
+			end as spi_five_inc_amt,
 
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 5.01 to 6.0 ) Crs') is null
-				then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 5.01 to 6.0 ) Crs')is null then
-				0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 5.01 to 6.0 ) Crs') end) else
-				(select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 5.01 to 6.0 ) Crs') end as spi_six_inc_amt,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 5.01 to 6.0 ) Crs') is null
+			then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 5.01 to 6.0 ) Crs')is null then
+			0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 5.01 to 6.0 ) Crs') end) else
+			(select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 5.01 to 6.0 ) Crs') end as spi_six_inc_amt,
 
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 6.01 to 7.0 ) Crs') is null
-				then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 6.01 to 7.0 ) Crs')is null then
-				0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 6.01 to 7.0 ) Crs') end) else
-				(select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 6.01 to 7.0 ) Crs') end as spi_seven_inc_amt,
-
-
-				(select max(gross_salary) from ch_kg_contract_pre_salary where header_id_pre_salary=contract.id) as last_inc_amt,
-				(select to_char(max(updated_date),'dd/mm/yyyy') from ch_kg_contract_pre_salary where header_id_pre_salary=contract.id) as last_inc_date,
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and category_id=8) is null
-				then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and category_id=8) end as bonus_amt,
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and code='PF') is null
-				then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and code='PF') end as pf_amt,
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and code='ESI') is null
-				then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and code='ESI') end as esi_amt,
-
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and code='SHOE') is null
-				then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and code='SHOE')is null then
-				0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and code='SHOE') end) else
-				(select amount from hr_payslip_line where slip_id = payslip.id and code='SHOE') end as shoe_amt,
-
-				case when (select amount from hr_payslip_line where slip_id = payslip.id and code='COFFEE ALLOW') is null
-				then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and code='COFFEE ALLOW')is null then
-				0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and code='COFFEE ALLOW') end) else
-				(select amount from hr_payslip_line where slip_id = payslip.id and code='COFFEE ALLOW') end as coff_allow_amt,
-				(select worked_days from kg_monthly_attendance where start_date = payslip.date_from and end_date=payslip.date_to and employee_id = payslip.employee_id and state='approved') as worked_days
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 6.01 to 7.0 ) Crs') is null
+			then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 6.01 to 7.0 ) Crs')is null then
+			0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and name='Special Incentive ( 6.01 to 7.0 ) Crs') end) else
+			(select amount from hr_payslip_line where slip_id = payslip.id and name='Special Incentive ( 6.01 to 7.0 ) Crs') end as spi_seven_inc_amt,
+			(select max(gross_salary) from ch_kg_contract_pre_salary where header_id_pre_salary=contract.id) as last_inc_amt,
+			(select to_char(max(updated_date),'dd/mm/yyyy') from ch_kg_contract_pre_salary where header_id_pre_salary=contract.id) as last_inc_date,
+			case when (select sum(amount) from hr_payslip_line where slip_id = payslip.id and category_id=8) is null
+			then 0.00 else (select sum(amount) from hr_payslip_line where slip_id = payslip.id and category_id=8) end as bonus_amt,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and code='PF') is null
+			then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and code='PF') end as pf_amt,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and code='ESI') is null
+			then 0.00 else (select amount from hr_payslip_line where slip_id = payslip.id and code='ESI') end as esi_amt,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and code='SHOE') is null
+			then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and code='SHOE')is null then
+			0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and code='SHOE') end) else
+			(select amount from hr_payslip_line where slip_id = payslip.id and code='SHOE') end as shoe_amt,
+			case when (select amount from hr_payslip_line where slip_id = payslip.id and code='COFFEE ALLOW') is null
+			then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and code='COFFEE ALLOW')is null then
+			0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and code='COFFEE ALLOW') end) else
+			(select amount from hr_payslip_line where slip_id = payslip.id and code='COFFEE ALLOW') end as coff_allow_amt,
+			(select worked_days from kg_monthly_attendance where start_date = payslip.date_from and end_date=payslip.date_to and employee_id = payslip.employee_id and state='approved' limit 1) as worked_days
 
 
 
-				from hr_payslip payslip
 
-				left join hr_employee emp on (emp.id=payslip.employee_id)
-				left join hr_contract contract on (contract.employee_id=payslip.employee_id)
-				left join hr_job job on (job.id=emp.job_id)
-				left join kg_job_nature job_nature on (job_nature.id=emp.nature_of_job_id)
-				left join kg_allowance_deduction allow_ded on (allow_ded.id=(select id from kg_allowance_deduction where start_date=payslip.date_from and end_date=payslip.date_to and state='approved' ))
-				left join ch_kg_allowance_deduction allow_ded_line on (allow_ded_line.header_id=allow_ded.id)
-				left join ch_kg_employee_ref_edu edu_line on (edu_line.id=(select max(id)from ch_kg_employee_ref_edu where header_id_ref_edu=emp.id))
 
-				where payslip.month="""+month_yr+' '+""" """+ employee +""" """+ category+ """ """+ division+ """"""
+
+
+
+			from hr_payslip payslip
+
+			left join hr_employee emp on (emp.id=payslip.employee_id)
+			left join hr_contract contract on (contract.employee_id=payslip.employee_id)
+			left join hr_job job on (job.id=emp.job_id)
+			left join kg_job_nature job_nature on (job_nature.id=emp.nature_of_job_id)
+			left join kg_allowance_deduction allow_ded on (allow_ded.id=(select id from kg_allowance_deduction where start_date=payslip.date_from and end_date=payslip.date_to and state='approved' limit 1 ))
+			left join ch_kg_allowance_deduction allow_ded_line on (allow_ded_line.header_id=allow_ded.id)
+			left join ch_kg_employee_ref_edu edu_line on (edu_line.id=(select max(id)from ch_kg_employee_ref_edu where header_id_ref_edu=emp.id))
+
+			where payslip.month="""+month_yr+' '+""" """+ employee +""" """+ category+ """ """+ division+ """"""
 
 				
 
