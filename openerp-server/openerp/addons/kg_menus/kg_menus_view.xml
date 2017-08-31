@@ -329,6 +329,8 @@
 				<menuitem name="Advance" parent="rpm_hrms_reports" action="kg_reports.ram_advance_excel_rep" id="ram_advance_reports" sequence="6"/>
 				<menuitem name="Punching" parent="rpm_hrms_reports" action="kg_reports.ram_punching_excel_rep" id="ram_punching_reports" sequence="7"/>
 				<menuitem name="Gratuity" parent="rpm_hrms_reports" action="kg_reports.ram_gratuity_excel_rep" id="ram_gratuity_reports" sequence="8"/>
+				<menuitem name="OT" parent="rpm_hrms_reports" action="kg_reports.ram_ot_excel_rep" id="ram_ot_reports" sequence="9"/>
+				<menuitem name="Bank Copy" parent="rpm_hrms_reports" action="kg_reports.ram_bank_copy_excel_rep" id="ram_bank_copy_reports" sequence="10"/>
 				
 		
 			<!--Duplicate Account Menus-->
