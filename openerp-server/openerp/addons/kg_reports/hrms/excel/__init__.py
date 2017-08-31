@@ -8,3 +8,5 @@ import kg_excel_staff_ctc_report
 import kg_excel_advance_report
 import kg_excel_gratuity_report
 import kg_excel_punching_report
+import kg_excel_ot_report
+import kg_excel_bank_copy_report

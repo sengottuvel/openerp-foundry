@@ -40,6 +40,8 @@
 		'hrms/excel/kg_excel_advance_report_view.xml',
 		'hrms/excel/kg_excel_gratuity_report_view.xml',
 		'hrms/excel/kg_excel_punching_report_view.xml',
+		'hrms/excel/kg_excel_ot_report_view.xml',
+		'hrms/excel/kg_excel_bank_copy_report_view.xml',
 		'planning/excel_report/kg_machine_list_excel_view.xml',
 		'planning/excel_report/kg_foundry_partlist_excel_view.xml',
 		],

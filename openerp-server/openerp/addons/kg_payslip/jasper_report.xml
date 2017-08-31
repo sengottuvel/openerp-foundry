@@ -13,6 +13,25 @@
 				menu="True"
 				header="False"
         />
+        
+        <report string="Staff Bank Slip Print"
+				model="hr.payslip"
+				auto="True"
+				name="onscreen_bankslip"
+				rml="kg_payslip/report/bank_slip_print.jrxml"
+				id="cd_jasper_report_bankslip_1" 
+				menu="True"
+				header="False"
+        />
+		<report string="Worker Bank Slip Print"
+				model="hr.payslip"
+				auto="True"
+				name="onscreen_bankslip_worker"
+				rml="kg_payslip/report/bank_slip_worker_print.jrxml"
+				id="cd_jasper_report_bankslip_2" 
+				menu="True"
+				header="False"
+        />
 
         
     </data>
