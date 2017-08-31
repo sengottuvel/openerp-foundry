@@ -213,7 +213,8 @@ class kg_excel_staff_ctc_report(osv.osv):
 				case when (select amount from hr_payslip_line where slip_id = payslip.id and code='COFFEE ALLOW') is null
 				then (case when (select amount from ch_other_salary_comp where slip_id = payslip.id and code='COFFEE ALLOW')is null then
 				0.00 else (select amount from ch_other_salary_comp where slip_id = payslip.id and code='COFFEE ALLOW') end) else
-				(select amount from hr_payslip_line where slip_id = payslip.id and code='COFFEE ALLOW') end as coff_allow_amt
+				(select amount from hr_payslip_line where slip_id = payslip.id and code='COFFEE ALLOW') end as coff_allow_amt,
+				(select worked_days from kg_monthly_attendance where start_date = payslip.date_from and end_date=payslip.date_to and employee_id = payslip.employee_id and state='approved') as worked_days
 
 
 
@@ -275,6 +276,7 @@ class kg_excel_staff_ctc_report(osv.osv):
 		sheet1.col(26).width = 4000
 		sheet1.col(27).width = 4000
 		sheet1.col(28).width = 4000
+		sheet1.col(29).width = 4000
 		
 		
 		
@@ -286,10 +288,10 @@ class kg_excel_staff_ctc_report(osv.osv):
 		date_to = datetime.strptime(rec.date_to, '%Y-%m-%d').strftime('%d/%m/%Y')
 		
 		
-		sheet1.write_merge(0, 3, 0, 28,"SAM TURBO INDUSTRY PRIVATE LIMITED \n Avinashi Road, Neelambur,\n Coimbatore - 641062 \n Tel:3053555, 3053556,Fax : 0422-3053535",style2)
+		sheet1.write_merge(0, 3, 0, 29,"SAM TURBO INDUSTRY PRIVATE LIMITED \n Avinashi Road, Neelambur,\n Coimbatore - 641062 \n Tel:3053555, 3053556,Fax : 0422-3053535",style2)
 		sheet1.row(0).height = 450
-		sheet1.write_merge(4, 4, 0, 28,"CTC DETAILS - "+ rec.month+'-'+rec.year,style2)
-		sheet1.write_merge(5, 5, 0, 28,"",style2)
+		sheet1.write_merge(4, 4, 0, 29,"CTC DETAILS - "+ rec.month+'-'+rec.year,style2)
+		sheet1.write_merge(5, 5, 0, 29,"",style2)
 		#~ sheet1.write_merge(3, 3, 0, 5,"",style2)
 		
 		sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/img/sam.bmp',0,0)
@@ -299,30 +301,31 @@ class kg_excel_staff_ctc_report(osv.osv):
 		sheet1.write(s2,2,"QUAL.",style1)
 		sheet1.write(s2,3,"DESG.",style1)
 		sheet1.write(s2,4,"DOJ",style1)
-		sheet1.write(s2,5,"BASIC",style1)
-		sheet1.write(s2,6,"D.A.",style1)
-		sheet1.write(s2,7,"F.D.A",style1)
-		sheet1.write(s2,8,"ALLW..",style1)
-		sheet1.write(s2,9,"SALARY",style1)
-		sheet1.write(s2,10,"FIXED INCENTIVE",style1)
-		sheet1.write(s2,11,"SPL.INC.",style1)
-		sheet1.write(s2,12,"TOTAL",style1)
-		sheet1.write(s2,13,"5C",style1)
-		sheet1.write(s2,14,"6C",style1)
-		sheet1.write(s2,15,"7C",style1)
-		sheet1.write(s2,16,"TOTAL WITH SPL INC.",style1)
-		sheet1.write(s2,17,"LAST INCR.",style1)
-		sheet1.write(s2,18,"INCR.DATE.",style1)
-		sheet1.write(s2,19,"EL",style1)
-		sheet1.write(s2,20,"BONUS",style1)
-		sheet1.write(s2,21,"GRATUITY",style1)
-		sheet1.write(s2,22,"PF WAGE",style1)
-		sheet1.write(s2,23,"PF",style1)
-		sheet1.write(s2,24,"ESI",style1)
-		sheet1.write(s2,25,"SHOE",style1)
-		sheet1.write(s2,26,"TEA",style1)
-		sheet1.write(s2,27,"CTC/MON",style1)
-		sheet1.write(s2,28,"CTC/DAY",style1)
+		sheet1.write(s2,5,"WD",style1)
+		sheet1.write(s2,6,"BASIC",style1)
+		sheet1.write(s2,7,"D.A.",style1)
+		sheet1.write(s2,8,"F.D.A",style1)
+		sheet1.write(s2,9,"ALLW..",style1)
+		sheet1.write(s2,10,"SALARY",style1)
+		sheet1.write(s2,11,"FIXED INCENTIVE",style1)
+		sheet1.write(s2,12,"SPL.INC.",style1)
+		sheet1.write(s2,13,"TOTAL",style1)
+		sheet1.write(s2,14,"5C",style1)
+		sheet1.write(s2,15,"6C",style1)
+		sheet1.write(s2,16,"7C",style1)
+		sheet1.write(s2,17,"TOTAL WITH SPL INC.",style1)
+		sheet1.write(s2,18,"LAST INCR.",style1)
+		sheet1.write(s2,19,"INCR.DATE.",style1)
+		sheet1.write(s2,20,"EL",style1)
+		sheet1.write(s2,21,"BONUS",style1)
+		sheet1.write(s2,22,"GRATUITY",style1)
+		sheet1.write(s2,23,"PF WAGE",style1)
+		sheet1.write(s2,24,"PF",style1)
+		sheet1.write(s2,25,"ESI",style1)
+		sheet1.write(s2,26,"SHOE",style1)
+		sheet1.write(s2,27,"TEA",style1)
+		sheet1.write(s2,28,"CTC/MON",style1)
+		sheet1.write(s2,29,"CTC/DAY",style1)
 		
 		
 		salary=0.00
@@ -331,7 +334,25 @@ class kg_excel_staff_ctc_report(osv.osv):
 		ctc_per_mon=0.00
 		gratuity=0.00
 		el=0.00
+		basic_amt = 0.00
+		vda_amt = 0.00
+		fda_amt = 0.00
+		allow_amt = 0.00
+		bonus_amt = 0.00
+		pf_amt = 0.00
+		esi_amt = 0.00
+		shoe_amt = 0.00
+		coff_allow_amt = 0.00
 		for ele in data:
+			basic_amt += ele['basic_amt']
+			vda_amt += ele['vda_amt']
+			fda_amt += ele['fda_amt']
+			allow_amt += ele['allow']
+			bonus_amt += ele['bonus_amt']
+			pf_amt += ele['pf_amt']
+			esi_amt += ele['esi_amt']
+			shoe_amt += ele['shoe_amt']
+			coff_allow_amt += ele['coff_allow_amt']
 			s2+=1
 			salary = ele['basic_amt']+ele['vda_amt']+ele['fda_amt']+ele['allow']
 			
@@ -345,35 +366,63 @@ class kg_excel_staff_ctc_report(osv.osv):
 			sheet1.write(s2,2,ele['qualification'],style3)
 			sheet1.write(s2,3,ele['designation'],style3)
 			sheet1.write(s2,4,ele['date_of_join'],style3)
-			sheet1.write(s2,5,ele['basic_amt'],style3)
-			sheet1.write(s2,6,ele['vda_amt'],style3)
-			sheet1.write(s2,7,ele['fda_amt'],style3)
-			sheet1.write(s2,8,ele['allow'],style3)
-			sheet1.write(s2,9,salary,style3)
-			sheet1.write(s2,10,ele['fi_inc_amt'],style3)
-			sheet1.write(s2,11,ele['spi_inc_amt'],style3)
-			sheet1.write(s2,12,total,style3)
-			sheet1.write(s2,13,ele['spi_five_inc_amt'],style3)
-			sheet1.write(s2,14,ele['spi_six_inc_amt'],style3)
-			sheet1.write(s2,15,ele['spi_seven_inc_amt'],style3)
-			sheet1.write(s2,16,total_spl_inc,style3)
-			sheet1.write(s2,17,ele['last_inc_amt'],style3)
-			sheet1.write(s2,18,ele['last_inc_date'],style3)
-			sheet1.write(s2,19,el,style3)
-			sheet1.write(s2,20,ele['bonus_amt'],style3)
-			sheet1.write(s2,21,gratuity,style3)
-			sheet1.write(s2,22,(ele['basic_amt']+ele['vda_amt']+ele['fda_amt']),style3)
-			sheet1.write(s2,23,ele['pf_amt'],style3)
-			sheet1.write(s2,24,ele['esi_amt'],style3)
-			sheet1.write(s2,25,ele['shoe_amt'],style3)
-			sheet1.write(s2,26,ele['coff_allow_amt'],style3)
-			sheet1.write(s2,27,(ctc_per_mon),style3)
-			sheet1.write(s2,28,round((ctc_per_mon/30),2),style3)
-			
+			sheet1.write(s2,5,ele['worked_days'],style3)
+			sheet1.write(s2,6,ele['basic_amt'],style3)
+			sheet1.write(s2,7,ele['vda_amt'],style3)
+			sheet1.write(s2,8,ele['fda_amt'],style3)
+			sheet1.write(s2,9,ele['allow'],style3)
+			sheet1.write(s2,10,salary,style3)
+			sheet1.write(s2,11,ele['fi_inc_amt'],style3)
+			sheet1.write(s2,12,ele['spi_inc_amt'],style3)
+			sheet1.write(s2,13,total,style3)
+			sheet1.write(s2,14,ele['spi_five_inc_amt'],style3)
+			sheet1.write(s2,15,ele['spi_six_inc_amt'],style3)
+			sheet1.write(s2,16,ele['spi_seven_inc_amt'],style3)
+			sheet1.write(s2,17,total_spl_inc,style3)
+			sheet1.write(s2,18,ele['last_inc_amt'],style3)
+			sheet1.write(s2,19,ele['last_inc_date'],style3)
+			sheet1.write(s2,20,el,style3)
+			sheet1.write(s2,21,ele['bonus_amt'],style3)
+			sheet1.write(s2,22,gratuity,style3)
+			sheet1.write(s2,23,(ele['basic_amt']+ele['vda_amt']+ele['fda_amt']),style3)
+			sheet1.write(s2,24,ele['pf_amt'],style3)
+			sheet1.write(s2,25,ele['esi_amt'],style3)
+			sheet1.write(s2,26,ele['shoe_amt'],style3)
+			sheet1.write(s2,27,ele['coff_allow_amt'],style3)
+			sheet1.write(s2,28,(ctc_per_mon),style3)
+			sheet1.write(s2,29,round((ctc_per_mon/30),2),style3)
+		
+			#~ ss2 = 
 			
 																	
 			
 			sno = sno + 1
+		sheet1.write_merge(s2+2, s2+2, 0, 5,"Total",style3)
+		sheet1.write(s2+2,6,basic_amt,style3)
+		sheet1.write(s2+2,7,vda_amt,style3)
+		sheet1.write(s2+2,8,fda_amt,style3)
+		sheet1.write(s2+2,9,allow_amt,style3)
+		sheet1.write(s2+2,10,'',style3)
+		sheet1.write(s2+2,11,'',style3)
+		sheet1.write(s2+2,12,'',style3)
+		sheet1.write(s2+2,13,'',style3)
+		sheet1.write(s2+2,14,'',style3)
+		sheet1.write(s2+2,15,'',style3)
+		sheet1.write(s2+2,16,'',style3)
+		sheet1.write(s2+2,17,'',style3)
+		sheet1.write(s2+2,18,'',style3)
+		sheet1.write(s2+2,19,'',style3)
+		sheet1.write(s2+2,20,'',style3)
+		sheet1.write(s2+2,21,bonus_amt,style3)
+		sheet1.write(s2+2,22,bonus_amt,style3)
+		sheet1.write(s2+2,23,bonus_amt,style3)
+		sheet1.write(s2+2,24,pf_amt,style3)
+		sheet1.write(s2+2,25,esi_amt,style3)
+		sheet1.write(s2+2,26,shoe_amt,style3)
+		sheet1.write(s2+2,27,coff_allow_amt,style3)
+		sheet1.write(s2+2,28,'',style3)
+		sheet1.write(s2+2,29,'',style3)
+		print "lassssssssssssssssssssssssssssssssssssssssssssssssssssssssss",s2
 			
 		"""Parsing data as string """
 		file_data=StringIO.StringIO()
