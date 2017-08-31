@@ -307,7 +307,7 @@ class kg_excel_ot_report(osv.osv):
 					sheet1.row(0).height = 450
 					sheet1.write_merge(4, 4, 0,month_last_day+4,"EXTRA ALLOW FOR THE PERIOD "+ date_from + " "+ "TO "+date_to,style1)
 					sheet1.write_merge(5, 5, 0,month_last_day+4,"",style2)
-					sheet1.insert_bitmap('/home/sujith/SVN_Projects/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+					sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/img/sam.bmp',0,0)
 					sheet1.write(s2,0,"S.NO",style1)
 					sheet1.write(s2,1,"ACCOUNT NO",style1)
 					sheet1.write(s2,2,"NAME",style1)
