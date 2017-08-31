@@ -157,7 +157,7 @@ class kg_excel_staff_ctc_report(osv.osv):
 
 
 			emp.name_related as employee_name,
-			--edu_line.ug_degree as qualification,
+			edu_line.ug_degree as qualification,
 			job.name AS designation,
 			to_char(emp.join_date,'dd/mm/yyyy') AS date_of_join,
 			case when (select amount from hr_payslip_line where slip_id = payslip.id and code='BASIC') is null
