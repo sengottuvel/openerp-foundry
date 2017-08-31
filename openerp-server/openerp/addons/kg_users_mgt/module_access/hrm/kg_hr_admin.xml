@@ -858,6 +858,46 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="r_kg_excel_punching_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_punching_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Punching Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="r_kg_excel_ot_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_ot_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">OT Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="r_kg_excel_bank_copy_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_bank_copy_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Bank Copy Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="r_kg_excel_gratuity_report" model="ir.model.access">
+			<field name="model_id" ref="kg_reports.model_kg_excel_gratuity_report"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Gratuity Report</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
