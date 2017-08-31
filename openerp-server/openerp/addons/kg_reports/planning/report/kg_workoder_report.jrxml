@@ -752,7 +752,7 @@ left join kg_qap_plan qap on qap.id = pump_crm.qap_plan_id
 left join kg_pumpseries_master pumpseries on pumpseries.id = pump_crm.pumpseries_id
 left join kg_primemover_master primemover on primemover.id = pump_crm.primemover_id
 
-where wo_line.id in (select id from ch_work_order_details where header_id = 1861 )]]>
+where wo_line.id in (select id from ch_work_order_details where header_id in ( $P{wo_line_ids}))]]>
 	</queryString>
 	<field name="new_date" class="java.lang.String"/>
 	<field name="id" class="java.lang.Integer"/>
