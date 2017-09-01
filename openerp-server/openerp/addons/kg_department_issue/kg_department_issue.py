@@ -298,8 +298,8 @@ class kg_department_issue(osv.osv):
 						'issue_qty':cutting_qty,
 						'issue_qty_2':cutting_qty,
 						'indent_qty':qty,
-						'length':group[0].length,
-						'breadth':group[0].breadth,
+						'length':group[0].length or 1,
+						'breadth':group[0].breadth or 1,
 						'uom_conversation_factor':group[0].product_id.uom_conversation_factor,
 						'name':prod_browse.name,
 						'location_id':main_location,
@@ -390,7 +390,6 @@ class kg_department_issue(osv.osv):
 			lot_obj = self.pool.get('stock.production.lot')
 			product_obj = self.pool.get('product.product')
 			dep_issue_line_obj = self.pool.get('kg.department.issue.line')
-			
 			if not obj_rec.name:
 				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.department.issue')])
 				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
@@ -398,9 +397,7 @@ class kg_department_issue(osv.osv):
 				seq_name = cr.fetchone();
 				issue_name = seq_name[0]
 				obj_rec.write({'name': issue_name})
-			
 			obj_rec.write({'state': 'approve','confirmed_by':uid,'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
-			
 			if not obj_rec.issue_line_ids:
 				raise osv.except_osv(_('Item Line Empty!'),_('You cannot process Issue without Item Line.'))
 			else:
@@ -444,54 +441,67 @@ class kg_department_issue(osv.osv):
 								uom = lot_rec.product_uom.name
 								tot += lot_rec.pending_qty
 							
-							## Lot qty check
-							#~ if obj_rec.department_id.name != 'DP2':
-								#~ sql = """ select
-											#~ 
-											#~ sum(lot.pending_qty) - (select sum(line.issue_qty) from kg_department_issue issue 
-											#~ left join kg_department_issue_line line on(line.issue_id=issue.id) where issue.id = %s and line.product_id = %s and line.brand_id = %s) as qty,
-											#~ prod.name_template as product
-											#~ 
-											#~ from
-											#~ 
-											#~ stock_production_lot lot
-											#~ left join product_product prod on(prod.id=lot.product_id)
-											#~ where lot.id in (select lot_id from kg_department_issue_details where grn_id = %s and lot.product_id = %s and lot.brand_id = %s)
-											#~ group by 2
-											#~ """ %(obj_rec.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id,dep_issue_line_rec.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id)
-								#~ cr.execute(sql)
-								#~ lot_datas = cr.dictfetchall()
-								#~ print"dep_issue_line_rec",dep_issue_line_rec.id
-								#~ print"obj_recobj_rec",obj_rec.id
-								#~ print"lot_datas",lot_datas,lot_datas[0]['qty']
-								#~ if lot_datas:
-									#~ if lot_datas[0]['qty'] < 0:
-										#~ raise osv.except_osv(_('Stock not available!'),
-											#~ _('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
-							#~ if obj_rec.department_id.name == 'DP2':
-								#~ sql = """ select
-											#~ 
-											#~ sum(lot.pending_qty) - (select sum(line.issue_qty * line.length) from kg_department_issue issue 
-											#~ left join kg_department_issue_line line on(line.issue_id=issue.id) where issue.id = %s and line.product_id = %s and line.brand_id = %s) as qty,
-											#~ prod.name_template as product
-											#~ 
-											#~ from
-											#~ 
-											#~ stock_production_lot lot
-											#~ left join product_product prod on(prod.id=lot.product_id)
-											#~ where lot.id in (select lot_id from kg_department_issue_details where grn_id = %s and lot.product_id = %s and lot.brand_id = %s)
-											#~ group by 2
-											#~ """ %(obj_rec.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id,dep_issue_line_rec.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id)
-								#~ cr.execute(sql)
-								#~ lot_datas = cr.dictfetchall()
-								#~ print"dep_issue_line_rec",dep_issue_line_rec.id
-								#~ print"obj_recobj_rec",obj_rec.id
-								#~ if lot_datas:
-									#~ if lot_datas[0]['qty'] < 0:
-										#~ raise osv.except_osv(_('Stock not available!'),
-											#~ _('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
-							
+							## Mapped Lot qty checking process starts
 							if obj_rec.department_id.name != 'DP2':
+								sql = """ select
+								sum(lot.pending_qty) - (select sum(case when line.uom_id = lot_1.po_uom then line.issue_qty
+								when line.uom_id = lot_1.product_uom then line.issue_qty / prod_1.po_uom_coeff else 0 end) from kg_department_issue issue 
+								join kg_department_issue_line line on(line.issue_id=issue.id)
+								join product_product prod_1 on(prod_1.id=line.product_id) 
+								join stock_production_lot lot_1 on (lot_1.id = (select lot_id from kg_department_issue_details where grn_id = %s))
+								
+								where issue.id = %s and line.product_id = %s and line.brand_id = %s) as qty,
+								prod.name_template as product
+								
+								from
+								
+								stock_production_lot lot
+								join product_product prod on(prod.id=lot.product_id)
+								where lot.id in (select lot_id from kg_department_issue_details where grn_id = %s and product_id = %s) and lot.product_id = %s and lot.brand_id = %s
+								group by 2 """ %(dep_issue_line_rec.id,obj_rec.id,
+								dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id,dep_issue_line_rec.id,
+								dep_issue_line_rec.product_id.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id)
+								cr.execute(sql)
+								lot_datas = cr.dictfetchall()
+								print"dep_issue_line_rec",dep_issue_line_rec.id
+								print"obj_recobj_rec",obj_rec.id
+								print"lot_datas",lot_datas,lot_datas[0]['qty']
+								if lot_datas:
+									if lot_datas[0]['qty'] < 0:
+										raise osv.except_osv(_('Stock not available!'),
+											_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
+							elif obj_rec.department_id.name == 'DP2':
+								sql = """ select
+								sum(lot.pending_qty) - (select sum(case when line.uom_conversation_factor = 'one_dimension' then line.issue_qty * line.length
+								when line.uom_conversation_factor = 'two_dimension' then line.issue_qty * line.length * line.breadth else 0 end) from kg_department_issue issue 
+								join kg_department_issue_line line on(line.issue_id=issue.id)
+								join product_product prod_1 on(prod_1.id=line.product_id) 
+								join stock_production_lot lot_1 on (lot_1.id = (select lot_id from kg_department_issue_details where grn_id = %s))
+								
+								where issue.id = %s and line.product_id = %s and line.brand_id = %s) as qty,
+								prod.name_template as product
+								
+								from
+								
+								stock_production_lot lot
+								join product_product prod on(prod.id=lot.product_id)
+								where lot.id in (select lot_id from kg_department_issue_details where grn_id = %s and product_id = %s) and lot.product_id = %s and lot.brand_id = %s
+								group by 2 """ %(dep_issue_line_rec.id,obj_rec.id,
+								dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id,dep_issue_line_rec.id,
+								dep_issue_line_rec.product_id.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id)
+								cr.execute(sql)
+								lot_datas = cr.dictfetchall()
+								print"dep_issue_line_rec",dep_issue_line_rec.id
+								print"obj_recobj_rec",obj_rec.id
+								if lot_datas:
+									if lot_datas[0]['qty'] < 0:
+										raise osv.except_osv(_('Stock not available!'),
+											_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
+							## Mapped Lot qty checking process ends
+							
+							if obj_rec.department_id.name == 'DP2':
+								crnt_qty = dep_issue_line_rec.issue_qty * dep_issue_line_rec.length
+							elif obj_rec.department_id.name != 'DP2':
 								if dep_issue_line_rec.uom_conversation_factor == 'one_dimension':
 									if dep_issue_line_rec.uom_id.id == lot_rec.po_uom.id:
 										crnt_qty = dep_issue_line_rec.issue_qty
@@ -502,11 +512,11 @@ class kg_department_issue(osv.osv):
 										crnt_qty = dep_issue_line_rec.issue_qty
 									elif dep_issue_line_rec.uom_id.id == lot_rec.product_uom.id:
 										crnt_qty = dep_issue_line_rec.issue_qty / dep_issue_line_rec.product_id.po_uom_in_kgs / dep_issue_line_rec.length / dep_issue_line_rec.breadth
-								print"tottot",tot
-								print"crnt_qty",crnt_qty
-								if tot < crnt_qty:
-									raise osv.except_osv(_('Stock not available!'),
-										_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(item.product_id.name)))
+							print"tottot",round(tot,2)
+							print"crnt_qty",round(crnt_qty,2)
+							if round(tot,2) < round(crnt_qty,2):
+								raise osv.except_osv(_('Stock not available!'),
+									_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(item.product_id.name)))
 							
 							## Reserved Qty update process starts
 							#~ sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(item.id)
@@ -615,7 +625,7 @@ class kg_department_issue(osv.osv):
 					stock_main_store = self.pool.get('stock.location').search(cr,uid,[('custom','=',True),('location_type','=','main')])
 					main_location = stock_main_store[0]
 					dep_stock_location = issue_record.department_id.stock_location.id
-					
+			
 			if line_ids.issue_qty > line_ids.issue_qty_2:
 				raise osv.except_osv(_('Warning!'),
 					_('%s Qty is exceeding store issue qty'%(line_ids.product_id.name)))
@@ -710,24 +720,85 @@ class kg_department_issue(osv.osv):
 					for i in val:
 						lot_rec = lot_obj.browse(cr, uid, i)
 						tot += lot_rec.pending_qty
-					if line_ids.uom_conversation_factor == 'one_dimension':
-						if line_ids.uom_id.id == lot_rec.po_uom.id:
-							crnt_qty = line_ids.issue_qty
-						elif line_ids.uom_id.id == lot_rec.product_uom.id:
-							crnt_qty = line_ids.issue_qty / line_ids.product_id.po_uom_coeff
-					elif line_ids.uom_conversation_factor == 'two_dimension':
-						if line_ids.uom_id.id == lot_rec.po_uom.id:
-							crnt_qty = line_ids.issue_qty
-						elif line_ids.uom_id.id == lot_rec.product_uom.id:
-							crnt_qty = line_ids.issue_qty / line_ids.product_id.po_uom_in_kgs / line_ids.length / line_ids.breadth
-					print"crnt_qtycrnt_qtycrnt_qty",crnt_qty
-					print"tottot",tot
-					if tot < crnt_qty:
-						raise osv.except_osv(_('Stock not available !!'),
+					if line_ids.issue_id.department_id.name == 'DP2':
+						crnt_qty = line_ids.issue_qty * line_ids.length
+					elif line_ids.issue_id.department_id.name != 'DP2':
+						if line_ids.uom_conversation_factor == 'one_dimension':
+							if line_ids.uom_id.id == lot_rec.po_uom.id:
+								crnt_qty = line_ids.issue_qty
+							elif line_ids.uom_id.id == lot_rec.product_uom.id:
+								crnt_qty = line_ids.issue_qty / line_ids.product_id.po_uom_coeff
+						elif line_ids.uom_conversation_factor == 'two_dimension':
+							if line_ids.uom_id.id == lot_rec.po_uom.id:
+								crnt_qty = line_ids.issue_qty
+							elif line_ids.uom_id.id == lot_rec.product_uom.id:
+								crnt_qty = line_ids.issue_qty / line_ids.product_id.po_uom_in_kgs / line_ids.length / line_ids.breadth
+					print"tottot",round(tot,2)
+					print"crnt_qty",round(crnt_qty,2)
+					if round(tot,2) < round(crnt_qty,2):
+						raise osv.except_osv(_('Stock not available!'),
 							_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(line_ids.product_id.name)))
-					### Updation Issue Pending Qty in Department Issue ###
+					
+					## Mapped Lot qty checking process starts
+					if obj_rec.department_id.name != 'DP2':
+						sql = """ select
+						sum(lot.pending_qty) - (select sum(case when line.uom_id = lot_1.po_uom then line.issue_qty
+						when line.uom_id = lot_1.product_uom then line.issue_qty / prod_1.po_uom_coeff else 0 end) from kg_department_issue issue 
+						join kg_department_issue_line line on(line.issue_id=issue.id)
+						join product_product prod_1 on(prod_1.id=line.product_id) 
+						join stock_production_lot lot_1 on (lot_1.id = (select lot_id from kg_department_issue_details where grn_id = %s))
+						
+						where issue.id = %s and line.product_id = %s and line.brand_id = %s) as qty,
+						prod.name_template as product
+						
+						from
+						
+						stock_production_lot lot
+						join product_product prod on(prod.id=lot.product_id)
+						where lot.id in (select lot_id from kg_department_issue_details where grn_id = %s and product_id = %s) and lot.product_id = %s and lot.brand_id = %s
+						group by 2 """ %(line_ids.id,issue_record.id,
+						line_ids.product_id.id,line_ids.brand_id.id,line_ids.id,
+						line_ids.product_id.id,line_ids.product_id.id,line_ids.brand_id.id)
+						cr.execute(sql)
+						lot_datas = cr.dictfetchall()
+						print"dep_issue_line_rec",line_ids.id
+						print"obj_recobj_rec",issue_record.id
+						print"lot_datas",lot_datas,lot_datas[0]['qty']
+						if lot_datas:
+							if lot_datas[0]['qty'] < 0:
+								raise osv.except_osv(_('Stock not available!'),
+									_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
+					elif obj_rec.department_id.name == 'DP2':
+						sql = """ select
+						sum(lot.pending_qty) - (select sum(case when line.uom_conversation_factor = 'one_dimension' then line.issue_qty * line.length
+						when line.uom_conversation_factor = 'two_dimension' then line.issue_qty * line.length * line.breadth else 0 end) from kg_department_issue issue 
+						join kg_department_issue_line line on(line.issue_id=issue.id)
+						join product_product prod_1 on(prod_1.id=line.product_id) 
+						join stock_production_lot lot_1 on (lot_1.id = (select lot_id from kg_department_issue_details where grn_id = %s))
+						
+						where issue.id = %s and line.product_id = %s and line.brand_id = %s) as qty,
+						prod.name_template as product
+						
+						from
+						
+						stock_production_lot lot
+						join product_product prod on(prod.id=lot.product_id)
+						where lot.id in (select lot_id from kg_department_issue_details where grn_id = %s and product_id = %s) and lot.product_id = %s and lot.brand_id = %s
+						group by 2 """ %(line_ids.id,issue_record.id,
+						line_ids.product_id.id,line_ids.brand_id.id,line_ids.id,
+						line_ids.product_id.id,line_ids.product_id.id,line_ids.brand_id.id)
+						cr.execute(sql)
+						lot_datas = cr.dictfetchall()
+						print"dep_issue_line_rec",line_ids.id
+						print"obj_recobj_rec",issue_record.id
+						if lot_datas:
+							if lot_datas[0]['qty'] < 0:
+								raise osv.except_osv(_('Stock not available!'),
+									_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
+					## Mapped Lot qty checking process ends
+					
 					if issue_record.issue_type == 'material':
-						dep_line_obj = self.pool.get('kg.depindent.line')   
+						dep_line_obj = self.pool.get('kg.depindent.line')
 						#~ self.write(cr, uid, ids, {'state': 'done'})
 						cr.execute(""" select stock_picking_id from kg_department_indent_picking where kg_depline_id = %s """ %(issue_record.id))
 						data = cr.dictfetchall()
@@ -879,11 +950,11 @@ class kg_department_issue(osv.osv):
 									print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA"
 									if line_ids.product_id.po_uom_in_kgs > 0:
 										if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
-											store_pending_qty = lot_rec.store_pending_qty - line_ids.issue_qty
-											lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty / line_ids.product_id.po_uom_in_kgs / line_ids.length / line_ids.breadth)
+											store_pending_qty = lot_rec.store_pending_qty - (line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth)
+											lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty * line_ids.length * line_ids.breadth)
 										elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
 											store_pending_qty = lot_rec.store_pending_qty - (line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth)
-											lot_pending_qty = lot_rec.pending_qty - line_ids.issue_qty
+											lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty * line_ids.length * line_ids.breadth)
 								
 								print"lot_pending_qtylot_pending_qty",lot_pending_qty
 								print"store_pending_qtystore_pending_qty",store_pending_qty

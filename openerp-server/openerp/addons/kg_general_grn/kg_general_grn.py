@@ -491,11 +491,11 @@ class kg_general_grn(osv.osv):
 							if line.product_id.po_uom_in_kgs > 0:
 								if line.uom_id.id == line.product_id.uom_id.id:
 									product_qty = exp.product_qty
-									pending_qty = exp.product_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth
+									pending_qty = exp.product_qty / line.product_id.po_uom_in_kgs
 									store_pending_qty = exp.product_qty
 								elif line.uom_id.id == line.product_id.uom_po_id.id:
 									product_qty = exp.product_qty
-									pending_qty = exp.product_qty
+									pending_qty = exp.product_qty * line.length * line.breadth
 									store_pending_qty = exp.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
 						print"product_qtyproduct_qty",product_qty
 						print"pending_qtypending_qty",pending_qty
