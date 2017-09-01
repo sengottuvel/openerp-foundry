@@ -634,7 +634,7 @@ class kg_purchase_order(osv.osv):
 						## Design Rate update process end
 					else:
 						pass
-		#~ self.approved_po_mail(cr,uid,ids,obj,context)
+		self.approved_po_mail(cr,uid,ids,obj,context)
 		return True
 	
 	def wkf_approve_order(self, cr, uid, ids, context=None):
