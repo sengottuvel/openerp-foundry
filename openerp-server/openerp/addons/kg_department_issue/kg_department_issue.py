@@ -584,6 +584,7 @@ class kg_department_issue(osv.osv):
 		return True
 	
 	def issue_item_approval(self,cr,uid,issue_line_ids,context=None):
+		obj_rec = self.browse(cr, uid, ids[0])
 		print"issue_line_idsissue_line_ids***********",issue_line_ids
 		stock_move_obj=self.pool.get('stock.move')
 		product_obj = self.pool.get('product.product')
