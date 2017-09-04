@@ -342,7 +342,7 @@
 									<field name="bot_id" on_change="onchange_bot(bot_id)"/>	
 									<field name="item_name" readonly="1"/>
 									<field name="off_name"/>
-									<field name="position_id" required="1"/>
+									<field name="position_id" required="0"/>
 									<field name="material_code"/>																			
 									<field name="qty" required="1" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}"/>
 									<field name="unit_price"/>
@@ -444,7 +444,7 @@
 													colors="red:prime_cost &lt; wo_prime_cost;">
 													<field name="is_applicable"/>
 													<field name="order_category" invisible="1"/>
-													<field name="position_id" required="1"/>
+													<field name="position_id" required="0"/>
 													<field name="ms_id"/>
 													<field name="item_name" readonly="1"/>
 													<field name="off_name"/>
@@ -589,7 +589,7 @@
 													<field name="is_applicable"/>
 													<field name="order_category" invisible="1"/>
 													<field name="sequence_no"/>
-													<field name="position_id" required="1"/>
+													<field name="position_id" required="0"/>
 													<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 													<field name="off_name"/>
