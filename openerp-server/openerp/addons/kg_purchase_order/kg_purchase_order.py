@@ -443,7 +443,7 @@ class kg_purchase_order(osv.osv):
 			else:
 				if obj.confirmed_by.id == uid:
 					raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
-			self.write(cr,uid,ids,{'state':'verified','verified_by':uid,'verified_date':dt_time,'approval_flag':True})
+			self.write(cr,uid,ids,{'state':'verified','verified_by':uid,'verified_date':dt_time,'approval_flag':False,'sent_mail_flag':False})
 		
 		return True
 	
