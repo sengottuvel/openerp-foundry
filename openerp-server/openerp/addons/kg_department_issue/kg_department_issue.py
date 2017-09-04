@@ -584,7 +584,6 @@ class kg_department_issue(osv.osv):
 		return True
 	
 	def issue_item_approval(self,cr,uid,issue_line_ids,context=None):
-		obj_rec = self.browse(cr, uid, ids[0])
 		print"issue_line_idsissue_line_ids***********",issue_line_ids
 		stock_move_obj=self.pool.get('stock.move')
 		product_obj = self.pool.get('product.product')
@@ -741,7 +740,7 @@ class kg_department_issue(osv.osv):
 							_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(line_ids.product_id.name)))
 					
 					## Mapped Lot qty checking process starts
-					if obj_rec.department_id.name != 'DP2':
+					if issue_record.department_id.name != 'DP2':
 						sql = """ select
 						sum(lot.pending_qty) - (select sum(case when line.uom_id = lot_1.po_uom then line.issue_qty
 						when line.uom_id = lot_1.product_uom then line.issue_qty / prod_1.po_uom_coeff else 0 end) from kg_department_issue issue 
@@ -763,13 +762,13 @@ class kg_department_issue(osv.osv):
 						cr.execute(sql)
 						lot_datas = cr.dictfetchall()
 						print"dep_issue_line_rec",line_ids.id
-						print"obj_recobj_rec",issue_record.id
+						print"issue_record",issue_record.id
 						print"lot_datas",lot_datas,lot_datas[0]['qty']
 						if lot_datas:
 							if lot_datas[0]['qty'] < 0:
 								raise osv.except_osv(_('Stock not available!'),
 									_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
-					elif obj_rec.department_id.name == 'DP2':
+					elif issue_record.department_id.name == 'DP2':
 						sql = """ select
 						sum(lot.pending_qty) - (select sum(case when line.uom_conversation_factor = 'one_dimension' then line.issue_qty * line.length
 						when line.uom_conversation_factor = 'two_dimension' then line.issue_qty * line.length * line.breadth else 0 end) from kg_department_issue issue 
@@ -791,7 +790,7 @@ class kg_department_issue(osv.osv):
 						cr.execute(sql)
 						lot_datas = cr.dictfetchall()
 						print"dep_issue_line_rec",line_ids.id
-						print"obj_recobj_rec",issue_record.id
+						print"issue_record",issue_record.id
 						if lot_datas:
 							if lot_datas[0]['qty'] < 0:
 								raise osv.except_osv(_('Stock not available!'),
