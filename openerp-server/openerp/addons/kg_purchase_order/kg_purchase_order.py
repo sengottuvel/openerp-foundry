@@ -443,7 +443,7 @@ class kg_purchase_order(osv.osv):
 			else:
 				if obj.confirmed_by.id == uid:
 					raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
-			self.write(cr,uid,ids,{'state':'verified','verified_by':uid,'verified_date':dt_time,'approval_flag':True,'sent_mail_flag':False})
+			self.write(cr,uid,ids,{'state':'verified','verified_by':uid,'verified_date':dt_time,'approval_flag':True})
 		
 		return True
 	
@@ -1018,15 +1018,15 @@ class kg_purchase_order(osv.osv):
 						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
 					if rec.verified_by.id == uid:
 						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Verified user'))
-					self.write(cr,uid,ids,{'state': 'confirmed','rej_user_id': uid,'reject_date': dt_time})
+					self.write(cr,uid,ids,{'state': 'confirmed','rej_user_id': uid,'reject_date': dt_time,'sent_mail_flag':False})
 				elif rec.approval_flag == True and rec.state == 'confirmed':
 					if rec.confirmed_by.id == uid:
 						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
-					self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': dt_time})
+					self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': dt_time,'sent_mail_flag':False})
 				if rec.approval_flag != True:
 					if rec.confirmed_by.id == uid:
 						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
-					self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': dt_time})
+					self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': dt_time,'sent_mail_flag':False})
 		return True
 	
 	def action_set_to_draft(self, cr, uid, ids, context=None):
