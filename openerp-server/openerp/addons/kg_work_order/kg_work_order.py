@@ -205,6 +205,25 @@ class kg_work_order(osv.osv):
 			return False
 		return True
 		
+	def _name_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		res = True
+		if rec.entry_mode == 'manual':
+			if rec.name:
+				wo_name = rec.name
+				name=wo_name.upper()			
+				cr.execute(""" select upper(name) from kg_work_order where upper(name)  = '%s' """ %(name))
+				data = cr.dictfetchall()			
+				if len(data) > 1:
+					res = False
+				else:
+					res = True	
+			else:
+				res = True	
+		else:
+			res = True				
+		return res
+		
 	def _check_name(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		res = True	
@@ -226,6 +245,7 @@ class kg_work_order(osv.osv):
 		(_check_lineitems, 'System not allow to save with empty Work Order Details !!',['']),
 		(_Validation, 'Special Character Not Allowed in Work Order No.', ['']),
 		(_check_name, 'Work Order No. must be Unique', ['']),
+		(_name_validate, 'Work Order No. must be Unique', ['']),
 	   
 		
 	   ]	   
@@ -459,6 +479,17 @@ class kg_work_order(osv.osv):
 		assembly_bot_obj = self.pool.get('ch.assembly.bot.details')
 		
 		if entry.state in ('design_approved'):
+			
+			if entry.name:
+				wo_name = entry.name
+				name=wo_name.upper()			
+				cr.execute(""" select upper(name) from kg_work_order where upper(name)  = '%s' """ %(name))
+				data = cr.dictfetchall()			
+				if len(data) > 1:
+					raise osv.except_osv(_('Warning!'),
+						_('Work Order No. must be Unique !!'))
+				else:
+					pass
 			if entry.name:
 				cr.execute(""" select name from kg_work_order where name  = '%s'  """ %(entry.name))
 				data = cr.dictfetchall()			
@@ -470,12 +501,12 @@ class kg_work_order(osv.osv):
 			else:
 				pass
 			for line in entry.line_ids:
-				if line.order_no:
+				if line.order_no:				
 					cr.execute(""" select wo_order.id as order_id from kg_work_order wo_order
 						left join ch_work_order_details ch_work on ch_work.header_id = wo_order.id 
 						where ch_work.order_no  = '%s' and ch_work.header_id not in ('%s')   """ %(line.order_no,line.header_id.id))
 					data = cr.dictfetchall()			
-					if len(data) > 1:
+					if len(data) >= 1:
 						raise osv.except_osv(_('Warning!'),
 							_('Line Work Order No. must be Unique !!'))
 					else:
@@ -1071,60 +1102,62 @@ class kg_work_order(osv.osv):
 						#~ 
 						#~ schedule_obj.entry_confirm(cr, uid, [schedule_id])
 						
-				
-				if entry.order_priority in ('emergency','breakdown') and entry.order_category in ('pump','spare','pump_spare','service','access'):
-					
-					### Schedule Creation ###
-					
-					schedule_item_vals = {
-													
-						'name': '',
-						'location' : entry.location,
-						'order_priority': entry.order_priority,
-						'delivery_date': entry.delivery_date,
-						'order_line_ids': [(6, 0, order_line_ids)],
-						'state' : 'draft',			   
-						'entry_mode' : 'auto',			   
-					}
-					
-					schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-					
-					### Schedule Line Item Creation ###
-					
-					if item.order_category == 'pump':
-					
-						schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-					else:
-						schedule_obj.update_line_items(cr, uid, [schedule_id],0)
-					
-					### Schedule Confirmation ###
-					
-					schedule_obj.entry_confirm(cr, uid, [schedule_id])
-					
-				if entry.order_priority in ('emergency','breakdown') and entry.order_category in ('project'):
-					
-					### Schedule Creation ###
-					
-					schedule_item_vals = {
-													
-						'name': '',
-						'location' : entry.location,
-						'order_priority': entry.order_priority,
-						'delivery_date': entry.delivery_date,
-						'order_line_ids': [(6, 0, order_line_ids)],
-						'state' : 'draft',
-						'entry_mode' : 'auto',				   
-					}
-					
-					schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-					
-					### Schedule Line Item Creation ###
-					
-					if item.order_category == 'pump':
-					
-						schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-					else:
-						schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+				if order_line_ids != []:
+					if entry.order_priority in ('emergency','breakdown') and entry.order_category in ('pump','spare','pump_spare','service','access'):
+						
+						### Schedule Creation ###
+						
+						schedule_item_vals = {
+														
+							'name': '',
+							'location' : entry.location,
+							'order_priority': entry.order_priority,
+							'delivery_date': entry.delivery_date,
+							'order_line_ids': [(6, 0, order_line_ids)],
+							'state' : 'draft',			   
+							'entry_mode' : 'auto',			   
+						}
+						
+						schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+						
+						### Schedule Line Item Creation ###
+						
+						if item.order_category == 'pump':
+						
+							schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+						else:
+							schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+						
+						### Schedule Confirmation ###
+						
+						schedule_obj.entry_confirm(cr, uid, [schedule_id])
+						
+					if entry.order_priority in ('emergency','breakdown') and entry.order_category in ('project'):
+						
+						### Schedule Creation ###
+						
+						schedule_item_vals = {
+														
+							'name': '',
+							'location' : entry.location,
+							'order_priority': entry.order_priority,
+							'delivery_date': entry.delivery_date,
+							'order_line_ids': [(6, 0, order_line_ids)],
+							'state' : 'draft',
+							'entry_mode' : 'auto',				   
+						}
+						
+						schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+						
+						### Schedule Line Item Creation ###
+						
+						if item.order_category == 'pump':
+						
+							schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+						else:
+							schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+				else:
+					pass
 			
 			if entry.flag_data_bank == True:
 				

@@ -33,7 +33,7 @@
 						<group>
 							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="schedule_date" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
-							<field name="location" readonly="1"/>
+							<field name="location" readonly="1"/>							
 							<field name="pump_model_id" readonly="1"/>
 							<field name="item_name" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="each_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
@@ -58,6 +58,7 @@
 							<field name="allocated_qty" readonly="1"/>
 							<field name="reject_qty" on_change="onchange_reallocate_qty(allocated_qty,qty,reject_qty)" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="stock_location_id" readonly="1"/>
+							<field name="flag_moc_deviation" readonly="1" attrs="{'invisible': [('stock_type','=','pattern')]}"/>
 							<field name="sent_to" attrs="{'invisible': [('stock_type','!=','pump')],'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump'),('qty','!=',0)]}"/>
 							<field name="rework_qty" invisible="1"/>
 							<field name="position_no" invisible="1"/>

@@ -216,6 +216,12 @@ class ch_stock_inward_details(osv.osv):
 		'ms_finish_qty': fields.integer('MS Finish Qty'),
 		'position_id':fields.many2one('kg.position.number','Position No.'),
 		'remarks': fields.text('Remarks'),
+		
+		'flag_is_deviation': fields.boolean('MOC Deviation'),
+		
+		## Child Tables Declaration	
+		
+		'line_ids':fields.one2many('ch.manual.rejection', 'header_id', "Manual Rejection"),
 	
 	}
 	
@@ -224,6 +230,7 @@ class ch_stock_inward_details(osv.osv):
 	
 		'state': 'draft',				
 		'active': True,
+		'flag_is_deviation': False,
 		'stock_mode': 'manual',
 		'foundry_stock_state': 'ready_for_ms',
 		'stock_item': 'foundry_item' 
@@ -269,6 +276,24 @@ class ch_stock_inward_details(osv.osv):
 		self.write(cr, uid, ids, {'state':'approve','foundry_stock_state':'ready_for_ms'})
 		return True
 		
+	def entry_update(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		total_qty= 0.00
+		for line in rec.line_ids:			
+			if line.update_flag is False:
+				print"line.qty",line.qty
+				total_qty += line.qty
+				self.pool.get('ch.manual.rejection').write(cr,uid,line.id,{'update_flag':True})				
+			else:
+				pass		
+		if rec.available_qty < total_qty:
+			raise osv.except_osv(_('Excess Qty !!'),
+				_('Manual Rejection process Excess Qty Not Allowed !!'))		
+		else:
+			pass
+		total_avai_qty = rec.available_qty - total_qty
+		self.write(cr, uid, ids, {'available_qty': total_avai_qty})
+		return True
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -416,6 +441,41 @@ ch_stock_inward_details()
 
 
 
+class ch_manual_rejection(osv.osv):
+	
+	_name = "ch.manual.rejection"
+	_description = "Manual Rejection"
+	_order = "entry_date desc"
+	
+	_columns = {   
+			
+		'header_id':fields.many2one('ch.stock.inward.details', 'Stock Inward Details Entry', required=True, ondelete='cascade'),			
+		'entry_date':fields.date('Date',required=True),
+		'qty':fields.float('Qty',required=True),
+		'update_flag':fields.boolean('Update Flag'),
+		'remarks':fields.text('Remarks'),
+		
+	}	
+	
+	_defaults = {
+		
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'update_flag': False,
+		
+	}
+	
+	def _future_qty_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		if rec.qty <= 0.00:
+			return False
+		return True	
+		
+	_constraints = [			
+		
+		(_future_qty_check, 'System not allow to save zero and negative value !!',['Manual Rejection']),  		
+	   ]
+	   
+ch_manual_rejection()
 
 
 

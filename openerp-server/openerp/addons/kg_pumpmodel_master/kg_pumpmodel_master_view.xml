@@ -140,6 +140,7 @@
 								toolbar="True" string="Pump Model Master Tree">		
 					<field name="code"/>			
 					<field name="name"/>					
+					<field name="alias_name"/>					
 					<field name="pump_mode"/>	
 					<field name="bom"/>	
 					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>				
@@ -157,7 +158,8 @@
             <field name="model">kg.pumpmodel.master</field>
             <field name="arch" type="xml">
                 <search string="Pump Model Master Template">
-					<field name="name" string="Master"  filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" />
+					<field name="name" string="Name and code"  filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" />
+					<field name="alias_name" string="Alias Name"  filter_domain="[('alias_name','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				

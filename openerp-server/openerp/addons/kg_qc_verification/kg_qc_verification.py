@@ -82,7 +82,7 @@ class kg_qc_verification(osv.osv):
 		
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled'),('reject','Rejected')],'Status', readonly=True),
-		'schedule_line_id': fields.many2one('ch.schedule.details','Schedule Line Item'),
+		'schedule_line_id': fields.many2one('ch.schedule.details','Schedule Line Item'),		
 		'allocation_id': fields.many2one('ch.stock.allocation.detail','Allocation'),
 		'order_id': fields.many2one('kg.work.order','Work Order No.'),
 		'order_line_id': fields.many2one('ch.work.order.details','Order Line'),
@@ -125,6 +125,7 @@ class kg_qc_verification(osv.osv):
 		'serial_no': fields.char('Serial No', size=128),
 		'stock_location_id': fields.many2one('stock.location','Stock Location'),
 		'stock_inward_id': fields.many2one('ch.stock.inward.details', 'Stock Inward'),
+		'flag_moc_deviation': fields.related('stock_inward_id','flag_is_deviation', type='boolean', string='MOC Deviation', store=True, readonly=True),
 		'reallocate_qty': fields.integer('Re-stock Allocated Qty'),
 		'qc_type':fields.selection([('foundry','Foundry'),('ms','MS')],'QC Type'),
 		'item_code': fields.char('Item Code', readonly=True),
@@ -205,7 +206,7 @@ class kg_qc_verification(osv.osv):
 		reallocate_qty = allocated_qty - qty - reject_qty
 		return {'value': {'reallocate_qty':reallocate_qty}}
 	   
-	   
+	### Not in use ###  
 	def qc_process(self,cr,uid,ids,reject_qty,qc_type,context=None):
 		production_obj = self.pool.get('kg.production')
 		schedule_line_obj = self.pool.get('ch.weekly.schedule.details')
