@@ -89,12 +89,12 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 			   #~ group by sm.product_id''',('done',lo_type,form['date']))
 		#~ 
 		#~ data=self.cr.dictfetchall()
-		self.cr.execute('''		
+		self.cr.execute('''
 			   select sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
 				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s and b.location_id = %s) as stock_uom_close,
 				(case when a.uom_conversation_factor = 'two_dimension' then
-				(sum(a.product_qty) -
+				(sum(a.product_qty * a.length * a.breadth) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
 				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s and b.location_id = %s)) / prod.po_uom_in_kgs / a.length / a.breadth
 				else
@@ -160,8 +160,6 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 					lot_data = self.cr.dictfetchall()
 					print"lot_datalot_datalot_data--------------",lot_data
 					if lot_data:
-						
-						
 						closing_value = lot_data[0]['price']
 						item['po_price'] = lot_data[0]['price']
 						print"item['uom_conversation_factor']",item['uom_conversation_factor']
@@ -189,7 +187,8 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 					print"item['po_price']item['po_price']item['po_price']",item['po_price']
 					print"item['closing_value']item['closing_value']item['closing_value']",item['closing_value']
 					gr_total += item['closing_value']
-					item['grand_total'] = gr_total
+					item['grand_total'] = int(gr_total)
+					
 					data_new.append(item)
 		
 				else:

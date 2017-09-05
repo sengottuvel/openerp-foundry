@@ -1287,7 +1287,7 @@ class kg_po_grn(osv.osv):
 								if line.product_id.po_uom_in_kgs > 0:
 									if line.uom_id.id == line.product_id.uom_id.id:
 										product_qty = exp.product_qty
-										pending_qty = exp.product_qty / line.product_id.po_uom_in_kgs
+										pending_qty = (exp.product_qty / line.product_id.po_uom_in_kgs/ line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
 										store_pending_qty = exp.product_qty
 									elif line.uom_id.id == line.product_id.uom_po_id.id:
 										product_qty = exp.product_qty
@@ -1346,7 +1346,7 @@ class kg_po_grn(osv.osv):
 							if line.product_id.po_uom_in_kgs > 0:
 								if line.uom_id.id == line.product_id.uom_id.id:
 									product_qty = line.po_grn_qty
-									pending_qty = line.po_grn_qty / line.product_id.po_uom_in_kgs
+									pending_qty = (line.po_grn_qty / line.product_id.po_uom_in_kgs/ line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
 									store_pending_qty = line.po_grn_qty
 								elif line.uom_id.id == line.product_id.uom_po_id.id:
 									product_qty = line.po_grn_qty

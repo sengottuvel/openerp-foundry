@@ -120,32 +120,32 @@
 	
 	<pto_header>
 	
-	<blockTable colWidths="30,150,55,55,45,50,50,50,40,50" repeatRows="1" style="Table4">
+	<blockTable colWidths="30,150,55,70,35,50,35,50,42,50" repeatRows="1" style="Table4">
 		<tr>
 			<td>          <para style="terp_61t">S.No</para></td>
 			<td>          <para style="terp_61t">Item Name</para></td>
 			<td>          <para style="terp_61t">Brand</para></td>
 			<td>          <para style="terp_61t">MOC</para></td>
 			<td>          <para style="terp_61t">PO UOM</para></td>
-			<td>          <para style="terp_61t">PO UOM Qty</para></td>
+			<td>          <para style="terp_61t">Qty</para></td>
 			<td>          <para style="terp_61t">Store UOM</para></td>
-			<td>          <para style="terp_61t">Store UOM Qty</para></td>
+			<td>          <para style="terp_61t">Qty</para></td>
 			<td>          <para style="terp_61t">Latest Price</para></td>
 			<td>          <para style="terp_61t">Closing Value</para></td>
 		</tr>
 	</blockTable>
 	</pto_header>
 	
-	<blockTable colWidths="30,150,55,55,45,50,50,50,40,50" repeatRows="1" style="Table4">
+	<blockTable colWidths="30,150,55,70,35,50,35,50,42,50" repeatRows="1" style="Table4">
 		<tr>
 			<td>          <para style="terp_61t">S.No</para></td>
 			<td>          <para style="terp_61t">Item Name</para></td>
 			<td>          <para style="terp_61t">Brand</para></td>
 			<td>          <para style="terp_61t">MOC</para></td>
 			<td>          <para style="terp_61t">PO UOM</para></td>
-			<td>          <para style="terp_61t">PO UOM Qty</para></td>
+			<td>          <para style="terp_61t">Qty</para></td>
 			<td>          <para style="terp_61t">Store UOM</para></td>
-			<td>          <para style="terp_61t">Store UOM Qty</para></td>
+			<td>          <para style="terp_61t">Qty</para></td>
 			<td>          <para style="terp_61t">Latest Price</para></td>
 			<td>          <para style="terp_61t">Closing Value</para></td>
 		</tr>
@@ -156,7 +156,7 @@
 	<section>
 	<para style="terp_default_8">[[ repeatIn(get_data(data['form']), 'x') ]]</para>
 	
-	<blockTable colWidths="30,150,55,55,45,50,50,50,40,50" repeatRows="1" style="Table4">
+	<blockTable colWidths="30,150,55,70,35,50,35,50,42,50" repeatRows="1" style="Table4">
 		<tr>
 			<td>          <para style="terp_61"> <seq id="prod_serial_no"/> </para>        </td>
 			<td>          <para style="terp_left_61">[[ x['product'] ]]</para>        </td>
@@ -172,13 +172,13 @@
 	</blockTable>
 	</section>
     
-	<blockTable colWidths="525,50" repeatRows="1" style="Table4">
+	<blockTable colWidths="517,50" repeatRows="1" style="Table4">
       <tr>
         <td>
          <para style="terp_61t">Grand Total(RS)</para>
         </td>
         <td>
-         <para style="terp_left_61_bold" alignment="right">[[ locale.format('%.2f', x['grand_total']) ]]</para>
+         <para style="terp_left_61_bold" alignment="right">[[ x['grand_total'] ]]</para>
         </td>
       </tr>
     </blockTable>

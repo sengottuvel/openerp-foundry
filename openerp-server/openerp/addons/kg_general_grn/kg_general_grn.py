@@ -427,6 +427,7 @@ class kg_general_grn(osv.osv):
 					length = 1
 				if breadth == 0.00:
 					breadth = 1
+				print"product_qtyproduct_qty",product_qty
 				stock_move_obj.create(cr,uid,
 					{
 					'general_grn_id': line.id,
@@ -491,10 +492,10 @@ class kg_general_grn(osv.osv):
 							if line.product_id.po_uom_in_kgs > 0:
 								if line.uom_id.id == line.product_id.uom_id.id:
 									product_qty = exp.product_qty
-									pending_qty = exp.product_qty / line.product_id.po_uom_in_kgs
+									pending_qty = (exp.product_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
 									store_pending_qty = exp.product_qty
 								elif line.uom_id.id == line.product_id.uom_po_id.id:
-									product_qty = exp.product_qty
+									product_qty = exp.product_qty * line.length * line.breadth
 									pending_qty = exp.product_qty * line.length * line.breadth
 									store_pending_qty = exp.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
 						print"product_qtyproduct_qty",product_qty
@@ -537,11 +538,11 @@ class kg_general_grn(osv.osv):
 						if line.product_id.po_uom_in_kgs > 0:
 							if line.uom_id.id == line.product_id.uom_id.id:
 								product_qty = line.grn_qty
-								pending_qty = line.grn_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth
+								pending_qty = (line.grn_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
 								store_pending_qty = line.grn_qty
 							elif line.uom_id.id == line.product_id.uom_po_id.id:
 								product_qty = line.grn_qty
-								pending_qty = line.grn_qty
+								pending_qty = line.grn_qty * line.length * line.breadth
 								store_pending_qty = line.grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
 					print"product_qtyproduct_qty",product_qty
 					print"pending_qtypending_qty",pending_qty
@@ -568,6 +569,7 @@ class kg_general_grn(osv.osv):
 						#'po_qty':move_record.po_to_stock_qty,
 					})
 					print"lot_idlot_idlot_idlot_idlot_id",lot_id
+				
 				grn_price = line.grn_qty * line.price_unit
 				line.write({'line_total':grn_price})
 				line_tot += grn_price
