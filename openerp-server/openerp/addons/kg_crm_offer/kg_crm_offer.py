@@ -78,7 +78,7 @@ class kg_crm_offer(osv.osv):
 		
 		## Basic Info
 		
-		'name': fields.char('Offer No', size=128,select=True),
+		'name': fields.char('Offer No', size=128,select=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'note': fields.char('Notes'),
 		'offer_date': fields.date('Offer Date',required=True),
 		'remarks': fields.text('Remarks'),
@@ -166,6 +166,7 @@ class kg_crm_offer(osv.osv):
 		'prj_name': fields.char('Project Name',readonly=True, states={'draft':[('readonly',False)]}),
 		'del_term': fields.selection([('ex_works','Ex-Works'),('fob','FOB'),('cfr','CFR'),('cif','CIF'),('cpt','CPT')],'Delivery Term',readonly=True, states={'draft':[('readonly',False)]}),
 		'mode_of_dispatch': fields.selection([('sea','Sea Worthy'),('air','Air Worthy')],'Mode Of Dispatch',readonly=True, states={'draft':[('readonly',False)]}),
+		'zone': fields.selection([('north','North'),('south','South'),('east','East'),('west','West')],'Zone',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		# Pump Offer Fields
 		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -460,15 +461,15 @@ class kg_crm_offer(osv.osv):
 			if entry.dummy_flag != True:
 				raise osv.except_osv(_('Warning'),_('Kindly update values for Ratio,Discount'))
 			#~ for line in entry.line_pump_ids:
-			if not entry.name:
-				off_no = ''	
-				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.offer')])
-				rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],rec.code,entry.offer_date))
-				off_no = cr.fetchone();
-				off_no = off_no[0]
-			else:
-				off_no = entry.name
+			#~ if not entry.name:
+				#~ off_no = ''	
+				#~ seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.offer')])
+				#~ rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				#~ cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],rec.code,entry.offer_date))
+				#~ off_no = cr.fetchone();
+				#~ off_no = off_no[0]
+			#~ else:
+			off_no = entry.name
 			#~ self.wo_creation(cr,uid,entry)
 			
 			self.write(cr, uid, ids, {
