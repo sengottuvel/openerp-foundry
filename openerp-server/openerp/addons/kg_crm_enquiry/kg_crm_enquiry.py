@@ -35,7 +35,7 @@ class kg_crm_enquiry(osv.osv):
 		
 		## Basic Info
 		
-		'name': fields.char('Enquiry No.', size=128,select=True),
+		'name': fields.char('Enquiry No.', size=128,select=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'offer_date': fields.date('Enquiry Date',required=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'note': fields.char('Notes',readonly=True, states={'draft':[('readonly',False)]}),
 		'service_det': fields.char('Service Details'),
@@ -84,6 +84,7 @@ class kg_crm_enquiry(osv.osv):
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
 		'flag_data_bank': fields.boolean('Is Data WO',readonly=True, states={'draft':[('readonly',False)]}),
 		'enq_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Enquiry Status',readonly=True, states={'draft':[('readonly',False)]}),
+		'zone': fields.selection([('north','North'),('south','South'),('east','East'),('west','West')],'Zone',readonly=True, states={'draft':[('readonly',False)]}),
 		'prj_name': fields.char('Project Name',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		## Child Tables Declaration
@@ -95,6 +96,7 @@ class kg_crm_enquiry(osv.osv):
 		'ch_line_ids_c': fields.one2many('ch.crm.component.ms', 'header_id', "MS",readonly=True, states={'draft':[('readonly',False)]}),
 		'ch_line_ids_d': fields.one2many('ch.crm.component.bot', 'header_id', "BOT",readonly=True, states={'draft':[('readonly',False)]}),
 		'ch_line_ids_e': fields.one2many('ch.crm.component.access', 'header_id', "Accessories",readonly=True, states={'draft':[('readonly',False)]}),
+		'ch_line_ids_f': fields.one2many('ch.crm.component.primemover', 'header_id', "Primemover",readonly=True, states={'draft':[('readonly',False)]}),
 		
 		## Entry Info
 		
@@ -244,8 +246,10 @@ class kg_crm_enquiry(osv.osv):
 							else:
 								applicable_b='no'
 						if applicable == 'no' and applicable_a == 'no' and applicable_b == 'no':
-							if rec.purpose_categ == 'spare'  and not rec.line_ids_spare_bom:
+							if rec.purpose_categ == 'spare' and not rec.line_ids_spare_bom:
 								raise osv.except_osv(_('Warning!'),_('Spare %s Kindly choose Is applicable in components'%(rec.pump_id.name)))
+							#~ elif rec.purpose_categ == 'spare' and rec.line_ids_spare_bom:
+								#~ raise osv.except_osv(_('Warning!'),_('Spare %s Kindly choose Is applicable in components'%(rec.pump_id.name)))
 							#~ elif rec.purpose_categ == 'pump':
 							if rec.purpose_categ == 'pump':
 								raise osv.except_osv(_('Warning!'),_('Pump %s Kindly choose Is applicable in components'%(rec.pump_id.name)))
@@ -684,34 +688,34 @@ class kg_crm_enquiry(osv.osv):
 		print "entry.line_ids",entry.ch_line_ids
 		if entry.state == 'draft':
 			off_no = ''
-			if not entry.name:
-				if entry.call_type == 'service':		
-					off_no = ''	
-					qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.enquiry')])
-					rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
-					off_no = cr.fetchone();
-					off_no = off_no[0]
-				elif entry.call_type == 'new_enquiry':
-					if entry.division_id.code == 'CPD':				
-						off_no = ''
-						qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.cp')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
-						off_no = cr.fetchone();
-						off_no = off_no[0]
-					elif entry.division_id.code == 'IPD':				
-						off_no = ''
-						qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.ip')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
-						off_no = cr.fetchone();
-						off_no = off_no[0]
-					else:
-						pass
-				else:
-					pass
-			elif entry.name:
+			#~ if not entry.name:
+				#~ if entry.call_type == 'service':		
+					#~ off_no = ''	
+					#~ qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.enquiry')])
+					#~ rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+					#~ cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
+					#~ off_no = cr.fetchone();
+					#~ off_no = off_no[0]
+				#~ elif entry.call_type == 'new_enquiry':
+					#~ if entry.division_id.code == 'CPD':				
+						#~ off_no = ''
+						#~ qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.cp')])
+						#~ rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+						#~ cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
+						#~ off_no = cr.fetchone();
+						#~ off_no = off_no[0]
+					#~ elif entry.division_id.code == 'IPD':				
+						#~ off_no = ''
+						#~ qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.ip')])
+						#~ rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+						#~ cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
+						#~ off_no = cr.fetchone();
+						#~ off_no = off_no[0]
+					#~ else:
+						#~ pass
+				#~ else:
+					#~ pass
+			if entry.name:
 				off_no = entry.name
 			print"off_nooff_no",off_no
 			
@@ -729,6 +733,7 @@ class kg_crm_enquiry(osv.osv):
 																		'dealer_id': entry.dealer_id.id,
 																		'ref_mode': entry.ref_mode,
 																		'division_id': entry.division_id.id,
+																		'zone': entry.zone,
 																		'purpose': entry.purpose,
 																		'segment': entry.segment,
 																		'flag_data_bank': entry.flag_data_bank,
@@ -988,6 +993,16 @@ class kg_crm_enquiry(osv.osv):
 					self.spare_component_creation(cr,uid,offer_id,access,prime_cost,'access')
 			## Accessories primecost ends
 			
+			## Primemover primecost starts
+			if entry.ch_line_ids_f:
+				for primemover in entry.ch_line_ids_f:
+					prime_cost = 0
+					primemover_prime_cost = self._prime_cost_calculation(cr,uid,'primemover',0,
+							0,0,primemover.primemover_id.id,0,primemover.moc_id.id,0)
+					prime_cost += primemover_prime_cost * primemover.qty
+				self.pool.get('ch.crm.component.primemover').write(cr,uid,primemover.id,{'prime_cost':prime_cost})
+				self.spare_component_creation(cr,uid,offer_id,primemover,prime_cost,'primemover')
+			## Primemover primecost ends
 			
 			## Additional Components Primecost calculation ends
 			
@@ -2249,8 +2264,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			if context['purpose_categ']:
 				if context['purpose_categ'] == 'pump':
 					context['purpose_categ'] = 'pump'
+					context['is_selectable_all'] = True
 				if context['purpose_categ'] == 'spare':
 					context['purpose_categ'] = 'spare'
+					context['is_selectable_all'] = False
 				if context['purpose_categ'] == 'access':
 					context['purpose_categ'] = 'access'
 					context['acces'] = 'yes'
@@ -2364,7 +2381,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		(_check_access_qty,'You cannot save with zero qty !',['Qty']),
 		(_duplicate_removed,'Duplicates removed !',['']),
 		#~ (_ms_raw_length_validate,'Length mismatched !',['']),
-		#~ (_template_name_validate,'Template name already exits!',['']),
+		(_template_name_validate,'Template name already exits!',['']),
 		#~ (_check_lineitems, 'System not allow to save with empty Accessories Details !!',['']),
 		#~ (_check_is_applicable,'You cannot save without Is applicable !',['Is Applicable']),
 		
@@ -2529,7 +2546,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								})
 		return {'value': {'line_ids_moc_a': moc_const_vals,'moc_construction_name':moc_const_rec.name}}
 	
-	def onchange_load_bom(self, cr, uid, ids, load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,
+	def onchange_load_bom(self, cr, uid, ids, load_bom,pump_id,wo_line_id,purpose_categ,flag_standard,moc_const_id,qty,
 		motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all):
 		
 		delivery_pipe_size = del_pipe_size
@@ -2639,6 +2656,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'load_bom': True,
 										'is_applicable': is_selectable_all,
 										'purpose_categ': purpose_categ,
+										'flag_standard': flag_standard,
 										#~ 'csd_no': item.csd_no,
 										#~ 'remarks': item.remarks,
 										})
@@ -2698,6 +2716,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'load_bom': True,
 										'is_applicable': is_selectable_all,
 										'purpose_categ': purpose_categ,
+										'flag_standard': flag_standard,
 										'line_ids': ch_ms_vals,
 										#~ 'csd_no': item.csd_no,
 										#~ 'remarks': item.remarks,
@@ -2746,6 +2765,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'flag_is_bearing': is_bearing,
 										'purpose_categ': purpose_categ,
 										'position_id': item.position_id.id,
+										'flag_standard': flag_standard,
 										#~ 'remarks': item.remarks,
 										})
 					print"bot_valsbot_vals",bot_vals
@@ -2775,7 +2795,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if is_selectable_all == True:
 							is_selectable_all = True
 						else:
-							is_selectable_all = True
+							is_selectable_all = False
 						fou_vals.append({
 										'position_id': item.position_id.id,
 										'pattern_id': item.pattern_id.id,
@@ -2788,6 +2808,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'load_bom': True,
 										'is_applicable': is_selectable_all,
 										'purpose_categ': purpose_categ,
+										'flag_standard': flag_standard,
 										#~ 'csd_no': item.csd_no,
 										#~ 'remarks': item.remarks,
 										})
@@ -2830,7 +2851,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if is_selectable_all == True:
 							is_selectable_all = True
 						else:
-							is_selectable_all = True
+							is_selectable_all = False
 						ms_vals.append({
 										'name': item.name,
 										'off_name': item.name,
@@ -2843,6 +2864,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'load_bom': True,
 										'is_applicable': is_selectable_all,
 										'purpose_categ': purpose_categ,
+										'flag_standard': flag_standard,
 										'line_ids': ch_ms_vals,
 										#~ 'csd_no': item.csd_no,
 										#~ 'remarks': item.remarks,
@@ -2870,7 +2892,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if is_selectable_all == True:
 							is_selectable_all = True
 						else:
-							is_selectable_all = True
+							is_selectable_all = False
 						bot_vals.append({
 										'item_name': item_name,
 										'off_name': item_name,
@@ -2884,6 +2906,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'flag_is_bearing': bot_rec.is_bearing,
 										'purpose_categ': purpose_categ,
 										'position_id': item.position_id.id,
+										'flag_standard': flag_standard,
 										#~ 'remarks': item.remarks,
 										})
 						print"bot_valsbot_vals",bot_vals
@@ -3175,6 +3198,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							'load_bom': True,
 							'moc_name': moc_name,
 							'moc_changed_flag': moc_changed_flag,
+							'flag_standard': flag_standard,
 							#~ 'bom_id': vertical_foundry['header_id'],
 							#~ 'bom_line_id': vertical_foundry['id'],	
 							#~ 'weight': wgt or 0.00,								  
@@ -3732,6 +3756,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							'moc_id': moc_id,
 							'moc_name': moc_name,
 							'moc_changed_flag': moc_changed_flag,
+							'flag_standard': flag_standard,
 							'line_ids': ch_ms_vals,
 							#~ 'pos_no':pos_no,
 							#~ 'ms_line_id': vertical_ms_details['id'],
@@ -3928,6 +3953,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							'moc_id': moc_id,
 							'moc_name': moc_name,
 							'moc_changed_flag': moc_changed_flag,
+							'flag_standard': flag_standard,
 							
 							})
 		
@@ -4319,6 +4345,7 @@ class ch_kg_crm_foundry_item(osv.osv):
 		'spare_offer_line_id': fields.integer('Spare Offer Line Id'),
 		'off_name': fields.char('Offer Name'),
 		'flag_pattern_check': fields.boolean('Is Pattern Check'),
+		'flag_standard': fields.boolean('Non Standarad'),
 		
 	}
 	
@@ -4400,6 +4427,7 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		'material_code': fields.char('Material Code'),
 		'spare_offer_line_id': fields.integer('Spare Offer Line Id'),
 		'off_name': fields.char('Offer Name'),
+		'flag_standard': fields.boolean('Non Standarad'),
 		
 		## Child Tables Declaration 
 		
@@ -4584,6 +4612,7 @@ class ch_kg_crm_bot(osv.osv):
 		'material_code': fields.char('Material Code'),
 		'spare_offer_line_id': fields.integer('Spare Offer Line Id'),
 		'off_name': fields.char('Offer Name'),
+		'flag_standard': fields.boolean('Non Standarad'),
 		
 	}
 	
@@ -5251,6 +5280,7 @@ class ch_kg_crm_accessories(osv.osv):
 		('foundation_bolt','Foundation Bolt'),('pump_pulley','Pump Pulley'),('motor_pulley','Motor Pulley'),
 		('slide_rail','Slide Rail'),('belt','Belt'),('belt_guard','Belt Guard'),('others','Others')],'Accessories type'),
 		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction'),
+		'flag_standard': fields.boolean('Non Standarad'),
 		
 		## Child Tables Declaration
 		
@@ -5293,7 +5323,7 @@ class ch_kg_crm_accessories(osv.osv):
 			raise osv.except_osv(_('Warning!'),_('System should allow without accessories category!'))
 		return {'value': value}
 	
-	def onchange_load_access(self,cr,uid,ids,load_access,access_id,moc_const_id,qty,is_selectable_all):
+	def onchange_load_access(self,cr,uid,ids,load_access,flag_standard,access_id,moc_const_id,qty,is_selectable_all):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
@@ -5340,6 +5370,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'is_applicable': is_selectable_all,
 									'csd_no': item.csd_no,
 									'remarks': item.remarks,
+									'flag_standard': flag_standard,
 									})
 				print"fou_valsfou_vals",fou_vals
 			if data_rec.line_ids_a:
@@ -5373,6 +5404,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'is_applicable': is_selectable_all,
 									'csd_no': item.csd_no,
 									'remarks': item.remarks,
+									'flag_standard': flag_standard,
 									})
 					print"ms_valsms_vals",ms_vals	
 			if data_rec.line_ids:
@@ -5411,6 +5443,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'is_applicable': is_selectable_all,
 									'csd_no': item.csd_no,
 									'remarks': item.remark,
+									'flag_standard': flag_standard,
 									})
 					print"bot_valsbot_vals",bot_vals	
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
@@ -5448,6 +5481,7 @@ class ch_crm_access_fou(osv.osv):
 		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
 		'material_code': fields.char('Material Code'),
+		'flag_standard': fields.boolean('Non Standarad'),
 		
 	}
 	
@@ -5494,6 +5528,7 @@ class ch_crm_access_ms(osv.osv):
 		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
 		'material_code': fields.char('Material Code'),
+		'flag_standard': fields.boolean('Non Standarad'),
 		
 	}
 	
@@ -5549,6 +5584,7 @@ class ch_crm_access_bot(osv.osv):
 		'prime_cost': fields.float('Prime Cost'),
 		'brand_id': fields.many2one('kg.brand.master','Brand'),
 		'material_code': fields.char('Material Code'),
+		'flag_standard': fields.boolean('Non Standarad'),
 		
 	}
 	
@@ -5840,3 +5876,44 @@ class ch_crm_component_access(osv.osv):
 		return {'value': value}
 	
 ch_crm_component_access()
+
+class ch_crm_component_primemover(osv.osv):
+	
+	_name = "ch.crm.component.primemover"
+	_description = "Ch CRM Component Primemover"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('kg.crm.enquiry', 'Enquiry Id', ondelete='cascade'),
+		'remarks':fields.text('Remarks'),
+		
+		## Module Requirement Fields
+		
+		'primemover_id': fields.many2one('kg.primemover.master','Primemover'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','not in',('reject','cancel'))]"),
+		'brand_id': fields.many2one('kg.brand.master','Brand '),
+		'qty': fields.float('Qty'),
+		'prime_cost': fields.float('Prime Cost'),
+		'is_applicable': fields.boolean('Is Applicable'),
+		'is_selectable_all': fields.boolean('Is Selectable'),
+		'off_name': fields.char('Offer Name'),
+		
+	}
+	
+	_defaults = {
+		
+		'is_applicable': False,
+		'qty': 1,
+		
+	}
+	
+	def onchange_primemover_id(self, cr, uid, ids, primemover_id):
+		value = {'off_name':''}
+		if primemover_id:
+			prime_rec = self.pool.get('kg.primemover.master').browse(cr,uid,primemover_id)
+			value = {'off_name':prime_rec.name}
+		return {'value': value}
+	
+ch_crm_component_primemover()

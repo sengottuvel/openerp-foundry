@@ -24,7 +24,7 @@
 					</header>
 						<group>
 							<group>
-								<field name="name" readonly="1"/>
+								<field name="name" required="1"/>
 								<field name="offer_date"/>
 								<field name="customer_id" required="1"/>
 								<field name="prj_name"/>
@@ -35,10 +35,10 @@
 								<field name="dealer_id" attrs="{'invisible': [('ref_mode','=','direct')],'required': [('ref_mode','=','dealer')]}"/>
 								<field name="note"/>
 								<field name="purpose" attrs="{'invisible': [('call_type','=','service')],'required': [('call_type','!=','service')]}"/>
-								
 								<!--<field name="order_type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>-->		
 								<field name="revision_remarks" attrs="{'invisible': [('state','not in',('moved_to_offer','revised'))],'readonly':[('state','=','revised')]}"/>
 								<field name="scope_of_supply" invisible="1"/>						
+								<field name="zone" invisible="1"/>						
 							</group>											
 							<group>
 								<field name="enquiry_no" required="1"/>
@@ -90,7 +90,7 @@
 						</group>
 						
 						<group string="Pump/Spare Details">
-							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'division_id':division_id,'purpose_categ':purpose,'temperature': 'normal','flange_type': 'standard','load_bom':False,'customer_id':customer_id}" widget="one2many_selectable">
+							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'division_id':division_id,'purpose_categ':purpose,'temperature':'normal','flange_type':'standard','load_bom':False,'customer_id':customer_id}" widget="one2many_selectable">
 								<tree string="Pump History">
 									<field name="equipment_no" required="1"/>
 									<field name="description" required="1"/>
@@ -329,8 +329,8 @@
 							</notebook>
 							<group>
 								<group>
-									<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all)" attrs="{'invisible':[('purpose_categ','in',('access','in_development'))]}"/>
-									<field name="is_selectable_all" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all)" attrs="{'invisible':[('load_bom','!=',True)]}"/>
+									<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,flag_standard,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all)" attrs="{'invisible':[('purpose_categ','in',('access','in_development'))]}"/>
+									<field name="is_selectable_all" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,flag_standard,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all)" attrs="{'invisible':[('load_bom','!=',True)]}"/>
 								</group>
 								<group>
 								</group>
@@ -392,7 +392,7 @@
 										<field name="off_name"/>
 										<field name="material_code"/>
 										<field name="flag_pattern_check"/>
-										<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+										<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
 										<field name="prime_cost" readonly="1"/>
@@ -401,6 +401,7 @@
 										<field name="purpose_categ" invisible="1"/>
 										<field name="moc_name" invisible="1"/>
 										<field name="moc_changed_flag" invisible="1"/>
+										<field name="flag_standard" invisible="1"/>
 									</tree>
 								</field>
 							</page>
@@ -413,7 +414,7 @@
 										<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="off_name"/>
 										<field name="material_code"/>
-										<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+										<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 										<field name="length"/>
 										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
@@ -423,6 +424,7 @@
 										<field name="purpose_categ" invisible="1"/>
 										<field name="moc_name" invisible="1"/>
 										<field name="moc_changed_flag" invisible="1"/>
+										<field name="flag_standard" invisible="1"/>
 									</tree>
 									<form string="MS Details Entry Tree" create="false" delete="false">					
 										<group colspan="4">
@@ -435,7 +437,7 @@
 												<field name="material_code"/>
 											</group>
 											<group>
-												<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+												<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required': [('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 												<field name="length" readonly="1"/>
 												<field name="csd_no"/>
 												<field name="qty" on_change="onchange_raw_qty(ms_id,qty)" attrs="{'readonly':[('purpose_categ','=','pump')],'required': [('is_applicable','=',True)]}"/>
@@ -444,6 +446,7 @@
 												<field name="purpose_categ" invisible="1"/>
 												<field name="moc_name" invisible="1"/>
 												<field name="moc_changed_flag" invisible="1"/>
+												<field name="flag_standard" invisible="1"/>
 											</group>
 										</group>
 										<notebook>
@@ -478,7 +481,7 @@
 										<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="off_name"/>
 										<field name="material_code"/>
-										<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+										<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 										<field name="brand_id" attrs="{'required': [('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
 										<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
 										<field name="prime_cost" readonly="1"/>
@@ -488,6 +491,7 @@
 										<field name="purpose_categ" invisible="1"/>
 										<field name="moc_name" invisible="1"/>
 										<field name="moc_changed_flag" invisible="1"/>
+										<field name="flag_standard" invisible="1"/>
 									</tree>
 								</field>
 							</page>
@@ -635,7 +639,7 @@
 					
 						<group string="Accessories" attrs="{'invisible':[('purpose_categ','=','in_development')]}">
 							<group>
-								<field name="acces"  on_change="onchange_access_load(acces,pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,service_factor,framesize,speed_in_rpm)" attrs="{'required':[('purpose_categ','in',('pump','spare','access'))],'readonly':[('purpose_categ','=','access')]}" colspan="1"/>
+								<field name="acces" on_change="onchange_access_load(acces,pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,service_factor,framesize,speed_in_rpm)" attrs="{'required':[('purpose_categ','in',('pump','spare','access'))],'readonly':[('purpose_categ','=','access')]}" colspan="1"/>
 							</group>
 							<group>
 			<!--
@@ -663,6 +667,7 @@
 												<field name="access_id" required="1" attrs="{'readonly':['|',('load_access','=',True),('access_categ_id','=',False)]}"/>
 												<field name="accessories_type" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
 												<field name="moc_const_id" required="1" attrs="{'readonly':[('load_access','=',True)]}" invisible="1"/>
+												<field name="flag_standard"/>
 												<field name="moc_id" invisible="1"/>
 											</group>
 											<group>
@@ -673,10 +678,10 @@
 											</group>
 											<group>
 											<group>
-												<field name="load_access" on_change="onchange_load_access(load_access,access_id,moc_const_id,qty,is_selectable_all)"/>
+												<field name="load_access" on_change="onchange_load_access(load_access,flag_standard,access_id,moc_const_id,qty,is_selectable_all)"/>
 											</group>
 											<group>
-												<field name="is_selectable_all" on_change="onchange_load_access(load_access,access_id,moc_const_id,qty,is_selectable_all)" attrs="{'invisible':[('load_access','!=',True)]}"/>
+												<field name="is_selectable_all" on_change="onchange_load_access(load_access,flag_standard,access_id,moc_const_id,qty,is_selectable_all)" attrs="{'invisible':[('load_access','!=',True)]}"/>
 											</group>
 											</group>
 										</group>
@@ -689,7 +694,7 @@
 														<field name="pattern_id" readonly="1"/>
 														<field name="pattern_name" readonly="1"/>
 														<field name="material_code"/>
-														<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+														<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 														<field name="csd_no" readonly="1"/>
 														<field name="qty" required="1"/>
 														<field name="prime_cost" readonly="1"/>
@@ -697,6 +702,7 @@
 														<field name="load_bom" invisible="1"/>
 														<field name="moc_name" invisible="1"/>
 														<field name="moc_changed_flag" invisible="1"/>
+														<field name="flag_standard" invisible="1"/>
 													</tree>
 												</field>								
 											</page>
@@ -708,7 +714,7 @@
 														<field name="ms_id" readonly="1"/>
 														<field name="name" readonly="1"/>
 														<field name="material_code"/>
-														<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+														<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 														<field name="csd_no" readonly="1"/>
 														<field name="qty" required="1"/>
 														<field name="prime_cost" readonly="1"/>
@@ -716,6 +722,7 @@
 														<field name="load_bom" invisible="1"/>
 														<field name="moc_name" invisible="1"/>
 														<field name="moc_changed_flag" invisible="1"/>
+														<field name="flag_standard" invisible="1"/>
 													</tree>
 												</field>								
 											</page>
@@ -727,7 +734,7 @@
 														<field name="ms_id" readonly="1"/>
 														<field name="name" readonly="1"/>
 														<field name="material_code"/>
-														<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+														<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 														<field name="csd_no" readonly="1"/>
 														<field name="qty" required="1"/>
 														<field name="prime_cost" readonly="1"/>
@@ -735,6 +742,7 @@
 														<field name="load_bom" invisible="1"/>
 														<field name="moc_name" invisible="1"/>
 														<field name="moc_changed_flag" invisible="1"/>
+														<field name="flag_standard" invisible="1"/>
 													</tree>
 												</field>								
 											</page>
@@ -881,7 +889,20 @@
 									
 								</field>
 							</page>
-							
+							<page string="Primemover">
+								<field name="ch_line_ids_f">
+									<tree string="Primemover Entry Tree" editable="top">
+										<field name="is_applicable"/>
+										<field name="primemover_id" required="1" on_change="onchange_primemover_id(primemover_id)"/>
+										<field name="off_name"/>
+										<field name="moc_id" required="1"/>
+										<field name="brand_id" required="1"/>
+										<field name="qty" invisible="1"/>
+										<field name="prime_cost"/>
+									</tree>
+									
+								</field>
+							</page>
 							</notebook>
 						</group>
 						
@@ -1044,8 +1065,74 @@
 			<field name="view_type">form</field>
 			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
 			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
-			<field name="context">{'default_source': 'market'}</field>
-			<field name="domain">[('state','!=','revised'),('source','=','market')]</field>
+			<field name="context">{'default_source':'market','default_segment':'dom','default_division_id':36}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('division_id','=',36)]</field>
+		</record>
+		
+		<record id="tma_crm_enquiry_mkt_north" model="ir.actions.act_window">
+			<field name="name">North Enquiry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.enquiry</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
+			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
+			<field name="context">{'default_source':'market','default_segment':'dom','default_zone':'north'}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('zone','=','north')]</field>
+		</record>
+		
+		<record id="tma_crm_enquiry_mkt_south" model="ir.actions.act_window">
+			<field name="name">South Enquiry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.enquiry</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
+			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
+			<field name="context">{'default_source':'market','default_segment':'dom','default_zone':'south'}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('zone','=','south')]</field>
+		</record>
+		
+		<record id="tma_crm_enquiry_mkt_east" model="ir.actions.act_window">
+			<field name="name">East Enquiry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.enquiry</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
+			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
+			<field name="context">{'default_source':'market','default_segment':'dom','default_zone':'east'}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('zone','=','east')]</field>
+		</record>
+		
+		<record id="tma_crm_enquiry_mkt_west" model="ir.actions.act_window">
+			<field name="name">West Enquiry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.enquiry</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
+			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
+			<field name="context">{'default_source':'market','default_segment':'dom','default_zone':'west'}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('zone','=','west')]</field>
+		</record>
+		
+		<record id="tma_crm_enquiry_mkt_exp" model="ir.actions.act_window">
+			<field name="name">Export Enquiry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.enquiry</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
+			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
+			<field name="context">{'default_source':'market','default_segment':'exp'}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','exp')]</field>
+		</record>
+		
+		<record id="tma_crm_enquiry_mkt_ipd" model="ir.actions.act_window">
+			<field name="name">IPD Enquiry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.enquiry</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
+			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
+			<field name="context">{'default_source':'market','default_segment':'dom','default_division_id':30}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('division_id','=',30)]</field>
 		</record>
 		
 	<!-- Menu Action End-->
@@ -1344,8 +1431,8 @@
 			</notebook>
 			<group>
 				<group>
-					<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all)" attrs="{'invisible':[('purpose_categ','in',('access','in_development'))]}"/>
-					<field name="is_selectable_all" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all)" attrs="{'invisible':[('load_bom','!=',True)]}"/>
+					<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,flag_standard,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all)" attrs="{'invisible':[('purpose_categ','in',('access','in_development'))]}"/>
+					<field name="is_selectable_all" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,flag_standard,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all)" attrs="{'invisible':[('load_bom','!=',True)]}"/>
 				</group>
 				<group>
 				</group>
@@ -1370,6 +1457,7 @@
 						<field name="purpose_categ" invisible="1"/>
 						<field name="moc_name" invisible="1"/>
 						<field name="moc_changed_flag" invisible="1"/>
+						<field name="flag_standard" invisible="1"/>
 					</tree>
 				</field>
 			</page>
@@ -1392,6 +1480,7 @@
 						<field name="purpose_categ" invisible="1"/>
 						<field name="moc_name" invisible="1"/>
 						<field name="moc_changed_flag" invisible="1"/>
+						<field name="flag_standard" invisible="1"/>
 					</tree>
 					<form string="MS Details Entry Tree" create="false" delete="false">					
 						<group colspan="4">
@@ -1413,6 +1502,7 @@
 								<field name="purpose_categ" invisible="1"/>
 								<field name="moc_name" invisible="1"/>
 								<field name="moc_changed_flag" invisible="1"/>
+								<field name="flag_standard" invisible="1"/>
 							</group>
 						</group>
 						<notebook>
@@ -1457,6 +1547,7 @@
 						<field name="purpose_categ" invisible="1"/>
 						<field name="moc_name" invisible="1"/>
 						<field name="moc_changed_flag" invisible="1"/>
+						<field name="flag_standard" invisible="1"/>
 					</tree>
 				</field>
 			</page>
@@ -1622,6 +1713,7 @@
 										<field name="load_bom" invisible="1"/>
 										<field name="moc_name" invisible="1"/>
 										<field name="moc_changed_flag" invisible="1"/>
+										<field name="flag_standard" invisible="1"/>
 									</tree>
 								</field>								
 							</page>
@@ -1641,6 +1733,7 @@
 										<field name="load_bom" invisible="1"/>
 										<field name="moc_name" invisible="1"/>
 										<field name="moc_changed_flag" invisible="1"/>
+										<field name="flag_standard" invisible="1"/>
 									</tree>
 								</field>								
 							</page>
@@ -1660,6 +1753,7 @@
 										<field name="load_bom" invisible="1"/>
 										<field name="moc_name" invisible="1"/>
 										<field name="moc_changed_flag" invisible="1"/>
+										<field name="flag_standard" invisible="1"/>
 									</tree>
 								</field>								
 							</page>
@@ -1724,6 +1818,24 @@
 	
 	<!-- Marketing Enquiry --> 
 	<menuitem action="tma_crm_enquiry_marketing" name="Marketing Enquiry" id="tma_crm_enquiry_marketings" parent="kg_menus.cpm_crm_enquiry_menu" sequence="2"/>
+	
+	<!-- Marketing Enquiry North--> 
+	<menuitem action="tma_crm_enquiry_mkt_north" name="North Enquiry" id="tam_crm_enquiry_north" parent="kg_menus.tpm_crm_enquiry_north" sequence="1"/>
+	
+	<!-- Marketing Enquiry South--> 
+	<menuitem action="tma_crm_enquiry_mkt_south" name="South Enquiry" id="tam_crm_enquiry_south" parent="kg_menus.tpm_crm_enquiry_south" sequence="1"/>
+	
+	<!-- Marketing Enquiry East--> 
+	<menuitem action="tma_crm_enquiry_mkt_east" name="East Enquiry" id="tam_crm_enquiry_east" parent="kg_menus.tpm_crm_enquiry_east" sequence="1"/>
+	
+	<!-- Marketing Enquiry West--> 
+	<menuitem action="tma_crm_enquiry_mkt_west" name="West Enquiry" id="tam_crm_enquiry_west" parent="kg_menus.tpm_crm_enquiry_west" sequence="1"/>
+	
+	<!-- Marketing Enquiry Export--> 
+	<menuitem action="tma_crm_enquiry_mkt_exp" name="Export Enquiry" id="tam_crm_enquiry_exp" parent="kg_menus.tpm_crm_enquiry_export" sequence="1"/>
+	
+	<!-- Marketing Enquiry IPD--> 
+	<menuitem action="tma_crm_enquiry_mkt_ipd" name="IPD Enquiry" id="tam_crm_enquiry_ipd" parent="kg_menus.tpm_crm_enquiry_ipd" sequence="1"/>
 	
 	<!-- Enquiry Template --> 
 	<menuitem action="tma_crm_enquiry_template" name="Enquiry Template" id="tam_crm_enquiry_template" parent="kg_menus.cpm_crm_enquiry_menu" sequence="11"/>
