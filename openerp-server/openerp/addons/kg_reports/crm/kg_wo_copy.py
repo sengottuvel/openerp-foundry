@@ -47,9 +47,6 @@ class kg_wo_copy(osv.osv):
 		'enq_id': fields.many2one('kg.crm.enquiry','Enq No.'),
 		'report_template': fields.selection([('1','Horizontal non slurry'),('2','Horizontal slurry'),('3','Vertical non slurry'),('4','Vertical slurry')],'Template',required=True),
 		
-		'attachment':fields.binary('Soft Copy 1'),
-		'attachment_1':fields.binary('Soft Copy 2'),
-		
 		'line_ids': fields.related('enq_id','ch_line_ids', type='one2many', relation='ch.kg.crm.pumpmodel', string='Items Details'),
 		
 	}
@@ -92,41 +89,9 @@ class kg_wo_copy(osv.osv):
 	
 	def print_wo(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])		
-		if rec.state == 'draft':		
-			rec = self.browse(cr,uid,ids[0])	
-			data = self.read(cr,uid,ids,)[-1]
-			myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/attachment_1.png'
-			if os.path.isfile(myfile) == True:
-				os.remove(myfile)
-			myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/attachment_2.png'
-			if os.path.isfile(myfile) == True:
-				os.remove(myfile)
-			if data['attachment']:
-				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/attachment_1.png'
-				if os.path.isfile(myfile) == True:
-					os.remove(myfile)
-				else:
-					pass
-				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images', 'attachment_1.png')
-				f = open(filepath, "a")
-				f.write(data['attachment'].decode('base64'))
-			else:
-				pass		
-			print "CCCCCCCCCCCCCCCCCCCCCCCCC ================="
-			
-			if data['attachment_1']:
-				myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/attachment_2.png'
-				if os.path.isfile(myfile) == True:
-					os.remove(myfile)
-				else:
-					pass
-				filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images', 'attachment_2.png')
-				f = open(filepath, "a")
-				f.write(data['attachment_1'].decode('base64'))
-			else:
-				pass		
-			print "CCCCCCCCCCCCCCCCCCCCCCCCC ================="
-			
+		if rec.state == 'draft':
+			self.write(cr,uid,ids,{'state':'confirmed'})
+			data = self.read(cr,uid,ids,)[-1]													
 					
 			print data,' create_report('
 			return {
@@ -141,6 +106,7 @@ class kg_wo_copy(osv.osv):
 					},
 				'nodestroy': False
 				}
+			
 		else:
 			pass
 		return True

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="48"/>
+	<property name="ireport.y" value="34"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -150,6 +150,7 @@ select enquiry_line_id from ch_work_order_details where id = $P{wo_line_id} )]]>
 	<parameter name="wo_line_ids" class="java.lang.Integer"/>
 	<parameter name="attach_1" class="java.lang.String"/>
 	<parameter name="attach_2" class="java.lang.String"/>
+	<parameter name="attach_3" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[select
 to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_date,
@@ -253,9 +254,12 @@ case when pump_crm.head_in > 0 then round(cast(pump_crm.head_in as numeric),2)::
 
 case when pump_crm.efficiency_in > 0 then round(cast(pump_crm.efficiency_in as numeric),2)::text else null end as efficiency,
 
-pump_crm.bkw_water as bkw_water,
+---pump_crm.bkw_water as bkw_water,
 
-pump_crm.bkw_liq as bkw,
+case when pump_crm.bkw_water is null then null else coalesce(pump_crm.bkw_water,0.00) end as bkw_water,
+case when pump_crm.bkw_liq is null then null else coalesce(pump_crm.bkw_liq,0.00) end as bkw,
+
+---pump_crm.bkw_liq as bkw,
 
 case when pump_crm.motor_kw > 0 then round(cast(pump_crm.motor_kw as numeric),2)::text else null end as motor_kw,
 
@@ -431,6 +435,8 @@ case when pump_crm.size_suctionx_flag  = 't' then (
 case when pump_crm.size_suctionx is not null then pump_crm.size_suctionx::text else null end)
 else null
 end as size_suctionx,
+
+coalesce(pump_crm.size_suctionx,'-') as del_size_suctionx,
 
 case when pump_crm.impeller_type_flag  = 't' then (
 case when pump_crm.impeller_type = 'open' then 'Open'
@@ -752,7 +758,7 @@ left join kg_qap_plan qap on qap.id = pump_crm.qap_plan_id
 left join kg_pumpseries_master pumpseries on pumpseries.id = pump_crm.pumpseries_id
 left join kg_primemover_master primemover on primemover.id = pump_crm.primemover_id
 
-where wo_line.id in (select id from ch_work_order_details where header_id in ( $P{wo_line_ids}))]]>
+where wo_line.id in (select id from ch_work_order_details where header_id = $P{wo_line_ids} )]]>
 	</queryString>
 	<field name="new_date" class="java.lang.String"/>
 	<field name="id" class="java.lang.Integer"/>
@@ -820,6 +826,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 	<field name="impeller_type" class="java.lang.String"/>
 	<field name="impeller_dia_min" class="java.lang.String"/>
 	<field name="size_suctionx" class="java.lang.String"/>
+	<field name="del_size_suctionx" class="java.lang.String"/>
 	<field name="flange_type" class="java.lang.String"/>
 	<field name="best_efficiency" class="java.lang.String"/>
 	<field name="impeller_tip_speed" class="java.lang.String"/>
@@ -941,7 +948,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="52" width="63" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="52" width="88" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1058,7 +1065,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<text><![CDATA[CPO Ref / Dealer Po Ref : --]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="116" width="63" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="116" width="88" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1071,7 +1078,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<text><![CDATA[Penalty: ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="137" width="63" height="18" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="137" width="88" height="18" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1084,7 +1091,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<text><![CDATA[Road permit: ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="399" y="116" width="54" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="399" y="116" width="75" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1094,10 +1101,10 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement verticalAlignment="Middle">
 						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[Drg. Appr.: ]]></text>
+					<text><![CDATA[Drg.Approval.: ]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="63" y="52" width="336" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="88" y="52" width="311" height="21"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -1114,7 +1121,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 				</image>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="63" y="116" width="180" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="88" y="116" width="155" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1140,7 +1147,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{inspection}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="453" y="116" width="112" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="474" y="116" width="91" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1153,7 +1160,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{drawing_approval}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="63" y="137" width="180" height="18"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="88" y="137" width="155" height="18"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1176,7 +1183,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[QAP:]]></text>
+					<text><![CDATA[QAP Approval:]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="399" y="137" width="166" height="18"/>
@@ -1210,10 +1217,10 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 	<group name="WO COPY FIELDS">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 	</group>
-	<group name="WO GROUP">
+	<group name="WO GROUP01">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
-			<band height="565">
+			<band height="80">
 				<textField isBlankWhenNull="true">
 					<reportElement x="307" y="0" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box topPadding="1" leftPadding="2">
@@ -1225,7 +1232,9 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{wo_ref}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="0" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="0" y="0" width="307" height="16" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{wo_ref}.equals(null)) & $F{wo_ref} != '']]></printWhenExpression>
+					</reportElement>
 					<box topPadding="1" leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1245,7 +1254,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement x="0" y="16" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{tag_no}.equals(null))]]></printWhenExpression>
+						<printWhenExpression><![CDATA[!($F{tag_no}.equals(null)) & $F{tag_no} != '']]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
 						<leftPen lineWidth="0.75"/>
@@ -1265,7 +1274,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement x="0" y="32" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{description}.equals(null))]]></printWhenExpression>
+						<printWhenExpression><![CDATA[!($F{description}.equals(null)) & $F{description} != '']]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
 						<leftPen lineWidth="0.75"/>
@@ -1293,89 +1302,6 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Quantity in Nos."]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="128" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{specific_gravity}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="128" width="307" height="16" isRemoveLineWhenBlank="true"/>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Specific Gravity "]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="144" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{suction_condition}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="144" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{suction_condition}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Suction Condition"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="160" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{viscosity_in_cst}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="176" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="0">
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{viscosity_crt_factor}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="160" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{viscosity_in_cst}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Viscosity in CST"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="176" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{viscosity_crt_factor}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Viscosity correction factors"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
 					<reportElement x="307" y="48" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="0">
 						<leftPen lineWidth="0.75"/>
@@ -1399,18 +1325,67 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					</textElement>
 					<textFieldExpression><![CDATA["Model / Alias name"]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="WO GROUP02">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="80">
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="80" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="48" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{del_pipe_size}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{specific_gravity}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="80" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{del_pipe_size}.equals(null))]]></printWhenExpression>
+					<reportElement x="0" y="48" width="307" height="16" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{specific_gravity}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="1" leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Specific Gravity "]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="64" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{suction_condition}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="64" width="307" height="16" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{suction_condition}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="1" leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Suction Condition"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="0" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{del_size_suctionx}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="16" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{del_size_suctionx}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
 						<leftPen lineWidth="0.75"/>
@@ -1420,7 +1395,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Delivery Pipe Size (mm)"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="96" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="16" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1429,7 +1404,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{flange_standard}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="96" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="16" width="307" height="16" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{flange_standard}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
@@ -1440,7 +1415,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Flange standard"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="112" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="32" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1449,7 +1424,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{liquid_handled}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="112" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="32" width="307" height="16" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{liquid_handled}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
@@ -1462,8 +1437,34 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement/>
 					<textFieldExpression><![CDATA["Liquid"]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="WO GROUP03">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="80">
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="192" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="0" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{viscosity_in_cst}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="16" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="0">
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{viscosity_crt_factor}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="32" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1472,7 +1473,51 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{ph_value}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="192" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="48" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{temperature_in_c}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="64" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{capacity_in_water}+" / "+$F{capacity_in_m3hr}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="16" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{viscosity_in_cst}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="1" leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Viscosity in CST"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="16" width="307" height="16" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{viscosity_crt_factor}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="1" leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Viscosity correction factors"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="32" width="307" height="16" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{ph_value}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
@@ -1483,16 +1528,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["PH Value"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="208" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{temperature_in_c}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="208" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="48" width="307" height="16" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{temperature_in_c}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
@@ -1502,19 +1538,10 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement/>
 					<textFieldExpression><![CDATA["Temperature in C"]]></textFieldExpression>
 				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="224" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center">
-						<font isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{capacity_in_water}+" / "+$F{capacity_in_m3hr}]]></textFieldExpression>
-				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="224" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="64" width="307" height="16" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{capacity_in_m3hr}.equals(null)) || !($F{capacity_in_water}.equals(null))]]></printWhenExpression>
+					</reportElement>
 					<box topPadding="1" leftPadding="2" bottomPadding="0">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1526,8 +1553,26 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					</textElement>
 					<textFieldExpression><![CDATA["Capacity in m3/Hr (W/L)"]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="WO GROUP04">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="100">
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="240" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="0" y="0" width="307" height="20" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{head_in_water}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Total Head in Mlc(Water)"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="0" width="258" height="20" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1536,7 +1581,9 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{head_in_water}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="256" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="20" width="258" height="20" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[$F{head_in_liquid}]]></printWhenExpression>
+					</reportElement>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1545,21 +1592,10 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{head_in_liquid}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="240" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{head_in_water}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Total Head in Mlc(Water)"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="256" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="20" width="307" height="20" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{head_in_liquid}.equals(null))]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="1" leftPadding="2">
+					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
@@ -1567,7 +1603,20 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Total Head in Mlc(Liquid)"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="272" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="0" y="40" width="307" height="20" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{efficiency}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Efficiency in % W/L"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="40" width="258" height="20" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{efficiency}.equals(null))]]></printWhenExpression>
+					</reportElement>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1576,19 +1625,10 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{efficiency}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="272" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{efficiency}.equals(null))]]></printWhenExpression>
+					<reportElement x="307" y="60" width="258" height="20" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{bkw_water}.equals(null))]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Efficiency in % W/L"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="288" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box topPadding="0" leftPadding="0">
+					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
@@ -1596,10 +1636,10 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{bkw_water}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="288" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="60" width="307" height="20" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{bkw_water}.equals(null))]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="1" leftPadding="2">
+					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
@@ -1607,7 +1647,9 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["BKW Water"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="304" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="80" width="258" height="20" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{bkw}.equals(null))]]></printWhenExpression>
+					</reportElement>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1616,38 +1658,25 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{bkw}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="304" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="80" width="307" height="20" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{bkw}.equals(null))]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="1" leftPadding="2">
+					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement/>
 					<textFieldExpression><![CDATA["BKW Liq"]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="WO GROUP05">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="82">
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="320" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{motor_kw}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="320" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{motor_kw}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Motor KW "]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="336" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="18" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1656,16 +1685,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{speed_pump}+" /  "+$F{speed_motor}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="336" width="307" height="16" isRemoveLineWhenBlank="true"/>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Speed - RPM (P/M)"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="352" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="34" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1676,18 +1696,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{type_of_drive}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="352" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{type_of_drive}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Type of Drive"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="368" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="50" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1698,7 +1707,38 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{motor_make}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="368" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="66" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{framesize}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="18" width="307" height="16" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{speed_pump}.equals(null)) || !($F{speed_motor}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="1" leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Speed - RPM (P/M)"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="16" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{type_of_drive}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="1" leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Type of Drive"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="50" width="307" height="16" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{motor_make}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
@@ -1712,18 +1752,55 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Motor Make"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="400" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
+					<reportElement x="0" y="66" width="307" height="16" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{framesize}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="1" leftPadding="2">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
 						<bottomPen lineWidth="0.0"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{impeller_dia_rated}]]></textFieldExpression>
+					<textElement/>
+					<textFieldExpression><![CDATA["Frame Size"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="400" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="0" width="258" height="18" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{motor_kw}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="18" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{motor_kw}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="1" leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Motor KW "]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="WO GROUP06">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="96">
+				<textField>
+					<reportElement x="0" y="96" width="565" height="0"/>
+					<box>
+						<bottomPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="16" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{impeller_dia_rated}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
@@ -1734,16 +1811,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Impeller Dia Rated"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="416" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{npsh_r_m}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="416" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="16" width="307" height="16" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{npsh_r_m}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
@@ -1754,16 +1822,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["NPSH R – M"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="432" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{shaft_sealing}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="432" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="32" width="307" height="16" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{shaft_sealing}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="1" leftPadding="2">
@@ -1774,16 +1833,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Shaft Sealing"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="448" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="0">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{mech_seal_make}+" / "+$F{seal_type}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="448" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="0" y="48" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box topPadding="1" leftPadding="2">
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1792,16 +1842,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Seal Make / Seal Type"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="464" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{face_combination}+" / "+$F{api_plan}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="464" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="0" y="64" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box topPadding="1" leftPadding="2">
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1810,7 +1851,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Face Combination / API Plan "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement mode="Transparent" x="0" y="480" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement mode="Transparent" x="0" y="80" width="307" height="16" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{setting_height}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="0" leftPadding="2" bottomPadding="0">
@@ -1825,60 +1866,97 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Setting Height"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement mode="Transparent" x="307" y="480" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="0" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
 						<bottomPen lineWidth="0.0"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{setting_height}]]></textFieldExpression>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{impeller_dia_rated}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement mode="Transparent" x="307" y="496" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="16" width="258" height="16" isRemoveLineWhenBlank="true"/>
 					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{setting_height}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement mode="Transparent" x="0" y="496" width="307" height="17" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{setting_height}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="0" leftPadding="2" bottomPadding="0">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="10" isBold="false"/>
-					</textElement>
-					<textFieldExpression><![CDATA["Sump Depth"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="513" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box topPadding="2">
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{solid_concen}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{npsh_r_m}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="513" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="32" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{shaft_sealing}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="48" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="0">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{mech_seal_make}+" / "+$F{seal_type}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="64" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{face_combination}+" / "+$F{api_plan}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement mode="Transparent" x="307" y="80" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{setting_height}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="WO GROUP">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="68">
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{setting_height}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Sump Depth"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{setting_height}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{solid_concen}.equals(null))]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="2" leftPadding="2">
+					<box leftPadding="2">
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
@@ -1886,7 +1964,27 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Solid Concentration by weight % "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="529" width="258" height="19" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{solid_concen}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{solid_concen_vol}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Solid Concentration by Volume % "]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1895,7 +1993,18 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{solid_concen_vol}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="548" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{npsh_avl}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["NPSH-AVL "]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -1903,185 +2012,26 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement textAlignment="Center"/>
 					<textFieldExpression><![CDATA[$F{npsh_avl}]]></textFieldExpression>
 				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="529" width="307" height="19" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{solid_concen_vol}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Solid Concentration by Volume % "]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="548" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{npsh_avl}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["NPSH-AVL "]]></textFieldExpression>
-				</textField>
-				<line>
-					<reportElement x="0" y="564" width="565" height="1"/>
-					<graphicElement>
-						<pen lineWidth="0.75"/>
-					</graphicElement>
-				</line>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="384" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{framesize}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="384" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{framesize}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Frame Size"]]></textFieldExpression>
-				</textField>
 			</band>
 		</groupHeader>
 	</group>
-	<group name="Extra fields">
+	<group name="Extra fields 01">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
-			<band height="147">
+			<band height="85">
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="49" width="258" height="17" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{suction_pressure}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="66" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{slurry_correction_in}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="82" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{suction_pressure_kg}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="98" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{differential_pressure_kg}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="114" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{discharge_pressure_kg}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="130" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box topPadding="0" leftPadding="0">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{temperature}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="49" width="307" height="17" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{suction_pressure}.equals(null))]]></printWhenExpression>
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{max_particle_size_mm}.equals(null))]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="1" leftPadding="2">
+					<box leftPadding="2">
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement/>
-					<textFieldExpression><![CDATA["Suction pressure"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Max Particle Size-mm "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="66" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{slurry_correction_in}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Slurry Correction in"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="82" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{suction_pressure_kg}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Suction Pressure - kg/cm2 "]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="98" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{differential_pressure_kg}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Differential Pressure - kg/cm2 "]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="114" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{discharge_pressure_kg}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Discharge Pressure - kg/cm2 "]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="130" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{temperature}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Temperature Condition "]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="1" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -2090,7 +2040,18 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{max_particle_size_mm}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="17" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{density}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Density(kg/m3) "]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -2099,7 +2060,18 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{density}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="33" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{consistency}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Consistency In %"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -2108,78 +2080,141 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{consistency}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="1" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{max_particle_size_mm}.equals(null))]]></printWhenExpression>
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{suction_pressure}.equals(null))]]></printWhenExpression>
 					</reportElement>
-					<box topPadding="1" leftPadding="2">
+					<box leftPadding="2">
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement/>
-					<textFieldExpression><![CDATA["Max Particle Size-mm "]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Suction pressure"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="17" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{density}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Density(kg/m3) "]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="33" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{consistency}.equals(null))]]></printWhenExpression>
-					</reportElement>
-					<box topPadding="1" leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Consistency In %"]]></textFieldExpression>
-				</textField>
-				<line>
-					<reportElement x="0" y="0" width="565" height="1"/>
-					<graphicElement>
-						<pen lineWidth="0.75"/>
-					</graphicElement>
-				</line>
-				<line>
-					<reportElement x="0" y="146" width="565" height="1"/>
-				</line>
-			</band>
-		</groupHeader>
-	</group>
-	<group name="Pump Specification">
-		<groupExpression><![CDATA[$F{id}]]></groupExpression>
-		<groupHeader>
-			<band height="752">
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="0" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{pumpseries}.equals(null))]]></printWhenExpression>
-					</reportElement>
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement/>
-					<textFieldExpression><![CDATA["Pump Series"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="0" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{pumpseries}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{suction_pressure}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="16" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="68" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{slurry_correction_in}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Slurry Correction in"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="68" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{slurry_correction_in}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Extra fields">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="68">
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{suction_pressure_kg}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Suction Pressure - kg/cm2"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{suction_pressure_kg}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{differential_pressure_kg}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Differential Pressure - kg/cm2 "]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{differential_pressure_kg}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{discharge_pressure_kg}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Discharge Pressure - kg/cm2 "]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{discharge_pressure_kg}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{temperature}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Temperature Condition "]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{temperature}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Pump Specification 01">
+		<groupExpression><![CDATA[$F{new_date}]]></groupExpression>
+		<groupHeader>
+			<band height="85">
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{supply_ref}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2190,7 +2225,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Previous Supply Reference "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="32" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{supply_ref}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{scope_of_supply}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2201,7 +2245,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Scope of Supply"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="48" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{scope_of_supply}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{number_of_stages}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2212,7 +2265,36 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Number of stages"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="64" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{number_of_stages}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{pumpseries}.equals(null))]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Pump Series"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{pumpseries}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="68" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{impeller_type}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2223,7 +2305,32 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Impeller Type"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="80" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="68" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{impeller_type}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Pump Specification 02">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="85">
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{impeller_dia_min}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{impeller_dia_min}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2234,7 +2341,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Impeller Dia Min mm"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="96" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{size_suctionx}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{size_suctionx}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2245,7 +2361,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Size-SuctionX Delivery(mm)"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="112" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{flange_type}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{flange_type}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2256,70 +2381,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Flange Type"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="16" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{supply_ref}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{best_efficiency}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="32" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{scope_of_supply}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="48" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{number_of_stages}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="64" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{impeller_type}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="80" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{impeller_dia_min}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="96" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{size_suctionx}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="112" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{flange_type}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="128" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{best_efficiency}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2330,7 +2401,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Best Efficiency NPSH in M "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="144" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="68" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{impeller_tip_speed}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="68" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{impeller_tip_speed}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2340,8 +2420,15 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement/>
 					<textFieldExpression><![CDATA["Impeller Tip Speed -M/Sec "]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Pump Specification 03">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="85">
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="160" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{hydrostatic_test_pressure}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2352,7 +2439,25 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Hydrostatic Test Pressure - Kg/cm2 "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="176" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{hydrostatic_test_pressure}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{speed_rpm_engine}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{speed_rpm_engine}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2363,7 +2468,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Speed in RPM - Engine "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="192" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{insulation}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{insulation}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2374,7 +2488,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Insulation "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="208" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{protection}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{protection}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2385,61 +2508,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Protection "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="128" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="68" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{best_efficiency}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{voltage}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="144" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{impeller_tip_speed}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="160" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{hydrostatic_test_pressure}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="176" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{speed_rpm_engine}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="192" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{insulation}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="208" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{protection}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="224" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="68" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{voltage}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2449,8 +2527,24 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement/>
 					<textFieldExpression><![CDATA["Voltage "]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Pump Specification 04">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="85">
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="240" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{phase}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{phase}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2461,8 +2555,17 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Phase "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="256" width="307" height="16" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[!($F{frequency}.equals(null))]]></printWhenExpression>
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{frequency}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{voltage}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
 						<leftPen lineWidth="0.75"/>
@@ -2472,7 +2575,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Motor frequency (HZ) "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="272" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{motor_margin}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{motor_margin}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2483,7 +2595,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Motor Margin(%) "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="288" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{end_of_the_curve}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{end_of_the_curve}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2494,7 +2615,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["End of the curve - KW(Rated) liquid "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="304" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="68" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{critical_speed}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="68" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{critical_speed}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2504,62 +2634,24 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement/>
 					<textFieldExpression><![CDATA["critical_speed"]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Pump Specification 05">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="85">
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="224" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{voltage}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{maximum_allowable_soild}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="240" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{phase}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="256" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{frequency}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="272" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{motor_margin}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="288" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{end_of_the_curve}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="304" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{critical_speed}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="320" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{maximum_allowable_soild}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2570,7 +2662,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Maximum Allowable Soild Size - MM "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="336" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{impeller_number}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{impeller_number}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2581,7 +2682,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Impeller Number of vanes "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="352" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{impeller_dia_max}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{impeller_dia_max}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2592,7 +2702,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Impeller Dia Max mm "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="368" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{max_allowable_test}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{max_allowable_test}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2603,7 +2722,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Max Allowable Casing design Pressure "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="384" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="68" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{crm_type}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="68" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{crm_type}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2613,8 +2741,15 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement/>
 					<textFieldExpression><![CDATA["Pump Design "]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Pump Specification 06">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="68">
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="400" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{bush_bearing}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2625,52 +2760,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Bush Bearing "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="320" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{maximum_allowable_soild}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="336" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{impeller_number}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="352" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{impeller_dia_max}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="368" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{max_allowable_test}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="384" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{crm_type}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="400" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -2679,7 +2769,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA[$F{bush_bearing}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="416" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{suction_size}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2690,7 +2780,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Suction Size "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="432" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{suction_size}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{rpm}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2698,10 +2797,19 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement/>
-					<textFieldExpression><![CDATA["RPM "]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Casing Feet Location "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="448" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{rpm}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{casing_design}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2712,7 +2820,23 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Casing Feet Location "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="464" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{casing_design}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Pump Specification 07">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="68">
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{shut_off_head}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2723,7 +2847,25 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Shut off Head in M"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="480" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{shut_off_head}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{shut_off_pressure}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{shut_off_pressure}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2734,7 +2876,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Shut off Pressure"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="496" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{minimum_contionuous}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{minimum_contionuous}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2745,61 +2896,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Minimum Contionuous Flow - M3/hr"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="416" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{suction_size}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{specific_speed}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="432" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{rpm}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="448" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{casing_design}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="464" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{shut_off_head}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="480" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{shut_off_pressure}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="496" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{minimum_contionuous}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="512" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{specific_speed}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2809,8 +2915,24 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement/>
 					<textFieldExpression><![CDATA["Specific Speed "]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Pump Specification 08" keepTogether="true">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="85">
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="528" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{suction_specific_speed}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{suction_specific_speed}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2821,7 +2943,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Suction Specific Speed "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="544" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{sealing_water_pressure}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2832,7 +2954,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Sealing Water Pressure Kg/cm^2 "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="560" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{sealing_water_pressure}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{sealing_water_capacity}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2843,7 +2974,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Sealing Water Capcity- m3/hr "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="576" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{sealing_water_capacity}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{gd_sq_value}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2854,7 +2994,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["GD SQ value "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="592" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{gd_sq_value}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="68" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{bearing_make}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2865,52 +3014,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Bearing Make "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="512" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{specific_speed}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="528" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{suction_specific_speed}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="544" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{sealing_water_pressure}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="560" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{sealing_water_capacity}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="576" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{gd_sq_value}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="592" width="258" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement x="307" y="68" width="258" height="17" isRemoveLineWhenBlank="true"/>
 					<box>
 						<leftPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
@@ -2918,8 +3022,24 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement textAlignment="Center"/>
 					<textFieldExpression><![CDATA[$F{bearing_make}]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Pump Specification 09" keepTogether="true">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="68">
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="608" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{bearing_number_nde}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{bearing_number_nde}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2930,7 +3050,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Bearing Number NDE / DE "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="624" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{bearing_qty_nde}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{bearing_qty_nde}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2941,7 +3070,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Bearing qty NDE / DE "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="640" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{lubrication_type}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{lubrication_type}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2952,7 +3090,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Lubrication "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="656" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{primemover_categ}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{primemover_categ}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2962,8 +3109,24 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement/>
 					<textFieldExpression><![CDATA["Primemover Category "]]></textFieldExpression>
 				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Pump Specification" minHeightToStartNewPage="12" keepTogether="true">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="85">
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="672" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="0" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{primemover}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{primemover}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2974,7 +3137,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Prime Mover "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="688" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="17" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{operation_range}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="17" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{operation_range}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2985,7 +3157,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Operation Range "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="704" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="34" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{motor_type}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="34" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{motor_type}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -2996,7 +3177,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Motor Type "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="720" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="51" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{motor_mounting}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="51" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{motor_mounting}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -3007,7 +3197,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textFieldExpression><![CDATA["Motor Mounting "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="736" width="307" height="16" isRemoveLineWhenBlank="true">
+					<reportElement x="307" y="68" width="258" height="17" isRemoveLineWhenBlank="true"/>
+					<box>
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{gland_plate}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="68" width="307" height="17" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{gland_plate}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="2">
@@ -3017,97 +3216,16 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 					<textElement/>
 					<textFieldExpression><![CDATA["Gland Plate "]]></textFieldExpression>
 				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="608" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{bearing_number_nde}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="624" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{bearing_qty_nde}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="640" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{lubrication_type}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="656" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{primemover_categ}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="672" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{primemover}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="688" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{operation_range}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="704" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{motor_type}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="720" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{motor_mounting}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="307" y="736" width="258" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[$F{gland_plate}]]></textFieldExpression>
-				</textField>
 			</band>
 		</groupHeader>
 	</group>
-	<group name="Extra Dynamic fields">
+	<group name="Extra Dynamic fields" keepTogether="true">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
 			<band height="16">
 				<printWhenExpression><![CDATA[!($F{extra_field}.equals(null))]]></printWhenExpression>
 				<componentElement>
-					<reportElement x="-1" y="0" width="567" height="16"/>
+					<reportElement positionType="Float" mode="Transparent" x="-1" y="0" width="567" height="16" isRemoveLineWhenBlank="true"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset2">
 							<datasetParameter name="wo_line_id">
@@ -3116,8 +3234,8 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 						</datasetRun>
 						<jr:listContents height="16" width="567">
-							<textField>
-								<reportElement x="1" y="0" width="307" height="16"/>
+							<textField isBlankWhenNull="true">
+								<reportElement positionType="Float" x="1" y="0" width="307" height="16" isRemoveLineWhenBlank="true"/>
 								<box leftPadding="2">
 									<topPen lineWidth="0.0"/>
 									<leftPen lineWidth="0.75"/>
@@ -3127,8 +3245,8 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 								<textElement/>
 								<textFieldExpression><![CDATA[$F{label_val}]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="308" y="0" width="258" height="16"/>
+							<textField isBlankWhenNull="true">
+								<reportElement positionType="Float" x="308" y="0" width="258" height="16" isRemoveLineWhenBlank="true"/>
 								<box>
 									<topPen lineWidth="0.0"/>
 									<leftPen lineWidth="0.75"/>
@@ -3152,7 +3270,7 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 		<groupHeader>
 			<band height="30">
 				<componentElement>
-					<reportElement x="-11" y="15" width="578" height="15">
+					<reportElement mode="Transparent" x="-11" y="15" width="578" height="15" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[!($F{offer}.equals(null))]]></printWhenExpression>
 					</reportElement>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
@@ -3192,9 +3310,6 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 						</jr:listContents>
 					</jr:list>
 				</componentElement>
-				<break>
-					<reportElement mode="Transparent" x="0" y="15" width="564" height="1"/>
-				</break>
 				<textField isBlankWhenNull="true">
 					<reportElement mode="Transparent" x="0" y="0" width="307" height="15"/>
 					<box leftPadding="2">
@@ -3745,10 +3860,10 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 	<group name="Attachment_1">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
-			<band height="782">
+			<band height="452">
 				<printWhenExpression><![CDATA[$P{attach_1} != '']]></printWhenExpression>
 				<image>
-					<reportElement x="1" y="12" width="563" height="770">
+					<reportElement x="1" y="0" width="563" height="452" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[$P{attach_1} != '']]></printWhenExpression>
 					</reportElement>
 					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/"+$P{attach_1}]]></imageExpression>
@@ -3756,16 +3871,30 @@ where wo_line.id in (select id from ch_work_order_details where header_id in ( $
 			</band>
 		</groupHeader>
 	</group>
-	<group name="Attachment_2">
+	<group name="Attacment_2">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
-			<band height="782">
+			<band height="722">
 				<printWhenExpression><![CDATA[$P{attach_2} != '']]></printWhenExpression>
 				<image>
-					<reportElement x="1" y="0" width="563" height="782">
+					<reportElement x="1" y="0" width="563" height="722" isRemoveLineWhenBlank="true">
 						<printWhenExpression><![CDATA[$P{attach_2} != '']]></printWhenExpression>
 					</reportElement>
 					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/"+$P{attach_2}]]></imageExpression>
+				</image>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Attachment_3">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="782">
+				<printWhenExpression><![CDATA[$P{attach_3} != '']]></printWhenExpression>
+				<image>
+					<reportElement x="1" y="0" width="564" height="782" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[$P{attach_3} != '']]></printWhenExpression>
+					</reportElement>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/planning/images/"+$P{attach_3}]]></imageExpression>
 				</image>
 			</band>
 		</groupHeader>
