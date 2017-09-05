@@ -33,6 +33,20 @@
 		</record>
 		
 		<!-- Stock Inward Child Class End-->
+		
+		<!-- Stock Inward Child Class Manual Rejection Start-->
+		
+		<record id="t_foundry_stock_inward_details_mr" model="ir.model.access">
+			<field name="model_id" ref="kg_stock_inward.model_ch_manual_rejection"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Manual Rejection Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Stock Inward Child Class Manual Rejection End-->
         
 		<!-- Work Order Start-->
 		
