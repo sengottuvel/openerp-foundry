@@ -37,6 +37,27 @@
 				<!-- Contractor Master  -->
 				<menuitem action="kg_partners.kg_action_contractor_form_1" name="Contractor" id="mam_contractor_master123" parent="kg_pumpmodel_master.mpm_planning_master" sequence="19"/>
 				
+			<!-- CRM Enquiry Menu -->
+			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
+			
+			<!-- CRM Enquiry North Menu -->
+            <menuitem name="North" id="tpm_crm_enquiry_north" parent = "cpm_crm" sequence="3"/>
+            
+			<!-- CRM Enquiry South Menu -->
+            <menuitem name="South" id="tpm_crm_enquiry_south" parent = "cpm_crm" sequence="4"/>
+            
+			<!-- CRM Enquiry East Menu -->
+            <menuitem name="East" id="tpm_crm_enquiry_east" parent = "cpm_crm" sequence="5"/>
+            
+			<!-- CRM Enquiry West Menu -->
+            <menuitem name="West" id="tpm_crm_enquiry_west" parent = "cpm_crm" sequence="6"/>
+            
+			<!-- CRM Enquiry Export Menu -->
+            <menuitem name="Export" id="tpm_crm_enquiry_export" parent = "cpm_crm" sequence="7"/>
+            
+			<!-- CRM Enquiry IPD Menu -->
+            <menuitem name="IPD" id="tpm_crm_enquiry_ipd" parent = "cpm_crm" sequence="8"/>
+            
 				<!-- Country -->
 <!--
 				<menuitem id="cam_crm_country_master" parent="cpm_crm_master_menu" name="Country" action="base.action_country" sequence="4"/>
