@@ -186,6 +186,8 @@ class kg_schedule(osv.osv):
 							'order_no':	order_item.order_no,
 							'pattern_id': bom_item.pattern_id.id,
 							'moc_id': bom_item.moc_id.id,			
+							'weight': bom_item.weight,			
+							'total_weight': bom_item.weight * sch_bom_qty,			
 							}
 						
 						schedule_line_id = schedule_line_obj.create(cr, uid, schedule_item_vals)
@@ -2350,6 +2352,8 @@ class ch_schedule_details(osv.osv):
 		'active': fields.boolean('Active'),
 		'acc_bomline_id': fields.many2one('ch.wo.accessories.foundry','Acc Foundry Item'),
 		'spare_bomline_id': fields.many2one('ch.wo.spare.foundry','Spare Foundry Item'),
+		'weight': fields.float('Each Weight(kgs)',readonly=True),
+		'total_weight': fields.float('Total Weight(kgs)',readonly=True),
 		
 	
 	}

@@ -52,6 +52,8 @@
 										<field name="order_qty" string="WO Qty"/>
 										<field name="stock_qty" string="Stock Qty"/>
 										<field name="qty" string="Sch Qty"/>
+										<field name="weight"/>
+										<field name="total_weight"/>
 										<field name="state" invisible="1"/>
 										<field name="remarks"/>
 									</tree>
@@ -160,8 +162,9 @@
 						<field name="order_no" readonly="1"/>
 						<field name="pattern_id"/>
 						<field name="order_category" string="purpose" readonly="1"/>
-						<field name="order_qty" />
+						<field name="order_qty" />						
 						<field name="qty" readonly="1" on_change="onchange_schedule_qty(order_qty,qty)"/>
+						<field name="weight" />
 						<field name="state" invisible="1"/>
 					</group>
 					
@@ -169,6 +172,7 @@
 						<field name="pump_model_id"/>
 						<field name="moc_id" />
 						<field name="stock_qty" />
+						<field name="total_weight" />
 						<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 						<field name="cancel_remark" attrs="{'invisible': [('state','in',['draft'])], 'readonly': [('state','in',['cancel'])]}"/>
 						<field name="line_status" invisible="1"/>
