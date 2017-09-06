@@ -3914,8 +3914,8 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 								</textElement>
 								<textFieldExpression><![CDATA[$F{net_amount}]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement isPrintRepeatedValues="false" x="0" y="0" width="278" height="14"/>
+							<textField isBlankWhenNull="true">
+								<reportElement isPrintRepeatedValues="false" x="0" y="0" width="278" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="0" leftPadding="1">
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -3928,8 +3928,8 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 								</textElement>
 								<textFieldExpression><![CDATA['Accessories:']]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement isPrintRepeatedValues="false" x="278" y="0" width="277" height="14"/>
+							<textField isBlankWhenNull="true">
+								<reportElement isPrintRepeatedValues="false" x="278" y="0" width="277" height="14" isRemoveLineWhenBlank="true"/>
 								<box>
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -3990,8 +3990,8 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 								</textElement>
 								<textFieldExpression><![CDATA[$F{net_amount}]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="0" y="0" width="278" height="14"/>
+							<textField isBlankWhenNull="true">
+								<reportElement isPrintRepeatedValues="false" x="0" y="0" width="278" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" leftPadding="1">
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
@@ -4002,8 +4002,8 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 								</textElement>
 								<textFieldExpression><![CDATA['Spares:']]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="278" y="0" width="277" height="14"/>
+							<textField isBlankWhenNull="true">
+								<reportElement isPrintRepeatedValues="false" x="278" y="0" width="277" height="14" isRemoveLineWhenBlank="true"/>
 								<box>
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
