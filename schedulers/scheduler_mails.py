@@ -17,5 +17,3 @@ sock.execute(dbname, uid, pwd, 'kg.scheduler', 'daily_stock_statement_scheduler_
 
 sock.execute(dbname, uid, pwd, 'kg.scheduler', 'transaction_summary_list_scheduler_mail')
 
-sock.execute(dbname, uid, pwd, 'kg.scheduler', 'daily_approved_po_grn_summary')
-
