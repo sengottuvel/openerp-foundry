@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="offer_copy_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.zoom" value="1.4641000000000006"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1074"/>
+	<property name="ireport.y" value="509"/>
 	<subDataset name="dataset2">
 		<parameter name="enq_line_id" class="java.lang.Integer"/>
 		<queryString>
@@ -104,7 +104,7 @@ where spare_offer.enquiry_line_id = $P{enq_line_id}]]>
 	<queryString>
 		<![CDATA[select  enq_line_id,offer_id,off_no,enquiry_no,revision,revision_remarks,company,comp_street,comp_street2,comp_city,comp_state,comp_zip,comp_fax,comp_phone,
 customer,offer_date,del_date,equipment_no,order_summary,description,qty,pre_suppliy_ref,liquid_name,temperature_in_c,solid_concen,solid_concen_vol,consistency,
-specific_gravity,density,viscosity,viscosity_crt_factor,max_particle_size_mm,npsh_avl,capacity_in_liquid,head_in_liquid,pump_type,suction_condition,pump_name,ph_value,
+specific_gravity,density,viscosity,viscosity_crt_factor,max_particle_size_mm,npsh_avl,capacity_in_liquid,head_in_liquid,pump_type,suction_condition,pump_name,alias_name,ph_value,
 motor_power,framesize,del_pipe_size,shaft_sealing,scope_of_supply,number_of_stages,impeller_type,impeller_dia_min,size_suctionx,flange_standard,efficiency_in,
 npsh_r_m,best_efficiency,bkw_water,bkw_liq,impeller_dia_rated,impeller_tip_speed,hydrostatic_test_pressure,setting_height,suction_spool,speed_in_rpm,full_load_rpm,
 frequency,motor_kw,motor_margin,speed_in_motor,end_of_the_curve,critical_speed,maximum_allowable_soild,impeller_number,impeller_dia_max,max_allowable_test,
@@ -169,6 +169,7 @@ enq_line.head_in_liquid as head_in_liquid,
 WHEN enq_line.suction_condition = 'suction_lift' THEN 'Suctoin Lift'
 WHEN enq_line.suction_condition = 'flooded' THEN 'Flooded' WHEN enq_line.suction_condition = 'sub_merged' THEN 'Submerged' ELSE ' ' end) as suction_condition,
 pm.name as pump_name,
+enq_line.alias_name as alias_name,
 enq_line.ph_value as ph_value,
 enq_line.motor_power as motor_power,
 enq_line.framesize as framesize,
@@ -369,6 +370,7 @@ enq_line.head_in_liquid as head_in_liquid,
 WHEN enq_line.suction_condition = 'suction_lift' THEN 'Suctoin Lift'
 WHEN enq_line.suction_condition = 'flooded' THEN 'Flooded' WHEN enq_line.suction_condition = 'sub_merged' THEN 'Submerged' ELSE ' ' end) as suction_condition,
 pm.name as pump_name,
+enq_line.alias_name as alias_name,
 enq_line.ph_value as ph_value,
 enq_line.motor_power as motor_power,
 enq_line.framesize as framesize,
@@ -569,6 +571,7 @@ enq_line.head_in_liquid as head_in_liquid,
 WHEN enq_line.suction_condition = 'suction_lift' THEN 'Suctoin Lift'
 WHEN enq_line.suction_condition = 'flooded' THEN 'Flooded' WHEN enq_line.suction_condition = 'sub_merged' THEN 'Submerged' ELSE ' ' end) as suction_condition,
 pm.name as pump_name,
+enq_line.alias_name as alias_name,
 enq_line.ph_value as ph_value,
 enq_line.motor_power as motor_power,
 enq_line.framesize as framesize,
@@ -750,6 +753,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 	<field name="pump_type" class="java.lang.String"/>
 	<field name="suction_condition" class="java.lang.String"/>
 	<field name="pump_name" class="java.lang.String"/>
+	<field name="alias_name" class="java.lang.String"/>
 	<field name="ph_value" class="java.lang.String"/>
 	<field name="motor_power" class="java.lang.String"/>
 	<field name="framesize" class="java.lang.String"/>
@@ -1139,7 +1143,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 			<band height="74">
 				<textField>
 					<reportElement x="278" y="0" width="277" height="14">
-						<printWhenExpression><![CDATA[(!($F{liquid_name}.equals(null))& ($F{liquid_name} != '')) | (!($F{ph_value}.equals(null ))& ($F{ph_value} != '')) | (!($F{temperature_in_c}.equals(null))& ($F{temperature_in_c} != '')) | ($F{consistency} > 0) | ($F{specific_gravity} > 0) | ($F{density} > 0) | ($F{viscosity} > 0) | (!($F{viscosity_crt_factor}.equals(null ))& ($F{viscosity_crt_factor} != '')) | ($F{solid_concen} > 0) | ($F{solid_concen_vol} > 0) | ($F{max_particle_size_mm} > 0) | (!($F{suction_condition}.equals(null)) & !($F{suction_condition} == ' ')) | ($F{npsh_avl} > 0) | ($F{capacity_in_liquid} > 0) | ($F{head_in_liquid} > 0) ]]></printWhenExpression>
+						<printWhenExpression><![CDATA[(!($F{liquid_name}.equals(null))& ($F{liquid_name} != '')) | (!($F{ph_value}.equals(null ))& ($F{ph_value} != '')) | (!($F{temperature_in_c}.equals(null))& ($F{temperature_in_c} != '')) | ($F{consistency} > 0) | ($F{specific_gravity} > 0) | ($F{density} > 0) | ($F{viscosity} > 0) | (!($F{viscosity_crt_factor}.equals(null ))& ($F{viscosity_crt_factor} != '')) | ($F{solid_concen} > 0) | ($F{solid_concen_vol} > 0) | ($F{max_particle_size_mm} > 0) | (!($F{suction_condition}.equals(null)) & !($F{suction_condition} == ' ')) | ($F{npsh_avl} > 0) | ($F{capacity_in_liquid} > 0) | ($F{head_in_liquid} > 0)]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="2" leftPadding="1">
 						<topPen lineWidth="0.5"/>
@@ -1154,7 +1158,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="278" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
-						<printWhenExpression><![CDATA[(!($F{liquid_name}.equals(null))& ($F{liquid_name} != '')) | (!($F{ph_value}.equals(null ))& ($F{ph_value} != '')) | (!($F{temperature_in_c}.equals(null))& ($F{temperature_in_c} != '')) | ($F{consistency} > 0) | ($F{specific_gravity} > 0) | ($F{density} > 0) | ($F{viscosity} > 0) | (!($F{viscosity_crt_factor}.equals(null ))& ($F{viscosity_crt_factor} != '')) | ($F{solid_concen} > 0) | ($F{solid_concen_vol} > 0) | ($F{max_particle_size_mm} > 0) | (!($F{suction_condition}.equals(null)) & !($F{suction_condition} == ' ')) | ($F{npsh_avl} > 0) | ($F{capacity_in_liquid} > 0) | ($F{head_in_liquid} > 0) ]]></printWhenExpression>
+						<printWhenExpression><![CDATA[(!($F{liquid_name}.equals(null))& ($F{liquid_name} != '')) | (!($F{ph_value}.equals(null ))& ($F{ph_value} != '')) | (!($F{temperature_in_c}.equals(null))& ($F{temperature_in_c} != '')) | ($F{consistency} > 0) | ($F{specific_gravity} > 0) | ($F{density} > 0) | ($F{viscosity} > 0) | (!($F{viscosity_crt_factor}.equals(null ))& ($F{viscosity_crt_factor} != '')) | ($F{solid_concen} > 0) | ($F{solid_concen_vol} > 0) | ($F{max_particle_size_mm} > 0) | (!($F{suction_condition}.equals(null)) & !($F{suction_condition} == ' ')) | ($F{npsh_avl} > 0) | ($F{capacity_in_liquid} > 0) | ($F{head_in_liquid} > 0)]]></printWhenExpression>
 					</reportElement>
 					<box leftPadding="1">
 						<topPen lineWidth="0.5"/>
@@ -1164,8 +1168,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textElement>
 						<font isBold="true" isUnderline="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Liquid details given by the customer:"
-]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Liquid details given by the customer:"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement x="278" y="14" width="277" height="12" isRemoveLineWhenBlank="true">
@@ -1618,7 +1621,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 	<group name="Pump_detail_2_01">
 		<groupExpression><![CDATA[$P{offer_id}]]></groupExpression>
 		<groupHeader>
-			<band height="62">
+			<band height="74">
 				<textField>
 					<reportElement x="278" y="0" width="277" height="14"/>
 					<box topPadding="2" leftPadding="1">
@@ -1749,6 +1752,34 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					</box>
 					<textElement/>
 					<textFieldExpression><![CDATA[$F{size_suctionx}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="278" y="62" width="277" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{alias_name}.equals(null ))& ($F{alias_name} != '')]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA[$F{alias_name}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="62" width="278" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[!($F{alias_name}.equals(null ))& ($F{alias_name} != '')]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="1">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA["Alias Name"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
