@@ -154,8 +154,9 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 								
 								JOIN purchase_order po ON (po.id=line.order_id)
 								
-								where po.state='approved' and line.product_id = %s and line.brand_id = %s and line.moc_id = %s
-								order by po.date_order desc limit 1''',(item['product_id'],item['brand_id'],item['moc_id']))
+								where po.state='approved' and line.product_id = %s and line.brand_id = %s
+								and line.moc_id = %s  and po.approved_date::date <= %s
+								order by po.date_order desc limit 1''',(item['product_id'],item['brand_id'],item['moc_id'],form['date']))
 					
 					lot_data = self.cr.dictfetchall()
 					print"lot_datalot_datalot_data--------------",lot_data
