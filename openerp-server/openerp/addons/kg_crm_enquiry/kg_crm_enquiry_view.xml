@@ -309,7 +309,7 @@
 							<group>
 								<group>
 									<field name="moc_const_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}" on_change="onchange_moc(moc_const_id,flag_standard,purpose_categ)"/>
-									<field name="flag_standard" on_change="onchange_moc(moc_const_id,flag_standard,purpose_categ)" attrs="{'invisible':[('purpose_categ','!=','pump')]}"/>
+									<field name="flag_standard" on_change="onchange_moc(moc_const_id,flag_standard,purpose_categ)" attrs="{'invisible':['|',('purpose_categ','not in',('pump','spare')),('moc_const_id','=',False)]}"/>
 								</group>
 								<group>
 									<field name="moc_construction_name"/>

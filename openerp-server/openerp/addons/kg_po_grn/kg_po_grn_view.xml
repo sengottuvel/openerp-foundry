@@ -625,7 +625,7 @@
         ======================== -->
 		
 		<record id="tma_po_grn" model="ir.actions.act_window">
-			<field name="name">PO/SO GRN - General</field>
+			<field name="name">PO/SO GRN - IPD</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.po.grn</field>
 			<field name="view_type">form</field>
@@ -789,14 +789,14 @@
 			<field name="name">PO GRN Gen</field>
 			<field name="code">kg.po.grn.gen</field>
 			<field name="padding" eval="4"/>
-			<field name="prefix">PO/SO GRN/%(year)s/G</field>
+			<field name="prefix">PO/SO GRN/%(year)s/IPD</field>
 			<field name="reset_sequence">fiscal_reset</field>
 		</record>
 		
 		<!-- Sequence Number Setting Ends Here -->
 		
-		<!-- GRN - General Transaction Menu -->
-		<menuitem action="tma_po_grn" id="gam_po_grn" name="PO/SO GRN - General" parent="kg_menus.gpm_grn_issue_menu" sequence="6"/>
+		<!-- GRN - IPD Transaction Menu -->
+		<menuitem action="tma_po_grn" id="gam_po_grn" name="PO/SO GRN - IPD" parent="kg_menus.gpm_grn_issue_menu" sequence="6"/>
         
 		<!-- GRN - MS Transaction Menu -->
 		<menuitem action="tma_ms_po_grn" id="tam_ms_po_grn" name="PO/SO GRN - MS" parent="kg_menus.gpm_grn_issue_menu" sequence="5"/>

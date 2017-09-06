@@ -452,6 +452,17 @@ class kg_crm_offer(osv.osv):
 									  'customer_discount':entry.o_customer_discount,
 									  'tax':entry.o_tax,
 									  'ed':entry.o_ed,
+										
+									  'r_dealer_discount':entry.o_dealer_discount,
+									  'r_special_discount':entry.o_special_discount,
+									  'r_p_f':entry.o_p_f,
+									  'r_p_f_in_ex':entry.o_p_f_in_ex,
+									  'r_freight':entry.o_freight,
+									  'r_freight_in_ex':entry.o_freight_in_ex,
+									  'r_insurance':entry.o_insurance,
+									  'r_insurance_in_ex':entry.o_insurance_in_ex,
+									  'r_customer_discount':entry.o_customer_discount,
+									  
 									  })
 		return True
 	
@@ -1376,12 +1387,12 @@ class kg_crm_offer(osv.osv):
 		style8 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz centre;''borders: left thin, right thin, top thin, bottom thin') 
 		
 		
-		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
+		img = Image.open('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
 		r, g, b, a = img.split()
 		img = Image.merge("RGB", (r, g, b))
-		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
-		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
-		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
+		img.save('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
+		img = Image.open('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
+		img.save('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
 		
 		#~ r, g, b, a = img.split()
 		#~ img = Image.merge("RGB", (r, g, b))
@@ -1470,8 +1481,8 @@ class kg_crm_offer(osv.osv):
 				logo_size = 120
 			elif len_col >= 4:
 				logo_size = 100
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
+			sheet1.insert_bitmap('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			sheet1.insert_bitmap('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
 			#~ print"col_1",col_1
 			#~ sheet1.write(s1,col_no,str(col_1),style1)
 			col_no = col_no + 1
@@ -2250,7 +2261,7 @@ class ch_pump_offer(osv.osv):
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
-		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
+		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = supervision_tot = tot_price = net_amount = 0
 		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = 0
 		for line in self.browse(cr, uid, ids, context=context):
 			print"linelineline",line
@@ -2272,48 +2283,144 @@ class ch_pump_offer(osv.osv):
 			
 			print"line.prime_cost",line.prime_cost
 			print"line.sam_ratio",line.sam_ratio
-			sam_ratio_tot = line.prime_cost * line.sam_ratio
+			sam_ratio_tot = round(line.prime_cost * line.sam_ratio,2)
 			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
-			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
+			dealer_discount = round(sam_ratio_tot / (1-line.dealer_discount/100.00),2)
+			dealer_discount_tot = round(dealer_discount - sam_ratio_tot,2)
 			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
-			i_tot = sam_ratio_tot + dealer_discount_tot
-			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
-			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
-			k_tot = i_tot + customer_discount_tot
-			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
+			spl_discount = round(dealer_discount / (1-line.special_discount/100.00),2)
+			spl_discount_tot = round(spl_discount - dealer_discount,2)
 			print"spl_discount_totspl_discount_tot",spl_discount_tot
-			m_tot = k_tot + spl_discount_tot
-			print"m_totm_tot",m_tot
-			tax_tot = (m_tot / 100) * (line.gst.amount or 0 *100)
-			print"tax_tottax_tot",tax_tot
-			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
+			if line.p_f_in_ex == 'inclusive':
+				p_f = round(spl_discount / (1-line.p_f/100.00),2)
+			else:
+				p_f = spl_discount
+			p_f_tot = round(p_f - spl_discount,2)
 			print"p_f_totp_f_tot",p_f_tot
-			p_tot = m_tot + tax_tot + p_f_tot
-			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
-			print"freight_totfreight_tot",freight_tot
-			r_tot = p_tot + freight_tot
-			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
-			print"insurance_totinsurance_tot",insurance_tot
-			pump_price_tot = r_tot + insurance_tot
-			print"pump_price_totpump_price_tot",pump_price_tot
-			tot_price = pump_price_tot / line.qty
-			print"tot_pricetot_price",tot_price
-			net_amount = tot_price * line.qty
-			print"net_amountnet_amount",net_amount
-			print"************************************************************"
+			if line.freight_in_ex == 'inclusive':
+				insurance = round(p_f / (1-line.insurance/100.00),2)
+			else:
+				insurance = p_f
+			insurance_tot = round(insurance - p_f,2)
+			print"insurance_tot",insurance_tot
+			if line.freight_in_ex == 'inclusive':
+				freight = round(insurance / (1-line.freight/100.00),2)
+			else:
+				freight = insurance
+			freight_tot = round(freight - insurance,2)
+			print"freight_tot",freight_tot
+			pump_price_tot = freight
+			print"pump_price_tot",pump_price_tot
+			customer_discount = round(pump_price_tot / (1-line.customer_discount/100.00),2)
+			customer_discount_tot = round(customer_discount - pump_price_tot,2)
+			print"customer_discount_tot",customer_discount_tot
+			tax = round(customer_discount / (1-(line.gst.amount*100)/100.00),2)
+			print"tax",tax
+			tax_tot = round(tax - customer_discount,2)
+			print"tax_tottax_tot",tax_tot
+			#~ supervision_tot = round(tax + line.supervision_amount,2)
+			#~ print"supervision_tot",supervision_tot
+			tot_price = tax
+			print"tot_price",tot_price
+			
+			#~ r_customer_discount_tot = round((tot_price * line.r_customer_discount) / 100.00,2)
+			r_customer_discount_tot = round((line.r_cpo_amount * line.r_customer_discount) / 100.00,2)
+			print"r_customer_discount_tot",r_customer_discount_tot
+			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot,2)
+			print"r_pump_price_tot",r_pump_price_tot
+			r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00,2)
+			print"r_tax_tot",r_tax_tot
+			if line.r_freight_in_ex == 'inclusive':
+				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00,2)
+			else:
+				r_freight_tot = 0
+			print"r_freight_tot",r_freight_tot
+			if line.r_insurance_in_ex == 'inclusive':
+				r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00,2)
+			else:
+				r_insurance_tot = 0
+			print"r_insurance_tot",r_insurance_tot
+			if line.r_p_f_in_ex == 'inclusive':
+				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00,2)
+				r_p_f_ex_tot = 0
+			elif line.r_p_f_in_ex == 'exclusive':
+				r_p_f_ex_tot = round((r_pump_price_tot*line.r_p_f)/100.00,2)
+				r_p_f_tot = 0
+			else:
+				r_p_f_tot = 0
+				r_p_f_ex_tot = 0
+			print"r_p_f_tot",r_p_f_tot
+			r_spl_discount = r_pump_price_tot - r_tax_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
+			print"r_spl_discount",r_spl_discount
+			r_spl_discount_tot = round((r_spl_discount*line.r_special_discount) / 100.00,2)
+			print"r_spl_discount_tot",r_spl_discount_tot
+			r_dealer_discount = r_spl_discount - r_spl_discount_tot
+			print"r_dealer_discount",r_dealer_discount
+			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00,2)
+			print"r_dealer_discount_tot",r_dealer_discount_tot
+			r_sam_ratio_tot = r_spl_discount - r_dealer_discount_tot - r_spl_discount_tot
+			print"r_sam_ratio_tot",r_sam_ratio_tot
+			print"line.prime_costline.prime_cost",line.prime_cost
+			r_sam_ratio = r_sam_ratio_tot / line.prime_cost
+			print"r_sam_ratio",r_sam_ratio
+			#~ stop
+			
+			#~ i_tot = sam_ratio_tot + dealer_discount_tot
+			#~ customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
+			#~ print"customer_discount_totcustomer_discount_tot",customer_discount_tot
+			#~ k_tot = i_tot + customer_discount_tot
+			#~ spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
+			#~ print"spl_discount_totspl_discount_tot",spl_discount_tot
+			#~ m_tot = k_tot + spl_discount_tot
+			#~ print"m_totm_tot",m_tot
+			#~ tax_tot = (m_tot / 100) * (line.gst.amount or 0 *100)
+			#~ print"tax_tottax_tot",tax_tot
+			#~ p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
+			#~ print"p_f_totp_f_tot",p_f_tot
+			#~ p_tot = m_tot + tax_tot + p_f_tot
+			#~ freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
+			#~ print"freight_totfreight_tot",freight_tot
+			#~ r_tot = p_tot + freight_tot
+			#~ insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
+			#~ print"insurance_totinsurance_tot",insurance_tot
+			#~ pump_price_tot = r_tot + insurance_tot
+			#~ print"pump_price_totpump_price_tot",pump_price_tot
+			
+			#~ tot_price = pump_price_tot / line.qty
+			#~ print"tot_pricetot_price",tot_price
+			#~ net_amount = tot_price * line.qty
+			#~ print"net_amountnet_amount",net_amount
 			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
 			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
-			res[line.id]['customer_discount_tot'] = customer_discount_tot
 			res[line.id]['spl_discount_tot'] = spl_discount_tot
-			res[line.id]['tax_tot'] = tax_tot
 			res[line.id]['p_f_tot'] = p_f_tot
-			res[line.id]['freight_tot'] = freight_tot
 			res[line.id]['insurance_tot'] = insurance_tot
+			res[line.id]['freight_tot'] = freight_tot
 			res[line.id]['pump_price_tot'] = pump_price_tot
+			res[line.id]['customer_discount_tot'] = customer_discount_tot
+			res[line.id]['tax_tot'] = tax_tot
+			res[line.id]['supervision_tot'] = line.supervision_amount
 			res[line.id]['tot_price'] = tot_price
-			res[line.id]['net_amount'] = net_amount
-			res[line.id]['prime_cost'] = (line.per_pump_prime_cost * line.qty) + line.additional_cost
+			res[line.id]['net_amount'] = tot_price
 			
+			res[line.id]['r_sam_ratio'] = r_sam_ratio
+			res[line.id]['r_works_value'] = r_sam_ratio_tot
+			res[line.id]['r_sam_ratio_tot'] = r_sam_ratio_tot
+			res[line.id]['r_dealer_discount_tot'] = r_dealer_discount_tot
+			res[line.id]['r_spl_discount_tot'] = r_spl_discount_tot
+			res[line.id]['r_p_f_tot'] = r_p_f_tot
+			res[line.id]['r_p_f_ex_tot'] = r_p_f_ex_tot
+			res[line.id]['r_insurance_tot'] = r_insurance_tot
+			res[line.id]['r_freight_tot'] = r_freight_tot
+			res[line.id]['r_pump_price_tot'] = r_pump_price_tot
+			res[line.id]['r_customer_discount_tot'] = r_customer_discount_tot
+			res[line.id]['r_tax_tot'] = r_tax_tot
+			#~ res[line.id]['r_tot_price'] = tot_price
+			res[line.id]['r_net_amount'] = r_pump_price_tot			
+			res[line.id]['prime_cost'] = (line.per_pump_prime_cost * line.qty) + line.additional_cost
+			print"line.r_cpo_amount",line.r_cpo_amount
+			if line.r_cpo_amount == 0.00:
+				self.write(cr,uid,ids,{'r_cpo_amount':tot_price})
 		return res
 	
 	_name = "ch.pump.offer"
@@ -2366,17 +2473,47 @@ class ch_pump_offer(osv.osv):
 		'wo_line_id': fields.many2one('ch.work.order.details','WO Line'),
 		'order_summary': fields.char('Order Summary'),
 		
+		'r_agent_com': fields.float('Agent Commission(%)'),
+		'r_dealer_discount': fields.float('Dealer Discount(%)'),
+		'r_customer_discount': fields.float('Customer Discount(%)'),
+		'r_special_discount': fields.float('Special Discount(%)'),
+		'r_p_f': fields.float('P&F(%)'),
+		'r_freight': fields.float('Freight(%)'),
+		'r_insurance': fields.float('Insurance(%)'),
+		'r_p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F'),
+		'r_freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight'),
+		'r_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
+		'r_supervision_amount': fields.float('Supervision(Rs.)'),
+		'r_additional_cost': fields.float('Additional Cost'),
+		'r_cpo_amount': fields.float('CPO Value'),
+		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
 		'dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
 		'customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
 		'spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),	
-		'tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),	
+		'tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='GST',multi="sums",store=True),	
 		'p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
 		'freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
 		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
+		'supervision_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Supervision Price',multi="sums",store=True),	
 		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
-		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
+		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Quoted Value',multi="sums",store=True),	
+		
+		#~ 'r_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
+		'r_sam_ratio': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio(%)',multi="sums",store=True),	
+		'r_works_value': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Works Value',multi="sums",store=True),	
+		'r_sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
+		'r_dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
+		'r_customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
+		'r_spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),	
+		'r_tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='GST',multi="sums",store=True),	
+		'r_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
+		'r_p_f_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F Ex',multi="sums",store=True),	
+		'r_freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
+		'r_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
+		'r_pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
+		'r_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
 		
 		## Child Tables Declaration
 		
@@ -2400,9 +2537,57 @@ class ch_pump_offer(osv.osv):
 	def onchange_sam_ratio(self, cr, uid, ids, prime_cost, works_value, works_value_flag, sam_ratio, sam_ratio_flag, context=None):
 		value = {'works_value':'','sam_ratio':''}
 		if works_value_flag == True and works_value:
-			value = {'sam_ratio': float(works_value)/float(prime_cost)}
+			value = {'sam_ratio': float(works_value)/float(prime_cost),'r_sam_ratio':float(works_value)/float(prime_cost)}
 		elif sam_ratio_flag == True and sam_ratio:
-			value = {'works_value': prime_cost * sam_ratio}
+			value = {'works_value': prime_cost * sam_ratio,'r_sam_ratio':sam_ratio}
+		return {'value': value}
+	
+	def onchange_delaer_discount(self, cr, uid, ids, delaer_discount):
+		value = {'r_delaer_discount':0}
+		if delaer_discount:
+			value = {'r_dealer_discount': delaer_discount}
+		return {'value': value}
+	
+	def onchange_customer_discount(self, cr, uid, ids, customer_discount):
+		value = {'r_customer_discount':0}
+		if customer_discount:
+			value = {'r_customer_discount': customer_discount}
+		return {'value': value}
+	
+	def onchange_special_discount(self, cr, uid, ids, special_discount):
+		value = {'r_special_discount':0}
+		if special_discount:
+			value = {'r_special_discount': special_discount}
+		return {'value': value}
+	
+	def onchange_p_f(self, cr, uid, ids, p_f, p_f_in_ex):
+		value = {'r_p_f':0,'r_p_f_in_ex':''}
+		if p_f and p_f_in_ex:
+			value = {'r_p_f': p_f,'r_p_f_in_ex': p_f_in_ex}
+		return {'value': value}
+	
+	def onchange_freight(self, cr, uid, ids, freight, freight_in_ex):
+		value = {'r_freight':0,'r_freight_in_ex':''}
+		if freight and freight_in_ex:
+			value = {'r_freight': freight,'r_freight_in_ex': freight_in_ex}
+		return {'value': value}
+	
+	def onchange_insurance(self, cr, uid, ids, insurance, insurance_in_ex):
+		value = {'r_insurance':0,'r_insurance_in_ex':''}
+		if insurance and insurance_in_ex:
+			value = {'r_insurance': insurance,'r_insurance_in_ex': insurance_in_ex}
+		return {'value': value}
+	
+	def onchange_supervision(self, cr, uid, ids, supervision_amount):
+		value = {'r_supervision_amount':0}
+		if supervision_amount:
+			value = {'r_supervision_amount': supervision_amount}
+		return {'value': value}
+	
+	def onchange_additional_cost(self, cr, uid, ids, additional_cost):
+		value = {'r_additional_cost':0}
+		if additional_cost:
+			value = {'r_additional_cost': additional_cost}
 		return {'value': value}
 	
 	def onchange_gst(self, cr, uid, ids, hsn_no):
@@ -2412,10 +2597,18 @@ class ch_pump_offer(osv.osv):
 			value = {'gst': hsn_rec.igst_id.id}
 		return {'value': value}
 	
+	def entry_update(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		self.write(cr, uid, ids, {
+									'sam_ratio':entry.sam_ratio,
+									
+								})
+		return True
+		
 	#~ def onchange_gst(self, cr, uid, ids, pump_id,hsn_no, gst, context=None):
 		#~ value = {'hsn_no': '','gst': ''}
 		#~ pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr,uid,pump_id)
-#~ 
+		#~ 
 		#~ sql_check = """ select hsn_id from hsn_no_product where hsn_id = %s and pump_id = %s""" %(hsn_no,pump_id)
 		#~ cr.execute(sql_check)
 		#~ data = cr.dictfetchall()

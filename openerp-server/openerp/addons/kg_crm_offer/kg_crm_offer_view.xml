@@ -386,13 +386,19 @@
 							<field name="hsn_no" on_change="onchange_gst(hsn_no)"/>
 							<field name="gst" attrs="{'readonly':[('hsn_no','!=',False)]}"/>
 							<field name="customer_id" invisible="1"/>
+							<field name="purpose_categ" readonly="1"/>
 							<field name="moc_const_id" readonly="1"/>
 							<field name="drawing_approval"/>
+						</group>
+						<group>
 							<field name="inspection"/>
 							<field name="qty" readonly="1"/>
 							<field name="prime_cost" readonly="1"/>
-							<field name="additional_cost"/>
-							<field name="additional_cost_remark" widget="char"/>
+							<field name="order_summary"/>
+						</group>
+					</group>
+					<group string="Forward">
+						<group>
 							<label for="sam_ratio" string="Sam Ratio" class="append_percentage"/>
 							<div>
 								<div class="address_format">
@@ -407,38 +413,76 @@
 									<field name="works_value_flag" style="width: 35%%" attrs="{'readonly':[('sam_ratio_flag','=',True)]}"/>
 								</div>
 							</div>
-							<field name="purpose_categ" readonly="1"/>
+							<field name="dealer_discount" on_change="onchange_delaer_discount(dealer_discount)"/>
+							<field name="customer_discount" on_change="onchange_customer_discount(customer_discount)"/>
+							<field name="special_discount" on_change="onchange_special_discount(special_discount)"/>
+							<field name="agent_com" invisible="1"/>
 						</group>
 						<group>
-							<field name="dealer_discount"/>
-							<field name="customer_discount"/>
-							<field name="agent_com"/>
-							<field name="special_discount"/>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
 							<div>
 								<div class="address_format">
-									<field name="p_f" style="width: 40%%"/>
-									<field name="p_f_in_ex" style="width: 35%%" attrs="{'required': [('p_f','>',0)]}"/>
+									<field name="p_f" style="width: 40%%" on_change="onchange_p_f(p_f,p_f_in_ex)"/>
+									<field name="p_f_in_ex" style="width: 35%%" on_change="onchange_p_f(p_f,p_f_in_ex)" attrs="{'required': [('p_f','>',0)]}"/>
 								</div>
 							</div>
 							<label for="freight" string="Freight" class="append_percentage"/>
 							<div>
 								<div class="address_format">
-									<field name="freight" style="width: 40%%"/>
-									<field name="freight_in_ex" style="width: 35%%" attrs="{'required': [('freight','>',0)]}"/>
+									<field name="freight" style="width: 40%%" on_change="onchange_freight(freight,freight_in_ex)"/>
+									<field name="freight_in_ex" style="width: 35%%" on_change="onchange_freight(freight,freight_in_ex)" attrs="{'required': [('freight','>',0)]}"/>
 								</div>
 							</div>
 							<label for="insurance" string="Insurance" class="append_percentage"/>
 							<div>
 								<div class="address_format">
-									<field name="insurance" style="width: 40%%"/>
-									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
+									<field name="insurance" style="width: 40%%" on_change="onchange_insurance(insurance,insurance_in_ex)"/>
+									<field name="insurance_in_ex" style="width: 35%%" on_change="onchange_insurance(insurance,insurance_in_ex)" attrs="{'required': [('insurance','>',0)]}"/>
 								</div>
 							</div>
-							<field name="supervision_amount"/>
-							<field name="order_summary"/>
+							<field name="supervision_amount" on_change="onchange_supervision(supervision_amount)" invisible="1"/>
+							<field name="additional_cost" on_change="onchange_additional_cost(additional_cost)"/>
+							<field name="additional_cost_remark" widget="char"/>
 						</group>
 					</group>
+					<group string="Reverse">
+						<group>
+							<field name="r_cpo_amount"/>
+							<field name="r_sam_ratio" readonly="1"/>
+							<field name="r_works_value" readonly="1"/>
+							<field name="r_dealer_discount"/>
+							<field name="r_customer_discount"/>
+							<field name="r_agent_com" invisible="1"/>
+						</group>
+						<group>
+							<field name="r_special_discount"/>
+							<label for="r_p_f" string="P&amp;F" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_p_f" style="width: 40%%"/>
+									<field name="r_p_f_in_ex" style="width: 35%%" attrs="{'required': [('r_p_f','>',0)]}"/>
+								</div>
+							</div>
+							<label for="r_freight" string="Freight" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_freight" style="width: 40%%"/>
+									<field name="r_freight_in_ex" style="width: 35%%" attrs="{'required': [('r_freight','>',0)]}"/>
+								</div>
+							</div>
+							<label for="r_insurance" string="Insurance" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_insurance" style="width: 40%%"/>
+									<field name="r_insurance_in_ex" style="width: 35%%" attrs="{'required': [('r_insurance','>',0)]}"/>
+								</div>
+							</div>
+							<field name="r_supervision_amount" invisible="1"/>
+							<field name="r_additional_cost"/>
+						</group>
+						<button name="entry_update" type="object" string="Update" class="oe_highlight"/>
+					</group>
+
 					<notebook attrs="{'invisible':[('purpose_categ','!=','pump')]}">
 						<page string="Foundry Items">
 							<group colspan="6" col="6">		
@@ -527,26 +571,39 @@
 						</page>
 					</notebook>
 					<group>
-						<group>
-						</group>
-						<group class="oe_subtotal_footer oe_right">
-							
+						<group class="oe_subtotal_footer oe_left">
 							<field name="sam_ratio_tot"/>
 							<field name="dealer_discount_tot"/>
-							<field name="customer_discount_tot"/>
 							<field name="spl_discount_tot"/>
-							<field name="tax_tot"/>
 							<field name="p_f_tot"/>
-							<field name="freight_tot"/>
 							<field name="insurance_tot"/>
+							<field name="freight_tot"/>
 							<field name="pump_price_tot"/>
-<!--
-							<field name="tot_price"/>
--->
+							<field name="customer_discount_tot"/>
+							<field name="tax_tot"/>
+							<field name="supervision_tot" invisible="1"/>
+							<!--<field name="tot_price"/>-->
 							<div class="oe_subtotal_footer_separator oe_inline">
 							<label for="net_amount"/>
 							</div>
 							<field name="net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+						</group>
+						<group class="oe_subtotal_footer oe_right">
+							<field name="r_sam_ratio_tot"/>
+							<field name="r_dealer_discount_tot"/>
+							<field name="r_spl_discount_tot"/>
+							<field name="r_p_f_tot"/>
+							<field name="r_p_f_ex_tot" invisible="1"/>
+							<field name="r_insurance_tot"/>
+							<field name="r_freight_tot"/>
+							<field name="r_tax_tot"/>
+							<field name="r_pump_price_tot" invisible="1"/>
+							<field name="r_customer_discount_tot"/>
+							<!--<field name="tot_price"/>-->
+							<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="r_net_amount"/>
+							</div>
+							<field name="r_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 						</group>
 					</group>
 					
@@ -1064,22 +1121,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_crm_offer"/>
 			<field name="search_view_id" ref="t_search_v_crm_offer"/>
-			<field name="domain">[('state','!=','revised')]</field>
-		</record>
-		
-	<!-- Menu Action End-->
-	
-	<!-- Menu Spl Apl Action Start-->
-		
-		<record id="tma_crm_offer_spl_apl" model="ir.actions.act_window">
-			<field name="name">Offer</field>
-			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.crm.offer</field>
-			<field name="view_type">form</field>
-			<field name="context">{}</field>
-			<field name="view_id" ref="t_tree_v_crm_offer"/>
-			<field name="search_view_id" ref="t_search_v_crm_offer"/>
-			<field name="domain">[('state','=','wfa_md')]</field>
+			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('division_id','=',36)]</field>
 		</record>
 		
 		<record id="tma_crm_offer_north" model="ir.actions.act_window">
@@ -1146,6 +1188,21 @@
 			<field name="view_id" ref="t_tree_v_crm_offer"/>
 			<field name="search_view_id" ref="t_search_v_crm_offer"/>
 			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('division_id','=',30)]</field>			
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Menu Spl Apl Action Start-->
+		
+		<record id="tma_crm_offer_spl_apl" model="ir.actions.act_window">
+			<field name="name">Offer</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.offer</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_crm_offer"/>
+			<field name="search_view_id" ref="t_search_v_crm_offer"/>
+			<field name="domain">[('state','=','wfa_md')]</field>
 		</record>
 		
 	<!-- Menu Spl Apl Action End-->

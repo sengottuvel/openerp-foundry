@@ -170,6 +170,7 @@ class kg_general_grn(osv.osv):
 		'vehicle_details':fields.char('Vehicle Details', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'insp_ref_no':fields.char('Insp.Ref.No.', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'location_dest_id': fields.many2one('stock.location','Location',domain="[('location_type','=','main')]"),
+		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division'),
 		
 		## Child Tables Declaration
 		
@@ -474,6 +475,8 @@ class kg_general_grn(osv.osv):
 				if not line.product_id.po_uom_coeff or line.product_id.po_uom_coeff == 0:
 					raise osv.except_osv(_('Warning!'),_('%s Kindly configure PO coeff in Product Master'%(line.product_id.name)))
 				
+				if line.product_id.po_uom_coeff == 0.00:
+					raise osv.except_osv(_('Warning!'),_('Kindly configure coeff for %s '%(line.product_id.name)))
 				if line.exp_batch_id:
 					for exp in line.exp_batch_id:
 						if line.uom_conversation_factor == 'one_dimension':

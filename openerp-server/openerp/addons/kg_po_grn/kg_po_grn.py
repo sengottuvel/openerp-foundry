@@ -1254,6 +1254,8 @@ class kg_po_grn(osv.osv):
 				# This code will create Production lot
 				# UOM Checking #
 				if grn_entry.grn_type == 'from_po':
+					if line.product_id.po_uom_coeff == 0.00:
+						raise osv.except_osv(_('Warning!'),_('Kindly configure coeff for %s '%(line.product_id.name)))
 					if line.po_exp_id:
 						for exp in line.po_exp_id:
 							print exp.product_qty
