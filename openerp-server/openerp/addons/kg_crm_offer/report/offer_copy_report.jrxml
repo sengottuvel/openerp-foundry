@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="offer_copy_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.4641000000000006"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="509"/>
+	<property name="ireport.y" value="1734"/>
 	<subDataset name="dataset2">
 		<parameter name="enq_line_id" class="java.lang.Integer"/>
 		<queryString>
@@ -836,7 +836,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 						<bottomPen lineWidth="0.0"/>
 						<rightPen lineWidth="0.0"/>
 					</box>
-					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
+					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
 				</image>
 				<textField>
 					<reportElement x="56" y="15" width="432" height="15"/>
@@ -854,7 +854,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 						<bottomPen lineWidth="0.0"/>
 						<rightPen lineWidth="0.5"/>
 					</box>
-					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp"]]></imageExpression>
+					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp"]]></imageExpression>
 				</image>
 				<textField>
 					<reportElement x="41" y="0" width="463" height="15"/>
@@ -3884,7 +3884,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 						</datasetRun>
 						<jr:listContents height="28" width="555">
 							<textField isBlankWhenNull="true">
-								<reportElement x="278" y="14" width="277" height="14" isRemoveLineWhenBlank="true">
+								<reportElement x="0" y="14" width="278" height="14" isRemoveLineWhenBlank="true">
 									<printWhenExpression><![CDATA[!($F{net_amount}.equals(null ))& ($F{net_amount} != '')]]></printWhenExpression>
 								</reportElement>
 								<box topPadding="0" leftPadding="1">
@@ -3900,7 +3900,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 								<textFieldExpression><![CDATA[$F{access_name}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="14" width="278" height="14" isRemoveLineWhenBlank="true">
+								<reportElement x="278" y="14" width="277" height="14" isRemoveLineWhenBlank="true">
 									<printWhenExpression><![CDATA[!($F{net_amount}.equals(null ))& ($F{net_amount} != '')]]></printWhenExpression>
 								</reportElement>
 								<box topPadding="0" leftPadding="2">
