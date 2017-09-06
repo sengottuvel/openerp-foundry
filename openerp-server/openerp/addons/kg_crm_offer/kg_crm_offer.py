@@ -2331,7 +2331,10 @@ class ch_pump_offer(osv.osv):
 			print"r_customer_discount_tot",r_customer_discount_tot
 			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot,2)
 			print"r_pump_price_tot",r_pump_price_tot
-			r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00,2)
+			if line.gst:
+				r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00,2)
+			else:
+				r_tax_tot = 0 
 			print"r_tax_tot",r_tax_tot
 			if line.r_freight_in_ex == 'inclusive':
 				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00,2)
@@ -2422,7 +2425,7 @@ class ch_pump_offer(osv.osv):
 			res[line.id]['r_net_amount'] = r_pump_price_tot			
 			res[line.id]['prime_cost'] = (line.per_pump_prime_cost * line.qty) + line.additional_cost
 			print"line.r_cpo_amount",line.r_cpo_amount
-			if line.r_cpo_amount == 0.00:
+			if line.r_cpo_amount == 0.00 and line.header_id.name:
 				self.write(cr,uid,ids,{'r_cpo_amount':tot_price})
 		return res
 	
@@ -2529,14 +2532,14 @@ class ch_pump_offer(osv.osv):
 		
 	}
 	
-	_defaults = {
+	#~ _defaults = {
 		
 		#~ 'temperature': 'normal',
 		#~ 'flange_type': 'standard',
 		#~ 'load_bom':False,
-		'r_cpo_amount':0.00,
+		#~ 'r_cpo_amount':0.00,
 		
-	}
+	#~ }
 	
 	def onchange_sam_ratio(self, cr, uid, ids, prime_cost, works_value, works_value_flag, sam_ratio, sam_ratio_flag, context=None):
 		value = {'works_value':'','sam_ratio':''}
