@@ -2314,7 +2314,10 @@ class ch_pump_offer(osv.osv):
 			customer_discount = round(pump_price_tot / (1-line.customer_discount/100.00),2)
 			customer_discount_tot = round(customer_discount - pump_price_tot,2)
 			print"customer_discount_tot",customer_discount_tot
-			tax = round(customer_discount / (1-(line.gst.amount*100)/100.00),2)
+			if line.gst:
+				tax = round(customer_discount / (1-(line.gst.amount*100)/100.00),2)
+			else:
+				tax = customer_discount
 			print"tax",tax
 			tax_tot = round(tax - customer_discount,2)
 			print"tax_tottax_tot",tax_tot
@@ -2526,13 +2529,14 @@ class ch_pump_offer(osv.osv):
 		
 	}
 	
-	#~ _defaults = {
-		#~ 
+	_defaults = {
+		
 		#~ 'temperature': 'normal',
 		#~ 'flange_type': 'standard',
 		#~ 'load_bom':False,
-		#~ 
-	#~ }
+		'r_cpo_amount':0.00,
+		
+	}
 	
 	def onchange_sam_ratio(self, cr, uid, ids, prime_cost, works_value, works_value_flag, sam_ratio, sam_ratio_flag, context=None):
 		value = {'works_value':'','sam_ratio':''}

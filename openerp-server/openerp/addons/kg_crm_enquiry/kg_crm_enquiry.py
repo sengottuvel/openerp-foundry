@@ -872,6 +872,7 @@ class kg_crm_enquiry(osv.osv):
 																					  'order_summary': order_item.order_summary,
 																					  'hsn_no': hsn_no,
 																					  'gst': gst,
+																					  'r_cpo_amount': 0.00,
 																					   })
 					
 					if order_item.purpose_categ == 'in_development':
