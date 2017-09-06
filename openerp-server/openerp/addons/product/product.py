@@ -657,6 +657,13 @@ class product_template(osv.osv):
 	def onchange_uom(self, cursor, user, ids, uom_id, uom_po_id):
 		if uom_id:
 			return {'value': {'uom_po_id': ''}}
+		if uom_id == uom_po_id:
+			return {'value': {'po_uom_coeff': 1}}
+		return {}
+		
+	def onchange_po_uom(self, cursor, user, ids, uom_id, uom_po_id):		
+		if uom_id == uom_po_id:
+			return {'value': {'po_uom_coeff': 1}}
 		return {}
 
 	def write(self, cr, uid, ids, vals, context=None):

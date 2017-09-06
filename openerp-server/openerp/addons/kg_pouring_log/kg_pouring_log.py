@@ -38,7 +38,7 @@ class kg_pouring_log(osv.osv):
 		### For Mould Update ###
 		'mould_date': fields.date('Date'),
 		'mould_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'mould_contractor':fields.many2one('res.partner','Contractor'),
+		'mould_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'mould_moulder': fields.integer('Moulder'),
 		#~ 'mould_box_id': fields.related('pattern_id','box_id', type='many2one', relation='kg.box.master', string='Box Size', store=True),
 		'mould_helper': fields.integer('Helper'),
@@ -620,6 +620,38 @@ class kg_pouring_log(osv.osv):
 						
 					fettling_id = fettling_obj.create(cr, uid, fettling_vals)
 					
+					
+					### Stock Inward Creation ###
+					inward_obj = self.pool.get('kg.stock.inward')
+					inward_line_obj = self.pool.get('ch.stock.inward.details')
+					
+					inward_vals = {
+						'location': production_rec.location
+					}
+					
+					inward_id = inward_obj.create(cr, uid, inward_vals)
+					
+					inward_line_vals = {
+						'header_id': inward_id,
+						'location': production_rec.location,
+						'stock_type': 'pattern',
+						'pump_model_id': production_rec.pump_model_id.id,
+						'pattern_id': production_rec.pattern_id.id,
+						'pattern_name': production_rec.pattern_name,
+						'moc_id': production_rec.moc_id.id,						
+						'qty': excess_qty,
+						'available_qty': excess_qty,
+						'each_wgt': production_rec.each_weight,
+						'total_weight': production_rec.total_weight,
+						'stock_mode': 'excess',
+						'foundry_stock_state': 'foundry_inprogress',
+						'stock_item': 'foundry_item',
+						'fettling_id': fettling_id,
+						'heat_no': entry.melting_id.name
+					}
+					
+					inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
+					
 					production_obj.write(cr,uid,production_rec.id,{'pour_qty':production_rec.pour_qty + line_item.qty,'pour_state':'done','state':'fettling_inprogress'})
 				
 				else:
@@ -699,11 +731,26 @@ class ch_pouring_details(osv.osv):
 		if entry.weight < 0:
 			return False 
 		return True
-		
+	
+	def _duplicate_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.order_line_id:
+			print"order_line_id",rec.order_line_id					
+			print"production_id",rec.production_id					
+			print"qty",rec.qty					
+			cr.execute(""" select order_line_id from ch_pouring_details where order_line_id  = '%s' and production_id = '%s' and qty = '%s' and header_id =%s """ %(rec.order_line_id.id,rec.production_id.id,rec.qty,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
 		
 	_constraints = [		
 			  
 		(_check_values, 'System not allow to save with zero and less than zero qty .!!',['Quantity,Weight(Kgs)']),
+		(_duplicate_validate, 'Please Check Same Work Order,Pattern,Qty Not allowed !!!',['Pourning Details']),
 		
 	   ]
 	

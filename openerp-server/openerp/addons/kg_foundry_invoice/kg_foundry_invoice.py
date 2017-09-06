@@ -280,6 +280,8 @@ class kg_foundry_invoice(osv.osv):
 	def update_line_items(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		print"entry.contractor_id",entry.contractor_id.id		
+		print"entry.date_from",entry.date_from
+		print"entry.date_to",entry.date_to	
 		invoice_line_details_obj = self.pool.get('ch.foundry.invoice.line.details')
 		invoice_line_summary_obj = self.pool.get('ch.foundry.invoice.line.summary')
 			
@@ -289,7 +291,7 @@ class kg_foundry_invoice(osv.osv):
 		cr.execute(del_sql_summary)
 		
 		cr.execute(""" (select moc_id,id,knockout_name as stage_code,knockout_date,knockout_weight as each_weight,knockout_accept_qty as qty,knockout_state,'KNOCK OUT' as stage_name from kg_fettling where  knockout_date >= '%s' and knockout_date <= '%s'
-						and knockout_state = 'complete' and state != 'complete' and knockout_contractor = %s)
+						and knockout_state in ('pending','complete') and state in ('complete','accept') and knockout_contractor = %s)
 
 						UNION
 
@@ -299,7 +301,7 @@ class kg_foundry_invoice(osv.osv):
 						UNION
 						
 						(select moc_id,id,shot_blast_name as stage_code,shot_blast_date,shot_blast_weight as each_weight,shot_blast_accept_qty as qty,shot_blast_state,'SHOT BLAST' as stage_name from kg_fettling where  shot_blast_date >= '%s' and shot_blast_date <= '%s'
-						and shot_blast_state = 'complete' and state != 'complete' and shot_blast_contractor = %s) 
+						and shot_blast_state = 'complete' and state = 'complete' and shot_blast_contractor = %s) 
 						
 						UNION
 						
@@ -371,7 +373,7 @@ class kg_foundry_invoice(osv.osv):
 				'qty':item['qty'],
 				'moc_id':item['moc_id'],								
 				'stage_name':item['stage_name'],								
-				'each_weight':item['each_weight'],									
+											
 				
 			}
 			
@@ -388,7 +390,7 @@ class kg_foundry_invoice(osv.osv):
 				'qty':item['qty'],								
 				'moc_id':item['moc_id'],								
 				'stage_name':item['stage_name'],								
-				'each_weight':item['each_weight'],								
+											
 				
 			}
 			
@@ -521,27 +523,7 @@ class kg_foundry_invoice(osv.osv):
 						}
 				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)	
 			for expense in rec.line_ids_b:
-				ex_account_id = expense.expense.account_id.id			
-				tax_obj = self.pool.get('account.tax')
-				taxes = tax_obj.compute_all(cr, uid, expense.tax_id, expense.amount, 1, 1, partner=rec.contractor_id)			
-				for tax in taxes['taxes']:
-					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])				
-					credit = 0.00
-					debit = ((tax['amount']))					
-					tax_account = tax['account_collected_id']				
-					if not tax_account:
-						raise osv.except_osv(_('Account Configuration Warning !!'),
-							_('Tax account should be configured !!'))
-					move_line_vals = {
-						'move_id': move_id,
-						'account_id': tax_account,
-						'credit': credit,
-						'debit': debit,					
-						'journal_id': journal_rec.id,						
-						'date': rec.entry_date,
-						'name': rec.name,
-						}
-					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)			
+				ex_account_id = expense.expense.account_id.id							
 				if not ex_account_id:
 					raise osv.except_osv(_('Expense Configuration Warning !!'),
 						_('Expense account should be configured !!'))
@@ -557,33 +539,53 @@ class kg_foundry_invoice(osv.osv):
 				
 				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)		
 			
-			discount = 0.00
-			if rec.tax_id:				
-				if rec.discount > 0:
-					discount = rec.discount
-				else:
-					discount = (total_value_amt * rec.discount_per) / 100			
-				price_amt_val = total_value_amt	- discount			
-				tax_obj = self.pool.get('account.tax')
-				taxes = tax_obj.compute_all(cr, uid, rec.tax_id, price_amt_val, 1, product=rec.contractor_id, partner=rec.contractor_id)			
-				for tax in taxes['taxes']:
-					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])
-					credit = 0.00
-					debit = ((tax['amount']))					
-					tax_account = tax['account_collected_id']				
-					if not tax_account:
-						raise osv.except_osv(_('Account Configuration Warning !!'),
+			tax_sql = """ select sub_query.acc_col_id,sum(sub_query.debit) as debit
+								from (
+								select 
+								ac_tax.account_collected_id as acc_col_id,
+								sum((line_exp.amount * ac_tax.amount)) as debit
+								from 
+								foundry_invoice_expense_taxe line_tax 
+								left join ch_foundry_invoice_expense_track line_exp on(line_exp.id=line_tax.invoice_id)
+								left join account_tax ac_tax on(ac_tax.id=line_tax.tax_id)
+								left join kg_foundry_invoice inv on(inv.id=line_exp.header_id)
+
+								where line_exp.header_id = %s
+								group by 1
+
+								union all
+
+								select 
+								ac_tax.account_collected_id as acc_col_id,
+								sum(((inv.amount_untaxed - inv.total_discount) * ac_tax.amount)) as debit
+								from 
+								foundry_invoice_taxes line_tax 
+
+								left join kg_foundry_invoice inv on(inv.id=line_tax.invoice_id)
+								left join account_tax ac_tax on(ac_tax.id=line_tax.tax_id)			
+
+								where inv.id = %s
+								group by 1) as sub_query
+
+								group by 1"""%(rec.id,rec.id)
+			cr.execute(tax_sql)		
+			data = cr.dictfetchall()
+			for vals in data:			
+				if vals['acc_col_id'] is None:
+					raise osv.except_osv(_('Account Configuration Warning !!'),
 							_('Tax account should be configured !!'))
-					move_line_vals = {
-						'move_id': move_id,
-						'account_id': tax_account,
-						'credit': credit,
-						'debit': debit,					
-						'journal_id': journal_rec.id,						
-						'date': rec.entry_date,
-						'name': rec.name,
-						}
-					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+				move_line_vals = {
+					'move_id': move_id,
+					'account_id': vals['acc_col_id'],
+					'credit': 0.00,
+					'debit': vals['debit'],
+					'journal_id': journal_rec.id,	
+					'date': rec.entry_date,
+					'name': rec.name,
+					}
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)			
+			
+			discount = 0.00		
 			
 			if rec.amount_untaxed > 0:
 				discount = 0.00
@@ -701,7 +703,7 @@ class ch_foundry_invoice_line_details(osv.osv):
 		'stage_id': fields.related('fettling_id','stage_id', type='many2one', relation='kg.stage.master', string='Stage Name', store=True, readonly=True),
 		'stage_name': fields.char('Stage Name', select=True,readonly=True),		
 		'qty': fields.integer('QTY'),
-		'each_weight': fields.float('Each Weight'),			
+		'each_weight': fields.related('fettling_id','each_weight', type='float', string='Each Weight', store=True, readonly=True),	
 		'state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done')],'Status', readonly=True),
 		
 		'rate': fields.function(_get_rate_value, digits_compute= dp.get_precision('Account'), string='Rate',
@@ -791,11 +793,11 @@ class ch_foundry_invoice_line_summary(osv.osv):
 		'melting_id': fields.related('fettling_id','melting_id', type='many2one', relation='kg.melting', string='Heat No.', store=True, readonly=True),
 		'stage_id': fields.related('fettling_id','stage_id', type='many2one', relation='kg.stage.master', string='Stage Name', store=True, readonly=True),
 		'stage_name': fields.char('Stage Name', select=True,readonly=True),
-		
+		'each_weight': fields.related('fettling_id','each_weight', type='float', string='Each Weight', store=True, readonly=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 
 		'qty': fields.integer('QTY'),
-		'each_weight': fields.float('Each Weight'),		
+		
 		
 		'rate': fields.function(_get_rate_value, digits_compute= dp.get_precision('Account'), string='Rate',
 			store={
