@@ -836,7 +836,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 						<bottomPen lineWidth="0.0"/>
 						<rightPen lineWidth="0.0"/>
 					</box>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
 				</image>
 				<textField>
 					<reportElement x="56" y="15" width="432" height="15"/>
@@ -854,7 +854,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 						<bottomPen lineWidth="0.0"/>
 						<rightPen lineWidth="0.5"/>
 					</box>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp"]]></imageExpression>
 				</image>
 				<textField>
 					<reportElement x="41" y="0" width="463" height="15"/>
