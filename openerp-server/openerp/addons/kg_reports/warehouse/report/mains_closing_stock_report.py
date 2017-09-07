@@ -128,8 +128,8 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				left JOIN product_template pt ON (pt.id=a.product_id)
 				left join product_category pc on(pc.id=pt.categ_id)
 				
-			   where a.move_type = 'in' and a.date <= %s and a.state=%s '''+ where_sql + major + product + pro_type +'''
-			   group by 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 order by prod.name_template''',(form['date'],location,form['date'],location,form['date'],location,form['date'],'done'))
+			   where a.move_type = 'in' and a.date <= %s and a.state=%s and a.location_dest_id = %s '''+ where_sql + major + product + pro_type +'''
+			   group by 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 order by prod.name_template''',(form['date'],location,form['date'],location,form['date'],location,form['date'],'done',location))
 		
 		data=self.cr.dictfetchall()
 		print "in_data ::::::::::::::=====>>>>", data
