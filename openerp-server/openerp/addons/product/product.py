@@ -1073,14 +1073,25 @@ class product_product(osv.osv):
 			
 		return res
 
-	def onchange_uom(self, cursor, user, ids, uom_id, uom_po_id):
+	def onchange_uom(self, cursor, user, ids, uom_id, uom_po_id):		
 		if uom_id and uom_po_id:
+			if uom_id == uom_po_id:
+				po_coeff = 1
+			else:
+				po_coeff = 0
 			uom_obj=self.pool.get('product.uom')
 			uom=uom_obj.browse(cursor,user,[uom_id])[0]
 			uom_po=uom_obj.browse(cursor,user,[uom_po_id])[0]
 			if uom.category_id.id != uom_po.category_id.id:
-				return {'value': {'uom_po_id': ''}}
+				return {'value': {'uom_po_id': '','po_uom_coeff':po_coeff}}
 		return False
+		
+	def onchange_po_uom(self, cursor, user, ids, uom_id, uom_po_id):		
+		if uom_id == uom_po_id:
+			return {'value': {'po_uom_coeff': 1}}
+		else:
+			return {'value': {'po_uom_coeff': 0}}
+		return {}
 
 	def _check_ean_key(self, cr, uid, ids, context=None):
 		for product in self.read(cr, uid, ids, ['ean13'], context=context):
