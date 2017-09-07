@@ -136,6 +136,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		print "in_data ::::::::::::::=====>>>>", data
 		data_new = []
 		gr_total=0.0
+		s_no = 0
 		if data:
 			for item in data:
 				if item['product_id']:
@@ -143,6 +144,8 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 					item['suom'] = proc_rec.uom_id.name
 					item['puom'] = proc_rec.uom_po_id.name
 				if item['stock_uom_close'] > 0:
+					s_no = s_no + 1
+					item['s_no'] = s_no
 					self.cr.execute('''
 							   SELECT
 								line.price_unit as price,

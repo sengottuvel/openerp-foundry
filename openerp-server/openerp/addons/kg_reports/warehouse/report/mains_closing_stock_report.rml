@@ -158,7 +158,8 @@
 	
 	<blockTable colWidths="30,150,55,70,35,50,35,50,42,50" repeatRows="1" style="Table4">
 		<tr>
-			<td>          <para style="terp_61"> <seq id="prod_serial_no"/> </para>        </td>
+<!--		<td>          <para style="terp_61"> <seq id="prod_serial_no"/> </para>        </td>-->
+			<td>          <para style="terp_61"> [[ x['s_no'] ]] </para>        </td>
 			<td>          <para style="terp_left_61">[[ x['product'] ]]</para>        </td>
 			<td>          <para style="terp_left_61">[[ x['brand'] ]]</para>        </td>
 			<td>          <para style="terp_left_61">[[ x['moc'] ]]</para>        </td>
@@ -178,7 +179,7 @@
          <para style="terp_61t">Grand Total(RS)</para>
         </td>
         <td>
-         <para style="terp_left_61_bold" alignment="right">[[ x['grand_total'] ]]</para>
+         <para style="terp_left_61_bold" alignment="right">[[ locale.format('%.2f', x['grand_total']) ]]</para>
         </td>
       </tr>
     </blockTable>
