@@ -54,7 +54,8 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 			for ids2 in form['product']:
 				product.append("a.product_id = %s"%(ids2))	
 		if product:
-			product = ' and '+' or '.join(product)
+			product = ' and ('+' or '.join(product)
+			product = product +')'
 		else:
 			product=''
 		
