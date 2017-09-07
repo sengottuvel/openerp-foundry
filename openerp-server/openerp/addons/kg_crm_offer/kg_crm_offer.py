@@ -1387,12 +1387,12 @@ class kg_crm_offer(osv.osv):
 		style8 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz centre;''borders: left thin, right thin, top thin, bottom thin') 
 		
 		
-		img = Image.open('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
+		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
 		r, g, b, a = img.split()
 		img = Image.merge("RGB", (r, g, b))
-		img.save('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
-		img = Image.open('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
-		img.save('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
+		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
+		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
+		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
 		
 		#~ r, g, b, a = img.split()
 		#~ img = Image.merge("RGB", (r, g, b))
@@ -1481,8 +1481,8 @@ class kg_crm_offer(osv.osv):
 				logo_size = 120
 			elif len_col >= 4:
 				logo_size = 100
-			sheet1.insert_bitmap('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
-			sheet1.insert_bitmap('/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
+			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
 			#~ print"col_1",col_1
 			#~ sheet1.write(s1,col_no,str(col_1),style1)
 			col_no = col_no + 1
@@ -2425,8 +2425,17 @@ class ch_pump_offer(osv.osv):
 			res[line.id]['r_net_amount'] = r_pump_price_tot			
 			res[line.id]['prime_cost'] = (line.per_pump_prime_cost * line.qty) + line.additional_cost
 			print"line.r_cpo_amount",line.r_cpo_amount
-			if line.r_cpo_amount == 0.00 and line.header_id.name:
-				self.write(cr,uid,ids,{'r_cpo_amount':tot_price})
+			enq_no = line.header_id.enquiry_no
+			print"enq_noenq_no",enq_no
+			enq_ids = self.pool.get('kg.crm.enquiry').search(cr,uid,[('name','=',enq_no),('state','!=','revised')])
+			print"enq_ids",enq_ids
+			if enq_ids:
+				enq_rec = self.pool.get('kg.crm.enquiry').browse(cr,uid,enq_ids[0])
+			print"enq_recenq_rec",enq_rec.state
+			if line.r_cpo_amount == 0.00 and not enq_rec.state == 'draft':
+				#~ self.write(cr,uid,ids,{'r_cpo_amount':tot_price})
+				print"tot_pricetot_price",tot_price
+				cr.execute('''update ch_pump_offer set r_cpo_amount = %s where id = %s ''',(tot_price,line.id))
 		return res
 	
 	_name = "ch.pump.offer"
@@ -2608,6 +2617,7 @@ class ch_pump_offer(osv.osv):
 		entry = self.browse(cr,uid,ids[0])
 		self.write(cr, uid, ids, {
 									'sam_ratio':entry.sam_ratio,
+									#~ 'r_cpo_amount':entry.sam_ratio,
 									
 								})
 		return True

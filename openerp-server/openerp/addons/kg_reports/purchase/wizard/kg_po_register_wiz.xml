@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-
         <record id="view_po_stm_report" model="ir.ui.view">
             <field name="name">Purchase Order Register</field>
             <field name="model">kg.po.register.wiz</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
              <form string="Purchase Order Register">
-				 <group string="Filters">
+				 <group>
 					<group>
-						<field name="date_from" required="1"/>
-						<field name = "supplier"  widget="many2many_tags"/>
-						<field name = "po_no"  widget="many2many_tags"/>
+						<field name="date_from" required="1" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
+						<field name="supplier" widget="many2many_tags"/>
+						<field name="division"/>
+						<field name="po_no" widget="many2many_tags"/>
 					</group>
 					<group >
-						<field name="date_to" required="1"/>
-						<field name = "product_id" string="Product" widget="many2many_tags"/>
-						<field name = "print_date"  invisible="1"/>
+						<field name="date_to" required="1" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
+						<field name="product_id" string="Product" widget="many2many_tags"/>
+						<field name="status"/>
+						<field name="print_date" invisible="1"/>
 					</group>
 				</group>
 				<separator colspan="4"/>
@@ -27,7 +28,7 @@
                 </form>
             </field>
         </record>
-
+		
         <record id="action_po_stm_report" model="ir.actions.act_window">  
             <field name="name">Purchase Order Register</field>
             <field name="type">ir.actions.act_window</field>
@@ -45,6 +46,6 @@
 		id="po_jasper_register_id"
 		menu="False"
 		/>     
-
+	
     </data>
 </openerp>
