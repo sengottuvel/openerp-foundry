@@ -49,8 +49,8 @@ class kg_melting(osv.osv):
 	
 		### Header Details ####
 		
-		'name': fields.char('Heat No.', size=128,required=False),	
-		'entry_date': fields.date('Entry Date',required=False),	
+		'name': fields.char('Heat No.', size=128,required=True),	
+		'entry_date': fields.date('Entry Date',required=True),	
 		'remark': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'active': fields.boolean('Active'),
@@ -61,34 +61,34 @@ class kg_melting(osv.osv):
 		'line_ids_b':fields.one2many('ch.mechanical.properties', 'header_id', "Mechanical Properties"),
 		
 		## Furnace Log Book Start
-		'moc_id': fields.many2one('kg.moc.master','MOC', required=False,domain="[('active','=','t')]"),
-		'ladle_id': fields.many2one('kg.ladle.master','Ladle', required=False,domain="[('active','=','t')]"),
-		'furnace_id': fields.many2one('kg.furnace.master','Furnace', required=False,domain="[('active','=','t')]"),	
-		'lining_age': fields.char('Lining Age', size=128,required=False),	
-		'melting_hrs': fields.float('Total Melting Hours',required=False),		
-		'time': fields.float('Time',required=False),
-		'time_type': fields.selection([('am','AM'),('pm','PM')],'Time Type', required=False),
-		'input_volt': fields.float('Input Volt',required=False),	
-		'frequency': fields.float('Frequency',required=False),	
-		'kw': fields.float('KW',required=False),	
-		'output_volt': fields.float('Output Volt',required=False),	
-		'final_reading': fields.float('Final Reading',required=False),
-		'final_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Final Reading Type', required=False),	
-		'initial_reading': fields.float('Initial Reading',required=False),
-		'initial_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Initial Reading Type', required=False),	
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]"),
+		'ladle_id': fields.many2one('kg.ladle.master','Ladle', required=True,domain="[('active','=','t')]"),
+		'furnace_id': fields.many2one('kg.furnace.master','Furnace', required=True,domain="[('active','=','t')]"),	
+		'lining_age': fields.char('Lining Age', size=128,required=True),	
+		'melting_hrs': fields.float('Total Melting Hours',required=True),		
+		'time': fields.float('Time',required=True),
+		'time_type': fields.selection([('am','AM'),('pm','PM')],'Time Type', required=True),
+		'input_volt': fields.float('Input Volt',required=True),	
+		'frequency': fields.float('Frequency',required=True),	
+		'kw': fields.float('KW',required=True),	
+		'output_volt': fields.float('Output Volt',required=True),	
+		'final_reading': fields.float('Final Reading',required=True),
+		'final_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Final Reading Type', required=True),	
+		'initial_reading': fields.float('Initial Reading',required=True),
+		'initial_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Initial Reading Type', required=True),	
 		
 		'total_units': fields.float('Total Units',readonly=True),		
 		'amount': fields.float('Amount',readonly=True , help="total_value = total_reading * rate_rec.value"),		
 		
-		'pouring_temp': fields.float('Pouring Temp',required=False),
-		'pouring_hrs': fields.float('Pouring Hours',required=False),
-		'pouring_hrs_type': fields.selection([('am','AM'),('pm','PM')],'Pouring Hr Type', required=False),
-		'ret': fields.char('Return Metal',required=False),			
-		'tapping_temp': fields.float('Tepping Temp',required=False),	
-		'pouring_finished': fields.float('Pouring Finished at',required=False),
-		'pouring_finished_time_type': fields.selection([('am','AM'),('pm','PM')],'Time Type', required=False),
-		'liquid_metal_wt': fields.float('Liquid Metal Wt.',required=False,digits=(16,3)),	
-		'ingot_wt': fields.float('Ingot Wt.',required=False,digits=(16,3)),	
+		'pouring_temp': fields.float('Pouring Temp',required=True),
+		'pouring_hrs': fields.float('Pouring Hours',required=True),
+		'pouring_hrs_type': fields.selection([('am','AM'),('pm','PM')],'Pouring Hr Type', required=True),
+		'ret': fields.char('Return Metal',required=True),			
+		'tapping_temp': fields.float('Tepping Temp',required=True),	
+		'pouring_finished': fields.float('Pouring Finished at',required=True),
+		'pouring_finished_time_type': fields.selection([('am','AM'),('pm','PM')],'Time Type', required=True),
+		'liquid_metal_wt': fields.float('Liquid Metal Wt.',required=True,digits=(16,3)),	
+		'ingot_wt': fields.float('Ingot Wt.',required=True,digits=(16,3)),	
 		'total_weight_metal': fields.float('Total Weight',digits=(16,3)),	
 		
 		
@@ -311,8 +311,8 @@ class ch_melting_charge_details(osv.osv):
 	
 	_columns = {
 			
-		'header_id':fields.many2one('kg.melting', 'Melting Entry', required=False, ondelete='cascade'),							
-		'product_id': fields.many2one('product.product','Raw Materials', required=False,domain="[('active','=','t'),('product_type','in',('raw','ms','bot'))]"),	
+		'header_id':fields.many2one('kg.melting', 'Melting Entry', required=True, ondelete='cascade'),							
+		'product_id': fields.many2one('product.product','Raw Materials', required=True,domain="[('active','=','t'),('product_type','in',('raw','ms','bot'))]"),	
 		'first_addition':fields.float('First Addition',digits=(16,3)),
 		'second_addition':fields.float('Second Addition',digits=(16,3)),
 		'total_weight':fields.float('Total Weight(kg.)',digits=(16,3)),
@@ -372,8 +372,8 @@ class ch_melting_chemistry_details(osv.osv):
 	
 	_columns = {
 			
-		'header_id':fields.many2one('kg.melting', 'Chemistry Entry', required=False, ondelete='cascade'),							
-		'chemistry_id': fields.many2one('kg.chemical.master','Name', required=False,domain="[('active','=','t')]"),	
+		'header_id':fields.many2one('kg.melting', 'Chemistry Entry', required=True, ondelete='cascade'),							
+		'chemistry_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('active','=','t')]"),	
 		'required_chemistry':fields.float('Required Chemistry Min',digits_compute=dp.get_precision('Required Chemistry')),
 		'required_chemistry_max':fields.float('Required Chemistry Max',digits_compute=dp.get_precision('Required Chemistry')),
 		'bath_1':fields.float('Bath 1',digits=(16,3)),
@@ -393,10 +393,10 @@ class ch_mechanical_properties(osv.osv):
 	
 	_columns = {
 			
-		'header_id':fields.many2one('kg.melting', 'Melting Entry', required=False, ondelete='cascade'),
+		'header_id':fields.many2one('kg.melting', 'Melting Entry', required=True, ondelete='cascade'),
 		'uom': fields.char('UOM',size=128),						
-		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=False,domain="[('active','=','t')]"),	
-		'mech_value':fields.float('Value',required=False),
+		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('active','=','t')]"),	
+		'mech_value':fields.float('Value',required=True),
 		'min':fields.float('Min'),
 		'max':fields.float('Max'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
