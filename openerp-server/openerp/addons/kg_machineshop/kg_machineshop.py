@@ -566,10 +566,10 @@ class kg_id_commitment(osv.osv):
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
 		
 		## After added
-		'ms_schedule_no': fields.char('MS Schedule No.',required=True),
-		'ms_schedule_date': fields.date('MS Schedule Date',required=True),				
+		'ms_schedule_no': fields.char('MS Schedule No.',required=False),
+		'ms_schedule_date': fields.date('MS Schedule Date',required=False),				
 		'order_priority': fields.selection(ORDER_WO_PRIORITY,'Priority'),
-		'delivery_date': fields.date('Delivery Date',required=True),
+		'delivery_date': fields.date('Delivery Date',required=False),
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
 		'packing_type': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Packing Type', required=False),
 		'rm_date': fields.date('R.M Completed Date',required=False),
