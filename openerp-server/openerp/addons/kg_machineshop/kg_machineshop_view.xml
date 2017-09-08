@@ -170,6 +170,33 @@
         </record>
 		
 	<!-- Menu Action End-->
+	
+	
+	<!-- Foundry Pending List menu -->
+	
+	<record id="tma_ms_fou_pending_inward" model="ir.actions.act_window">
+		<field name="name">Foundry Pending List</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">kg.machineshop</field>
+		<field name="view_type">form</field>
+		<field name="context">{}</field>
+		<field name="domain">[('state','=','pending'),('ms_type','=','foundry_item')]</field>
+		<field name="search_view_id" ref="t_search_v_ms_inward"/>
+	</record>
+	
+	 <record model="ir.actions.act_window.view" id="tma_ms_fou_pending_inward_tree_view">
+		<field name="sequence" eval="1"/>
+		<field name="view_mode">tree</field>
+		<field name="view_id" ref="t_tree_v_ms_inward"/>
+		<field name="act_window_id" ref="tma_ms_fou_pending_inward"/>
+	</record>
+	<record model="ir.actions.act_window.view" id="tma_ms_fou_pending_inward_form_view">
+		<field name="sequence" eval="2"/>
+		<field name="view_mode">form</field>
+		<field name="view_id" ref="t_form_v_ms_inward"/>
+		<field name="act_window_id" ref="tma_ms_fou_pending_inward"/>
+	</record>
+	
 		
 
 	
@@ -1008,9 +1035,14 @@
 		<menuitem action="kg_stock_inward.tma_ms_stock_details" id="tam_ms_stock_list" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="kg_qc_verification.tma_ms_qc_verification" id="tam_ms_qc_verif" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="tma_ms_unsch_list" id="tam_ms_unsch_list" parent="tpm_ms_process" sequence="3" />
-		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="2" />
+		
 		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="4" />
 		<menuitem action="tma_ms_issue_pending_list" id="tam_ms_sch_pending_list" parent="tpm_ms_process" sequence="4" />
+		
+		
+		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="2" />
+		
+		<menuitem action="tma_ms_fou_pending_inward" id="tam_fou_pending_ms_inward" parent="tpm_ms_process" sequence="2" />
 		
 		
 	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="4"/>

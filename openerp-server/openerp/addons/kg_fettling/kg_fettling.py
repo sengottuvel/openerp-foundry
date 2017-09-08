@@ -59,6 +59,7 @@ class kg_fettling(osv.osv):
 		'schedule_id': fields.many2one('kg.schedule','Schedule No.'),
 		'schedule_date': fields.related('schedule_id','entry_date', type='date', string='Schedule Date', store=True, readonly=True),
 		'schedule_line_id': fields.many2one('ch.schedule.details','Schedule Line Item'),
+		'each_weight': fields.related('schedule_line_id','weight', type='float', string='Each Weight', store=True, readonly=True),
 		
 		### Work Order Details ###
 		'order_bomline_id': fields.many2one('ch.order.bom.details','Order BOM Line Id',readonly=True),
@@ -507,6 +508,7 @@ class kg_fettling(osv.osv):
 		
 	}
 	
+	### Not in Use ###
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		today = date.today()
@@ -564,52 +566,59 @@ class kg_fettling(osv.osv):
 		ms_obj = self.pool.get('kg.machineshop')
 		entry_rec = self.browse(cr, uid, ids[0])
 		if entry_rec.ms_state != 'created':
-			### Sequence Number Generation ###
-			ms_name = ''	
-			ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
-			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
-			ms_name = cr.fetchone();
 			
-			ms_vals = {
-			'name': ms_name[0],
-			'location':entry_rec.location,
-			'schedule_id':entry_rec.schedule_id.id,
-			'schedule_date':entry_rec.schedule_date,
-			'schedule_line_id':entry_rec.schedule_line_id.id,
-			'order_bomline_id':entry_rec.order_bomline_id.id,
-			'order_id':entry_rec.order_id.id,
-			'order_line_id':entry_rec.order_line_id.id,
-			'order_no':entry_rec.order_no,
-			'order_delivery_date':entry_rec.order_delivery_date,
-			'order_date':entry_rec.order_date,
-			'order_category':entry_rec.order_category,
-			'order_priority':entry_rec.order_priority,
-			'pump_model_id':entry_rec.pump_model_id.id,
-			'pattern_id':entry_rec.pattern_id.id,
-			'pattern_code':entry_rec.pattern_code,
-			'pattern_name':entry_rec.pattern_name,
-			'moc_id':entry_rec.moc_id.id,
-			'schedule_qty':entry_rec.schedule_qty,
-			'fettling_id':entry_rec.id,
-			'fettling_qty':inward_qty,
-			'inward_accept_qty':inward_qty,
-			'state':'waiting',
-			'ms_sch_qty': inward_qty,
-			'ms_type': 'foundry_item',
-			'item_code': entry_rec.pattern_code,
-			'item_name': entry_rec.pattern_name,
-			'position_id': entry_rec.order_bomline_id.position_id.id,
-			'oth_spec': entry_rec.order_bomline_id.add_spec,
-			'flag_trimming_dia': entry_rec.order_bomline_id.flag_trimming_dia,
-			'bom_type': entry_rec.order_bomline_id.bom_type,
-			'spare_id': entry_rec.order_bomline_id.spare_id.id,
+			ms_shop_id = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',entry_rec.order_line_id.id),('pattern_id','=',entry_rec.pattern_id.id),('schedule_line_id','=',entry_rec.schedule_line_id.id)])
+			ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])
 			
-			}
+			
+			self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'fettling_id':entry_rec.id,'fettling_qty':ms_shop_rec.fettling_qty + inward_qty,'state':'waiting',})
+
+			#~ ### Sequence Number Generation ###
+			#~ ms_name = ''	
+			#~ ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
+			#~ seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
+			#~ cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
+			#~ ms_name = cr.fetchone();
+			#~ 
+			#~ ms_vals = {
+			#~ 'name': ms_name[0],
+			#~ 'location':entry_rec.location,
+			#~ 'schedule_id':entry_rec.schedule_id.id,
+			#~ 'schedule_date':entry_rec.schedule_date,
+			#~ 'schedule_line_id':entry_rec.schedule_line_id.id,
+			#~ 'order_bomline_id':entry_rec.order_bomline_id.id,
+			#~ 'order_id':entry_rec.order_id.id,
+			#~ 'order_line_id':entry_rec.order_line_id.id,
+			#~ 'order_no':entry_rec.order_no,
+			#~ 'order_delivery_date':entry_rec.order_delivery_date,
+			#~ 'order_date':entry_rec.order_date,
+			#~ 'order_category':entry_rec.order_category,
+			#~ 'order_priority':entry_rec.order_priority,
+			#~ 'pump_model_id':entry_rec.pump_model_id.id,
+			#~ 'pattern_id':entry_rec.pattern_id.id,
+			#~ 'pattern_code':entry_rec.pattern_code,
+			#~ 'pattern_name':entry_rec.pattern_name,
+			#~ 'moc_id':entry_rec.moc_id.id,
+			#~ 'schedule_qty':entry_rec.schedule_qty,
+			#~ 'fettling_id':entry_rec.id,
+			#~ 'fettling_qty':inward_qty,
+			#~ 'inward_accept_qty':inward_qty,
+			#~ 'state':'waiting',
+			#~ 'ms_sch_qty': inward_qty,
+			#~ 'ms_type': 'foundry_item',
+			#~ 'item_code': entry_rec.pattern_code,
+			#~ 'item_name': entry_rec.pattern_name,
+			#~ 'position_id': entry_rec.order_bomline_id.position_id.id,
+			#~ 'oth_spec': entry_rec.order_bomline_id.add_spec,
+			#~ 'flag_trimming_dia': entry_rec.order_bomline_id.flag_trimming_dia,
+			#~ 'bom_type': entry_rec.order_bomline_id.bom_type,
+			#~ 'spare_id': entry_rec.order_bomline_id.spare_id.id,
+			#~ 
+			#~ }
 			
 			if entry_rec.state != 'complete':
 				
-				ms_id = ms_obj.create(cr, uid, ms_vals)
+				#~ ms_id = ms_obj.create(cr, uid, ms_vals)
 			
 				### Status Updation ###
 				if entry_rec.production_id.id != False:
@@ -1017,6 +1026,7 @@ class kg_fettling(osv.osv):
 					
 		return True
 		
+	### Not in Use Alter Reject function in qc ###
 	def fettling_reject_process(self,cr,uid,ids,fettling_qty,fettling_reject_qty,fettling_weight,fettling_date,fettling_reject_remarks_id,context=None):
 		production_obj = self.pool.get('kg.production')
 		entry = self.browse(cr, uid, ids[0])
@@ -3553,8 +3563,8 @@ class kg_fettling(osv.osv):
 			
 				self.fettling_accept_process(cr,uid,ids,entry.finish_grinding_qty,entry.finish_grinding_accept_qty,
 					entry.finish_grinding_weight,entry.finish_grinding_date)
-				self.fettling_reject_process(cr,uid,ids,entry.finish_grinding_qty,entry.finish_grinding_reject_qty,
-					entry.finish_grinding_weight,entry.finish_grinding_date,entry.finish_grinding_reject_remarks_id.id)
+				#~ self.fettling_reject_process(cr,uid,ids,entry.finish_grinding_qty,entry.finish_grinding_reject_qty,
+					#~ entry.finish_grinding_weight,entry.finish_grinding_date,entry.finish_grinding_reject_remarks_id.id)
 					
 				self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.finish_grinding_reject_qty,'foundry','fettling',entry,False,entry.finish_grinding_qty)
 					

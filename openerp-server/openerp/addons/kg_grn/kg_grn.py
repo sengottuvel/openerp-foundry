@@ -1519,6 +1519,7 @@ class kg_stock_move(osv.osv):
     
     'name': fields.char('Description', select=True),
     'date': fields.date('Date'),
+    'trans_date': fields.date('Trans Date'),
     'po_qty': fields.float('Pending Qty', readonly=True),
     'cons_qty': fields.float('Available Qty', readonly=True),
     'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),

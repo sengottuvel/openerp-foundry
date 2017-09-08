@@ -49,7 +49,7 @@ class kg_ms_daily_planning(osv.osv):
 		'line_ids': fields.one2many('ch.ms.daily.planning.details', 'header_id', "Planning Details"),
 		
 		'ms_line_ids':fields.many2many('kg.machineshop','m2m_ms_planning_details' , 'planning_id', 'ms_id', 'MS Details',
-			domain="[('state','in',('accept','raw_pending')),'&',('ms_plan_rem_qty','>',0),'&',('flag_trimming_dia','=', False)]"),
+			domain="[('ms_plan_rem_qty','>',0),'&',('flag_trimming_dia','=', False)]"),
 		'flag_planning': fields.boolean('Schedule'),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'cancel_remark': fields.text('Cancel Remarks'),

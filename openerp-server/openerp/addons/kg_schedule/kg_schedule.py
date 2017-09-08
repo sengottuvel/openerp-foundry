@@ -196,7 +196,7 @@ class kg_schedule(osv.osv):
 						order_line_obj.write(cr, uid, order_item.id, {'schedule_status':'not_allow'})		
 						tot_stock = 0
 						
-						if order_item.header_id.order_category != 'project':
+						if order_item.header_id.order_category != 'project' and order_item.header_id.stock_check != 'no':
 							### Checking stock exists for corresponding pattern ###
 							cr.execute(''' select sum(available_qty) as stock_qty
 								from ch_stock_inward_details  
@@ -1375,7 +1375,58 @@ class kg_schedule(osv.osv):
 					
 						production_id = production_obj.create(cr, uid, production_vals)
 						
-					if ms_no == 1:
+						
+					### Foundry Item Machine Shop Creation Process ###
+						
+					ms_fou_obj = self.pool.get('kg.machineshop')						
+					
+					### Sequence Number Generation ###
+					ms_name = ''	
+					ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
+					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
+					ms_name = cr.fetchone();
+					
+					ms_foun_vals = {
+						'name': ms_name[0],
+						'location':entry.location,
+						'schedule_id':entry.id,
+						'schedule_date':entry.entry_date,
+						'schedule_line_id':schedule_item.id,
+						'order_bomline_id':schedule_item.order_bomline_id.id,
+						'order_id':schedule_item.order_id.id,
+						'order_line_id':schedule_item.order_line_id.id,
+						'order_no':schedule_item.order_no,
+						'order_delivery_date':schedule_item.order_line_id.delivery_date,
+						'order_date':schedule_item.order_id.entry_date,
+						'order_category':schedule_item.order_id.order_category,
+						'order_priority':priority,
+						'pump_model_id':schedule_item.pump_model_id.id,
+						'pattern_id':schedule_item.pattern_id.id,
+						'pattern_code':schedule_item.pattern_id.name,
+						'pattern_name':schedule_item.pattern_id.pattern_name,
+						'moc_id':schedule_item.moc_id.id,
+						'schedule_qty':schedule_item.qty,						
+						'fettling_qty':0,
+						'inward_accept_qty':0,
+						'state':'pending',
+						'ms_sch_qty': schedule_item.qty,
+						'ms_type': 'foundry_item',
+						'item_code': schedule_item.pattern_id.name,
+						'item_name': schedule_item.pattern_id.pattern_name,
+						'position_id': schedule_item.order_bomline_id.position_id.id,
+						'oth_spec': schedule_item.order_bomline_id.add_spec,
+						'flag_trimming_dia': schedule_item.order_bomline_id.flag_trimming_dia,
+						'bom_type': schedule_item.order_bomline_id.bom_type,
+						'spare_id': schedule_item.order_bomline_id.spare_id.id,
+						'ms_plan_rem_qty':schedule_item.qty,
+					
+					}						
+						
+					ms_fou_id = ms_fou_obj.create(cr, uid, ms_foun_vals)		
+						
+						
+					if ms_no == 1:					
 						
 						### Machine shop Item Creation ####
 						cr.execute("""
@@ -1591,7 +1642,7 @@ class kg_schedule(osv.osv):
 									'ms_plan_rem_qty':reject_rem_qty,
 									'ms_type': 'ms_item',
 									'ms_state': 'in_plan',
-									'state':'raw_pending',
+									'state':'pending',
 									'ms_id': ms_item['ms_id'],
 									'ms_bom_id': ms_item['ms_bom_id'],
 									'ms_bom_line_id': ms_bom_line_id,

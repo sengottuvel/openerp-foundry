@@ -1138,12 +1138,13 @@ class kg_qc_verification(osv.osv):
 						'ms_sch_qty':reject_rem_qty,
 						'ms_type': 'ms_item',
 						'ms_state': 'in_plan',
-						'state':'raw_pending',
+						'state':'pending',
 						'ms_id': entry.ms_id.id,
 						'position_id': entry.position_id.id,
 						'item_code': entry.item_code,
 						'item_name': entry.item_name,
-						'oth_spec': entry.oth_spec
+						'oth_spec': entry.oth_spec,
+						'ms_plan_rem_qty':reject_rem_qty,
 						
 						}
 						
@@ -2042,7 +2043,17 @@ class kg_qc_verification(osv.osv):
 								'mould_state': 'pending',	  
 							}
 							production_id = production_obj.create(cr, uid, production_vals)
-				
+							
+							ms_shop_id = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',ref_id.order_line_id.id),('pattern_id','=',ref_id.pattern_id.id),('schedule_line_id','=',ref_id.schedule_line_id.id)])
+							ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])
+							
+							if ms_shop_rec.schedule_qty < ref_id.order_bomline_id.qty:
+								if ms_shop_rec.ms_plan_rem_qty == 0:
+									ms_state = 'pending'
+								else:
+									ms_state = ms_shop_rec.state
+								self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':ms_state,'ms_sch_qty':ms_shop_rec.ms_sch_qty + rem_qty,'schedule_qty':ms_shop_rec.schedule_qty + rem_qty,'ms_plan_rem_qty':ms_shop_rec.ms_plan_rem_qty + rem_qty})
+										
 				else:
 					
 					if reject_type == 'fettling':
@@ -2183,7 +2194,7 @@ class kg_qc_verification(osv.osv):
 										inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
 								
 				print "lssssssssss",reject_rem_qty					
-				if reject_rem_qty > 0:
+				if reject_rem_qty > 0:				
 					
 					### Sequence Number Generation ###
 					ms_name = ''	
@@ -2214,12 +2225,13 @@ class kg_qc_verification(osv.osv):
 					'ms_sch_qty':reject_rem_qty,
 					'ms_type': 'ms_item',
 					'ms_state': 'in_plan',
-					'state':'raw_pending',
+					'state':'pending',
 					'ms_id': ref_id.ms_id.id,
 					'position_id': ref_id.position_id.id,
 					'item_code': ref_id.item_code,
 					'item_name': ref_id.item_name,
-					'oth_spec': ref_id.oth_spec
+					'oth_spec': ref_id.oth_spec,
+					'ms_plan_rem_qty':reject_rem_qty,
 					
 					}
 					
@@ -2393,47 +2405,59 @@ class kg_qc_verification(osv.osv):
 				if entry.qty > 0:
 					
 					if entry.stock_type == 'pattern':
-						ms_obj = self.pool.get('kg.machineshop')
 						
-						### Sequence Number Generation ###
-						ms_name = ''	
-						ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
-						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
-						ms_name = cr.fetchone();
-						print "entry.order_bomline_id",entry.order_bomline_id
-						ms_vals = {
-							'name': ms_name[0],
-							'location':entry.location,
-							'schedule_id':entry.schedule_id.id,
-							'schedule_date':entry.schedule_date,
-							'schedule_line_id':entry.schedule_line_id.id,
-							'order_bomline_id':entry.order_bomline_id.id,
-							'order_id':entry.order_id.id,
-							'order_line_id':entry.order_line_id.id,
-							'order_no':entry.order_no,
-							'order_delivery_date':entry.order_line_id.delivery_date,
-							'order_date':entry.order_id.entry_date,
-							'order_category':entry.order_category,
-							'order_priority':entry.order_priority,
-							'pump_model_id':entry.pump_model_id.id,
-							'pattern_id':entry.pattern_id.id,
-							'pattern_name':entry.pattern_name,
-							'moc_id':entry.moc_id.id,
-							'schedule_qty':entry.qty,
-							'fettling_qty':entry.qty,
-							'inward_accept_qty':entry.qty,
-							'state':'waiting',
-							'ms_sch_qty': entry.qty,
-							'ms_type': 'foundry_item',
-							'item_code': entry.pattern_id.name,
-							'item_name': entry.pattern_name,
-							'position_id': entry.order_bomline_id.position_id.id,
-							'oth_spec': entry.oth_spec
+						ms_shop_id = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',entry.order_line_id.id),('pattern_id','=',entry.pattern_id.id),('schedule_line_id','=',entry.schedule_line_id.id)])
+						ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])
 						
-						}
+						if ms_shop_rec.schedule_qty < entry.order_bomline_id.qty:
+							if ms_shop_rec.ms_plan_rem_qty == 0:
+								ms_state = 'raw_pending'
+							else:
+								ms_state = ms_shop_rec.state
+							self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':ms_state,'ms_sch_qty':ms_shop_rec.ms_sch_qty + entry.qty,'schedule_qty':ms_shop_rec.schedule_qty + entry.qty,'fettling_qty':ms_shop_rec.fettling_qty + entry.qty,'inward_accept_qty':ms_shop_rec.inward_accept_qty + entry.qty,'ms_plan_rem_qty':ms_shop_rec.inward_accept_qty + entry.qty})
 						
-						ms_id = ms_obj.create(cr, uid, ms_vals)
+						#~ ms_obj = self.pool.get('kg.machineshop')
+						#~ 
+						#~ ### Sequence Number Generation ###
+						#~ ms_name = ''	
+						#~ ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
+						#~ seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
+						#~ cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
+						#~ ms_name = cr.fetchone();
+						#~ print "entry.order_bomline_id",entry.order_bomline_id
+						#~ ms_vals = {
+							#~ 'name': ms_name[0],
+							#~ 'location':entry.location,
+							#~ 'schedule_id':entry.schedule_id.id,
+							#~ 'schedule_date':entry.schedule_date,
+							#~ 'schedule_line_id':entry.schedule_line_id.id,
+							#~ 'order_bomline_id':entry.order_bomline_id.id,
+							#~ 'order_id':entry.order_id.id,
+							#~ 'order_line_id':entry.order_line_id.id,
+							#~ 'order_no':entry.order_no,
+							#~ 'order_delivery_date':entry.order_line_id.delivery_date,
+							#~ 'order_date':entry.order_id.entry_date,
+							#~ 'order_category':entry.order_category,
+							#~ 'order_priority':entry.order_priority,
+							#~ 'pump_model_id':entry.pump_model_id.id,
+							#~ 'pattern_id':entry.pattern_id.id,
+							#~ 'pattern_name':entry.pattern_name,
+							#~ 'moc_id':entry.moc_id.id,
+							#~ 'schedule_qty':entry.qty,
+							#~ 'fettling_qty':entry.qty,
+							#~ 'inward_accept_qty':entry.qty,
+							#~ 'state':'waiting',
+							#~ 'ms_sch_qty': entry.qty,
+							#~ 'ms_type': 'foundry_item',
+							#~ 'item_code': entry.pattern_id.name,
+							#~ 'item_name': entry.pattern_name,
+							#~ 'position_id': entry.order_bomline_id.position_id.id,
+							#~ 'oth_spec': entry.oth_spec,
+							#~ 'ms_plan_rem_qty':entry.qty,
+						#~ 
+						#~ }
+						#~ 
+						#~ ms_id = ms_obj.create(cr, uid, ms_vals)
 						
 					if entry.stock_type == 'pump':
 						
