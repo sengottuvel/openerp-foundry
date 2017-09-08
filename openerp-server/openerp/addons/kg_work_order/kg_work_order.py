@@ -88,6 +88,7 @@ class kg_work_order(osv.osv):
 		'order_value': fields.function(_get_order_value, string='WO Value', method=True, store=True, type='float'),
 		'order_category': fields.selection(ORDER_CATEGORY,'Category'),
 		'partner_id': fields.many2one('res.partner','Customer'),
+		'dealer_id': fields.many2one('res.partner','Dealer Name'),
 		'progress_state': fields.selection([
 		('mould_com','Moulding Completed'),
 		('pour_com','Pouring Completed'),
