@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kg_grn_register" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.2100000000000006"/>
+	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset1">
@@ -126,7 +126,50 @@ left join res_company res_cmp on (res_cmp.id=gen_grn.company_id)
 	<parameter name="print_date" class="java.lang.String"/>
 	<parameter name="printed_by" class="java.lang.String"/>
 	<queryString>
-		<![CDATA[select trim(TO_CHAR((sum(a.grn_total) OVER (PARTITION BY dummy))::float, '999G999G99G999G99G99G990D99')) as grand_total,ROW_NUMBER() Over (Partition by a.division) as num,*
+		<![CDATA[select ROW_NUMBER() OVER (PARTITION by division ORDER by division,grn_date,grn_number) as sno,
+division,grn_date,grn_number,
+product_name,case when (brand_name is null or brand_name != '') then '-' else brand_name end as brand_name,moc,
+trim(TO_CHAR((qty), '999999999999999999999999990D99')) as qty_txt,
+trim(TO_CHAR((cost_price), '999G999G99G999G99G99G990D99')) as cost_price_txt,
+trim(TO_CHAR((discount), '999G999G99G999G99G99G990D99')) as discount_txt,
+trim(TO_CHAR((COALESCE((sum(grn_total) OVER (PARTITION by division)) ,0.00) ), '999G999G99G999G99G99G990D99')) as div_gnd_txt,
+trim(TO_CHAR((sum(grn_total) OVER ()), '999G999G99G999G99G99G990D99')) as overall_gnd_txt,
+qty,uom,cost_price,discount,
+order_no,order_date,dc_no,dc_date,dummy,
+inward_type,grn_total,grn_totals,line_id,
+comp_name,created_by,part_name,str1,city,
+zip,state,country,from_date,to_date,status,printed_by,print_date,grn_datee,
+sum(grn_total) OVER (PARTITION by division) as div_gnd,
+sum(grn_total) OVER () as overall_gnd,remarks
+from (
+select division,grn_date,grn_number,
+product_name,case when (brand_name is null or brand_name != '') then '-' else brand_name end as brand_name,moc,qty,uom,cost_price,discount,
+order_no,order_date,dc_no,dc_date,dummy,
+inward_type,grn_total,grn_totals,line_id,
+comp_name,created_by,part_name,str1,city,
+zip,state,country,from_date,to_date,status,printed_by,print_date,grn_datee,
+case when (remarks is null or remarks = '') then '-' else remarks end as remarks
+from (
+select
+division,
+grn_id,grn_date,grn_number,grn_datee,dc_no,dc_date,created_by,part_name,str1,city,zip,state,country,product_name,
+(select name from kg_brand_master where id = brand_id) as brand_name,
+moc,qty,uom,line_id,cost_price,discount,inward_type,grn_total,grn_totals,comp_name,order_no,order_date,dummy,from_date,to_date,status,printed_by,print_date,remarks
+from (
+select
+grn_id,grn_date,grn_datee,grn_number,remarks,grn_total,
+(CASE WHEN division = 'ppd'
+THEN 'PPD'
+WHEN division = 'ipd'
+THEN 'IPD'
+WHEN division = 'foundry'
+THEN 'FOU'
+WHEN (division is null or division = '')
+THEN '-'
+ELSE 'None'
+end ) as division,
+dc_no,dc_date,created_by,part_name,str1,city,zip,state,country,product_name,brand_id,moc,qty,uom,line_id,
+cost_price,discount,inward_type,grn_totals,comp_name,order_no,order_date,dummy,from_date,to_date,status,printed_by,print_date
 from ((SELECT
 po_grn.id AS grn_id,
 to_char(po_grn.grn_date,'dd/mm/yyyy') AS grn_date,
@@ -134,14 +177,7 @@ po_grn.grn_date AS grn_datee,
 po_grn.name AS grn_number,
 po_grn.po_so_remark AS remarks,
 grn_line.price_subtotal As grn_total,
-(CASE WHEN po_grn.division = 'ppd'
-THEN 'PPD'
-WHEN po_grn.division = 'ipd'
-THEN 'IPD'
-WHEN po_grn.division = 'foundry'
-THEN 'FOU'
-ELSE ''
-end ) as division,
+po_grn.division as division,
 case when (invoice_ids.name) is null then po_grn.dc_no else
 (po_grn.dc_no||' , '||invoice_ids.name) end AS dc_no,
 case when (invoice_ids.invoice_date) is null then to_char(po_grn.dc_date,'dd/mm/yyyy') else
@@ -154,6 +190,7 @@ part.zip as zip,
 st.name as state,
 coun.name as country,
 prd.name_template AS product_name,
+grn_line.brand_id AS brand_id,
 moc.name AS moc,
 grn_line.po_grn_qty AS qty,
 uom.name AS uom,
@@ -161,7 +198,7 @@ grn_line.id AS line_id,
 grn_line.price_unit As cost_price,
 grn_line.kg_discount_per as discount,
 inw.name AS inward_type,
-to_char((grn_line.price_subtotal)::float, '999G999G99G999G99G99G990D99') as grn_totals,
+trim(TO_CHAR((COALESCE((grn_line.price_subtotal) ,0.00) ), '999G999G99G999G99G99G990D99')) as grn_totals,
 res_cmp.name as comp_name,
 grn_line.order_no as order_no,
 to_char(grn_line.order_date::date,'dd/mm/yyyy') AS order_date,
@@ -225,10 +262,10 @@ when (select status from kg_grn_register_wiz where id = $P{wiz_id}) is not null 
 else
 po_grn.state !='draft' end
 
-and po_grn.grn_date >=to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and po_grn.grn_date <= to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
+and po_grn.grn_date >=to_date('2017-08-01','YYYY-MM-DD') or '2017-08-01' = '' and po_grn.grn_date <= to_date('2017-09-10','YYYY-MM-DD') or '2017-09-10' = ''
 order by po_grn.name)
 
-UNION
+UNION ALL
 
 (SELECT
 gen_grn.id AS grn_id,
@@ -237,7 +274,7 @@ gen_grn.grn_date AS grn_datee,
 gen_grn.name AS grn_number,
 gen_grn.remark AS remarks,
 gen_grn.sub_total As grn_total,
-' ' as division,
+gen_grn.division as division,
 case when (invoice_idss.name) is null then gen_grn.dc_no else
 (gen_grn.dc_no||','||invoice_idss.name) end AS dc_no,
 case when (invoice_idss.invoice_date) is null then to_char(gen_grn.dc_date,'dd/mm/yyyy') else
@@ -250,6 +287,7 @@ part.zip as zip,
 st.name as state,
 coun.name as country,
 prd.name_template AS product_name,
+grn_line.brand_id AS brand_id,
 moc.name AS moc,
 grn_line.grn_qty AS qty,
 uom.name AS uom,
@@ -257,7 +295,7 @@ grn_line.id AS line_id,
 grn_line.price_unit As cost_price,
 grn_line.kg_discount_per as discount,
 inw.name AS inward_type,
-to_char((grn_line.price_subtotal)::float, '999G999G99G999G99G99G990D99') as grn_totals,
+trim(TO_CHAR((COALESCE((grn_line.price_subtotal) ,0.00) ), '999G999G99G999G99G99G990D99')) as grn_totals,
 res_cmp.name as comp_name,
 '-----------'::text as order_no,
 '-----------'::text as order_date,
@@ -310,19 +348,45 @@ else
 gen_grn.state !='draft' end
 
 and gen_grn.grn_date >= to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and gen_grn.grn_date <=to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
-order by gen_grn.name)) as a]]>
+order by gen_grn.name)) as a
+) as sub
+where
+CASE
+WHEN (select division from kg_grn_wiz_pro where order_id = $P{wiz_id}) is not null THEN division in
+(select division from kg_grn_wiz_pro where order_id = $P{wiz_id})
+ELSE
+division != ''
+end
+order by division,grn_date,grn_number
+) as sample order by division,grn_date,grn_number
+) as final order by division,grn_date,grn_number]]>
 	</queryString>
-	<field name="grand_total" class="java.lang.String"/>
-	<field name="num" class="java.lang.Long"/>
-	<field name="grn_id" class="java.lang.Integer"/>
-	<field name="grn_date" class="java.lang.String"/>
-	<field name="grn_datee" class="java.sql.Date"/>
-	<field name="grn_number" class="java.lang.String"/>
-	<field name="remarks" class="java.lang.String"/>
-	<field name="grn_total" class="java.lang.Double"/>
+	<field name="sno" class="java.lang.Long"/>
 	<field name="division" class="java.lang.String"/>
+	<field name="grn_date" class="java.lang.String"/>
+	<field name="grn_number" class="java.lang.String"/>
+	<field name="product_name" class="java.lang.String"/>
+	<field name="brand_name" class="java.lang.String"/>
+	<field name="moc" class="java.lang.String"/>
+	<field name="qty_txt" class="java.lang.String"/>
+	<field name="cost_price_txt" class="java.lang.String"/>
+	<field name="discount_txt" class="java.lang.String"/>
+	<field name="div_gnd_txt" class="java.lang.String"/>
+	<field name="overall_gnd_txt" class="java.lang.String"/>
+	<field name="qty" class="java.lang.Double"/>
+	<field name="uom" class="java.lang.String"/>
+	<field name="cost_price" class="java.lang.Double"/>
+	<field name="discount" class="java.math.BigDecimal"/>
+	<field name="order_no" class="java.lang.String"/>
+	<field name="order_date" class="java.lang.String"/>
 	<field name="dc_no" class="java.lang.String"/>
 	<field name="dc_date" class="java.lang.String"/>
+	<field name="dummy" class="java.lang.Integer"/>
+	<field name="inward_type" class="java.lang.String"/>
+	<field name="grn_total" class="java.lang.Double"/>
+	<field name="grn_totals" class="java.lang.String"/>
+	<field name="line_id" class="java.lang.Integer"/>
+	<field name="comp_name" class="java.lang.String"/>
 	<field name="created_by" class="java.lang.Integer"/>
 	<field name="part_name" class="java.lang.String"/>
 	<field name="str1" class="java.lang.String"/>
@@ -330,24 +394,69 @@ order by gen_grn.name)) as a]]>
 	<field name="zip" class="java.lang.String"/>
 	<field name="state" class="java.lang.String"/>
 	<field name="country" class="java.lang.String"/>
-	<field name="product_name" class="java.lang.String"/>
-	<field name="moc" class="java.lang.String"/>
-	<field name="qty" class="java.lang.Double"/>
-	<field name="uom" class="java.lang.String"/>
-	<field name="line_id" class="java.lang.Integer"/>
-	<field name="cost_price" class="java.lang.Double"/>
-	<field name="discount" class="java.math.BigDecimal"/>
-	<field name="inward_type" class="java.lang.String"/>
-	<field name="grn_totals" class="java.lang.String"/>
-	<field name="comp_name" class="java.lang.String"/>
-	<field name="order_no" class="java.lang.String"/>
-	<field name="order_date" class="java.lang.String"/>
-	<field name="dummy" class="java.lang.Integer"/>
 	<field name="from_date" class="java.lang.String"/>
 	<field name="to_date" class="java.lang.String"/>
 	<field name="status" class="java.lang.String"/>
 	<field name="printed_by" class="java.lang.String"/>
 	<field name="print_date" class="java.lang.String"/>
+	<field name="grn_datee" class="java.sql.Date"/>
+	<field name="div_gnd" class="java.lang.Double"/>
+	<field name="overall_gnd" class="java.lang.Double"/>
+	<field name="remarks" class="java.lang.String"/>
+	<group name="Division">
+		<groupExpression><![CDATA[$F{division}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField isBlankWhenNull="true">
+					<reportElement x="1" y="0" width="255" height="15" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[new Boolean($F{sno}.intValue() == 1)]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="2"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Division : "+$F{division}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<staticText>
+					<reportElement x="1" y="0" width="255" height="20"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7" isBold="true" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Division Total]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="256" y="0" width="256" height="20"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{div_gnd_txt}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="512" y="0" width="240" height="20"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -417,7 +526,7 @@ order by gen_grn.name)) as a]]>
 				<reportElement x="0" y="-1" width="752" height="1"/>
 			</line>
 			<staticText>
-				<reportElement x="0" y="14" width="30" height="10"/>
+				<reportElement x="0" y="15" width="30" height="10"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -428,7 +537,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[S.No]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="29" y="14" width="47" height="10"/>
+				<reportElement x="29" y="15" width="35" height="10"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -439,27 +548,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[No]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="255" y="-1" width="32" height="25"/>
-				<box>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="7" isBold="true"/>
-				</textElement>
-				<text><![CDATA[UOM]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="75" y="-1" width="45" height="25"/>
-				<box>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="7" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Date]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="119" y="0" width="74" height="24"/>
+				<reportElement x="182" y="0" width="74" height="25"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -469,17 +558,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[Product]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="286" y="-1" width="46" height="25"/>
-				<box>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="7" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Rate]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="331" y="0" width="52" height="24"/>
+				<reportElement x="459" y="0" width="53" height="25"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -489,17 +568,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[Value]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="222" y="-1" width="34" height="25"/>
-				<box>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="7" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Qty]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="382" y="14" width="51" height="10"/>
+				<reportElement x="512" y="15" width="32" height="10"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -510,7 +579,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[No]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="432" y="14" width="52" height="10"/>
+				<reportElement x="543" y="15" width="52" height="10"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -521,7 +590,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[Date]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="640" y="14" width="51" height="10"/>
+				<reportElement x="637" y="15" width="51" height="10"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -532,7 +601,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[Date]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="558" y="14" width="83" height="10"/>
+				<reportElement x="595" y="15" width="42" height="10"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -543,7 +612,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[No]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="690" y="0" width="62" height="24"/>
+				<reportElement x="688" y="0" width="64" height="25"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -553,7 +622,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[Remarks]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="0" width="76" height="13"/>
+				<reportElement x="0" y="0" width="64" height="14"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -563,7 +632,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[GRN]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="382" y="0" width="102" height="13"/>
+				<reportElement x="512" y="0" width="83" height="14"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -573,27 +642,47 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[Order]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="483" y="-1" width="76" height="25"/>
+				<reportElement x="595" y="0" width="93" height="14"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Vendor]]></text>
+				<text><![CDATA[DC]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="558" y="-1" width="133" height="14"/>
+				<reportElement x="383" y="0" width="32" height="25"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
-				<text><![CDATA[DC/INV]]></text>
+				<text><![CDATA[UOM]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="193" y="-1" width="30" height="25"/>
+				<reportElement x="414" y="0" width="46" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rate]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="350" y="0" width="34" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Qty]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="304" y="0" width="47" height="25"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -602,12 +691,42 @@ order by gen_grn.name)) as a]]>
 				</textElement>
 				<text><![CDATA[MOC]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="256" y="0" width="48" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Brand]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="64" y="0" width="45" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="109" y="0" width="73" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vendor]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="37" splitType="Stretch">
+		<band height="23" splitType="Stretch">
 			<textField>
-				<reportElement x="30" y="15" width="47" height="22"/>
+				<reportElement x="30" y="1" width="34" height="22"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -617,7 +736,7 @@ order by gen_grn.name)) as a]]>
 				<textFieldExpression><![CDATA[$F{grn_number}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="76" y="15" width="45" height="22"/>
+				<reportElement x="64" y="1" width="45" height="22"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -627,7 +746,7 @@ order by gen_grn.name)) as a]]>
 				<textFieldExpression><![CDATA[$F{grn_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="120" y="14" width="73" height="23"/>
+				<reportElement x="182" y="0" width="74" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -637,17 +756,17 @@ order by gen_grn.name)) as a]]>
 				<textFieldExpression><![CDATA[$F{product_name}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="223" y="14" width="34" height="23"/>
+				<reportElement x="350" y="0" width="34" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="7"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{qty_txt}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="256" y="14" width="32" height="23"/>
+				<reportElement x="383" y="0" width="32" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -657,17 +776,17 @@ order by gen_grn.name)) as a]]>
 				<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="287" y="14" width="46" height="23"/>
+				<reportElement x="414" y="0" width="46" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="7"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{cost_price}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{cost_price_txt}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="332" y="14" width="52" height="23"/>
+				<reportElement x="459" y="0" width="53" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -677,7 +796,7 @@ order by gen_grn.name)) as a]]>
 				<textFieldExpression><![CDATA[$F{grn_totals}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="383" y="14" width="51" height="23"/>
+				<reportElement x="512" y="0" width="32" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -687,7 +806,7 @@ order by gen_grn.name)) as a]]>
 				<textFieldExpression><![CDATA[$F{order_no}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="433" y="14" width="52" height="23"/>
+				<reportElement x="544" y="0" width="51" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -697,17 +816,7 @@ order by gen_grn.name)) as a]]>
 				<textFieldExpression><![CDATA[$F{order_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="484" y="14" width="76" height="23"/>
-				<box>
-					<topPen lineWidth="0.0"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font size="7"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{part_name}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="559" y="14" width="83" height="23"/>
+				<reportElement x="595" y="0" width="43" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -717,7 +826,7 @@ order by gen_grn.name)) as a]]>
 				<textFieldExpression><![CDATA[$F{dc_no}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="641" y="14" width="51" height="23"/>
+				<reportElement x="639" y="0" width="49" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -727,7 +836,7 @@ order by gen_grn.name)) as a]]>
 				<textFieldExpression><![CDATA[$F{dc_date}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="691" y="14" width="62" height="23"/>
+				<reportElement x="688" y="0" width="65" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -737,24 +846,14 @@ order by gen_grn.name)) as a]]>
 				<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1" y="15" width="30" height="22"/>
+				<reportElement x="1" y="1" width="30" height="22"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="7"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{num}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{sno}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="0" y="0" width="100" height="15" isRemoveLineWhenBlank="true">
-					<printWhenExpression><![CDATA[new Boolean($F{num}.intValue() == 1)]]></printWhenExpression>
-				</reportElement>
-				<box topPadding="2"/>
-				<textElement>
-					<font size="8" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{division}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="193" y="14" width="30" height="23"/>
+				<reportElement x="303" y="0" width="47" height="23"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -762,6 +861,26 @@ order by gen_grn.name)) as a]]>
 					<font size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="256" y="0" width="48" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{brand_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="109" y="0" width="73" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{part_name}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -800,9 +919,9 @@ order by gen_grn.name)) as a]]>
 		</band>
 	</pageFooter>
 	<summary>
-		<band height="41" splitType="Stretch">
+		<band height="20" splitType="Stretch">
 			<staticText>
-				<reportElement x="0" y="0" width="247" height="20"/>
+				<reportElement x="0" y="0" width="256" height="20"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -813,7 +932,7 @@ order by gen_grn.name)) as a]]>
 				<text><![CDATA[Grand Total]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="248" y="0" width="135" height="20"/>
+				<reportElement x="256" y="0" width="256" height="20"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -821,7 +940,7 @@ order by gen_grn.name)) as a]]>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="7"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{grand_total}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{overall_gnd_txt}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="383" y="0" width="369" height="20"/>
