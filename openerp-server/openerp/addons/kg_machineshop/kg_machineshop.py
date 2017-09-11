@@ -202,8 +202,8 @@ class kg_machineshop(osv.osv):
 		entry_rec = self.browse(cr, uid, ids[0])
 		if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) > entry_rec.fettling_qty:
 			return False
-		if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) < entry_rec.fettling_qty:
-			return False					
+		#~ if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) < entry_rec.fettling_qty:
+			#~ return False					
 		return True
 		
 	_constraints = [
