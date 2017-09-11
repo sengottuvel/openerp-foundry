@@ -572,7 +572,7 @@ class kg_crm_offer(osv.osv):
 																  'offer_no': entry.name,
 																  'project_name': entry.prj_name,
 																  'division_id': entry.division_id.id,
-																  'delaer_id': entry.delaer_id.id,
+																  'dealer_id': entry.dealer_id.id,
 																  #~ 'location': entry.location,
 																  'entry_mode': 'auto',
 																  'partner_id': entry.customer_id.id,
