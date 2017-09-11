@@ -119,19 +119,20 @@ class kg_sale_invoice(osv.osv):
 		billing_address = ''		
 		del_address = ''		
 		values = {'contact_person':'','billing_address':'','del_address':''}
-		for bill in cust_rec.billing_ids:	
-			bill_ids = self.pool.get('kg.billing.address').search(cr, uid, [('bill_id','=',cust_rec.id),('default','=',True)])	
-			if bill_ids:							
-				bill_rec = self.pool.get('kg.billing.address').browse(cr, uid,bill_ids[0])			
-				billing_address = bill_rec.id			
-		for delivery in cust_rec.delivery_ids:
-			del_ids = self.pool.get('kg.delivery.address').search(cr, uid, [('src_id','=',cust_rec.id),('default','=',True)])
-			if del_ids:									
-				del_rec = self.pool.get('kg.delivery.address').browse(cr, uid,del_ids[0])			
-				del_address = del_rec.id				
-		if cust_rec.contact_person :
-			contact_person = cust_rec.contact_person		
-		values = {'contact_person':contact_person,'billing_address':billing_address,'del_address':del_address}		
+		if cust_rec.id:
+			for bill in cust_rec.billing_ids:	
+				bill_ids = self.pool.get('kg.billing.address').search(cr, uid, [('bill_id','=',cust_rec.id),('default','=',True)])	
+				if bill_ids:							
+					bill_rec = self.pool.get('kg.billing.address').browse(cr, uid,bill_ids[0])			
+					billing_address = bill_rec.id			
+			for delivery in cust_rec.delivery_ids:
+				del_ids = self.pool.get('kg.delivery.address').search(cr, uid, [('src_id','=',cust_rec.id),('default','=',True)])
+				if del_ids:									
+					del_rec = self.pool.get('kg.delivery.address').browse(cr, uid,del_ids[0])			
+					del_address = del_rec.id				
+			if cust_rec.contact_person :
+				contact_person = cust_rec.contact_person		
+			values = {'contact_person':contact_person,'billing_address':billing_address,'del_address':del_address}		
 		return {'value' : values}
 	
 	def load_wo_details(self,cr,uid,ids,context=None):
