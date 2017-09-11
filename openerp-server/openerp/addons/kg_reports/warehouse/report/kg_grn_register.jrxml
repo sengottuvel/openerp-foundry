@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kg_grn_register" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="222"/>
 	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset1">
 		<queryString>
@@ -484,21 +484,21 @@ order by division,grn_date,grn_number
 				<text><![CDATA[GRN Register]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="601" y="33" width="43" height="10"/>
+				<reportElement x="601" y="33" width="63" height="10"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{from_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="643" y="33" width="14" height="10"/>
+				<reportElement x="664" y="33" width="14" height="10"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["to"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="656" y="33" width="49" height="10"/>
+				<reportElement x="677" y="33" width="49" height="10"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
