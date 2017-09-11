@@ -10,12 +10,12 @@
              <form string="GRN Register">
 				 <group string="Filters">
 					<group>
-						<field name="from_date" required="1"/>
+						<field name="from_date" required="1" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
 						<field name="supplier_id" widget="many2many_tags"/>
 						<field name="division"/>
 					</group>
 					<group >
-						<field name="to_date" required="1"/>
+						<field name="to_date" required="1" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
 						<field name="product_id" string="Product" widget="many2many_tags"/>
 						<field name="status"/>
 						<field name="print_date" invisible="1"/>
@@ -29,8 +29,8 @@
                 </form>
             </field>
         </record>
-
-        <record id="r_action_grn_reg" model="ir.actions.act_window">  
+		
+		<record id="r_action_grn_reg" model="ir.actions.act_window">  
             <field name="name">GRN Register</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">kg.grn.register.wiz</field>

@@ -9,9 +9,9 @@ logger = logging.getLogger('server')
 import datetime
 from datetime import datetime
 from datetime import date
-	
+
 class kg_grn_register_wiz(osv.osv_memory):
-		
+	
 	_name = 'kg.grn.register.wiz'
 	_columns = {
 		
@@ -32,13 +32,13 @@ class kg_grn_register_wiz(osv.osv_memory):
 	
 	_defaults = {
 		
-		'filter': 'filter_date', 
-		'from_date': lambda * a: time.strftime('%Y-%m-%d'),
-		'to_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'filter'    : 'filter_date', 
+		'from_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'to_date'   : lambda * a: time.strftime('%Y-%m-%d'),
 		'print_date': fields.datetime.now,
 		'printed_by': lambda obj, cr, uid, context: uid,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.grn.register.wiz', context=c),
-		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id,
+		'user_id'   : lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id,
 		
 	}
 	
@@ -46,40 +46,28 @@ class kg_grn_register_wiz(osv.osv_memory):
 		data = self.read(cr,uid,ids,)[-1]
 		print data,' create_report('
 		return {
-			'type'		 : 'ir.actions.report.xml',
-			'report_name'   : 'jasper_kg_grn_register',
-			'datas': {
-					'model':'kg.grn.register.wiz',
-					'id': context.get('active_ids') and context.get('active_ids')[0] or False,
-					'ids': context.get('active_ids') and context.get('active_ids') or [],
-					'report_type':'pdf',
-					'form':data
-				},
-			'nodestroy': False
+			'type'		  : 'ir.actions.report.xml',
+			'report_name' : 'jasper_kg_grn_register',
+			'datas'       : {
+							'model'		  : 'kg.grn.register.wiz',
+							'id'		  : context.get('active_ids') and context.get('active_ids')[0] or False,
+							'ids'		  : context.get('active_ids') and context.get('active_ids') or [],
+							'report_type' : 'pdf',
+							'form' 		  : data
+								},
+			'nodestroy'   : False
 			}
-	
-	def _date_check(self,cr,uid,ids,context=None):
-		rec=self.browse(cr,uid,ids[0])
-		current_date=time.strftime('%Y-%m-%d')
-		if rec.from_date > current_date or rec.to_date > current_date:
-			raise osv.except_osv(_('Warning!'),
-						_('Future Date are not allowed in Start Date and End Date!!'))
-			return False
-		return True
 	
 	def _enddate_check(self,cr,uid,ids,context=None):
 		rec=self.browse(cr,uid,ids[0])
 		if rec.to_date < rec.from_date:
-			raise osv.except_osv(_('Warning!'),
-						_('End Date is lesser than Start Date!!'))
-			return False
+			raise osv.except_osv(_('Warning!'),_('End Date is lesser than Start Date!!'))
 		return True
 	
 	_constraints = [
-	
-		(_date_check, 'Future Dates are Not Allowed !!!', ['Check Date']),
+		
 		(_enddate_check, 'Future Dates are Not Allowed !!!', ['Check Date']),
-
+		
 	]
 	
 kg_grn_register_wiz()
