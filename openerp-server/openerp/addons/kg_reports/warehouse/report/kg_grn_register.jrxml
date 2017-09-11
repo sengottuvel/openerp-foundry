@@ -484,21 +484,21 @@ order by division,grn_date,grn_number
 				<text><![CDATA[GRN Register]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="601" y="33" width="63" height="10"/>
+				<reportElement x="601" y="33" width="50" height="10"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{from_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="664" y="33" width="14" height="10"/>
+				<reportElement x="650" y="33" width="14" height="10"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["to"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="677" y="33" width="49" height="10"/>
+				<reportElement x="663" y="33" width="49" height="10"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
