@@ -16,6 +16,7 @@
 					<button name="opening_stock_mail_creation" string="Open Stock Mail" type="object" class="oe_highlight"/>
 					<button name="auto_purchase_indent" string="Auto Indent" type="object" class="oe_highlight"/>
 					<button name="auto_primecost_delete" string="Delete Primecost" type="object" class="oe_highlight"/>
+					<button name="weekly_excel_report_deletion" string="Excel Deletion" type="object" class="oe_highlight"/>
 				</header>	
 				<group>
 					<button name="auto_scheduler_pouring_date" string="Pouring Date" type="object" class="oe_highlight"/>

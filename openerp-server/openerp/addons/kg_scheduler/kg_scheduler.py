@@ -599,4 +599,13 @@ class kg_scheduler(osv.osv):
 	
 	## Weekly once primecostview entry delete end
 	
+	### Below function deletes the past 7 days records daily starts ###
+	
+	def weekly_excel_report_deletion(self,cr,uid,ids=0,context = None):
+		cr.execute("""select excel_deletion()""")
+		data = cr.fetchall();
+		return True
+	
+	### Below function deletes the past 7 days records daily ends ###
+	
 kg_scheduler()
