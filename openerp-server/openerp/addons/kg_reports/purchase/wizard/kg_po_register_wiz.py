@@ -18,7 +18,7 @@ class kg_po_register_wiz(osv.osv_memory):
 		'fis_year'  : fields.many2one('account.fiscalyear','Fiscal year',readonly=True),
 		'product_id': fields.many2many('product.product','kg_po_stm_pro','order_id','product_id','Product Name',domain="[('state','in',('draft','confirm','approved'))]"),
 		'supplier'  : fields.many2many('res.partner','kg_po_stm_sup','order_id','supplier_id','Supplier',domain="[('partner_state','not in',('cancel','reject')),('supplier','=',True)]"),
-		'po_no'		: fields.many2many('purchase.order','kg_po_stm_pono','order_id','po_no_id','PO No',domain="[('state','!=','draft'),('division','=',division)]"),
+		'po_no'		: fields.many2many('purchase.order','kg_po_stm_pono','order_id','po_no_id','PO No',domain="[('state','!=','draft')]"),
 		'filter'	: fields.selection([('filter_no', 'No Filters'), ('filter_date', 'Date')], "Filter by", required=True),
 		'date_from'	: fields.date("Start Date"),
 		'date_to'	: fields.date("End Date"),

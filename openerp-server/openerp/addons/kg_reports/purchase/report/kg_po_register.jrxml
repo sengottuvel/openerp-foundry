@@ -42,9 +42,9 @@ status,from_date,to_date,user as curr_user,user_date,company_name
 
 from (
 
-select division,
+select distinct division,
 po_no,po_date,pod_date,date,su_name,status,from_date,to_date,user,
-user_date,company_name,sum(total_amount) as total_amount,sum(discount_amount) as discount_amount,sum(tax_amount) as tax_amount,sum(net_amount) as net_amount
+user_date,company_name,total_amount,discount_amount,tax_amount,net_amount
 from (
 
 
@@ -134,7 +134,7 @@ case when ((select division from kg_po_register_wiz where id = 22) is not null) 
 lower(division) in (select division from kg_po_register_wiz where id = 22)
 else
 division !='' end
-group by 1,2,3,4,5,6,7,8,9,10,11,12
+---group by 1,2,3,4,5,6,7,8,9,10,11,12
 order by 1,date,po_no
 ) as res order by 1,date,po_no
 ) as test order by 2,1]]>
@@ -180,7 +180,7 @@ order by 1,date,po_no
 		<groupFooter>
 			<band height="20">
 				<textField>
-					<reportElement x="514" y="0" width="58" height="20"/>
+					<reportElement x="498" y="0" width="74" height="20"/>
 					<box rightPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.0"/>
@@ -193,7 +193,7 @@ order by 1,date,po_no
 					<textFieldExpression><![CDATA[$F{net_amt_txt}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="0" y="0" width="310" height="20"/>
+					<reportElement x="0" y="0" width="302" height="20"/>
 					<box>
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.0"/>
@@ -206,7 +206,7 @@ order by 1,date,po_no
 					<textFieldExpression><![CDATA["Division Total :   "]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="310" y="0" width="71" height="20"/>
+					<reportElement x="302" y="0" width="71" height="20"/>
 					<box rightPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.0"/>
@@ -219,7 +219,7 @@ order by 1,date,po_no
 					<textFieldExpression><![CDATA[$F{div_tot_amt_txt}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="381" y="0" width="79" height="20"/>
+					<reportElement x="373" y="0" width="75" height="20"/>
 					<box rightPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.0"/>
@@ -232,7 +232,7 @@ order by 1,date,po_no
 					<textFieldExpression><![CDATA[$F{disc_amt_txt}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="460" y="0" width="54" height="20"/>
+					<reportElement x="448" y="0" width="50" height="20"/>
 					<box rightPadding="2">
 						<topPen lineWidth="0.5"/>
 						<leftPen lineWidth="0.0"/>
@@ -280,7 +280,7 @@ order by 1,date,po_no
 					<textFieldExpression><![CDATA[$F{po_no}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="310" y="0" width="71" height="18"/>
+					<reportElement x="310" y="0" width="63" height="18"/>
 					<box rightPadding="2">
 						<pen lineWidth="0.0"/>
 						<topPen lineWidth="0.5"/>
@@ -308,7 +308,7 @@ order by 1,date,po_no
 					<textFieldExpression><![CDATA[$F{su_name}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="381" y="0" width="79" height="18"/>
+					<reportElement x="373" y="0" width="75" height="18"/>
 					<box rightPadding="2">
 						<pen lineWidth="0.0"/>
 						<topPen lineWidth="0.5"/>
@@ -322,7 +322,7 @@ order by 1,date,po_no
 					<textFieldExpression><![CDATA[$F{discount_amount_txt}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="460" y="0" width="54" height="18"/>
+					<reportElement x="448" y="0" width="50" height="18"/>
 					<box rightPadding="2">
 						<pen lineWidth="0.0"/>
 						<topPen lineWidth="0.5"/>
@@ -336,7 +336,7 @@ order by 1,date,po_no
 					<textFieldExpression><![CDATA[$F{tax_amount_txt}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="514" y="0" width="58" height="18"/>
+					<reportElement x="498" y="0" width="74" height="18"/>
 					<box rightPadding="2">
 						<pen lineWidth="0.0"/>
 						<topPen lineWidth="0.5"/>
@@ -409,7 +409,7 @@ order by 1,date,po_no
 				<textFieldExpression><![CDATA["S.No"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="33" y="1" width="119" height="22" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToTallestObject" x="33" y="1" width="108" height="22" isPrintWhenDetailOverflows="true"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
@@ -422,7 +422,7 @@ order by 1,date,po_no
 				<textFieldExpression><![CDATA["PO No"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="514" y="1" width="58" height="22" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToTallestObject" x="498" y="1" width="74" height="22" isPrintWhenDetailOverflows="true"/>
 				<box rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
@@ -432,10 +432,10 @@ order by 1,date,po_no
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Net Amount"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Net Amt"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="310" y="1" width="71" height="22" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToTallestObject" x="302" y="1" width="71" height="22" isPrintWhenDetailOverflows="true"/>
 				<box rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
@@ -445,10 +445,10 @@ order by 1,date,po_no
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Total Amount"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Total Amt"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="152" y="1" width="158" height="22" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToTallestObject" x="141" y="1" width="161" height="22" isPrintWhenDetailOverflows="true"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
@@ -461,7 +461,7 @@ order by 1,date,po_no
 				<textFieldExpression><![CDATA["Supplier Name"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="381" y="1" width="79" height="22" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToTallestObject" x="373" y="1" width="75" height="22" isPrintWhenDetailOverflows="true"/>
 				<box rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
@@ -471,10 +471,10 @@ order by 1,date,po_no
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Discount Amount"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Discount Amt"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="460" y="1" width="54" height="22" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToTallestObject" x="448" y="1" width="50" height="22" isPrintWhenDetailOverflows="true"/>
 				<box rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
@@ -484,7 +484,7 @@ order by 1,date,po_no
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Tax Amount"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Tax Amt"]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>
@@ -525,7 +525,7 @@ order by 1,date,po_no
 	<summary>
 		<band height="20">
 			<textField>
-				<reportElement x="0" y="0" width="310" height="20"/>
+				<reportElement x="0" y="0" width="302" height="20"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
@@ -538,7 +538,7 @@ order by 1,date,po_no
 				<textFieldExpression><![CDATA["Grand Total :   "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="460" y="0" width="54" height="20"/>
+				<reportElement x="448" y="0" width="50" height="20"/>
 				<box rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
@@ -551,7 +551,7 @@ order by 1,date,po_no
 				<textFieldExpression><![CDATA[$F{gnd_tax_amt_txt}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="310" y="0" width="71" height="20"/>
+				<reportElement x="302" y="0" width="71" height="20"/>
 				<box rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
@@ -564,7 +564,7 @@ order by 1,date,po_no
 				<textFieldExpression><![CDATA[$F{gnd_div_tot_amt_txt}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="381" y="0" width="79" height="20"/>
+				<reportElement x="373" y="0" width="75" height="20"/>
 				<box rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
@@ -577,7 +577,7 @@ order by 1,date,po_no
 				<textFieldExpression><![CDATA[$F{gnd_disc_amt_txt}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="514" y="0" width="58" height="20"/>
+				<reportElement x="498" y="0" width="74" height="20"/>
 				<box rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.0"/>
