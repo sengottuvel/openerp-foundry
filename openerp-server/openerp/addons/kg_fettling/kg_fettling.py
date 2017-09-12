@@ -766,9 +766,9 @@ class kg_fettling(osv.osv):
 							heat3_total_qty = entry.inward_accept_qty
 							self.write(cr, uid, ids, {'heat3_date':time.strftime('%Y-%m-%d'),'heat3_total_qty': heat3_total_qty,'heat3_qty':heat3_total_qty})
 							
-							if entry.order_id.flag_for_stock == False:
-								if stage_item['flag_ms'] == True: 
-									self.ms_inward_update(cr, uid, [entry.id],entry.inward_accept_qty,'created')
+							#~ if entry.order_id.flag_for_stock == False:
+								#~ if stage_item['flag_ms'] == True: 
+									#~ self.ms_inward_update(cr, uid, [entry.id],entry.inward_accept_qty,'created')
 							
 						if stage_item['stage_name'] == 'ROUGH GRINDING':
 							rough_grinding_qty = entry.inward_accept_qty
@@ -2214,7 +2214,7 @@ class kg_fettling(osv.osv):
 			#~ self.fettling_reject_process(cr,uid,ids,entry.gas_cutting_qty,entry.gas_cutting_reject_qty,
 				#~ entry.gas_cutting_weight,entry.gas_cutting_date,entry.gas_cutting_reject_remarks_id.id)
 				
-			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.gas_cutting_accept_qty,'foundry','fettling',entry,False,entry.gas_cutting_qty)
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.gas_cutting_reject_qty,'foundry','fettling',entry,False,entry.gas_cutting_qty)
 				
 			if entry.gas_cutting_reject_qty > 0:
 			
