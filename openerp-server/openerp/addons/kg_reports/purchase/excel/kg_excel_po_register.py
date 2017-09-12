@@ -15,11 +15,10 @@ import datetime
 import calendar
 from datetime import datetime
 import ast
-
 logger = logging.getLogger('server')
 
 class kg_excel_po_register(osv.osv):
-
+	
 	_name = 'kg.excel.po.register'
 	_order = 'creation_date desc'
 	
@@ -43,7 +42,7 @@ class kg_excel_po_register(osv.osv):
 		#~ first = datetime.date(day=1, month=today.month, year=today.year)
 		#~ res = first.strftime('%Y-%m-%d')
 		#~ return res
-			
+	
 	_defaults = {
 		
 		'state': 'draft',
@@ -53,7 +52,7 @@ class kg_excel_po_register(osv.osv):
 		'date_to' : lambda * a: time.strftime('%Y-%m-%d'),
 		
 		}
-		
+	
 	def produce_xls(self, cr, uid, ids, context={}):
 		
 		import StringIO
@@ -63,7 +62,7 @@ class kg_excel_po_register(osv.osv):
 			import xlwt
 		except:
 		   raise osv.except_osv('Warning !','Please download python xlwt module from\nhttp://pypi.python.org/packages/source/x/xlwt/xlwt-0.7.2.tar.gz\nand install it')
-		   
+		
 		rec =self.browse(cr,uid,ids[0])
 		
 		where_sql = []
@@ -76,7 +75,7 @@ class kg_excel_po_register(osv.osv):
 			po_state = "'"+'cancel'+"'"
 		else:
 			po_state = "'"+'approved'+"'"
-			
+		
 		if rec.supplier:
 			sup = [x.id for x in rec.supplier]
 			supplier_ids = ",".join(str(x) for x in sup)
@@ -103,7 +102,7 @@ class kg_excel_po_register(osv.osv):
 		date_to = 	"'"+rec.date_to+"'"
 		
 		if not rec.status or rec.status == 'approved' or rec.status == 'cancelled':	
-			sql = """		
+			sql = """
 				SELECT
 					  distinct po.id AS po_id,
 					  po.name AS po_no,
@@ -112,14 +111,13 @@ class kg_excel_po_register(osv.osv):
 					  po.note AS remark,
 					  po.amount_total as total,
 					  po.add_text as address,
-					  po.amount_tax as taxamt,
+					  pol.product_tax_amt as taxamt,
 					  pol.id as pol_id,
 					  pol.product_qty AS qty,
 					  pol.pending_qty AS pending_qty,
-					  pol.price_unit as rate,
+					  pol.price_unit * pol.product_qty as rate,
 					  pol.kg_discount_per as disc1,
 					  pol.kg_disc_amt_per as disc2,	
-					  po_ad.advance_amt as po_ad_amt,				  
 					  uom.name AS uom,
 					  pt.name AS pro_name,
 					  res.name AS su_name,
@@ -130,9 +128,9 @@ class kg_excel_po_register(osv.osv):
 					  brand.name as brand_name,
 					  po.quot_ref_no as quot_ref_no,
 					  moc.name as moc
-								  
+					  
 					  FROM  purchase_order po
-								  
+					  
 					  JOIN res_partner res ON (res.id=po.partner_id)
 					  left join res_city city on(city.id=res.city_id)
 					  left join res_country_state state on(state.id=res.state_id)
@@ -141,12 +139,11 @@ class kg_excel_po_register(osv.osv):
 					  JOIN product_template pt ON (pt.id=prd.product_tmpl_id)
 					  JOIN product_uom uom ON (uom.id=pol.product_uom)
 					  left JOIN kg_brand_master brand ON (pol.brand_id = brand.id)
-					  left JOIN kg_po_advance po_ad ON (po_ad.po_id = po.id)
 					  left JOIN kg_moc_master moc ON (moc.id=pol.moc_id)
 					  where po.state = """+po_state+""" and po.date_order >="""+date_from+""" and po.date_order <="""+date_to+' '+""" """+ supplier +""" """+ product+ """
 					  order by po.date_order """
 		elif rec.status == 'pending':
-			sql = """		
+			sql = """
 				SELECT
 				  distinct po.id AS po_id,
 				  po.name AS po_no,
@@ -155,14 +152,13 @@ class kg_excel_po_register(osv.osv):
 				  po.note AS remark,
 				  po.amount_total as total,
 				  po.add_text as address,
-				  po.amount_tax as taxamt,
+				  pol.product_tax_amt as taxamt,
 				  pol.id as pol_id,
 				  pol.product_qty AS qty,
 				  pol.pending_qty AS pending_qty,
-				  pol.price_unit as rate,
+				  pol.price_unit * pol.product_qty as rate,
 				  pol.kg_discount_per as disc1,
 				  pol.kg_disc_amt_per as disc2,	
-				  po_ad.advance_amt as po_ad_amt,			  
 				  uom.name AS uom,
 				  pt.name AS pro_name,
 				  res.name AS su_name,
@@ -173,9 +169,9 @@ class kg_excel_po_register(osv.osv):
 				  brand.name as brand_name,
 				  po.quot_ref_no as quot_ref_no,
 				  moc.name as moc
-						  
+				  
 				  FROM  purchase_order po
-							  
+				  
 				  JOIN res_partner res ON (res.id=po.partner_id)
 				  left join res_city city on(city.id=res.city_id)
 				  left join res_country_state state on(state.id=res.state_id)
@@ -184,7 +180,6 @@ class kg_excel_po_register(osv.osv):
 				  JOIN product_template pt ON (pt.id=prd.product_tmpl_id)
 				  JOIN product_uom uom ON (uom.id=pol.product_uom)
 				  left JOIN kg_brand_master brand ON (pol.brand_id = brand.id)
-				  left JOIN kg_po_advance po_ad ON (po_ad.po_id = po.id)
 				  left JOIN kg_moc_master moc ON (moc.id=pol.moc_id)
 				  where po.state='approved' and pol.pending_qty > 0 and po.date_order >="""+date_from+""" and po.date_order <="""+date_to+' '+""" """+ supplier +""" """+ product+ """
 				  order by po.date_order  """
@@ -195,7 +190,9 @@ class kg_excel_po_register(osv.osv):
 		record={}
 		sno=1
 		wbk = xlwt.Workbook()
-		style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center;''borders: left thin, right thin, top thin') 
+		style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')
+		style2 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
+		style3 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
 		s1=0
 		
 		"""adding a worksheet along with name"""
@@ -237,14 +234,14 @@ class kg_excel_po_register(osv.osv):
 		sheet1.write(s1,11,"Pending Qty",style1)
 		sheet1.write(s1,12,"Rate(Rs)",style1)
 		sheet1.write(s1,13,"Disc%",style1)
-		sheet1.write(s1,14,"Tax%",style1)
+		sheet1.write(s1,14,"GST%",style1)
 		sheet1.write(s1,15,"TAT",style1)
-		sheet1.write(s1,16,"Advance Amt",style1)
-		sheet1.write(s1,17,"Net Amount",style1)
+		sheet1.write(s1,16,"Net Amount",style1)
 		
 		new_data = []
 		count = 0
 		gr_tot = 0
+		gr_tax_tot = 0
 		gr_total = 0
 		ad_amt = 0
 		gr_order_qty_total = 0
@@ -313,7 +310,6 @@ class kg_excel_po_register(osv.osv):
 						item2_2['po_no'] = ''
 						item2_2['po_date'] = ''
 						item2_2['address']=''
-						item2_2['po_ad_amt']=0
 						item2_2['total']=0
 						item2_2['pending_days']=0
 						#~ item2_2['tax']=item1['tax']
@@ -329,25 +325,24 @@ class kg_excel_po_register(osv.osv):
 			#~ ele['po_ad_amt'] = 0		
 			
 			ele['received_qty'] = ele['qty'] - ele['pending_qty']
-			sheet1.write(s2,0,sno)
-			sheet1.write(s2,1,ele['su_name'])
-			sheet1.write(s2,2,ele['po_no'])
-			sheet1.write(s2,3,ele['po_date'])
-			sheet1.write(s2,4,ele['quot_ref_no'])
-			sheet1.write(s2,5,ele['pro_name'])
-			sheet1.write(s2,6,ele['moc'])
-			sheet1.write(s2,7,ele['brand_name'])
-			sheet1.write(s2,8,ele['uom'])
-			sheet1.write(s2,9,ele['qty'])
-			sheet1.write(s2,10,ele['received_qty'])
-			sheet1.write(s2,11,ele['pending_qty'])
-			sheet1.write(s2,12,ele['rate'])
-			sheet1.write(s2,13,ele['disc1'])
-			sheet1.write(s2,14,ele['taxamt'])
-			sheet1.write(s2,15,ele['pending_days'])
-			sheet1.write(s2,16,ele['po_ad_amt'])
-			sheet1.write(s2,17,ele['total'])
-																	
+			sheet1.write(s2,0,sno,style2)
+			sheet1.write(s2,1,ele['su_name'],style2)
+			sheet1.write(s2,2,ele['po_no'],style2)
+			sheet1.write(s2,3,ele['po_date'],style2)
+			sheet1.write(s2,4,ele['quot_ref_no'],style2)
+			sheet1.write(s2,5,ele['pro_name'],style2)
+			sheet1.write(s2,6,ele['moc'],style2)
+			sheet1.write(s2,7,ele['brand_name'],style2)
+			sheet1.write(s2,8,ele['uom'],style2)
+			sheet1.write(s2,9,ele['qty'],style2)
+			sheet1.write(s2,10,ele['received_qty'],style2)
+			sheet1.write(s2,11,ele['pending_qty'],style2)
+			sheet1.write(s2,12,ele['rate'],style2)
+			sheet1.write(s2,13,ele['disc1'],style2)
+			sheet1.write(s2,14,ele['taxamt'],style2)
+			sheet1.write(s2,15,ele['pending_days'],style2)
+			sheet1.write(s2,16,ele['total'],style2)
+			
 			s2+=1
 			sno = sno + 1
 			
@@ -355,13 +350,18 @@ class kg_excel_po_register(osv.osv):
 				gr_tot += ele['total']
 			else:
 				pass
-				
+			if ele['taxamt']:
+				gr_tax_tot += ele['taxamt']
+			else:
+				pass
+		
 		sheet1.write(s2,3,"Total",style1)
-		sheet1.write(s2,16,gr_tot,style1)
+		sheet1.write(s2,14,gr_tax_tot,style3)
+		sheet1.write(s2,16,gr_tot,style3)
 		#~ sheet1.write(s2,16,gr_tot_qty,style1)
 		#~ sheet1.write(s2,18,gr_com_amt,style1)
 		#~ sheet1.write(s2,19,gr_se_com_amt,style1)
-
+		
 		"""Parsing data as string """
 		file_data=StringIO.StringIO()
 		o=wbk.save(file_data)		

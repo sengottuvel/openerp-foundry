@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kg_grn_register" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="222"/>
+	<property name="ireport.zoom" value="1.1269722013523664"/>
+	<property name="ireport.x" value="171"/>
 	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset1">
 		<queryString>
@@ -262,7 +262,7 @@ when (select status from kg_grn_register_wiz where id = $P{wiz_id}) is not null 
 else
 po_grn.state !='draft' end
 
-and po_grn.grn_date >=to_date('2017-08-01','YYYY-MM-DD') or '2017-08-01' = '' and po_grn.grn_date <= to_date('2017-09-10','YYYY-MM-DD') or '2017-09-10' = ''
+and po_grn.grn_date >=to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and po_grn.grn_date <= to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
 order by po_grn.name)
 
 UNION ALL
@@ -422,7 +422,7 @@ order by division,grn_date,grn_number
 		<groupFooter>
 			<band height="20">
 				<staticText>
-					<reportElement x="1" y="0" width="255" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="1" y="0" width="255" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 					<box>
 						<topPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
@@ -432,8 +432,8 @@ order by division,grn_date,grn_number
 					</textElement>
 					<text><![CDATA[Division Total]]></text>
 				</staticText>
-				<textField>
-					<reportElement x="256" y="0" width="256" height="20"/>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" x="256" y="0" width="256" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 					<box>
 						<topPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
@@ -443,8 +443,8 @@ order by division,grn_date,grn_number
 					</textElement>
 					<textFieldExpression><![CDATA[$F{div_gnd_txt}]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="512" y="0" width="240" height="20"/>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+					<reportElement stretchType="RelativeToTallestObject" x="512" y="0" width="240" height="20" isPrintWhenDetailOverflows="true"/>
 					<box>
 						<topPen lineWidth="0.5"/>
 						<bottomPen lineWidth="0.5"/>
@@ -725,8 +725,8 @@ order by division,grn_date,grn_number
 	</columnHeader>
 	<detail>
 		<band height="23" splitType="Stretch">
-			<textField>
-				<reportElement x="30" y="1" width="34" height="22"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="30" y="1" width="34" height="22" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -735,8 +735,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{grn_number}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="64" y="1" width="45" height="22"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="64" y="1" width="45" height="22" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -745,8 +745,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{grn_date}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="182" y="0" width="74" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="182" y="0" width="74" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -755,8 +755,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{product_name}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="350" y="0" width="34" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="350" y="0" width="34" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -765,8 +765,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{qty_txt}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="383" y="0" width="32" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="383" y="0" width="32" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -775,8 +775,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="414" y="0" width="46" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="414" y="0" width="46" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -785,8 +785,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{cost_price_txt}]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="459" y="0" width="53" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="459" y="0" width="53" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -795,8 +795,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{grn_totals}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="512" y="0" width="32" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="512" y="0" width="32" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -805,8 +805,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{order_no}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="544" y="0" width="51" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="544" y="0" width="51" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -815,8 +815,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{order_date}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="595" y="0" width="43" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="595" y="0" width="43" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -825,8 +825,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{dc_no}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="639" y="0" width="49" height="23"/>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToTallestObject" x="639" y="0" width="49" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -835,8 +835,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{dc_date}]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="688" y="0" width="65" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="688" y="0" width="65" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -845,15 +845,15 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="1" y="1" width="30" height="22"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="1" y="1" width="30" height="22" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{sno}]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="303" y="0" width="47" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="303" y="0" width="47" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -862,8 +862,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="256" y="0" width="48" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="256" y="0" width="48" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -872,8 +872,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{brand_name}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="109" y="0" width="73" height="23"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="109" y="0" width="73" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 				</box>
@@ -921,7 +921,7 @@ order by division,grn_date,grn_number
 	<summary>
 		<band height="20" splitType="Stretch">
 			<staticText>
-				<reportElement x="0" y="0" width="256" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="256" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -931,8 +931,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<text><![CDATA[Grand Total]]></text>
 			</staticText>
-			<textField>
-				<reportElement x="256" y="0" width="256" height="20"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="256" y="0" width="256" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -942,8 +942,8 @@ order by division,grn_date,grn_number
 				</textElement>
 				<textFieldExpression><![CDATA[$F{overall_gnd_txt}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="383" y="0" width="369" height="20"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement stretchType="RelativeToTallestObject" x="383" y="0" width="369" height="20" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
