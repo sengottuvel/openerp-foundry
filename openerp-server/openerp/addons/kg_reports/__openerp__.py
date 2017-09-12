@@ -44,6 +44,7 @@
 		'hrms/excel/kg_excel_bank_copy_report_view.xml',
 		'planning/excel_report/kg_machine_list_excel_view.xml',
 		'planning/excel_report/kg_foundry_partlist_excel_view.xml',
+		'planning/excel_report/kg_pouring_pending_excel_view.xml',
 		],
     'installable': True,
     'auto_install': True,
