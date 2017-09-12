@@ -69,7 +69,7 @@ pro.order_priority in
 		ELSE order_priority in (select distinct order_priority
 		from kg_production) END) and
 
-to_char(pro.order_delivery_date::date,'yyyy-mm-dd') <= $P{as_on_date}
+to_char(pro.crt_date::date,'yyyy-mm-dd') <= $P{as_on_date}
 
 order by ref_order_priority,order_date,order_no,pattern_no]]>
 	</queryString>
