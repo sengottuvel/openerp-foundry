@@ -9,15 +9,16 @@
             <field name="type">form</field>            
             <field name="arch" type="xml">
 				<form string="Issue Register">
-					<group string="Filters">
+					<group>
 						<group>
-							<field name="from_date" string="Start Date" required="1"/>
-							<field name = "dep_id" string="Department" widget="many2many_tags"/>
+							<field name="from_date" string="Start Date" required="1" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
+							<field name="dep_id" widget="many2many_tags"/>
+							<field name="moc_id" widget="many2many_tags"/>
 						</group>
 						<group >
-							<field name="to_date" string="End Date" required="1"/>
-							<field name = "product" widget="many2many_tags"/>
-							<field name = "print_date" invisible="1"/>
+							<field name="to_date" string="End Date" required="1" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
+							<field name="product" widget="many2many_tags"/>
+							<field name="print_date" invisible="1"/>
 						</group>
 					</group>
                     <separator colspan="4"/>
@@ -38,12 +39,12 @@
         </record>        
 
         <report string="Issue Register"
-		model="dep.issue.register.wizard"
-		auto="True"
-		name="jasper_kg_dep_issue"
-		rml="kg_reports/warehouse/report/kg_dep_issue.jrxml"
-		id="dep_issue_jasper_register_id"
-		menu="False"
+				model="dep.issue.register.wizard"
+				auto="True"
+				name="jasper_kg_dep_issue"
+				rml="kg_reports/warehouse/report/kg_dep_issue.jrxml"
+				id="dep_issue_jasper_register_id"
+				menu="False"
 		/>               
         
     </data>

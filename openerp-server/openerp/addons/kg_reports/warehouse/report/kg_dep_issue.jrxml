@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kg_dep_issue" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.2396694214876032"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="27"/>
 	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset1">
 		<parameter name="dep_issue_id" class="java.lang.Integer"/>
@@ -22,10 +22,13 @@ select
 res_cmpny.name as company_name,
 dep_mas.dep_name as department_name,
 product_mas.name_template as product_name,
+brand_mas.name as brand_name,
+moc_mas.name as moc_name,
 to_char(kg_issue.issue_date::date,'YYYY-mm-dd') as issue_date,
 to_char(kg_issue.issue_date::date,'dd-mm-YYYY')  as issue_dates,
 kg_issue.name as issue_no,
 uom_mas.name as req_uom,
+kg_issue_line.remarks as remarks,
 case when
 trim(TO_CHAR(kg_issue_line.price_unit::float, '999G999G99G999G99G99G990D99')) is not null  then trim(TO_CHAR(kg_issue_line.price_unit::float, '999G999G99G999G99G99G990D99'))
 else '0.00' end  as rate,
@@ -53,8 +56,6 @@ ROW_NUMBER() Over (Partition by kg_issue.name) as num,
 (select login from res_users where id in (select user_id from dep_issue_register_wizard where id =$P{wiz_id} )) as user,
 (select to_char(print_date + interval '5.30 hour','dd-mm-YYYY HH:MM:SS') from dep_issue_register_wizard where id =$P{wiz_id}) as user_date
 
-
-
 from kg_department_issue kg_issue
 
 left join kg_depmaster dep_mas on(dep_mas.id=kg_issue.department_id)
@@ -63,17 +64,15 @@ left join product_uom uom_mas on(uom_mas.id= kg_issue_line.uom_id)
 left join kg_item_wise_dept_issue issued_stock on(issued_stock.issue_line_id= kg_issue_line.id)
 left join product_uom uom_mast on(uom_mast.id= issued_stock.uom_id)
 left join product_product product_mas on(product_mas.id= kg_issue_line.product_id)
-
+left join kg_brand_master brand_mas on(brand_mas.id= kg_issue_line.brand_id)
+left join kg_moc_master moc_mas on(moc_mas.id= kg_issue_line.wo_moc_id)
 
 left join kg_depindent_line dep_indent on(dep_indent.id= kg_issue_line.indent_line_id)
 left join kg_depindent dep_indent_mas on(dep_indent_mas.id= dep_indent.indent_id)
 
-
 left join kg_service_indent_line serv_indent on(serv_indent.id= kg_issue_line.service_indent_line_id)
 left join kg_service_indent serv_indent_mas on(serv_indent_mas.id= serv_indent.service_id)
 left join res_company res_cmpny on (res_cmpny.id=kg_issue.company_id)
-
-
 
 where
 
@@ -91,6 +90,19 @@ from product_product)
 end
 and
 
+CASE
+
+WHEN (select moc_id from dep_issue_wiz where wiz_id = $P{wiz_id} limit 1) > 0 THEN kg_issue_line.wo_moc_id in
+
+(select moc_id from dep_issue_wiz where wiz_id = $P{wiz_id})
+
+ELSE
+
+kg_issue_line.wo_moc_id in (select id
+from kg_moc_master)
+
+end
+and
 
 CASE
 
@@ -108,24 +120,22 @@ end
 and
 kg_issue.state ='done'
 
-
-
-
- group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 order by kg_issue.issue_date
+ group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 order by kg_issue.issue_date
 ) as a
 
-
-
-where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
+where issue_date >= $P{from_date} and issue_date <= $P{to_date}]]>
 	</queryString>
 	<field name="granddd_total" class="java.lang.String"/>
 	<field name="company_name" class="java.lang.String"/>
 	<field name="department_name" class="java.lang.String"/>
 	<field name="product_name" class="java.lang.String"/>
+	<field name="brand_name" class="java.lang.String"/>
+	<field name="moc_name" class="java.lang.String"/>
 	<field name="issue_date" class="java.lang.String"/>
 	<field name="issue_dates" class="java.lang.String"/>
-	<field name="req_no" class="java.lang.String"/>
+	<field name="issue_no" class="java.lang.String"/>
 	<field name="req_uom" class="java.lang.String"/>
+	<field name="remarks" class="java.lang.String"/>
 	<field name="rate" class="java.lang.String"/>
 	<field name="req_qty" class="java.lang.Double"/>
 	<field name="issued_qty" class="java.lang.Double"/>
@@ -133,7 +143,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 	<field name="amount_total" class="java.lang.Double"/>
 	<field name="qty" class="java.lang.Integer"/>
 	<field name="issued_uom" class="java.lang.String"/>
-	<field name="issue_no" class="java.lang.String"/>
+	<field name="req_no" class="java.lang.String"/>
 	<field name="stock_group" class="java.lang.String"/>
 	<field name="issue_identity" class="java.lang.Integer"/>
 	<field name="total" class="java.lang.String"/>
@@ -148,28 +158,28 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 	<pageHeader>
 		<band height="41" splitType="Stretch">
 			<textField>
-				<reportElement x="575" y="26" width="82" height="15"/>
+				<reportElement x="615" y="26" width="59" height="15"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{from_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="677" y="26" width="59" height="15"/>
+				<reportElement x="693" y="26" width="59" height="15"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{to_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="516" y="26" width="59" height="15"/>
+				<reportElement x="556" y="26" width="59" height="15"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Date Range :"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="657" y="26" width="20" height="15"/>
+				<reportElement x="673" y="26" width="20" height="15"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
@@ -191,7 +201,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 			</textField>
 			<image>
 				<reportElement x="10" y="1" width="69" height="40"/>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</pageHeader>
@@ -226,7 +236,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA["No"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="42" y="1" width="78" height="32"/>
+				<reportElement x="91" y="1" width="61" height="32"/>
 				<box>
 					<pen lineWidth="0.75"/>
 					<topPen lineWidth="0.75"/>
@@ -240,7 +250,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA["Department"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="120" y="1" width="187" height="32"/>
+				<reportElement x="152" y="1" width="103" height="32"/>
 				<box>
 					<pen lineWidth="0.75"/>
 					<topPen lineWidth="0.75"/>
@@ -254,7 +264,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA["Product"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="307" y="1" width="61" height="32"/>
+				<reportElement x="42" y="1" width="49" height="32"/>
 				<box>
 					<pen lineWidth="0.75"/>
 					<topPen lineWidth="0.75"/>
@@ -268,7 +278,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA["Date"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="368" y="1" width="82" height="32"/>
+				<reportElement x="359" y="1" width="58" height="32"/>
 				<box>
 					<pen lineWidth="0.75"/>
 					<topPen lineWidth="0.75"/>
@@ -282,7 +292,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA["Reqt No"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="516" y="1" width="46" height="32"/>
+				<reportElement x="483" y="1" width="46" height="32"/>
 				<box>
 					<pen lineWidth="0.75"/>
 					<topPen lineWidth="0.75"/>
@@ -296,7 +306,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA["Reqt Qty"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="562" y="1" width="82" height="32"/>
+				<reportElement x="529" y="1" width="64" height="32"/>
 				<box>
 					<pen lineWidth="0.75"/>
 					<topPen lineWidth="0.75"/>
@@ -310,7 +320,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA["Issue No"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="644" y="1" width="59" height="32"/>
+				<reportElement x="593" y="1" width="59" height="32"/>
 				<box>
 					<pen lineWidth="0.75"/>
 					<topPen lineWidth="0.75"/>
@@ -324,7 +334,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA["Issued UOM"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="703" y="1" width="48" height="32"/>
+				<reportElement x="652" y="1" width="48" height="32"/>
 				<box>
 					<pen lineWidth="0.75"/>
 					<topPen lineWidth="0.75"/>
@@ -338,7 +348,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA["Issued Qty"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="450" y="1" width="66" height="32"/>
+				<reportElement x="417" y="1" width="66" height="32"/>
 				<box>
 					<pen lineWidth="0.75"/>
 					<topPen lineWidth="0.75"/>
@@ -351,12 +361,54 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				</textElement>
 				<textFieldExpression><![CDATA["Reqt UOM"]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement x="255" y="1" width="52" height="32"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Brand"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="307" y="1" width="52" height="32"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["MOC"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="700" y="1" width="52" height="32"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Remarks"]]></textFieldExpression>
+			</textField>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="38" splitType="Stretch">
-			<textField>
-				<reportElement x="450" y="0" width="66" height="38"/>
+		<band height="16" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="417" y="0" width="66" height="16"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -369,8 +421,8 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{req_uom}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="307" y="0" width="61" height="38"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="42" y="0" width="49" height="16"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -383,8 +435,8 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{issue_dates}]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="644" y="0" width="59" height="38"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="593" y="0" width="59" height="16"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -397,8 +449,8 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{issued_uom}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="562" y="0" width="82" height="38"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="529" y="0" width="64" height="16"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -411,8 +463,8 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{issue_no}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="516" y="0" width="46" height="38"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="483" y="0" width="46" height="16"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -425,8 +477,8 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{req_qty}]]></textFieldExpression>
 			</textField>
-			<textField pattern="" isBlankWhenNull="true">
-				<reportElement x="368" y="0" width="82" height="38"/>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="359" y="0" width="58" height="16"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -440,7 +492,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA[$F{req_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="22" height="38"/>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="22" height="16"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -453,22 +505,8 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="42" y="0" width="78" height="38"/>
-				<box>
-					<pen lineWidth="0.0"/>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{department_name}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="703" y="0" width="48" height="38"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="652" y="0" width="48" height="16"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -481,8 +519,8 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{issued_qty}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="120" y="0" width="187" height="38"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="152" y="0" width="103" height="16"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -495,8 +533,8 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{product_name}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="22" y="0" width="20" height="38"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="22" y="0" width="20" height="16"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -508,6 +546,36 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{num}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="255" y="0" width="52" height="16"/>
+				<box topPadding="5"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{brand_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="307" y="0" width="52" height="16"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="700" y="0" width="52" height="16"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="91" y="0" width="61" height="16"/>
+				<box topPadding="4"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{department_name}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
