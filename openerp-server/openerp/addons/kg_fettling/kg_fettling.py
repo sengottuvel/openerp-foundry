@@ -966,9 +966,9 @@ class kg_fettling(osv.osv):
 					if stage_item['stage_name'] == 'HEAT TREATMENT3':
 						heat3_total_qty = fettling_accept_qty
 						self.write(cr, uid, ids, {'heat3_date':time.strftime('%Y-%m-%d'),'heat3_total_qty': heat3_total_qty,'heat3_qty':heat3_total_qty})
-						if entry.order_id.flag_for_stock == False:
-							if stage_item['flag_ms'] == True: 
-								self.ms_inward_update(cr, uid, [entry.id],fettling_accept_qty,'created')
+						#~ if entry.order_id.flag_for_stock == False:
+							#~ if stage_item['flag_ms'] == True: 
+								#~ self.ms_inward_update(cr, uid, [entry.id],fettling_accept_qty,'created')
 	
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
