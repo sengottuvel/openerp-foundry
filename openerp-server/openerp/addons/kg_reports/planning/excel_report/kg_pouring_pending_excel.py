@@ -152,7 +152,7 @@ class kg_pouring_pending_excel(osv.osv):
 			left join kg_moc_master moc on (moc.id = pro.moc_id)
 			left join res_company company on (company.id = pro.company_id)
 
-			where to_char(pro.order_delivery_date::date,'yyyy-mm-dd') <= """+as_on_date+""" and pro.pour_state !='done' """+schedule+""""""+pattern+""""""+moc+""""""+category+"""
+			where to_char(pro.crt_date::date,'yyyy-mm-dd') <= """+as_on_date+""" and pro.pour_state !='done' """+schedule+""""""+pattern+""""""+moc+""""""+category+"""
 
 			order by ref_order_priority,order_date,order_no,pattern_no"""
 				
