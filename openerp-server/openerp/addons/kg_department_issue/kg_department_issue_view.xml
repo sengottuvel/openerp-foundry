@@ -51,7 +51,7 @@
 					<notebook>
 						<page string="Products" autofocus="True" attrs="{'invisible': [('products_flag','=',False)]}" >
 						<field name="issue_line_ids" colspan="4" nolabel="1" context="{'issue_type':issue_type,'dep_issue_type':dep_issue_type,'wo_state':'accept','state':'draft','location_id':location_id,'dep_id':department_id,'accept_date':issue_date}">
-							<form string="Entry Tree">					
+							<form string="Entry Tree">
 								<group string="Product Details" colspan="4">
 									<group>
 										<field name="product_id" on_change="onchange_product_id(product_id)" attrs="{'readonly':[('dep_issue_type','!=','direct')]}"/>               

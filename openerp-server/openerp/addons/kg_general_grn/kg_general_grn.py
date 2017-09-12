@@ -419,11 +419,11 @@ class kg_general_grn(osv.osv):
 				if line.uom_conversation_factor == 'two_dimension':
 					if line.product_id.po_uom_in_kgs > 0:
 						if line.uom_id.id == line.product_id.uom_id.id:
-							product_qty = line.grn_qty
+							product_qty = line.grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
 						elif line.uom_id.id == line.product_id.uom_po_id.id:
 							product_qty = line.grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
-							length = line.length
-							breadth = line.breadth
+						length = line.length
+						breadth = line.breadth
 				if length == 0.00:
 					length = 1
 				if breadth == 0.00:
@@ -451,6 +451,7 @@ class kg_general_grn(osv.osv):
 					'uom_conversation_factor': line.uom_conversation_factor,
 					'length': length,
 					'breadth': breadth,
+					'trans_date': grn_entry.grn_date,
 					})
 				if grn_entry.grn_dc == 'dc_invoice' and grn_entry.bill == 'applicable':
 						pi_gen_grn_obj.create(cr,uid,
@@ -495,8 +496,10 @@ class kg_general_grn(osv.osv):
 							if line.product_id.po_uom_in_kgs > 0:
 								if line.uom_id.id == line.product_id.uom_id.id:
 									product_qty = exp.product_qty
-									pending_qty = (exp.product_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
-									store_pending_qty = exp.product_qty
+									pending_qty = exp.product_qty * line.length * line.breadth
+									store_pending_qty = exp.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+									#~ pending_qty = (exp.product_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
+									#~ store_pending_qty = exp.product_qty
 								elif line.uom_id.id == line.product_id.uom_po_id.id:
 									product_qty = exp.product_qty * line.length * line.breadth
 									pending_qty = exp.product_qty * line.length * line.breadth
@@ -541,8 +544,10 @@ class kg_general_grn(osv.osv):
 						if line.product_id.po_uom_in_kgs > 0:
 							if line.uom_id.id == line.product_id.uom_id.id:
 								product_qty = line.grn_qty
-								pending_qty = (line.grn_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
-								store_pending_qty = line.grn_qty
+								pending_qty = line.grn_qty * line.length * line.breadth
+								store_pending_qty = line.grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+								#~ pending_qty = (line.grn_qty / line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
+								#~ store_pending_qty = line.grn_qty
 							elif line.uom_id.id == line.product_id.uom_po_id.id:
 								product_qty = line.grn_qty
 								pending_qty = line.grn_qty * line.length * line.breadth

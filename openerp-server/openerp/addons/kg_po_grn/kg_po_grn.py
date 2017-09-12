@@ -1070,11 +1070,12 @@ class kg_po_grn(osv.osv):
 					if line.uom_conversation_factor == 'two_dimension':
 						if line.product_id.po_uom_in_kgs > 0:
 							if line.uom_id.id == line.product_id.uom_id.id:
-								product_qty = line.po_grn_qty
+								#~ product_qty = line.po_grn_qty
+								product_qty = line.po_grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
 							elif line.uom_id.id == line.product_id.uom_po_id.id:
 								product_qty = line.po_grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
-								length = line.length
-								breadth = line.breadth
+							length = line.length
+							breadth = line.breadth
 					if length == 0.00:
 						length = 1
 					if breadth == 0.00:
@@ -1105,6 +1106,7 @@ class kg_po_grn(osv.osv):
 						'length': length,
 						'breadth': breadth,
 						'uom_conversation_factor': line.uom_conversation_factor,
+						'trans_date': grn_entry.grn_date,
 						})
 					if  line.po_line_id.order_id:
 						po_name = line.po_line_id.order_id.name
@@ -1185,6 +1187,7 @@ class kg_po_grn(osv.osv):
 						'price_unit': price_unit or 0.0,
 						'origin': grn_entry.so_id.name,
 						'stock_rate': price_unit or 0.0,
+						'trans_date': grn_entry.grn_date,
 						})
 					if grn_entry.grn_dc == 'dc_invoice': 
 						
@@ -1249,6 +1252,7 @@ class kg_po_grn(osv.osv):
 						'price_unit': (line.price_subtotal / line.po_grn_qty) or 0.0,
 						'origin': line.gp_line_id.gate_id.name,
 						'stock_rate': (line.price_subtotal / line.po_grn_qty) or 0.0,
+						'trans_date': grn_entry.grn_date,
 						})
 					line.write({'state':'done'})
 				# This code will create Production lot
@@ -1289,8 +1293,10 @@ class kg_po_grn(osv.osv):
 								if line.product_id.po_uom_in_kgs > 0:
 									if line.uom_id.id == line.product_id.uom_id.id:
 										product_qty = exp.product_qty
-										pending_qty = (exp.product_qty / line.product_id.po_uom_in_kgs/ line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
-										store_pending_qty = exp.product_qty
+										pending_qty = exp.product_qty * line.length * line.breadth
+										store_pending_qty = exp.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+										#~ pending_qty = (exp.product_qty / line.product_id.po_uom_in_kgs/ line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
+										#~ store_pending_qty = exp.product_qty
 									elif line.uom_id.id == line.product_id.uom_po_id.id:
 										product_qty = exp.product_qty
 										pending_qty = exp.product_qty * line.length * line.breadth
@@ -1348,8 +1354,10 @@ class kg_po_grn(osv.osv):
 							if line.product_id.po_uom_in_kgs > 0:
 								if line.uom_id.id == line.product_id.uom_id.id:
 									product_qty = line.po_grn_qty
-									pending_qty = (line.po_grn_qty / line.product_id.po_uom_in_kgs/ line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
-									store_pending_qty = line.po_grn_qty
+									pending_qty = line.po_grn_qty * line.length * line.breadth
+									store_pending_qty = line.po_grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+									#~ pending_qty = (line.po_grn_qty / line.product_id.po_uom_in_kgs/ line.product_id.po_uom_in_kgs / line.length / line.breadth) * line.length * line.breadth
+									#~ store_pending_qty = line.po_grn_qty
 								elif line.uom_id.id == line.product_id.uom_po_id.id:
 									product_qty = line.po_grn_qty
 									pending_qty = line.po_grn_qty * line.length * line.breadth
@@ -1368,7 +1376,6 @@ class kg_po_grn(osv.osv):
 							'product_uom':line.product_id.uom_id.id,
 							'product_qty':product_qty,
 							'pending_qty':product_qty,
-							'store_pending_qty':store_pending_qty,
 							'store_pending_qty':store_pending_qty,
 							'issue_qty':product_qty,
 							'price_unit':price_unit or 0.0,

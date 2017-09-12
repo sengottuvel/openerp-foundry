@@ -8,7 +8,7 @@ import datetime
 class mains_closing_stock_report(report_sxw.rml_parse):
 	
 	_name = 'mains.closing.stock.report'
-	_inherit='stock.picking'   
+	_inherit='stock.picking'
 	
 	def __init__(self, cr, uid, name, context=None):
 		if context is None:

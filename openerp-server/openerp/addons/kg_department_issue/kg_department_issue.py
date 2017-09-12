@@ -404,6 +404,15 @@ class kg_department_issue(osv.osv):
 				for item in obj_rec.issue_line_ids:
 					if item.issue_qty > 0:
 						self.pool.get('kg.department.issue.line').write(cr,uid,item.id,{'state':'confirmed'})
+						
+					# New daily planning status update starts
+					if obj_rec.department_id.name == 'DP2':
+						ms_obj = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',item.w_order_line_id.id),('ms_id','=',item.ms_bot_id.id),('state','=','pending')])
+						if ms_obj:
+							ms_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_obj[0])
+							self.pool.get('kg.machineshop').write(cr,uid,ms_rec.id,{'state':'raw_pending'})
+					# New daily planning status update ends	
+					
 					dep_issue_line_rec = dep_issue_line_obj.browse(cr, uid, item.id)
 					product_id = dep_issue_line_rec.product_id.id
 					product_uom = dep_issue_line_rec.uom_id.id
@@ -625,9 +634,9 @@ class kg_department_issue(osv.osv):
 					main_location = stock_main_store[0]
 					dep_stock_location = issue_record.department_id.stock_location.id
 			
-			if line_ids.issue_qty > line_ids.issue_qty_2:
-				raise osv.except_osv(_('Warning!'),
-					_('%s Qty is exceeding store issue qty'%(line_ids.product_id.name)))
+			#~ if line_ids.issue_qty > line_ids.issue_qty_2:
+				#~ raise osv.except_osv(_('Warning!'),
+					#~ _('%s Qty is exceeding store issue qty'%(line_ids.product_id.name)))
 			print"line_ids.wo_stateline_ids.wo_state",line_ids.wo_state
 			
 			#~ if line_ids.wo_state == 'accept':
@@ -641,7 +650,8 @@ class kg_department_issue(osv.osv):
 							ms_obj = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',line_ids.w_order_line_id.id),('ms_id','=',line_ids.ms_bot_id.id),('state','=','raw_pending')])
 							if ms_obj:
 								ms_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_obj[0])
-								self.pool.get('kg.machineshop').write(cr,uid,ms_rec.id,{'state':'accept','ms_plan_rem_qty':line_ids.cutting_qty})
+								#~ self.pool.get('kg.machineshop').write(cr,uid,ms_rec.id,{'state':'accept','ms_plan_rem_qty':line_ids.cutting_qty})
+								self.pool.get('kg.machineshop').write(cr,uid,ms_rec.id,{'state':'accept',})
 							cr.execute(""" update kg_ms_operations set reject_state = 'issued' where id in (
 								select id from kg_ms_operations where state = 'reject' 
 								and order_line_id = %s and reject_state = 'not_issued' and ms_type = 'ms_item'
@@ -654,58 +664,57 @@ class kg_department_issue(osv.osv):
 							if ms_obj:
 								ms_rec = self.pool.get('kg.ms.stores').browse(cr,uid,ms_obj[0])
 								self.pool.get('kg.ms.stores').write(cr,uid,ms_rec.id,{'accept_state':'waiting'})
-				length = 1
-				breadth = 1
-				if line_ids.uom_conversation_factor == 'one_dimension':
-					if line_ids.issue_id.department_id.name == 'DP2':
-						product_qty = line_ids.issue_qty * line_ids.length * line_ids.product_id.po_uom_coeff
-					else:
-						if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
-							print"*************************"
-							product_qty = line_ids.issue_qty
-						elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
-							print"--------------------------"
-							po_coeff = line_ids.product_id.po_uom_coeff
-							product_qty = line_ids.issue_qty * po_coeff
-				elif line_ids.uom_conversation_factor == 'two_dimension':
-					if line_ids.product_id.po_uom_in_kgs > 0:
-						if line_ids.issue_id.department_id.name == 'DP2':
-							product_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
-						else:
-							if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
-								product_qty = line_ids.issue_qty
-							elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
-								product_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
-						length = line_ids.length
-						breadth = line_ids.breadth
-						
-				print"product_qtyproduct_qty",product_qty
-				
-				stock_move_obj.create(cr,uid,
-				{
-				'dept_issue_id': issue_record.id,
-				'dept_issue_line_id': line_ids.id,
-				'product_id': line_ids.product_id.id,
-				'brand_id': line_ids.brand_id.id,
-				'moc_id': line_ids.wo_moc_id.id,
-				'name': line_ids.product_id.name,
-				'product_qty': product_qty,
-				'po_to_stock_qty': product_qty,
-				'stock_uom': line_ids.product_id.uom_id.id,
-				'product_uom': line_ids.product_id.uom_po_id.id,
-				#~ 'location_id': main_location,
+				#~ length = 1
+				#~ breadth = 1
+				#~ if line_ids.uom_conversation_factor == 'one_dimension':
+					#~ if line_ids.issue_id.department_id.name == 'DP2':
+						#~ product_qty = line_ids.issue_qty * line_ids.length * line_ids.product_id.po_uom_coeff
+					#~ else:
+						#~ if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+							#~ print"*************************"
+							#~ product_qty = line_ids.issue_qty
+						#~ elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
+							#~ print"--------------------------"
+							#~ po_coeff = line_ids.product_id.po_uom_coeff
+							#~ product_qty = line_ids.issue_qty * po_coeff
+				#~ elif line_ids.uom_conversation_factor == 'two_dimension':
+					#~ if line_ids.product_id.po_uom_in_kgs > 0:
+						#~ if line_ids.issue_id.department_id.name == 'DP2':
+							#~ product_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+						#~ else:
+							#~ if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+								#~ product_qty = line_ids.issue_qty
+							#~ elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
+								#~ product_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+						#~ length = line_ids.length
+						#~ breadth = line_ids.breadth
+						#~ 
+				#~ print"product_qtyproduct_qty",product_qty
+				#~ 
+				#~ stock_move_obj.create(cr,uid,
+				#~ {
+				#~ 'dept_issue_id': issue_record.id,
+				#~ 'dept_issue_line_id': line_ids.id,
+				#~ 'product_id': line_ids.product_id.id,
+				#~ 'brand_id': line_ids.brand_id.id,
+				#~ 'moc_id': line_ids.wo_moc_id.id,
+				#~ 'name': line_ids.product_id.name,
+				#~ 'product_qty': product_qty,
+				#~ 'po_to_stock_qty': product_qty,
+				#~ 'stock_uom': line_ids.product_id.uom_id.id,
+				#~ 'product_uom': line_ids.product_id.uom_po_id.id,
+				#~ 'location_id': line_ids.location_id.id,
 				#~ 'location_dest_id': dep_stock_location,
-				'location_id': line_ids.location_id.id,
-				'location_dest_id': dep_stock_location,
-				'move_type': 'out',
-				'state': 'done',
-				'price_unit': line_ids.price_unit or 0.0,
-				'stock_rate': line_ids.price_unit or 0.0,
-				'uom_conversation_factor': line_ids.uom_conversation_factor,
-				'length': length,
-				'breadth': breadth,
-				
-				})
+				#~ 'move_type': 'out',
+				#~ 'state': 'done',
+				#~ 'price_unit': line_ids.price_unit or 0.0,
+				#~ 'stock_rate': line_ids.price_unit or 0.0,
+				#~ 'uom_conversation_factor': line_ids.uom_conversation_factor,
+				#~ 'length': length,
+				#~ 'breadth': breadth,
+				#~ 'trans_date': issue_record.issue_date,
+				#~ 
+				#~ })
 				
 				lot_sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(line_ids.id)
 				cr.execute(lot_sql)
@@ -914,113 +923,188 @@ class kg_department_issue(osv.osv):
 					cr.execute(sql)
 					data = cr.dictfetchall()
 					print"datadata",data
-					
 					if data:
 						val = [d['lot_id'] for d in data if 'lot_id' in d]
 						print"valvalvalvalval",val
 						issue_qty = line_ids.issue_qty
 						remain_qty = 0
 						reserved_qty_in_po_uom = 0
+						length = 1
+						breadth = 1
+						if issue_record.department_id.name == 'DP2':
+							if line_ids.uom_conversation_factor == 'one_dimension':
+								line_qty = (line_ids.issue_qty * line_ids.length)*line_ids.product_id.po_uom_coeff
+								line_lot_pending_qty = line_ids.issue_qty * line_ids.length
+								line_store_pending_qty = (line_ids.issue_qty * line_ids.length)*line_ids.product_id.po_uom_coeff
+							elif line_ids.uom_conversation_factor == 'two_dimension':
+								line_qty = line_ids.issue_qty * line_ids.length * line_ids.breadth * line_ids.product_id.po_uom_in_kgs
+								line_lot_pending_qty = line_ids.issue_qty * line_ids.length * line_ids.breadth
+								line_store_pending_qty = line_ids.issue_qty * line_ids.length * line_ids.breadth * line_ids.product_id.po_uom_in_kgs
+							length = line_ids.length
+							breadth = line_ids.breadth
+						elif issue_record.department_id.name != 'DP2':
+							if line_ids.uom_conversation_factor == 'one_dimension':
+								if line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
+									line_qty = line_ids.issue_qty*line_ids.product_id.po_uom_coeff
+									line_lot_pending_qty = line_ids.issue_qty
+									line_store_pending_qty = line_ids.issue_qty*line_ids.product_id.po_uom_coeff
+								elif line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+									line_qty = line_ids.issue_qty
+									line_store_pending_qty = line_ids.issue_qty
+									line_lot_pending_qty = line_ids.issue_qty / line_ids.product_id.po_uom_coeff
+							elif line_ids.uom_conversation_factor == 'two_dimension':
+								if line_ids.product_id.po_uom_in_kgs > 0:
+									if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
+										line_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+										line_store_pending_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+										line_lot_pending_qty = line_ids.issue_qty * line_ids.length * line_ids.breadth
+									elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
+										line_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+										line_store_pending_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+										line_lot_pending_qty = line_ids.issue_qty * line_ids.length * line_ids.breadth
+									length = line_ids.length
+									breadth = line_ids.breadth
+						print"line_qtyline_qty",line_qty
 						for i in val:
 							print'aaaaaaaaaaaaaaaaaa'
 							lot_rec = lot_obj.browse(cr,uid,i)
-							#~ move_qty = issue_qty
-							#~ print"move_qty",move_qty
-							#~ print"lot_rec.pending_qty",lot_rec.pending_qty
-							#~ if move_qty > 0 and move_qty <= lot_rec.pending_qty:
-							#~ lot_pending_qty = lot_rec.pending_qty - move_qty
 							print"lot_reclot_rec",lot_rec.id
-							if issue_record.department_id.name == 'DP2':
-								lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty * line_ids.length)
-								store_pending_qty = lot_rec.store_pending_qty - ((line_ids.issue_qty * line_ids.length)*line_ids.product_id.po_uom_coeff)
+							# Lot updation process starts
+							
+							store_pending_qty = lot_rec.store_pending_qty - line_store_pending_qty
+							lot_pending_qty = lot_rec.pending_qty - line_lot_pending_qty
+							print"store_pending_qty+++++++++++",store_pending_qty
+							print"lot_pending_qty+++++++++++",lot_pending_qty
+							if store_pending_qty < 0:
+								line_store_pending_qty = -1 * store_pending_qty
+								store_pending_qty = 0
+							if lot_pending_qty < 0:
+								line_lot_pending_qty = -1 * lot_pending_qty
+								lot_pending_qty = 0	
+							print"lot_pending_qtylot_pending_qty",lot_pending_qty
+							print"store_pending_qtystore_pending_qty",store_pending_qty
+							
+							if lot_pending_qty >= 0 and store_pending_qty >= 0:
+								print"9999999999999999999999999999999999999999999999999999999",store_pending_qty
+								print"101010101010101011101101101010101010101010101010101001",lot_pending_qty
+								lot_rec.write({'pending_qty':lot_pending_qty,'store_pending_qty':store_pending_qty,'issue_qty':0.0})
+							
+							# Lot updation process ends
+							
+							# Stock move creation process starts
+							
+							if line_qty > 0:
+								move_pending_qty = lot_rec.store_pending_qty - line_qty
+								print"move_pending_qtymove_pending_qty*******************",move_pending_qty
+								if move_pending_qty < 0:
+									move_pending_qty = lot_rec.store_pending_qty
+								elif move_pending_qty >= 0:
+									move_pending_qty = line_qty
+								print"move_pending_qtymove_pending_qtymove_pending_qty88888888888888",move_pending_qty
+								line_qty = line_qty - move_pending_qty
+								print"line_qtyline_qty************",line_qty
 							else:
-								if line_ids.uom_conversation_factor == 'one_dimension':
-									if line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
-										print"///////////////////"
-										lot_pending_qty = lot_rec.pending_qty - line_ids.issue_qty
-										store_pending_qty = lot_rec.store_pending_qty - (line_ids.issue_qty*line_ids.product_id.po_uom_coeff)
-									elif line_ids.uom_id.id == line_ids.product_id.uom_id.id:
-										print"*-************************"
-										store_pending_qty = lot_rec.store_pending_qty - line_ids.issue_qty
-										lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty / line_ids.product_id.po_uom_coeff)
-									else:
-										store_pending_qty = 0
-								elif line_ids.uom_conversation_factor == 'two_dimension':
-									print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA"
-									if line_ids.product_id.po_uom_in_kgs > 0:
-										if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
-											store_pending_qty = lot_rec.store_pending_qty - (line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth)
-											lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty * line_ids.length * line_ids.breadth)
-										elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
-											store_pending_qty = lot_rec.store_pending_qty - (line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth)
-											lot_pending_qty = lot_rec.pending_qty - (line_ids.issue_qty * line_ids.length * line_ids.breadth)
+								move_pending_qty = 0
+							if move_pending_qty < 0:
+								move_pending_qty = 0
+							
+							print"move_pending_qty---------------------------",move_pending_qty,"issue_record.id",issue_record.id
+							if move_pending_qty > 0:
+								stock_move_obj.create(cr,uid,
+								{
+								'dept_issue_id': issue_record.id,
+								'dept_issue_line_id': line_ids.id,
+								'product_id': line_ids.product_id.id,
+								'brand_id': lot_rec.brand_id.id,
+								'moc_id': lot_rec.moc_id.id,
+								#~ 'moc_id': line_ids.wo_moc_id.id,
+								'name': line_ids.product_id.name,
+								'product_qty': move_pending_qty,
+								'po_to_stock_qty': move_pending_qty,
+								'stock_uom': line_ids.product_id.uom_id.id,
+								'product_uom': line_ids.product_id.uom_po_id.id,
+								#~ 'location_id': main_location,
+								#~ 'location_dest_id': dep_stock_location,
+								'location_id': line_ids.location_id.id,
+								'location_dest_id': dep_stock_location,
+								'move_type': 'out',
+								'state': 'done',
+								'price_unit': line_ids.price_unit or 0.0,
+								'stock_rate': line_ids.price_unit or 0.0,
+								'uom_conversation_factor': line_ids.uom_conversation_factor,
+								'length': length,
+								'breadth': breadth,
+								'trans_date': issue_record.issue_date,
 								
-								print"lot_pending_qtylot_pending_qty",lot_pending_qty
-								print"store_pending_qtystore_pending_qty",store_pending_qty
-								lot_rec.write({'pending_qty': lot_pending_qty,'store_pending_qty':store_pending_qty,'issue_qty': 0.0})
-								#### wrting data into kg_issue_details ###
-								lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
-								if lot_issue_qty == 0:
-									issue_qty = lot_rec.pending_qty
-								elif lot_issue_qty > 0:
-									issue_qty = lot_issue_qty
-								item_issue_obj.create(cr,uid,
-										{
-										'issue_line_id':line_ids.id,
-										'product_id':line_ids.product_id.id,
-										'uom_id':line_ids.uom_id.id,
-										'grn_qty':lot_rec.pending_qty,
-										'issue_qty':issue_qty,
-										'price_unit':lot_rec.price_unit,
-										'expiry_date':lot_rec.expiry_date,
-										'batch_no':lot_rec.batch_no,
-										'lot_id':lot_rec.id,
-										})
-								##### Ends Here ###
-								#~ break
-							#~ else:
-								#~ if move_qty > 0:								
-									#~ lot_pending_qty = lot_rec.pending_qty
-									#~ remain_qty =  move_qty - lot_pending_qty
-									#~ print'remain_qty',remain_qty
-									#~ if issue_record.department_id.name == 'DP2':
-										#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
-									#~ else:
-										#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
-									#~ lot_rec.write({'pending_qty': 0.0,'reserved_qty': 0.0})
-									#~ #### wrting data into kg_issue_details ###
-									#~ lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
-									#~ if lot_issue_qty == 0:
-										#~ issue_qty = lot_rec.pending_qty
-									#~ elif lot_issue_qty > 0:
-										#~ issue_qty = lot_issue_qty
-									#~ issue_name = 'OUT'
-									#~ item_issue_obj.create(cr,uid,
-										#~ {
-										#~ 'issue_line_id':line_ids.id,
-										#~ 'product_id':line_ids.product_id.id,
-										#~ 'uom_id':line_ids.uom_id.id,
-										#~ 'grn_qty':lot_rec.pending_qty,
-										#~ 'issue_qty':issue_qty,
-										#~ 'price_unit':lot_rec.price_unit,
-										#~ 'expiry_date':lot_rec.expiry_date,
-										#~ 'batch_no':lot_rec.batch_no,
-										#~ 'lot_id':lot_rec.id,
-										#~ })
-									#~ ##### Ends Here ###
-								#~ elif move_qty == 0:
-									#~ print"issue_record.confirm_qty",line_ids.confirm_qty
-									#~ print"issue_record.issue_qty",line_ids.issue_qty
-									#~ print"lot_rec.reserved_qty",lot_rec.reserved_qty
-									#~ print":ffffffffffff",lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)
-									#~ if issue_record.department_id.name == 'DP2':
-										#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
-									#~ else:
-										#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
-									#~ lot_rec.write({'reserved_qty': lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)})
+								})
+								
+								# Stock move creation process ends
+							
+							#### wrting data into kg_issue_details ###
+							lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
+							if lot_issue_qty == 0:
+								issue_qty = lot_rec.pending_qty
+							elif lot_issue_qty > 0:
+								issue_qty = lot_issue_qty
+							item_issue_obj.create(cr,uid,
+									{
+									'issue_line_id':line_ids.id,
+									'product_id':line_ids.product_id.id,
+									'uom_id':line_ids.uom_id.id,
+									'grn_qty':lot_rec.pending_qty,
+									'issue_qty':issue_qty,
+									'price_unit':lot_rec.price_unit,
+									'expiry_date':lot_rec.expiry_date,
+									'batch_no':lot_rec.batch_no,
+									'lot_id':lot_rec.id,
+									})
+							#### Ends Here ###
+							#~ break
+						#~ else:
+							#~ if move_qty > 0:								
+								#~ lot_pending_qty = lot_rec.pending_qty
+								#~ remain_qty =  move_qty - lot_pending_qty
+								#~ print'remain_qty',remain_qty
+								#~ if issue_record.department_id.name == 'DP2':
+									#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
 								#~ else:
-									#~ pass
-							#~ issue_qty = remain_qty
+									#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
+								#~ lot_rec.write({'pending_qty': 0.0,'reserved_qty': 0.0})
+								#~ #### wrting data into kg_issue_details ###
+								#~ lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
+								#~ if lot_issue_qty == 0:
+									#~ issue_qty = lot_rec.pending_qty
+								#~ elif lot_issue_qty > 0:
+									#~ issue_qty = lot_issue_qty
+								#~ issue_name = 'OUT'
+								#~ item_issue_obj.create(cr,uid,
+									#~ {
+									#~ 'issue_line_id':line_ids.id,
+									#~ 'product_id':line_ids.product_id.id,
+									#~ 'uom_id':line_ids.uom_id.id,
+									#~ 'grn_qty':lot_rec.pending_qty,
+									#~ 'issue_qty':issue_qty,
+									#~ 'price_unit':lot_rec.price_unit,
+									#~ 'expiry_date':lot_rec.expiry_date,
+									#~ 'batch_no':lot_rec.batch_no,
+									#~ 'lot_id':lot_rec.id,
+									#~ })
+								#~ ##### Ends Here ###
+							#~ elif move_qty == 0:
+								#~ print"issue_record.confirm_qty",line_ids.confirm_qty
+								#~ print"issue_record.issue_qty",line_ids.issue_qty
+								#~ print"lot_rec.reserved_qty",lot_rec.reserved_qty
+								#~ print":ffffffffffff",lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)
+								#~ if issue_record.department_id.name == 'DP2':
+									#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - (line_ids.issue_qty * line_ids.length)
+								#~ else:
+									#~ reserved_qty_in_po_uom = lot_rec.reserved_qty_in_po_uom - line_ids.issue_qty
+								#~ lot_rec.write({'reserved_qty': lot_rec.reserved_qty + (line_ids.confirm_qty - line_ids.issue_qty)})
+							#~ else:
+								#~ pass
+						#~ issue_qty = remain_qty
+							if store_pending_qty > 0 and lot_pending_qty > 0:
+								break
 					else:
 						pass
 		
@@ -1074,7 +1158,7 @@ class kg_department_issue_line(osv.osv):
 		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type'),
 		'dep_issue_type': fields.selection([('from_indent','From Indent'),('direct','Direct')], string='Issue Type'),
 		'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry',
-					domain="[('product_id','=',product_id),'&',('grn_type','=',issue_type),'&',('pending_qty','>',0),'&',('store_pending_qty','>',0),'&',('lot_type','!=','out'),'&',('moc_id','=',wo_moc_id),'&',('location_id','=',location_id)]",
+					domain="[('product_id','=',product_id),'&',('grn_type','=',issue_type),'&',('pending_qty','>',0),'&',('store_pending_qty','>',0),'&',('lot_type','!=','out'),'&',('moc_id','=',wo_moc_id),'&',('location_id','=',location_id),'&',('moc_id','=',wo_moc_id)]",
 					),
 		#'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry'),
 		'brand_id': fields.many2one('kg.brand.master','Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
