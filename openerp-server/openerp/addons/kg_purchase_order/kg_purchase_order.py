@@ -428,9 +428,9 @@ class kg_purchase_order(osv.osv):
 				cr.execute("""update purchase_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,order_line.id))
 			if approval == 'yes' and obj.sent_mail_flag == False:
 				self.spl_po_apl_mail(cr,uid,ids,obj,context)
-				self.write(cr,uid,ids,{'sent_mail_flag':True,'approval_flag':True,'state':'confirmed','confirmed_by':uid,'confirmed_date':dt_time})
+				self.write(cr,uid,ids,{'sent_mail_flag':True,'approval_flag':True,'state':'confirmed','confirmed_by':uid,'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 			if approval != 'yes':
-				self.write(cr,uid,ids,{'state':'verified','confirmed_by':uid,'confirmed_date':dt_time,'approval_flag':False})
+				self.write(cr,uid,ids,{'state':'verified','confirmed_by':uid,'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S'),'approval_flag':False})
 		return True
 	
 	def verify_po(self,cr,uid,ids, context=None):
@@ -443,7 +443,7 @@ class kg_purchase_order(osv.osv):
 			else:
 				if obj.confirmed_by.id == uid:
 					raise osv.except_osv(_('Warning'),_('Verify cannot be done by Confirmed user'))
-			self.write(cr,uid,ids,{'state':'verified','verified_by':uid,'verified_date':dt_time,'approval_flag':True})
+			self.write(cr,uid,ids,{'state':'verified','verified_by':uid,'verified_date':time.strftime('%Y-%m-%d %H:%M:%S'),'approval_flag':True})
 		
 		return True
 	
@@ -559,7 +559,7 @@ class kg_purchase_order(osv.osv):
 								  'date_approve': time.strftime('%Y-%m-%d'),
 								  'order_line.line_state' : 'confirm',
 								  'approved_by': uid,
-								  'approved_date': dt_time})
+								  'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		po_id=obj.id
 		po_lines = obj.order_line
 		cr.execute("""select piline_id from kg_poindent_po_line where po_order_id = %s"""  %(str(ids[0])))
@@ -748,7 +748,7 @@ class kg_purchase_order(osv.osv):
 									  'date_approve': time.strftime('%Y-%m-%d'),
 									  'order_line.line_state' : 'confirm',
 									  'approved_by': uid,
-									  'approved_date': dt_time})
+									  'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 			
 			po_id=obj.id
 			po_lines = obj.order_line
@@ -885,12 +885,12 @@ class kg_purchase_order(osv.osv):
 		
 		return True
 	
-	def approved_po_mail(self,cr,uid,ids,obj,context=None):
-		cr.execute("""select trans_po_approved('approved po',"""+str(obj.id)+""")""")
+	def approved_po_mail(self,cr,uid,ids=0,context=None):
+		cr.execute("""select trans_po_approved('approved po')""")
 		data = cr.fetchall();
-		if data[0][0] is None:
+		if (data[0][0] is None) and (data[0][0] != ''):	
 			return False
-		if data[0][0] is not None:	
+		if (data[0][0] is not None) and (data[0][0] != ''):	
 			maildet = (str(data[0])).rsplit('~');
 			cont = data[0][0].partition('UNWANTED.')		
 			email_from = maildet[1]	
@@ -997,11 +997,11 @@ class kg_purchase_order(osv.osv):
 					for line in purchase.order_line:
 						pi_line_obj.write(cr,uid,line.pi_line_id.id,{'line_state' : 'noprocess'})		
 			else:
-				self.write(cr,uid,ids,{'state': 'cancel','cancel_user_id': uid,'cancel_date': dt_time})
+				self.write(cr,uid,ids,{'state': 'cancel','cancel_user_id': uid,'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 			
 			for (id, name) in self.name_get(cr, uid, ids):
 				wf_service.trg_validate(uid, 'purchase.order', id, 'purchase_cancel', cr)
-		return True			
+		return True
 	
 	def entry_reject(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0], context=context)
@@ -1018,15 +1018,15 @@ class kg_purchase_order(osv.osv):
 						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
 					if rec.verified_by.id == uid:
 						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Verified user'))
-					self.write(cr,uid,ids,{'state': 'confirmed','rej_user_id': uid,'reject_date': dt_time,'sent_mail_flag':False})
+					self.write(cr,uid,ids,{'state': 'confirmed','rej_user_id': uid,'reject_date': time.strftime('%Y-%m-%d %H:%M:%S'),'sent_mail_flag':False})
 				elif rec.approval_flag == True and rec.state == 'confirmed':
 					if rec.confirmed_by.id == uid:
 						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
-					self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': dt_time,'sent_mail_flag':False})
+					self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': time.strftime('%Y-%m-%d %H:%M:%S'),'sent_mail_flag':False})
 				if rec.approval_flag != True:
 					if rec.confirmed_by.id == uid:
 						raise osv.except_osv(_('Warning'),_('Reject cannot be done by Confirmed user'))
-					self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': dt_time,'sent_mail_flag':False})
+					self.write(cr,uid,ids,{'state': 'draft','rej_user_id': uid,'reject_date': time.strftime('%Y-%m-%d %H:%M:%S'),'sent_mail_flag':False})
 		return True
 	
 	def action_set_to_draft(self, cr, uid, ids, context=None):
@@ -1036,7 +1036,7 @@ class kg_purchase_order(osv.osv):
 		return True
 	
 	def write(self, cr, uid, ids, vals, context=None):		
-		vals.update({'update_date': dt_time,'update_user_id': uid})
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid})
 		return super(kg_purchase_order, self).write(cr, uid, ids, vals, context)
 	
 	def _check_line(self, cr, uid, ids, context=None):
