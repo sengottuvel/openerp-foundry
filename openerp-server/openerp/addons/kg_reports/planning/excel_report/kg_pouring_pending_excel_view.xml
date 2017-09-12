@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_kg_pouring_pending_excel_form" model="ir.ui.view">
+            <field name="name">Pouring Pending</field>
+            <field name="model">kg.pouring.pending.excel</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+			<form string="Pouring Pending" version="7.0">             			 
+				<header>
+					<button name="produce_xls" states="draft" string="Generate" type="object" class="oe_highlight"/>
+				</header>
+				<group>
+					<group>
+						<field name="as_on_date" options="{'datepicker':{'maxDate': 0,'minDate': null}}" attrs="{'readonly': [('state','in',['done'])]}"/>							   				     
+						<field name="schedule_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['done'])]}"/>
+						<field name="category" attrs="{'readonly': [('state','in',['done'])]}"/>	
+					</group>
+					<group>
+					 <field name="pattern_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['done'])]}"/>
+					 <field name="moc_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['done'])]}"/> 
+					 <field name="state" invisible="1"/>
+					 <field name="rep_data" nolabel="1" readonly="1" width="100" filename="name"/>
+					</group>
+				</group>
+			</form>
+            </field>
+        </record>
+        
+        <record id="view_kg_pouring_pending_excel_tree_view" model="ir.ui.view">
+            <field name="name">Pouring Pending</field>
+            <field name="model">kg.pouring.pending.excel</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+             <tree string="Pouring Pending">				 
+				 <field name="date"/>				 			 
+				 <field name="as_on_date"/>				 			 
+				 <field name="name"/>               
+				<field name="rep_data"/>
+				<field name="state"/>                
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_kg_pouring_pending_excel" model="ir.actions.act_window">
+			<field name="name">Pouring Pending</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.pouring.pending.excel</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="view_kg_pouring_pending_excel_tree_view"/>
+	</record>
+	
+	
+	<menuitem name="Pouring Pending" parent="kg_menus.rpm_excel_report_menu" action="action_kg_pouring_pending_excel" id="kg_pouring_pending_excel_mm" sequence="2"/>	
+            
+
+    </data>
+</openerp>
