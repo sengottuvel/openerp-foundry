@@ -114,14 +114,15 @@
 									</field>
 								  </group>							
 							</form>
-							<tree string="Entry Tree">					
+							<tree string="Entry Tree">
 								<field name="product_id"/>
-								<field name="brand_id"/>              
+								<field name="brand_id"/>
+								<field name="wo_moc_id"/>
 								<field name="uom_id"/>
 								<field name="issue_qty"/>
 								<field name="price_unit"/>
 								<field name="state" invisible="1"/>
-								<field name="wo_state" invisible="1"/>								
+								<field name="wo_state" invisible="1"/>
 							</tree>
 							
 						</field>
