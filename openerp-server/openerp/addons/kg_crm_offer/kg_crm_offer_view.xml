@@ -52,7 +52,7 @@
 								<field name="segment" readonly="1"/>
 								<field name="del_term" attrs="{'invisible':[('segment','!=','exp')]}"/>
 								<field name="mode_of_dispatch" attrs="{'invisible':[('segment','!=','exp')]}"/>
-								<field name="flag_data_bank"/>
+								<field name="flag_data_bank" attrs="{'invisible':['|','|',('zone','!=',False),('segment','!=','dom'),('division_id','!=',36)]}"/>
 								<field name="location" required="0" invisible="1"/>
 								<field name="excise_duty"/>
 								<field name="drawing_approval"/>
@@ -64,46 +64,94 @@
 								<field name="rep_data" readonly="1" width="100" filename="offer_copy"/>
 								<field name="term_data" readonly="1" width="100" filename="term_copy"/>
 							</group>
-						</group>
-						<group class="oe_subtotal_footer oe_right">
-							<field name="offer_net_amount"/>
-							<field name="component_net_amount"/>
-							<field name="supervision_amount"/>
+							<group string="Breakups">
+								<field name="offer_sam_ratio_tot"/>
+								<field name="offer_dealer_discount_tot"/>
+								<field name="offer_spl_discount_tot"/>
+								<field name="offer_p_f_tot"/>
+								<field name="offer_insurance_tot"/>
+							</group>
+							<group>
+								<field name="offer_freight_tot"/>
+								<field name="offer_tax_tot"/>
+								<field name="offer_customer_discount_tot"/>
+								<field name="offer_net_amount"/>
+								<field name="component_net_amount" invisible="1"/>
+								<field name="supervision_amount" invisible="1"/>
+							</group>
 						</group>
 						<group string="Apply All">
 							<group>
 								<field name="pump_per_flag"/>
 								<field name="access_per_flag"/>
-								<field name="o_sam_ratio"/>
-								<field name="o_dealer_discount"/>
-								<field name="o_special_discount"/>
-								<label for="o_p_f" string="P&amp;F" class="append_percentage"/>
-								<div>
-									<div class="address_format">
-										<field name="o_p_f" style="width: 20%%"/>
-										<field name="o_p_f_in_ex" style="width: 18%%" attrs="{'required': [('o_p_f','>',0)]}"/>
-									</div>
-								</div>
 							</group>
 							<group>
 								<field name="spare_per_flag"/>
 								<field name="super_per_flag" invisible="1"/>
+							</group>
+							<group string="Forward">
+								<field name="o_sam_ratio"/>
+								<field name="o_dealer_discount" on_change="onchange_delaer_discount(o_dealer_discount)"/>
+								<field name="o_special_discount" on_change="onchange_special_discount(o_special_discount)"/>
+								<label for="o_p_f" string="P&amp;F" class="append_percentage"/>
+								<div>
+									<div class="address_format">
+										<field name="o_p_f" style="width: 20%%" on_change="onchange_p_f(o_p_f,o_p_f_in_ex)"/>
+										<field name="o_p_f_in_ex" style="width: 18%%" on_change="onchange_p_f(o_p_f,o_p_f_in_ex)" attrs="{'required': [('o_p_f','>',0)]}"/>
+									</div>
+								</div>
+							</group>
+							<group>
 								<label for="o_freight" string="Freight" class="append_percentage"/>
 								<div>
 									<div class="address_format">
-										<field name="o_freight" style="width: 21%%"/>
-										<field name="o_freight_in_ex" style="width: 19%%" attrs="{'required': [('o_freight','>',0)]}"/>
+										<field name="o_freight" style="width: 21%%" on_change="onchange_freight(o_freight,o_freight_in_ex)"/>
+										<field name="o_freight_in_ex" style="width: 19%%" on_change="onchange_freight(o_freight,o_freight_in_ex)" attrs="{'required': [('o_freight','>',0)]}"/>
 									</div>
 								</div>
 								<label for="o_insurance" string="Insurance" class="append_percentage"/>
 								<div>
 									<div class="address_format">
-										<field name="o_insurance" style="width: 21%%"/>
-										<field name="o_insurance_in_ex" style="width: 19%%" attrs="{'required': [('o_insurance','>',0)]}"/>
+										<field name="o_insurance" style="width: 21%%" on_change="onchange_insurance(o_insurance,o_insurance_in_ex)"/>
+										<field name="o_insurance_in_ex" style="width: 19%%" on_change="onchange_insurance(o_insurance,o_insurance_in_ex)" attrs="{'required': [('o_insurance','>',0)]}"/>
 									</div>
 								</div>
-								<field name="o_customer_discount"/>
-								<field name="o_agent_com"/>
+								<field name="o_customer_discount" on_change="onchange_customer_discount(o_customer_discount)"/>
+								<field name="o_agent_com" invisible="1"/>
+							</group>
+							<group string="Reverse">
+								<field name="r_o_dealer_discount"/>
+								<field name="r_o_special_discount"/>
+								<label for="r_o_p_f" string="P&amp;F" class="append_percentage"/>
+								<div>
+									<div class="address_format">
+										<field name="r_o_p_f" style="width: 20%%"/>
+										<field name="r_o_p_f_in_ex" style="width: 18%%" attrs="{'required': [('r_o_p_f','>',0)]}"/>
+									</div>
+								</div>
+							</group>
+							<group>
+								<label for="r_o_freight" string="Freight" class="append_percentage"/>
+								<div>
+									<div class="address_format">
+										<field name="r_o_freight" style="width: 21%%"/>
+										<field name="r_o_freight_in_ex" style="width: 19%%" attrs="{'required': [('r_o_freight','>',0)]}"/>
+									</div>
+								</div>
+								<label for="r_o_insurance" string="Insurance" class="append_percentage"/>
+								<div>
+									<div class="address_format">
+										<field name="r_o_insurance" style="width: 21%%"/>
+										<field name="r_o_insurance_in_ex" style="width: 19%%" attrs="{'required': [('r_o_insurance','>',0)]}"/>
+									</div>
+								</div>
+								<label for="r_o_customer_discount" string="Customer Discount" class="append_percentage"/>
+								<div>
+									<div class="address_format">
+										<field name="r_o_customer_discount" style="width: 21%%"/>
+										<field name="r_o_cust_in_ex" style="width: 19%%" attrs="{'required': [('r_o_customer_discount','>',0)]}"/>
+									</div>
+								</div>
 							</group>
 							<button name="update_percentage" type="object" string="Update" states="draft" class="oe_highlight"/>
 						</group>
@@ -117,6 +165,18 @@
 									<field name="per_pump_prime_cost" sum="per_pump_prime_cost"/>
 									<field name="additional_cost"/>
 									<field name="prime_cost" sum="prime_cost"/>
+									
+									<field name="r_sam_ratio"/>
+									<field name="r_works_value"/>
+									<field name="r_dealer_discount"/>
+									<field name="r_special_discount"/>
+									<field name="r_p_f"/>
+									<field name="r_freight"/>
+									<field name="r_insurance"/>
+									<field name="r_customer_discount"/>
+									<field name="gst"/>
+									<field name="r_net_amount" sum="net_amount"/>
+<!--
 									<field name="sam_ratio"/>
 									<field name="sam_ratio_tot" string="Works Value"/>
 									<field name="dealer_discount"/>
@@ -130,6 +190,7 @@
 									<field name="supervision_amount" sum="supervision_amount"/>
 									<field name="tot_price" sum="total_price"/>
 									<field name="net_amount" sum="net_amount"/>
+-->
 								</tree>
 							</field>
 <!--
@@ -451,7 +512,13 @@
 							<field name="r_sam_ratio" readonly="1"/>
 							<field name="r_works_value" readonly="1"/>
 							<field name="r_dealer_discount"/>
-							<field name="r_customer_discount"/>
+							<label for="r_customer_discount" string="Customer Discount" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_customer_discount" style="width: 40%%"/>
+									<field name="cust_in_ex" style="width: 35%%" attrs="{'required':[('r_customer_discount','>',0)]}"/>
+								</div>
+							</div>
 							<field name="r_agent_com" invisible="1"/>
 						</group>
 						<group>
