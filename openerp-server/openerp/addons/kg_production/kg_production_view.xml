@@ -1669,7 +1669,7 @@
 				<field name="qty" string="Schedule Qty" sum="Total Qty"/>
 				<field name="each_weight" sum="Total Each Weight"/>
 				<field name="total_weight" sum="Total Weight"/>
-				<field name="mould_qty" string="Mould Completed Qty" sum="Qty"/>
+				<field name="total_mould_qty" string="Mould Completed Qty" sum="Qty"/>
 				<field name="pour_qty" string="Pouring Completed Qty" sum="Qty"/>
 				<field name="pour_pending_qty" string="Pouring Pending Qty" sum="Pending Qty"/>
 				<field name="sch_remarks"/>

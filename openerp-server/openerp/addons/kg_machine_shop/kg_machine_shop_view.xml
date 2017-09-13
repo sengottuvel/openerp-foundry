@@ -39,7 +39,8 @@
 							<field name="type" invisible="1"/>
 							<field name="dynamic_length" attrs="{'invisible':[('type','=','bot')]}"/>												
 							<field name="flag_heat_no" attrs="{'invisible':[('type','=','bot')]}"/>												
-							<field name="is_bearing" attrs="{'invisible':[('type','=','ms')]}"/>												
+							<field name="is_bearing" attrs="{'invisible':[('type','=','ms')]}"/>	
+							<field name="flag_fabrication" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'invisible':[('type','=','bot')]}"/>												
 							<field name="od" invisible="1"/>											
 							<field name="length" invisible="1"/>	
 							<field name="copy_flag" invisible="1"/>											

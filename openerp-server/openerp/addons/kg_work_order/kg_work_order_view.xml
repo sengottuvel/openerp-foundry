@@ -202,7 +202,7 @@
 							<field name="shaft_ext" invisible="1"/>
 							<field name="trimming_dia"/>
 							<field name="cc_drill"/>
-							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)"/>
+							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" readonly="1"/>
 							<field name="mar_prime_cost" readonly="1" invisible="0"/>
 							<field name="wo_prime_cost" readonly="1"/>
 							<field name="flag_offer" invisible="1"/>
