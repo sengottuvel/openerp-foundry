@@ -116,7 +116,7 @@
 										<field name="o_insurance_in_ex" style="width: 19%%" on_change="onchange_insurance(o_insurance,o_insurance_in_ex)" attrs="{'required': [('o_insurance','>',0)]}"/>
 									</div>
 								</div>
-								<field name="o_customer_discount" on_change="onchange_customer_discount(o_customer_discount)"/>
+								<field name="o_customer_discount"/>
 								<field name="o_agent_com" invisible="1"/>
 							</group>
 							<group string="Reverse">
@@ -430,6 +430,30 @@
 						<group string="Annexure 1">
 							<field name="annexure_1" nolabel="1" colspan="4"/>
 						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<group>
+										<field name="company_id"/>
+									</group>
+									<group>
+										<field name="active"/>
+									</group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
 				</form>
 			</field>
 		</record>
@@ -475,7 +499,7 @@
 								</div>
 							</div>
 							<field name="dealer_discount" on_change="onchange_delaer_discount(dealer_discount)"/>
-							<field name="customer_discount" on_change="onchange_customer_discount(customer_discount)"/>
+							<field name="customer_discount"/>
 							<field name="special_discount" on_change="onchange_special_discount(special_discount)"/>
 							<field name="agent_com" invisible="1"/>
 						</group>
@@ -508,14 +532,20 @@
 					</group>
 					<group string="Reverse">
 						<group>
-							<field name="r_cpo_amount"/>
+							<label for="r_cpo_amount" string="CPO Value"/>
+							<div>
+								<div class="address_format">
+									<field name="r_cpo_amount" style="width: 40%%"/>
+									<field name="cpo_quote_cust" style="width: 45%%" attrs="{'required':[('r_cpo_amount','>',0)]}"/>
+								</div>
+							</div>
 							<field name="r_sam_ratio" readonly="1"/>
 							<field name="r_works_value" readonly="1"/>
 							<field name="r_dealer_discount"/>
 							<label for="r_customer_discount" string="Customer Discount" class="append_percentage"/>
 							<div>
 								<div class="address_format">
-									<field name="r_customer_discount" style="width: 40%%"/>
+									<field name="r_customer_discount" on_change="onchange_cust_in_ex(r_customer_discount)" style="width: 40%%"/>
 									<field name="cust_in_ex" style="width: 35%%" attrs="{'required':[('r_customer_discount','>',0)]}"/>
 								</div>
 							</div>
