@@ -95,9 +95,9 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
 				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s and b.location_id = %s) as stock_uom_close,
 				(case when a.uom_conversation_factor = 'two_dimension' then
-				(sum(a.product_qty * a.length * a.breadth) -
+				(sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
-				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s and b.location_id = %s)) / prod.po_uom_in_kgs / a.length / a.breadth
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s and b.location_id = %s)) / prod.po_uom_in_kgs
 				else
 				(sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
@@ -130,7 +130,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				left join product_category pc on(pc.id=pt.categ_id)
 				
 			   where a.move_type = 'in' and a.date <= %s and a.state=%s and a.location_dest_id = %s'''+ major + product + pro_type +'''
-			   group by 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 order by prod.name_template ''',(form['date'],location,form['date'],location,form['date'],location,form['date'],'done',location))
+			   group by 3,4,5,6,7,8,9,10,11,12,13,14,15 order by prod.name_template ''',(form['date'],location,form['date'],location,form['date'],location,form['date'],'done',location))
 		
 		data=self.cr.dictfetchall()
 		print "in_data ::::::::::::::=====>>>>", data
