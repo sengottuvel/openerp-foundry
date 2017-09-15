@@ -422,6 +422,8 @@
                     <filter icon="terp-check" name="available" string="Available" domain="[('stock_available', '&gt;', 0)]" help="Available Product Lots"/>
                     <group expand="0" string="Group By...">
                         <filter string="Product" name="group_product_id" icon="terp-personal" domain="[]" context="{'group_by':'product_id'}"/>
+                        <filter string="Brand" name="group_brand_id" icon="terp-personal" domain="[]" context="{'group_by':'brand_id'}"/>
+                        <filter string="MOC" name="group_moc_id" icon="terp-personal" domain="[]" context="{'group_by':'moc_id'}"/>
                     </group>
                 </search>
 <!--
