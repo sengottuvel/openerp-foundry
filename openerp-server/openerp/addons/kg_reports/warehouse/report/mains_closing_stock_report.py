@@ -113,8 +113,6 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				a.product_uom as product_uom,
 				suom.name as suom,
 				puom.name as puom,
-				a.length as length,
-				a.breadth as breadth,
 				prod.po_uom_in_kgs as po_uom_in_kgs,
 				a.uom_conversation_factor as uom_conversation_factor,
 				prod.po_uom_coeff as po_uom_coeff
