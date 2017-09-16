@@ -1375,6 +1375,13 @@ class kg_schedule(osv.osv):
 					
 						production_id = production_obj.create(cr, uid, production_vals)
 						
+					
+					if schedule_item.order_bomline_id.id != False:
+						position_id = schedule_item.order_bomline_id.position_id.id
+						spare_id = schedule_item.order_bomline_id.spare_id.id
+					if schedule_item.order_bomline_id.id == False:
+						position_id = schedule_item.acc_bomline_id.position_id.id
+						spare_id = schedule_item.order_bomline_id.spare_id
 						
 					### Foundry Item Machine Shop Creation Process ###
 						
@@ -1414,11 +1421,11 @@ class kg_schedule(osv.osv):
 						'ms_type': 'foundry_item',
 						'item_code': schedule_item.pattern_id.name,
 						'item_name': schedule_item.pattern_id.pattern_name,
-						'position_id': schedule_item.order_bomline_id.position_id.id,
+						'position_id': position_id,
 						'oth_spec': schedule_item.order_bomline_id.add_spec,
 						'flag_trimming_dia': schedule_item.order_bomline_id.flag_trimming_dia,
 						'bom_type': schedule_item.order_bomline_id.bom_type,
-						'spare_id': schedule_item.order_bomline_id.spare_id.id,
+						'spare_id': spare_id,
 						'ms_plan_rem_qty':schedule_item.qty,
 					
 					}						
