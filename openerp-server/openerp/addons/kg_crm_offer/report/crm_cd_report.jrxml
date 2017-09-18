@@ -12,11 +12,11 @@
 sum((COALESCE((COALESCE(pump.r_cpo_amount,0)),0)))::integer as basic_cpo_val,
 
 -- Cust Dis val
-(case when pump.cust_in_ex = 'inclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as cust_dis_val,
+(case when pump.cust_in_ex = 'exclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as cust_dis_val,
 
 -- Book val
 sum((COALESCE((COALESCE(pump.r_cpo_amount,0)),0)))::integer -
-(case when pump.cust_in_ex = 'inclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as book_val,
+(case when pump.cust_in_ex = 'exclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as book_val,
 
 -- Spl val
 sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer as spl_val,
@@ -1049,11 +1049,11 @@ from
 sum((COALESCE((COALESCE(pump.r_cpo_amount,0)),0)))::integer as basic_cpo_val,
 
 -- Cust Dis val
-(case when pump.cust_in_ex = 'inclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as cust_dis_val,
+(case when pump.cust_in_ex = 'exclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as cust_dis_val,
 
 -- Book val
 sum((COALESCE((COALESCE(pump.r_cpo_amount,0)),0)))::integer -
-(case when pump.cust_in_ex = 'inclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as book_val,
+(case when pump.cust_in_ex = 'exclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as book_val,
 
 -- Spl val
 sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer as spl_val,
@@ -1913,7 +1913,7 @@ where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is
 
 -- Book val
 sum((COALESCE((COALESCE(pump.r_cpo_amount,0)),0)))::integer -
-(case when pump.cust_in_ex = 'inclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as book_val,
+(case when pump.cust_in_ex = 'exclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as book_val,
 
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
@@ -1923,7 +1923,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer as tax,
 
 -- Total
 (sum((COALESCE((COALESCE(pump.r_cpo_amount,0)),0)))::integer -
-(case when pump.cust_in_ex = 'inclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) +
+(case when pump.cust_in_ex = 'exclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) +
 
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
 
@@ -1936,7 +1936,7 @@ sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_dea
 
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_cpo_amount,0)),0)))::integer -
-(case when pump.cust_in_ex = 'inclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) +
+(case when pump.cust_in_ex = 'exclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) +
 
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
 
@@ -2382,7 +2382,7 @@ sum(les_deal_dis) as les_deal_dis,sum(nett_sam) as nett_sam from
 
 -- Book val
 sum((COALESCE((COALESCE(pump.r_cpo_amount,0)),0)))::integer -
-(case when pump.cust_in_ex = 'inclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as book_val,
+(case when pump.cust_in_ex = 'exclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) as book_val,
 
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
@@ -2392,7 +2392,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer as tax,
 
 -- Total
 (sum((COALESCE((COALESCE(pump.r_cpo_amount,0)),0)))::integer -
-(case when pump.cust_in_ex = 'inclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) +
+(case when pump.cust_in_ex = 'exclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) +
 
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
 
@@ -2405,7 +2405,7 @@ sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_dea
 
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_cpo_amount,0)),0)))::integer -
-(case when pump.cust_in_ex = 'inclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) +
+(case when pump.cust_in_ex = 'exclusive' then (sum(COALESCE(pump.r_customer_discount_tot ,0.00)))::integer else 0 end) +
 
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
 
