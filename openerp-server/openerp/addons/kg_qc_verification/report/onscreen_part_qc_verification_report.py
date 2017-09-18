@@ -71,7 +71,8 @@ class onscreen_part_qc_verification_report(JasperDataParser.JasperDataParser):
 		user_rec = self.pool.get('res.users').browse(cr,uid,uid)		
 		val['printed_by'] = str(user_rec.name)	
 		val['print_date'] = print_date	
-		val['id'] = str(val['id'])				
+		val['id'] = str(val['id'])	
+		print"val['id']",val['id']			
 		return val
 
 	def generate_records(self, cr, uid, ids, data, context):
