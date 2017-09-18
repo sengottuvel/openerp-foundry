@@ -80,6 +80,7 @@
 					<field name="schedule_date"/>
 					<field name="schedule_id"/>
 					<field name="order_no"/>
+					<field name="order_value"/>
 					<field name="pump_model_id"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
@@ -126,7 +127,8 @@
 				
 					<separator/>
                     <group expand="0" string="Group By...">
-						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_id'}"/>
+						<filter string="Child Order No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
 						<filter string="Schedule Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_date'}"/>
 						<filter string="Schedule No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'schedule_id'}"/>
