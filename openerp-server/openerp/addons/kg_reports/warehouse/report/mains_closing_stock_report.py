@@ -177,10 +177,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 									item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
 							elif lot_data[0]['price_type'] == 'per_kg':
 								print"per_kgper_kgper_kgper_kgper_kg"
-								if lot_data[0]['product_uom'] == item['stock_uom']:
-									item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
-								else:
-									item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['product_qty'] * item['po_uom_coeff']))
+								item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
 						elif item['uom_conversation_factor'] == 'one_dimension':
 							print"bbbbbbbbbbbbbbbbbbbbb"
 							if lot_data[0]['price_type'] == 'po_uom':
@@ -191,10 +188,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 									item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
 							elif lot_data[0]['price_type'] == 'per_kg':
 								print"per_kgper_kgper_kgper_kgper_kg"
-								if lot_data[0]['product_uom'] == item['stock_uom']:
-									item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
-								else:
-									item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['product_qty'] * item['po_uom_coeff']))
+								item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
 						else:
 							item['closing_value'] = 0
 					else:
