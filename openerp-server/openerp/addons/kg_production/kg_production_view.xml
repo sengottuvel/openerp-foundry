@@ -82,6 +82,7 @@
 					<field name="order_no"/>
 					<field name="order_value"/>
 					<field name="pump_model_id"/>
+					<field name="order_id" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
 					<field name="pattern_name" string="Part Name."/>
