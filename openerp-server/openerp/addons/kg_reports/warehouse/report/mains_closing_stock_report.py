@@ -178,7 +178,8 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 							print"bbbbbbbbbbbbbbbbbbbbb"
 							if lot_data[0]['price_type'] == 'po_uom':
 								print"popopopopopopopo"
-								item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['product_qty'] * item['po_uom_coeff']))
+								#~ item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['product_qty'] * item['po_uom_coeff']))
+								item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
 							elif lot_data[0]['price_type'] == 'per_kg':
 								print"per_kgper_kgper_kgper_kgper_kg"
 								item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
