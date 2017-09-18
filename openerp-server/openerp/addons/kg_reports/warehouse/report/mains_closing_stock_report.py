@@ -150,7 +150,8 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 								line.price_type as price_type,
 								line.length as length,
 								line.breadth as breadth,
-								line.product_qty as product_qty
+								line.product_qty as product_qty,
+								line.product_uom as product_uom
 								
 								FROM purchase_order_line line
 								
@@ -178,8 +179,10 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 							print"bbbbbbbbbbbbbbbbbbbbb"
 							if lot_data[0]['price_type'] == 'po_uom':
 								print"popopopopopopopo"
-								#~ item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['product_qty'] * item['po_uom_coeff']))
-								item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
+								if lot_data[0]['product_uom'] == item['product_uom']:
+									item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['product_qty'] * item['po_uom_coeff']))
+								else:
+									item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
 							elif lot_data[0]['price_type'] == 'per_kg':
 								print"per_kgper_kgper_kgper_kgper_kg"
 								item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
