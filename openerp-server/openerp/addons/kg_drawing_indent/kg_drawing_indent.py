@@ -73,14 +73,21 @@ class kg_drawing_indent(osv.osv):
 	def onchange_order_line_id(self, cr, uid, ids, order_line_id):
 		if order_line_id:
 			order_rec = self.pool.get('ch.work.order.details').browse(cr, uid, order_line_id)
-			print "order_recorder_rec",order_rec
+			print "order_recorder_rec",order_rec.pump_model_type
+			if order_rec.pump_model_type == False:
+				raise osv.except_osv(_('Warning!'),
+						_('This work order pump type not mapping !!'))			
 		return {'value': {'pump_model_type':order_rec.pump_model_type}}
 	
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':		
-			
+			if entry.pump_model_type == False:
+				raise osv.except_osv(_('Warning!'),
+						_('This work order pump type not mapping !!'))
+			if not entry.line_ids:
+				raise osv.except_osv(_('Line Item Details !!'),_('Enter the Indent Details !!'))
 			### Sequence Number Generation  ###		
 			if entry.name == '' or entry.name == False:
 				seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.drawing.indent')])

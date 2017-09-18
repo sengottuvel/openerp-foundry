@@ -437,12 +437,10 @@ class kg_drawing_inward(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':						
-			#~ if len(entry.line_ids) == 0:
-				#~ raise osv.except_osv(_('Warning!'),
-					#~ _('System not allow to without Drawing details line items !!'))	
-			#~ if len(entry.line_ids_a) == 0:
-				#~ raise osv.except_osv(_('Warning!'),			
-					#~ _('System not allow to without Equipment details line items !!'))	
+			if len(entry.line_ids) == 0 and len(entry.line_ids_a) == 0:
+				raise osv.except_osv(_('Warning!'),
+					_('System not allow to without Drawing details or Equipment details line items !!'))	
+			
 			dc_ids = []		
 			for draw_line_item in entry.line_ids:
 				dc_id = draw_line_item.dc_drawing_id.header_id.id

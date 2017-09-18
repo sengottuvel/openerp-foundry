@@ -109,7 +109,8 @@ class kg_drawing_issue(osv.osv):
 		position_obj = self.pool.get('kg.position.number')
 		if entry.state == 'draft':
 			### Drawing No. Updation ##
-			
+			if not entry.line_ids:
+				raise osv.except_osv(_('Line Item Details !!'),_('Enter the Issue Details !!'))
 			for issue_item in entry.line_ids:
 				position_obj.write(cr,uid,issue_item.position_id.id,{'drawing_no':issue_item.drawing_no})
 				self.pool.get('ch.drawing.issue.line').write(cr,uid,issue_item.id,{'pending_qty':issue_item.qty})				
@@ -210,10 +211,17 @@ class ch_drawing_issue_line(osv.osv):
 			else:
 				res = True				
 		return res
+		
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.qty <= 0.00:
+			return False
+		return True	
 	
 		
 	_constraints = [						
-		(_position_validate, 'Please Check Position No should be unique!!!',['Position No.']),			
+		(_position_validate, 'Please Check Position No should be unique!!!',['Position No.']),	
+		(_check_values, 'System not allow to save negative and zero values..!!',['Qty']),		
 	   ]
 	
 
@@ -323,7 +331,9 @@ class kg_drawing_return(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])	
 		issue_line_obj = self.pool.get('ch.drawing.issue.line')	
-		if entry.state == 'draft':	
+		if entry.state == 'draft':
+			if not entry.line_ids:
+				raise osv.except_osv(_('Line Item Details !!'),_('Enter the Return Details !!'))	
 			for line in entry.line_ids:
 				if line.issue_line_id.pending_qty < line.qty:
 					raise osv.except_osv(_('Excess Qty Not Allowed'),
@@ -403,6 +413,16 @@ class ch_drawing_return_line(osv.osv):
 		
 			
 	}	
+	
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.qty <= 0.00:
+			return False
+		return True	
+		
+	_constraints = [			
+		(_check_values, 'System not allow to save negative and zero values..!!',['Qty']),		
+	   ]
 	
 
 ch_drawing_return_line()	

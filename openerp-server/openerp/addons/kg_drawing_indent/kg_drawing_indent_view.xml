@@ -22,7 +22,7 @@
 						<group>
 							<field name="entry_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="dep_id" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-							<field name="pump_model_type" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>														
+							<field name="pump_model_type"/>														
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 						</group>					
 					</group>					
