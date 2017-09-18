@@ -478,7 +478,8 @@ class kg_crm_offer(osv.osv):
 	def update_percentage(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state in ('draft','moved_to_offer'):
-			if entry.o_sam_ratio > 0 or entry.o_dealer_discount > 0 or entry.o_special_discount > 0 or entry.o_p_f > 0 or entry.o_freight > 0 or entry.o_insurance > 0 or entry.o_customer_discount > 0 or entry.o_agent_com > 0:
+			if entry.o_sam_ratio > 0 or entry.o_dealer_discount > 0 or entry.o_special_discount > 0 or entry.o_p_f > 0 or entry.o_freight > 0 or entry.o_insurance > 0 or entry.o_customer_discount > 0:
+				print"entry.pump_per_flag",entry.pump_per_flag
 				if entry.pump_per_flag == True:
 					if entry.line_pump_ids:
 						obj = self.pool.get('ch.pump.offer')
@@ -1371,875 +1372,595 @@ class kg_crm_offer(osv.osv):
 	def offer_copy(self,cr,uid,ids,context=None):
 		import StringIO
 		import base64
-		
+		import string
 		try:
 			import xlwt
 		except:
 		   raise osv.except_osv('Warning !','Please download python xlwt module from\nhttp://pypi.python.org/packages/source/x/xlwt/xlwt-0.7.2.tar.gz\nand install it')
-		
-		rec =self.browse(cr,uid,ids[0])
-		print"recrec",rec
-		
-		#######
-		line_sql = """
-			(select pump.pump_id
-			from ch_pump_offer pump
-			left join kg_pumpmodel_master pmm on(pmm.id=pump.pump_id)
-			where header_id = """+ str(rec.id) +""" order by pump.pump_id)
-			union 
-			(select pump.pump_id
-			from ch_spare_offer pump
-			left join kg_pumpmodel_master pmm on(pmm.id=pump.pump_id)
-			where header_id = """+ str(rec.id) +""" order by pump.pump_id)
-			union 
-			(select pump.pump_id
-			from ch_accessories_offer pump
-			left join kg_pumpmodel_master pmm on(pmm.id=pump.pump_id)
-			where header_id = """+ str(rec.id) +""" order by pump.pump_id)
-			
-			"""
-		cr.execute(line_sql)		
-		line_data = cr.dictfetchall()
-		print"line_dataline_data",line_data
-		enq_line_data = []
-		enq_line_data = line_data
-		for item in line_data:
-			pump_off_obj = self.pool.get('ch.pump.offer').search(cr,uid,[('header_id','=',rec.id),('pump_id','=',item['pump_id'])])
-			
-			if pump_off_obj:
-				off_pump_line_rec = self.pool.get('ch.pump.offer').browse(cr,uid,pump_off_obj[0])
-				pump_enq_line_id = off_pump_line_rec.enquiry_line_id.id
-				item['enquiry_line_id'] = pump_enq_line_id
-				item['name'] = off_pump_line_rec.pump_id.name
-				item['id'] = off_pump_line_rec.id
-				print"item['enquiry_line_id']",item['enquiry_line_id']
-			spare_off_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('header_id','=',rec.id),('pump_id','=',item['pump_id'])])
-			if spare_off_obj:
-				spare_pump_line_rec = self.pool.get('ch.spare.offer').browse(cr,uid,spare_off_obj[0])
-				spr_enq_line_id = spare_pump_line_rec.enquiry_line_id.id
-				item['enquiry_line_id'] = spr_enq_line_id
-				print"item['enquiry_line_id']",item['enquiry_line_id']
-				item['name'] = spare_pump_line_rec.pump_id.name
-				item['id'] = spare_pump_line_rec.id
-			access_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('header_id','=',rec.id),('pump_id','=',item['pump_id'])])
-			if access_off_obj:
-				access_pump_line_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,access_off_obj[0])
-				acc_enq_line_id = access_pump_line_rec.enquiry_line_id.id
-				item['enquiry_line_id'] = acc_enq_line_id
-				print"item['enquiry_line_id']",item['enquiry_line_id']
-				item['name'] = access_pump_line_rec.pump_id.name
-				item['id'] = access_pump_line_rec.id
-		
-		print"line_data",line_data
-		
-		print"line_dataline_data",len(line_data)
-		
-		len_col = 0
-		if line_data:
-			if len(line_data):
-				if len(line_data) <= 1:
-					len_col = len(line_data) 
-				elif len(line_data) <= 3 or len(line_data) > 3:
-					len_col = len(line_data)
-		print"len_collen_collen_col",len_col
-		
-		line_data.sort(key=lambda line_data: line_data['pump_id'])
 		record={}
-		sno=0
 		wbk = xlwt.Workbook()
-		style1 = xlwt.easyxf('font: bold on,height 240,color_index red;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin') 
-		style2 = xlwt.easyxf('font: bold on,height 240,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin') 
-		style3 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin') 
-		style4 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz left;''borders: left thin, right thin, top thin, bottom thin') 
-		style5 = xlwt.easyxf('font: bold on,height 200,color_index black;' 'align: horiz left;''borders: left thin, right thin, top thin, bottom thin;''font: underline on;') 
-		style6 = xlwt.easyxf('font: height 200,color_index black;' 'align: vert centre, horiz left;''borders: left thin, right thin, top thin, bottom thin') 
-		style7 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz left;''borders: left thin, right thin, top thin, bottom thin') 
-		style8 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz centre;''borders: left thin, right thin, top thin, bottom thin') 
-		
-		
-		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
-		r, g, b, a = img.split()
-		img = Image.merge("RGB", (r, g, b))
-		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
-		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
-		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
-		
-		#~ r, g, b, a = img.split()
-		#~ img = Image.merge("RGB", (r, g, b))
-		s1=7
-		
-		"""adding a worksheet along with name"""
-		
-		sheet1 = wbk.add_sheet('Offer Copy')
-		
-		s2=8
-		if line_data:
-			if len_col <= 1:
-				sheet1.col(0).width = 8000
-				sheet1.col(1).width = 12000
-			elif len_col <= 2:
-				sheet1.col(0).width = 8000
-				sheet1.col(1).width = 7000
-				sheet1.col(2).width = 7000
-			elif len_col >= 3:
-				sheet1.col(0).width = 8000
-				sheet1.col(1).width = 7000
-				sheet1.col(2).width = 7000
-				sheet1.col(3).width = 7000
+		style_mast_header = xlwt.easyxf('font: height 320;font: bold off;align: wrap on;align: wrap off, vert bottom, horiz center;border: top thin, bottom thin, left thin, right thin;')
+		style_header1 = xlwt.easyxf('font: bold on,height 200;align: wrap off, vert bottom, horiz center;border: top thin, bottom thin, left thin, right thin;')
+		style_center = xlwt.easyxf('font: height 180,name Calibri;align: wrap off, vert bottom, horiz center;border: top thin, bottom thin, left thin, right thin;')		
+		style_left_header = xlwt.easyxf('font: bold on,height 220,color_index 0X36;align: wrap off, vert center, horiz left;border: top thin, bottom thin, left thin, right thin;')			
+		style_left = xlwt.easyxf('font: height 180,name Calibri;align: wrap off, vert bottom, horiz left;border: top thin, bottom thin, left thin, right thin;')		
+		style_sub_left = xlwt.easyxf('font: height 180,underline on,bold on,name Calibri;align: wrap off, vert bottom, horiz left;border: top thin, bottom thin, left thin, right thin;')		
+		style_highlight = xlwt.easyxf('font: height 180,bold on,name Calibri,color_index red;;align: wrap off, vert bottom, horiz left;border: top thin, bottom thin, left thin, right thin;')
+		style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')
+		style2 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
+		style3 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
+		style41 = xlwt.easyxf('font: height 200,bold on,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')		
+		style4 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')
+		cmp_obj = self.pool.get('res.company')
+		rec =self.browse(cr,uid,ids[0])
+		enq_ids = self.pool.get('kg.crm.enquiry').search(cr,uid,[('name','=',rec.enquiry_no),('state','!=','revised')])
+		if enq_ids:
+			enq_rec = self.pool.get('kg.crm.enquiry').browse(cr,uid,enq_ids[0])
 		else:
-			sheet1.col(0).width = 8000
-			sheet1.col(1).width = 5000
-			sheet1.col(2).width = 5000
-		sheet1.col(len_col+1).width = 5000
-		sheet1.col(len_col+2).width = 5000
-		sheet1.col(len_col+3).width = 5000
-		sheet1.col(len_col+4).width = 5000
-		sheet1.col(len_col+5).width = 5000
-		sheet1.col(len_col+6).width = 5000
-		sheet1.col(len_col+7).width = 5000
+			raise osv.except_osv(_('Warning!'),_('You cannot get offer copy'))
+		pass_id = enq_ids
+		pass_param = '(' +",".join([str(s) for s in list(pass_id)])+ ')'
+		rpt_type = ['horizontal','vertical']
+		hz_dictn = {
+		'01#Item Details:':[('Equipment No','item_eqno'),('Description','item_desc'),('Quantity in No','item_qty')],
+		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in 0C','lspec_temp'),('Specific Gravity -SLURRY/SOLID','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Slurry Correction in - kq/kh/kn ','lspec_slur'),('Suction Condition','lspec_suct')],
+		'03#Duty Parameters:':[('Capacity in M3 / hr Wat / Liq','duty_cap'),('Head in M Wat / Liq','duty_head')],
+		'04#Pump Specification:':[('Pump Type','pump_pmodtype'), ('Pump Model','pump_pmodel'), ('Number of stages','pump_stgno'), ('Size-SuctionX Delivery- in mm','pump_sizex'), ('Flange Standard','pump_flange'), ('Efficiency in % Wat/Liq','pump_eff'), ('BKW  Wat / Liq	  ','pump_bkw'), ('End of the curve - KW(Rated)','pump_eoc'), ('Motor KW ','pump_motor_kw'), ('Speed in RPM- Pump / Motor','pump_speed'), ('Type of Drive','pump_tod'), ('NPSH R - M','pump_npsh'), ('Impeller Type','pump_impeller_type'), ('Impeller Dia Rated / Max / Min - mm','pump_impeller_dia'), ('Maximum Allowable Soild Size - MM','pump_max_solid'), ('Hydrostatic Test Pressure - Kg/cm2','pump_hydro'), ('Shut off Head in M','pump_shut'), ('Minimum Contionuous Flow - M3/hr','pump_mini'), ('Belt Loss in Kw - 3% of BKW','pump_belt'), ('Motor KW ','pump_motor_kw1'), ('Speed in RPM Pump / Motor','pump_speed1'), ('Type of Drive','pump_tod1'), ('Impeller Tip Speed -M/Sec','pump_impeller_tip'), ('Sealing Water Requirement-Pressure/Flow-Kg/cm^2&m3/hr','pump_seal_press'), ('Sealing Water Capcity- m3/hr','pump_seal_cap')],
+		'05#Material of Construction: ':[('Purpose','purp_categ')],
+		#~ '05#Material of Construction: ':[('Access','acces')],
+		'06#Mechanical Seal: Make: Eagle / Flowserve / Leak Proof / Hifab: ':[('Type / Face combination','mech_type_face'),('Gland Plate / API Plan','mech_gld_api')],
+		'07#Motor: Make: KEC / ABB / CGL :':[('Type / Mounting','mot_type_mount'),('Insulation / Protection','mot_ins_prot'),('Voltage / Phase / Frequency','mot_volt_ph_frq')],
+		'08#Scope of Supply / Price per each in Rs:':[('Bare Pump','bare_pump'),('All Accessories','acces'),('Spares','spare')]
+		}
+		vz_dictn = {
+		'01#Item Details:':[('Equipment No','item_eqno'),('Description','item_desc'),('Quantity in No','item_qty')],
+		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in 0C','lspec_temp'),('Specific Gravity ','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Suction Condition','lspec_suct')],
+		'03#Duty Parameters:':[('Capacity in M3 / hr Wat / Liq','duty_cap'),('Head in M Wat / Liq','duty_head'),('Head in M Wat / Liq','duty_head'),('Suction Condition','duty_suct')],
+		'04#Pump Specification:':[('Pump Type','pump_pmodtype'), ('Pump Model','pump_pmodel'), ('Number of stages','pump_stgno'), ('Size-SuctionX Delivery- in mm','pump_sizex'), ('Flange Standard','pump_flange'), ('Efficiency in % Wat/Liq','pump_eff'), ('BKW  Wat / Liq	  ','pump_bkw'), ('End of the curve - KW(Rated)','pump_eoc'), ('Motor KW ','pump_motor_kw'), ('Speed in RPM- Pump / Motor','pump_speed'), ('Type of Drive','pump_tod'), ('NPSH R - M','pump_npsh'), ('Impeller Type','pump_impeller_type'), ('Impeller Dia Rated / Max / Min - mm','pump_impeller_dia'), ('Maximum Allowable Soild Size - MM','pump_max_solid'), ('Hydrostatic Test Pressure - Kg/cm2','pump_hydro'), ('Shut off Head in M','pump_shut'), ('Minimum Contionuous Flow - M3/hr','pump_mini'), ('Setting Height in MM ','pump_setting_height'), ('Sump Depth in MM','pump_sump_depth')],
+		'05#Material of Construction: ':[('Purpose','purp_categ')],
+		'06#Mechanical Seal: Make: Eagle / Flowserve / Leak Proof / Hifab: ':[('Type / Face combination','mech_type_face'),('Gland Plate / API Plan','mech_gld_api')],
+		'07#Motor: Make: KEC / ABB / CGL :':[('Type / Mounting','mot_type_mount'),('Insulation / Protection','mot_ins_prot'),('Voltage / Phase / Frequency','mot_volt_ph_frq')],
+		'08#Scope of Supply / Price per each in Rs:':[('Bare Pump','bare_pump'),('All Accessories','acces'),('Spares','spare')]
+		}
+		self_obj = self.pool.get('ch.kg.crm.pumpmodel')
+		sqltwo = """ select 
+		coalesce(item_eqno,'-') as item_eqno,coalesce(item_desc,'-') as item_desc,coalesce(item_qty,0) as item_qty,
+		coalesce(lspec_lqd,'-') as lspec_lqd,coalesce(lspec_temp,'-') as lspec_temp,coalesce(lspec_sgvt,0) as lspec_sgvt,coalesce(lspec_ph,'-') as lspec_ph,coalesce(lspec_viscst,0) as lspec_viscst,coalesce(lspec_visfact,'-') as lspec_visfact,
+		coalesce(lspec_solid,'-') as lspec_solid,
+		coalesce(lspec_slur,0) as lspec_slur,
+		coalesce(lspec_suct,'-') as lspec_suct,
+		coalesce(duty_cap,'-') as duty_cap,coalesce(duty_head,'-') as duty_head,
+		coalesce(duty_suct,'-') as duty_suct,coalesce(pump_pmodtype,'-') as pump_pmodtype,
+		coalesce(pump_pmodel,'-') as pump_pmodel,coalesce(pump_stgno,0) as pump_stgno,
+		coalesce(pump_sizex,'-') as pump_sizex,coalesce(pump_flange,0) as pump_flange,
+		coalesce(pump_eff,0) as pump_eff,coalesce(pump_bkw,'-') as pump_bkw,
+		coalesce(pump_eoc,0) as pump_eoc,coalesce(pump_motor_kw,0) as pump_motor_kw,
+		coalesce(pump_speed,'-') as pump_speed,coalesce(pump_tod1,'-') as pump_tod,
+		coalesce(pump_npsh1,0) as pump_npsh,coalesce(pump_impeller_type,'-') as pump_impeller_type,
+		coalesce(pump_impeller_dia,'-') as pump_impeller_dia,
+		coalesce(pump_max_solid,0) as pump_max_solid,coalesce(pump_hydro,0) as pump_hydro,
+		coalesce(pump_shut,0) as pump_shut,coalesce(pump_setting_height,0) as pump_setting_height,
+		coalesce(pump_sump_depth,'-') as pump_sump_depth,
+		coalesce(pump_mini,0) as pump_mini,coalesce(pump_belt,0) as pump_belt,
+		coalesce(pump_motor_kw,0) as pump_motor_kw1,coalesce(pump_speed1,'-') as pump_speed1,
+		coalesce(pump_tod1,'-') as pump_tod1,coalesce(pump_impeller_tip,0) as pump_impeller_tip,
+		coalesce(pump_seal_press,0) as pump_seal_press,coalesce(pump_seal_cap,0) as pump_seal_cap,
+		acces,coalesce(mech_type_face,'-') as mech_type_face,coalesce(mech_gld_api,'-') as mech_gld_api,
+		coalesce(mot_type_mount,'-') as mot_type_mount,coalesce(mot_ins_prot,'-') as mot_ins_prot,
+		coalesce(mot_volt_ph_frq,'-') as mot_volt_ph_frq,'bare_pump'::text as bare_pump,'spare'::text as spare from (
+		select
+		item_eqno,item_desc,item_qty,lspec_lqd,lspec_temp,lspec_sgvt,lspec_ph,lspec_viscst,lspec_visfact,
+		case when ((solid_concern_vol is not null and solid_concern_vol != '') and 
+		(solid_concern is not null and solid_concern != '')) then 
+		(solid_concern_vol::text||'$'||solid_concern)
+		else ( case when ((solid_concern_vol is not null and solid_concern_vol != '') or 
+		(solid_concern is not null and solid_concern != '')) then 
+		(solid_concern_vol::text||solid_concern::text) else '-' end ) end as lspec_solid,
+		lspec_slur,lspec_suct,
+		case when ((duty_cap_wat is not null and duty_cap_wat >0) and 
+		(duty_cap_lqd is not null and duty_cap_lqd >0)) then 
+		(duty_cap_wat::text||'$'||duty_cap_lqd)
+		else ( case when ((duty_cap_wat is not null and duty_cap_wat >0) or 
+		(duty_cap_lqd is not null and duty_cap_lqd >0)) then 
+		(duty_cap_wat::text||duty_cap_lqd::text) else '-' end ) end as duty_cap,
+		case when ((duty_head_wat is not null and duty_head_wat >0) and 
+		(duty_head_lqd is not null and duty_head_lqd >0)) then 
+		(duty_head_wat::text||'$'||duty_head_lqd)
+		else ( case when ((duty_head_wat is not null and duty_head_wat >0) or 
+		(duty_head_lqd is not null and duty_head_lqd >0)) then 
+		(duty_head_wat::text||duty_head_lqd::text) else '-' end ) end as duty_head,
+		duty_suct,pump_pmodtype,pump_pmodel,pump_stgno,pump_sizex,pump_flange,pump_eff,
+		case when ((pump_bkw_water is not null and pump_bkw_water != '') and 
+		(pump_bkw_liq is not null and pump_bkw_liq != '')) then 
+		(pump_bkw_water::text||'$'||pump_bkw_liq)
+		else ( case when ((pump_bkw_water is not null and pump_bkw_water != '') or 
+		(pump_bkw_liq is not null and pump_bkw_liq != '')) then 
+		(pump_bkw_water::text||pump_bkw_liq::text) else '-' end ) end as pump_bkw,
+		pump_eoc,pump_motor_kw,
+		case when ((pump_full_load_rpm is not null and pump_full_load_rpm != '') and 
+		(pump_speed_in_rpm is not null and pump_speed_in_rpm != '')) then 
+		(pump_full_load_rpm::text||'$'||pump_speed_in_rpm)
+		else ( case when ((pump_full_load_rpm is not null and pump_full_load_rpm != '') or 
+		(pump_speed_in_rpm is not null and pump_speed_in_rpm != '')) then 
+		(pump_full_load_rpm::text||pump_speed_in_rpm::text) else '-' end ) end as pump_speed,
+		pump_tod,pump_npsh,pump_impeller_type,
+		case when ((pump_imp_dia_rate is not null and pump_imp_dia_rate > 0) and 
+		(pump_impeller_dia_max is not null and pump_impeller_dia_max != '') and (pump_impeller_dia_min is not null and pump_impeller_dia_min != '')) then 
+		(pump_imp_dia_rate::text||'$'||pump_impeller_dia_max||'$'||pump_impeller_dia_min::text)
+		else ( case when ((pump_imp_dia_rate is not null and pump_imp_dia_rate > 0) and 
+		(pump_impeller_dia_max is not null and pump_impeller_dia_max != '') or (pump_impeller_dia_min is not null or  pump_impeller_dia_min != '')) then 
+		(pump_imp_dia_rate::text||' '||pump_impeller_dia_max||' '||pump_impeller_dia_min) else '-' end ) 
+		end as  pump_impeller_dia,
+		pump_max_solid,pump_hydro,pump_shut,pump_setting_height,pump_sump_depth,
+		pump_mini,pump_belt,pump_motor_kw as pump_motor_kw1,
+		case when ((pump_full_load_rpm is not null and pump_full_load_rpm != '') and 
+		(pump_speed_in_rpm is not null and pump_speed_in_rpm != '')) then 
+		(pump_full_load_rpm::text||'$'||pump_speed_in_rpm)
+		else ( case when ((pump_full_load_rpm is not null and pump_full_load_rpm != '') or 
+		(pump_speed_in_rpm is not null and pump_speed_in_rpm != '')) then 
+		(pump_full_load_rpm::text||pump_speed_in_rpm::text) else '-' end ) end as pump_speed1,
+		pump_tod,pump_npsh as pump_npsh1,pump_impeller_type as pump_impeller_type1,
+		pump_tod as pump_tod1,pump_impeller_tip,pump_seal_press,pump_seal_cap,acces,
+		case when ((mech_type is not null and mech_type != '') and 
+		(mech_face is not null and mech_face != '')) then 
+		(mech_type::text||'$'||mech_face::text)
+		else ( case when ((mech_type is not null and mech_type != '') or 
+		(mech_face is not null and mech_face != '')) then 
+		(mech_type::text||mech_face::text) else '-' end ) end as mech_type_face,
+		case when ((mech_gland_plate is not null and mech_gland_plate != '') and 
+		(mech_api_plan is not null and mech_api_plan != '')) then 
+		(mech_gland_plate::text||'$'||mech_api_plan::text)
+		else ( case when ((mech_gland_plate is not null and mech_gland_plate != '') and 
+		(mech_api_plan is not null and mech_api_plan != '')) then 
+		(mech_gland_plate::text||'$'||mech_api_plan::text) else '-' end ) end as mech_gld_api,
+		case when ((motor_type is not null and motor_type != '') and 
+		(motor_mounting is not null and motor_mounting != '')) then 
+		(motor_type::text||'$'||motor_mounting::text)
+		else ( case when ((motor_type is not null and motor_type != '') or 
+		(motor_mounting is not null and motor_mounting != '')) then 
+		(motor_type::text||motor_mounting::text) else '-' end ) end as  mot_type_mount,
+		case when ((motor_insulation is not null and motor_insulation != '') and 
+		(motor_protection is not null and motor_protection != '')) then 
+		(motor_insulation::text||'$'||motor_protection::text)
+		else ( case when ((motor_insulation is not null and motor_insulation != '') or 
+		(motor_protection is not null and motor_protection != '')) then 
+		(motor_insulation::text||motor_protection::text) else '-' end ) end as mot_ins_prot,
+		case when ((motor_voltage is not null and motor_voltage != '') and 
+		(motor_phase is not null and motor_phase != '') and 
+		(motor_Frequency is not null and motor_Frequency != '')) then 
+		(motor_voltage::text||'$'||motor_phase::text)
+		else ( case when ((motor_voltage is not null and motor_voltage != '') and 
+		(motor_phase is not null and motor_phase != '') and 
+		(motor_Frequency is not null and motor_Frequency != '')) then 
+		(motor_voltage::text||motor_phase::text||motor_Frequency::text) else '-' end ) end as mot_volt_ph_frq,
+		'bare_pump'::text as bare_pump,
+		'spare'::text as spare from (	
+		"""
+		sqlone_query = """ select crm_id,pump_mod_type,purp_categ,
+		item_eqno,item_desc, item_qty,lspec_lqd,lspec_temp, lspec_sgvt,lspec_ph,lspec_viscst,lspec_visfact,solid_concern_vol,solid_concern,
+		lspec_slur,lspec_suct,duty_cap_wat,duty_cap_lqd,duty_head_wat,duty_head_lqd,
+		duty_suct,pump_pmodtype,pump_pmodel,pump_stgno,pump_sizex,pump_flange,pump_eff,
+		pump_bkw_water,pump_bkw_liq,pump_eoc,pump_motor_kw,pump_full_load_rpm,pump_speed_in_rpm,pump_tod,pump_npsh,
+		pump_impeller_type,
+		pump_imp_dia_rate,pump_impeller_dia_max,pump_impeller_dia_min,pump_max_solid,pump_hydro,pump_shut,pump_setting_height,pump_sump_depth,
+		pump_mini,pump_belt,pump_motor_kw as pump_motor_kw1,pump_impeller_tip,pump_seal_press,pump_seal_cap,acces,
+		mech_type,mech_face,mech_gland_plate,mech_api_plan,motor_type,motor_mounting,motor_insulation,motor_protection,
+		motor_voltage,motor_phase,motor_Frequency,'bare_pump'::text as bare_pump,
+		'spare'::text as spare
+		from (
+		select id as crm_id,pump_model_type as pump_mod_type,purpose_categ as purp_categ,
+		---- Item Details Starts Here
+		equipment_no as item_eqno,description as item_desc,qty as item_qty,
+		---- Item Details Ends Here
+		---- Liquid Specifications Starts Here
+		(select name from kg_fluid_master where id = fluid_id) as lspec_lqd,
+		temperature_in_c as lspec_temp,
+		specific_gravity as lspec_sgvt,
+		ph_value as lspec_ph,
+		viscosity as lspec_viscst,
+		viscosity_crt_factor as lspec_visfact,
+		case when solid_concen_vol>0 then solid_concen_vol::text else ''::text end as solid_concern_vol,
+		case when solid_concen>0 then solid_concen::text else ''::text end as solid_concern,
+		slurry_correction_in as lspec_slur, --- not for vertical
 		
-		sheet1.write_merge(0, 0, 0, len_col,"SAM TURBO INDUSTRY PRIVATE LIMITED",style2)
-		sheet1.row(0).height = 450
-		sheet1.write_merge(1, 1, 0, len_col,"Avinashi Road, Neelambur, Coimbatore - 641062",style3)
-		sheet1.write_merge(2, 2, 0, len_col,"Tel:3053555, 3053556,Fax : 0422-3053535",style3)
-		sheet1.write_merge(3, 3, 0, len_col,"TECHNICAL CUM PRICED OFFER",style2)
-		sheet1.row(3).height = 300
-		to = "To : " + str(rec.customer_id.name)
-		sheet1.write_merge(4, 4, 0, 0, to, style4)
-		enq_ref = "Enquiry Ref : " + str(rec.enquiry_no)
-		sheet1.write_merge(4, 4, 1, len_col, enq_ref, style4)
-		sheet1.row(4).height = 450
-		off_ref_no = "Offer Ref : " + str(rec.name)
-		sheet1.write_merge(5, 5, 0, 0, off_ref_no or "-", style4)
-		offer_date = rec.offer_date
-		offer_date = datetime.strptime(offer_date, '%Y-%m-%d').strftime('%d/%m/%Y')
-		date = "Date : " + offer_date
-		sheet1.write_merge(5, 5, 1, len_col, date, style4)
-		sheet1.row(5).height = 400
+		case when suction_condition = 'positive' then 'Positive' else
+		(case when suction_condition = 'negative' then 'Negative' else
+		(case when suction_condition = 'flooded' then 'Flooded' else
+		(case when suction_condition = 'sub_merged' then 'Submerged' else
+		(case when suction_condition = 'suction_lift' then 'Suction' else '' end) end) end) end) end as lspec_suct,
+		---- Liquid Specifications Ends Here
+		---- Duty Parameters Starts Here
+		capacity_in as duty_cap_wat,
+		capacity_in_liquid as duty_cap_lqd,
+		head_in_liquid as duty_head_lqd,
+		head_in as duty_head_wat,
+		suction_pressure as duty_suct, -- *v
+		---- Duty Parameters Ends Here
+		---- Pump Specification Starts Here
+		pump_model_type as pump_pmodtype,
+		(select name from kg_pumpmodel_master where id = pump_id) as pump_pmodel,
+		number_of_stages as pump_stgno,
+		size_suctionx as pump_sizex,
+		flange_standard as pump_flange,
+		efficiency_in as pump_eff,
+		case when bkw_liq>0 then bkw_liq::text else ''::text end as pump_bkw_liq,
+		case when bkw_water>0 then bkw_water::text else ''::text end as pump_bkw_water,
+		end_of_the_curve as pump_eoc,
+		motor_kw as pump_motor_kw,
+		case when full_load_rpm>0 then full_load_rpm::text else ''::text end as pump_full_load_rpm,
+		case when speed_in_rpm>0 then speed_in_rpm::text else ''::text end as pump_speed_in_rpm,
+		npsh_r_m as pump_npsh,
+		impeller_type as pump_impeller_type,
 		
-		revision = "Revision : " + str(rec.revision)
-		sheet1.write_merge(6, 6, 0, 0, revision or "-", style4)
-		if rec.revision > 0:
-			revision_remark = "Remarks : " + rec.revision_remarks
-		else:
-			revision_remark = "Remarks : - "
-		sheet1.write_merge(6, 6, 1, len_col, revision_remark, style4)
-		sheet1.row(6).height = 400
+		case when type_of_drive = 'motor_direct' then ('Direct') else
+		(case when type_of_drive = 'belt_drive' then ('Belt drive') else
+		(case when type_of_drive = 'fc_gb' then ('Fluid Coupling Gear Box') else
+		(case when type_of_drive = 'vfd' then ('VFD') else '' end) end) end ) end as pump_tod,
 		
-		sheet1.write_merge(7, 7, 0, len_col, 'Item Details:', style5)
-		sheet1.row(7).height = 400
-		#~ sheet1.write_merge(7, 7, 0, 0, 'Application', style4)
-		#~ sheet1.write_merge(7, 7, 1, len_col, 'List Of Horizontal Centrifugal pump for Heavy Water Upgradation Plant', style6)
-		sheet1.write_merge(13, 13, 0, len_col, 'Liquid details given by the customer:', style5)
-		sheet1.row(13).height = 400
-		sheet1.write_merge(27, 27, 0, len_col, 'Pump Specification:', style5)
-		sheet1.row(27).height = 400
-		sheet1.write_merge(77, 77, 0, len_col, 'Material of construction:', style5)
-		sheet1.row(77).height = 400
-		########
+		impeller_dia_rated as pump_imp_dia_rate,
+		case when impeller_dia_min>0 then impeller_dia_min::text else ''::text end as pump_impeller_dia_min,
+		case when impeller_dia_max>0 then impeller_dia_max::text else ''::text end as pump_impeller_dia_max,
+		maximum_allowable_soild as pump_max_solid,
+		hydrostatic_test_pressure as pump_hydro,
+		shut_off_head as pump_shut,
+		setting_height as pump_setting_height,
+		sump_depth as pump_sump_depth,			
+		minimum_contionuous as pump_mini,
+		belt_loss_in_kw as pump_belt,
+		impeller_tip_speed as pump_impeller_tip,
+		sealing_water_pressure as pump_seal_press,
+		sealing_water_capacity as pump_seal_cap,
+		---- Pump Specification Ends Here
+		---- MOC Starts Here
+		acces as acces,
+		---- MOC Ends Here
+		---- Mech Specification Starts Here
+		seal_type as mech_type,
+		face_combination as mech_face,
+		gland_plate as mech_gland_plate,
+		api_plan as mech_api_plan,
+		---- Mech Specification Ends Here
+		---- Motor Specification Starts Here
 		
-		col_1 = ''
-		col_no = 1
-		logo_size = 0
-		for item in line_data:
-			""" writing field headings """
-			col_1 = item['name']
-			
-			if len_col == 1:
-				logo_size = 250
-			elif len_col <= 3:
-				logo_size = 120
-			elif len_col >= 4:
-				logo_size = 100
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
-			#~ print"col_1",col_1
-			#~ sheet1.write(s1,col_no,str(col_1),style1)
-			col_no = col_no + 1
-
-		"""writing data according to query and filteration in worksheet"""
+		case when motor_type = 'eff_1' then 'EFF-1' else
+		(case when motor_type = 'eff_2' then 'EFF-2' else
+		(case when motor_type = 'eff_3' then 'EFF-3' else '' end) end) end as motor_type,
 		
-		sheet1.write(s2,0,"Sr.No",style6)
-		sheet1.write(s2+1,0,"Tag No",style6)
-		sheet1.write(s2+2,0,"Description",style6)
-		sheet1.write(s2+3,0,"Quantity in nos",style6)
-		sheet1.write(s2+4,0,"Previous Supply Reference",style6)
-		sheet1.write(s2+6,0,"Liquid",style6)
-		sheet1.write(s2+7,0,"Temperature in C",style6)
-		sheet1.write(s2+8,0,"Solid Concentration by weight %",style6)
-		sheet1.write(s2+9,0,"Solid Concentration by Volume %",style6)
-		sheet1.write(s2+10,0,"Consistency In %",style6)
-		sheet1.write(s2+11,0,"Specific Gravity",style6)
-		sheet1.write(s2+12,0,"Density(kg/m3)",style6)
-		sheet1.write(s2+13,0,"Viscosity in CST",style6)
-		sheet1.write(s2+14,0,"Viscosity correction factors",style6)
-		sheet1.write(s2+15,0,"Max Particle Size-mm",style6)
-		sheet1.write(s2+16,0,"NPSH-AVL",style6)
-		sheet1.write(s2+17,0,"Capacity in M3/hr(Liquid)",style6)
-		sheet1.write(s2+18,0,"Total Head in Mlc(Liquid)",style6)
-		sheet1.write(s2+20,0,"Pump Type",style6)
-		sheet1.row(s2+20).height = 490
-		sheet1.write(s2+21,0,"Pump Model",style6)
-		#~ sheet1.write(s2+20,0,"Pumpseries",style6)
-		#~ sheet1.write(s2+21,0,"Previous Supply Reference",style6)
-		sheet1.write(s2+22,0,"PH value",style6)
-		sheet1.write(s2+23,0,"Shaft Sealing",style6)
-		sheet1.write(s2+24,0,"Scope of Supply",style6)
-		sheet1.write(s2+25,0,"Number of stages",style6)
-		sheet1.write(s2+26,0,"Impeller Type",style6)
-		sheet1.write(s2+27,0,"Impeller Dia Min mm",style6)
-		sheet1.write(s2+28,0,"Size-SuctionX Delivery(mm)",style6)
-		#~ sheet1.write(s2+26,0,"Flange Type",style6)
-		sheet1.write(s2+29,0,"Flange Standard",style6)
-		sheet1.write(s2+30,0,"Efficiency in % Wat",style6)
-		sheet1.write(s2+31,0,"NPSH R - M",style6)
-		sheet1.write(s2+32,0,"Best Efficiency NPSH in M",style6)
-		sheet1.write(s2+33,0,"BKW Water",style6)
-		sheet1.write(s2+34,0,"BKW Liq",style6)
-		sheet1.write(s2+35,0,"Impeller Dia Rated mm",style6)
-		sheet1.write(s2+36,0,"Impeller Tip Speed -M/Sec",style6)
-		sheet1.write(s2+37,0,"Hydrostatic Test Pressure - Kg/cm2",style6)
-		sheet1.write(s2+38,0,"Setting Height",style6)
-		sheet1.write(s2+39,0,"Speed in RPM-Pump",style6)
-		sheet1.write(s2+40,0,"Speed in RPM-Engine",style6)
-		sheet1.write(s2+41,0,"Motor frequency (HZ)",style6)
-		sheet1.write(s2+42,0,"Motor KW",style6)
-		sheet1.write(s2+43,0,"Motor Margin(%)",style6)
-		sheet1.write(s2+44,0,"Speed in RPM-Motor",style6)
-		sheet1.write(s2+45,0,"End of the curve - KW(Rated) liquid",style6)
-		sheet1.write(s2+46,0,"Critical Speed",style6)
-		sheet1.write(s2+47,0,"Maximum Allowable Soild Size - MM",style6)
-		sheet1.write(s2+48,0,"Impeller Number of vanes",style6)
+		case when motor_mounting = 'foot' then 'Foot' else
+		(case when motor_mounting = 'flange' then 'Flange' else ''
+		end) end as motor_mounting,
 		
-		sheet1.write(s2+49,0,"Impeller Dia Max mm",style6)
-		sheet1.write(s2+50,0,"Max Allowable Casing Design Pressure",style6)
-		sheet1.write(s2+51,0,"Pump Design",style6)
-		sheet1.write(s2+52,0,"Casing Feet Location",style6)
-		sheet1.write(s2+53,0,"Shut off Head in M",style6)
-		sheet1.write(s2+54,0,"Shut off Pressure",style6)
-		sheet1.write(s2+55,0,"Minimum Contionuous Flow - M3/hr",style6)
-		sheet1.write(s2+56,0,"Specific Speed",style6)
-		sheet1.write(s2+57,0,"Suction Specific Speed",style6)
-		sheet1.write(s2+58,0,"Sealing Water Pressure Kg/cm^2",style6)
-		sheet1.write(s2+59,0,"Sealing Water Capcity- m3/hr",style6)
-		sheet1.write(s2+60,0,"GD SQ value",style6)
-		sheet1.write(s2+61,0,"Bearing Make",style6)
-		sheet1.write(s2+62,0,"BEARING NUMBER NDE / DE",style6)
-		sheet1.write(s2+63,0,"Bearing Qty NDE / DE",style6)
-		sheet1.write(s2+64,0,"Lubrication",style6)
-		sheet1.write(s2+65,0,"Primemover Category",style6)
-		sheet1.write(s2+66,0,"Transmission",style6)
-		sheet1.write(s2+67,0,"Primemover",style6)
-		sheet1.write(s2+68,0,"Operation Range",style6)
-		
-		if line_data:
-			coln_no = 1
-			s_no = 1
-			for item in line_data:
-				print"item['enquiry_line_id']--------------------------",item['enquiry_line_id']
-				print"item['pump_id']",item['pump_id']
-				item_sql = """
-					select 
-					enq_line.equipment_no as equipment_no,
-					enq_line.description as description,
-					enq_line.qty as qty,
-					liquid.name as liquid_name,
-					enq_line.temperature_in_c as temperature_in_c,
-					enq_line.solid_concen as solid_concen,
-					enq_line.solid_concen_vol as solid_concen_vol,
-					enq_line.specific_gravity as specific_gravity,
-					enq_line.viscosity as viscosity,
-					enq_line.viscosity_crt_factor as viscosity_crt_factor,
-					enq_line.max_particle_size_mm as max_particle_size_mm,
-					enq_line.npsh_avl as npsh_avl,
-					enq_line.density as density,
-					enq_line.capacity_in_liquid as capacity_in_liquid,
-					enq_line.head_in_liquid as head_in_liquid,
-					enq_line.consistency as consistency,
-					enq_line.ph_value as ph_value,
-					psm.name as pumpseries,
-					psms.name as pumpseries,
-					enq_line.pre_suppliy_ref as pre_suppliy_ref,
-					(CASE WHEN enq_line.shaft_sealing = 'gld_packing_tiga' 
-						THEN 'Gland Packing-TIGA'
-						WHEN enq_line.shaft_sealing = 'gld_packing_ptfe' 
-						THEN 'Gland Packing-PTFE'
-						WHEN enq_line.shaft_sealing = 'mc_seal' 
-						THEN 'M/C Seal'
-						WHEN enq_line.shaft_sealing = 'dynamic_seal' 
-						THEN 'Dynamic Seal'
-						WHEN enq_line.shaft_sealing = 'f_s' 
-						THEN 'Felt Seal'
-						ELSE ''
-						end ) as shaft_sealing,
-					(CASE WHEN enq_line.scope_of_supply = 'bare_pump' 
-						THEN 'Bare Pump'
-						WHEN enq_line.scope_of_supply = 'pump_with_acces' 
-						THEN 'Pump With Accessories'
-						WHEN enq_line.scope_of_supply = 'pump_with_acces_motor' 
-						THEN 'Pump With Accessories And Motor'
-						ELSE ''
-						end ) as scope_of_supply,
-					enq_line.number_of_stages as number_of_stages,
-					(CASE WHEN enq_line.impeller_type = 'open' 
-						THEN 'Open'
-						WHEN enq_line.impeller_type = 'semi_open' 
-						THEN 'Semi Open'
-						WHEN enq_line.impeller_type = 'close' 
-						THEN 'Closed'
-						ELSE ''
-						end ) as impeller_type,
-					enq_line.impeller_dia_min as impeller_dia_min,
-					enq_line.size_suctionx as size_suctionx,
-					(CASE WHEN enq_line.flange_type = 'standard' 
-						THEN 'Standard'
-						WHEN enq_line.flange_type = 'optional' 
-						THEN 'Optional'
-						ELSE ''
-						end ) as flange_type,
-					psf.name as flange_standard,
-					enq_line.efficiency_in as efficiency_in,
-					enq_line.npsh_r_m as npsh_r_m,
-					enq_line.best_efficiency as best_efficiency,
-					enq_line.bkw_water as bkw_water,
-					enq_line.bkw_liq as bkw_liq,
-					enq_line.impeller_dia_rated as impeller_dia_rated,
-					enq_line.impeller_tip_speed as impeller_tip_speed,
-					enq_line.hydrostatic_test_pressure as hydrostatic_test_pressure,
-					enq_line.setting_height as setting_height,
-					enq_line.speed_in_rpm as speed_in_rpm,
-					enq_line.rpm as rpm,
-					enq_line.full_load_rpm as full_load_rpm,
-					(CASE WHEN enq_line.frequency = '50' 
-						THEN '50'
-						WHEN enq_line.frequency = '60' 
-						THEN '60'
-						ELSE ''
-						end ) as frequency,
-					enq_line.motor_kw as motor_kw,
-					enq_line.motor_margin as motor_margin,
-					enq_line.speed_in_motor as speed_in_motor,
-					enq_line.end_of_the_curve as end_of_the_curve,
-					enq_line.critical_speed as critical_speed,
-					enq_line.maximum_allowable_soild as maximum_allowable_soild,
-					enq_line.impeller_number as impeller_number,
-					enq_line.impeller_dia_max as impeller_dia_max,
-					enq_line.max_allowable_test as max_allowable_test,
-					(CASE WHEN enq_line.crm_type = 'pull_out' 
-						THEN 'End Suction Back Pull Out'
-						WHEN enq_line.crm_type = 'split_case' 
-						THEN 'Split Case'
-						WHEN enq_line.crm_type = 'multistage' 
-						THEN 'Multistage'
-						WHEN enq_line.crm_type = 'twin_casing' 
-						THEN 'Twin Casing'
-						WHEN enq_line.crm_type = 'single_casing' 
-						THEN 'Single Casing'
-						WHEN enq_line.crm_type = 'self_priming' 
-						THEN 'Self Priming'
-						WHEN enq_line.crm_type = 'vo_vs4' 
-						THEN 'VO-VS4'
-						WHEN enq_line.crm_type = 'vg_vs5' 
-						THEN 'VG-VS5'
-						ELSE ''
-						end ) as crm_type,
-					(CASE WHEN enq_line.casing_design = 'base' 
-						THEN 'Base'
-						WHEN enq_line.casing_design = 'center_line' 
-						THEN 'Center Line'
-						ELSE ''
-						end ) as casing_design,
-					enq_line.shut_off_head as shut_off_head,
-					enq_line.shut_off_pressure as shut_off_pressure,
-					enq_line.minimum_contionuous as minimum_contionuous,
-					enq_line.specific_speed as specific_speed,
-					enq_line.suction_specific_speed as suction_specific_speed,
-					enq_line.sealing_water_pressure as sealing_water_pressure,
-					enq_line.sealing_water_capacity as sealing_water_capacity,
-					enq_line.gd_sq_value as gd_sq_value,
-					enq_line.bearing_make as bearing_make,
-					enq_line.bearing_number_nde as bearing_number_nde,
-					enq_line.bearing_qty_nde as bearing_qty_nde,
-					(CASE WHEN enq_line.lubrication_type = 'grease' 
-						THEN 'Grease'
-						WHEN enq_line.lubrication_type = 'oil' 
-						THEN 'Oil'
-						ELSE ''
-						end ) as lubrication_type,
-					(CASE WHEN enq_line.primemover_categ = 'engine' 
-						THEN 'Engine'
-						WHEN enq_line.primemover_categ = 'motor' 
-						THEN 'Motor'
-						WHEN enq_line.primemover_categ = 'vfd' 
-						THEN 'VFD'
-						ELSE ''
-						end ) as primemover_categ,
-					(CASE WHEN enq_line.type_of_drive = 'motor_direct' 
-						THEN 'Motor-direct'
-						WHEN enq_line.type_of_drive = 'belt_drive' 
-						THEN 'Belt drive'
-						WHEN enq_line.type_of_drive = 'fc_gb' 
-						THEN 'Fluid Coupling Gear Box'
-						WHEN enq_line.type_of_drive = 'vfd' 
-						THEN 'VFD'
-						ELSE ''
-						end ) as type_of_drive,
-					(CASE WHEN enq_line.pump_model_type = 'vertical' 
-						THEN 'Vertical'
-						WHEN enq_line.pump_model_type = 'horizontal' 
-						THEN 'Horizontal'
-						ELSE ''
-						end ) as pump_type,
-					pm.name as primemover,
-					enq_line.operation_range as operation_range
-					
-					from ch_kg_crm_pumpmodel enq_line
-					
-					left join kg_fluid_master liquid on(liquid.id=enq_line.fluid_id)
-					left join ch_pumpseries_flange psf on(psf.id=enq_line.flange_standard)
-					left join kg_pumpseries_master psm on(psm.id=enq_line.pumpseries_id)
-					left join kg_pumpseries_master psms on(psms.id=enq_line.spare_pumpseries_id)
-					left join kg_primemover_master pm on(pm.id=enq_line.primemover_id)
-					where enq_line.id = """+ str(item['enquiry_line_id']) +""" and enq_line.pump_id = """+ str(item['pump_id']) + """ order by enq_line.pump_id
-					"""
-				cr.execute(item_sql)		
-				item_data = cr.dictfetchall()
-				print"item_dataitem_data",item_data
-				if item_data:
-					for ele in item_data:
-						sheet1.write(s2,coln_no,s_no,style8)
-						sheet1.write(s2+1,coln_no,ele['equipment_no'] or "-",style8)
-						sheet1.write(s2+2,coln_no,ele['description'] or "-",style8)
-						sheet1.write(s2+3,coln_no,ele['qty'] or "-",style8)
-						sheet1.write(s2+4,coln_no,ele['pre_suppliy_ref'] or "-",style8)
-						sheet1.write(s2+6,coln_no,ele['liquid_name'] or "-",style8)
-						sheet1.write(s2+7,coln_no,ele['temperature_in_c'] or "-",style8)
-						sheet1.write(s2+8,coln_no,ele['solid_concen'] or "-",style8)
-						sheet1.write(s2+9,coln_no,ele['solid_concen_vol'] or "-",style8)
-						sheet1.write(s2+10,coln_no,ele['consistency'] or "-",style8)
-						sheet1.write(s2+11,coln_no,ele['specific_gravity'] or "-",style8)
-						sheet1.write(s2+12,coln_no,ele['density'] or "-",style8)
-						sheet1.write(s2+13,coln_no,ele['viscosity'] or "-",style8)
-						sheet1.write(s2+14,coln_no,ele['viscosity_crt_factor'] or "-",style8)
-						sheet1.write(s2+15,coln_no,ele['max_particle_size_mm'] or "-",style8)
-						sheet1.write(s2+16,coln_no,ele['npsh_avl'] or "-",style8)
-						sheet1.write(s2+17,coln_no,ele['capacity_in_liquid'] or "-",style8)
-						sheet1.write(s2+18,coln_no,ele['head_in_liquid'] or "-",style8)
-						sheet1.write(s2+20,coln_no,ele['pump_type'] or "-",style8)
-						sheet1.row(s2+20).height = 490
-						sheet1.write(s2+21,coln_no,item['name'] or "-",style1)
-						#~ sheet1.write(s2+20,coln_no,ele['pumpseries'] or "-",style8)	
-						#~ sheet1.write(s2+21,coln_no,ele['pre_suppliy_ref'] or "-",style8)
-						sheet1.write(s2+22,coln_no,ele['ph_value'] or "-",style8)
-						sheet1.write(s2+23,coln_no,ele['shaft_sealing'] or "-",style8)
-						sheet1.write(s2+24,coln_no,ele['scope_of_supply'] or "-",style8)
-						sheet1.write(s2+25,coln_no,ele['number_of_stages'] or "-",style8)
-						sheet1.write(s2+26,coln_no,ele['impeller_type'] or "-",style8)
-						sheet1.write(s2+27,coln_no,ele['impeller_dia_min'] or "-",style8)
-						sheet1.write(s2+28,coln_no,ele['size_suctionx'] or "-",style8)
-						#~ sheet1.write(s2+26,coln_no,ele['flange_type'] or "-",style8)
-						sheet1.write(s2+29,coln_no,ele['flange_standard'] or "-",style8)
-						sheet1.write(s2+30,coln_no,ele['efficiency_in'] or "-",style8)
-						sheet1.write(s2+31,coln_no,ele['npsh_r_m'] or "-",style8)
-						sheet1.write(s2+32,coln_no,ele['best_efficiency'] or "-",style8)
-						sheet1.write(s2+33,coln_no,ele['bkw_water'] or "-",style8)
-						sheet1.write(s2+34,coln_no,ele['bkw_liq'] or "-",style8)
-						sheet1.write(s2+35,coln_no,ele['impeller_dia_rated'] or "-",style8)
-						sheet1.write(s2+36,coln_no,ele['impeller_tip_speed'] or "-",style8)
-						sheet1.write(s2+37,coln_no,ele['hydrostatic_test_pressure'] or "-",style8)
-						sheet1.write(s2+38,coln_no,ele['setting_height'] or "-",style8)
-						sheet1.write(s2+39,coln_no,ele['rpm'] or "-",style8)
-						sheet1.write(s2+40,coln_no,ele['full_load_rpm'] or "-",style8)
-						sheet1.write(s2+41,coln_no,ele['frequency'] or "-",style8)
-						sheet1.write(s2+42,coln_no,ele['motor_kw'] or "-",style8)
-						sheet1.write(s2+43,coln_no,ele['motor_margin'] or "-",style8)
-						sheet1.write(s2+44,coln_no,ele['speed_in_motor'] or "-",style8)
-						sheet1.write(s2+45,coln_no,ele['end_of_the_curve'] or "-",style8)
-						sheet1.write(s2+46,coln_no,ele['critical_speed'] or "-",style8)
-						sheet1.write(s2+47,coln_no,ele['maximum_allowable_soild'] or "-",style8)
-						sheet1.write(s2+48,coln_no,ele['impeller_number'] or "-",style8)
-					
-						sheet1.write(s2+49,coln_no,ele['impeller_dia_max'] or "-",style8)
-						sheet1.write(s2+50,coln_no,ele['max_allowable_test'] or "-",style8)
-						sheet1.write(s2+51,coln_no,ele['crm_type'] or "-",style8)
-						sheet1.write(s2+52,coln_no,ele['casing_design'] or "-",style8)
-						sheet1.write(s2+53,coln_no,ele['shut_off_head'] or "-",style8)
-						sheet1.write(s2+54,coln_no,ele['shut_off_pressure'] or "-",style8)
-						sheet1.write(s2+55,coln_no,ele['minimum_contionuous'] or "-",style8)
-						sheet1.write(s2+56,coln_no,ele['specific_speed'] or "-",style8)
-						sheet1.write(s2+57,coln_no,ele['suction_specific_speed'] or "-",style8)
-						sheet1.write(s2+58,coln_no,ele['sealing_water_pressure'] or "-",style8)
-						sheet1.write(s2+59,coln_no,ele['sealing_water_capacity'] or "-",style8)
-						sheet1.write(s2+60,coln_no,ele['gd_sq_value'] or "-",style8)
-						sheet1.write(s2+61,coln_no,ele['bearing_make'] or "-",style8)
-						sheet1.write(s2+62,coln_no,ele['bearing_number_nde'] or "-",style8)
-						sheet1.write(s2+63,coln_no,ele['bearing_qty_nde'] or "-",style8)
-						sheet1.write(s2+64,coln_no,ele['lubrication_type'] or "-",style8)
-						sheet1.write(s2+65,coln_no,ele['primemover_categ'] or "-",style8)
-						sheet1.write(s2+66,coln_no,ele['type_of_drive'] or "-",style8)
-						sheet1.write(s2+67,coln_no,ele['primemover'] or "-",style8)
-						sheet1.write(s2+68,coln_no,ele['operation_range'] or "-",style8)
-						
-						s_no = s_no + 1
-					coln_no = coln_no + 1
-				else:
-					sheet1.write(s2+1,coln_no,"-",style6)
-					sheet1.write(s2+2,coln_no,"-",style6)
-					sheet1.write(s2+3,coln_no,"-",style6)
-					sheet1.write(s2+5,coln_no,"-",style6)
-					sheet1.write(s2+6,coln_no,"-",style6)
-					sheet1.write(s2+7,coln_no,"-",style6)
-					sheet1.write(s2+8,coln_no,"-",style6)
-					sheet1.write(s2+9,coln_no,"-",style6)
-					sheet1.write(s2+10,coln_no,"-",style6)
-					sheet1.write(s2+11,coln_no,"-",style6)
-					sheet1.write(s2+12,coln_no,"-",style6)
-					sheet1.write(s2+13,coln_no,"-",style6)
-					sheet1.write(s2+14,coln_no,"-",style6)
-					sheet1.write(s2+15,coln_no,"-",style6)
-					sheet1.write(s2+16,coln_no,"-",style6)
-					sheet1.write(s2+17,coln_no,"-",style6)
-					sheet1.write(s2+19,coln_no,"-",style6)
-					sheet1.row(s2+19).height = 490
-					sheet1.write(s2+20,coln_no,"-",style1)
-					sheet1.write(s2+21,coln_no,"-",style6)	
-					#~ sheet1.write(s2+20,coln_no,"-",style6)
-					#~ sheet1.write(s2+21,coln_no,"-",style6)
-					sheet1.write(s2+22,coln_no,"-",style6)
-					sheet1.write(s2+23,coln_no,"-",style6)
-					sheet1.write(s2+24,coln_no,"-",style6)
-					sheet1.write(s2+25,coln_no,"-",style6)
-					sheet1.write(s2+26,coln_no,"-",style6)
-					sheet1.write(s2+27,coln_no,"-",style6)
-					sheet1.write(s2+28,coln_no,"-",style6)
-					#~ sheet1.write(s2+26,coln_no,"-",style6)
-					sheet1.write(s2+29,coln_no,"-",style6)
-					sheet1.write(s2+30,coln_no,"-",style6)
-					sheet1.write(s2+31,coln_no,"-",style6)
-					sheet1.write(s2+32,coln_no,"-",style6)
-					sheet1.write(s2+33,coln_no,"-",style6)
-					sheet1.write(s2+34,coln_no,"-",style6)
-					sheet1.write(s2+35,coln_no,"-",style6)
-					sheet1.write(s2+36,coln_no,"-",style6)
-					sheet1.write(s2+37,coln_no,"-",style6)
-					sheet1.write(s2+38,coln_no,"-",style6)
-					sheet1.write(s2+39,coln_no,"-",style6)
-					sheet1.write(s2+40,coln_no,"-",style6)
-					sheet1.write(s2+41,coln_no,"-",style6)
-					sheet1.write(s2+42,coln_no,"-",style6)
-					sheet1.write(s2+43,coln_no,"-",style6)
-					sheet1.write(s2+44,coln_no,"-",style6)
-					sheet1.write(s2+45,coln_no,"-",style6)
-					sheet1.write(s2+46,coln_no,"-",style6)
-					sheet1.write(s2+47,coln_no,"-",style6)
-					
-					sheet1.write(s2+50,coln_no,"-",style6)
-					sheet1.write(s2+51,coln_no,"-",style6)
-					sheet1.write(s2+52,coln_no,"-",style6)
-					sheet1.write(s2+53,coln_no,"-",style6)
-					sheet1.write(s2+54,coln_no,"-",style6)
-					sheet1.write(s2+55,coln_no,"-",style6)
-					sheet1.write(s2+56,coln_no,"-",style6)
-					sheet1.write(s2+57,coln_no,"-",style6)
-					sheet1.write(s2+58,coln_no,"-",style6)
-					sheet1.write(s2+59,coln_no,"-",style6)
-					sheet1.write(s2+60,coln_no,"-",style6)
-					sheet1.write(s2+61,coln_no,"-",style6)
-					sheet1.write(s2+62,coln_no,"-",style6)
-					sheet1.write(s2+63,coln_no,"-",style6)
-					sheet1.write(s2+64,coln_no,"-",style6)
-					sheet1.write(s2+65,coln_no,"-",style6)
-					sheet1.write(s2+66,coln_no,"-",style6)
-					sheet1.write(s2+67,coln_no,"-",style6)
-					sheet1.write(s2+68,coln_no,"-",style6)
-					sheet1.write(s2+69,coln_no,"-",style6)
-					coln_no = coln_no+ 1
-					
-		if line_data:
-			em_col = 1
-			for item in line_data:
-				mat_sql = """
-							select 
-							omat.name as mat_name,
-							moc.name as moc
-
-							from ch_kg_crm_pumpmodel enq_line
-							
-							join ch_moc_construction mocc on(mocc.header_id=enq_line.id)
-							left join kg_offer_materials omat on(omat.id=mocc.offer_id)
-							left join kg_moc_master moc on(moc.id=mocc.moc_id)
-							where enq_line.id = """+ str(item['enquiry_line_id']) +""" and enq_line.pump_id = """+ str(item['pump_id']) + """ order by enq_line.pump_id,enq_line.id
-							"""
-				cr.execute(mat_sql)		
-				mat_data = cr.dictfetchall()
-				print"mat_data",mat_data
-				row_no = s2+70
-				
-				if mat_data:
-					for item_1 in mat_data:
-						if item_1['mat_name'] or item_1['moc']:
-							m_col_no = 0
-							if em_col == 1:
-								sheet1.write(row_no,m_col_no,item_1['mat_name'],style4)
-							else:
-								pass
-							sheet1.write(row_no,em_col,item_1['moc'] or "-",style8)
-							row_no = row_no+1
-				else:
-					m_col_no = 0
-					sheet1.write(row_no,em_col,"-",style8)
-					row_no = row_no+1
-				em_col = em_col + 1 
-		print"row_norow_norow_norow_no",row_no
-		
-		sheet1.write_merge(row_no, row_no, 0, len_col, 'Mechanical Seal Details:', style5)
-		sheet1.row(row_no).height = 400
-		row_no = row_no + 1
-		
-		sheet1.write_merge(row_no, row_no, 0, 0, 'Mech. Seal Make', style4)
-		print"row_norow_norow_nosssssssssS",row_no
-		print"row_norow_norow_nolen_collen_collen_col",len_col
-		sheet1.write_merge(row_no+1, row_no+1, 0, 0, 'Seal Type', style4)
-		sheet1.write_merge(row_no+2, row_no+2, 0, 0, 'Face Combination', style4)
-		sheet1.write_merge(row_no+3, row_no+3, 0, 0, 'Gland Plate', style4)
-		sheet1.write_merge(row_no+4, row_no+4, 0, 0, 'API Plan', style4)
-		if line_data:
-			em_col = 1
-			for item in line_data:
-				mech_sql = """
-							select 
-							enq_line.shaft_sealing as shaft_sealing,
-							enq_line.shaft_sealing as gland,
-							brand.name as mech_seal_make,
-							(CASE WHEN enq_line.seal_type = 'sums' 
-							THEN 'Single Unbalanced Multiple Spring'
-							WHEN enq_line.seal_type = 'suss' 
-							THEN 'Single Unbalanced Single Spring'
-							WHEN enq_line.seal_type = 'sbsm' 
-							THEN 'Single Balanced Spring Stationary Mounted'
-							WHEN enq_line.seal_type = 'cs' 
-							THEN 'Cartridge Seal'
-							WHEN enq_line.seal_type = 'sbms' 
-							THEN 'Single Balanced Multiple Spring'
-							WHEN enq_line.seal_type = 'sbss' 
-							THEN 'Single Balanced Single Spring'
-							WHEN enq_line.seal_type = 'sc' 
-							THEN 'Single Cartridge'
-							WHEN enq_line.seal_type = 'dubtb' 
-							THEN 'Double Unbalanced Back to Back'
-							WHEN enq_line.seal_type = 'dbbtb' 
-							THEN 'Double Balanced Back to Back'
-							WHEN enq_line.seal_type = 'ts' 
-							THEN 'Tandem Seal'
-							WHEN enq_line.seal_type = 'dc' 
-							THEN 'Double Cartridge'
-							WHEN enq_line.seal_type = 'drsu' 
-							THEN 'Dry Running - Single Unbalanced'
-							WHEN enq_line.seal_type = 'mbi' 
-							THEN 'Metallic Bellow Inside'
-							WHEN enq_line.seal_type = 'tbs' 
-							THEN 'Teflon Bellow Seal-Outside Mounted Dry Running'
-							ELSE ''
-							end ) as seal_type,
-							(CASE WHEN enq_line.face_combination = 'c_vs_sic' 
-							THEN 'C VS SIC'
-							WHEN enq_line.face_combination = 'sic_vs_sic' 
-							THEN 'SIC VS SIC'
-							WHEN enq_line.face_combination = 'c_vs_sic' 
-							THEN 'SIC VS SIC / C VS SIC'
-							WHEN enq_line.face_combination = 'gft_vs_ceramic' 
-							THEN 'GFT VS CERAMIC'
-							ELSE ''
-							end ) as face_combination,
-							enq_line.gland_plate as gland_plate,
-							enq_line.api_plan as api_plan
-							
-							from ch_kg_crm_pumpmodel enq_line
-							left join kg_brand_master brand on(brand.id=enq_line.mech_seal_make)
-							where enq_line.id = """+ str(item['enquiry_line_id']) +""" and enq_line.pump_id = """+ str(item['pump_id']) + """
-							"""
-				cr.execute(mech_sql)		
-				mech_data = cr.dictfetchall()
-				print"mech_data",mech_data
-				if mech_data:
-					s = 1
-					for item_1 in mech_data:
-						if item_1['mech_seal_make'] or item_1['seal_type'] or item_1['face_combination'] or item_1['gland_plate'] or item_1['api_plan']:
-							m_col_no = 1
-							sheet1.write(row_no,em_col,item_1['mech_seal_make'],style8)
-							sheet1.write(row_no+1,em_col,item_1['seal_type'],style8)
-							sheet1.write(row_no+2,em_col,item_1['face_combination'],style8)
-							sheet1.write(row_no+3,em_col,item_1['gland_plate'],style8)
-							sheet1.write(row_no+4,em_col,item_1['api_plan'],style8)
-							m_col_no = m_col_no+1
-						else:
-							m_col_no = 1
-							sheet1.write(row_no,em_col,"-",style8)
-							sheet1.write(row_no+1,em_col,"-",style8)
-							sheet1.write(row_no+2,em_col,"-",style8)
-							sheet1.write(row_no+3,em_col,"-",style8)
-							sheet1.write(row_no+4,em_col,"-",style8)
-							m_col_no = m_col_no+1
-						s = s + 4
-						em_col = em_col + 1
-						print"sssssssssssss",s
-				else:
-					sheet1.write(row_no,em_col,"-",style8)
-					sheet1.write(row_no+1,em_col,"-",style8)
-					sheet1.write(row_no+2,em_col,"-",style8)
-					sheet1.write(row_no+3,em_col,"-",style8)
-					sheet1.write(row_no+4,em_col,"-",style8)
-					em_col = em_col + 1
-					
-			print"row_norow_nodddddD",row_no
-			row_no = row_no + s
-		
-		sheet1.write_merge(row_no, row_no, 0, len_col, 'Motor Make Details:', style5)
-		sheet1.row(row_no).height = 400
-		row_no = row_no + 1
-		
-		sheet1.write_merge(row_no, row_no, 0, 0, 'Type / Mounting', style4)
-		sheet1.write_merge(row_no+1, row_no+1, 0, 0, 'Insulation / protection', style4)
-		sheet1.write_merge(row_no+2, row_no+2, 0, 0, 'Voltage / Phase / Frequency', style4)
-		if line_data:
-			em_col = 1
-			for item in line_data:
-				mm_sql = """
-							select 
-							enq_line.shaft_sealing as shaft_sealing,
-							enq_line.qty as qty,
-							enq_line.qty as qty
-							
-							from ch_kg_crm_pumpmodel enq_line
-							
-							where enq_line.id = """+ str(item['enquiry_line_id']) +""" and enq_line.pump_id = """+ str(item['pump_id']) + """ """
-				cr.execute(mm_sql)		
-				mm_data = cr.dictfetchall()
-				print"mm_data",mm_data
-				s = 1
-				if mm_data:
-					for item_1 in mm_data:
-						if item_1['shaft_sealing'] or item_1['qty']:
-							sheet1.write(row_no,em_col,"-",style8)
-							sheet1.write(row_no+1,em_col,"-",style8)
-							sheet1.write(row_no+2,em_col,"-",style8)
-							#~ sheet1.write(row_no,em_col,item_1['shaft_sealing'] or "-",style8)
-							#~ sheet1.write(row_no+1,em_col,item_1['qty'] or "-",style8)
-							#~ sheet1.write(row_no+2,em_col,item_1['qty'] or "-",style8)
-						else:
-							sheet1.write(row_no,em_col,"-",style8)
-							sheet1.write(row_no+1,em_col,"-",style8)
-							sheet1.write(row_no+2,em_col,"-",style8)
-						s = s + 2
-						em_col = em_col + 1
-				else:
-					sheet1.write(row_no,em_col,"-",style8)
-					sheet1.write(row_no+1,em_col,"-",style8)
-					sheet1.write(row_no+2,em_col,"-",style8)
-					em_col = em_col + 1
-		row_no = row_no + s
-		
-		sheet1.write_merge(row_no, row_no, 0, len_col, 'Scope of Supply / Price per Each in Rs.', style5)
-		sheet1.row(row_no).height = 400
-		row_no = row_no + 1
-		
-		sheet1.write_merge(row_no, row_no, 0, 0, 'Bare Pump', style4)
-		
-		if line_data:
-			em_col = 1
-			for item in line_data:
-				ss_sql = """
-							select 
-							pump_offer.tot_price as tot_price
-							
-							from ch_pump_offer pump_offer
-							
-							where pump_offer.header_id = """+ str(rec.id) +""" and pump_offer.pump_id = """+ str(item['pump_id']) + """ """
-				cr.execute(ss_sql)		
-				ss_data = cr.dictfetchall()
-				print"ss_data",ss_data
-				if ss_data:
-					for item_1 in ss_data:
-						if item_1['tot_price']:
-							sheet1.write(row_no,em_col,item_1['tot_price'] or "-",style8)
-						else:
-							sheet1.write(row_no,em_col,"-",style8)
-						em_col = em_col + 1
-				else:
-					sheet1.write(row_no,em_col,"-",style8)
-					em_col = em_col + 1
-		row_no = row_no
-		print"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",row_no
-		sheet1.write_merge(row_no+1, row_no+1, 0, len_col, 'Accessories', style5)
-		sheet1.row(row_no+1).height = 400
-		row_no = row_no + 1
-		
-		if line_data:
-			em_col = 1
-			for item in line_data:
-				access_sql = """
-							select 
-							acc.name as access_name,
-							categ.name as access_cate_name,
+		insulation as motor_insulation,
+		protection as motor_protection,
+		voltage as motor_voltage,
+		phase as motor_phase,
+		frequency as motor_Frequency
+		---- Motor Specification Ends Here
+		"""
+		sql_twoend = """ ) as sample ) as sample"""
+		for report in rpt_type:
+			print " --- Starts Here ----"
+			crm_line_obj = self.pool.get('ch.kg.crm.pumpmodel')
+			count_sql = """ select 
+			(select name from kg_pumpmodel_master where id = pump_id) as pump_name,
+			id as crm_id,purpose_categ as purpose_categ,
+			count(*) OVER () from ch_kg_crm_pumpmodel where header_id in %s and pump_model_type = '%s' order by pump_model_type,purpose_categ,id """%(pass_param,report)
+			cr.execute(count_sql)
+			count_data = cr.dictfetchone()
+			if not count_data:
+				pass
+			else:
+				print " = RRRRRRRR TTTTTT =============",report
+				if report == 'horizontal':
+					sheet1 = wbk.add_sheet('Horizontal')
+					dictn = hz_dictn
+				elif report == 'vertical':
+					sheet1 = wbk.add_sheet('Vertical')			
+					dictn = vz_dictn
+				count = count_data['count']
+				pump_sql = count_sql
+				cr.execute(pump_sql)
+				pump_data = cr.dictfetchall()
+				s1 = 0
+				c1=0
+				s2 = s1+1	
+				c2 = c1+count				
+				sheet1.col(0).width = 20000
+				cmp_ids = cmp_obj.browse(cr, uid, 1)
+				#~ sheet1.write_merge(s2, s2, c1, c2, str(cmp_ids.name or ''), style_mast_header)
+				sheet1.write_merge(s2, s2, c1, c2,"SAM TURBO INDUSTRY PRIVATE LIMITED",style1)
+				sheet1.row(0).height = 400
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, c1, c2,"Avinashi Road, Neelambur, Coimbatore - 641062",style4)
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, c1, c2,"Tel:3053555, 3053556,Fax : 0422-3053535",style4)				
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, c1, c2, report.upper()+'SLURRY-CENTRIFUGAL PUMP OFFER SHEET ', style41)
+				s2 = s2+1
+				sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+				sheet1.row(0).height = 400
+				sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,c2)
+				for key in sorted(dictn):
+					s2 = s2+1
+					c1 = c1+1
+					c1 = 0
+					sheet1.write_merge(s2, s2, c1, c1+count, key.split('#')[1], style_left_header)
+					print "key.split('#')[1]======================",key.split('#')[1]
+					for var in (dictn[key]):
+						s2 = s2+1
+						c1 = c1+1
+						c1 = 0
+						print "ssss @@@@@@@@@@@@@@@@@@@@@",s2
+						if var[0] == 'Purpose':
+							#~ moc_query = """ select offer_mat.name as mat,moc.name as moc from ch_moc_construction moc_const
+							#~ left join kg_offer_materials offer_mat on offer_mat.id = moc_const.offer_id
+							#~ left join kg_moc_master moc on  moc.id = moc_const.moc_id
+							#~ left join ch_kg_crm_pumpmodel enq_line on  enq_line.id = moc_const.header_id  """							
+							#~ moc_cond_query = """ where enq_line.id in (select id from ch_kg_crm_pumpmodel where header_id in %s and pump_model_type = '%s') """%(pass_param,report)
+							#~ moc_cnt_query = """ select count(*) from ( """ + moc_query + moc_cond_query + """ )  as sql_moc """
+							#~ cr.execute(moc_cnt_query)
+							#~ moc_cnt_data = cr.dictfetchone()
+							#~ moc_cnt = 0
+							#~ if moc_cnt_data:
+								#~ moc_cnt = moc_cnt_data['count']
+							#~ if not (moc_cnt > 0) :
+								#~ s2 = s2 + 1
+								#~ sheet1.write_merge(s2, s2, c1, c2, '-', style_center)
+								#~ print "ff"
+							#~ else:
+								#~ s2 -= 1
+							#~ print "fffff @@@@@@@@@@@@@@@@@",s2
+							#~ pump_cnt = 1
+							#~ print "lelelelelle pumpppp",len(pump_data)
+							#~ if pump_data:
+								#~ moc_s2 = s2
+								#~ for pump in pump_data:
+									#~ print "pump ======================",pump
+									#~ c1 += 1
+									#~ crm_line_rec = crm_line_obj.browse(cr, uid, pump['crm_id'])
+									#~ acc_cond = """where enq_line.id = %s"""%(pump['crm_id'])
+									#~ moc_pump_query = moc_query+acc_cond
+									#~ cr.execute(moc_pump_query)
+									#~ moc_pump_data = cr.dictfetchall()
+									#~ print "pppppp ========",pump['crm_id']
+									#~ print "moc_pump_data ======",moc_pump_data
+									#~ if moc_pump_data:
+										#~ print "###### $$$$$$$$$$$$$ Starts Here ====="
+										#~ for moc in moc_pump_data:
+											#~ print "moc @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",moc
+											#~ print "moc_s2moc_s2moc_s2moc_s2moc_s2moc_s2",moc_s2
+											#~ s2 = moc_s2 + moc_pump_data.index(moc) + 1
+											#~ print "sssssssssssssssss222222222222222",s2
+											#~ if moc['moc']:
+												#~ moc_name = moc['moc']
+											#~ else:
+												#~ moc_name = '-'
+											#~ sheet1.write_merge(s2, s2, 0, 0, moc['mat'], style_left)
+											#~ sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, moc['moc'], style_left)
+											#~ for c in range(1,count+1):
+												#~ if (c != pump_cnt and c != 0):
+													#~ print "cccc",c
+													#~ sheet1.write_merge(s2, s2, c, c, 444, style_left)
+										#~ print "###### $$$$$$$$$$$$$ Ends Here ====="
+									#~ else:
+										#~ s2 -= 1
+									#~ s2 += 1
+									#~ pump_cnt += 1	
+								#~ c1 = 0
+							#~ else:
+								#~ s2 -= 1
+							#~ s2 -= 1
+							moc_com_query = """ select crm.id as crm_id,
+							moc.offer_id,moc.moc_id,
+							(select name from kg_offer_materials where id = moc.offer_id) as moc_offer_name,
+							(select name from kg_moc_master where id = moc.moc_id) as moc_offer_value
+							from ch_moc_construction moc 
+							left outer join ch_kg_crm_pumpmodel crm on crm.id = moc.header_id """
+							moc_cond = """where crm.header_id in  %s and crm.pump_model_type = '%s' """%(pass_param,report)
+							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
+							cr.execute(moc_query)
+							moc_cond = """where crm.header_id in  %s and crm.pump_model_type = '%s' """%(pass_param,report)
+							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
+							cr.execute(moc_query)
+							print "ERERERERER ",moc_query
+							moc_query_data = cr.dictfetchall()
+							if not moc_query_data:
+								sheet1.write_merge(s2, s2, c1, c2, '-', style_center)
+								s2 += 1
+							for moc in moc_query_data:
+								sheet1.write_merge(s2, s2, c1, c1, moc['moc_offer_name'], style_left)
+								print "dddff 45454545454",s2
+								if pump_data:
+									for pump in pump_data:
+										crm_line_rec = crm_line_obj.browse(cr, uid, pump['crm_id'])
+										c1 += 1
+										moc_pump_query = moc_com_query+ """where crm.header_id in  %s and crm.pump_model_type = '%s' and crm.id = %s and moc.offer_id = %s """%(pass_param,report,pump['crm_id'],moc['offer_id'])
+										cr.execute(moc_pump_query)
+										print "moc_pump_query ================",moc_pump_query
+										moc_pump_data = cr.dictfetchall()
+										print "ssssss33333333333333333333",s2
+										if moc_pump_data:
+											for moc_val in moc_pump_data:
+												print "ininiinii s22222",s2
+												print "ffff iniiinii",moc_pump_data.index(moc_val)
+												sheet1.write_merge(s2, s2, c1, c1, moc_val['moc_offer_value'], style_left)
+										else:
+											sheet1.write_merge(s2, s2, c1, c1, '-', style_left)
+								s2 += 1
+								c1 = 0
+							s2 = s2-1
+						elif var[0] == 'All Accessories':
+							access_query = """ select
+							acc.name ||' ('|| case when hsn.name is not null then hsn.name else '-' end ||')'||'('|| tax.name||')' as access_name,
 							access_offer.net_amount as net_amount
-							
 							from ch_accessories_offer access_offer
 							left join kg_accessories_master acc on(acc.id=access_offer.access_id)
 							left join kg_accessories_category categ on(categ.id=acc.access_cate_id)
-							where access_offer.header_id = """+ str(rec.id) +""" and access_offer.pump_id = """+ str(item['pump_id']) + """ order by access_offer.pump_id """
-				cr.execute(access_sql)		
-				access_data = cr.dictfetchall()
-				print"access_data",access_data
-				if access_data:
-					for item_1 in access_data:
-						if item_1['net_amount'] or item_1['access_cate_name']:
-							sheet1.write(row_no+1,0,item_1['access_cate_name'],style8)
-							sheet1.write(row_no+1,em_col,item_1['net_amount'] or "-",style8)
-							row_no = row_no+1
-					em_col = em_col + 1
-				else:
-					sheet1.write(row_no+1,em_col,"-",style8)
-					em_col = em_col + 1
-		row_no = row_no
-		
-		sheet1.write_merge(row_no+2, row_no+2, 0, len_col, 'Spares:', style5)
-		sheet1.row(row_no+1).height = 400
-		row_no = row_no + 1
-		
-		if line_data:
-			em_col = 1
-			for item in line_data:
-				spare_sql = """
-							select 
-							spare_offer.item_name as spare_name,
+							left join kg_hsn_master hsn on(hsn.id=access_offer.hsn_no)
+							left join account_tax tax on(tax.id=access_offer.gst) """							
+							access_cond_query = """ where access_offer.enquiry_line_id in (select id from ch_kg_crm_pumpmodel where header_id in %s and pump_model_type = '%s') """%(pass_param,report)
+							access_cnt_query = """ select count(*) from ( """ + access_query + access_cond_query + """ )  as sql_access """
+							cr.execute(access_cnt_query)
+							access_cnt_data = cr.dictfetchone()
+							access_cnt = 0
+							if access_cnt_data:
+								access_cnt = access_cnt_data['count']
+							if access_cnt > 0 :
+								sheet1.write_merge(s2, s2, c1, c1+count, var[0], style_sub_left)
+							else:
+								pass							
+							pump_cnt = 1
+							if pump_data:
+								s2 = s2
+								for pump in pump_data:
+									print "dfffffffffffffffff =============",pump_data
+									c1 += 1
+									crm_line_rec = crm_line_obj.browse(cr, uid, pump['crm_id'])
+									print "acccc pump _id =========================",pump['crm_id']
+									acc_cond = """where access_offer.enquiry_line_id = %s"""%(pump['crm_id'])
+									access_pump_query = access_query+acc_cond
+									cr.execute(access_pump_query)
+									access_pump_data = cr.dictfetchall()
+									if access_pump_data:
+										for access in access_pump_data:
+											s2 = s2 + access_pump_data.index(access) + 1
+											if access['access_name']:
+												acc = access['access_name']
+											else:
+												acc = '-'
+											print "affff ssss222222",s2
+											sheet1.write_merge(s2, s2, 0, 0, acc, style_left)
+											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, access['net_amount'], style_left)
+											for c in range(1,count+1):
+												if (c != pump_cnt and c != 0):
+													sheet1.write_merge(s2, s2, c, c, 0.00, style_left)
+									else:
+										s2 -= 1
+									s2 += 1
+									pump_cnt += 1	
+								c1 = 0
+							else:
+								s2 -= 1
+							s2 = s2 - 1
+						elif var[0] == 'Spares':
+							spare_query = """ select
+							spare_offer.item_name ||' ('|| case when hsn.name is not null then hsn.name else '-' end ||')'||'('|| tax.name||')' as spare_name,
 							pmm.name as pump_name,
 							spare_offer.net_amount as net_amount
-							
+
 							from ch_spare_offer spare_offer
+
 							left join kg_pumpmodel_master pmm on(pmm.id=spare_offer.pump_id)
-							where spare_offer.header_id = """+ str(rec.id) +""" and spare_offer.pump_id = """+ str(item['pump_id']) + """ order by spare_offer.pump_id """
-				cr.execute(spare_sql)		
-				spare_data = cr.dictfetchall()
-				print"spare_data",spare_data
-				if spare_data:
-					for item_1 in spare_data:
-						if item_1['spare_name'] or item_1['net_amount']:
-							m_col_no = 1
-							sheet1.write(row_no+2,0,item_1['spare_name'],style8)
-							sheet1.write(row_no+2,em_col,item_1['net_amount'] or "-",style8)
-							row_no = row_no+1
-				else:
-					sheet1.write(row_no+2,em_col,"-",style8)
-					em_col = em_col + 1
-		row_no = row_no
-		print"row_norow_norow_norow_norow_norow_no",row_no
-			
+							left join kg_hsn_master hsn on(hsn.id=spare_offer.hsn_no)
+							left join account_tax tax on(tax.id=spare_offer.gst) """
+							spare_cond_query = """ where spare_offer.enquiry_line_id in (select id from ch_kg_crm_pumpmodel where header_id in %s and pump_model_type = '%s') """%(pass_param,report)
+							spare_cnt_query = """ select count(*) from ( """ + spare_query + spare_cond_query + """ )  as sql_spare """
+							cr.execute(spare_cnt_query)
+							spare_cnt_data = cr.dictfetchone()
+							spare_cnt = 0
+							if spare_cnt_data:
+								spare_cnt = spare_cnt_data['count']
+							if spare_cnt > 0 :
+								sheet1.write_merge(s2, s2, c1, c1+count, var[0], style_sub_left)
+								#~ s2 += 1
+							else:
+								pass
+							pump_cnt = 1
+							if pump_data:
+								s2 = s2
+								for pump in pump_data:
+									c1 += 1
+									crm_line_rec = crm_line_obj.browse(cr, uid, pump['crm_id'])
+									print "acccc pump _id =========================",pump['crm_id']
+									spa_cond = """where spare_offer.enquiry_line_id = %s"""%(pump['crm_id'])
+									spare_pump_query = spare_query+spa_cond
+									cr.execute(spare_pump_query)
+									spare_pump_data = cr.dictfetchall()
+									print "22222222222222222 ##################",s2
+									head_s2 = s2
+									if spare_pump_data:
+										for spare in spare_pump_data:
+											s2 = s2 + spare_pump_data.index(spare) + 1
+											print "inidnedieidi sss sdd ds222222",s2
+											if spare['spare_name']:
+												spa = spare['spare_name']
+												sheet1.write_merge(s2, s2, 0, 0, spa, style_left)
+											else:
+												spa = '-'
+												sheet1.write_merge(s2, s2, 0, 0, spa, style_left)
+											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, spare['net_amount'], style_left)
+											for c in range(1,count+1):
+												if (c != pump_cnt and c != 0):
+													sheet1.write_merge(s2, s2, c, c, 0.00, style_left)
+									else:
+										s2 -= 1
+									s2 += 1
+									pump_cnt += 1	
+								c1 = 0
+							else:
+								s2 -= 1
+							s2 = s2 - 1
+						else:
+							sheet1.write_merge(s2, s2, c1, c1, var[0], style_left)
+						if pump_data:
+							for pump in pump_data:
+								crm_line_rec = crm_line_obj.browse(cr, uid, pump['crm_id'])
+								c1 += 1
+								if var[1] in ('purp_categ','acces','spare'):
+									pass
+								elif var[1] == 'bare_pump':
+									bare_pump_query = """ select
+									pump_offer.tot_price as tot_price
+									from ch_pump_offer pump_offer
+									left join kg_hsn_master hsn on(hsn.id=pump_offer.hsn_no)
+									left join account_tax tax on(tax.id=pump_offer.gst)
+									where pump_offer.enquiry_line_id = %s """%(pump['crm_id'])
+									cr.execute(bare_pump_query)
+									bare_pump_data = cr.dictfetchone()
+									bare_pump = 0.00
+									if bare_pump_data:
+										bare_pump = bare_pump_data['tot_price']									
+									sheet1.write_merge(s2, s2, c1, c1, bare_pump, style_left)								
+								else:
+									sqltwo_query = """
+									from ch_kg_crm_pumpmodel where header_id in %s and pump_model_type = '%s' and id = %s
+									) as sql_all  """%(pass_param,report,pump['crm_id'])
+									sql_query = sqltwo+sqlone_query+sqltwo_query+sql_twoend
+									cr.execute(sql_query)
+									sql_query_data = cr.dictfetchall()
+									if sql_query_data:
+										for loop in sql_query_data:
+											if loop[var[1]] != '-':
+												replace_str = str(loop[var[1]])
+												values = string.replace(replace_str, '$', '/')
+												if var[1] == 'pump_pmodtype':
+													ref_value = dict(self_obj._columns['pump_model_type'].selection)
+													values = str(ref_value[loop[var[1]]])
+												if var[1] == 'pump_impeller_type':
+													ref_value = dict(self_obj._columns['impeller_type'].selection)
+													if loop[var[1]] != '-':
+														values = str(ref_value[loop[var[1]]])
+											else:
+												values = loop[var[1]]
+											if var[1] == 'pump_pmodel':
+												sheet1.write_merge(s2, s2, c1, c1, values, style_highlight)
+											else:
+												sheet1.write_merge(s2, s2, c1, c1, values, style_left)
+									else:
+										sheet1.write_merge(s2, s2, c1, c1, '', style_left)
+				if pump_data:
+					s1 = 5
+					c1 = 0
+					for pump in pump_data:
+						c1 += 1
+						sheet1.col(c1).width = 3000
+						print "ERRRRRRRRRRRRRRRRRRRR REEEEEEEEEEEEEEEEe",str(pump['crm_id'])
+						sheet1.write_merge(s1, s1, c1, c1, '', style_left)
+				
+				print " --- Ends Here ----"				
+		
 		"""Parsing data as string """
 		file_data=StringIO.StringIO()
-		
-		sheet1.set_protect(True)
-		sheet1.set_password('secret')
-		
 		o=wbk.save(file_data)		
 		"""string encode of data in wksheet"""		
 		out=base64.encodestring(file_data.getvalue())
@@ -2494,9 +2215,9 @@ class ch_pump_offer(osv.osv):
 			res[line.id]['r_tax_tot'] = r_tax_tot
 			#~ res[line.id]['r_tot_price'] = tot_price
 			if line.cust_in_ex == 'inclusive':
-				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot
+				res[line.id]['r_net_amount'] = r_pump_price_tot 
 			else:
-				res[line.id]['r_net_amount'] = r_pump_price_tot
+				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot
 			res[line.id]['prime_cost'] = (line.per_pump_prime_cost * line.qty) + line.additional_cost
 			print"line.r_cpo_amount",line.r_cpo_amount
 			enq_no = line.header_id.enquiry_no
