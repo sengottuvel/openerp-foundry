@@ -95,6 +95,7 @@ class kg_drawing_issue(osv.osv):
 					'position_id': indent_item.position_id.id,	
 					'item_code': indent_item.item_code,
 					'item_name': indent_item.item_name,				
+					'indent_id': indent_item.id,				
 					
 					}
 				issue_line_id = issue_line_obj.create(cr, uid, issue_details)
@@ -175,6 +176,7 @@ class ch_drawing_issue_line(osv.osv):
 	_columns = {
 		
 		'header_id': fields.many2one('kg.drawing.issue','Header Id', required=True, ondelete='cascade'),
+		'indent_id': fields.many2one('ch.drawing.indent.line','Indent Line Id'),
 		'order_line_id': fields.many2one('ch.work.order.details','WO No.',domain="[('header_id.state','=','confirmed')]"),
 		'pump_model_type': fields.related('order_line_id','pump_model_type', type='selection', selection=[('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], string='Pump Type', store=True, readonly=True),
 		'position_id': fields.many2one('kg.position.number','Position No.',domain="[('state','=','approved')]"),	

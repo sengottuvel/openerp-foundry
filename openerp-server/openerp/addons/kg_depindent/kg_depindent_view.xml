@@ -217,7 +217,7 @@
 			<field name="type">tree</field>
 			<field name="priority">2</field>
 			<field name="arch" type="xml" >
-			   <tree string="Department Indent" create="false">
+			   <tree string="Department Indent" create="false" delete="false">
 					<field name="indent_id" string="Indent No"/>
 					<field name="line_date"/>
 					<field name="order_line_id"/>

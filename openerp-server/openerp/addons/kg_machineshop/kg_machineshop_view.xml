@@ -8,7 +8,7 @@
 			<field name="name">MS Foundry Inward Form</field>
 			<field name="model">kg.machineshop</field>
 			<field name="arch" type="xml">
-				<form string="MS Foundry Inward" version="7.0" create="false">
+				<form string="MS Foundry Inward" version="7.0" create="false" delete="false">
 					<header>
 						<button name="ms_accept" type="object" string="Update" class="oe_highlight"
 						attrs="{'invisible': [('state','in',['accept'])]}"/>
@@ -84,7 +84,7 @@
 			<field name="model">kg.machineshop</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="MS Foundry Inward Entry Tree" create="false">					
+				<tree toolbar="True" string="MS Foundry Inward Entry Tree" create="false" delete="false">					
 					<field name="name" invisible="1"/>
 					<field name="order_no"/>
 					<field name="order_delivery_date"/>
