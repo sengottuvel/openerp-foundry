@@ -1010,6 +1010,11 @@ class purchase_order_line(osv.osv):
 		
 		# - check that uom and product uom belong to the same category
 		product_uom_po_id = product.uom_po_id.id
+		product_po_copy_uom = product.po_copy_uom.id
+		if product_po_copy_uom:
+			po_copy_uom_id = product_po_copy_uom
+		else:
+			po_copy_uom_id = ''
 		if not uom_id:
 			uom_id = product_uom_po_id
 		
@@ -1018,7 +1023,7 @@ class purchase_order_line(osv.osv):
 				#~ res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
 			uom_id = product_uom_po_id
 		
-		res['value'].update({'product_uom': uom_id})
+		res['value'].update({'product_uom': uom_id,'po_copy_uom': po_copy_uom_id})
 		
 		# - determine product_qty and date_planned based on seller info
 		if not date_order:

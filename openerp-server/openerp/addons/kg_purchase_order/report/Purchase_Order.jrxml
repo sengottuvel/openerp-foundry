@@ -95,7 +95,7 @@ from
 
 purchase_order_line line
 left join product_product prod on(prod.id=line.product_id)
-left join product_uom uom on(uom.id=line.product_uom)
+left join product_uom uom on(uom.id=line.po_copy_uom)
 left join ch_brandmoc_rate_details moc on(moc.id=line.moc_id_temp)
 left join kg_brand_master brand on(brand.id=line.brand_id)
 left join ch_purchase_wo wo on(wo.header_id=line.id)

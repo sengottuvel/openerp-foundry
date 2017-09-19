@@ -293,6 +293,7 @@
                 </field>
 				<field name="product_uom" position="after">
 				<field name="cancel_flag" invisible="1"/>
+				<field name="po_copy_uom" required="1"/>
 				<field name="delivery_date"/>
 				<field name="po_type" invisible="1"/>
 				<field name="test_cert_flag"/>

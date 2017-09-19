@@ -1203,6 +1203,7 @@ class kg_purchase_order_line(osv.osv):
 		'approval_flag': fields.boolean('Spl Approval'),
 		'test_cert_flag': fields.boolean('Test Certificate'),
 		'test_certificate': fields.binary('Test Certificate Attach'),
+		'po_copy_uom': fields.many2one('product.uom','PO Copy UOM',domain="[('dummy_state','=','approved')]"),
 		
 		## Child Tables Declaration
 		
