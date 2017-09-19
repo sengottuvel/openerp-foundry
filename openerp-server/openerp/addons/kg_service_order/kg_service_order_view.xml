@@ -256,7 +256,7 @@
             <field name="type">tree</field>
             <field name="priority">2</field>
             <field name="arch" type="xml">
-                <tree string="Service order Line" create="false">
+                <tree string="Service order Line" create="false" delete="false">
                     <field name="service_id" string="SO No"/>
                     <field name="so_date"/>
                     <field name="partner_id"/>
