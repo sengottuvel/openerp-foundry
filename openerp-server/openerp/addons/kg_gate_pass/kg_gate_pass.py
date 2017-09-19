@@ -344,7 +344,8 @@ class kg_gate_pass_line(osv.osv):
 		## Module Requirement Fields
 		
 		'product_id': fields.many2one('product.product', 'Item Name',domain=[('state','not in',('reject','cancel'))]),
-		'brand_id': fields.many2one('kg.brand.master', 'Brand Name'),
+		'brand_id': fields.many2one('kg.brand.master', 'Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
+		'moc_id': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 		'uom': fields.many2one('product.uom', 'UOM'),
 		'qty': fields.float('Quantity'),
 		'indent_qty': fields.float('Indent Qty'),

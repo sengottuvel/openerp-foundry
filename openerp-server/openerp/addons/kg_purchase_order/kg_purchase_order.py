@@ -626,9 +626,9 @@ class kg_purchase_order(osv.osv):
 						if item.rate <= po_lines[i].price_unit:
 							design_rate = ((po_lines[i].price_unit/100.00) * 5) + po_lines[i].price_unit
 							self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'rate' : design_rate})
-						elif (item.rate - ((item.rate/100.00) * 5)) >= po_lines[i].price_unit:
-							design_rate = ((po_lines[i].price_unit/100.00)*5) + po_lines[i].price_unit
-							self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'rate' : design_rate})
+						#~ elif (item.rate - ((item.rate/100.00) * 5)) >= po_lines[i].price_unit:
+							#~ design_rate = ((po_lines[i].price_unit/100.00)*5) + po_lines[i].price_unit
+							#~ self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'rate' : design_rate})
 						else:
 							pass
 						## Design Rate update process end

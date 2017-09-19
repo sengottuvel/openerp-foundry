@@ -50,7 +50,8 @@
 						<field colspan="4" string="Gate Pass Line" mode="tree" name="gate_line" nolabel="1" widget="one2many_list" context="{'mode':mode,'entry_mode':'manual'}">
 							<tree string="Gate Pass Line" editable="bottom"> 
 								<field name="product_id" attrs="{'readonly':['|',('mode','in',['frm_indent']),('entry_mode','=','auto')]}" on_change="onchange_uom(product_id)" required="1"/>
-								<field name="brand_id" attrs="{'readonly':['|',('mode','in',['frm_indent']),('entry_mode','=','auto')]}"/>
+								<field name="brand_id" required="1" attrs="{'readonly':['|',('mode','in',['frm_indent']),('entry_mode','=','auto')]}"/>
+								<field name="moc_id" required="1" attrs="{'readonly':['|',('mode','in',['frm_indent']),('entry_mode','=','auto')]}"/>
 								<field name="uom" readonly="1" required="1"/>
 								<field name="qty" attrs="{'readonly':[('entry_mode','=','auto')]}" required="1" on_change="onchange_pending_qty(qty,grn_pending_qty,so_pending_qty)"/>
 								<field name="serial_no" attrs="{'readonly':['|',('mode','in',['frm_indent']),('entry_mode','=','auto')]}"/>
