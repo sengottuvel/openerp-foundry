@@ -233,6 +233,56 @@ class kg_monthly_attendance(osv.osv):
 		emp = self.pool.get('hr.employee').browse(cr, uid, employee_id, context=context)
 		value = {'code': emp.code,'emp_categ_id':emp.emp_categ_id.id,'division_id':emp.division_id.id}
 		return {'value': value}
+	
+	def month_att_entry_creation(self,cr,uid,ids=0,contex=None):
+		today = datetime.date.today()
+		first = datetime.date(day=1, month=today.month, year=today.year)
+		mon = today.month - 1
+		if mon == 0:
+			mon = 12
+		else:
+			mon = mon
+		tot_days = calendar.monthrange(today.year,mon)[1]
+		test = first - datetime.timedelta(days=tot_days)
+		res_start = test.strftime('%Y-%m-%d')
+		last = first - datetime.timedelta(days=1)
+		res_end = last.strftime('%Y-%m-%d')
+		today = date.today()
+		days_back = today - timedelta(today.day)		
+		last_month = days_back.strftime('%B')
+		cur_year = days_back.year
+		month_1 = str(last_month) + '-' + str(cur_year)
+		#sql = """ select id from hr_employee where att_code !='' and payslip=True """
+		sql = """ select hr.id as id
+					from hr_employee hr
+					left join resource_resource res on(res.id=hr.id)
+					where hr.att_code !='' and hr.payslip=True and res.active = True"""
+		cr.execute(sql)
+		data = cr.dictfetchall()
+		att_obj = self.pool.get('kg.monthly.attendance')
+		
+		for item in data:
+			emp_id = item.values()[0]
+			att_ser = att_obj.search(cr,uid,[('start_date','=',res_start),('end_date','=',res_end),('employee_id','=',emp_id)])
+			if not att_ser:
+				emp_rec = self.pool.get('hr.employee').browse(cr,uid,emp_id)
+				att_vals = {
+
+					'employee_id': emp_id,
+					'code':emp_rec.code,
+					'month':month_1,
+					'emp_categ_id':emp_rec.emp_categ_id.id,
+					'division_id':emp_rec.division_id.id,
+					'start_date': res_start,
+					'end_date': res_end,
+
+					}
+				att_id = att_obj.create(cr,uid,att_vals)
+			else:
+				raise osv.except_osv(_('Warning!'),
+					_('Monthly attendance Entry already created for this month !!'))
+
+		return True
 		
 	def update_monthly_att(self,cr,uid,ids,context=None):
 		
@@ -257,15 +307,20 @@ class kg_monthly_attendance(osv.osv):
 		last_month = days_back.strftime('%B')
 		cur_year = days_back.year
 		month_1 = str(last_month) + '-' + str(cur_year)
-		da_ids = da_obj.search(cr,uid,[('month','=',last_month),('year','=',cur_year)])
+		da_ids = da_obj.search(cr,uid,[('month','=','September'),('year','=',cur_year)])
 		check_data = mon_att_obj.search(cr,uid,[('start_date','=',res_start),('end_date','=',res_end)])
 		print "-------------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",len(check_data)
+		print "-------------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",res_start
+		print "-------------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",res_end
 		ot_tot_days = 0.00
 		total_ot_mon = 0.00
-		if len(check_data) == 1:
-			 
-			for item in da_ids:
-				da_rec = da_obj.browse(cr,uid,item)
+		#~ if len(check_data) == 1:
+			
+		for item in da_ids:
+			da_rec = da_obj.browse(cr,uid,item)
+			check_data = mon_att_obj.search(cr,uid,[('start_date','=',res_start),('end_date','=',res_end),('employee_id','=',da_rec.employee_id.id)])
+			if len(check_data) == 1:
+			
 				w_days = da_line_obj.search(cr,uid,[('header_id','=',item),
 								('status','not in',('weekoff','absent','halfday','compoff_half','compoff_full'))])
 				lev_days = da_line_obj.search(cr,uid,[('header_id','=',item),
@@ -327,10 +382,11 @@ class kg_monthly_attendance(osv.osv):
 							'state':'draft',
 							
 						}
-				att_id = mon_att_obj.create(cr,uid,att_vals)
-		else:
-			raise osv.except_osv(_('Warning!'),
-					_('Monthly attendance already created for this month !!'))
+				att_id = mon_att_obj.write(cr,uid,check_data[0],att_vals)
+			
+			else:
+				raise osv.except_osv(_('Warning!'),
+						_('Monthly attendance already created for this month !!'))
 		return True
 		
 	

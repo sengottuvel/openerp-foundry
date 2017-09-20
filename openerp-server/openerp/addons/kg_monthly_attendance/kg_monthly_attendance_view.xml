@@ -16,6 +16,7 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="update_monthly_att" type="object" string="Calculate" class="oe_highlight"/>
+						<button name="month_att_entry_creation" type="object" string="Monthly Attendance Creation" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
