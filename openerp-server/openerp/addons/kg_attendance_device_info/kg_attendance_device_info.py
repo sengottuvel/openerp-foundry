@@ -382,7 +382,7 @@ class kg_attendance_device_info(osv.osv):
 						
 						### Validating Using Shift Hours####
 						
-						rec=self.browse(cr,uid,ids[0])
+						#~ rec=self.browse(cr,uid,ids[0])
 						check_emp = self.pool.get('hr.employee').search(cr,uid,[('att_code','=',att_code[4:8])])
 						check_cont = self.pool.get('hr.contract').search(cr,uid,[('employee_id','=',check_emp[0])])
 						if check_cont:
