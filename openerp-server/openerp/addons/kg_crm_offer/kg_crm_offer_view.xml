@@ -226,21 +226,19 @@
 									<field name="moc_changed_flag" readonly="1"/>
 									<field name="moc_const_id" readonly="1"/>
 									<field name="qty" sum="qty"/>
-									<field name="additional_cost"/>
 									<field name="prime_cost" sum="prime_cost"/>
-									<field name="sam_ratio"/>
-									<field name="sam_ratio_tot" string="Works Value"/>
-									<field name="dealer_discount"/>
-									<field name="special_discount"/>
-									<field name="p_f"/>
-									<field name="freight"/>
-									<field name="insurance"/>
-									<field name="customer_discount"/>
-									<field name="agent_com"/>
+									
+									<field name="r_sam_ratio"/>
+									<field name="r_works_value"/>
+									<field name="r_dealer_discount"/>
+									<field name="r_special_discount"/>
+									<field name="r_p_f"/>
+									<field name="r_freight"/>
+									<field name="r_insurance"/>
+									<field name="r_customer_discount"/>
 									<field name="gst"/>
-									<field name="supervision_amount" sum="supervision_amount"/>
-									<field name="tot_price" sum="total_price"/>
-									<field name="net_amount" sum="net_amount"/>
+									<field name="r_net_amount" sum="net_amount"/>
+									
 								</tree>
 							</field>
 <!--
@@ -271,25 +269,24 @@
 									<field name="access_id" required="1" readonly="1"/>
 									<field name="off_name" readonly="1"/>
 									<field name="pump_id" required="1" readonly="1"/>
-									<field name="moc_id" required="1" readonly="1"/>
-									<field name="moc_changed_flag" readonly="1"/>
+									<field name="moc_id" required="1" readonly="1" invisible="1"/>
+									<field name="moc_changed_flag" readonly="1" invisible="1"/>
 									<field name="qty" sum="qty"/>
 									<field name="per_access_prime_cost" sum="per_access_prime_cost" readonly="1"/>
 									<field name="additional_cost"/>
 									<field name="prime_cost" sum="prime_cost" readonly="1"/>
-									<field name="sam_ratio"/>
-									<field name="sam_ratio_tot" string="Works Value"/>
-									<field name="dealer_discount"/>
-									<field name="special_discount"/>
-									<field name="p_f"/>
-									<field name="freight"/>
-									<field name="insurance"/>
-									<field name="customer_discount"/>
-									<field name="agent_com"/>
+																		
+									<field name="r_sam_ratio"/>
+									<field name="r_works_value"/>
+									<field name="r_dealer_discount"/>
+									<field name="r_special_discount"/>
+									<field name="r_p_f"/>
+									<field name="r_freight"/>
+									<field name="r_insurance"/>
+									<field name="r_customer_discount"/>
 									<field name="gst"/>
-									<field name="supervision_amount" sum="supervision_amount"/>
-									<field name="tot_price" sum="total_price"/>
-									<field name="net_amount" sum="net_amount"/>
+									<field name="r_net_amount" sum="net_amount"/>
+									
 								</tree>
 							</field>
 <!--
@@ -546,7 +543,7 @@
 							<div>
 								<div class="address_format">
 									<field name="r_customer_discount" on_change="onchange_cust_in_ex(r_customer_discount)" style="width: 40%%"/>
-									<field name="cust_in_ex" style="width: 35%%" attrs="{'required':[('r_customer_discount','>',0)]}"/>
+									<field name="cust_in_ex" style="width: 35%%" attrs="{'required':[('r_customer_discount','>',0)]}" invisible="1"/>
 								</div>
 							</div>
 							<field name="r_agent_com" invisible="1"/>
@@ -677,7 +674,7 @@
 							<field name="freight_tot"/>
 							<field name="pump_price_tot"/>
 							<field name="customer_discount_tot"/>
-							<field name="tax_tot"/>
+							<field name="tax_tot" invisible="1"/>
 							<field name="supervision_tot" invisible="1"/>
 							<!--<field name="tot_price"/>-->
 							<div class="oe_subtotal_footer_separator oe_inline">
@@ -693,9 +690,17 @@
 							<field name="r_p_f_ex_tot" invisible="1"/>
 							<field name="r_insurance_tot"/>
 							<field name="r_freight_tot"/>
+							<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="r_cpo_amount_tot"/>
+							</div>
+							<field name="r_cpo_amount_tot" nolabel="1" class="oe_subtotal_footer_separator"/>
+							<field name="r_customer_discount_tot"/>
+							<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="r_net_amt_tot"/>
+							</div>
+							<field name="r_net_amt_tot" nolabel="1" class="oe_subtotal_footer_separator"/>
 							<field name="r_tax_tot"/>
 							<field name="r_pump_price_tot" invisible="1"/>
-							<field name="r_customer_discount_tot"/>
 							<!--<field name="tot_price"/>-->
 							<div class="oe_subtotal_footer_separator oe_inline">
 							<label for="r_net_amount"/>
@@ -724,13 +729,21 @@
 							<field name="hsn_no" attrs="{'readonly':[('hsn_no','!=',False)]}"/>
 							<field name="gst" attrs="{'readonly':[('gst','!=',False)]}"/>
 							<field name="customer_id" invisible="1"/>
+							<field name="pattern_id" readonly="1" invisible="1"/>
+							<field name="ms_id" readonly="1" invisible="1"/>
+							<field name="bot_id" readonly="1" invisible="1"/>
+						</group>
+						<group>
+							<field name="qty" readonly="1"/>
 							<field name="off_name" readonly="1"/>
 							<field name="moc_id" required="1" readonly="1"/>
 							<field name="moc_changed_flag" readonly="1"/>
-							<field name="qty" readonly="1"/>
 							<field name="prime_cost" readonly="1"/>
-							<field name="additional_cost"/>
-							<field name="additional_cost_remark" widget="char"/>
+						</group>					
+					</group>
+					
+					<group string="Forward">
+						<group>
 							<label for="sam_ratio" string="Sam Ratio" class="append_percentage"/>
 							<div>
 								<div class="address_format">
@@ -745,38 +758,86 @@
 									<field name="works_value_flag" style="width: 35%%" attrs="{'readonly':[('sam_ratio_flag','=',True)]}"/>
 								</div>
 							</div>
-							<field name="pattern_id" readonly="1" invisible="1"/>
-							<field name="ms_id" readonly="1" invisible="1"/>
-							<field name="bot_id" readonly="1" invisible="1"/>
+							<field name="dealer_discount" on_change="onchange_delaer_discount(dealer_discount)"/>
+							<field name="customer_discount"/>
+							<field name="special_discount" on_change="onchange_special_discount(special_discount)"/>
+							<field name="agent_com" invisible="1"/>
 						</group>
 						<group>
-							<field name="dealer_discount"/>
-							<field name="customer_discount"/>
-							<field name="agent_com"/>
-							<field name="special_discount"/>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
 							<div>
 								<div class="address_format">
-									<field name="p_f" style="width: 40%%"/>
-									<field name="p_f_in_ex" style="width: 35%%" attrs="{'required': [('p_f','>',0)]}"/>
+									<field name="p_f" style="width: 40%%" on_change="onchange_p_f(p_f,p_f_in_ex)"/>
+									<field name="p_f_in_ex" style="width: 35%%" on_change="onchange_p_f(p_f,p_f_in_ex)" attrs="{'required': [('p_f','>',0)]}"/>
 								</div>
 							</div>
 							<label for="freight" string="Freight" class="append_percentage"/>
 							<div>
 								<div class="address_format">
-									<field name="freight" style="width: 40%%"/>
-									<field name="freight_in_ex" style="width: 35%%" attrs="{'required': [('freight','>',0)]}"/>
+									<field name="freight" style="width: 40%%" on_change="onchange_freight(freight,freight_in_ex)"/>
+									<field name="freight_in_ex" style="width: 35%%" on_change="onchange_freight(freight,freight_in_ex)" attrs="{'required': [('freight','>',0)]}"/>
 								</div>
 							</div>
 							<label for="insurance" string="Insurance" class="append_percentage"/>
 							<div>
 								<div class="address_format">
-									<field name="insurance" style="width: 40%%"/>
-									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
+									<field name="insurance" style="width: 40%%" on_change="onchange_insurance(insurance,insurance_in_ex)"/>
+									<field name="insurance_in_ex" style="width: 35%%" on_change="onchange_insurance(insurance,insurance_in_ex)" attrs="{'required': [('insurance','>',0)]}"/>
 								</div>
 							</div>
-							<field name="supervision_amount"/>
-						</group>					
+							<field name="supervision_amount" on_change="onchange_supervision(supervision_amount)" invisible="1"/>
+							<field name="additional_cost" on_change="onchange_additional_cost(additional_cost)"/>
+							<field name="additional_cost_remark" widget="char"/>
+						</group>
+					</group>
+					<group string="Reverse">
+						<group>
+							<label for="r_cpo_amount" string="CPO Value"/>
+							<div>
+								<div class="address_format">
+									<field name="r_cpo_amount" style="width: 40%%"/>
+									<field name="cpo_quote_cust" style="width: 45%%" attrs="{'required':[('r_cpo_amount','>',0)]}"/>
+								</div>
+							</div>
+							<field name="r_sam_ratio" readonly="1"/>
+							<field name="r_works_value" readonly="1"/>
+							<field name="r_dealer_discount"/>
+							<label for="r_customer_discount" string="Customer Discount" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_customer_discount" on_change="onchange_cust_in_ex(r_customer_discount)" style="width: 40%%"/>
+									<field name="cust_in_ex" style="width: 35%%" attrs="{'required':[('r_customer_discount','>',0)]}" invisible="1"/>
+								</div>
+							</div>
+							<field name="r_agent_com" invisible="1"/>
+						</group>
+						<group>
+							<field name="r_special_discount"/>
+							<label for="r_p_f" string="P&amp;F" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_p_f" style="width: 40%%"/>
+									<field name="r_p_f_in_ex" style="width: 35%%" attrs="{'required': [('r_p_f','>',0)]}"/>
+								</div>
+							</div>
+							<label for="r_freight" string="Freight" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_freight" style="width: 40%%"/>
+									<field name="r_freight_in_ex" style="width: 35%%" attrs="{'required': [('r_freight','>',0)]}"/>
+								</div>
+							</div>
+							<label for="r_insurance" string="Insurance" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_insurance" style="width: 40%%"/>
+									<field name="r_insurance_in_ex" style="width: 35%%" attrs="{'required': [('r_insurance','>',0)]}"/>
+								</div>
+							</div>
+							<field name="r_supervision_amount" invisible="1"/>
+							<field name="r_additional_cost"/>
+						</group>
+						<button name="entry_update" type="object" string="Update" class="oe_highlight"/>
 					</group>
 <!--
 					<notebook>
@@ -836,23 +897,46 @@
 					</notebook>		
 -->
 						<group>
-							<group>
-							</group>
-							<group class="oe_subtotal_footer oe_right">
+							<group class="oe_subtotal_footer oe_left">
 								<field name="sam_ratio_tot"/>
 								<field name="dealer_discount_tot"/>
-								<field name="customer_discount_tot"/>
 								<field name="spl_discount_tot"/>
-								<field name="tax_tot"/>
 								<field name="p_f_tot"/>
-								<field name="freight_tot"/>
 								<field name="insurance_tot"/>
+								<field name="freight_tot"/>
 								<field name="pump_price_tot"/>
-						<!--	<field name="tot_price"/>	-->
+								<field name="customer_discount_tot"/>
+								<field name="tax_tot" invisible="1"/>
+								<!--<field name="tot_price"/>-->
 								<div class="oe_subtotal_footer_separator oe_inline">
 								<label for="net_amount"/>
 								</div>
 								<field name="net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							</group>
+							<group class="oe_subtotal_footer oe_right">
+								<field name="r_sam_ratio_tot"/>
+								<field name="r_dealer_discount_tot"/>
+								<field name="r_spl_discount_tot"/>
+								<field name="r_p_f_tot"/>
+								<field name="r_p_f_ex_tot" invisible="1"/>
+								<field name="r_insurance_tot"/>
+								<field name="r_freight_tot"/>
+								<div class="oe_subtotal_footer_separator oe_inline">
+								<label for="r_cpo_amount_tot"/>
+								</div>
+								<field name="r_cpo_amount_tot" nolabel="1" class="oe_subtotal_footer_separator"/>
+								<field name="r_customer_discount_tot"/>
+								<div class="oe_subtotal_footer_separator oe_inline">
+								<label for="r_net_amt_tot"/>
+								</div>
+								<field name="r_net_amt_tot" nolabel="1" class="oe_subtotal_footer_separator"/>
+								<field name="r_tax_tot"/>
+								<field name="r_pump_price_tot" invisible="1"/>
+								<!--<field name="tot_price"/>-->
+								<div class="oe_subtotal_footer_separator oe_inline">
+								<label for="r_net_amount"/>
+								</div>
+								<field name="r_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 							</group>
 						</group>
 				</sheet>
@@ -1026,13 +1110,18 @@
 							<field name="gst" attrs="{'readonly':[('gst','!=',False)]}"/>
 							<field name="customer_id" invisible="1"/>
 							<field name="off_name" readonly="1"/>
-							<field name="moc_id" required="1" readonly="1"/>
-							<field name="moc_changed_flag" readonly="1"/>
+						</group>
+						<group>
 							<field name="pump_id" readonly="1"/>
+							<field name="moc_id" required="0" readonly="1" invisible="1"/>
+							<field name="moc_changed_flag" readonly="1" invisible="1"/>
 							<field name="qty" readonly="1"/>
 							<field name="prime_cost" readonly="1"/>
-							<field name="additional_cost"/>
-							<field name="additional_cost_remark" widget="char"/>
+						</group>
+					</group>
+					
+					<group string="Forward">
+						<group>
 							<label for="sam_ratio" string="Sam Ratio" class="append_percentage"/>
 							<div>
 								<div class="address_format">
@@ -1047,42 +1136,88 @@
 									<field name="works_value_flag" style="width: 35%%" attrs="{'readonly':[('sam_ratio_flag','=',True)]}"/>
 								</div>
 							</div>
+							<field name="dealer_discount" on_change="onchange_delaer_discount(dealer_discount)"/>
+							<field name="customer_discount"/>
+							<field name="special_discount" on_change="onchange_special_discount(special_discount)"/>
+							<field name="agent_com" invisible="1"/>
 						</group>
 						<group>
-							<field name="dealer_discount"/>
-							<field name="customer_discount"/>
-							<field name="agent_com"/>
-							<field name="special_discount"/>
 							<label for="p_f" string="P&amp;F" class="append_percentage"/>
 							<div>
 								<div class="address_format">
-									<field name="p_f" style="width: 40%%"/>
-									<field name="p_f_in_ex" style="width: 35%%" attrs="{'required': [('p_f','>',0)]}"/>
+									<field name="p_f" style="width: 40%%" on_change="onchange_p_f(p_f,p_f_in_ex)"/>
+									<field name="p_f_in_ex" style="width: 35%%" on_change="onchange_p_f(p_f,p_f_in_ex)" attrs="{'required': [('p_f','>',0)]}"/>
 								</div>
 							</div>
 							<label for="freight" string="Freight" class="append_percentage"/>
 							<div>
 								<div class="address_format">
-									<field name="freight" style="width: 40%%"/>
-									<field name="freight_in_ex" style="width: 35%%" attrs="{'required': [('freight','>',0)]}"/>
+									<field name="freight" style="width: 40%%" on_change="onchange_freight(freight,freight_in_ex)"/>
+									<field name="freight_in_ex" style="width: 35%%" on_change="onchange_freight(freight,freight_in_ex)" attrs="{'required': [('freight','>',0)]}"/>
 								</div>
 							</div>
 							<label for="insurance" string="Insurance" class="append_percentage"/>
 							<div>
 								<div class="address_format">
-									<field name="insurance" style="width: 40%%"/>
-									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
+									<field name="insurance" style="width: 40%%" on_change="onchange_insurance(insurance,insurance_in_ex)"/>
+									<field name="insurance_in_ex" style="width: 35%%" on_change="onchange_insurance(insurance,insurance_in_ex)" attrs="{'required': [('insurance','>',0)]}"/>
 								</div>
 							</div>
-							<field name="supervision_amount"/>
-<!--
-						<field name="pump_price" readonly="1"/>
--->
-<!--
-						<field name="total_price" readonly="1"/>
--->
+							<field name="supervision_amount" on_change="onchange_supervision(supervision_amount)" invisible="1"/>
+							<field name="additional_cost" on_change="onchange_additional_cost(additional_cost)"/>
+							<field name="additional_cost_remark" widget="char"/>
 						</group>
 					</group>
+					<group string="Reverse">
+						<group>
+							<label for="r_cpo_amount" string="CPO Value"/>
+							<div>
+								<div class="address_format">
+									<field name="r_cpo_amount" style="width: 40%%"/>
+									<field name="cpo_quote_cust" style="width: 45%%" attrs="{'required':[('r_cpo_amount','>',0)]}"/>
+								</div>
+							</div>
+							<field name="r_sam_ratio" readonly="1"/>
+							<field name="r_works_value" readonly="1"/>
+							<field name="r_dealer_discount"/>
+							<label for="r_customer_discount" string="Customer Discount" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_customer_discount" on_change="onchange_cust_in_ex(r_customer_discount)" style="width: 40%%"/>
+									<field name="cust_in_ex" style="width: 35%%" attrs="{'required':[('r_customer_discount','>',0)]}" invisible="1"/>
+								</div>
+							</div>
+							<field name="r_agent_com" invisible="1"/>
+						</group>
+						<group>
+							<field name="r_special_discount"/>
+							<label for="r_p_f" string="P&amp;F" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_p_f" style="width: 40%%"/>
+									<field name="r_p_f_in_ex" style="width: 35%%" attrs="{'required': [('r_p_f','>',0)]}"/>
+								</div>
+							</div>
+							<label for="r_freight" string="Freight" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_freight" style="width: 40%%"/>
+									<field name="r_freight_in_ex" style="width: 35%%" attrs="{'required': [('r_freight','>',0)]}"/>
+								</div>
+							</div>
+							<label for="r_insurance" string="Insurance" class="append_percentage"/>
+							<div>
+								<div class="address_format">
+									<field name="r_insurance" style="width: 40%%"/>
+									<field name="r_insurance_in_ex" style="width: 35%%" attrs="{'required': [('r_insurance','>',0)]}"/>
+								</div>
+							</div>
+							<field name="r_supervision_amount" invisible="1"/>
+							<field name="r_additional_cost"/>
+						</group>
+						<button name="entry_update" type="object" string="Update" class="oe_highlight"/>
+					</group>
+					
 					<notebook>
 						<page string="Foundry Items">
 							<group colspan="6" col="6">		
@@ -1140,26 +1275,47 @@
 						</page>
 					</notebook>		
 						<group>
-							<group>
-							</group>
-							<group class="oe_subtotal_footer oe_right">
-								<field name="sam_ratio_tot"/>
-								<field name="dealer_discount_tot"/>
-								<field name="customer_discount_tot"/>
-								<field name="spl_discount_tot"/>
-								<field name="tax_tot"/>
-								<field name="p_f_tot"/>
-								<field name="freight_tot"/>
-								<field name="insurance_tot"/>
-								<field name="pump_price_tot"/>
-<!--
-								<field name="tot_price"/>
--->
-								<div class="oe_subtotal_footer_separator oe_inline">
-								<label for="net_amount"/>
-								</div>
-								<field name="net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-							</group>
+							<group class="oe_subtotal_footer oe_left">
+							<field name="sam_ratio_tot"/>
+							<field name="dealer_discount_tot"/>
+							<field name="spl_discount_tot"/>
+							<field name="p_f_tot"/>
+							<field name="insurance_tot"/>
+							<field name="freight_tot"/>
+							<field name="pump_price_tot"/>
+							<field name="customer_discount_tot"/>
+							<field name="tax_tot" invisible="1"/>
+							<!--<field name="tot_price"/>-->
+							<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="net_amount"/>
+							</div>
+							<field name="net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+						</group>
+						<group class="oe_subtotal_footer oe_right">
+							<field name="r_sam_ratio_tot"/>
+							<field name="r_dealer_discount_tot"/>
+							<field name="r_spl_discount_tot"/>
+							<field name="r_p_f_tot"/>
+							<field name="r_p_f_ex_tot" invisible="1"/>
+							<field name="r_insurance_tot"/>
+							<field name="r_freight_tot"/>
+							<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="r_cpo_amount_tot"/>
+							</div>
+							<field name="r_cpo_amount_tot" nolabel="1" class="oe_subtotal_footer_separator"/>
+							<field name="r_customer_discount_tot"/>
+							<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="r_net_amt_tot"/>
+							</div>
+							<field name="r_net_amt_tot" nolabel="1" class="oe_subtotal_footer_separator"/>
+							<field name="r_tax_tot"/>
+							<field name="r_pump_price_tot" invisible="1"/>
+							<!--<field name="tot_price"/>-->
+							<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="r_net_amount"/>
+							</div>
+							<field name="r_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+						</group>
 						</group>
 						
 						
