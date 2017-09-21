@@ -1044,7 +1044,7 @@ class kg_po_grn(osv.osv):
 						if line.uom_id.id != line.product_id.uom_id.id:
 							product_uom = line.product_id.uom_id.id
 							po_coeff = line.product_id.po_uom_coeff
-							product_qty = line.po_grn_qty 
+							product_qty = line.po_grn_qty * po_coeff
 							price_unit =  line.po_line_id.price_subtotal / product_qty
 						elif line.uom_id.id == line.product_id.uom_id.id:
 							product_uom = line.product_id.uom_id.id
