@@ -47,7 +47,7 @@
 								<field name="del_date" on_change="onchange_del_date(del_date)" required="1" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="expected_value"/>								
 								<field name="segment" required="1"/>		
-								<field name="flag_data_bank"/>		
+								<field name="flag_data_bank" attrs="{'invisible':['|','|',('zone','!=',False),('segment','!=','dom'),('division_id','!=',36)]}"/>
 								<field name="source" required="1" readonly="1" invisible="1"/>		
 								<field name="service_det" attrs="{'invisible': [('call_type','!=','service')],'required': [('call_type','=','service')]}"/>
 								<field name="enq_status"/>
@@ -321,7 +321,7 @@
 										<tree string="Material of Construction Details Entry Tree" editable="top" >
 											<field name="offer_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
 											<field name="moc_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
-											<field name="remarks" widget="char" readonly="1"/>
+											<field name="remarks" widget="char"/>
 											<field name="flag_standard" invisible="1"/>
 										</tree>
 									</field>	
@@ -940,12 +940,12 @@
 								
 								<page string="Entry Info">
 									<group>
-										<field name="company_id"/>
-									</group>
-									<group>
-										<field name="active"/>
-									</group>
-									<group>
+										<group>
+											<field name="company_id"/>
+										</group>
+										<group>
+											<field name="active"/>
+										</group>
 										<group>
 											<field name="user_id"/>
 											<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>

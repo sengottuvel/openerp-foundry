@@ -13,7 +13,7 @@ CALL_TYPE_SELECTION = [
 	('new_enquiry','New Enquiry')
 ]
 PURPOSE_SELECTION = [
-	('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump and Spare'),('access','Only Accessories'),('in_development','In Development')
+	('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump and Spare'),('access','Only Accessories'),('in_development','New Development')
 ]
 STATE_SELECTION = [
 	('draft','Draft'),('moved_to_offer','Moved To Offer'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
@@ -245,15 +245,24 @@ class kg_crm_enquiry(osv.osv):
 								applicable_b='yes'
 							else:
 								applicable_b='no'
+						print"applicable",applicable,"applicable_a",applicable_a,"applicable_b",applicable_b
+						
 						if applicable == 'no' and applicable_a == 'no' and applicable_b == 'no':
 							if rec.purpose_categ == 'spare' and not rec.line_ids_spare_bom:
 								raise osv.except_osv(_('Warning!'),_('Spare %s Kindly choose Is applicable in components'%(rec.pump_id.name)))
-							#~ elif rec.purpose_categ == 'spare' and rec.line_ids_spare_bom:
+							elif rec.purpose_categ == 'spare' and rec.line_ids_spare_bom:
+								for spare_bom in rec.line_ids_spare_bom:
+									fou_data = [x for x in spare_bom.line_ids if x.is_applicable == True]
+									ms_data = [x for x in spare_bom.line_ids_a if x.is_applicable == True]
+									bot_data = [x for x in spare_bom.line_ids_b if x.is_applicable == True]
+									print"fou_datafou_data",fou_data
+									if not fou_data and not ms_data and not bot_data:
+										raise osv.except_osv(_('Warning!'),_('Spare %s %s Kindly choose Is applicable in components'%(rec.pump_id.name,spare_bom.bom_id.name)))
 								#~ raise osv.except_osv(_('Warning!'),_('Spare %s Kindly choose Is applicable in components'%(rec.pump_id.name)))
 							#~ elif rec.purpose_categ == 'pump':
 							if rec.purpose_categ == 'pump':
 								raise osv.except_osv(_('Warning!'),_('Pump %s Kindly choose Is applicable in components'%(rec.pump_id.name)))
-					if rec.purpose_categ == 'access':
+					if rec.purpose_categ in ('pump','spare','access'):
 						if rec.line_ids_access_a and rec.acces == 'yes':
 							for line in rec.line_ids_access_a:
 								if line.line_ids:
@@ -288,6 +297,9 @@ class kg_crm_enquiry(osv.osv):
 										applicable_b='no'
 								if applicable == 'no' and applicable_a == 'no' and applicable_b == 'no':
 									raise osv.except_osv(_('Warning!'),_('Pump %s Accessories %s Kindly choose Is applicable in components'%(rec.pump_id.name,line.access_id.name)))
+					if rec.purpose_categ == 'pump':
+						if not rec.line_ids_moc_a:
+							raise osv.except_osv(_('Warning!'),_('%s Kindly Configure Offer Material '%(rec.pump_id.name)))
 		return True
 	
 	def _check_lineitems(self, cr, uid, ids, context=None):
@@ -1817,7 +1829,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'qty':fields.integer('Quantity'),
 		'del_date':fields.date('Delivery Date'),
 		'oth_spec':fields.char('Other Specification'),
-		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories'),('in_development','In Development')],'Purpose Category'),
+		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories'),('in_development','New Development')],'Purpose Category'),
 		#~ 'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')],'Purpose Category'),
 		
 		# Item Details
@@ -4292,7 +4304,7 @@ class ch_crm_development_details(osv.osv):
 		'prime_cost': fields.float('Prime Cost'),
 		
 		'is_applicable': fields.boolean('Is Applicable'),
-		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories'),('in_development','In Development')],'Purpose Category'),
+		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories'),('in_development','New Development')],'Purpose Category'),
 		
 	}
 	
