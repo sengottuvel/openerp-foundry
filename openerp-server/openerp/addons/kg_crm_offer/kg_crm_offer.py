@@ -2192,11 +2192,11 @@ class ch_pump_offer(osv.osv):
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
 			print"r_p_f_tot",r_p_f_tot
-			r_spl_discount = (r_pump_price_tot - ((round((line.r_cpo_amount*line.r_special_discount) / 100.00,2)) - (r_freight_tot) - (r_insurance_tot) - (r_p_f_tot)))
-			#~ r_spl_discount = line.r_cpo_amount
-			print"r_spl_discount",r_spl_discount
 			r_spl_discount_tot = round((line.r_cpo_amount*line.r_special_discount) / 100.00,2)
 			print"r_spl_discount_tot",r_spl_discount_tot
+			r_spl_discount = r_pump_price_tot - r_spl_discount_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
+			#~ r_spl_discount = line.r_cpo_amount
+			print"r_spl_discount",r_spl_discount
 			#~ r_dealer_discount = r_spl_discount - r_spl_discount_tot
 			r_dealer_discount = r_spl_discount
 			print"r_dealer_discount",r_dealer_discount
@@ -2727,11 +2727,11 @@ class ch_spare_offer(osv.osv):
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
 			print"r_p_f_tot",r_p_f_tot
-			r_spl_discount = r_pump_price_tot - (round((line.r_cpo_amount*line.r_special_discount) / 100.00,2) - r_freight_tot - r_insurance_tot - r_p_f_tot)
-			#~ r_spl_discount = line.r_cpo_amount
-			print"r_spl_discount",r_spl_discount
 			r_spl_discount_tot = round((line.r_cpo_amount*line.r_special_discount) / 100.00,2)
 			print"r_spl_discount_tot",r_spl_discount_tot
+			r_spl_discount = r_pump_price_tot - r_spl_discount_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
+			#~ r_spl_discount = line.r_cpo_amount
+			print"r_spl_discount",r_spl_discount
 			#~ r_dealer_discount = r_spl_discount - r_spl_discount_tot
 			r_dealer_discount = r_spl_discount
 			print"r_dealer_discount",r_dealer_discount
@@ -3150,11 +3150,12 @@ class ch_accessories_offer(osv.osv):
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
 			print"r_p_f_tot",r_p_f_tot
-			r_spl_discount = r_pump_price_tot - (round((line.r_cpo_amount*line.r_special_discount) / 100.00,2) - r_freight_tot - r_insurance_tot - r_p_f_tot)
-			#~ r_spl_discount = line.r_cpo_amount
-			print"r_spl_discount",r_spl_discount
 			r_spl_discount_tot = round((line.r_cpo_amount*line.r_special_discount) / 100.00,2)
 			print"r_spl_discount_tot",r_spl_discount_tot
+			r_spl_discount = r_pump_price_tot - r_spl_discount_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
+			#~ r_spl_discount = line.r_cpo_amount
+			print"r_spl_discount",r_spl_discount
+			
 			r_dealer_discount = r_spl_discount - r_spl_discount_tot
 			print"r_dealer_discount",r_dealer_discount
 			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00,2)
