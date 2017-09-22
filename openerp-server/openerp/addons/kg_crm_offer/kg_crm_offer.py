@@ -2255,7 +2255,7 @@ class ch_pump_offer(osv.osv):
 			print"tot_pricetot_price",tot_price
 			if line.cpo_quote_cust == 'quoted':
 				cr.execute('''update ch_pump_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(tot_price,tot_price,line.id))
-			elif line.cpo_quote_cust == 'cust':
+			elif line.cpo_quote_cust == 'cust_po':
 				cr.execute('''update ch_pump_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(line.r_cpo_amount,line.r_cpo_amount,line.id))
 		
 		return res
@@ -2785,7 +2785,7 @@ class ch_spare_offer(osv.osv):
 			print"tot_pricetot_price",tot_price
 			if line.cpo_quote_cust == 'quoted':
 				cr.execute('''update ch_spare_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(tot_price,tot_price,line.id))
-			elif line.cpo_quote_cust == 'cust':
+			elif line.cpo_quote_cust == 'cust_po':
 				cr.execute('''update ch_spare_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(line.r_cpo_amount,line.r_cpo_amount,line.id))
 		
 		return res
@@ -3206,7 +3206,7 @@ class ch_accessories_offer(osv.osv):
 			print"tot_pricetot_price",tot_price
 			if line.cpo_quote_cust == 'quoted':
 				cr.execute('''update ch_accessories_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(tot_price,tot_price,line.id))
-			elif line.cpo_quote_cust == 'cust':
+			elif line.cpo_quote_cust == 'cust_po':
 				cr.execute('''update ch_accessories_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(line.r_cpo_amount,line.r_cpo_amount,line.id))
 		
 		return res
