@@ -2,1633 +2,382 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cd_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000008"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="48"/>
+	<property name="ireport.y" value="96"/>
 	<subDataset name="dataset1">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
-sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
+
+-- Basic cpo val
+sum((COALESCE((COALESCE(pump.r_cpo_amount_tot,0)),0)))::integer as basic_cpo_val,
+
 -- Cust Dis val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer as cust_dis_val,
+sum((COALESCE((COALESCE(pump.r_customer_discount_tot,0)),0)))::integer as cust_dis_val,
+
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
+
 -- Spl val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer as spl_val,
+sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer as spl_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_tot,0)),0)))::integer pf_val,
 
 -- Freight val
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val,
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val,
 
 -- Dealer val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer as dealer_val,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
+-- Les Dealer val
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer as les_dealer_val,
 
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer as dealer_val,
--- Agent Com val
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer as agent_com_val,
 -- Works val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as works_val,
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 
 -- Primecost val
-sum(pump.prime_cost)::integer as prime_cost,
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost,
 
 -- Ratio val
-ltrim(to_char((COALESCE((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+sum((COALESCE((COALESCE(round(pump.r_sam_ratio,2),0)),0))) as ratio,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
+-- Percentage val
 
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer
-
-/
-
-sum(pump.prime_cost)::numeric, 0.00)),'999G999G99G999G99G99G990D99')) as ratio,
-
-avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
-avg((COALESCE(pump.special_discount,0))) as avg_spl_dis,
-avg((COALESCE(pump.p_f,0))) as avg_pf_dis,
-avg((COALESCE(pump.freight,0))) as avg_freight_dis,
-avg((COALESCE(pump.dealer_discount,0))) as avg_deal_dis,
-avg((COALESCE(pump.agent_com,0))) as avg_agent_dis
+round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
+round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
+round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
+round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
+round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
 
 from ch_pump_offer pump
 
 where header_id = $P{offer_id}
 
-group by pump.insurance_in_ex]]>
+group by pump.cust_in_ex]]>
 		</queryString>
-		<field name="net_amount" class="java.math.BigDecimal"/>
+		<field name="basic_cpo_val" class="java.lang.Integer"/>
 		<field name="cust_dis_val" class="java.lang.Integer"/>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="spl_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="freight_val" class="java.lang.Integer"/>
 		<field name="dealer_val" class="java.lang.Integer"/>
-		<field name="agent_com_val" class="java.lang.Integer"/>
+		<field name="les_dealer_val" class="java.lang.Integer"/>
 		<field name="works_val" class="java.lang.Integer"/>
 		<field name="prime_cost" class="java.lang.Integer"/>
-		<field name="ratio" class="java.lang.String"/>
-		<field name="avg_cust_dis" class="java.lang.Double"/>
-		<field name="avg_spl_dis" class="java.lang.Double"/>
-		<field name="avg_pf_dis" class="java.lang.Double"/>
-		<field name="avg_freight_dis" class="java.lang.Double"/>
-		<field name="avg_deal_dis" class="java.lang.Double"/>
-		<field name="avg_agent_dis" class="java.lang.Double"/>
+		<field name="ratio" class="java.math.BigDecimal"/>
+		<field name="avg_cust_dis" class="java.lang.String"/>
+		<field name="avg_spl_dis" class="java.lang.String"/>
+		<field name="avg_pf_dis" class="java.lang.String"/>
+		<field name="avg_freight_dis" class="java.lang.String"/>
+		<field name="avg_deal_dis" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dataset2">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
-sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
+
+-- Basic cpo val
+sum((COALESCE((COALESCE(pump.r_cpo_amount_tot,0)),0)))::integer as basic_cpo_val,
+
 -- Cust Dis val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer as cust_dis_val,
+sum((COALESCE((COALESCE(pump.r_customer_discount_tot,0)),0)))::integer as cust_dis_val,
+
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
+
 -- Spl val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer as spl_val,
+sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer as spl_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_tot,0)),0)))::integer pf_val,
 
 -- Freight val
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val,
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val,
 
 -- Dealer val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer as dealer_val,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
+-- Les Dealer val
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer as les_dealer_val,
 
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer as dealer_val,
--- Agent Com val
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer as agent_com_val,
 -- Works val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as works_val,
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 
 -- Primecost val
-sum(pump.prime_cost)::integer as prime_cost,
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost,
 
 -- Ratio val
-ltrim(to_char((COALESCE((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+sum((COALESCE((COALESCE(round(pump.r_sam_ratio,2),0)),0))) as ratio,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
+-- Percentage val
 
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer
-
-/
-
-sum(pump.prime_cost)::numeric, 0.00)),'999G999G99G999G99G99G990D99')) as ratio,
-
-avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
-avg((COALESCE(pump.special_discount,0))) as avg_spl_dis,
-avg((COALESCE(pump.p_f,0))) as avg_pf_dis,
-avg((COALESCE(pump.freight,0))) as avg_freight_dis,
-avg((COALESCE(pump.dealer_discount,0))) as avg_deal_dis,
-avg((COALESCE(pump.agent_com,0))) as avg_agent_dis
+round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
+round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
+round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
+round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
+round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
 
 from ch_spare_offer pump
 
 where header_id = $P{offer_id}
 
-group by pump.insurance_in_ex]]>
+group by pump.cust_in_ex]]>
 		</queryString>
-		<field name="net_amount" class="java.math.BigDecimal"/>
+		<field name="basic_cpo_val" class="java.lang.Integer"/>
 		<field name="cust_dis_val" class="java.lang.Integer"/>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="spl_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="freight_val" class="java.lang.Integer"/>
 		<field name="dealer_val" class="java.lang.Integer"/>
-		<field name="agent_com_val" class="java.lang.Integer"/>
+		<field name="les_dealer_val" class="java.lang.Integer"/>
 		<field name="works_val" class="java.lang.Integer"/>
 		<field name="prime_cost" class="java.lang.Integer"/>
-		<field name="ratio" class="java.lang.String"/>
-		<field name="avg_cust_dis" class="java.lang.Double"/>
-		<field name="avg_spl_dis" class="java.lang.Double"/>
-		<field name="avg_pf_dis" class="java.lang.Double"/>
-		<field name="avg_freight_dis" class="java.lang.Double"/>
-		<field name="avg_deal_dis" class="java.lang.Double"/>
-		<field name="avg_agent_dis" class="java.lang.Double"/>
+		<field name="ratio" class="java.math.BigDecimal"/>
+		<field name="avg_cust_dis" class="java.lang.String"/>
+		<field name="avg_spl_dis" class="java.lang.String"/>
+		<field name="avg_pf_dis" class="java.lang.String"/>
+		<field name="avg_freight_dis" class="java.lang.String"/>
+		<field name="avg_deal_dis" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dataset3">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
-sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
+
+-- Basic cpo val
+sum((COALESCE((COALESCE(pump.r_cpo_amount_tot,0)),0)))::integer as basic_cpo_val,
 
 -- Cust Dis val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer as cust_dis_val,
+sum((COALESCE((COALESCE(pump.r_customer_discount_tot,0)),0)))::integer as cust_dis_val,
+
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
+
 -- Spl val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer as spl_val,
+sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer as spl_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_tot,0)),0)))::integer pf_val,
 
 -- Freight val
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val,
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val,
 
 -- Dealer val
-
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer as dealer_val,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer as dealer_val,
 
 -- Les Dealer val
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer as les_dealer_val,
 
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer as agent_com_val,
 -- Works val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as works_val,
 -- Primecost val
-sum(pump.prime_cost)::integer as prime_cost,
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost,
 
 -- Ratio val
-ltrim(to_char((COALESCE((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+sum((COALESCE((COALESCE(round(pump.r_sam_ratio,2),0)),0))) as ratio,
+
+-- Percentage val
+
+round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
+round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
+round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
+round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
+round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
+
 from ch_accessories_offer pump
 
 join kg_accessories_master access on(access.id=pump.access_id)
 
 where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
 
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer
-
-/
-
-sum(pump.prime_cost)::numeric, 0.00)),'999G999G99G999G99G99G990D99')) as ratio,
-
-avg(pump.tax) as avg_basic_cpo,
-avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
-avg((COALESCE(pump.special_discount,0))) as avg_spl_dis,
-avg((COALESCE(pump.p_f,0))) as avg_pf_dis,
-avg((COALESCE(pump.freight,0))) as avg_freight_dis,
-avg((COALESCE(pump.dealer_discount,0))) as avg_deal_dis,
-avg((COALESCE(pump.dealer_discount,0))) as avg_agent_dis
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.insurance_in_ex]]>
+group by pump.cust_in_ex]]>
 		</queryString>
-		<field name="net_amount" class="java.math.BigDecimal"/>
+		<field name="basic_cpo_val" class="java.lang.Integer"/>
 		<field name="cust_dis_val" class="java.lang.Integer"/>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="spl_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="freight_val" class="java.lang.Integer"/>
 		<field name="dealer_val" class="java.lang.Integer"/>
-		<field name="agent_com_val" class="java.lang.Integer"/>
+		<field name="les_dealer_val" class="java.lang.Integer"/>
 		<field name="works_val" class="java.lang.Integer"/>
 		<field name="prime_cost" class="java.lang.Integer"/>
-		<field name="ratio" class="java.lang.String"/>
-		<field name="avg_basic_cpo" class="java.lang.Double"/>
-		<field name="avg_cust_dis" class="java.lang.Double"/>
-		<field name="avg_spl_dis" class="java.lang.Double"/>
-		<field name="avg_pf_dis" class="java.lang.Double"/>
-		<field name="avg_freight_dis" class="java.lang.Double"/>
-		<field name="avg_deal_dis" class="java.lang.Double"/>
-		<field name="avg_agent_dis" class="java.lang.Double"/>
+		<field name="ratio" class="java.math.BigDecimal"/>
+		<field name="avg_cust_dis" class="java.lang.String"/>
+		<field name="avg_spl_dis" class="java.lang.String"/>
+		<field name="avg_pf_dis" class="java.lang.String"/>
+		<field name="avg_freight_dis" class="java.lang.String"/>
+		<field name="avg_deal_dis" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dataset4">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
-			<![CDATA[select sum(net_amount) as net_amount,sum(cust_dis_val) as cust_dis_val,sum(book_val) as book_val,
+			<![CDATA[select sum(basic_cpo_val) as basic_cpo_val,sum(cust_dis_val) as cust_dis_val,sum(book_val) as book_val,
 sum(spl_val) as spl_val,sum(pf_val) as pf_val,sum(freight_val) as freight_val,sum(dealer_val) as dealer_val,
-sum(agent_com_val) as agent_com_val,sum(works_val) as works_val,sum(prime_cost) as prime_cost
+sum(les_dealer_val) as les_dealer_val,sum(works_val) as works_val,sum(prime_cost) as prime_cost
 
 from
 
 ((select
-sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
+
+-- Basic cpo val
+sum((COALESCE((COALESCE(pump.r_cpo_amount_tot,0)),0)))::integer as basic_cpo_val,
+
 -- Cust Dis val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer as cust_dis_val,
+sum((COALESCE((COALESCE(pump.r_customer_discount_tot,0)),0)))::integer as cust_dis_val,
+
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
+
 -- Spl val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer as spl_val,
+sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer as spl_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_tot,0)),0)))::integer pf_val,
 
 -- Freight val
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val,
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val,
 
 -- Dealer val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer as dealer_val,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
+-- Les Dealer val
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer as les_dealer_val,
 
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer as dealer_val,
--- Agent Com val
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer as agent_com_val,
 -- Works val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as works_val,
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 
 -- Primecost val
-sum(pump.prime_cost)::integer as prime_cost,
-
-avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
-avg((COALESCE(pump.special_discount,0))) as avg_spl_dis,
-avg((COALESCE(pump.p_f,0))) as avg_pf_dis,
-avg((COALESCE(pump.freight,0))) as avg_freight_dis,
-avg((COALESCE(pump.dealer_discount,0))) as avg_deal_dis,
-avg((COALESCE(pump.agent_com,0))) as avg_agent_dis
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost
 
 from ch_pump_offer pump
 
 where header_id = $P{offer_id}
 
-group by pump.insurance_in_ex)
-
-
+group by pump.cust_in_ex
+)
 
 ---------------Spare
 union all
 
 (select
-sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
+
+-- Basic cpo val
+sum((COALESCE((COALESCE(pump.r_cpo_amount_tot,0)),0)))::integer as basic_cpo_val,
+
 -- Cust Dis val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer as cust_dis_val,
+sum((COALESCE((COALESCE(pump.r_customer_discount_tot,0)),0)))::integer as cust_dis_val,
+
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
+
 -- Spl val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer as spl_val,
+sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer as spl_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_tot,0)),0)))::integer pf_val,
 
 -- Freight val
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val,
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val,
 
 -- Dealer val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer as dealer_val,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
+-- Les Dealer val
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer as les_dealer_val,
 
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer as dealer_val,
--- Agent Com val
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer as agent_com_val,
 -- Works val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as works_val,
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 
 -- Primecost val
-sum(pump.prime_cost)::integer as prime_cost,
-
-avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
-avg((COALESCE(pump.special_discount,0))) as avg_spl_dis,
-avg((COALESCE(pump.p_f,0))) as avg_pf_dis,
-avg((COALESCE(pump.freight,0))) as avg_freight_dis,
-avg((COALESCE(pump.dealer_discount,0))) as avg_deal_dis,
-avg((COALESCE(pump.agent_com,0))) as avg_agent_dis
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost
 
 from ch_spare_offer pump
 
 where header_id = $P{offer_id}
 
-group by pump.insurance_in_ex)
+group by pump.cust_in_ex
+)
 
 union all
 ---------------Access
 
 (select
-sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
+
+-- Basic cpo val
+sum((COALESCE((COALESCE(pump.r_cpo_amount_tot,0)),0)))::integer as basic_cpo_val,
 
 -- Cust Dis val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer as cust_dis_val,
+sum((COALESCE((COALESCE(pump.r_customer_discount_tot,0)),0)))::integer as cust_dis_val,
+
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
+
 -- Spl val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer as spl_val,
+sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer as spl_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_tot,0)),0)))::integer pf_val,
 
 -- Freight val
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val,
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val,
 
 -- Dealer val
-
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer as dealer_val,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer as dealer_val,
 
 -- Les Dealer val
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer as les_dealer_val,
 
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer as agent_com_val,
 -- Works val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as works_val,
 -- Primecost val
-sum(pump.prime_cost)::integer as prime_cost,
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost
 
-avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
-avg((COALESCE(pump.special_discount,0))) as avg_spl_dis,
-avg((COALESCE(pump.p_f,0))) as avg_pf_dis,
-avg((COALESCE(pump.freight,0))) as avg_freight_dis,
-avg((COALESCE(pump.dealer_discount,0))) as avg_deal_dis,
-avg((COALESCE(pump.dealer_discount,0))) as avg_agent_dis
 from ch_accessories_offer pump
 
 join kg_accessories_master access on(access.id=pump.access_id)
 
 where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.insurance_in_ex)
+
+group by pump.cust_in_ex
+)
 
 union all
 
 (select
-
-sum((COALESCE(pump.net_amount,0))) as net_amount,
+-- Basic cpo val
+sum((COALESCE((COALESCE(pump.r_cpo_amount_tot,0)),0)))::integer as basic_cpo_val,
 
 -- Cust Dis val
-sum((((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer) as cust_dis_val,
+sum((COALESCE((COALESCE(pump.r_customer_discount_tot,0)),0)))::integer as cust_dis_val,
 
 -- Book val
-sum(((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer) as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- Spl val
-sum(((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer) as spl_val,
+sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer as spl_val,
 
 -- PF val
-sum(((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer) as pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_tot,0)),0)))::integer pf_val,
 
 -- Freight val
-sum(((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer) as freight_val,
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val,
 
 -- Dealer val
-sum(((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer) as dealer_val,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer as dealer_val,
 
--- Less Dealer Val
-sum(((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer*
-(COALESCE(pump.agent_com ,0)))/100)::integer) as agent_com_val,
+-- Les Dealer val
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer as les_dealer_val,
 
--- Works Val
-sum(((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer*
-(COALESCE(pump.dealer_discount ,0)))/100)::integer) as works_val,
+-- Works val
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 
---Primecost val
-sum((COALESCE(pump.prime_cost ,0))) as prime_cost,
-
-avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
-avg((COALESCE(pump.special_discount,0))) as avg_spl_dis,
-avg((COALESCE(pump.p_f,0))) as avg_pf_dis,
-avg((COALESCE(pump.freight,0))) as avg_freight_dis,
-avg((COALESCE(pump.dealer_discount,0))) as avg_deal_dis,
-avg((COALESCE(pump.dealer_discount,0))) as avg_agent_dis
-
-from ch_accessories_offer pump
-
-left join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True)
-
------------Freight
-union all
-
-(select sum(freight_val)::integer as net_amount,0,sum(freight_val)::integer as book_val,0,0,0,0,0,0,0,0,0,0,0,0,0
-from(
-
--- Pump Freight val
-select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.insurance_in_ex
-
-union
-
--- Spare Freight val
-select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.insurance_in_ex
-
-union
-
--- Access Freight val
-select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
-
-union
-
--- Access False Freight val
-select
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer as freight_val
+-- Primecost val
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost
 
 from ch_accessories_offer pump
 
@@ -1636,299 +385,157 @@ left join kg_accessories_master access on(access.id=pump.access_id)
 
 where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
 
+group by access.name,pump.cust_in_ex)
+
+-----------Freight
+union all
+
+(select sum(freight_val)::integer as basic_cpo_val,0 as cust_dis_val,sum(freight_val)::integer as book_val,0 as spl_val,
+0 as pf_val,0 as freight_val,0 as dealer_val,0 as les_dealer_val,0 as works_val,0 as prime_cost
+from(
+
+select sum(freight_val)::integer as freight_val
+from(
+
+-- Pump Freight val
+select
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.cust_in_ex
+
+union
+
+-- Spare Freight val
+select
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.cust_in_ex
+
+union
+
+-- Access Freight val
+select
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+from ch_accessories_offer pump
+left join kg_accessories_master access on(access.id=pump.access_id)
+where header_id = $P{offer_id} and access.is_pump_acc_flag = True
+group by pump.cust_in_ex
+
+union
+
+-- Access False Freight val
+select
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+from ch_accessories_offer pump
+left join kg_accessories_master access on(access.id=pump.access_id)
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
+group by pump.cust_in_ex
+
+)as tot
+
 )as tot
 )
 
 
 )as tot]]>
 		</queryString>
-		<field name="net_amount" class="java.math.BigDecimal"/>
-		<field name="cust_dis_val" class="java.math.BigDecimal"/>
-		<field name="book_val" class="java.math.BigDecimal"/>
-		<field name="spl_val" class="java.math.BigDecimal"/>
-		<field name="pf_val" class="java.math.BigDecimal"/>
-		<field name="freight_val" class="java.math.BigDecimal"/>
-		<field name="dealer_val" class="java.math.BigDecimal"/>
-		<field name="agent_com_val" class="java.math.BigDecimal"/>
-		<field name="works_val" class="java.math.BigDecimal"/>
-		<field name="prime_cost" class="java.math.BigDecimal"/>
+		<field name="basic_cpo_val" class="java.lang.Long"/>
+		<field name="cust_dis_val" class="java.lang.Long"/>
+		<field name="book_val" class="java.lang.Long"/>
+		<field name="spl_val" class="java.lang.Long"/>
+		<field name="pf_val" class="java.lang.Long"/>
+		<field name="freight_val" class="java.lang.Long"/>
+		<field name="dealer_val" class="java.lang.Long"/>
+		<field name="les_dealer_val" class="java.lang.Long"/>
+		<field name="works_val" class="java.lang.Long"/>
+		<field name="prime_cost" class="java.lang.Long"/>
 	</subDataset>
 	<subDataset name="dataset5">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
+
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer as pf_val,
+-- Total
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
--- Tot val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer as total,
+-- Les deal dis
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
--- Les agent dis
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as les_agent_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
 
 from ch_pump_offer pump
 
 where header_id = $P{offer_id}
 
-group by pump.insurance_in_ex]]>
+group by pump.cust_in_ex]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
-		<field name="les_agent_dis" class="java.lang.Integer"/>
+		<field name="les_deal_dis" class="java.lang.Integer"/>
 		<field name="nett_sam" class="java.lang.Integer"/>
 	</subDataset>
 	<subDataset name="dataset6">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
+
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer as pf_val,
+-- Total
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
--- Tot val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer as total,
+-- Les deal dis
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
--- Les agent dis
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as les_agent_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
 
 from ch_spare_offer pump
 
 where header_id = $P{offer_id}
 
-group by pump.insurance_in_ex]]>
+group by pump.cust_in_ex]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
-		<field name="les_agent_dis" class="java.lang.Integer"/>
+		<field name="les_deal_dis" class="java.lang.Integer"/>
 		<field name="nett_sam" class="java.lang.Integer"/>
 	</subDataset>
 	<subDataset name="dataset7">
@@ -1937,422 +544,117 @@ group by pump.insurance_in_ex]]>
 			<![CDATA[select
 
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
-join kg_accessories_master access on(access.id=pump.access_id)
+-- Total
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
 
--- Total val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+-- Les deal dis
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer as total,
-
--- Les Agent val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer as les_agent_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-join kg_accessories_master access on(access.id=pump.access_id)
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer) -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
 
 from ch_accessories_offer pump
 
 join kg_accessories_master access on(access.id=pump.access_id)
 
 where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.insurance_in_ex]]>
+group by pump.insurance_in_ex
+]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
-		<field name="les_agent_dis" class="java.lang.Integer"/>
+		<field name="les_deal_dis" class="java.lang.Integer"/>
 		<field name="nett_sam" class="java.lang.Integer"/>
 	</subDataset>
 	<subDataset name="dataset8">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select sum(book_val) as book_val,sum(pf_val) as pf_val,sum(total) as total,
-sum(les_agent_dis) as les_agent_dis,sum(nett_sam) as nett_sam from
+sum(les_deal_dis) as les_deal_dis,sum(nett_sam) as nett_sam from
 ((select
+
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer as pf_val,
+-- Total
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
--- Tot val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer as total,
+-- Les deal dis
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
--- Les agent dis
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as les_agent_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_pump_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
 
 from ch_pump_offer pump
 
 where header_id = $P{offer_id}
 
-group by pump.insurance_in_ex)
+group by pump.cust_in_ex)
 
 --------------Spare
 union all
 
 (select
+
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer as pf_val,
+-- Total
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
--- Tot val
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer as total,
+-- Les deal dis
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
--- Les agent dis
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as les_agent_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)::integer-
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_spare_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
 
-where header_id = $P{offer_id}
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer)::integer as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
 
 from ch_spare_offer pump
 
 where header_id = $P{offer_id}
 
-group by pump.insurance_in_ex)
+group by pump.cust_in_ex)
 
 ---------------Access
 union all
@@ -2360,292 +662,125 @@ union all
 (select
 
 -- Book val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
-join kg_accessories_master access on(access.id=pump.access_id)
+-- Total
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
 
--- Total val
-(sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+-- Les deal dis
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer as total,
-
--- Les Agent val
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer as les_agent_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-join kg_accessories_master access on(access.id=pump.access_id)
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer) -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
-(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-COALESCE((select ref_calc from (
-select p_f_in_ex,
-case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.p_f_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
-from ch_accessories_offer pump
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.p_f_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer -
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer)::integer * avg((COALESCE(pump.agent_com ,0.00))))/100)::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
 
 from ch_accessories_offer pump
 
 join kg_accessories_master access on(access.id=pump.access_id)
 
 where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.insurance_in_ex
+
+group by pump.cust_in_ex
+
 )
 
 union all
 
 (select
 
---Basic Book val
-sum(((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer) as book_val,
+-- Book val
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-sum(((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'exclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer) as pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
 -- Total
-sum(((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer +
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'exclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer) as total,
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
--- Les agent dis
-sum(((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer +
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer*
-(COALESCE(pump.agent_com ,0)))/100)::integer) as les_agent_dis,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
+
+-- Les deal dis
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
-sum((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer +
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'exclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer) +
-(((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer +
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer*
-(COALESCE(pump.agent_com ,0)))/100)::integer)) as nett_sam
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-from ch_accessories_offer pump
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
 
-left join kg_accessories_master access on(access.id=pump.access_id)
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True)
-
--------------Freight
-union all
-
-(select sum(freight_val)::integer as freight_val,0,sum(freight_val)::integer as freight_val,0,sum(freight_val)::integer as freight_val
-from(
-
--- Pump Freight val
-select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.insurance_in_ex
-
-union
-
--- Spare Freight val
-select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.insurance_in_ex
-
-union
-
--- Access Freight val
-select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
-from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
-
-union
-
--- Access False Freight val
-select
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'exclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer as freight_val
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
 
 from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
 where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
+
+group by pump.cust_in_ex)
+
+-------------Freight
+union all
+
+(select sum(freight_val)::integer as book_val,0,sum(freight_val)::integer as total,0,sum(freight_val)::integer as nett_sam
+from(
+
+select sum(freight_val)::integer as freight_val
+from(
+
+-- Pump Freight val
+select
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.cust_in_ex
+
+union
+
+-- Spare Freight val
+select
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.cust_in_ex
+
+union
+
+-- Access Freight val
+select
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+from ch_accessories_offer pump
+left join kg_accessories_master access on(access.id=pump.access_id)
+where header_id = $P{offer_id} and access.is_pump_acc_flag = True
+group by pump.cust_in_ex
+
+union
+
+-- Access False Freight val
+select
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+from ch_accessories_offer pump
+left join kg_accessories_master access on(access.id=pump.access_id)
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
+group by pump.cust_in_ex
+
+)as tot
 
 )as tot
 
@@ -2655,150 +790,83 @@ where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is
 
 ) as ttaota]]>
 		</queryString>
-		<field name="book_val" class="java.math.BigDecimal"/>
-		<field name="pf_val" class="java.math.BigDecimal"/>
-		<field name="total" class="java.math.BigDecimal"/>
-		<field name="les_agent_dis" class="java.math.BigDecimal"/>
-		<field name="nett_sam" class="java.math.BigDecimal"/>
+		<field name="book_val" class="java.lang.Long"/>
+		<field name="pf_val" class="java.lang.Long"/>
+		<field name="total" class="java.lang.Long"/>
+		<field name="les_deal_dis" class="java.lang.Long"/>
+		<field name="nett_sam" class="java.lang.Long"/>
 	</subDataset>
 	<subDataset name="dataset9">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
-
 access.name as acc_name,
-
-(COALESCE(pump.net_amount,0)) as net_amount,
+-- Basic cpo val
+sum((COALESCE((COALESCE(pump.r_cpo_amount_tot,0)),0)))::integer as basic_cpo_val,
 
 -- Cust Dis val
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer as cust_dis_val,
+sum((COALESCE((COALESCE(pump.r_customer_discount_tot,0)),0)))::integer as cust_dis_val,
 
 -- Book val
-((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer as book_val,
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- Spl val
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer as spl_val,
+sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer as spl_val,
 
 -- PF val
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer as pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_tot,0)),0)))::integer pf_val,
 
 -- Freight val
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer as freight_val,
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val,
 
 -- Dealer val
-((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer as dealer_val,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer as dealer_val,
 
--- Less Dealer Val
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer*
-(COALESCE(pump.agent_com ,0)))/100)::integer as agent_com_val,
+-- Les Dealer val
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer as les_dealer_val,
 
--- Works Val
-((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer*
-(COALESCE(pump.dealer_discount ,0)))/100)::integer as works_val,
+-- Works val
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 
---Primecost val
-(COALESCE(pump.prime_cost ,0)) as prime_cost,
+-- Primecost val
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost,
 
 -- Ratio val
-ltrim(to_char((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer*
-(COALESCE(pump.dealer_discount ,0)))/100)::integer)/
-((COALESCE(pump.prime_cost::numeric ,0))),'999G999G99G999G99G99G990D99')) as ratio,
+sum((COALESCE((COALESCE(round(pump.r_sam_ratio,2),0)),0))) as ratio,
 
-pump.tax as avg_basic_cpo,
-(COALESCE(pump.customer_discount,0)) as avg_cust_dis,
-(COALESCE(pump.special_discount,0)) as avg_spl_dis,
-(COALESCE(pump.p_f,0)) as avg_pf_dis,
-(COALESCE(pump.freight,0)) as avg_freight_dis,
-(COALESCE(pump.dealer_discount,0)) as avg_deal_dis,
-(COALESCE(pump.dealer_discount,0)) as avg_agent_dis
+-- Percentage val
+
+round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
+round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
+round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
+round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
+round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
 
 from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
-where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)]]>
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
+
+group by access.name,pump.cust_in_ex]]>
 		</queryString>
 		<field name="acc_name" class="java.lang.String"/>
-		<field name="net_amount" class="java.math.BigDecimal"/>
+		<field name="basic_cpo_val" class="java.lang.Integer"/>
 		<field name="cust_dis_val" class="java.lang.Integer"/>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="spl_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="freight_val" class="java.lang.Integer"/>
 		<field name="dealer_val" class="java.lang.Integer"/>
-		<field name="agent_com_val" class="java.lang.Integer"/>
+		<field name="les_dealer_val" class="java.lang.Integer"/>
 		<field name="works_val" class="java.lang.Integer"/>
-		<field name="prime_cost" class="java.math.BigDecimal"/>
-		<field name="ratio" class="java.lang.String"/>
-		<field name="avg_basic_cpo" class="java.lang.Double"/>
-		<field name="avg_cust_dis" class="java.lang.Double"/>
-		<field name="avg_spl_dis" class="java.lang.Double"/>
-		<field name="avg_pf_dis" class="java.lang.Double"/>
-		<field name="avg_freight_dis" class="java.lang.Double"/>
-		<field name="avg_deal_dis" class="java.lang.Double"/>
-		<field name="avg_agent_dis" class="java.lang.Double"/>
+		<field name="prime_cost" class="java.lang.Integer"/>
+		<field name="ratio" class="java.math.BigDecimal"/>
+		<field name="avg_cust_dis" class="java.lang.String"/>
+		<field name="avg_spl_dis" class="java.lang.String"/>
+		<field name="avg_pf_dis" class="java.lang.String"/>
+		<field name="avg_freight_dis" class="java.lang.String"/>
+		<field name="avg_deal_dis" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dataset10">
 		<parameter name="offer_id" class="java.lang.Integer"/>
@@ -2807,68 +875,44 @@ where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is
 
 access.name as acc_name,
 
---Basic Book val
-((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer as book_val,
+-- Book val
+sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'exclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer as pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
 -- Total
-((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer +
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'exclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer as total,
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
--- Les agent dis
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer +
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer*
-(COALESCE(pump.agent_com ,0)))/100)::integer as les_agent_dis,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
+
+-- Les deal dis
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
-(((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer +
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'exclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer) +
-(((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer +
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*(COALESCE(pump.special_discount ,0.00)))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.p_f_in_ex = 'inclusive' then (COALESCE(pump.p_f ,0.00)) else 0.00 end))/100)::integer -
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer*
-(COALESCE(pump.agent_com ,0)))/100)::integer) as nett_sam
+(sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
+
+(sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
 
 from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
 
-where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)]]>
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
+
+group by access.name,pump.cust_in_ex]]>
 		</queryString>
 		<field name="acc_name" class="java.lang.String"/>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
-		<field name="les_agent_dis" class="java.lang.Integer"/>
+		<field name="les_deal_dis" class="java.lang.Integer"/>
 		<field name="nett_sam" class="java.lang.Integer"/>
 	</subDataset>
 	<subDataset name="dataset11">
@@ -2879,79 +923,41 @@ from(
 
 -- Pump Freight val
 select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
 from ch_pump_offer pump
 
 where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.insurance_in_ex
+group by pump.cust_in_ex
 
 union
 
 -- Spare Freight val
 select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
 from ch_spare_offer pump
 
 where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.insurance_in_ex
+group by pump.cust_in_ex
 
 union
 
 -- Access Freight val
 select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
 from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
+left join kg_accessories_master access on(access.id=pump.access_id)
 where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
+group by pump.cust_in_ex
 
 union
 
 -- Access False Freight val
 select
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'inclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer as freight_val
-
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
 from ch_accessories_offer pump
-
 left join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
+group by pump.cust_in_ex
 
 )as tot]]>
 		</queryString>
@@ -2965,79 +971,41 @@ from(
 
 -- Pump Freight val
 select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
 from ch_pump_offer pump
 
 where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.insurance_in_ex
+group by pump.cust_in_ex
 
 union
 
 -- Spare Freight val
 select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0))) -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
 from ch_spare_offer pump
 
 where header_id = $P{offer_id}
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.insurance_in_ex
+group by pump.cust_in_ex
 
 union
 
 -- Access Freight val
 select
-COALESCE((select ref_calc from (
-select freight_in_ex,
-case when freight_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
-calc from (
-select pump.freight_in_ex,((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer -
-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.freight ,0.00))))/100 as calc
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
 from ch_accessories_offer pump
-
-join kg_accessories_master access on(access.id=pump.access_id)
-
+left join kg_accessories_master access on(access.id=pump.access_id)
 where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.freight_in_ex
-) as sample
-) as sam where ref_calc != 0),0)::integer freight_val
+group by pump.cust_in_ex
 
 union
 
 -- Access False Freight val
 select
-((((COALESCE(pump.net_amount,0))::integer -
-(((COALESCE(pump.net_amount,0))::integer*(COALESCE(pump.customer_discount ,0.00)))/100)::integer)::integer*
-(case when pump.freight_in_ex = 'exclusive' then (COALESCE(pump.freight ,0.00)) else 0.00 end))/100)::integer as freight_val
-
+sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
 from ch_accessories_offer pump
-
 left join kg_accessories_master access on(access.id=pump.access_id)
-
-where header_id = $P{offer_id} and access.is_pump_acc_flag != True
+where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
+group by pump.cust_in_ex
 
 )as tot]]>
 		</queryString>
@@ -3140,7 +1108,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{net_amount}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{basic_cpo_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="212" y="0" width="56" height="14" isRemoveLineWhenBlank="true"/>
@@ -3220,7 +1188,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{agent_com_val}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{les_dealer_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="664" y="0" width="56" height="14" isRemoveLineWhenBlank="true"/>
@@ -3368,7 +1336,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{net_amount}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{basic_cpo_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="187" y="0" width="25" height="14"/>
@@ -3536,7 +1504,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{agent_com_val}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{les_dealer_val}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
@@ -3579,7 +1547,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{net_amount}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{basic_cpo_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="187" y="0" width="25" height="14"/>
@@ -3700,7 +1668,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{avg_agent_dis}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{avg_deal_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="612" y="0" width="52" height="14"/>
@@ -3711,7 +1679,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{agent_com_val}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{les_dealer_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="664" y="0" width="56" height="14"/>
@@ -3775,7 +1743,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{net_amount}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{basic_cpo_val}]]></textFieldExpression>
 							</textField>
 							<textField>
 								<reportElement x="0" y="0" width="140" height="14"/>
@@ -3917,7 +1885,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{agent_com_val}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{les_dealer_val}]]></textFieldExpression>
 							</textField>
 							<textField>
 								<reportElement x="664" y="0" width="56" height="14"/>
@@ -4056,7 +2024,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8" isBold="true"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{net_amount}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{basic_cpo_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="127" y="0" width="81" height="15"/>
@@ -4135,7 +2103,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8" isBold="true"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{agent_com_val}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{les_dealer_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="604" y="0" width="56" height="15"/>
@@ -4314,7 +2282,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{les_agent_dis}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{les_deal_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="735" y="0" width="90" height="14"/>
@@ -4413,7 +2381,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{les_agent_dis}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{les_deal_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="735" y="0" width="90" height="14"/>
@@ -4500,7 +2468,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{les_agent_dis}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{les_deal_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="735" y="0" width="90" height="14"/>
@@ -4585,7 +2553,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{les_agent_dis}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{les_deal_dis}]]></textFieldExpression>
 							</textField>
 							<textField>
 								<reportElement x="735" y="0" width="90" height="14"/>
@@ -4745,7 +2713,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textElement textAlignment="Right">
 									<font size="8" isBold="true"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{les_agent_dis}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{les_deal_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="595" y="0" width="90" height="14"/>
