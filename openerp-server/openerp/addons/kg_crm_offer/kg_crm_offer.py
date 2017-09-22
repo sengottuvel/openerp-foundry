@@ -2192,7 +2192,8 @@ class ch_pump_offer(osv.osv):
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
 			print"r_p_f_tot",r_p_f_tot
-			r_spl_discount = r_pump_price_tot - r_tax_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
+			#~ r_spl_discount = r_pump_price_tot - r_tax_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
+			r_spl_discount = line.r_cpo_amount - r_tax_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
 			print"r_spl_discount",r_spl_discount
 			r_spl_discount_tot = round((line.r_cpo_amount*line.r_special_discount) / 100.00,2)
 			print"r_spl_discount_tot",r_spl_discount_tot
@@ -2355,7 +2356,7 @@ class ch_pump_offer(osv.osv):
 		'r_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
 		'r_pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),
 		'r_net_amt_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
-		'r_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Total',multi="sums",store=True),
+		'r_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Grand Total',multi="sums",store=True),
 		
 		## Child Tables Declaration
 		
@@ -2725,7 +2726,8 @@ class ch_spare_offer(osv.osv):
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
 			print"r_p_f_tot",r_p_f_tot
-			r_spl_discount = r_pump_price_tot - r_tax_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
+			#~ r_spl_discount = r_pump_price_tot - r_tax_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
+			r_spl_discount = line.r_cpo_amount - r_tax_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
 			print"r_spl_discount",r_spl_discount
 			r_spl_discount_tot = round((line.r_cpo_amount*line.r_special_discount) / 100.00,2)
 			print"r_spl_discount_tot",r_spl_discount_tot
@@ -2955,7 +2957,7 @@ class ch_spare_offer(osv.osv):
 		'r_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
 		'r_pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),
 		'r_net_amt_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
-		'r_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Total',multi="sums",store=True),
+		'r_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Grand Total',multi="sums",store=True),
 		
 		## Child Tables Declaration
 		
@@ -3146,7 +3148,8 @@ class ch_accessories_offer(osv.osv):
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
 			print"r_p_f_tot",r_p_f_tot
-			r_spl_discount = r_pump_price_tot - r_tax_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
+			#~ r_spl_discount = r_pump_price_tot - r_tax_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
+			r_spl_discount = line.r_cpo_amount - r_tax_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
 			print"r_spl_discount",r_spl_discount
 			r_spl_discount_tot = round((line.r_cpo_amount*line.r_special_discount) / 100.00,2)
 			print"r_spl_discount_tot",r_spl_discount_tot
@@ -3370,7 +3373,7 @@ class ch_accessories_offer(osv.osv):
 		'r_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
 		'r_pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),		
 		'r_net_amt_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
-		'r_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Total',multi="sums",store=True),
+		'r_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Grand Total',multi="sums",store=True),
 		
 		## Child Tables Declaration
 		
