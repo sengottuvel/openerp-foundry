@@ -213,6 +213,7 @@ class ch_bank_statement(osv.osv):
 	'debit':fields.float('Debit'),
 	'credit':fields.float('Credit'),
 	'narration':fields.text('Narration'),
+	'partner_flag':fields.boolean('Partner Flag'),
 	'employee_flag':fields.boolean('Employee Flag'),
 	
 	}
