@@ -86,7 +86,7 @@ class kg_bank_statement(osv.osv):
 		'actual_close_bal_type':fields.selection([('dr','Dr'),('cr','Cr')],'Dr/Cr'),
 		'division_id':fields.many2one('kg.division.master','Division'),
 		'acct_name':fields.many2one('account.account','Account Name'),
-		'bnk_imp_id':fields.many2one('kg.bank.statement.import','Bank Statement Import'),
+		#~ 'bnk_imp_id':fields.many2one('kg.bank.statement.import','Bank Statement Import'),
 		
 		## Child Tables Declaration
 		
