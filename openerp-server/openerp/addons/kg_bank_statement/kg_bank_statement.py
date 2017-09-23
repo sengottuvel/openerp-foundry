@@ -212,7 +212,8 @@ class ch_bank_statement(osv.osv):
 	'cheque_no':fields.char('Cheque No/Ref No'),
 	'debit':fields.float('Debit'),
 	'credit':fields.float('Credit'),
-	'narration':fields.text('Narration')
+	'narration':fields.text('Narration'),
+	'employee_flag':fields.boolean('Employee Flag'),
 	
 	}
 	
