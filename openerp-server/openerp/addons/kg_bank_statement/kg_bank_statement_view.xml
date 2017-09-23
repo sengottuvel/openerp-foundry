@@ -18,13 +18,13 @@
 					</header>
 						<group>
 							<group>						
-								<field name="division_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>																
-								<field name="clear_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" options="{'datepicker':{'maxDate': null}}" required="1"/>															
+								<field name="division_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>																
+								<field name="clear_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" options="{'datepicker':{'maxDate': 0}}" required="1"/>															
 								<field name="modify" invisible = "1"/>
 							</group>
 							<group>
 								<field name="acc_journal_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" on_change="onchange_account(acc_journal_id,acct_name)"/>	
-								<field name="acct_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>	
+								<field name="acct_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>	
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
@@ -112,7 +112,7 @@
 								toolbar="True" string="Bank Statement Entry">				
 					<field name="acc_journal_id"/>
 					<field name="clear_date"/>
-					<field name="division_id"/>
+					<field name="division_id" invisible="1"/>
 					<field name="state"/>
 					<field name="entry_mode"/>
 				</tree>
@@ -170,7 +170,7 @@
 		
 		<!-- Menu Name Start here --> 
 			<menuitem id = "tam_kg_bank_state_brs" parent = "account.mpm_acc_masters" sequence="3" name="BRS Process"/>
-				<menuitem action="mma_kg_bank_state" name="Bank Statement Entry" id="mam_kg_bank_statement" parent="tam_kg_bank_state_brs" sequence="0"/>
+				<menuitem action="mma_kg_bank_state" name="Bank Statement Entry" id="mam_kg_bank_statement" parent="tam_kg_bank_state_brs" sequence="1"/>
 
 		<!-- Menu Name End here --> 
 
