@@ -207,6 +207,8 @@ class ch_bank_statement(osv.osv):
 	_columns = {
 
 	'header_id':fields.many2one('kg.bank.statement','Header id'),
+	'partner_id':fields.many2one('res.partner','Party Name',domain=[('partner_state','=','approve')]),
+	'employee_id':fields.many2one('hr.employee','Employee',domain=[('status','=','approved')]),
 	'cheque_no':fields.char('Cheque No/Ref No'),
 	'debit':fields.float('Debit'),
 	'credit':fields.float('Credit'),

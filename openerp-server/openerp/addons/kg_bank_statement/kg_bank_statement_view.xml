@@ -32,6 +32,8 @@
 							<field name="line_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" nolabel="1" colspan="4">
 								<tree name="Bank Statement Details" editable="bottom">
 									<field name="cheque_no" required="1" class="aplhanum_expect"/>
+									<field name="partner_id" attrs="{'readonly': [('employee_flag','=',True)]}" on_change="onchange_partner_id(partner_id)" required="0"/>
+									<field name="employee_id" attrs="{'readonly': [('partner_flag','=',True)]}" on_change="onchange_employee_id(employee_id)" required="0"/>
 									<field name="narration" required="1" class="aplhanum_expect"/>
 									<field name="debit" required="1"/>
 									<field name="credit" required="1"/>
