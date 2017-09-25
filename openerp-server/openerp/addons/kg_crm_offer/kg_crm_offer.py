@@ -2200,7 +2200,7 @@ class ch_pump_offer(osv.osv):
 			print"r_dealer_discount",r_dealer_discount
 			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00,2)
 			print"r_dealer_discount_tot",r_dealer_discount_tot
-			r_sam_ratio_tot = r_spl_discount - r_dealer_discount_tot - r_spl_discount_tot
+			r_sam_ratio_tot = r_pump_price_tot - r_spl_discount_tot - r_dealer_discount_tot - r_p_f_tot - r_insurance_tot - r_freight_tot
 			print"r_sam_ratio_tot",r_sam_ratio_tot
 			print"line.prime_costline.prime_cost",line.prime_cost
 			r_sam_ratio = r_sam_ratio_tot / line.prime_cost
