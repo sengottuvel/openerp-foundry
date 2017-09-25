@@ -919,7 +919,7 @@ order by division,grn_date,grn_number
 			</textField>
 			<image>
 				<reportElement x="130" y="0" width="116" height="32"/>
-				<imageExpression><![CDATA["/home/sujith/SVN_Projects/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</title>
