@@ -19,6 +19,7 @@ class kg_grn_register_wiz(osv.osv_memory):
 		'product_id':fields.many2many('product.product','kg_grn_wiz_pro','order_id','product_id','Product Name',domain="[('state','in',('draft','confirm','approved'))]"),
 		'supplier_id':fields.many2many('res.partner','kg_grn_wiz_sup','order_id','supplier_id','Supplier',domain="[('partner_state','not in',('cancel','reject')),('supplier','=',True)]"),
 		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division'),
+		'report_type': fields.selection([('details','Details'),('summary','Summary')],'Report Type',required=True),
 		'filter': fields.selection([('filter_no', 'No Filters'), ('filter_date', 'Date')], "Filter by", required=True),
 		'from_date': fields.date("Start Date"),
 		'to_date': fields.date("End Date"),
@@ -39,24 +40,42 @@ class kg_grn_register_wiz(osv.osv_memory):
 		'printed_by': lambda obj, cr, uid, context: uid,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.grn.register.wiz', context=c),
 		'user_id'   : lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id,
+		'report_type'   : 'summary',
 		
 	}
 	
 	def create_report(self, cr, uid, ids, context={}):
 		data = self.read(cr,uid,ids,)[-1]
 		print data,' create_report('
-		return {
-			'type'		  : 'ir.actions.report.xml',
-			'report_name' : 'jasper_kg_grn_register',
-			'datas'       : {
-							'model'		  : 'kg.grn.register.wiz',
-							'id'		  : context.get('active_ids') and context.get('active_ids')[0] or False,
-							'ids'		  : context.get('active_ids') and context.get('active_ids') or [],
-							'report_type' : 'pdf',
-							'form' 		  : data
-								},
-			'nodestroy'   : False
-			}
+		rec = self.browse(cr,uid,ids[0])
+		if rec.report_type == 'details':
+			print"aaaaaaaaaaaaaaaaaa"
+			return {
+				'type'		  : 'ir.actions.report.xml',
+				'report_name' : 'jasper_kg_grn_register',
+				'datas'       : {
+								'model'		  : 'kg.grn.register.wiz',
+								'id'		  : context.get('active_ids') and context.get('active_ids')[0] or False,
+								'ids'		  : context.get('active_ids') and context.get('active_ids') or [],
+								'report_type' : 'pdf',
+								'form' 		  : data
+									},
+				'nodestroy'   : False
+				}
+		if rec.report_type == 'summary':
+			print"bbbbbbbbbbbbbbbbbbbbbb"
+			return {
+				'type'		  : 'ir.actions.report.xml',
+				'report_name' : 'jasper_kg_grn_register_summary',
+				'datas'       : {
+								'model'		  : 'kg.grn.register.wiz',
+								'id'		  : context.get('active_ids') and context.get('active_ids')[0] or False,
+								'ids'		  : context.get('active_ids') and context.get('active_ids') or [],
+								'report_type' : 'pdf',
+								'form' 		  : data
+									},
+				'nodestroy'   : False
+				}
 	
 	def _enddate_check(self,cr,uid,ids,context=None):
 		rec=self.browse(cr,uid,ids[0])

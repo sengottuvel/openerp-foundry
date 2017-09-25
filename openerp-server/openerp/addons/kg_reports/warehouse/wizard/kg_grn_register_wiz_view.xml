@@ -8,9 +8,10 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
              <form string="GRN Register">
-				 <group string="Filters">
+				 <group>
 					<group>
 						<field name="from_date" required="1" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
+						<field name="report_type" invisible="1"/>
 						<field name="supplier_id" widget="many2many_tags"/>
 						<field name="division"/>
 					</group>
@@ -45,6 +46,14 @@
 				name="jasper_kg_grn_register"
 				rml="kg_reports/warehouse/report/kg_grn_register.jrxml"
 				id="grn_jasper_register_id"
+				menu="False"
+		/>
+        <report string="GRN Register Summary"
+				model="kg.grn.register.wiz"
+				auto="True"
+				name="jasper_kg_grn_register_summary"
+				rml="kg_reports/warehouse/report/kg_grn_register_summary.jrxml"
+				id="grn_jasper_register_summary_id"
 				menu="False"
 		/>
 		

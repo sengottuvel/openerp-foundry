@@ -1,0 +1,1457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kg_grn_register" language="groovy" pageWidth="612" pageHeight="792" whenNoDataType="NoDataSection" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="12"/>
+	<property name="ireport.y" value="0"/>
+	<subDataset name="dataset1">
+		<parameter name="from_date" class="java.lang.String">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<parameter name="to_date" class="java.lang.String">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<parameter name="wiz_id" class="java.lang.Integer"/>
+		<queryString>
+			<![CDATA[select *,
+max(ref_sno) OVER () as max_ref_sno
+ from (
+select *,
+row_number() OVER () as ref_sno
+ from (
+select distinct division,
+div_grn_discount_txt,divc_grn_other_charge_txt,divc_grn_amount_untaxed_txt,divc_grn_amount_tax_txt,divc_grn_amount_total_txt,
+gnd_grn_discount_txt,gnd_grn_other_charge_txt,gnd_grn_amount_untaxed_txt,gnd_grn_amount_tax_txt,gnd_grn_amount_total_txt from (
+select *,
+
+
+trim(TO_CHAR((sum(divc_grn_discount) OVER (PARTITION by division)), '999G999G99G999G99G99G990D99')) as div_grn_discount_txt,
+trim(TO_CHAR((sum(divc_grn_other_charge) OVER (PARTITION by division)), '999G999G99G999G99G99G990D99')) as divc_grn_other_charge_txt,
+trim(TO_CHAR((sum(divc_grn_amount_untaxed) OVER (PARTITION by division)), '999G999G99G999G99G99G990D99')) as divc_grn_amount_untaxed_txt,
+trim(TO_CHAR((sum(divc_grn_amount_tax) OVER (PARTITION by division)), '999G999G99G999G99G99G990D99')) as divc_grn_amount_tax_txt,
+trim(TO_CHAR((sum(divc_grn_amount_total) OVER (PARTITION by division)), '999G999G99G999G99G99G990D99')) as divc_grn_amount_total_txt,
+
+
+trim(TO_CHAR((sum(divc_grn_discount) OVER ()), '999G999G99G999G99G99G990D99')) as gnd_grn_discount_txt,
+trim(TO_CHAR((sum(divc_grn_other_charge) OVER ()), '999G999G99G999G99G99G990D99')) as gnd_grn_other_charge_txt,
+trim(TO_CHAR((sum(divc_grn_amount_untaxed) OVER ()), '999G999G99G999G99G99G990D99')) as gnd_grn_amount_untaxed_txt,
+trim(TO_CHAR((sum(divc_grn_amount_tax) OVER ()), '999G999G99G999G99G99G990D99')) as gnd_grn_amount_tax_txt,
+trim(TO_CHAR((sum(divc_grn_amount_total) OVER ()), '999G999G99G999G99G99G990D99')) as gnd_grn_amount_total_txt
+
+from (
+
+select *
+,case when head_sno = 1 then grn_discount else 0.00 end as divc_grn_discount,
+case when head_sno = 1 then grn_other_charge else 0.00 end as divc_grn_other_charge,
+case when head_sno = 1 then grn_amount_untaxed else 0.00 end as divc_grn_amount_untaxed,
+case when head_sno = 1 then grn_amount_tax else 0.00 end as divc_grn_amount_tax,
+case when head_sno = 1 then grn_amount_total else 0.00 end as divc_grn_amount_total
+ from (
+select
+dense_rank() OVER (PARTITION by division ORDER by division,grn_date,grn_number ) as main_sno,
+ROW_NUMBER() OVER (PARTITION by division,grn_date,grn_number ORDER by division,grn_date,grn_number) as head_sno,
+ROW_NUMBER() OVER (PARTITION by division ORDER by division,grn_date,grn_number) as sno,
+division,grn_date,grn_number,
+product_name,case when (brand_name is null or brand_name != '') then '-' else brand_name end as brand_name,moc,
+trim(TO_CHAR((qty), '999999999999999999999999990D99')) as qty_txt,
+trim(TO_CHAR((cost_price), '999G999G99G999G99G99G990D99')) as cost_price_txt,
+trim(TO_CHAR((discount), '999G999G99G999G99G99G990D99')) as discount_txt,
+
+--- Added For Testing Starts Here
+trim(TO_CHAR((grn_discount), '999G999G99G999G99G99G990D99')) as grn_discount_txt,
+trim(TO_CHAR((grn_other_charge), '999G999G99G999G99G99G990D99')) as grn_other_charge_txt,
+trim(TO_CHAR((grn_amount_untaxed), '999G999G99G999G99G99G990D99')) as grn_amount_untaxed_txt,
+trim(TO_CHAR((grn_amount_tax), '999G999G99G999G99G99G990D99')) as grn_amount_tax_txt,
+trim(TO_CHAR((grn_amount_total), '999G999G99G999G99G99G990D99')) as grn_amount_total_txt,
+--- Added For Testing Ends Here
+
+trim(TO_CHAR((COALESCE((sum(grn_total) OVER (PARTITION by division)) ,0.00) ), '999G999G99G999G99G99G990D99')) as div_gnd_txt,
+trim(TO_CHAR((sum(grn_total) OVER ()), '999G999G99G999G99G99G990D99')) as overall_gnd_txt,
+qty,uom,cost_price,discount,
+--- Added For Testing Starts Here
+grn_discount,
+grn_other_charge,
+grn_amount_untaxed,
+grn_amount_tax,
+grn_amount_total,
+--- Added For Testing Ends Here
+
+order_no,order_date,dc_no,dc_date,dummy,
+inward_type,grn_total,grn_totals,line_id,
+comp_name,created_by,part_name,str1,city,
+zip,state,country,from_date,to_date,status,printed_by,print_date,grn_datee,
+sum(grn_total) OVER (PARTITION by division) as div_gnd,
+sum(grn_total) OVER () as overall_gnd,remarks
+from (
+select division,grn_date,grn_number,
+product_name,case when (brand_name is null or brand_name != '') then '-' else brand_name end as brand_name,moc,qty,uom,cost_price,discount,
+--- Added For Testing Starts Here
+grn_discount,
+grn_other_charge,
+grn_amount_untaxed,
+grn_amount_tax,
+grn_amount_total,
+--- Added For Testing Ends Here
+
+order_no,order_date,dc_no,dc_date,dummy,
+inward_type,grn_total,grn_totals,line_id,
+comp_name,created_by,part_name,str1,city,
+zip,state,country,from_date,to_date,status,printed_by,print_date,grn_datee,
+case when (remarks is null or remarks = '') then '-' else remarks end as remarks
+from (
+select
+division,
+grn_id,grn_date,grn_number,grn_datee,dc_no,dc_date,created_by,part_name,str1,city,zip,state,country,product_name,
+(select name from kg_brand_master where id = brand_id) as brand_name,
+moc,qty,uom,line_id,cost_price,discount,
+
+--- Added For Testing Starts Here
+grn_discount,
+grn_other_charge,
+grn_amount_untaxed,
+grn_amount_tax,
+grn_amount_total,
+--- Added For Testing Ends Here
+
+inward_type,grn_total,grn_totals,comp_name,order_no,order_date,dummy,from_date,to_date,status,printed_by,print_date,remarks
+from (
+select
+grn_id,grn_date,grn_datee,grn_number,remarks,grn_total,
+(CASE WHEN division = 'ppd'
+THEN 'PPD'
+WHEN division = 'ipd'
+THEN 'IPD'
+WHEN division = 'foundry'
+THEN 'FOU'
+WHEN (division is null or division = '')
+THEN '-'
+ELSE 'None'
+end ) as division,
+dc_no,dc_date,created_by,part_name,str1,city,zip,state,country,product_name,brand_id,moc,qty,uom,line_id,
+cost_price,discount,
+--- Added For Testing Starts Here
+grn_discount,
+grn_other_charge,
+grn_amount_untaxed,
+grn_amount_tax,
+grn_amount_total,
+--- Added For Testing Ends Here
+inward_type,grn_totals,comp_name,order_no,order_date,dummy,from_date,to_date,status,printed_by,print_date
+from ((SELECT
+po_grn.id AS grn_id,
+to_char(po_grn.grn_date,'dd/mm/yyyy') AS grn_date,
+po_grn.grn_date AS grn_datee,
+po_grn.name AS grn_number,
+po_grn.po_so_remark AS remarks,
+grn_line.price_subtotal As grn_total,
+po_grn.division as division,
+case when (invoice_ids.name) is null then po_grn.dc_no else
+(po_grn.dc_no||' , '||invoice_ids.name) end AS dc_no,
+case when (invoice_ids.invoice_date) is null then to_char(po_grn.dc_date,'dd/mm/yyyy') else
+(to_char(po_grn.dc_date,'dd/mm/yyyy')||','||to_char(invoice_ids.invoice_date,'dd/mm/yyyy')) end AS dc_date,
+po_grn.created_by AS created_by,
+part.name AS part_name,
+part.street as str1,
+ct.name as city,
+part.zip as zip,
+st.name as state,
+coun.name as country,
+prd.name_template AS product_name,
+grn_line.brand_id AS brand_id,
+moc.name AS moc,
+grn_line.po_grn_qty AS qty,
+uom.name AS uom,
+grn_line.id AS line_id,
+grn_line.price_unit As cost_price,
+grn_line.kg_discount_per as discount,
+po_grn.discount as grn_discount,
+0.00::numeric as grn_other_charge,
+po_grn.amount_untaxed as grn_amount_untaxed,
+po_grn.amount_tax as grn_amount_tax,
+po_grn.amount_total as grn_amount_total,
+inw.name AS inward_type,
+trim(TO_CHAR((COALESCE((grn_line.price_subtotal) ,0.00) ), '999G999G99G999G99G99G990D99')) as grn_totals,
+res_cmp.name as comp_name,
+grn_line.order_no as order_no,
+to_char(grn_line.order_date::date,'dd/mm/yyyy') AS order_date,
+1 as dummy,
+(select to_char(from_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as from_date,
+(select to_char(to_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as to_date,
+case when (select status from kg_grn_register_wiz where id =$P{wiz_id}) is null then 'All'
+else (select status from kg_grn_register_wiz where id =$P{wiz_id}) end as status,
+users.login as printed_by,
+(select to_char(print_date + interval '5.30 hour','dd-mm-YYYY HH:MM:SS') from kg_grn_register_wiz where id =$P{wiz_id}) as print_date
+
+FROM  kg_po_grn po_grn
+
+left JOIN res_partner part ON (part.id=po_grn.supplier_id)
+left join res_country_state st on(st.id=part.state_id)
+left join res_city ct on(ct.id=part.city_id)
+left join res_country as coun on(coun.id=part.country_id)
+left JOIN po_grn_line grn_line ON (grn_line.po_grn_id=po_grn.id)
+left JOIN ch_brandmoc_rate_details moc_temp ON (moc_temp.id=grn_line.moc_id_temp)
+left JOIN kg_moc_master moc ON (moc.id=moc_temp.moc_id)
+left JOIN kg_inwardmaster inw ON (inw.id = grn_line.inward_type)
+left JOIN product_uom uom ON (uom.id=grn_line.uom_id)
+left JOIN product_product prd ON (prd.id=grn_line.product_id)
+left join res_company res_cmp on (res_cmp.id=po_grn.company_id)
+left join purchase_invoice_grn_ids grn_invoice_ids on (grn_invoice_ids.grn_id=po_grn.id)
+left join kg_purchase_invoice invoice_ids on (invoice_ids.id=grn_invoice_ids.invoice_id)
+left join res_users users on (users.id=(select user_id from kg_grn_register_wiz where id =$P{wiz_id}))
+
+where
+
+CASE
+WHEN (select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id} limit 1) > 0 THEN grn_line.product_id in
+(select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id})
+ELSE
+grn_line.product_id in (select id
+from product_product)
+end and
+
+CASE
+WHEN (select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id} limit 1) > 0 THEN po_grn.supplier_id in
+(select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id})
+ELSE
+po_grn.supplier_id in (select id
+from res_partner)
+end and
+
+
+CASE
+WHEN (select division from kg_grn_register_wiz where id = $P{wiz_id} limit 1) is not null THEN po_grn.division in
+(select division from kg_grn_register_wiz where id = $P{wiz_id})
+ELSE
+po_grn.division in ('ppd','ipd','foundry')
+end and
+
+
+po_grn.type = 'in'
+
+and
+case
+when (select status from kg_grn_register_wiz where id = $P{wiz_id}) is not null then po_grn.state in (select status from kg_grn_register_wiz where id = $P{wiz_id})
+else
+po_grn.state !='draft' end
+
+and po_grn.grn_date >=to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and po_grn.grn_date <= to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
+order by po_grn.name)
+
+UNION ALL
+
+(SELECT
+gen_grn.id AS grn_id,
+to_char(gen_grn.grn_date,'dd/mm/yyyy') AS grn_date,
+gen_grn.grn_date AS grn_datee,
+gen_grn.name AS grn_number,
+gen_grn.remark AS remarks,
+gen_grn.sub_total As grn_total,
+gen_grn.division as division,
+case when (invoice_idss.name) is null then gen_grn.dc_no else
+(gen_grn.dc_no||','||invoice_idss.name) end AS dc_no,
+case when (invoice_idss.invoice_date) is null then to_char(gen_grn.dc_date,'dd/mm/yyyy') else
+(to_char(gen_grn.dc_date,'dd/mm/yyyy')||' , '||to_char(invoice_idss.invoice_date,'dd/mm/yyyy')) end AS dc_date,
+gen_grn.user_id AS created_by,
+part.name AS part_name,
+part.street as str1,
+ct.name as city,
+part.zip as zip,
+st.name as state,
+coun.name as country,
+prd.name_template AS product_name,
+grn_line.brand_id AS brand_id,
+moc.name AS moc,
+grn_line.grn_qty AS qty,
+uom.name AS uom,
+grn_line.id AS line_id,
+grn_line.price_unit As cost_price,
+grn_line.kg_discount_per as discount,
+gen_grn.discount as grn_discount,
+0.00::numeric as grn_other_charge,
+gen_grn.amount_untaxed as grn_amount_untaxed,
+gen_grn.amount_tax as grn_amount_tax,
+gen_grn.amount_total as grn_amount_total,
+inw.name AS inward_type,
+trim(TO_CHAR((COALESCE((grn_line.price_subtotal) ,0.00) ), '999G999G99G999G99G99G990D99')) as grn_totals,
+res_cmp.name as comp_name,
+'-----------'::text as order_no,
+'-----------'::text as order_date,
+1 as dummy,
+(select to_char(from_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as from_date,
+(select to_char(to_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as to_date,
+case when (select status from kg_grn_register_wiz where id =$P{wiz_id}) is null then 'All'
+else (select status from kg_grn_register_wiz where id =$P{wiz_id}) end as status,
+users.login as printed_by,
+(select to_char(print_date + interval '5.30 hour','dd-mm-YYYY HH:MM:SS') from kg_grn_register_wiz where id =$P{wiz_id}) as print_date
+
+FROM  kg_general_grn gen_grn
+
+left JOIN res_partner part ON (part.id=gen_grn.supplier_id)
+left join res_country_state st on(st.id=part.state_id)
+left join res_city ct on(ct.id=part.city_id)
+left join res_country as coun on(coun.id=part.country_id)
+left JOIN kg_general_grn_line grn_line ON (grn_line.grn_id=gen_grn.id)
+left JOIN ch_brandmoc_rate_details moc_temp ON (moc_temp.id=grn_line.moc_id_temp)
+left JOIN kg_moc_master moc ON (moc.id=moc_temp.moc_id)
+left JOIN kg_inwardmaster inw ON (inw.id = grn_line.inward_type)
+left JOIN product_uom uom ON (uom.id=grn_line.uom_id)
+left JOIN product_product prd ON (prd.id=grn_line.product_id)
+left join res_company res_cmp on (res_cmp.id=gen_grn.company_id)
+left join purchase_invoice_general_grn_ids gen_invoice_ids on (gen_invoice_ids.grn_id=gen_grn.id)
+left join kg_purchase_invoice invoice_idss on (invoice_idss.id=gen_invoice_ids.invoice_id)
+left join res_users users on (users.id=(select user_id from kg_grn_register_wiz where id =$P{wiz_id}))
+
+where
+CASE
+WHEN (select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id} limit 1) > 0 THEN grn_line.product_id in
+(select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id})
+ELSE
+grn_line.product_id in (select id
+from product_product)
+end and
+
+CASE
+WHEN (select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id} limit 1) > 0 THEN gen_grn.supplier_id in
+(select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id})
+ELSE
+gen_grn.supplier_id in (select id
+from res_partner)
+end and
+gen_grn.type = 'in' and
+
+case
+when (select status from kg_grn_register_wiz where id = $P{wiz_id}) is not null then gen_grn.state in (select status from kg_grn_register_wiz where id = $P{wiz_id})
+else
+gen_grn.state !='draft' end
+
+and gen_grn.grn_date >= to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and gen_grn.grn_date <=to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
+order by gen_grn.name)) as a
+) as sub
+where
+CASE
+WHEN (select division from kg_grn_wiz_pro where order_id = $P{wiz_id}) is not null THEN division in
+(select division from kg_grn_wiz_pro where order_id = $P{wiz_id})
+ELSE
+division != ''
+end
+order by division,grn_date,grn_number
+) as sample order by division,grn_date,grn_number
+) as final order by division,1,2
+---division,grn_date,grn_number
+) as sample order by division,1,2
+) as test order by division,1,2
+) as head_sql order by division
+) as headone_sql order by division
+) as headtwo_sql order by division]]>
+		</queryString>
+		<field name="division" class="java.lang.String"/>
+		<field name="div_grn_discount_txt" class="java.lang.String"/>
+		<field name="divc_grn_other_charge_txt" class="java.lang.String"/>
+		<field name="divc_grn_amount_untaxed_txt" class="java.lang.String"/>
+		<field name="divc_grn_amount_tax_txt" class="java.lang.String"/>
+		<field name="divc_grn_amount_total_txt" class="java.lang.String"/>
+		<field name="gnd_grn_discount_txt" class="java.lang.String"/>
+		<field name="gnd_grn_other_charge_txt" class="java.lang.String"/>
+		<field name="gnd_grn_amount_untaxed_txt" class="java.lang.String"/>
+		<field name="gnd_grn_amount_tax_txt" class="java.lang.String"/>
+		<field name="gnd_grn_amount_total_txt" class="java.lang.String"/>
+		<field name="ref_sno" class="java.lang.Long"/>
+		<field name="max_ref_sno" class="java.lang.Long"/>
+	</subDataset>
+	<parameter name="from_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="to_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="po_partner" class="java.lang.String"/>
+	<parameter name="gen_partner" class="java.lang.String"/>
+	<parameter name="wiz_id" class="java.lang.Integer"/>
+	<parameter name="status" class="java.lang.String"/>
+	<parameter name="print_date" class="java.lang.String"/>
+	<parameter name="printed_by" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select *,
+
+
+trim(TO_CHAR((sum(divc_grn_discount) OVER (PARTITION by division)), '999G999G99G999G99G99G990D99')) as div_grn_discount_txt,
+trim(TO_CHAR((sum(divc_grn_other_charge) OVER (PARTITION by division)), '999G999G99G999G99G99G990D99')) as divc_grn_other_charge_txt,
+trim(TO_CHAR((sum(divc_grn_amount_untaxed) OVER (PARTITION by division)), '999G999G99G999G99G99G990D99')) as divc_grn_amount_untaxed_txt,
+trim(TO_CHAR((sum(divc_grn_amount_tax) OVER (PARTITION by division)), '999G999G99G999G99G99G990D99')) as divc_grn_amount_tax_txt,
+trim(TO_CHAR((sum(divc_grn_amount_total) OVER (PARTITION by division)), '999G999G99G999G99G99G990D99')) as divc_grn_amount_total_txt,
+
+
+trim(TO_CHAR((sum(divc_grn_discount) OVER ()), '999G999G99G999G99G99G990D99')) as gnd_grn_discount_txt,
+trim(TO_CHAR((sum(divc_grn_other_charge) OVER ()), '999G999G99G999G99G99G990D99')) as gnd_grn_other_charge_txt,
+trim(TO_CHAR((sum(divc_grn_amount_untaxed) OVER ()), '999G999G99G999G99G99G990D99')) as gnd_grn_amount_untaxed_txt,
+trim(TO_CHAR((sum(divc_grn_amount_tax) OVER ()), '999G999G99G999G99G99G990D99')) as gnd_grn_amount_tax_txt,
+trim(TO_CHAR((sum(divc_grn_amount_total) OVER ()), '999G999G99G999G99G99G990D99')) as gnd_grn_amount_total_txt
+
+from (
+
+select *
+,case when head_sno = 1 then grn_discount else 0.00 end as divc_grn_discount,
+case when head_sno = 1 then grn_other_charge else 0.00 end as divc_grn_other_charge,
+case when head_sno = 1 then grn_amount_untaxed else 0.00 end as divc_grn_amount_untaxed,
+case when head_sno = 1 then grn_amount_tax else 0.00 end as divc_grn_amount_tax,
+case when head_sno = 1 then grn_amount_total else 0.00 end as divc_grn_amount_total
+ from (
+select
+dense_rank() OVER (PARTITION by division ORDER by division,grn_date,grn_number ) as main_sno,
+ROW_NUMBER() OVER (PARTITION by division,grn_date,grn_number ORDER by division,grn_date,grn_number) as head_sno,
+ROW_NUMBER() OVER (PARTITION by division ORDER by division,grn_date,grn_number) as sno,
+division,grn_date,grn_number,
+product_name,case when (brand_name is null or brand_name != '') then '-' else brand_name end as brand_name,moc,
+trim(TO_CHAR((qty), '999999999999999999999999990D99')) as qty_txt,
+trim(TO_CHAR((cost_price), '999G999G99G999G99G99G990D99')) as cost_price_txt,
+trim(TO_CHAR((discount), '999G999G99G999G99G99G990D99')) as discount_txt,
+
+--- Added For Testing Starts Here
+trim(TO_CHAR((grn_discount), '999G999G99G999G99G99G990D99')) as grn_discount_txt,
+trim(TO_CHAR((grn_other_charge), '999G999G99G999G99G99G990D99')) as grn_other_charge_txt,
+trim(TO_CHAR((grn_amount_untaxed), '999G999G99G999G99G99G990D99')) as grn_amount_untaxed_txt,
+trim(TO_CHAR((grn_amount_tax), '999G999G99G999G99G99G990D99')) as grn_amount_tax_txt,
+trim(TO_CHAR((grn_amount_total), '999G999G99G999G99G99G990D99')) as grn_amount_total_txt,
+--- Added For Testing Ends Here
+
+trim(TO_CHAR((COALESCE((sum(grn_total) OVER (PARTITION by division)) ,0.00) ), '999G999G99G999G99G99G990D99')) as div_gnd_txt,
+trim(TO_CHAR((sum(grn_total) OVER ()), '999G999G99G999G99G99G990D99')) as overall_gnd_txt,
+qty,uom,cost_price,discount,
+--- Added For Testing Starts Here
+grn_discount,
+grn_other_charge,
+grn_amount_untaxed,
+grn_amount_tax,
+grn_amount_total,
+--- Added For Testing Ends Here
+
+order_no,order_date,dc_no,dc_date,dummy,
+inward_type,grn_total,grn_totals,line_id,
+comp_name,created_by,part_name,str1,city,
+zip,state,country,from_date,to_date,status,printed_by,print_date,grn_datee,
+sum(grn_total) OVER (PARTITION by division) as div_gnd,
+sum(grn_total) OVER () as overall_gnd,remarks
+from (
+select division,grn_date,grn_number,
+product_name,case when (brand_name is null or brand_name != '') then '-' else brand_name end as brand_name,moc,qty,uom,cost_price,discount,
+--- Added For Testing Starts Here
+grn_discount,
+grn_other_charge,
+grn_amount_untaxed,
+grn_amount_tax,
+grn_amount_total,
+--- Added For Testing Ends Here
+
+order_no,order_date,dc_no,dc_date,dummy,
+inward_type,grn_total,grn_totals,line_id,
+comp_name,created_by,part_name,str1,city,
+zip,state,country,from_date,to_date,status,printed_by,print_date,grn_datee,
+case when (remarks is null or remarks = '') then '-' else remarks end as remarks
+from (
+select
+division,
+grn_id,grn_date,grn_number,grn_datee,dc_no,dc_date,created_by,part_name,str1,city,zip,state,country,product_name,
+(select name from kg_brand_master where id = brand_id) as brand_name,
+moc,qty,uom,line_id,cost_price,discount,
+
+--- Added For Testing Starts Here
+grn_discount,
+grn_other_charge,
+grn_amount_untaxed,
+grn_amount_tax,
+grn_amount_total,
+--- Added For Testing Ends Here
+
+inward_type,grn_total,grn_totals,comp_name,order_no,order_date,dummy,from_date,to_date,status,printed_by,print_date,remarks
+from (
+select
+grn_id,grn_date,grn_datee,grn_number,remarks,grn_total,
+(CASE WHEN division = 'ppd'
+THEN 'PPD'
+WHEN division = 'ipd'
+THEN 'IPD'
+WHEN division = 'foundry'
+THEN 'FOU'
+WHEN (division is null or division = '')
+THEN '-'
+ELSE 'None'
+end ) as division,
+dc_no,dc_date,created_by,part_name,str1,city,zip,state,country,product_name,brand_id,moc,qty,uom,line_id,
+cost_price,discount,
+--- Added For Testing Starts Here
+grn_discount,
+grn_other_charge,
+grn_amount_untaxed,
+grn_amount_tax,
+grn_amount_total,
+--- Added For Testing Ends Here
+inward_type,grn_totals,comp_name,order_no,order_date,dummy,from_date,to_date,status,printed_by,print_date
+from ((SELECT
+po_grn.id AS grn_id,
+to_char(po_grn.grn_date,'dd/mm/yyyy') AS grn_date,
+po_grn.grn_date AS grn_datee,
+po_grn.name AS grn_number,
+po_grn.po_so_remark AS remarks,
+grn_line.price_subtotal As grn_total,
+po_grn.division as division,
+case when (invoice_ids.name) is null then po_grn.dc_no else
+(po_grn.dc_no||' , '||invoice_ids.name) end AS dc_no,
+case when (invoice_ids.invoice_date) is null then to_char(po_grn.dc_date,'dd/mm/yyyy') else
+(to_char(po_grn.dc_date,'dd/mm/yyyy')||','||to_char(invoice_ids.invoice_date,'dd/mm/yyyy')) end AS dc_date,
+po_grn.created_by AS created_by,
+part.name AS part_name,
+part.street as str1,
+ct.name as city,
+part.zip as zip,
+st.name as state,
+coun.name as country,
+prd.name_template AS product_name,
+grn_line.brand_id AS brand_id,
+moc.name AS moc,
+grn_line.po_grn_qty AS qty,
+uom.name AS uom,
+grn_line.id AS line_id,
+grn_line.price_unit As cost_price,
+grn_line.kg_discount_per as discount,
+po_grn.discount as grn_discount,
+0.00::numeric as grn_other_charge,
+po_grn.amount_untaxed as grn_amount_untaxed,
+po_grn.amount_tax as grn_amount_tax,
+po_grn.amount_total as grn_amount_total,
+inw.name AS inward_type,
+trim(TO_CHAR((COALESCE((grn_line.price_subtotal) ,0.00) ), '999G999G99G999G99G99G990D99')) as grn_totals,
+res_cmp.name as comp_name,
+grn_line.order_no as order_no,
+to_char(grn_line.order_date::date,'dd/mm/yyyy') AS order_date,
+1 as dummy,
+(select to_char(from_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as from_date,
+(select to_char(to_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as to_date,
+case when (select status from kg_grn_register_wiz where id =$P{wiz_id}) is null then 'All'
+else (select status from kg_grn_register_wiz where id =$P{wiz_id}) end as status,
+users.login as printed_by,
+(select to_char(print_date + interval '5.30 hour','dd-mm-YYYY HH:MM:SS') from kg_grn_register_wiz where id =$P{wiz_id}) as print_date
+
+FROM  kg_po_grn po_grn
+
+left JOIN res_partner part ON (part.id=po_grn.supplier_id)
+left join res_country_state st on(st.id=part.state_id)
+left join res_city ct on(ct.id=part.city_id)
+left join res_country as coun on(coun.id=part.country_id)
+left JOIN po_grn_line grn_line ON (grn_line.po_grn_id=po_grn.id)
+left JOIN ch_brandmoc_rate_details moc_temp ON (moc_temp.id=grn_line.moc_id_temp)
+left JOIN kg_moc_master moc ON (moc.id=moc_temp.moc_id)
+left JOIN kg_inwardmaster inw ON (inw.id = grn_line.inward_type)
+left JOIN product_uom uom ON (uom.id=grn_line.uom_id)
+left JOIN product_product prd ON (prd.id=grn_line.product_id)
+left join res_company res_cmp on (res_cmp.id=po_grn.company_id)
+left join purchase_invoice_grn_ids grn_invoice_ids on (grn_invoice_ids.grn_id=po_grn.id)
+left join kg_purchase_invoice invoice_ids on (invoice_ids.id=grn_invoice_ids.invoice_id)
+left join res_users users on (users.id=(select user_id from kg_grn_register_wiz where id =$P{wiz_id}))
+
+where
+
+CASE
+WHEN (select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id} limit 1) > 0 THEN grn_line.product_id in
+(select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id})
+ELSE
+grn_line.product_id in (select id
+from product_product)
+end and
+
+CASE
+WHEN (select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id} limit 1) > 0 THEN po_grn.supplier_id in
+(select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id})
+ELSE
+po_grn.supplier_id in (select id
+from res_partner)
+end and
+
+
+CASE
+WHEN (select division from kg_grn_register_wiz where id = $P{wiz_id} limit 1) is not null THEN po_grn.division in
+(select division from kg_grn_register_wiz where id = $P{wiz_id})
+ELSE
+po_grn.division in ('ppd','ipd','foundry')
+end and
+
+
+po_grn.type = 'in'
+
+and
+case
+when (select status from kg_grn_register_wiz where id = $P{wiz_id}) is not null then po_grn.state in (select status from kg_grn_register_wiz where id = $P{wiz_id})
+else
+po_grn.state !='draft' end
+
+and po_grn.grn_date >=to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and po_grn.grn_date <= to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
+order by po_grn.name)
+
+UNION ALL
+
+(SELECT
+gen_grn.id AS grn_id,
+to_char(gen_grn.grn_date,'dd/mm/yyyy') AS grn_date,
+gen_grn.grn_date AS grn_datee,
+gen_grn.name AS grn_number,
+gen_grn.remark AS remarks,
+gen_grn.sub_total As grn_total,
+gen_grn.division as division,
+case when (invoice_idss.name) is null then gen_grn.dc_no else
+(gen_grn.dc_no||','||invoice_idss.name) end AS dc_no,
+case when (invoice_idss.invoice_date) is null then to_char(gen_grn.dc_date,'dd/mm/yyyy') else
+(to_char(gen_grn.dc_date,'dd/mm/yyyy')||' , '||to_char(invoice_idss.invoice_date,'dd/mm/yyyy')) end AS dc_date,
+gen_grn.user_id AS created_by,
+part.name AS part_name,
+part.street as str1,
+ct.name as city,
+part.zip as zip,
+st.name as state,
+coun.name as country,
+prd.name_template AS product_name,
+grn_line.brand_id AS brand_id,
+moc.name AS moc,
+grn_line.grn_qty AS qty,
+uom.name AS uom,
+grn_line.id AS line_id,
+grn_line.price_unit As cost_price,
+grn_line.kg_discount_per as discount,
+gen_grn.discount as grn_discount,
+0.00::numeric as grn_other_charge,
+gen_grn.amount_untaxed as grn_amount_untaxed,
+gen_grn.amount_tax as grn_amount_tax,
+gen_grn.amount_total as grn_amount_total,
+inw.name AS inward_type,
+trim(TO_CHAR((COALESCE((grn_line.price_subtotal) ,0.00) ), '999G999G99G999G99G99G990D99')) as grn_totals,
+res_cmp.name as comp_name,
+'-----------'::text as order_no,
+'-----------'::text as order_date,
+1 as dummy,
+(select to_char(from_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as from_date,
+(select to_char(to_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as to_date,
+case when (select status from kg_grn_register_wiz where id =$P{wiz_id}) is null then 'All'
+else (select status from kg_grn_register_wiz where id =$P{wiz_id}) end as status,
+users.login as printed_by,
+(select to_char(print_date + interval '5.30 hour','dd-mm-YYYY HH:MM:SS') from kg_grn_register_wiz where id =$P{wiz_id}) as print_date
+
+FROM  kg_general_grn gen_grn
+
+left JOIN res_partner part ON (part.id=gen_grn.supplier_id)
+left join res_country_state st on(st.id=part.state_id)
+left join res_city ct on(ct.id=part.city_id)
+left join res_country as coun on(coun.id=part.country_id)
+left JOIN kg_general_grn_line grn_line ON (grn_line.grn_id=gen_grn.id)
+left JOIN ch_brandmoc_rate_details moc_temp ON (moc_temp.id=grn_line.moc_id_temp)
+left JOIN kg_moc_master moc ON (moc.id=moc_temp.moc_id)
+left JOIN kg_inwardmaster inw ON (inw.id = grn_line.inward_type)
+left JOIN product_uom uom ON (uom.id=grn_line.uom_id)
+left JOIN product_product prd ON (prd.id=grn_line.product_id)
+left join res_company res_cmp on (res_cmp.id=gen_grn.company_id)
+left join purchase_invoice_general_grn_ids gen_invoice_ids on (gen_invoice_ids.grn_id=gen_grn.id)
+left join kg_purchase_invoice invoice_idss on (invoice_idss.id=gen_invoice_ids.invoice_id)
+left join res_users users on (users.id=(select user_id from kg_grn_register_wiz where id =$P{wiz_id}))
+
+where
+CASE
+WHEN (select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id} limit 1) > 0 THEN grn_line.product_id in
+(select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id})
+ELSE
+grn_line.product_id in (select id
+from product_product)
+end and
+
+CASE
+WHEN (select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id} limit 1) > 0 THEN gen_grn.supplier_id in
+(select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id})
+ELSE
+gen_grn.supplier_id in (select id
+from res_partner)
+end and
+gen_grn.type = 'in' and
+
+case
+when (select status from kg_grn_register_wiz where id = $P{wiz_id}) is not null then gen_grn.state in (select status from kg_grn_register_wiz where id = $P{wiz_id})
+else
+gen_grn.state !='draft' end
+
+and gen_grn.grn_date >= to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and gen_grn.grn_date <=to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
+order by gen_grn.name)) as a
+) as sub
+where
+CASE
+WHEN (select division from kg_grn_wiz_pro where order_id = $P{wiz_id}) is not null THEN division in
+(select division from kg_grn_wiz_pro where order_id = $P{wiz_id})
+ELSE
+division != ''
+end
+order by division,grn_date,grn_number
+) as sample order by division,grn_date,grn_number
+) as final order by division,1,2
+---division,grn_date,grn_number
+) as sample order by division,1,2
+) as test order by division,1,2]]>
+	</queryString>
+	<field name="main_sno" class="java.lang.Long"/>
+	<field name="head_sno" class="java.lang.Long"/>
+	<field name="sno" class="java.lang.Long"/>
+	<field name="division" class="java.lang.String"/>
+	<field name="grn_date" class="java.lang.String"/>
+	<field name="grn_number" class="java.lang.String"/>
+	<field name="product_name" class="java.lang.String"/>
+	<field name="brand_name" class="java.lang.String"/>
+	<field name="moc" class="java.lang.String"/>
+	<field name="qty_txt" class="java.lang.String"/>
+	<field name="cost_price_txt" class="java.lang.String"/>
+	<field name="discount_txt" class="java.lang.String"/>
+	<field name="grn_discount_txt" class="java.lang.String"/>
+	<field name="grn_other_charge_txt" class="java.lang.String"/>
+	<field name="grn_amount_untaxed_txt" class="java.lang.String"/>
+	<field name="grn_amount_tax_txt" class="java.lang.String"/>
+	<field name="grn_amount_total_txt" class="java.lang.String"/>
+	<field name="div_gnd_txt" class="java.lang.String"/>
+	<field name="overall_gnd_txt" class="java.lang.String"/>
+	<field name="qty" class="java.lang.Double"/>
+	<field name="uom" class="java.lang.String"/>
+	<field name="cost_price" class="java.lang.Double"/>
+	<field name="discount" class="java.math.BigDecimal"/>
+	<field name="grn_discount" class="java.math.BigDecimal"/>
+	<field name="grn_other_charge" class="java.math.BigDecimal"/>
+	<field name="grn_amount_untaxed" class="java.math.BigDecimal"/>
+	<field name="grn_amount_tax" class="java.math.BigDecimal"/>
+	<field name="grn_amount_total" class="java.math.BigDecimal"/>
+	<field name="order_no" class="java.lang.String"/>
+	<field name="order_date" class="java.lang.String"/>
+	<field name="dc_no" class="java.lang.String"/>
+	<field name="dc_date" class="java.lang.String"/>
+	<field name="dummy" class="java.lang.Integer"/>
+	<field name="inward_type" class="java.lang.String"/>
+	<field name="grn_total" class="java.lang.Double"/>
+	<field name="grn_totals" class="java.lang.String"/>
+	<field name="line_id" class="java.lang.Integer"/>
+	<field name="comp_name" class="java.lang.String"/>
+	<field name="created_by" class="java.lang.Integer"/>
+	<field name="part_name" class="java.lang.String"/>
+	<field name="str1" class="java.lang.String"/>
+	<field name="city" class="java.lang.String"/>
+	<field name="zip" class="java.lang.String"/>
+	<field name="state" class="java.lang.String"/>
+	<field name="country" class="java.lang.String"/>
+	<field name="from_date" class="java.lang.String"/>
+	<field name="to_date" class="java.lang.String"/>
+	<field name="status" class="java.lang.String"/>
+	<field name="printed_by" class="java.lang.String"/>
+	<field name="print_date" class="java.lang.String"/>
+	<field name="grn_datee" class="java.sql.Date"/>
+	<field name="div_gnd" class="java.lang.Double"/>
+	<field name="overall_gnd" class="java.lang.Double"/>
+	<field name="remarks" class="java.lang.String"/>
+	<field name="divc_grn_discount" class="java.math.BigDecimal"/>
+	<field name="divc_grn_other_charge" class="java.math.BigDecimal"/>
+	<field name="divc_grn_amount_untaxed" class="java.math.BigDecimal"/>
+	<field name="divc_grn_amount_tax" class="java.math.BigDecimal"/>
+	<field name="divc_grn_amount_total" class="java.math.BigDecimal"/>
+	<field name="div_grn_discount_txt" class="java.lang.String"/>
+	<field name="divc_grn_other_charge_txt" class="java.lang.String"/>
+	<field name="divc_grn_amount_untaxed_txt" class="java.lang.String"/>
+	<field name="divc_grn_amount_tax_txt" class="java.lang.String"/>
+	<field name="divc_grn_amount_total_txt" class="java.lang.String"/>
+	<field name="gnd_grn_discount_txt" class="java.lang.String"/>
+	<field name="gnd_grn_other_charge_txt" class="java.lang.String"/>
+	<field name="gnd_grn_amount_untaxed_txt" class="java.lang.String"/>
+	<field name="gnd_grn_amount_tax_txt" class="java.lang.String"/>
+	<field name="gnd_grn_amount_total_txt" class="java.lang.String"/>
+	<group name="Division">
+		<groupExpression><![CDATA[$F{division}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="256" height="15" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[new Boolean($F{sno}.intValue() == 1)]]></printWhenExpression>
+					</reportElement>
+					<box topPadding="2"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Division : "+$F{division}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<staticText>
+					<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="313" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7" isBold="true" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Division Total :  ]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+					<reportElement stretchType="RelativeToTallestObject" x="512" y="0" width="60" height="20" isPrintWhenDetailOverflows="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" x="512" y="0" width="60" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{divc_grn_amount_total_txt}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" x="467" y="0" width="45" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{divc_grn_other_charge_txt}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" x="373" y="0" width="47" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{divc_grn_amount_tax_txt}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" x="313" y="0" width="60" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{divc_grn_amount_untaxed}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" x="420" y="0" width="47" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{div_grn_discount_txt}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="45" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="572" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{comp_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="511" y="33" width="14" height="10"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["to"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="524" y="33" width="49" height="10"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{to_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="33" width="40" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Status :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="40" y="33" width="100" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="399" y="33" width="63" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date Range:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="20" width="571" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[GRN Register]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="462" y="33" width="50" height="10"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{from_date}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="130" y="0" width="116" height="32"/>
+				<imageExpression><![CDATA["/home/sujith/SVN_Projects/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="-1" width="572" height="1"/>
+			</line>
+			<staticText>
+				<reportElement x="273" y="0" width="34" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DC No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="22" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[S.No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="511" y="0" width="61" height="25"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="467" y="0" width="45" height="25"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A.Charge]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="367" y="0" width="53" height="25"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tax Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="168" y="0" width="105" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Supplier]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="22" y="0" width="45" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[GRN Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="307" y="0" width="60" height="25"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Base Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="0" width="47" height="25"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Discount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="67" y="0" width="101" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[GRN No]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="45" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="67" y="0" width="101" height="22" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+					<printWhenExpression><![CDATA[$F{head_sno} == 1]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_number}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="22" y="0" width="45" height="22" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+					<printWhenExpression><![CDATA[$F{head_sno} == 1]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_date}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="30" y="22" width="28" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{head_sno}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="218" y="22" width="44" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{qty_txt}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="186" y="22" width="32" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="0" y="0" width="22" height="22" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+					<printWhenExpression><![CDATA[$F{head_sno} == 1]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{main_sno}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="168" y="0" width="105" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+					<printWhenExpression><![CDATA[$F{head_sno} == 1]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{part_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="273" y="0" width="34" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+					<printWhenExpression><![CDATA[$F{head_sno} == 1]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dc_no}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="307" y="0" width="60" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+					<printWhenExpression><![CDATA[$F{head_sno} == 1]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_amount_untaxed_txt}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="420" y="0" width="47" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+					<printWhenExpression><![CDATA[$F{head_sno} == 1]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_discount_txt}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="511" y="0" width="61" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+					<printWhenExpression><![CDATA[$F{head_sno} == 1]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_amount_total_txt}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="58" y="22" width="128" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{product_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="367" y="0" width="53" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+					<printWhenExpression><![CDATA[$F{head_sno} == 1]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_amount_tax_txt}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="467" y="0" width="45" height="23" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+					<printWhenExpression><![CDATA[$F{head_sno} == 1]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_other_charge_txt}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="218" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{printed_by}+"/"+$F{print_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="218" y="0" width="80" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="298" y="0" width="274" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="69" splitType="Stretch">
+			<componentElement>
+				<reportElement x="0" y="12" width="571" height="57"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="dataset1">
+						<datasetParameter name="from_date">
+							<datasetParameterExpression><![CDATA[$P{from_date}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="to_date">
+							<datasetParameterExpression><![CDATA[$P{to_date}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="wiz_id">
+							<datasetParameterExpression><![CDATA[$P{wiz_id}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="57" width="571">
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="0" y="19" width="307" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" leftPadding="2"/>
+							<textElement>
+								<font size="7"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{division}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="0" y="0" width="307" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" leftPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement>
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA["Division Name"]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="510" y="19" width="61" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" rightPadding="2"/>
+							<textElement textAlignment="Right">
+								<font size="7"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{divc_grn_amount_total_txt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="510" y="0" width="61" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Center">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA["Total"]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="466" y="19" width="45" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" rightPadding="2"/>
+							<textElement textAlignment="Right">
+								<font size="7"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{divc_grn_other_charge_txt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="466" y="0" width="45" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Center">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA["A.Charge"]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="419" y="19" width="47" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" rightPadding="2"/>
+							<textElement textAlignment="Right">
+								<font size="7"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{div_grn_discount_txt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="419" y="0" width="47" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Center">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA["Discount"]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="372" y="19" width="47" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" rightPadding="2"/>
+							<textElement textAlignment="Right">
+								<font size="7"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{divc_grn_amount_tax_txt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="372" y="0" width="47" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Center">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA["Tax Amount"]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="307" y="19" width="65" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" rightPadding="2"/>
+							<textElement textAlignment="Right">
+								<font size="7"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{divc_grn_amount_untaxed_txt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="307" y="0" width="65" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Center">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA["Base Amount"]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="510" y="38" width="61" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+								<printWhenExpression><![CDATA[$F{ref_sno} == $F{max_ref_sno}]]></printWhenExpression>
+							</reportElement>
+							<box topPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Right">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{gnd_grn_amount_total_txt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="466" y="38" width="45" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+								<printWhenExpression><![CDATA[$F{ref_sno} == $F{max_ref_sno}]]></printWhenExpression>
+							</reportElement>
+							<box topPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Right">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{gnd_grn_other_charge_txt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="0" y="38" width="307" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+								<printWhenExpression><![CDATA[$F{ref_sno} == $F{max_ref_sno}]]></printWhenExpression>
+							</reportElement>
+							<box topPadding="2" leftPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Right">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA["Grand Total : "]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="372" y="38" width="47" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+								<printWhenExpression><![CDATA[$F{ref_sno} == $F{max_ref_sno}]]></printWhenExpression>
+							</reportElement>
+							<box topPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Right">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{gnd_grn_amount_tax_txt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="307" y="38" width="65" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+								<printWhenExpression><![CDATA[$F{ref_sno} == $F{max_ref_sno}]]></printWhenExpression>
+							</reportElement>
+							<box topPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Right">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{gnd_grn_amount_untaxed_txt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="419" y="38" width="47" height="19" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true">
+								<printWhenExpression><![CDATA[$F{ref_sno} == $F{max_ref_sno}]]></printWhenExpression>
+							</reportElement>
+							<box topPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Right">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{gnd_grn_discount_txt}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+		</band>
+	</summary>
+	<noData>
+		<band height="21">
+			<staticText>
+				<reportElement x="295" y="0" width="165" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[No Records Found]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>
