@@ -39,7 +39,8 @@ sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost,
 
 -- Ratio val
-sum((COALESCE((COALESCE(round(pump.r_sam_ratio,2),0)),0))) as ratio,
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer /
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as ratio,
 
 -- Percentage val
 
@@ -65,7 +66,7 @@ group by pump.cust_in_ex]]>
 		<field name="les_dealer_val" class="java.lang.Integer"/>
 		<field name="works_val" class="java.lang.Integer"/>
 		<field name="prime_cost" class="java.lang.Integer"/>
-		<field name="ratio" class="java.math.BigDecimal"/>
+		<field name="ratio" class="java.lang.Integer"/>
 		<field name="avg_cust_dis" class="java.lang.String"/>
 		<field name="avg_spl_dis" class="java.lang.String"/>
 		<field name="avg_pf_dis" class="java.lang.String"/>
@@ -108,7 +109,8 @@ sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost,
 
 -- Ratio val
-sum((COALESCE((COALESCE(round(pump.r_sam_ratio,2),0)),0))) as ratio,
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer /
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as ratio,
 
 -- Percentage val
 
@@ -134,7 +136,7 @@ group by pump.cust_in_ex]]>
 		<field name="les_dealer_val" class="java.lang.Integer"/>
 		<field name="works_val" class="java.lang.Integer"/>
 		<field name="prime_cost" class="java.lang.Integer"/>
-		<field name="ratio" class="java.math.BigDecimal"/>
+		<field name="ratio" class="java.lang.Integer"/>
 		<field name="avg_cust_dis" class="java.lang.String"/>
 		<field name="avg_spl_dis" class="java.lang.String"/>
 		<field name="avg_pf_dis" class="java.lang.String"/>
@@ -177,7 +179,8 @@ sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost,
 
 -- Ratio val
-sum((COALESCE((COALESCE(round(pump.r_sam_ratio,2),0)),0))) as ratio,
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer /
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as ratio,
 
 -- Percentage val
 
@@ -205,7 +208,7 @@ group by pump.cust_in_ex]]>
 		<field name="les_dealer_val" class="java.lang.Integer"/>
 		<field name="works_val" class="java.lang.Integer"/>
 		<field name="prime_cost" class="java.lang.Integer"/>
-		<field name="ratio" class="java.math.BigDecimal"/>
+		<field name="ratio" class="java.lang.Integer"/>
 		<field name="avg_cust_dis" class="java.lang.String"/>
 		<field name="avg_spl_dis" class="java.lang.String"/>
 		<field name="avg_pf_dis" class="java.lang.String"/>
@@ -831,7 +834,8 @@ sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer as works_val,
 sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as prime_cost,
 
 -- Ratio val
-sum((COALESCE((COALESCE(round(pump.r_sam_ratio,2),0)),0))) as ratio,
+sum((COALESCE((COALESCE(pump.r_sam_ratio_tot,0)),0)))::integer /
+sum((COALESCE((COALESCE(pump.prime_cost,0)),0)))::integer as ratio,
 
 -- Percentage val
 
@@ -860,7 +864,7 @@ group by access.name,pump.cust_in_ex]]>
 		<field name="les_dealer_val" class="java.lang.Integer"/>
 		<field name="works_val" class="java.lang.Integer"/>
 		<field name="prime_cost" class="java.lang.Integer"/>
-		<field name="ratio" class="java.math.BigDecimal"/>
+		<field name="ratio" class="java.lang.Integer"/>
 		<field name="avg_cust_dis" class="java.lang.String"/>
 		<field name="avg_spl_dis" class="java.lang.String"/>
 		<field name="avg_pf_dis" class="java.lang.String"/>
