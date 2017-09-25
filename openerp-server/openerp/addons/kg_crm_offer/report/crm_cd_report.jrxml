@@ -490,7 +490,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) as total,
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
@@ -501,7 +501,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
 
 from ch_pump_offer pump
 
@@ -540,7 +540,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) as total,
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
@@ -551,7 +551,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
 
 from ch_spare_offer pump
 
@@ -590,7 +590,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) as total,
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
@@ -601,7 +601,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
 
 from ch_accessories_offer pump
 
@@ -646,7 +646,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) as total,
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
@@ -657,7 +657,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
 
 from ch_pump_offer pump
 
@@ -689,7 +689,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) as total,
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
@@ -700,7 +700,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
 
 from ch_spare_offer pump
 
@@ -732,7 +732,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) as total,
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
@@ -743,7 +743,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
 
 from ch_accessories_offer pump
 
@@ -777,7 +777,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) as total,
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
@@ -788,7 +788,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
 
 from ch_accessories_offer pump
 
@@ -913,7 +913,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) as total,
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as les_deal_dis,
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_deal_dis,
 
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
@@ -924,7 +924,7 @@ sum((COALESCE((COALESCE(pump.r_tax_tot,0)),0)))::integer) -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_val,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
 
 from ch_accessories_offer pump
 
