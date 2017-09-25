@@ -116,8 +116,9 @@ class kg_excel_po_register(osv.osv):
 					  pol.product_qty AS qty,
 					  pol.pending_qty AS pending_qty,
 					  pol.price_unit * pol.product_qty as rate,
+					  case when pol.kg_discount_per = 0 then pol.kg_discount else (pol.price_unit * pol.product_qty)*pol.kg_discount_per/100 end as discount,
 					  pol.kg_discount_per as disc1,
-					  pol.kg_disc_amt_per as disc2,	
+					  pol.kg_discount as disc2,	
 					  uom.name AS uom,
 					  pt.name AS pro_name,
 					  res.name AS su_name,
@@ -157,8 +158,9 @@ class kg_excel_po_register(osv.osv):
 				  pol.product_qty AS qty,
 				  pol.pending_qty AS pending_qty,
 				  pol.price_unit * pol.product_qty as rate,
+				  case when pol.kg_discount_per = 0 then pol.kg_discount else (pol.price_unit * pol.product_qty)*pol.kg_discount_per/100 end as discount,
 				  pol.kg_discount_per as disc1,
-				  pol.kg_disc_amt_per as disc2,	
+				  pol.kg_discount as disc2,	
 				  uom.name AS uom,
 				  pt.name AS pro_name,
 				  res.name AS su_name,
@@ -190,21 +192,24 @@ class kg_excel_po_register(osv.osv):
 		record={}
 		sno=1
 		wbk = xlwt.Workbook()
-		style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')
-		style2 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
-		style3 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
+		style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center,vertical center;''borders: left thin, right thin, top thin, bottom thin')
+		style2 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz left;''borders: left thin, right thin, top thin, bottom thin')
+		style3 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
+		style4 = xlwt.easyxf('font: bold on,height 240,color_index 0x95;' 'align: horiz center,vertical center;''borders: left thin, right thin, top thin ,bottom thin') 
+		style5 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz right,vertical center;''borders: left thin, right thin, top thin, bottom thin')
+
 		s1=0
 		
 		"""adding a worksheet along with name"""
 		
 		sheet1 = wbk.add_sheet('PO Register')
-		s2=1
-		sheet1.col(0).width = 2000
-		sheet1.col(1).width = 6000
-		sheet1.col(2).width = 3000
-		sheet1.col(3).width = 2500
-		sheet1.col(4).width = 3000
-		sheet1.col(5).width = 8000
+		s2=5
+		sheet1.col(0).width = 1500
+		sheet1.col(1).width = 3000
+		sheet1.col(2).width = 2500
+		sheet1.col(3).width = 3000
+		sheet1.col(4).width = 15000
+		sheet1.col(5).width = 9000
 		sheet1.col(6).width = 4000
 		sheet1.col(7).width = 4000
 		sheet1.col(8).width = 3000
@@ -218,25 +223,33 @@ class kg_excel_po_register(osv.osv):
 		sheet1.col(16).width = 4000
 		sheet1.col(17).width = 4000
 		
+		date_from = datetime.strptime(rec.date_from, '%Y-%m-%d').strftime('%d/%m/%Y')
+		date_to = datetime.strptime(rec.date_to, '%Y-%m-%d').strftime('%d/%m/%Y')
+		
+		sheet1.write_merge(0, 3, 0, 16,"SAM TURBO INDUSTRY PRIVATE LIMITED \n Avinashi Road, Neelambur,\n Coimbatore - 641062 \n Tel:3053555, 3053556,Fax : 0422-3053535",style4)
+		sheet1.row(0).height = 450
+		sheet1.write_merge(4, 4, 0, 16,"PO REGISTER - "+ date_from + " "+ "TO "+date_to,style4)
+		sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,4)
+		
 		""" writing field headings """
 		
-		sheet1.write(s1,0,"S No",style1)
-		sheet1.write(s1,1,"Supplier Name",style1)
-		sheet1.write(s1,2,"PO No",style1)
-		sheet1.write(s1,3,"PO Date",style1)
-		sheet1.write(s1,4,"Quote Ref",style1)
-		sheet1.write(s1,5,"Product",style1)
-		sheet1.write(s1,6,"MOC",style1)
-		sheet1.write(s1,7,"Brand",style1)
-		sheet1.write(s1,8,"UOM",style1)
-		sheet1.write(s1,9,"Order Qty",style1)
-		sheet1.write(s1,10,"Received Qty",style1)
-		sheet1.write(s1,11,"Pending Qty",style1)
-		sheet1.write(s1,12,"Rate(Rs)",style1)
-		sheet1.write(s1,13,"Disc%",style1)
-		sheet1.write(s1,14,"GST%",style1)
-		sheet1.write(s1,15,"TAT",style1)
-		sheet1.write(s1,16,"Net Amount",style1)
+		sheet1.write(s2,0,"S No",style1)
+		sheet1.write(s2,1,"PO No",style1)
+		sheet1.write(s2,2,"PO Date",style1)
+		sheet1.write(s2,3,"Quote Ref",style1)
+		sheet1.write(s2,4,"Supplier Name",style1)
+		sheet1.write(s2,5,"Product",style1)
+		sheet1.write(s2,6,"MOC",style1)
+		sheet1.write(s2,7,"Brand",style1)
+		sheet1.write(s2,8,"UOM",style1)
+		sheet1.write(s2,9,"Order Qty",style1)
+		sheet1.write(s2,10,"Received Qty",style1)
+		sheet1.write(s2,11,"Pending Qty",style1)
+		sheet1.write(s2,12,"Unit Price",style1)
+		sheet1.write(s2,13,"Discount",style1)
+		sheet1.write(s2,14,"GST",style1)
+		sheet1.write(s2,15,"Net Amount",style1)
+		sheet1.write(s2,16,"TAT",style1)
 		
 		new_data = []
 		count = 0
@@ -248,16 +261,17 @@ class kg_excel_po_register(osv.osv):
 		gr_rec_qty_total = 0
 		gr_pending_qty_total = 0
 		gr_rate_total = 0
+		disc_amt = 0
 		pol_obj = self.pool.get('purchase.order.line')
 		for pos1, item1 in enumerate(data):
 			if item1['disc1'] == None:
-				item1['disc1'] = 0.00
+				disc_amt = 0.00
 			else:
-				item1['disc1'] = item1['disc1']
+				disc_amt = (item1['rate']*item1['disc1'])/100
 			if item1['disc2'] == None:
-				item1['disc2'] = 0.00
+				disc_amt = 0.00
 			else:
-				item1['disc2'] = item1['disc2']							
+				disc_amt = item1['disc2']							
 			delete_items = []
 			po_no = item1['po_no']
 			order_id = item1['po_id']
@@ -322,28 +336,29 @@ class kg_excel_po_register(osv.osv):
 		
 		for ele in data:
 			#~ ele['tax'] = 0
-			#~ ele['po_ad_amt'] = 0		
-			
+			#~ ele['po_ad_amt'] = 0	
+			s2+=1	
+			print "disc_amtdisc_amtdisc_amtdisc_amtdisc_amtdisc_amtdisc_amt",disc_amt
 			ele['received_qty'] = ele['qty'] - ele['pending_qty']
 			sheet1.write(s2,0,sno,style2)
-			sheet1.write(s2,1,ele['su_name'],style2)
-			sheet1.write(s2,2,ele['po_no'],style2)
-			sheet1.write(s2,3,ele['po_date'],style2)
-			sheet1.write(s2,4,ele['quot_ref_no'],style2)
+			sheet1.write(s2,1,ele['po_no'],style2)
+			sheet1.write(s2,2,ele['po_date'],style2)
+			sheet1.write(s2,3,ele['quot_ref_no'],style2)
+			sheet1.write(s2,4,ele['su_name'],style2)
 			sheet1.write(s2,5,ele['pro_name'],style2)
 			sheet1.write(s2,6,ele['moc'],style2)
 			sheet1.write(s2,7,ele['brand_name'],style2)
 			sheet1.write(s2,8,ele['uom'],style2)
-			sheet1.write(s2,9,ele['qty'],style2)
-			sheet1.write(s2,10,ele['received_qty'],style2)
-			sheet1.write(s2,11,ele['pending_qty'],style2)
-			sheet1.write(s2,12,ele['rate'],style2)
-			sheet1.write(s2,13,ele['disc1'],style2)
-			sheet1.write(s2,14,ele['taxamt'],style2)
-			sheet1.write(s2,15,ele['pending_days'],style2)
-			sheet1.write(s2,16,ele['total'],style2)
+			sheet1.write(s2,9,ele['qty'],style3)
+			sheet1.write(s2,10,ele['received_qty'],style3)
+			sheet1.write(s2,11,ele['pending_qty'],style3)
+			sheet1.write(s2,12,ele['rate'],style3)
+			sheet1.write(s2,13,ele['discount'],style3)
+			sheet1.write(s2,14,ele['taxamt'],style3)
+			sheet1.write(s2,15,ele['total'],style3)
+			sheet1.write(s2,16,ele['pending_days'],style3)
 			
-			s2+=1
+			
 			sno = sno + 1
 			
 			if ele['total']:	
@@ -355,12 +370,12 @@ class kg_excel_po_register(osv.osv):
 			else:
 				pass
 		
-		sheet1.write(s2,3,"Total",style1)
+		s2=s2+1
+		sheet1.write_merge(s2, s2, 0, 13,"Total  ",style5)
 		sheet1.write(s2,14,gr_tax_tot,style3)
-		sheet1.write(s2,16,gr_tot,style3)
-		#~ sheet1.write(s2,16,gr_tot_qty,style1)
-		#~ sheet1.write(s2,18,gr_com_amt,style1)
-		#~ sheet1.write(s2,19,gr_se_com_amt,style1)
+		sheet1.write(s2,15,gr_tot,style3)
+		sheet1.write(s2,16,"",style3)
+		
 		
 		"""Parsing data as string """
 		file_data=StringIO.StringIO()
@@ -370,6 +385,6 @@ class kg_excel_po_register(osv.osv):
 		"""returning the output xls as binary"""
 		report_name = 'PO_Register_Report' + '.' + 'xls'
 		
-		return self.write(cr, uid, ids, {'rep_data':out, 'name':report_name,'state': 'done'},context=context)
+		return self.write(cr, uid, ids, {'rep_data':out, 'name':report_name,'state':'done'},context=context)
 		
 kg_excel_po_register()
