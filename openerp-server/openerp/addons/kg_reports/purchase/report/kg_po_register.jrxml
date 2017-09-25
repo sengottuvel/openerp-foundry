@@ -551,7 +551,7 @@ order by 1,date,po_no
 			</textField>
 			<image>
 				<reportElement x="112" y="0" width="60" height="30"/>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="0" y="30" width="325" height="20"/>
