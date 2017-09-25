@@ -580,11 +580,11 @@ class kg_crm_offer(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
-			if entry.is_zero_offer == True:
-				pass
-			else:
-				if entry.dummy_flag != True:
-					raise osv.except_osv(_('Warning'),_('Kindly update values for Ratio,Discount'))
+			#~ if entry.is_zero_offer == True:
+				#~ pass
+			#~ else:
+				#~ if entry.dummy_flag != True:
+					#~ raise osv.except_osv(_('Warning'),_('Kindly update values for Ratio,Discount'))
 			#~ for line in entry.line_pump_ids:
 			#~ if not entry.name:
 				#~ off_no = ''	
