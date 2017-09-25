@@ -519,24 +519,24 @@ class kg_crm_offer(osv.osv):
 	def update_percentage(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state in ('draft','moved_to_offer'):
-			if entry.o_sam_ratio > 0 or entry.o_dealer_discount > 0 or entry.o_special_discount > 0 or entry.o_p_f > 0 or entry.o_freight > 0 or entry.o_insurance > 0 or entry.o_customer_discount > 0:
-				print"entry.pump_per_flag",entry.pump_per_flag
-				if entry.pump_per_flag == True:
-					if entry.line_pump_ids:
-						obj = self.pool.get('ch.pump.offer')
-						line_ids = entry.line_pump_ids
-						self.update_to_all(cr,uid,entry,obj,line_ids)
-				if entry.spare_per_flag == True:
-					if entry.line_spare_ids:
-						obj = self.pool.get('ch.spare.offer')
-						line_ids = entry.line_spare_ids
-						self.update_to_all(cr,uid,entry,obj,line_ids)
-				if entry.access_per_flag == True:
-					if entry.line_accessories_ids:
-						obj = self.pool.get('ch.accessories.offer')
-						line_ids = entry.line_accessories_ids
-						self.update_to_all(cr,uid,entry,obj,line_ids)
-				self.write(cr,uid,ids,{'dummy_flag':True})
+			#~ if entry.o_sam_ratio > 0 or entry.o_dealer_discount > 0 or entry.o_special_discount > 0 or entry.o_p_f > 0 or entry.o_freight > 0 or entry.o_insurance > 0 or entry.o_customer_discount > 0:
+			print"entry.pump_per_flag",entry.pump_per_flag
+			if entry.pump_per_flag == True:
+				if entry.line_pump_ids:
+					obj = self.pool.get('ch.pump.offer')
+					line_ids = entry.line_pump_ids
+					self.update_to_all(cr,uid,entry,obj,line_ids)
+			if entry.spare_per_flag == True:
+				if entry.line_spare_ids:
+					obj = self.pool.get('ch.spare.offer')
+					line_ids = entry.line_spare_ids
+					self.update_to_all(cr,uid,entry,obj,line_ids)
+			if entry.access_per_flag == True:
+				if entry.line_accessories_ids:
+					obj = self.pool.get('ch.accessories.offer')
+					line_ids = entry.line_accessories_ids
+					self.update_to_all(cr,uid,entry,obj,line_ids)
+			self.write(cr,uid,ids,{'dummy_flag':True})
 		return True
 	
 	def update_to_all(self,cr,uid,entry,obj,line_ids,context=None):
