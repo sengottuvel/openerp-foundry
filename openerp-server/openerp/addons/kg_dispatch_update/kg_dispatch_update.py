@@ -197,6 +197,7 @@ class kg_dispatch_update(osv.osv):
 							'header_id': entry.id,
 							'invoice_id':item.id,
 							'pump_line_id':pump.id,
+							'order_line_id':pump.order_line_id.id,
 							'pump_id':pump.pump_model_id.id,								
 							'order_category':'pump',		
 							'actual_qty':pump.qty,		
@@ -212,6 +213,7 @@ class kg_dispatch_update(osv.osv):
 							'header_id': entry.id,
 							'invoice_id':item.id,
 							'spare_line_id':spare.id,
+							'order_line_id':spare.order_line_id.id,
 							'pump_id':spare.pump_id.id,								
 							'order_category':'spare',		
 							'actual_qty':spare.qty,		
@@ -227,6 +229,7 @@ class kg_dispatch_update(osv.osv):
 						vals = {			
 							'header_id': entry.id,
 							'invoice_id':item.id,
+							'order_line_id':access.order_line_id.id,
 							'acc_line_id':access.id,
 							'pump_id':access.pump_id.id,								
 							'order_category':'access',		
@@ -322,7 +325,23 @@ class kg_dispatch_update(osv.osv):
 				direct_exp_line_id = direct_line_obj.create(cr, uid,vals)	
 									
 				self.pool.get('direct.entry.expense').entry_confirm(cr, uid, [direct_exp_id])								
-				self.pool.get('direct.entry.expense').entry_approve(cr, uid, [direct_exp_id])								
+				self.pool.get('direct.entry.expense').entry_approve(cr, uid, [direct_exp_id])	
+			
+			cr.execute(''' 			
+			select sale_in_work.work_order_id
+			from kg_dispatch_update disp
+			left join invoice_order_ids dis_inv on (dis_inv.invoice_id = disp.id)
+			left join kg_sale_invoice sale_in on (sale_in.id = dis_inv.invoice_order_id)
+			left join invoice_work_order_ids sale_in_work on (sale_in_work.invoice_id=sale_in.id)
+			where disp.id=%s ''',[entry.id])
+			order_id = cr.fetchone()					
+			packing_id = self.pool.get('kg.packing').search(cr,uid,[('order_id','=',order_id[0])])			
+			if packing_id == []:
+				raise osv.except_osv(_('Warning!'),
+							_('Packing process not completed !!'))										
+			for item in packing_id:						
+				packing_rec = self.pool.get('kg.packing').browse(cr,uid,item)
+				self.pool.get('kg.packing').write(cr, uid, packing_rec.id, {'dispatch_state':'dispatch_completed'})										
 			self.write(cr, uid, ids, {'state': 'confirmed','name':dc_name,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})								
 								
 		return True
@@ -380,6 +399,8 @@ class ch_dispatch_update_line(osv.osv):
 		### Basic Info
 		
 		'header_id':fields.many2one('kg.dispatch.update', 'Transaction', required=1, ondelete='cascade'),
+		'customer_id': fields.related('header_id','customer_id', type='many2one', relation='res.partner', string='Customer Name', store=True, readonly=True),
+		'entry_date': fields.related('header_id','entry_date', type='date', string='DC Date', store=True, readonly=True),
 		'remark': fields.text('Remarks'),
 		'active': fields.boolean('Active'),			
 		
