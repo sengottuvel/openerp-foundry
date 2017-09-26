@@ -93,28 +93,28 @@ class kg_crm_offer(osv.osv):
 				component_net_amount += line.net_amount
 				print"component_net_amount",component_net_amount
 				
-			res[order.id]['pump_net_amount'] = pump_net_amount
-			res[order.id]['spare_net_amount'] = spare_net_amount
-			res[order.id]['access_net_amount'] = access_net_amount
+			res[order.id]['pump_net_amount'] = round(pump_net_amount)
+			res[order.id]['spare_net_amount'] = round(spare_net_amount)
+			res[order.id]['access_net_amount'] = round(access_net_amount)
 			print"pump_net_amount",pump_net_amount
 			print"access_net_amount",access_net_amount
 			#~ res[order.id]['offer_net_amount'] = pump_net_amount + spare_net_amount + access_net_amount
-			sam_ratio_tot = offer_sam_ratio_tot / (offer_prime_cost_tot or 1)
-			res[order.id]['sam_ratio_tot'] = sam_ratio_tot
-			res[order.id]['offer_prime_cost_tot'] = offer_prime_cost_tot
-			res[order.id]['offer_sam_ratio_tot'] = offer_sam_ratio_tot
-			res[order.id]['offer_dealer_discount_tot'] = offer_dealer_discount_tot
-			res[order.id]['offer_spl_discount_tot'] = offer_spl_discount_tot
-			res[order.id]['offer_p_f_tot'] = offer_p_f_tot
-			res[order.id]['offer_insurance_tot'] = offer_insurance_tot
-			res[order.id]['offer_freight_tot'] = offer_freight_tot
-			res[order.id]['offer_tax_tot'] = offer_tax_tot
-			res[order.id]['offer_customer_discount_tot'] = offer_customer_discount_tot
-			res[order.id]['offer_net_amount'] = offer_net_amount
+			sam_ratio_tot = round(offer_sam_ratio_tot / (offer_prime_cost_tot or 1))
+			res[order.id]['sam_ratio_tot'] = round(sam_ratio_tot)
+			res[order.id]['offer_prime_cost_tot'] = round(offer_prime_cost_tot)
+			res[order.id]['offer_sam_ratio_tot'] = round(offer_sam_ratio_tot)
+			res[order.id]['offer_dealer_discount_tot'] = round(offer_dealer_discount_tot)
+			res[order.id]['offer_spl_discount_tot'] = round(offer_spl_discount_tot)
+			res[order.id]['offer_p_f_tot'] = round(offer_p_f_tot)
+			res[order.id]['offer_insurance_tot'] = round(offer_insurance_tot)
+			res[order.id]['offer_freight_tot'] = round(offer_freight_tot)
+			res[order.id]['offer_tax_tot'] = round(offer_tax_tot)
+			res[order.id]['offer_customer_discount_tot'] = round(offer_customer_discount_tot)
+			res[order.id]['offer_net_amount'] = round(offer_net_amount)
 			print"res[order.id]['offer_net_amount']--------------",res[order.id]['offer_net_amount']
 			
-			res[order.id]['component_net_amount'] = component_net_amount
-			res[order.id]['supervision_amount'] = supervision_amount
+			res[order.id]['component_net_amount'] = round(component_net_amount)
+			res[order.id]['supervision_amount'] = round(supervision_amount)
 			
 		return res
 	
@@ -2166,47 +2166,52 @@ class ch_pump_offer(osv.osv):
 			print"tax_tottax_tot",tax_tot
 			#~ supervision_tot = round(tax + line.supervision_amount,2)
 			#~ print"supervision_tot",supervision_tot
-			tot_price = customer_discount
+			tot_price = round(customer_discount)
 			#~ tot_price = tax
 			print"tot_price",tot_price
 			
 			#~ r_customer_discount_tot = round((tot_price * line.r_customer_discount) / 100.00,2)
-			r_customer_discount_tot = round((line.r_cpo_amount * line.r_customer_discount) / 100.00,2)
+			r_customer_discount_tot = round((line.r_cpo_amount * line.r_customer_discount) / 100.00)
 			print"r_customer_discount_tot",r_customer_discount_tot
-			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot,2)
+			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot)
 			print"r_pump_price_tot",r_pump_price_tot
 			if line.gst:
-				r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00,2)
+				r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00)
 			else:
 				r_tax_tot = 0 
 			print"r_tax_tot",r_tax_tot
 			if line.r_freight_in_ex == 'inclusive':
-				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00,2)
+				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00)
+				r_freight_ex_tot = 0
+			elif line.r_freight_in_ex == 'exclusive':
+				r_freight_ex_tot = round((r_pump_price_tot*line.r_freight)/100.00)
+				r_freight_tot = 0
 			else:
 				r_freight_tot = 0
+				r_freight_ex_tot = 0
 			print"r_freight_tot",r_freight_tot
 			if line.r_insurance_in_ex == 'inclusive':
-				r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00,2)
+				r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
 			else:
 				r_insurance_tot = 0
 			print"r_insurance_tot",r_insurance_tot
 			if line.r_p_f_in_ex == 'inclusive':
-				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00,2)
+				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_ex_tot = 0
 			elif line.r_p_f_in_ex == 'exclusive':
-				r_p_f_ex_tot = round((r_pump_price_tot*line.r_p_f)/100.00,2)
+				r_p_f_ex_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_tot = 0
 			else:
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
 			print"r_p_f_tot",r_p_f_tot
-			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00,2)
+			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00)
 			print"r_spl_discount_tot",r_spl_discount_tot
 			r_spl_discount = r_pump_price_tot - r_spl_discount_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
 			print"r_spl_discount",r_spl_discount
 			r_dealer_discount = r_spl_discount
 			print"r_dealer_discount",r_dealer_discount
-			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00,2)
+			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00)
 			print"r_dealer_discount_tot",r_dealer_discount_tot
 			r_sam_ratio_tot = r_pump_price_tot - r_spl_discount_tot - r_dealer_discount_tot - r_p_f_tot - r_insurance_tot - r_freight_tot
 			print"r_sam_ratio_tot",r_sam_ratio_tot
@@ -2239,6 +2244,7 @@ class ch_pump_offer(osv.osv):
 			res[line.id]['r_p_f_ex_tot'] = r_p_f_ex_tot
 			res[line.id]['r_insurance_tot'] = r_insurance_tot
 			res[line.id]['r_freight_tot'] = r_freight_tot
+			res[line.id]['r_freight_ex_tot'] = r_freight_ex_tot
 			res[line.id]['r_pump_price_tot'] = r_pump_price_tot
 			res[line.id]['r_customer_discount_tot'] = r_customer_discount_tot
 			res[line.id]['r_net_amt_tot'] = r_net_amt_tot
@@ -2359,6 +2365,7 @@ class ch_pump_offer(osv.osv):
 		'r_tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='GST',multi="sums",store=True),
 		'r_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
 		'r_p_f_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F Ex',multi="sums",store=True),
+		'r_freight_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight Ex',multi="sums",store=True),
 		'r_freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),
 		'r_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
 		'r_pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),
@@ -2640,7 +2647,7 @@ class ch_spare_offer(osv.osv):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
 		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = supervision_tot = tot_price = net_amount = 0
-		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = r_dealer_discount = r_net_amt_tot = 0
+		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = r_dealer_discount = r_net_amt_tot = r_freight_ex_tot = 0
 		for line in self.browse(cr, uid, ids, context=context):
 			print"linelineline",line
 			res[line.id] = {
@@ -2699,47 +2706,52 @@ class ch_spare_offer(osv.osv):
 			print"tax",tax
 			tax_tot = round(tax - customer_discount,2)
 			print"tax_tottax_tot",tax_tot
-			tot_price = customer_discount
+			tot_price = round(customer_discount)
 			#~ tot_price = tax
 			print"tot_price",tot_price
 			
 			#~ r_customer_discount_tot = round((tot_price * line.r_customer_discount) / 100.00,2)
-			r_customer_discount_tot = round((line.r_cpo_amount * line.r_customer_discount) / 100.00,2)
+			r_customer_discount_tot = round((line.r_cpo_amount * line.r_customer_discount) / 100.00)
 			print"r_customer_discount_tot",r_customer_discount_tot
-			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot,2)
+			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot)
 			print"r_pump_price_tot",r_pump_price_tot
 			if line.gst:
-				r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00,2)
+				r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00)
 			else:
 				r_tax_tot = 0 
 			print"r_tax_tot",r_tax_tot
 			if line.r_freight_in_ex == 'inclusive':
-				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00,2)
+				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00)
+				r_freight_ex_tot = 0
+			elif line.r_freight_in_ex == 'exclusive':
+				r_freight_ex_tot = round((r_pump_price_tot*line.r_freight)/100.00)
+				r_freight_tot = 0
 			else:
 				r_freight_tot = 0
+				r_freight_ex_tot = 0
 			print"r_freight_tot",r_freight_tot
 			if line.r_insurance_in_ex == 'inclusive':
-				r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00,2)
+				r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
 			else:
 				r_insurance_tot = 0
 			print"r_insurance_tot",r_insurance_tot
 			if line.r_p_f_in_ex == 'inclusive':
-				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00,2)
+				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_ex_tot = 0
 			elif line.r_p_f_in_ex == 'exclusive':
-				r_p_f_ex_tot = round((r_pump_price_tot*line.r_p_f)/100.00,2)
+				r_p_f_ex_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_tot = 0
 			else:
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
 			print"r_p_f_tot",r_p_f_tot
-			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00,2)
+			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00)
 			print"r_spl_discount_tot",r_spl_discount_tot
 			r_spl_discount = r_pump_price_tot - r_spl_discount_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
 			print"r_spl_discount",r_spl_discount
 			r_dealer_discount = r_spl_discount
 			print"r_dealer_discount",r_dealer_discount
-			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00,2)
+			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00)
 			print"r_dealer_discount_tot",r_dealer_discount_tot
 			r_sam_ratio_tot = r_pump_price_tot - r_spl_discount_tot - r_dealer_discount_tot - r_p_f_tot - r_insurance_tot - r_freight_tot
 			print"r_sam_ratio_tot",r_sam_ratio_tot
@@ -2772,6 +2784,7 @@ class ch_spare_offer(osv.osv):
 			res[line.id]['r_p_f_ex_tot'] = r_p_f_ex_tot
 			res[line.id]['r_insurance_tot'] = r_insurance_tot
 			res[line.id]['r_freight_tot'] = r_freight_tot
+			res[line.id]['r_freight_ex_tot'] = r_freight_ex_tot
 			res[line.id]['r_pump_price_tot'] = r_pump_price_tot
 			res[line.id]['r_net_amt_tot'] = r_net_amt_tot
 			res[line.id]['r_customer_discount_tot'] = r_customer_discount_tot
@@ -2960,6 +2973,7 @@ class ch_spare_offer(osv.osv):
 		'r_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
 		'r_p_f_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F Ex',multi="sums",store=True),
 		'r_freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),
+		'r_freight_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight Ex',multi="sums",store=True),
 		'r_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
 		'r_pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),
 		'r_net_amt_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
@@ -3061,7 +3075,7 @@ class ch_accessories_offer(osv.osv):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
 		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = supervision_tot = tot_price = net_amount = 0
-		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = r_dealer_discount = r_net_amt_tot = 0
+		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = r_dealer_discount = r_net_amt_tot = r_freight_ex_tot = 0
 		for line in self.browse(cr, uid, ids, context=context):
 			print"linelineline",line
 			res[line.id] = {
@@ -3120,47 +3134,52 @@ class ch_accessories_offer(osv.osv):
 			print"tax",tax
 			tax_tot = round(tax - customer_discount,2)
 			print"tax_tottax_tot",tax_tot
-			tot_price = customer_discount
+			tot_price = round(customer_discount)
 			#~ tot_price = tax
 			print"tot_price",tot_price
 			
 			#~ r_customer_discount_tot = round((tot_price * line.r_customer_discount) / 100.00,2)
-			r_customer_discount_tot = round((line.r_cpo_amount * line.r_customer_discount) / 100.00,2)
+			r_customer_discount_tot = round((line.r_cpo_amount * line.r_customer_discount) / 100.00)
 			print"r_customer_discount_tot",r_customer_discount_tot
-			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot,2)
+			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot)
 			print"r_pump_price_tot",r_pump_price_tot
 			if line.gst:
-				r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00,2)
+				r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00)
 			else:
 				r_tax_tot = 0 
 			print"r_tax_tot",r_tax_tot
 			if line.r_freight_in_ex == 'inclusive':
-				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00,2)
+				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00)
+				r_freight_ex_tot = 0
+			elif line.r_freight_in_ex == 'exclusive':
+				r_freight_ex_tot = round((r_pump_price_tot*line.r_freight)/100.00)
+				r_freight_tot = 0
 			else:
 				r_freight_tot = 0
+				r_freight_ex_tot = 0
 			print"r_freight_tot",r_freight_tot
 			if line.r_insurance_in_ex == 'inclusive':
-				r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00,2)
+				r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
 			else:
 				r_insurance_tot = 0
 			print"r_insurance_tot",r_insurance_tot
 			if line.r_p_f_in_ex == 'inclusive':
-				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00,2)
+				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_ex_tot = 0
 			elif line.r_p_f_in_ex == 'exclusive':
-				r_p_f_ex_tot = round((r_pump_price_tot*line.r_p_f)/100.00,2)
+				r_p_f_ex_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_tot = 0
 			else:
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
 			print"r_p_f_tot",r_p_f_tot
-			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00,2)
+			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00)
 			print"r_spl_discount_tot",r_spl_discount_tot
 			r_spl_discount = r_pump_price_tot - r_spl_discount_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
 			print"r_spl_discount",r_spl_discount
 			r_dealer_discount = r_spl_discount
 			print"r_dealer_discount",r_dealer_discount
-			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00,2)
+			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00)
 			print"r_dealer_discount_tot",r_dealer_discount_tot
 			r_sam_ratio_tot = r_pump_price_tot - r_spl_discount_tot - r_dealer_discount_tot - r_p_f_tot - r_insurance_tot - r_freight_tot
 			print"r_sam_ratio_tot",r_sam_ratio_tot
@@ -3193,6 +3212,7 @@ class ch_accessories_offer(osv.osv):
 			res[line.id]['r_p_f_ex_tot'] = r_p_f_ex_tot
 			res[line.id]['r_insurance_tot'] = r_insurance_tot
 			res[line.id]['r_freight_tot'] = r_freight_tot
+			res[line.id]['r_freight_ex_tot'] = r_freight_ex_tot
 			res[line.id]['r_pump_price_tot'] = r_pump_price_tot
 			res[line.id]['r_net_amt_tot'] = r_net_amt_tot
 			res[line.id]['r_customer_discount_tot'] = r_customer_discount_tot
@@ -3375,6 +3395,7 @@ class ch_accessories_offer(osv.osv):
 		'r_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
 		'r_p_f_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F Ex',multi="sums",store=True),
 		'r_freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),
+		'r_freight_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight Ex',multi="sums",store=True),
 		'r_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
 		'r_pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),		
 		'r_net_amt_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
