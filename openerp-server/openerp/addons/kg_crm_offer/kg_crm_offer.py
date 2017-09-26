@@ -425,7 +425,7 @@ class kg_crm_offer(osv.osv):
 	
 	_constraints = [
 		(_supervision, 'Supervision more than one not allowed!', ['']),
-		(_line_validations, 'Kindly check Line details!', ['']),
+		#~ (_line_validations, 'Kindly check Line details!', ['']),
 		#~ (_exceed_discount, 'Discount more than confirgured not allowed!', ['']),
 		]
 	
