@@ -745,7 +745,7 @@ from(
 
 -- Pump Freight val
 select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
 from ch_pump_offer pump
 
 where header_id = $P{offer_id}
@@ -755,7 +755,7 @@ union
 
 -- Spare Freight val
 select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
 from ch_spare_offer pump
 
 where header_id = $P{offer_id}
@@ -765,7 +765,7 @@ union
 
 -- Access Freight val
 select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
 from ch_accessories_offer pump
 left join kg_accessories_master access on(access.id=pump.access_id)
 where header_id = $P{offer_id} and access.is_pump_acc_flag = True
@@ -775,7 +775,7 @@ union
 
 -- Access False Freight val
 select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
 from ch_accessories_offer pump
 left join kg_accessories_master access on(access.id=pump.access_id)
 where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
@@ -973,7 +973,7 @@ from(
 
 -- Pump Freight val
 select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
 from ch_pump_offer pump
 
 where header_id = $P{offer_id}
@@ -983,7 +983,7 @@ union
 
 -- Spare Freight val
 select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
 from ch_spare_offer pump
 
 where header_id = $P{offer_id}
@@ -993,7 +993,7 @@ union
 
 -- Access Freight val
 select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
 from ch_accessories_offer pump
 left join kg_accessories_master access on(access.id=pump.access_id)
 where header_id = $P{offer_id} and access.is_pump_acc_flag = True
@@ -1003,7 +1003,7 @@ union
 
 -- Access False Freight val
 select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
 from ch_accessories_offer pump
 left join kg_accessories_master access on(access.id=pump.access_id)
 where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
