@@ -131,7 +131,7 @@ group by order_line_id
 			</staticText>
 			<image>
 				<reportElement x="126" y="0" width="69" height="31"/>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="1" y="54" width="66" height="20"/>

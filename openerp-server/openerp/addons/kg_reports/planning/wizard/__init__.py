@@ -10,5 +10,6 @@ import kg_pouring_over
 import kg_purchase_list_print
 import kg_accessories_list_print
 import kg_supplied_order_print
-
+import kg_drawing_sc_print
+import kg_drawing_internal_print
 

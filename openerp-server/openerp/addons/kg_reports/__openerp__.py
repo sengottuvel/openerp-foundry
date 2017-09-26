@@ -20,6 +20,8 @@
 		'planning/wizard/kg_purchase_list_view.xml',
 		'planning/wizard/kg_accessories_list_view.xml',
 		'planning/wizard/kg_supplied_order_print_view.xml',
+		'planning/wizard/kg_drawing_sc_print_view.xml',		
+		'planning/wizard/kg_drawing_internal_print_view.xml',	
 								
 		'purchase/excel/kg_excel_po_register_view.xml',
 		'purchase/wizard/kg_po_register_wiz.xml',

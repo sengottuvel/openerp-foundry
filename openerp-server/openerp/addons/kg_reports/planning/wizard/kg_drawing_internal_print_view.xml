@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_drawing_internal" model="ir.ui.view">
+            <field name="name">kg.drawing.internal.form</field>
+            <field name="model">kg.drawing.internal.print</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Drawing DC Details Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">										
+							<field name="as_on_date" options="{'datepicker':{'maxDate': '0'}}"/>												
+							<field name="dep_id" widget="many2many_tags"/>											   				    			     
+						</page>	    
+                                                                         
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>        
+        
+        
+        <report string="Drawing internal Details Statement"
+		model="kg.drawing.internal.print"
+		auto="True"
+		name="jasper_drawing_internal_report"
+		rml="kg_reports/planning/report/kg_drawing_internal_report.jrxml"
+		id="drawinginternaldetailsreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_drawing_internal" model="ir.actions.act_window">  
+            <field name="name">Drawing Internal Details</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.drawing.internal.print</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+	<menuitem name="Internal Drawing Issue - Pending" parent="kg_menus.rpm_planning_reports" action="rma_drawing_internal" id="kg_drawing_internal_details_reports" sequence="12"/>	
+      
+
+    </data>
+</openerp>

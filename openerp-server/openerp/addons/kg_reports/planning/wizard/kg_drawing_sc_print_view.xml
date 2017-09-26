@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_drawing_sc" model="ir.ui.view">
+            <field name="name">kg.drawing.sc.form</field>
+            <field name="model">kg.drawing.sc.print</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Drawing DC Details Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">										
+							<field name="as_on_date" options="{'datepicker':{'maxDate': '0'}}"/>												
+							<field name="contractor_id" widget="many2many_tags"/>											   				    			     
+						</page>	    
+                                                                         
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>        
+        
+        
+        <report string="Drawing SC Details Statement"
+		model="kg.drawing.sc.print"
+		auto="True"
+		name="jasper_drawing_sc_report"
+		rml="kg_reports/planning/report/kg_drawing_sc_report.jrxml"
+		id="drawingscdetailsreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_drawing_dc" model="ir.actions.act_window">  
+            <field name="name">Drawing DC Details</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.drawing.sc.print</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+	<menuitem name="SC Drawing DC - Pending" parent="kg_menus.rpm_planning_reports" action="rma_drawing_dc" id="kg_drawing_dc_details_reports" sequence="11"/>	
+      
+
+    </data>
+</openerp>

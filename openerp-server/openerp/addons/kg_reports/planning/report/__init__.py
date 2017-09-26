@@ -10,4 +10,5 @@ import kg_pouring_over_report
 import kg_purchase_list_report
 import kg_accessories_part_list_report
 import kg_supplied_order_report
-
+import kg_drawing_sc_report
+import kg_drawing_internal_report
