@@ -8,7 +8,7 @@
     'name': 'Fettling Invoice',
     'version': '0.1',
     'author': 'Karthikeyan.S',    
-    'depends' : ['base','kg_fettling_process'],
+    'depends' : ['base','kg_fettling_process','kg_subcontract_advance'],
     'data': [
     
 			'kg_fettling_invoice_view.xml',
