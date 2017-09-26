@@ -114,14 +114,14 @@ class kg_foundry_invoice(osv.osv):
 		
 		## Module Requirement Info	
 		
-		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True),
+		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True,domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'date_from': fields.date('Date From',required=True),	
 		'date_to': fields.date('Date To',required=True),	
 		'phone': fields.char('Phone',size=64),
 		'contact_person': fields.char('Contact Person', size=128),			
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled'),('approved','AC ACK Pending'),('done','AC ACK Done')],'Status', readonly=True),
 		'flag_invoice': fields.boolean('Flag Invoice'),	
-		'division_id': fields.many2one('kg.division.master', 'Division',required=True),
+		'division_id': fields.many2one('kg.division.master', 'Division',required=True,domain="[('state','=','approved')]"),
 		
 		## Calculation process Start now 
 		
@@ -697,7 +697,7 @@ class ch_foundry_invoice_line_details(osv.osv):
 		'pattern_id': fields.related('fettling_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
 		'pattern_code': fields.related('fettling_id','pattern_code', type='char', string='Pattern Code', store=True, readonly=True),
 		'pattern_name': fields.related('fettling_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),		
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'schedule_qty': fields.related('fettling_id','schedule_qty', type='integer', size=100, string='Schedule Qty', store=True, readonly=True),	
 		'melting_id': fields.related('fettling_id','melting_id', type='many2one', relation='kg.melting', string='Heat No.', store=True, readonly=True),
 		'stage_id': fields.related('fettling_id','stage_id', type='many2one', relation='kg.stage.master', string='Stage Name', store=True, readonly=True),
@@ -794,7 +794,7 @@ class ch_foundry_invoice_line_summary(osv.osv):
 		'stage_id': fields.related('fettling_id','stage_id', type='many2one', relation='kg.stage.master', string='Stage Name', store=True, readonly=True),
 		'stage_name': fields.char('Stage Name', select=True,readonly=True),
 		'each_weight': fields.related('fettling_id','each_weight', type='float', string='Each Weight', store=True, readonly=True),
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 
 		'qty': fields.integer('QTY'),
 		
@@ -863,7 +863,7 @@ class ch_foundry_invoice_expense_track(osv.osv):
 		'description': fields.char('Description'),
 		'remark': fields.text('Remarks'),		
 		'expense_amt': fields.function(_get_total_amt, string='Total Amount',digits=(16,2), method=True, store=True, type='float'),		
-		'expense': fields.many2one('kg.expense.master','Expense'),
+		'expense': fields.many2one('kg.expense.master','Expense',domain="[('state','=','approved')]"),
 		
 	}
 	

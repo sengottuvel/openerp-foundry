@@ -818,6 +818,7 @@
 					<field name="pump_serial_no"/>
 					<field name="moc_construction_id"/>
 					<field name="packing_state"/>
+					<field name="dispatch_state"/>
 				</tree>
 			</field>
 		</record>

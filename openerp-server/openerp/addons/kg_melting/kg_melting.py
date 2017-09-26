@@ -50,7 +50,7 @@ class kg_melting(osv.osv):
 		### Header Details ####
 		
 		'name': fields.char('Heat No.', size=128,required=True),	
-		'entry_date': fields.date('Entry Date',required=True),	
+		'entry_date': fields.datetime('Entry Date',required=True),	
 		'remark': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'active': fields.boolean('Active'),
@@ -61,9 +61,9 @@ class kg_melting(osv.osv):
 		'line_ids_b':fields.one2many('ch.mechanical.properties', 'header_id', "Mechanical Properties"),
 		
 		## Furnace Log Book Start
-		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]"),
-		'ladle_id': fields.many2one('kg.ladle.master','Ladle', required=True,domain="[('active','=','t')]"),
-		'furnace_id': fields.many2one('kg.furnace.master','Furnace', required=True,domain="[('active','=','t')]"),	
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved')]"),
+		'ladle_id': fields.many2one('kg.ladle.master','Ladle', required=True,domain="[('state','=','approved')]"),
+		'furnace_id': fields.many2one('kg.furnace.master','Furnace', required=True,domain="[('state','=','approved')]"),	
 		'lining_age': fields.char('Lining Age', size=128,required=True),	
 		'melting_hrs': fields.float('Total Melting Hours',required=True),		
 		'time': fields.float('Time',required=True),
@@ -98,11 +98,11 @@ class kg_melting(osv.osv):
 		
 		
 		##### Worker Details ####
-		'supervisor_name': fields.many2one('res.partner','Supervisor Name', domain="[('active','=','t')]"),
+		'supervisor_name': fields.many2one('res.partner','Supervisor Name',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'done_by': fields.selection([('company_employee','Company Employee'),('contractor','Contractor')],'Done By'),		
-		'employee_id': fields.many2many('res.partner', 'm2m_moc_employee_details', 'melting_emp_id', 'employee_id','Name'),
+		'employee_id': fields.many2many('hr.employee', 'm2m_moc_employee_details', 'melting_emp_id', 'employee_id','Employee Name',domain="[('status','=','approved')]"),
 		'helper_count': fields.float('Helper Count'),	
-		'contractor_id': fields.many2one('res.partner','Contractor Name'),
+		'contractor_id': fields.many2one('res.partner','Contractor Name',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		
 		
 		### Entry Info ####
@@ -126,7 +126,7 @@ class kg_melting(osv.osv):
 	_defaults = {
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_melting', context=c),
-		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
@@ -223,6 +223,7 @@ class kg_melting(osv.osv):
 			grand_total =0.00
 			melt_cost =0.00
 			for entry in entry.line_ids_b:
+				print"entry.mech_value,entry.mech_value,entry.mech_value,entry.mpa_value,entry.mpa_value,entry.mpa_value,entry.moc_id.id,entry.mechanical_id.id",entry.mech_value,entry.mech_value,entry.mech_value,entry.mpa_value,entry.mpa_value,entry.mpa_value,entry.moc_id.id,entry.mechanical_id.id
 				cr.execute(''' select moc_line.header_id from 
 
 										ch_mechanical_chart as moc_line
@@ -373,7 +374,7 @@ class ch_melting_chemistry_details(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.melting', 'Chemistry Entry', required=True, ondelete='cascade'),							
-		'chemistry_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('active','=','t')]"),	
+		'chemistry_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('state','=','approved')]"),	
 		'required_chemistry':fields.float('Required Chemistry Min',digits_compute=dp.get_precision('Required Chemistry')),
 		'required_chemistry_max':fields.float('Required Chemistry Max',digits_compute=dp.get_precision('Required Chemistry')),
 		'bath_1':fields.float('Bath 1',digits=(16,3)),
@@ -395,7 +396,7 @@ class ch_mechanical_properties(osv.osv):
 			
 		'header_id':fields.many2one('kg.melting', 'Melting Entry', required=True, ondelete='cascade'),
 		'uom': fields.char('UOM',size=128),						
-		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('active','=','t')]"),	
+		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('state','=','approved')]"),	
 		'mech_value':fields.float('Value',required=True),
 		'min':fields.float('Min'),
 		'max':fields.float('Max'),

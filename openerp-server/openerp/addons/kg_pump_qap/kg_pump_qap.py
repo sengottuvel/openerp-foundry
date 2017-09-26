@@ -411,7 +411,7 @@ class kg_painting(osv.osv):
 		
 		'shift_id': fields.many2one('kg.shift.master','Shift'),
 		'operator': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'employee_id': fields.many2one('hr.employee','Employee Name'),
 		'verified_by': fields.char('Verified By'),
 		'paint_color': fields.char('Paint Color'),
@@ -543,6 +543,7 @@ class kg_packing(osv.osv):
 		'entry_date': fields.date('Date',required=True),		
 		'note': fields.text('Notes'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
+		'dispatch_state': fields.selection([('dispatch_pending','Dispatch Pending'),('dispatch_completed','Dispatch Completed')],'Dispatch Status', readonly=True),
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
 		'flag_sms': fields.boolean('SMS Notification'),
 		'flag_email': fields.boolean('Email Notification'),
@@ -580,7 +581,7 @@ class kg_packing(osv.osv):
 		
 		'shift_id': fields.many2one('kg.shift.master','Shift'),
 		'operator': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'employee_id': fields.many2one('hr.employee','Employee Name'),
 		'verified_by': fields.many2one('hr.employee','Verified By',domain="[('active','=','t')]"),
 		'packing_id': fields.many2one('kg.packing.type','Packing Type',domain="[('active','=','t')]"),	
@@ -617,6 +618,7 @@ class kg_packing(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',		
+		'dispatch_state': 'dispatch_pending',		
 		'active': True,
 		'entry_mode': 'manual',		
 		'flag_sms': False,		

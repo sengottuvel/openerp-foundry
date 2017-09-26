@@ -131,7 +131,7 @@ class kg_machineshop(osv.osv):
 		'inward_pending_qty': fields.function(_get_pending_qty, string='Pending Qty', method=True, store=True, type='integer'),
 		'each_weight': fields.function(_get_each_weight, string='Each Weight(Kgs)', method=True, store=True, type='float'),
 		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
-		'state': fields.selection([('pending','Pending'),('waiting','Waiting for Accept'),('raw_pending','Pending'),('accept','Accepted')],'Status', readonly=True),
+		'state': fields.selection([('pending','Pending'),('waiting','Waiting for Accept'),('raw_pending','Raw Pending'),('accept','Accepted')],'Status', readonly=True),
 		'accept_date': fields.date('Accepted Date'),
 		
 		### MS Inward Schedule List ###
@@ -535,7 +535,8 @@ class kg_id_commitment(osv.osv):
 	_columns = {
 	
 			
-		'order_id':fields.many2one('ch.work.order.details', 'WORK ORDER NO.', required=True),
+		'order_id':fields.many2one('kg.work.order', 'WORK ORDER NO.'),
+		'order_line_id':fields.many2one('ch.work.order.details', 'ORDER NO.'),
 		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Order Category', required=True),		
 		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], 'Type',required=True),
 		'qty': fields.integer('Qty', required=True),
@@ -566,13 +567,13 @@ class kg_id_commitment(osv.osv):
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
 		
 		## After added
-		'ms_schedule_no': fields.char('MS Schedule No.',required=False),
-		'ms_schedule_date': fields.date('MS Schedule Date',required=False),				
+		'ms_schedule_no': fields.char('MS Schedule No.',required=True),
+		'ms_schedule_date': fields.date('MS Schedule Date',required=True),				
 		'order_priority': fields.selection(ORDER_WO_PRIORITY,'Priority'),
-		'delivery_date': fields.date('Delivery Date',required=False),
+		'delivery_date': fields.date('Delivery Date',required=True),
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
-		'packing_type': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Packing Type', required=False),
-		'rm_date': fields.date('R.M Completed Date',required=False),
+		'packing_type': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Packing Type', required=True),
+		'rm_date': fields.date('R.M Completed Date',required=True),
 		'sub_comple_date': fields.date('Sub.Con Completed Date'),
 		'sub_con_date': fields.date('Sub.Con commitment Date'),
 		'in_house_date': fields.date('IN-House commitment Date'),

@@ -81,8 +81,9 @@
 					<field name="schedule_id"/>
 					<field name="order_no"/>
 					<field name="order_value"/>
-					<field name="pump_model_id"/>
 					<field name="order_id" invisible="1"/>
+					<field name="pump_model_id"/>
+					<field name="mould_mc_flag" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
 					<field name="pattern_name" string="Part Name."/>
@@ -91,7 +92,7 @@
 					<field name="each_weight" sum="Total Each Weight"/>
 					<field name="total_weight" sum="Total Weight"/>
 					<field name="flag_pattern_check"/>
-					<field name="sch_remarks"/>
+					<field name="sch_remarks"/>					
 					<field name="state"/>
 					<field name="name" invisible="1"/>
 					<field name="order_category" invisible="1"/>
@@ -127,7 +128,7 @@
 					<filter icon="terp-check" name="fettling_com" string="Fettling Completed" domain="[('state','=','fettling_com')]"/>				
 				
 					<separator/>
-                    <group expand="0" string="Group By...">
+                    <group expand="0" string="Group By...">						
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_id'}"/>
 						<filter string="Child Order No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
@@ -1053,6 +1054,7 @@
 					<field name="schedule_id"/>
 					<field name="order_no"/>
 					<field name="pump_model_id"/>
+					<field name="mould_mc_flag" invisible="1"/>
 					<field name="order_delivery_date" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
@@ -1628,6 +1630,7 @@
 				<field name="schedule_id"/>
 				<field name="order_no"/>
 				<field name="pump_model_id"/>
+				<field name="mould_mc_flag" invisible="1"/>
 				<field name="order_priority" string="Category"/>
 				<field name="pattern_id" string="Part No."/>
 				<field name="pattern_name" string="Part Name."/>
@@ -1665,6 +1668,7 @@
 				<field name="schedule_id"/>
 				<field name="order_no"/>
 				<field name="pump_model_id"/>
+				<field name="mould_mc_flag" invisible="1"/>
 				<field name="order_priority" string="Category"/>
 				<field name="pattern_id" string="Part No."/>
 				<field name="pattern_name" string="Part Name."/>
@@ -1672,6 +1676,7 @@
 				<field name="qty" string="Schedule Qty" sum="Total Qty"/>
 				<field name="each_weight" sum="Total Each Weight"/>
 				<field name="total_weight" sum="Total Weight"/>
+				<field name="mould_qty" string="Mould Completed Qty" sum="Qty" invisible="1"/>
 				<field name="total_mould_qty" string="Mould Completed Qty" sum="Qty"/>
 				<field name="pour_qty" string="Pouring Completed Qty" sum="Qty"/>
 				<field name="pour_pending_qty" string="Pouring Pending Qty" sum="Pending Qty"/>
@@ -1752,7 +1757,7 @@
 			<field name="res_model">kg.production</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="domain">[('mould_state','in',('done','partial')),('state','in',('mould_com','pour_pending','issue_pending','issue_done'))]</field>
+			<field name="domain">[('mould_mc_flag','=','t'),('mould_state','in',('done','partial')),('state','in',('mould_com','pour_pending','issue_pending','issue_done'))]</field>
 <!--
 			<field name="domain">[('pour_qty','=','mould_qty')]</field>
 -->

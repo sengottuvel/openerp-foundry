@@ -29,7 +29,7 @@ class kg_pouring_log(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approve','Approved')],'Status'),
 		'remark': fields.text('Remarks'),
 		'note': fields.text('Notes'),
-		'shift_id': fields.many2one('kg.shift.master','Shift'),
+		'shift_id': fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'supervisor': fields.char('Supervisor', size=128),
 		'pour_close_team': fields.char('Pouring Closing Team', size=128),
 		
@@ -37,7 +37,7 @@ class kg_pouring_log(osv.osv):
 		
 		### For Mould Update ###
 		'mould_date': fields.date('Date'),
-		'mould_shift_id':fields.many2one('kg.shift.master','Shift'),
+		'mould_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'mould_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'mould_moulder': fields.integer('Moulder'),
 		#~ 'mould_box_id': fields.related('pattern_id','box_id', type='many2one', relation='kg.box.master', string='Box Size', store=True),
@@ -249,6 +249,7 @@ class kg_pouring_log(osv.osv):
 						'mould_operator': entry.mould_operator.id,
 						'mould_hardness': entry.mould_hardness,
 						'mould_remarks': entry.mould_remarks,
+						'mould_mc_flag': 't',
 						})
 						
 					## Calculating rem qty for next priority wise update ##
@@ -274,18 +275,20 @@ class kg_pouring_log(osv.osv):
 		
 					rem_qty = line_item.qty
 					
-					cr.execute(''' select id,order_priority,qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
+					cr.execute(''' select id,order_priority,qty,schedule_qty,pour_qty,total_mould_qty,mould_rem_qty,state from kg_production
 						
 						where
-						pattern_id = %s and
-						moc_id = %s and
+						pattern_id = %s and						
 						mould_state in ('partial','pending') and
 						order_line_id = %s
 						
-						''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id,line_item.order_line_id.id ])
+						''',[line_item.production_id.pattern_id.id,line_item.order_line_id.id ])
 					wo_production_ids = cr.dictfetchall()
 					if wo_production_ids:
-						for wo_produc_item in wo_production_ids:
+						for wo_produc_item in wo_production_ids:							
+							excess_tol_qty = line_item.qty + wo_produc_item['total_mould_qty']  - wo_produc_item['schedule_qty']
+							print"rem_qty",rem_qty							
+							print"rem_qty",excess_tol_qty							
 							if rem_qty > 0:
 								### Checking if there is mould pending qty ###
 								if wo_produc_item['mould_rem_qty'] > 0:
@@ -309,6 +312,8 @@ class kg_pouring_log(osv.osv):
 									print "mould_completed_qty",mould_completed_qty
 									print "wo_produc_item['total_mould_qty']",wo_produc_item['total_mould_qty']
 									
+									
+									
 									### Updating the values to that item ###
 									production_obj.write(cr, uid, [wo_produc_item['id']], 
 										{
@@ -325,7 +330,135 @@ class kg_pouring_log(osv.osv):
 										'mould_operator': entry.mould_operator.id,
 										'mould_hardness': entry.mould_hardness,
 										'mould_remarks': entry.mould_remarks,
+										'mould_mc_flag': 't',
 										})
+							
+							if excess_tol_qty > 0:								
+							
+								
+								### Production Number ###
+								produc_name = ''	
+								produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry.entry_date))
+								produc_name = cr.fetchone();
+								
+								### Issue Number ###
+								issue_name = ''	
+								issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry.entry_date))
+								issue_name = cr.fetchone();
+								
+								### Core Log Number ###
+								core_name = ''	
+								core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry.entry_date))
+								core_name = cr.fetchone();
+								
+								### Mould Log Number ###
+								mould_name = ''	
+								mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry.entry_date))
+								mould_name = cr.fetchone();
+								
+								### Getting STK WO ###
+								stk_wo_id = self.pool.get('kg.work.order').search(cr,uid,[('name','=','STK WO'),('flag_for_stock','=',True)])
+								stk_wo_line_id = self.pool.get('ch.work.order.details').search(cr,uid,[('order_no','=','STK WO'),('flag_for_stock','=',True)])
+								
+								stk_wo_rec = self.pool.get('kg.work.order').browse(cr,uid,stk_wo_id[0])
+								stk_wo_line_rec = self.pool.get('ch.work.order.details').browse(cr,uid,stk_wo_line_id[0])
+								
+								production_rec = self.pool.get('kg.production').browse(cr,uid,wo_produc_item['id'])	
+								
+								
+								
+								production_vals = {
+														
+									'name': produc_name[0],
+									'schedule_id': production_rec.schedule_id.id,
+									'schedule_date': production_rec.schedule_date,
+									'division_id': production_rec.division_id.id,
+									'location' : production_rec.location,
+									'schedule_line_id': production_rec.schedule_line_id.id,
+									'order_id': stk_wo_id[0],
+									'order_line_id': stk_wo_line_id[0],
+									'order_bomline_id': production_rec.order_bomline_id.id,
+									'qty' : excess_tol_qty,			  
+									'schedule_qty' : excess_tol_qty,			  
+									'state' : 'mould_com',
+									'order_category':'spare',
+									'order_priority':'8',
+									'pattern_id' : production_rec.pattern_id.id,
+									'pattern_name' : production_rec.pattern_name,	
+									'moc_id' : production_rec.moc_id.id,
+									'sch_remarks': production_rec.order_bomline_id.add_spec,
+									'request_state': 'done',
+									'issue_no': issue_name[0],
+									'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+									'issue_qty': 1,
+									'issue_state': 'issued',
+									'core_no': core_name[0],
+									'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+									'core_qty': excess_tol_qty,
+									'core_rem_qty': excess_tol_qty,
+									'core_state': 'pending',
+									
+									'mould_no': mould_name[0],
+									'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+									'mould_qty': excess_tol_qty,
+									'mould_rem_qty': excess_tol_qty,
+									'total_mould_qty': excess_tol_qty,
+									'mould_state': 'done',
+									'mould_mc_flag': 't',
+									
+								}
+								
+								
+						
+								production_id = production_obj.create(cr, uid, production_vals)
+							
+							
+								### Stock Inward Creation ###
+								inward_obj = self.pool.get('kg.stock.inward')
+								inward_line_obj = self.pool.get('ch.stock.inward.details')
+								
+								inward_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.stock.inward')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,inward_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(inward_id[0],rec.code,entry.entry_date))
+								inward_name = cr.fetchone();
+								inward_name = inward_name[0]
+								
+								inward_vals = {
+									'name':inward_name,
+									'location': production_rec.location,
+									'state': 'confirmed',
+									
+								}
+								
+								inward_id = inward_obj.create(cr, uid, inward_vals)
+								
+								inward_line_vals = {
+									'header_id': inward_id,
+									'location': production_rec.location,
+									'stock_type': 'pattern',
+									#~ 'pump_model_id': production_rec.pump_model_id.id,
+									'pattern_id': production_rec.pattern_id.id,
+									'pattern_name': production_rec.pattern_name,
+									'moc_id': production_rec.moc_id.id,						
+									'qty': excess_tol_qty,
+									'available_qty': excess_tol_qty,
+									'each_wgt': production_rec.each_weight,
+									'total_weight': production_rec.total_weight,
+									'stock_mode': 'excess',
+									'foundry_stock_state': 'foundry_inprogress',
+									'stock_item': 'foundry_item',					
+									
+								}
+								
+								inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
 							
 								
 				else:
@@ -483,57 +616,134 @@ class kg_pouring_log(osv.osv):
 						
 						### Excess qty updation ###
 						print "rem_qty",rem_qty
-						if rem_qty > 0:
+						
+						if rem_qty > 0:	
 							for excess_produc_item in excess_production_ids:
 								print "excess_production_ids",excess_production_ids
-								excess_production_rec = production_obj.browse(cr,uid,excess_produc_item['id'])
+								production_rec = production_obj.browse(cr,uid,excess_produc_item['id'])
 								
-								### Checking if there is mould pending qty ###
-								if excess_produc_item['mould_rem_qty'] > 0:
-									mould_done_qty = excess_produc_item['mould_rem_qty'] - rem_qty
-									### Calculating mould pending qty and mould completed qty for that item ###
-									if mould_done_qty <= 0:
-										mould_completed_qty = excess_produc_item['mould_rem_qty']
-										mould_pending_qty = 0
-									if mould_done_qty > 0:
-										mould_completed_qty = rem_qty
-										mould_pending_qty = mould_done_qty
-									### Finding the status of that item ###
-									if mould_pending_qty > 0:
-										mould_status = 'partial'
-										produc_state = excess_produc_item['state']
-									if mould_pending_qty == 0:
-										mould_status = 'done'
-										produc_state = 'mould_com'
-									print "mould_completed_qty",mould_completed_qty
-									print "mould_pending_qty",mould_pending_qty
-									print "excess_produc_item['total_mould_qty']",excess_produc_item['total_mould_qty']
+								### Production Number ###
+								produc_name = ''	
+								produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry.entry_date))
+								produc_name = cr.fetchone();
+								
+								### Issue Number ###
+								issue_name = ''	
+								issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry.entry_date))
+								issue_name = cr.fetchone();
+								
+								### Core Log Number ###
+								core_name = ''	
+								core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry.entry_date))
+								core_name = cr.fetchone();
+								
+								### Mould Log Number ###
+								mould_name = ''	
+								mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry.entry_date))
+								mould_name = cr.fetchone();
+								
+								### Getting STK WO ###
+								stk_wo_id = self.pool.get('kg.work.order').search(cr,uid,[('name','=','STK WO'),('flag_for_stock','=',True)])
+								stk_wo_line_id = self.pool.get('ch.work.order.details').search(cr,uid,[('order_no','=','STK WO'),('flag_for_stock','=',True)])
+								
+								stk_wo_rec = self.pool.get('kg.work.order').browse(cr,uid,stk_wo_id[0])
+								stk_wo_line_rec = self.pool.get('ch.work.order.details').browse(cr,uid,stk_wo_line_id[0])
+								
+								
+								production_vals = {
+														
+									'name': produc_name[0],
+									'schedule_id': production_rec.schedule_id.id,
+									'schedule_date': production_rec.schedule_date,
+									'division_id': production_rec.division_id.id,
+									'location' : production_rec.location,
+									'schedule_line_id': production_rec.schedule_line_id.id,
+									'order_id': stk_wo_id[0],
+									'order_line_id': stk_wo_line_id[0],
+									'order_bomline_id': production_rec.order_bomline_id.id,
+									'qty' : rem_qty,			  
+									'schedule_qty' : rem_qty,			  
+									'state' : 'mould_com',
+									'order_category':'spare',
+									'order_priority':'8',
+									'pattern_id' : production_rec.pattern_id.id,
+									'pattern_name' : production_rec.pattern_name,	
+									'moc_id' : production_rec.moc_id.id,
+									'sch_remarks': production_rec.order_bomline_id.add_spec,
+									'request_state': 'done',
+									'issue_no': issue_name[0],
+									'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+									'issue_qty': 1,
+									'issue_state': 'issued',
+									'core_no': core_name[0],
+									'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+									'core_qty': rem_qty,
+									'core_rem_qty': rem_qty,
+									'core_state': 'pending',
 									
-									### Updating the values to that item ###
-									production_obj.write(cr, uid, [excess_produc_item['id']], 
-										{
-										'mould_qty': mould_pending_qty,
-										'total_mould_qty': excess_production_rec.total_mould_qty + rem_qty,
-										'mould_rem_qty': mould_pending_qty,
-										'mould_state': mould_status,
-										'state': produc_state,
-										'mould_date': entry.mould_date,
-										'mould_shift_id': entry.mould_shift_id.id,
-										'mould_contractor': entry.mould_contractor.id,
-										'mould_moulder': entry.mould_moulder,
-										'mould_helper': entry.mould_helper,
-										'mould_operator': entry.mould_operator.id,
-										'mould_hardness': entry.mould_hardness,
-										'mould_remarks': entry.mould_remarks,
-										})
+									'mould_no': mould_name[0],
+									'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+									'mould_qty': rem_qty,
+									'mould_rem_qty': rem_qty,
+									'total_mould_qty': rem_qty,
+									'mould_state': 'done',
+									'mould_mc_flag': 't',
+									
+								}
+								
+								
+						
+								production_id = production_obj.create(cr, uid, production_vals)
 							
+							
+								### Stock Inward Creation ###
+								inward_obj = self.pool.get('kg.stock.inward')
+								inward_line_obj = self.pool.get('ch.stock.inward.details')
+								
+								inward_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.stock.inward')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,inward_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(inward_id[0],rec.code,entry.entry_date))
+								inward_name = cr.fetchone();
+								inward_name = inward_name[0]
+								
+								inward_vals = {
+									'name':inward_name,
+									'location': production_rec.location,
+									'state': 'confirmed',
+									
+								}
+								
+								inward_id = inward_obj.create(cr, uid, inward_vals)
+								
+								inward_line_vals = {
+									'header_id': inward_id,
+									'location': production_rec.location,
+									'stock_type': 'pattern',
+									#~ 'pump_model_id': production_rec.pump_model_id.id,
+									'pattern_id': production_rec.pattern_id.id,
+									'pattern_name': production_rec.pattern_name,
+									'moc_id': production_rec.moc_id.id,						
+									'qty': rem_qty,
+									'available_qty': rem_qty,
+									'each_wgt': production_rec.each_weight,
+									'total_weight': production_rec.total_weight,
+									'stock_mode': 'excess',
+									'foundry_stock_state': 'foundry_inprogress',
+									'stock_item': 'foundry_item',					
+									
+								}
+								
+								inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)							
 				
-			#~ ### Pour Log Number ###
-			#~ pour_name = ''  
-			#~ pour_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pouring.log')])
-			#~ rec = self.pool.get('ir.sequence').browse(cr,uid,pour_seq_id[0])
-			#~ cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(pour_seq_id[0],rec.code))
-			#~ pour_name = cr.fetchone();
+			
 			self.write(cr, uid, ids, {'state': 'approve','approve_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass
@@ -542,11 +752,12 @@ class kg_pouring_log(osv.osv):
 	def pour_entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
-			for line_item in entry.line_ids:
-				
+			for line_item in entry.line_ids:				
 				if line_item.order_line_id and line_item.order_line_id.id != False:
-					pour_qty = line_item.production_id.total_mould_qty
-					
+					pour_qty = line_item.production_id.total_mould_qty						
+					if (line_item.production_id.total_mould_qty - line_item.production_id.pour_qty)  < line_item.qty:
+						raise osv.except_osv(_('Warning!'),
+							_('Excess Qty not allowed, Kindly check total mould qty and total pour qty !!'))						
 					if pour_qty == 0:
 						raise osv.except_osv(_('Warning!'),
 								_(' There is no Mould completed qty for pattern %s !!')%(line_item.production_id.pattern_code))
@@ -569,106 +780,31 @@ class kg_pouring_log(osv.osv):
 				production_rec = self.pool.get('kg.production').browse(cr, uid, line_item.production_id.id)
 				### Checking whether it is excess qty ###
 				excess_qty = line_item.production_id.qty - (line_item.production_id.pour_qty + line_item.qty)
-				if excess_qty < 0:
-					excess_qty = (line_item.production_id.pour_qty + line_item.qty) - line_item.production_id.qty
-					### Excess Qty Updation ###
-										
-					
-					### Fettling Process Creation ###
-					fettling_obj = self.pool.get('kg.fettling')
-
-					### Sequence Number Generation ###
-					fettling_name = ''  
-					fettling_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.fettling.inward')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,fettling_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(fettling_seq_id[0],seq_rec.code))
-					fettling_name = cr.fetchone();
-					
-					### Getting STK WO ###
-					stk_wo_id = self.pool.get('kg.work.order').search(cr,uid,[('name','=','STK WO'),('flag_for_stock','=',True)])
-					stk_wo_line_id = self.pool.get('ch.work.order.details').search(cr,uid,[('order_no','=','STK WO'),('flag_for_stock','=',True)])
-					
-					stk_wo_rec = self.pool.get('kg.work.order').browse(cr,uid,stk_wo_id[0])
-					stk_wo_line_rec = self.pool.get('ch.work.order.details').browse(cr,uid,stk_wo_line_id[0])
-					
-					fettling_vals = {
-						'name': fettling_name[0],
-						'location':production_rec.location,
-						'schedule_id':production_rec.schedule_id.id,
-						'schedule_date':production_rec.schedule_date,
-						'schedule_line_id':production_rec.schedule_line_id.id,
-						'order_id': stk_wo_id[0],
-						'order_line_id': stk_wo_line_id[0],
-						'order_no': 'STK WO',
-						'order_category': 'spare',
-						'order_priority': '8',
-						'pump_model_id':stk_wo_line_rec.pump_model_id.id,
-						'pattern_id':production_rec.pattern_id.id,
-						'pattern_code':production_rec.pattern_code,
-						'pattern_name':production_rec.pattern_name,
-						'moc_id':production_rec.moc_id.id,
-						'schedule_qty':excess_qty,
-						'production_id':production_rec.id,
-						'pour_qty':excess_qty,
-						'inward_accept_qty':excess_qty,
-						'state':'waiting',
-						'pour_id': entry.id,
-						'pour_line_id': line_item.id
-						
-						
-					}
-						
-					fettling_id = fettling_obj.create(cr, uid, fettling_vals)
-					
-					
-					### Stock Inward Creation ###
-					inward_obj = self.pool.get('kg.stock.inward')
-					inward_line_obj = self.pool.get('ch.stock.inward.details')
-					
-					inward_vals = {
-						'location': production_rec.location
-					}
-					
-					inward_id = inward_obj.create(cr, uid, inward_vals)
-					
-					inward_line_vals = {
-						'header_id': inward_id,
-						'location': production_rec.location,
-						'stock_type': 'pattern',
-						'pump_model_id': production_rec.pump_model_id.id,
-						'pattern_id': production_rec.pattern_id.id,
-						'pattern_name': production_rec.pattern_name,
-						'moc_id': production_rec.moc_id.id,						
-						'qty': excess_qty,
-						'available_qty': excess_qty,
-						'each_wgt': production_rec.each_weight,
-						'total_weight': production_rec.total_weight,
-						'stock_mode': 'excess',
-						'foundry_stock_state': 'foundry_inprogress',
-						'stock_item': 'foundry_item',
-						'fettling_id': fettling_id,
-						'heat_no': entry.melting_id.name
-					}
-					
-					inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
-					
-					production_obj.write(cr,uid,production_rec.id,{'pour_qty':production_rec.pour_qty + line_item.qty,'pour_state':'done','state':'fettling_inprogress'})
+				
+				if (production_rec.total_mould_qty - production_rec.pour_qty) < line_item.qty:
+					raise osv.except_osv(_('Warning!'),
+						_('Excess Qty not allowed, Kindly check total mould qty and total pour qty !!'))	
 				
 				else:
+					
 					### Fettling creation for that item ###
 					self.fettling_inward_update(cr, uid, ids, production_rec.id,entry.id,line_item.id,line_item.qty)
-					tot_pour_qty = production_rec.pour_qty + line_item.qty
-					print "tot_pour_qty",tot_pour_qty
-					print "production_rec.total_mould_qty",production_rec.total_mould_qty
-					print "production_rec.pour_pending_qty",production_rec.pour_pending_qty
-					if tot_pour_qty < production_rec.total_mould_qty:
+					tot_pour_qty = production_rec.pour_qty + line_item.qty				
+						
+					pending_qty = production_rec.pour_pending_qty - tot_pour_qty
+					if pending_qty > 0:					
 						pour_status = 'partial'
-						status = 'mould_com'
-					if tot_pour_qty == production_rec.total_mould_qty:
+						status = 'pour_pending'					
+					else:
 						pour_status = 'done'
 						status = 'fettling_inprogress'
+						
+					if (production_rec.pour_qty + line_item.qty) == production_rec.total_mould_qty:
+						mould_mc_flag = 'f'
+					if (production_rec.pour_qty + line_item.qty) != production_rec.total_mould_qty:
+						mould_mc_flag = 't'
 					
-					production_obj.write(cr,uid,production_rec.id,{'pour_qty':tot_pour_qty,'pour_state':pour_status,'state':status})
+					production_obj.write(cr,uid,production_rec.id,{'mould_mc_flag':mould_mc_flag,'pour_qty':tot_pour_qty,'pour_state':pour_status,'state':status,'pour_date':time.strftime('%Y-%m-%d %H:%M:%S'),})
 					
 			### Pour Log Number ###
 			pour_name = ''  
@@ -758,8 +894,8 @@ class ch_pouring_details(osv.osv):
 		value = {'pattern_name': ''}
 		pour_qty = 0
 		if production_id:
-			production_rec = self.pool.get('kg.production').browse(cr, uid, production_id, context=context)
-			pour_qty = production_rec.pour_pending_qty
+			production_rec = self.pool.get('kg.production').browse(cr, uid, production_id, context=context)			
+			pour_qty = production_rec.total_mould_qty - production_rec.pour_qty 
 			value = {'qty':pour_qty,'pattern_state':production_rec.pattern_id.pattern_state,'pattern_name': production_rec.pattern_name,'order_line_id': production_rec.order_line_id.id}
 		return {'value': value}
 		

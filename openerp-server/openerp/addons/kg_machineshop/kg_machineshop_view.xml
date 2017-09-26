@@ -8,7 +8,7 @@
 			<field name="name">MS Foundry Inward Form</field>
 			<field name="model">kg.machineshop</field>
 			<field name="arch" type="xml">
-				<form string="MS Foundry Inward" version="7.0" create="false" delete="false">
+				<form string="MS Foundry Inward" version="7.0" create="false">
 					<header>
 						<button name="ms_accept" type="object" string="Update" class="oe_highlight"
 						attrs="{'invisible': [('state','in',['accept'])]}"/>
@@ -84,11 +84,14 @@
 			<field name="model">kg.machineshop</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="MS Foundry Inward Entry Tree" create="false" delete="false">					
+				<tree colors="red:state == 'pending';red:state == 'waiting'
+						;red:state == 'raw_pending';black:state == 'accept'" 
+								toolbar="True" string="MS Foundry Inward Entry Tree" create="false">									
 					<field name="name" invisible="1"/>
 					<field name="order_no"/>
 					<field name="order_delivery_date"/>
 					<field name="order_category" invisible="1"/>
+					<field name="ms_type" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id"/>
 					<field name="pattern_id"/>
@@ -135,6 +138,7 @@
 						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
 						<filter string="Stages" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'stage_id'}"/>
 						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+						<filter string="Item Type" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'ms_type'}"/>
 					</group>
                 </search>
 			</field>
@@ -172,31 +176,120 @@
 	<!-- Menu Action End-->
 	
 	
-	<!-- Foundry Pending List menu -->
-	
+	<!-- Foundry Pending List menu -->	
+
 	<record id="tma_ms_fou_pending_inward" model="ir.actions.act_window">
 		<field name="name">Foundry Pending List</field>
 		<field name="type">ir.actions.act_window</field>
 		<field name="res_model">kg.machineshop</field>
 		<field name="view_type">form</field>
-		<field name="context">{}</field>
+		<field name="view_mode">tree</field>
 		<field name="domain">[('state','=','pending'),('ms_type','=','foundry_item')]</field>
+		<field name="context">{}</field>
 		<field name="search_view_id" ref="t_search_v_ms_inward"/>
 	</record>
-	
-	 <record model="ir.actions.act_window.view" id="tma_ms_fou_pending_inward_tree_view">
-		<field name="sequence" eval="1"/>
+
+	<record id="tma_ms_fou_pending_inward_tree_view" model="ir.actions.act_window.view">
+		<field eval="1" name="sequence"/>
 		<field name="view_mode">tree</field>
 		<field name="view_id" ref="t_tree_v_ms_inward"/>
 		<field name="act_window_id" ref="tma_ms_fou_pending_inward"/>
 	</record>
-	<record model="ir.actions.act_window.view" id="tma_ms_fou_pending_inward_form_view">
-		<field name="sequence" eval="2"/>
-		<field name="view_mode">form</field>
-		<field name="view_id" ref="t_form_v_ms_inward"/>
-		<field name="act_window_id" ref="tma_ms_fou_pending_inward"/>
+	
+	<!-- Store Issue Pending List menu -->	
+	
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_ms_store_inward" model="ir.ui.view">
+			<field name="name">MS Foundry Inward Tree</field>
+			<field name="model">kg.machineshop</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="red:state == 'pending';red:state == 'waiting'
+						;red:state == 'raw_pending';black:state == 'accept'" 
+								toolbar="True" string="MS Foundry Inward Entry Tree" create="false">									
+					<field name="name" invisible="1"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_category" invisible="1"/>
+					<field name="ms_type" invisible="1"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="item_code"/>
+					<field name="item_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>					
+					<field name="ms_plan_rem_qty" string="Pending Qty" sum="Total Pending Qty"/>				
+					<field name="stage_id" invisible="1"/>
+					<field name="oth_spec"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->	
+	
+
+	<record id="tma_ms_item_pending_inward" model="ir.actions.act_window">
+		<field name="name">Store Issue Pending List</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">kg.machineshop</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree</field>
+		<field name="domain">[('state','=','pending'),('ms_type','=','ms_item')]</field>
+		<field name="context">{}</field>
+		<field name="search_view_id" ref="t_search_v_ms_inward"/>
+	</record>
+
+	<record id="tma_ms_item_pending_inward_tree_view" model="ir.actions.act_window.view">
+		<field eval="1" name="sequence"/>
+		<field name="view_mode">tree</field>
+		<field name="view_id" ref="t_tree_v_ms_store_inward"/>
+		<field name="act_window_id" ref="tma_ms_item_pending_inward"/>
 	</record>
 	
+	
+	<!-- MS Store Inward List menu -->	
+
+	<record id="tma_ms_item_raw_pending_inward" model="ir.actions.act_window">
+		<field name="name">MS Acceptance Pending</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">kg.machineshop</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree</field>
+		<field name="domain">[('state','=','raw_pending'),('ms_type','=','ms_item')]</field>
+		<field name="context">{}</field>
+		<field name="search_view_id" ref="t_search_v_ms_inward"/>
+	</record>
+
+	<record id="tma_ms_item_raw_pending_inward_tree_view" model="ir.actions.act_window.view">
+		<field eval="1" name="sequence"/>
+		<field name="view_mode">tree</field>
+		<field name="view_id" ref="t_tree_v_ms_store_inward"/>
+		<field name="act_window_id" ref="tma_ms_item_raw_pending_inward"/>
+	</record>
+	
+	
+	<!-- Inward Accepted List menu -->	
+
+	<record id="tma_ms_both_dp_pending_inward" model="ir.actions.act_window">
+		<field name="name">Inward Accepted List</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">kg.machineshop</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree</field>
+		<field name="domain">[('state','=','accept'),('flag_planning','=',False)]</field>
+		<field name="context">{}</field>
+		<field name="search_view_id" ref="t_search_v_ms_inward"/>
+	</record>
+
+	<record id="tma_ms_both_dp_pending_inward_tree_view" model="ir.actions.act_window.view">
+		<field eval="1" name="sequence"/>
+		<field name="view_mode">tree</field>
+		<field name="view_id" ref="t_tree_v_ms_inward"/>
+		<field name="act_window_id" ref="tma_ms_both_dp_pending_inward"/>
+	</record>
 		
 
 	
@@ -228,138 +321,51 @@
 	<!-- Sequence Number Setting Ends Here -->
 	
 	
-	<!-- MS Schedule List Starts Here -->
 	
-	<!-- Form View Start -->
-
-		<record id="t_form_v_ms_sch_list" model="ir.ui.view">
-			<field name="name">MS Schedule List Form</field>
-			<field name="model">kg.machineshop</field>
-			<field name="arch" type="xml">
-				<form string="MS Schedule List" version="7.0" create="false">
-						
-					<group string="MS Details">
-						<group>
-							<field name="name"/>
-							<field name="ms_sch_qty" readonly="1"/>
-							<field name="ms_type" invisible="1"/>
-						</group>											
-						<group>
-							<field name="entry_date" readonly="1"/>
-							<field name="ms_state" readonly="1"/>
-						</group>					
-					</group>
-					<group string="Work Order Details">
-						<group>
-							<field name="order_no" readonly="1"/>
-							<field name="order_priority" string="Category" readonly="1"/>
-							<field name="pattern_id" invisible="1"/>
-							<field name="item_code" readonly="1" />
-							<field name="moc_id" readonly="1"/>
-							<field name="total_weight" invisible="1"/>
-						</group>											
-						<group>
-							<field name="order_delivery_date"/>
-							<field name="pump_model_id" readonly="1"/>
-							<field name="pattern_name" invisible="1"/>
-							<field name="item_name" readonly="1"/>
-							<field name="each_weight" invisible="1"/>
-							<field name="oth_spec"/>
-						</group>					
-					</group>
-					<notebook>
-						
-						<page string="Entry Info">
-							<group>
-								<field name="company_id"/>
-							</group>
-							<group>
-								<field name="active"/>
-							</group>
-							<group>
-								<group>
-									<field name="user_id"/>
-									<field name="update_user_id"/>
-								</group>
-								<group>
-									<field name="crt_date"/>
-									<field name="update_date"/>
-								</group>
-							</group>
-						</page>
-					</notebook>
-				</form>
-			</field>
-		</record>
-		
-	<!-- Form View End -->
-		
 	
-	<!-- Tree View Start -->
+	
+	<!-- MS Schedule List -->
+	
+	<!--MS Schedule List Tree View Start -->
 		
-		<record id="t_tree_v_ms_sch_list" model="ir.ui.view">
+		<record id="t_tree_v_ms_schedule_list_list" model="ir.ui.view">
 			<field name="name">MS Schedule List Tree</field>
 			<field name="model">kg.machineshop</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="MS Schedule List Tree" create="false">					
+				<tree colors="red:state == 'pending';red:state == 'waiting'
+						;red:state == 'raw_pending';black:state == 'accept'" 
+								toolbar="True" string="MS Foundry Inward Entry Tree" create="false">									
 					<field name="name" invisible="1"/>
 					<field name="order_no"/>
 					<field name="order_delivery_date"/>
 					<field name="order_category" invisible="1"/>
+					<field name="item_name" invisible="1"/>
+					<field name="flag_planning" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id"/>
-					<field name="pattern_id" invisible="1"/>
-					<field name="pattern_name" invisible="1"/>
-					<field name="item_code" />
-					<field name="item_name"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
 					<field name="moc_id"/>
-					<field name="location" invisible="1"/>
-					<field name="ms_sch_qty" sum="Total Schedule Qty"/>
+					<field name="location"/>
+					<field name="fettling_qty" string="Fettling completed Qty" sum="Total Fettling Qty"/>
+					<field name="inward_accept_qty" string="MS Accepted Qty" sum="Total MS Qty"/>
+					<field name="inward_pending_qty" string="Pending Qty" sum="Total Pending Qty"/>
+					<field name="each_weight" sum="Total Each Weight"/>
+					<field name="total_weight" sum="Total Weight"/>
+					<field name="stage_id" invisible="1"/>
 					<field name="oth_spec"/>
-					<field name="ms_state"/>
-					
+					<field name="state"/>
 				</tree>
 			</field>
 		</record>
 		
-	<!-- Tree View End -->
+	<!-- MS Schedule List Tree View End -->
 	
-	
-	<!--Issue Pending List Tree View Start -->
-		
-		<record id="t_tree_v_ms_issue_pending_list" model="ir.ui.view">
-			<field name="name">Issue Pending List Tree</field>
-			<field name="model">kg.machineshop</field>
-			<field eval="8" name="priority"/>
-			<field name="arch" type="xml">
-				<tree toolbar="True" string="MS Schedule List Tree" create="false">					
-					<field name="name" invisible="1"/>
-					<field name="order_no"/>
-					<field name="order_delivery_date"/>
-					<field name="order_category" invisible="1"/>
-					<field name="order_priority" string="Category"/>
-					<field name="pump_model_id"/>
-					<field name="pattern_id" invisible="1"/>
-					<field name="pattern_name" invisible="1"/>
-					<field name="item_code" />
-					<field name="item_name"/>
-					<field name="moc_id"/>
-					<field name="location" invisible="1"/>
-					<field name="ms_sch_qty" sum="Total Schedule Qty"/>
-					<field name="oth_spec"/>
-					
-					
-				</tree>
-			</field>
-		</record>
-		
-	<!-- Issue Pending List Tree View End -->
-	
-	<!-- Issue Pending List Search View Start -->
+	<!-- MS Schedule List Search View Start -->
 
-		<record id="t_search_v_ms_issue_pending_list" model="ir.ui.view">
-			<field name="name">Issue Pending List Search</field>
+		<record id="t_search_v_ms_schedule_list_list" model="ir.ui.view">
+			<field name="name">MS Schedule List Search</field>
 			<field name="model">kg.machineshop</field>
 			<field name="arch" type="xml">
 				<search string="Daily Planning Entry Search">
@@ -367,159 +373,48 @@
 					<separator/>
 					<group expand="0" string="Group By...">
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+						<filter string="Item Type" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'ms_type'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Order No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Item Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_name'}"/>
 					</group>
 				</search>
 			</field>
 		</record>
 		
-	<!-- Issue Pending List Search View End -->	
+	<!-- MS Schedule List Search View End -->	
 	
-	<!-- Issue Pending List Menu Action Start-->
+	<!-- MS Schedule List Menu Action Start-->
 	
-	<record id="tma_ms_issue_pending_list" model="ir.actions.act_window">
-		<field name="name">Issue Pending List</field>
+	<record id="tma_ms_schedule_list_list" model="ir.actions.act_window">
+		<field name="name">MS Schedule List</field>
 		<field name="type">ir.actions.act_window</field>
 		<field name="res_model">kg.machineshop</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree</field>
 		<field name="context">{}</field>
-		<field name="view_id" ref="t_tree_v_ms_issue_pending_list"/>
-		<field name="search_view_id" ref="t_search_v_ms_issue_pending_list"/>
-		<field name="domain">[('state','=','raw_pending')]</field>
+		<field name="view_id" ref="t_tree_v_ms_schedule_list_list"/>
+		<field name="search_view_id" ref="t_search_v_ms_schedule_list_list"/>
+		<field name="domain">[('state','=','accept'),('ms_plan_rem_qty','>', 0)]</field>
 	</record>
 	
-	<!--Issue Pending List Menu Action Start-->
+	<!--MS Schedule List Menu Action Start-->
 	
+	<!-- DP Pending List Menu Action Start-->
 	
+	<record id="tma_dp_pending_list_list" model="ir.actions.act_window">
+		<field name="name">DP Pending List</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">kg.machineshop</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree</field>
+		<field name="context">{}</field>
+		<field name="view_id" ref="t_tree_v_ms_schedule_list_list"/>
+		<field name="search_view_id" ref="t_search_v_ms_schedule_list_list"/>
+		<field name="domain">[('state','=','accept')]</field>
+	</record>
 	
-	<!-- Tree View Start -->
-		
-		<record id="t_tree_v_ms_unsch_list" model="ir.ui.view">
-			<field name="name">MS Unschedule List Tree</field>
-			<field name="model">kg.machineshop</field>
-			<field eval="8" name="priority"/>
-			<field name="arch" type="xml">
-				<tree toolbar="True" string="MS Unschedule List Tree" create="false">					
-					<field name="name" invisible="1"/>
-					<field name="order_no"/>
-					<field name="order_delivery_date"/>
-					<field name="order_category" invisible="1"/>
-					<field name="order_priority" string="Category"/>
-					<field name="pump_model_id"/>
-					<field name="pattern_id" invisible="1"/>
-					<field name="pattern_name" invisible="1"/>
-					<field name="item_code" />
-					<field name="item_name"/>
-					<field name="moc_id"/>
-					<field name="location" invisible="1"/>
-					<field name="ms_sch_qty" string="Un schedule Qty" sum="Total Schedule Qty"/>
-					<field name="oth_spec"/>
-					<field name="ms_state" invisible="1"/>
-					
-				</tree>
-			</field>
-		</record>
-		
-	<!-- Tree View End -->
-	
-	<!-- Search View Start -->
-
-		<record id="t_search_v_ms_sch_list" model="ir.ui.view">
-            <field name="name">MS Schedule List Search</field>
-            <field name="model">kg.machineshop</field>
-            <field name="arch" type="xml">
-                <search string="MS Schedule List Search">
-					
-					<field name="item_code" string="Item Code"  filter_domain="[('item_code','ilike',self)]" />
-					<field name="item_name" string="Item Name"  filter_domain="[('item_name','ilike',self)]" />
-					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
-					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
-					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
-				
-					<filter icon="terp-check" name="in_plan" string="Planning In Progress" domain="[('ms_state','=','in_plan')]"/>
-					<filter icon="terp-check" name="sent_to_sc" string="In SC List" domain="[('ms_state','=','sent_to_sc')]"/>
-					<filter icon="terp-check" name="inhouse_1" string="In House -1" domain="[('ms_state','=','inhouse_1')]"/>
-					<filter icon="terp-check" name="inhouse_2" string="In House -2" domain="[('ms_state','=','inhouse_2')]"/>	
-					<filter icon="terp-check" name="op_in_sc" string="Operations Completed" domain="[('ms_state','=','op_in_sc')]"/>	
-					<filter icon="terp-check" name="op_rejected" string="Operation Rejected" domain="[('ms_state','=','op_rejected')]"/>	
-					<filter icon="terp-check" name="sent_to_store" string="In F.P store" domain="[('ms_state','=','sent_to_store')]"/>	
-					
-							
-					<separator/>
-                    <group expand="0" string="Group By...">
-						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
-						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
-						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
-						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
-						<filter string="Item Code" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_code'}"/>
-						<filter string="Item Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_name'}"/>
-						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
-						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'ms_state'}"/>
-						<filter name="group_wo" string="WO" icon="terp-partner" context="{'group_by':'order_no'}"/>
-					</group>
-                </search>
-			</field>
-		</record>
-		
-	<!-- Search View End -->		
-			
-		
-		<!-- Menu Action Start -->
-		
-		
-		<record id="tma_ms_sch_list" model="ir.actions.act_window">
-			<field name="name">MS Schedule List</field>
-			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.machineshop</field>
-			<field name="view_type">form</field>
-			<field name="context">{}</field>
-			<field name="domain">[('state','=','accept')]</field>
-			<field name="search_view_id" ref="t_search_v_ms_sch_list"/>
-		</record>
-		
-		 <record model="ir.actions.act_window.view" id="tma_ms_sch_list_tree_view">
-            <field name="sequence" eval="1"/>
-            <field name="view_mode">tree</field>
-            <field name="view_id" ref="t_tree_v_ms_sch_list"/>
-            <field name="act_window_id" ref="tma_ms_sch_list"/>
-        </record>
-        <record model="ir.actions.act_window.view" id="tma_ms_sch_list_form_view">
-            <field name="sequence" eval="2"/>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="t_form_v_ms_sch_list"/>
-            <field name="act_window_id" ref="tma_ms_sch_list"/>
-        </record>
-		
-	<!-- Menu Action End-->
-	
-	<!-- MS Unscheduled list Menu Action Start -->
-		
-		
-		<record id="tma_ms_unsch_list" model="ir.actions.act_window">
-			<field name="name">MS Unschedule List</field>
-			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.machineshop</field>
-			<field name="view_type">form</field>
-			<field name="domain">[('state','=','accept'),('ms_plan_rem_qty','>', 0)]</field>
-			<field name="search_view_id" ref="t_search_v_ms_sch_list"/>
-			<field name="context">{'search_default_group_wo': 1}</field>
-		</record>
-		
-		 <record model="ir.actions.act_window.view" id="tma_ms_unsch_list_tree_view">
-            <field name="sequence" eval="1"/>
-            <field name="view_mode">tree</field>
-            <field name="view_id" ref="t_tree_v_ms_unsch_list"/>
-            <field name="act_window_id" ref="tma_ms_unsch_list"/>
-        </record>
-        <record model="ir.actions.act_window.view" id="tma_ms_unsch_list_form_view">
-            <field name="sequence" eval="2"/>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="t_form_v_ms_sch_list"/>
-            <field name="act_window_id" ref="tma_ms_unsch_list"/>
-        </record>
-		
-	<!-- Menu Action End-->
-	
+	<!--MS Schedule List Menu Action Start-->	
 	
 	<!-- Batch Entries Starts Here -->
 	
@@ -715,7 +610,7 @@
 					</header>
 					<group>
 						<group>
-							<field name="order_id" readonly="1"/>
+							<field name="order_line_id" readonly="1"/>
 							<field name="order_category" readonly="1"/>
 							<field name="schedule_id" readonly="1"/>							
 							<field name="ms_schedule_no"/>
@@ -1032,17 +927,24 @@
 			
 		<menuitem action="tma_id_commitment" id="tam_ms_id_commitment" parent="tpm_ms_process" sequence="0" />
 		<menuitem action="tma_trimming_dia" id="tam_trimming_dia" parent="tpm_ms_process" sequence="1" />
+		
 		<menuitem action="kg_stock_inward.tma_ms_stock_details" id="tam_ms_stock_list" parent="tpm_ms_process" sequence="2" />
-		<menuitem action="kg_qc_verification.tma_ms_qc_verification" id="tam_ms_qc_verif" parent="tpm_ms_process" sequence="2" />
-		<menuitem action="tma_ms_unsch_list" id="tam_ms_unsch_list" parent="tpm_ms_process" sequence="3" />
-		
-		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="4" />
-		<menuitem action="tma_ms_issue_pending_list" id="tam_ms_sch_pending_list" parent="tpm_ms_process" sequence="4" />
+		<menuitem action="kg_qc_verification.tma_ms_qc_verification" id="tam_ms_qc_verif" parent="tpm_ms_process" sequence="3" />
 		
 		
-		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="2" />
+		<menuitem action="kg_schedule.tma_fabrication" id="tam_fabrication" parent="tpm_ms_process" sequence="4" />
+		<menuitem action="kg_schedule.tma_fabrication_inward" id="tam_fabrication_inward_form_update" parent="tpm_ms_process" sequence="5" />
+		<menuitem action="kg_schedule.tma_fabrication_completed" id="tam_fabrication_completed" parent="tpm_ms_process" sequence="6" />
 		
-		<menuitem action="tma_ms_fou_pending_inward" id="tam_fou_pending_ms_inward" parent="tpm_ms_process" sequence="2" />
+		
+		
+		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="7" />	
+		<menuitem action="tma_ms_fou_pending_inward" id="tam_fou_pending_ms_inward" parent="tpm_ms_process" sequence="8" />
+		<menuitem action="tma_ms_item_pending_inward" id="tam_ms_item_pending_ms_inward" parent="tpm_ms_process" sequence="9" />
+		<menuitem action="tma_ms_item_raw_pending_inward" id="tam_ms_item_raw_pending_ms_inward" parent="tpm_ms_process" sequence="10" />
+		<menuitem action="tma_ms_both_dp_pending_inward" id="tam_ms_both_dp_pending_inward" parent="tpm_ms_process" sequence="11" />
+		<menuitem action="tma_ms_schedule_list_list" id="tam_ms_schedule_list_inward" parent="tpm_ms_process" sequence="12" />
+		<menuitem action="tma_dp_pending_list_list" id="tam_dp_pending_list_inward" parent="tpm_ms_process" sequence="13" />
 		
 		
 	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="4"/>

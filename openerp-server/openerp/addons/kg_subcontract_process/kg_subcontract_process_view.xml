@@ -665,7 +665,7 @@
 			<field name="model">ch.subcontract.dc.line</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="Subcontract DC Line Tree">				
+				<tree toolbar="True" string="Subcontract DC Line Tree" create="false" delete="false">				
 					<field name="order_id"/>
 					<field name="order_delivery_date"/>					
 					<field name="order_priority" string="Category"/>
@@ -692,7 +692,7 @@
 			<field name="model">ch.subcontract.dc.line</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="Subcontract DC Line Tree">				
+				<tree toolbar="True" string="Subcontract DC Line Tree" create="false" delete="false">				
 					<field name="contractor_id"/>
 					<field name="order_id"/>
 					<field name="order_delivery_date"/>					

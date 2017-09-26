@@ -93,7 +93,7 @@ class kg_fettling(osv.osv):
 		'inward_accept_qty': fields.integer('Accepted Qty', required=True),  
 		'inward_reject_qty': fields.integer('Rejected Qty'),
 		'inward_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'inward_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'inward_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'inward_reject_date': fields.date('Rejection Date'),
 		'inward_remarks': fields.text('Remarks'),
 		'state': fields.selection([('waiting','Waiting for Accept'),('accept','Accepted'),('complete','Completed'),('reject','Rejected')],'Status', readonly=True),
@@ -101,9 +101,9 @@ class kg_fettling(osv.osv):
 		### KNOCK OUT ###
 		'knockout_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'knockout_date': fields.date('Date'),
-		'knockout_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'knockout_contractor':fields.many2one('res.partner','Contractor'),
-		'knockout_employee': fields.many2one('hr.employee','Employee'),
+		'knockout_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'knockout_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'knockout_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'knockout_qty': fields.integer('Total Qty'),
 		'knockout_accept_qty': fields.integer('Accepted Qty'),
 		'knockout_reject_qty': fields.integer('Rejected Qty'),
@@ -111,7 +111,7 @@ class kg_fettling(osv.osv):
 		'knockout_remarks': fields.text('Remarks'),
 		'knockout_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'knockout_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'knockout_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'knockout_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'knockout_reject_date': fields.date('Rejection Date'),
 		'knockout_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'flag_ko_special_app': fields.boolean('Special Approval'),
@@ -120,9 +120,9 @@ class kg_fettling(osv.osv):
 		### DECORING ###
 		'decoring_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'decoring_date': fields.date('Date'),
-		'decoring_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'decoring_contractor':fields.many2one('res.partner','Contractor'),
-		'decoring_employee': fields.many2one('hr.employee','Employee'),
+		'decoring_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'decoring_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'decoring_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'decoring_qty': fields.integer('Total Qty'),
 		'decoring_accept_qty': fields.integer('Accepted Qty'),
 		'decoring_reject_qty': fields.integer('Rejected Qty'),
@@ -130,7 +130,7 @@ class kg_fettling(osv.osv):
 		'decoring_remarks': fields.text('Remarks'),
 		'decoring_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'decoring_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'decoring_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'decoring_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'decoring_reject_date': fields.date('Rejection Date'),
 		'decoring_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'decoring_state': fields.selection([('pending','Pending'),('complete','Completed')],'Decoring State', readonly=True),
@@ -138,9 +138,9 @@ class kg_fettling(osv.osv):
 		### Shot Blast ###
 		'shot_blast_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'shot_blast_date': fields.date('Date'),
-		'shot_blast_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'shot_blast_contractor':fields.many2one('res.partner','Contractor'),
-		'shot_blast_employee': fields.many2one('hr.employee','Employee'),
+		'shot_blast_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'shot_blast_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'shot_blast_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'shot_blast_qty': fields.integer('Total Qty'),
 		'shot_blast_accept_qty': fields.integer('Accepted Qty'),
 		'shot_blast_reject_qty': fields.integer('Rejected Qty'),
@@ -148,7 +148,7 @@ class kg_fettling(osv.osv):
 		'shot_blast_remarks': fields.text('Remarks'),
 		'shot_blast_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'shot_blast_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'shot_blast_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'shot_blast_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'shot_blast_reject_date': fields.date('Rejection Date'),
 		'shot_blast_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'shot_blast_state': fields.selection([('pending','Pending'),('complete','Completed')],'Shot Blast State', readonly=True),
@@ -156,9 +156,9 @@ class kg_fettling(osv.osv):
 		### Hammering ###
 		'hammering_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'hammering_date': fields.date('Date'),
-		'hammering_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'hammering_contractor':fields.many2one('res.partner','Contractor'),
-		'hammering_employee': fields.many2one('hr.employee','Employee'),
+		'hammering_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'hammering_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'hammering_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'hammering_qty': fields.integer('Total Qty'),
 		'hammering_accept_qty': fields.integer('Accepted Qty'),
 		'hammering_reject_qty': fields.integer('Rejected Qty'),
@@ -166,7 +166,7 @@ class kg_fettling(osv.osv):
 		'hammering_remarks': fields.text('Remarks'),
 		'hammering_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'hammering_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'hammering_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'hammering_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'hammering_reject_date': fields.date('Rejection Date'),
 		'hammering_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'hammering_state': fields.selection([('pending','Pending'),('complete','Completed')],'Hammering State', readonly=True),
@@ -174,9 +174,9 @@ class kg_fettling(osv.osv):
 		### Wheel Cutting ###
 		'wheel_cutting_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'wheel_cutting_date': fields.date('Date'),
-		'wheel_cutting_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'wheel_cutting_contractor':fields.many2one('res.partner','Contractor'),
-		'wheel_cutting_employee': fields.many2one('hr.employee','Employee'),
+		'wheel_cutting_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'wheel_cutting_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'wheel_cutting_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'wheel_cutting_qty': fields.integer('Total Qty'),
 		'wheel_cutting_accept_qty': fields.integer('Accepted Qty'),
 		'wheel_cutting_reject_qty': fields.integer('Rejected Qty'),
@@ -184,7 +184,7 @@ class kg_fettling(osv.osv):
 		'wheel_cutting_remarks': fields.text('Remarks'),
 		'wheel_cutting_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'wheel_cutting_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'wheel_cutting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'wheel_cutting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'wheel_cutting_reject_date': fields.date('Rejection Date'),
 		'wheel_cutting_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'wheel_cutting_state': fields.selection([('pending','Pending'),('complete','Completed')],'Wheel Cutting State', readonly=True),
@@ -192,9 +192,9 @@ class kg_fettling(osv.osv):
 		### Gas Cutting ###
 		'gas_cutting_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'gas_cutting_date': fields.date('Date'),
-		'gas_cutting_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'gas_cutting_contractor':fields.many2one('res.partner','Contractor'),
-		'gas_cutting_employee': fields.many2one('hr.employee','Employee'),
+		'gas_cutting_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'gas_cutting_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'gas_cutting_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'gas_cutting_qty': fields.integer('Total Qty'),
 		'gas_cutting_accept_qty': fields.integer('Accepted Qty'),
 		'gas_cutting_reject_qty': fields.integer('Rejected Qty'),
@@ -202,7 +202,7 @@ class kg_fettling(osv.osv):
 		'gas_cutting_remarks': fields.text('Remarks'),
 		'gas_cutting_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'gas_cutting_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'gas_cutting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'gas_cutting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'gas_cutting_reject_date': fields.date('Rejection Date'),
 		'gas_cutting_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'gas_cutting_state': fields.selection([('pending','Pending'),('complete','Completed')],'Gas Cutting State', readonly=True),
@@ -210,9 +210,9 @@ class kg_fettling(osv.osv):
 		### ARC Cutting ###
 		'arc_cutting_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'arc_cutting_date': fields.date('Date'),
-		'arc_cutting_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'arc_cutting_contractor':fields.many2one('res.partner','Contractor'),
-		'arc_cutting_employee': fields.many2one('hr.employee','Employee'),
+		'arc_cutting_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'arc_cutting_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'arc_cutting_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'arc_cutting_qty': fields.integer('Total Qty'),
 		'arc_cutting_accept_qty': fields.integer('Accepted Qty'),
 		'arc_cutting_reject_qty': fields.integer('Rejected Qty'),
@@ -220,7 +220,7 @@ class kg_fettling(osv.osv):
 		'arc_cutting_remarks': fields.text('Remarks'),
 		'arc_cutting_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'arc_cutting_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'arc_cutting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'arc_cutting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'arc_cutting_reject_date': fields.date('Rejection Date'),
 		'arc_cutting_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'arc_cutting_state': fields.selection([('pending','Pending'),('complete','Completed')],'Arc Cutting State', readonly=True),
@@ -246,14 +246,14 @@ class kg_fettling(osv.osv):
 		'heat_total_qty': fields.integer('Total Qty'),
 		'heat_qty':fields.integer('Qty'),
 		'heat_reject_qty': fields.integer('Rejected Qty'),
-		'heat_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'heat_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'heat_each_weight':fields.integer('Each Weight'),
 		'heat_total_weight':fields.integer('Total Weight'),
 		'heat_remarks': fields.text('Remarks'),
 		'heat_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'heat_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'heat_contractor':fields.many2one('res.partner','Contractor'),
-		'heat_employee': fields.many2one('hr.employee','Employee'),
+		'heat_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'heat_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'heat_state': fields.selection([('pending','Pending'),('complete','Completed')],'Heat State', readonly=True),
 		
 		### HEAT TREATMENT 2 ###
@@ -277,14 +277,14 @@ class kg_fettling(osv.osv):
 		'heat2_total_qty': fields.integer('Total Qty'),
 		'heat2_qty':fields.integer('Qty'),
 		'heat2_reject_qty': fields.integer('Rejected Qty'),
-		'heat2_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'heat2_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'heat2_each_weight':fields.integer('Each Weight'),
 		'heat2_total_weight':fields.integer('Total Weight'),
 		'heat2_remarks': fields.text('Remarks'),
 		'heat2_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'heat2_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'heat2_contractor':fields.many2one('res.partner','Contractor'),
-		'heat2_employee': fields.many2one('hr.employee','Employee'),
+		'heat2_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'heat2_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'heat2_state': fields.selection([('pending','Pending'),('complete','Completed')],'Heat2 State', readonly=True),
 		
 		### HEAT TREATMENT 3 ###
@@ -308,23 +308,23 @@ class kg_fettling(osv.osv):
 		'heat3_total_qty': fields.integer('Total Qty'),
 		'heat3_qty':fields.integer('Qty'),
 		'heat3_reject_qty': fields.integer('Rejected Qty'),
-		'heat3_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'heat3_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'heat3_each_weight':fields.integer('Each Weight'),
 		'heat3_total_weight':fields.integer('Total Weight'),
 		'heat3_remarks': fields.text('Remarks'),
 		'heat3_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'heat3_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'heat3_contractor':fields.many2one('res.partner','Contractor'),
-		'heat3_employee': fields.many2one('hr.employee','Employee'),
+		'heat3_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'heat3_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'heat3_state': fields.selection([('pending','Pending'),('complete','Completed')],'Heat3 State', readonly=True),
 		
 		
 		### Rough Grinding ###
 		'rough_grinding_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'rough_grinding_date': fields.date('Date'),
-		'rough_grinding_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'rough_grinding_contractor':fields.many2one('res.partner','Contractor'),
-		'rough_grinding_employee': fields.many2one('hr.employee','Employee'),
+		'rough_grinding_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'rough_grinding_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'rough_grinding_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'rough_grinding_qty': fields.integer('Total Qty'),
 		'rough_grinding_accept_qty': fields.integer('Accepted Qty'),
 		'rough_grinding_reject_qty': fields.integer('Rejected Qty'),
@@ -333,7 +333,7 @@ class kg_fettling(osv.osv):
 		'rough_grinding_remarks': fields.text('Remarks'),
 		'rough_grinding_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'rough_grinding_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'rough_grinding_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'rough_grinding_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'rough_grinding_reject_date': fields.date('Rejection Date'),
 		'rough_grinding_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'rough_grinding_state': fields.selection([('pending','Pending'),('complete','Completed')],'Rough Grinding State', readonly=True),
@@ -341,9 +341,9 @@ class kg_fettling(osv.osv):
 		### Welding ###
 		'welding_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'welding_date': fields.date('Date'),
-		'welding_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'welding_contractor':fields.many2one('res.partner','Contractor'),
-		'welding_employee': fields.many2one('hr.employee','Employee'),
+		'welding_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'welding_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'welding_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'welding_qty': fields.integer('Total Qty'),
 		'welding_accept_qty': fields.integer('Accepted Qty'),
 		'welding_reject_qty': fields.integer('Rejected Qty'),
@@ -351,7 +351,7 @@ class kg_fettling(osv.osv):
 		'welding_remarks': fields.text('Remarks'),
 		'welding_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'welding_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'welding_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'welding_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'welding_reject_date': fields.date('Rejection Date'),
 		'welding_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'welding_stage_id':fields.many2one('kg.stage.master','Stage'),
@@ -362,9 +362,9 @@ class kg_fettling(osv.osv):
 		### Finish Grinding ###
 		'finish_grinding_name': fields.char('Production Entry Code', size=128,select=True),
 		'finish_grinding_date': fields.date('Date'),
-		'finish_grinding_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'finish_grinding_contractor':fields.many2one('res.partner','Contractor'),
-		'finish_grinding_employee': fields.many2one('hr.employee','Employee'),
+		'finish_grinding_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'finish_grinding_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'finish_grinding_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'finish_grinding_qty': fields.integer('Total Qty'),
 		'finish_grinding_accept_qty': fields.integer('Accepted Qty'),
 		'finish_grinding_reject_qty': fields.integer('Rejected Qty'),
@@ -372,7 +372,7 @@ class kg_fettling(osv.osv):
 		'finish_grinding_remarks': fields.text('Remarks'),
 		'finish_grinding_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'finish_grinding_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'finish_grinding_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'finish_grinding_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'finish_grinding_reject_date': fields.date('Rejection Date'),
 		'finish_grinding_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'flag_reshot_blast_applicable': fields.boolean('Re-Shot Blasting Applicable'),
@@ -382,9 +382,9 @@ class kg_fettling(osv.osv):
 		### Re shot Blasting ###
 		'reshot_blasting_name': fields.char('Production Entry Code', size=128,select=True),
 		'reshot_blasting_date': fields.date('Date'),
-		'reshot_blasting_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'reshot_blasting_contractor':fields.many2one('res.partner','Contractor'),
-		'reshot_blasting_employee': fields.many2one('hr.employee','Employee'),
+		'reshot_blasting_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'reshot_blasting_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'reshot_blasting_employee': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'reshot_blasting_qty': fields.integer('Total Qty'),
 		'reshot_blasting_accept_qty': fields.integer('Accepted Qty'),
 		'reshot_blasting_reject_qty': fields.integer('Rejected Qty'),
@@ -392,7 +392,7 @@ class kg_fettling(osv.osv):
 		'reshot_blasting_remarks': fields.text('Remarks'),
 		'reshot_blasting_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'reshot_blasting_accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'reshot_blasting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'reshot_blasting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'reshot_blasting_reject_date': fields.date('Rejection Date'),
 		'reshot_blasting_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'reshot_blasting_state': fields.selection([('pending','Pending'),('complete','Completed')],'Reshot Blasting State', readonly=True),
@@ -403,7 +403,7 @@ class kg_fettling(osv.osv):
 		'flag_allocated': fields.boolean('Allocated from Stock'),
 		'allocation_state': fields.selection([('waiting','Waiting'),('accept','Accepted'),('reject','Rejected')],'Allocation Status'),
 		'allocation_user_id': fields.many2one('res.users', 'Accepted By'), 
-		'allocation_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'allocation_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		
 		'ms_state': fields.selection([('created','Created'),('not_created','Not Created')],'MS Status'),
 		'flag_sub_order': fields.boolean('Sub Work Order'),
@@ -823,9 +823,9 @@ class kg_fettling(osv.osv):
 						
 			if entry.inward_reject_qty > 0:
 				
-				if entry.order_id.flag_for_stock == False:
+				#~ if entry.order_id.flag_for_stock == False:
 				
-					self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.inward_reject_qty,'foundry','fettling',entry,False,entry.pour_qty)
+				self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.inward_reject_qty,'foundry','fettling',entry,False,entry.pour_qty)
 					
 			if entry.inward_reject_qty > 0:
 				
@@ -3977,7 +3977,7 @@ class ch_fettling_batch_accept_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'remarks': fields.text('Remarks'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		
 		
 	}
@@ -4027,10 +4027,10 @@ class kg_batch_knock_out(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'knockout_date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 		
 
@@ -4187,8 +4187,8 @@ class ch_batch_knockout_line(osv.osv):
 		'pattern_name': fields.related('knockout_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('knockout_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -4197,8 +4197,8 @@ class ch_batch_knockout_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		
 		
 	}
@@ -4266,10 +4266,10 @@ class kg_batch_decoring(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'decoring_date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -4425,8 +4425,8 @@ class ch_batch_decoring_line(osv.osv):
 		'pattern_name': fields.related('decoring_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('decoring_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -4435,8 +4435,8 @@ class ch_batch_decoring_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name':fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),   
+		'employee_name':fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),   
 		
 		
 	}
@@ -4502,10 +4502,10 @@ class kg_batch_shot_blast(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'shot_blast_date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -4661,8 +4661,8 @@ class ch_batch_shot_blast_line(osv.osv):
 		'pattern_name': fields.related('shot_blast_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('shot_blast_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -4671,8 +4671,8 @@ class ch_batch_shot_blast_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		
 		
 	}
@@ -4737,10 +4737,10 @@ class kg_batch_hammering(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'hammering_date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -4896,8 +4896,8 @@ class ch_batch_hammering_line(osv.osv):
 		'pattern_name': fields.related('hammering_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('hammering_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -4906,8 +4906,8 @@ class ch_batch_hammering_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),  
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		
 		
 	}
@@ -4973,10 +4973,10 @@ class kg_batch_wheel_cutting(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'wheel_cutting_date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -5132,8 +5132,8 @@ class ch_batch_wheel_cutting_line(osv.osv):
 		'pattern_name': fields.related('wheel_cutting_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('wheel_cutting_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -5142,8 +5142,8 @@ class ch_batch_wheel_cutting_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),  
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		
 		
 	}
@@ -5209,10 +5209,10 @@ class kg_batch_gas_cutting(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'gas_cutting_date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -5368,8 +5368,8 @@ class ch_batch_gas_cutting_line(osv.osv):
 		'pattern_name': fields.related('gas_cutting_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('gas_cutting_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -5378,8 +5378,8 @@ class ch_batch_gas_cutting_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),   
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),   
 		
 		
 	}
@@ -5444,10 +5444,10 @@ class kg_batch_arc_cutting(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'arc_cutting_date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -5603,8 +5603,8 @@ class ch_batch_arc_cutting_line(osv.osv):
 		'pattern_name': fields.related('arc_cutting_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('arc_cutting_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -5613,8 +5613,8 @@ class ch_batch_arc_cutting_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),   
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),   
 		
 		
 	}
@@ -5683,8 +5683,8 @@ class kg_batch_heat_treatment(osv.osv):
 		'heat_treatment_date': fields.date('Date',required=True),
 		'heat_specification':fields.char('Specification', size=128),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'each_weight':fields.integer('Each Weight(kgs)'),
 		
 		
@@ -5883,16 +5883,16 @@ class ch_batch_heat_treatment_line(osv.osv):
 		'pattern_name': fields.related('heat_treatment_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('heat_treatment_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'each_weight':fields.integer('Each Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
 		'heat_specification':fields.char('Specification', size=128),
 		
@@ -5976,8 +5976,8 @@ class kg_batch_heat2_treatment(osv.osv):
 		'heat_treatment_date': fields.date('Date',required=True),
 		'heat_specification':fields.char('Specification', size=128),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'each_weight':fields.integer('Each Weight(kgs)'),
 		
 		
@@ -6176,16 +6176,16 @@ class ch_batch_heat2_treatment_line(osv.osv):
 		'pattern_name': fields.related('heat_treatment_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('heat_treatment_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'each_weight':fields.integer('Each Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
 		'heat_specification':fields.char('Specification', size=128),
 		
@@ -6269,8 +6269,8 @@ class kg_batch_heat3_treatment(osv.osv):
 		'heat_treatment_date': fields.date('Date',required=True),
 		'heat_specification':fields.char('Specification', size=128),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'each_weight':fields.integer('Each Weight(kgs)'),
 		
 		
@@ -6469,16 +6469,16 @@ class ch_batch_heat3_treatment_line(osv.osv):
 		'pattern_name': fields.related('heat_treatment_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('heat_treatment_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'each_weight':fields.integer('Each Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
 		'heat_specification':fields.char('Specification', size=128),
 		
@@ -6560,10 +6560,10 @@ class kg_batch_rough_grinding(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'rough_grinding_date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -6720,8 +6720,8 @@ class ch_batch_rough_grinding_line(osv.osv):
 		'pattern_name': fields.related('rough_grinding_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('rough_grinding_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -6731,8 +6731,8 @@ class ch_batch_rough_grinding_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),  
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		
 		
 	}
@@ -6799,10 +6799,10 @@ class kg_batch_welding(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'welding_date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -6958,8 +6958,8 @@ class ch_batch_welding_line(osv.osv):
 		'pattern_name': fields.related('welding_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('welding_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -6968,8 +6968,8 @@ class ch_batch_welding_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),   
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),   
 		
 		
 	}
@@ -7035,10 +7035,10 @@ class kg_batch_finish_grinding(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'finish_grinding_date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 		'flag_reshot_blast_applicable': fields.boolean('Re-Shot Blasting Applicable'),
 
@@ -7198,8 +7198,8 @@ class ch_batch_finish_grinding_line(osv.osv):
 		'pattern_name': fields.related('finish_grinding_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('finish_grinding_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -7208,8 +7208,8 @@ class ch_batch_finish_grinding_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'flag_reshot_blast_applicable': fields.boolean('Re-Shot Blasting Applicable'),  
 		
 		
@@ -7275,10 +7275,10 @@ class kg_batch_reshot_blasting(osv.osv):
 		'flag_batchline':fields.boolean('Batch Line Created'),
 		
 		'reshot_blasting_date': fields.date('Date', required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -7434,8 +7434,8 @@ class ch_batch_reshot_blasting_line(osv.osv):
 		'pattern_name': fields.related('reshot_blasting_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('reshot_blasting_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
-		'shift_id':fields.many2one('kg.shift.master','Shift'),
-		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
@@ -7444,8 +7444,8 @@ class ch_batch_reshot_blasting_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.many2one('hr.employee','Employee'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),   
+		'employee_name': fields.many2one('hr.employee','Employee',domain="[('status','=','approved')]"),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),   
 		
 		
 	}
@@ -7530,7 +7530,7 @@ class kg_foundry_rejection_list(osv.osv):
 		'qty': fields.integer('Qty'),
 		'each_weight': fields.float('Each Weight(Kgs)'),
 		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'oth_spec': fields.text('WO Remarks',readonly=True),
 		
 		

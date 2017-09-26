@@ -123,7 +123,7 @@ class kg_painting_invoice(osv.osv):
 		
 		## Module Requirement Info	
 		
-		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True),
+		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True,domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'date_from': fields.date('Date From',required=True),	
 		'date_to': fields.date('Date To',required=True),	
 		'phone': fields.char('Phone',size=64),

@@ -6,6 +6,7 @@ from datetime import date
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
 
+
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
@@ -76,7 +77,7 @@ class kg_qc_verification(osv.osv):
 		'entry_date': fields.date('QC Date',required=True),
 		'schedule_id': fields.many2one('kg.schedule','Schedule No.'),
 		'schedule_date': fields.related('schedule_id','entry_date', type='date', string='Schedule Date', store=True, readonly=True),
-		'division_id': fields.many2one('kg.division.master','Division'),
+		'division_id': fields.many2one('kg.division.master','Division',domain="[('state','=','approved')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'remark': fields.text('Remarks'),
 		
@@ -119,7 +120,7 @@ class kg_qc_verification(osv.osv):
 		'reject_remark': fields.text('Rejection Remarks'),
 		'each_weight': fields.function(_get_each_weight, string='Each Weight(Kgs)', method=True, store=True, type='float'),
 		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
-		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks',domain="[('state','=','approved')]"),
 		'stock_type':fields.selection([('pump','Pump'),('pattern','Part')],'Type', required=True),
 		'sent_to':fields.selection([('assembly','Assembly'),('dispatch','Dispatch')],'Sent to'),
 		'serial_no': fields.char('Serial No', size=128),
@@ -2045,33 +2046,59 @@ class kg_qc_verification(osv.osv):
 							production_id = production_obj.create(cr, uid, production_vals)
 							
 							ms_shop_id = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',ref_id.order_line_id.id),('pattern_id','=',ref_id.pattern_id.id),('schedule_line_id','=',ref_id.schedule_line_id.id)])
-							ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])
-							
-							if ms_shop_rec.schedule_qty < ref_id.order_bomline_id.qty:
-								if ms_shop_rec.ms_plan_rem_qty == 0:
-									ms_state = 'pending'
-								else:
-									ms_state = ms_shop_rec.state
-								self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':ms_state,'ms_sch_qty':ms_shop_rec.ms_sch_qty + rem_qty,'schedule_qty':ms_shop_rec.schedule_qty + rem_qty,'ms_plan_rem_qty':ms_shop_rec.ms_plan_rem_qty + rem_qty})
-										
+							if ms_shop_id != []:
+								ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])
+								
+								if ms_shop_rec.schedule_qty < ref_id.order_bomline_id.qty:
+									if ms_shop_rec.ms_plan_rem_qty == 0:
+										ms_state = 'pending'
+									else:
+										ms_state = ms_shop_rec.state
+									self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':ms_state,'ms_sch_qty':ms_shop_rec.ms_sch_qty + rem_qty,'schedule_qty':ms_shop_rec.schedule_qty + rem_qty,'ms_plan_rem_qty':ms_shop_rec.ms_plan_rem_qty + rem_qty})
+							else:
+								raise osv.except_osv(_('Warning !'), _('Old records not updated in Machineshop Process !!'))			
 				else:
 					
 					if reject_type == 'fettling':
 						### Updation in Stock Inward ###
 						
 						inward_line_obj = self.pool.get('ch.stock.inward.details')
+						manual_rejection_obj = self.pool.get('ch.manual.rejection')
 						
 						inward_line_id = inward_line_obj.search(cr, uid, [('fettling_id','=',ref_id.id)])
 						stock_updation_qty = reject_qty
 						
+						print"time.strftime('%Y-%m-%d')",time.strftime('%Y-%m-%d')
+						
 						if inward_line_id:
 							inward_line_rec = inward_line_obj.browse(cr, uid, inward_line_id[0])
 							if inward_line_rec.available_qty <= stock_updation_qty:
-								stock_avail_qty = 0
-								inward_line_obj.write(cr, uid, inward_line_rec.id,{'available_qty': stock_avail_qty})
+								manual_rejection_vals = {
+														
+									'header_id': inward_line_rec.id,
+									'entry_date': time.strftime('%Y-%m-%d'),
+									'qty': stock_updation_qty,																		
+									'remarks' : 'SYS - Fettling',								
+											
+								}
+								manjual_id = manual_rejection_obj.create(cr, uid, manual_rejection_vals)
+								self.pool.get('ch.stock.inward.details').entry_update(cr,uid,inward_line_id)
+								#~ stock_avail_qty = 0
+								#~ inward_line_obj.write(cr, uid, inward_line_rec.id,{'available_qty': stock_avail_qty})
 							if inward_line_rec.available_qty > stock_updation_qty:
-								stock_avail_qty = inward_line_rec.available_qty - stock_updation_qty
-								inward_line_obj.write(cr, uid,  inward_line_rec.id,{'available_qty': stock_avail_qty})
+								manual_rejection_vals = {
+														
+									'header_id': inward_line_rec.id,
+									'entry_date': time.strftime('%Y-%m-%d'),
+									'qty': stock_updation_qty,																		
+									'remarks' : 'SYS - Fettling',								
+											
+								}
+								manjual_id = manual_rejection_obj.create(cr, uid, manual_rejection_vals)
+								self.pool.get('ch.stock.inward.details').entry_update(cr,uid,inward_line_id)
+								
+								#~ stock_avail_qty = inward_line_rec.available_qty - stock_updation_qty
+								#~ inward_line_obj.write(cr, uid,  inward_line_rec.id,{'available_qty': stock_avail_qty})
 								
 						else:
 							### Qty Updation in Stock Inward ###
@@ -2091,11 +2118,34 @@ class kg_qc_verification(osv.osv):
 								if stock_updation_qty > 0:
 									
 									if stock_inward_item['available_qty'] <= stock_updation_qty:
-										stock_avail_qty = 0
-										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+											manual_rejection_vals = {
+														
+												'header_id': [stock_inward_item['id']][0],
+												'entry_date': time.strftime('%Y-%m-%d'),
+												'qty': stock_updation_qty,																		
+												'remarks' : 'SYS - Fettling',								
+														
+											}
+											manjual_id = manual_rejection_obj.create(cr, uid, manual_rejection_vals)
+											self.pool.get('ch.stock.inward.details').entry_update(cr,uid,[stock_inward_item['id']])													
+										
+										#~ stock_avail_qty = 0
+										#~ inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
 									if stock_inward_item['available_qty'] > stock_updation_qty:
-										stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
-										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+											manual_rejection_vals = {
+														
+												'header_id': [stock_inward_item['id']][0],
+												'entry_date': time.strftime('%Y-%m-%d'),
+												'qty': stock_updation_qty,																		
+												'remarks' : 'SYS - Fettling',								
+														
+											}
+											print"manual_rejection_vals",manual_rejection_vals
+											manjual_id = manual_rejection_obj.create(cr, uid, manual_rejection_vals)
+											self.pool.get('ch.stock.inward.details').entry_update(cr,uid,[stock_inward_item['id']])
+										
+										#~ stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
+										#~ inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
 										
 									if stock_inward_item['available_qty'] <= stock_updation_qty:
 										stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']

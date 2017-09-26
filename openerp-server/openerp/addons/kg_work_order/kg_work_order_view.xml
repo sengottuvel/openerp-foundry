@@ -30,7 +30,7 @@
 							<field name="drawing_approval" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="inspection" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" />
 							<field name="order_category" on_change="onchange_order_category_delivery_date(order_category,order_priority)" string="Purpose" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="partner_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="partner_id" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="project_name" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date,order_category,order_priority)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="flag_cancel" invisible="1"/>
@@ -160,7 +160,7 @@
 			<field name="model">ch.work.order.details</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<form string="Work Order Details Entry Form" version="7.0">
+				<form string="Work Order Details Entry Form" version="7.0" delete="false">
 					<group>
 						<group>
 							<field name="order_no" required="1"/>
@@ -202,10 +202,11 @@
 							<field name="shaft_ext" invisible="1"/>
 							<field name="trimming_dia"/>
 							<field name="cc_drill"/>
-							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" readonly="1"/>
+							<field name="delivery_date" readonly="1" on_change="onchange_delivery_date(delivery_date)"/>
 							<field name="mar_prime_cost" readonly="1" invisible="0"/>
 							<field name="wo_prime_cost" readonly="1"/>
 							<field name="flag_offer" invisible="1"/>
+							<field name="schedule_status" invisible="1"/>
 							<field name="order_summary" readonly="1"/>
 							<field name="note" string="Remarks"/>
 						</group>
@@ -227,7 +228,7 @@
 						<page string="Foundry Items">
 							<field name="line_ids" colspan="4" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="BOM Details" editable="bottom" colors="red:mar_prime_cost &lt; wo_prime_cost;" attrs="{'invisible': [('bom_type','=','spare')]}">
-								   <field name="order_category" invisible="1"/>
+								   <field name="order_category" invisible="1"/>								   
 								   <field name="flag_applicable"/>
 								   <field name="sequence_no" attrs="{'required': [('order_category','=','spare'),('flag_applicable','!=',False)],'readonly': [('order_category','!=','spare')]}"/>
 								   <field name="pattern_id"/>
@@ -242,6 +243,7 @@
 -->
 								   
 								   <field name="qty" required="1" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}"/>
+								   <field name="total_weight" />
 								   <field name="unit_price"/>
 								   <field name="mar_prime_cost" readonly="1" invisible="0"/>
 								   <field name="wo_prime_cost" readonly="1"/>
@@ -268,7 +270,7 @@
 											<field name="flag_applicable"/>
 											<field name="ms_id"/>
 											<field name="position_id" required="1"/>
-											<field name="qty" required="1" on_change="onchange_qty(qty)" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}"/>
+											<field name="qty" on_change="onchange_raw_qty(ms_id,qty)" required="1" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}"/>
 											<field name="indent_qty" invisible="1"/>
 											<field name="mar_prime_cost" readonly="1" invisible="0"/>
 											<field name="length"/>
@@ -295,7 +297,7 @@
 													<field name="uom" required="1" readonly="1"/>
 													<field name="uom_conversation_factor" readonly="1"/>
 													<field name="od" invisible="1"/>
-													<field name="length" readonly="0"/>
+													<field name="length" required="1" on_change="onchange_length(length,breadth,qty,temp_qty,uom_conversation_factor,product_id)"/>
 													<field name="breadth" readonly="1"/>
 													<field name="thickness" invisible="1"/>
 													<field name="weight" invisible="1"/>
@@ -410,7 +412,7 @@
 													<field name="material_code"/>
 													<field name="moc_id" required="1" attrs="{'readonly':[('flag_standard','!=',True)]}"/>
 													<field name="csd_no"/>
-													<field name="qty" required="1" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}"/>
+													<field name="qty" required="1" readonly="1"/>
 													<field name="prime_cost" readonly="1" invisible="0"/>
 													<field name="wo_prime_cost" readonly="1"/>
 													<field name="entry_mode" invisible="1"/>
@@ -433,7 +435,7 @@
 													<field name="material_code"/>
 													<field name="moc_id" required="1" attrs="{'readonly':[('flag_standard','!=',True)]}"/>
 													<field name="csd_no"/>
-													<field name="qty" required="1" on_change="onchange_qty(qty)" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}"/>
+													<field name="qty" required="1" on_change="onchange_qty(qty)" readonly="1"/>
 													<field name="indent_qty" invisible="1"/>
 													<field name="prime_cost" readonly="1" invisible="0"/>
 													<field name="wo_prime_cost" readonly="1"/>
@@ -457,7 +459,7 @@
 													<field name="material_code"/>
 													<field name="moc_id" required="1" attrs="{'readonly':[('flag_standard','!=',True)]}"/>
 													<field name="csd_no" required="1"/>
-													<field name="qty" required="1" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}"/>
+													<field name="qty" required="1" readonly="1"/>
 													<field name="prime_cost" readonly="1" invisible="0"/>
 													<field name="wo_prime_cost" readonly="1"/>
 													<field name="entry_mode" invisible="1"/>
@@ -564,7 +566,7 @@
 															<field name="material_code"/>
 															<field name="length"/>
 															<field name="entry_mode" invisible="1"/>
-															<field name="qty" required="1" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}" />
+															<field name="qty" required="1" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}" on_change="onchange_raw_qty(ms_id,qty)"/>
 															<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
 														</group>
 													</group>
@@ -576,7 +578,7 @@
 																	<field name="uom" required="1" readonly="1"/>
 																	<field name="uom_conversation_factor" readonly="1"/>
 																	<field name="od" invisible="1"/>
-																	<field name="length" readonly="0"/>
+																	<field name="length" required="1" on_change="onchange_length(length,breadth,qty,temp_qty,uom_conversation_factor,product_id)"/>
 																	<field name="breadth" readonly="1"/>
 																	<field name="thickness" invisible="1"/>
 																	<field name="weight" invisible="1"/>
@@ -811,6 +813,85 @@
 		</record>
 		
 	<!-- Menu Action End for Work Order -->
+	
+	
+	
+	<!-- UN-schedule Foundry Item Tree View Start-->
+    
+		<record id="t_tree_v_unscheduled_bom_list" model="ir.ui.view">
+			<field name="name">UN-Schedule Foundry Item Tree</field>
+			<field name="model">ch.order.bom.details</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="UN-Schedule Foundry Items Tree" create="false" delete="false">					
+					<field name="header_id" string="Order No."/>
+					<field name="pump_model_id"/>
+					<field name="order_category"/>
+					<field name="order_priority"/>
+					<field name="pattern_id"/>
+					<field name="flag_applicable" invisible="1"/>					
+					<field name="order_id" invisible="1"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="qty"/>
+					<field name="weight"/>					
+					<field name="total_weight"/>				
+					<field name="rate_kg"/>
+					<field name="flag_pattern_check"/>				
+					<field name="add_spec"/>
+				</tree>
+			</field>
+		</record>
+		
+	 <!-- UN-schedule Foundry Item Tree View End -->
+	 
+	 
+	 <!-- UN-schedule Foundry Item Search View Start -->
+
+		<record id="t_search_v_unscheduled_bom" model="ir.ui.view">
+            <field name="name">UN-Schedule Foundry Item Entry Search</field>
+            <field name="model">ch.order.bom.details</field>
+            <field name="arch" type="xml">
+                <search string="UN-Schedule Foundry Item Entry Search">	
+					<field name="header_id" string="Work Order No."  filter_domain="[('header_id','ilike',self)]" />
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />					
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Order No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'header_id'}"/>						
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						 <filter name="group_header_id" string="Order No." icon="terp-partner" context="{'group_by':'header_id'}"/>					
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- UN-schedule Foundry Item Search View End -->		
+	 
+	 <!-- UN-schedule Foundry Item menu -->	
+
+	<record id="tma_foundry_item_unscheduled_bom" model="ir.actions.act_window">
+		<field name="name">UN-Schedule Foundry Item</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">ch.order.bom.details</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree</field>
+		<field name="domain">[('order_id.order_priority','in',('normal','urgent')),('header_id.schedule_status','=','allow'),('flag_applicable','=','t')]</field>		
+		<field name="search_view_id" ref="t_search_v_unscheduled_bom"/>
+		<field name="context">{'search_default_group_header_id': 1}</field>
+	</record>
+
+	<record id="tma_foundry_item_unscheduled_bom_tree_view" model="ir.actions.act_window.view">
+		<field eval="1" name="sequence"/>
+		<field name="view_mode">tree</field>
+		<field name="view_id" ref="t_tree_v_unscheduled_bom_list"/>
+		<field name="act_window_id" ref="tma_foundry_item_unscheduled_bom"/>
+	</record>
+	
+	
+	<!-- UN-schedule Foundry Item menu END -->	
 		
 	
 	<!-- Menu Item Start -->
@@ -821,6 +902,7 @@
 		<menuitem  action="tma_wo_special_approval" id="tam_wo_special_approval" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
 		<!-- Un Scheduled Work Order -->
 		<menuitem  action="tma_unscheduled_wo_list" id="tam_unscheduled_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="4"/>
+		<menuitem  action="tma_foundry_item_unscheduled_bom" id="tam_unscheduled_bom_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="4"/>
 	
 	<!-- Menu Item End -->
 	

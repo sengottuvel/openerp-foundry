@@ -10,11 +10,13 @@ dt_time = lambda * a: time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
    ('1','MS NC'),
-   ('2','NC'),
-   ('3','Service'),
-   ('4','Emergency'),
-   ('5','Spare'),
-   ('6','Normal'),
+   ('2','Break down'),
+   ('3','Emergency'),
+   ('4','Service'),
+   ('5','FDY-NC'),
+   ('6','Spare'),
+   ('7','Urgent'),
+   ('8','Normal'),
   
 ]
 
@@ -76,9 +78,9 @@ class kg_fettling_workorder(osv.osv):
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),			
 		
 		## Module Requirement Info
-		'division_id': fields.many2one('kg.division.master','Division'),
+		'division_id': fields.many2one('kg.division.master','Division',domain="[('state','=','approved')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
-		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t')]"),
+		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'contact_person': fields.char('Contact Person', size=128),	  
 		'phone': fields.char('Phone',size=64),
 		'delivery_date': fields.date('Expected Delivery Date'),
@@ -202,8 +204,7 @@ class kg_fettling_workorder(osv.osv):
 					'allocation_id':item.allocation_id.id,
 					'schedule_id':item.schedule_id.id,
 					'schedule_line_id':item.schedule_line_id.id,
-					'qty':item.inward_accept_qty,
-					'each_weight':total_weight,
+					'qty':item.inward_accept_qty,					
 					'seq_no':seq_no,						
 															
 					}						
@@ -323,13 +324,13 @@ class ch_fettling_wo_line(osv.osv):
 		'contractor_id': fields.related('header_id','contractor_id', type='many2one', relation='res.partner', string='Contractor Name', store=True, readonly=True),		
 		'fettling_id': fields.many2one('kg.fettling','Fettling Id'),
 		
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number'),		
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',domain="[('state','=','approved')]"),		
 		'pattern_code': fields.char('Pattern Code'),
 		'pattern_name': fields.char('Pattern Name'),		
-		'moc_id': fields.many2one('kg.moc.master','MOC', required=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved')]"),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved')]"),
 		
-		'stage_id':fields.many2one('kg.stage.master','Stage'),
+		'stage_id':fields.many2one('kg.stage.master','Stage',domain="[('state','=','approved')]"),
 		'stage_name': fields.char('Stage Name'),
 		
 		'pour_id':fields.many2one('kg.pouring.log','Pour Id'),
@@ -354,8 +355,8 @@ class ch_fettling_wo_line(osv.osv):
 		'schedule_line_id': fields.many2one('ch.schedule.details','Schedule Line Item'),
 			
 		'qty': fields.integer('Quantity'),
-		'pending_qty': fields.integer('Pending Qty'),
-		'each_weight':fields.integer('Weight(kgs)'),
+		'pending_qty': fields.integer('Pending Qty'),		
+		'each_weight': fields.related('fettling_id','each_weight', type='float', string='Weight(kgs)', store=True, readonly=True),
 		'seq_no':fields.integer('Sequence'),		
 				
 		'amount': fields.function(_get_oper_value, string='Total Value', method=True, store=True, type='float'),		
@@ -385,11 +386,11 @@ class ch_wo_stage_details(osv.osv):
 	_columns = {		
 		
 		'header_id':fields.many2one('ch.fettling.wo.line', 'WO line Details', required=True, ondelete='cascade'),		
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'seq_no':fields.integer('Sequence'),		
 		'moc_stage_id': fields.many2one('ch.fettling.process','Stage',required=True,domain="[('header_id','=',moc_id),('seq_no','>=',seq_no)]"),		
 		'each_weight':fields.integer('Weight(kgs)'),		
-		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','not in',('reject','cancel'))]"), 			
+		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','=','approved')]"), 			
 		'stage_rate':fields.float('Rate(Rs)'),							
 		'remarks':fields.text('Remarks'),		
 	}	
@@ -487,9 +488,9 @@ class kg_fettling_dc(osv.osv):
 		## Module Requirement Info
 		'annexure_date': fields.date('Annexure Date'),
 		'annexure_no': fields.integer('Annexure 17 No.'),
-		'division_id': fields.many2one('kg.division.master','From Division'),
-		'to_division_id': fields.many2one('kg.division.master','To Division'),		
-		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t')]"),	
+		'division_id': fields.many2one('kg.division.master','From Division',domain="[('state','=','approved')]"),
+		'to_division_id': fields.many2one('kg.division.master','To Division',domain="[('state','=','approved')]"),		
+		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),	
 		'phone': fields.char('Phone',size=64),
 		'sub_wo_no': fields.char('Sub WO No.'),
 		'contact_person': fields.char('Contact Person', size=128),		
@@ -704,7 +705,7 @@ class ch_fettling_dc_line(osv.osv):
 			
 		'qty': fields.integer('Quantity', required=True),
 		'pending_qty': fields.integer('Pending Qty'),
-		'each_weight':fields.integer('Total Weight(kgs)'),
+		'each_weight': fields.related('fettling_id','each_weight', type='float', string='Weight(kgs)', store=True, readonly=True),
 		'seq_no':fields.integer('Sequence'),				
 		'remarks': fields.text('Remarks'),		
 		'state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done')],'Status', readonly=True),	
@@ -755,9 +756,9 @@ class kg_fettling_inward(osv.osv):
 		
 		## Module Requirement Info
 		
-		'division_id': fields.many2one('kg.division.master','From Division'),
-		'to_division_id': fields.many2one('kg.division.master','To Division'),		
-		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t')]"),	
+		'division_id': fields.many2one('kg.division.master','From Division',domain="[('state','=','approved')]"),
+		'to_division_id': fields.many2one('kg.division.master','To Division',domain="[('state','=','approved')]"),		
+		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),	
 		'phone': fields.char('Phone',size=64),		
 		'contact_person': fields.char('Contact Person', size=128),			
 		
@@ -1029,7 +1030,7 @@ class ch_fettling_inward_line(osv.osv):
 			
 		'qty': fields.integer('Quantity', required=True),
 		'pending_qty': fields.integer('Pending Qty'),
-		'each_weight':fields.integer('Total Weight(kgs)'),
+		'each_weight': fields.related('fettling_id','each_weight', type='float', string='Weight(kgs)', store=True, readonly=True),
 		'seq_no':fields.integer('Sequence'),				
 		'remarks': fields.text('Remarks'),		
 		'state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done')],'Status', readonly=True),	

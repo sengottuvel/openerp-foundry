@@ -73,7 +73,7 @@ class kg_work_order(osv.osv):
 		### Header Details  ###########
 		'name': fields.char('WO No.', size=128,select=True),
 		'entry_date': fields.date('WO Date',required=True),
-		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('active','=','t')]"),
+		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
@@ -87,8 +87,8 @@ class kg_work_order(osv.osv):
 		'delivery_date': fields.date('Delivery Date',required=True),
 		'order_value': fields.function(_get_order_value, string='WO Value', method=True, store=True, type='float'),
 		'order_category': fields.selection(ORDER_CATEGORY,'Category'),
-		'partner_id': fields.many2one('res.partner','Customer'),
-		'dealer_id': fields.many2one('res.partner','Dealer Name'),
+		'partner_id': fields.many2one('res.partner','Customer',domain="[('customer','=','t'),('partner_state','=','approve')]"),
+		'dealer_id': fields.many2one('res.partner','Dealer Name',domain="[('dealer','=','t'),('partner_state','=','approve')]"),
 		'progress_state': fields.selection([
 		('mould_com','Moulding Completed'),
 		('pour_com','Pouring Completed'),
@@ -1449,7 +1449,7 @@ class ch_work_order_details(osv.osv):
 		'order_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
 		'order_priority': fields.related('header_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		'order_ref_no': fields.related('header_id','name', type='char', string='Work Order No.', store=True, readonly=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved')]"),
 		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], 'Type',required=True),
 		'order_no': fields.char('Order No.', size=128,select=True),
 		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose', required=True),
@@ -1469,7 +1469,7 @@ class ch_work_order_details(osv.osv):
 		'unit_price': fields.float('WO Value',required=True),
 		### Used for Schedule Purpose
 		'schedule_status':fields.selection([('allow','Allow to Schedule'),('not_allow','Not Allow to Schedule'),('completed','Schedule Completed')],'Schedule Status', readonly=True),
-		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction Code',domain="[('active','=','t')]"),
+		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction Code',domain="[('state','=','approved')]"),
 		'moc_construction_name':fields.related('moc_construction_id','name', type='char', string='MOC Construction Name.', store=True, readonly=True),
 		### Used for VO ###
 		'rpm': fields.selection([('1450','1450'),('2900','2900')],'RPM', required=True),
@@ -1508,11 +1508,11 @@ class ch_work_order_details(osv.osv):
 		
 		
 		## QAP ##
-		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',required=True),
+		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',required=True,domain="[('state','=','approved')]"),
 		### Prime Cost ###
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
-		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',),
+		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',domain="[('state','=','approved')]"),
 		'trimming_dia': fields.char('Trimming Dia'),
 		'cc_drill': fields.selection([('basic_design','BASIC DESIGN'),('basic_design_a','BASIC DESIGN+A'),
 			('basic_design_c','BASIC DESIGN+C'),('nill','NILL')],' C.C. Drill'),
@@ -1520,7 +1520,7 @@ class ch_work_order_details(osv.osv):
 		'line_ids_e': fields.one2many('ch.wo.spare.bom', 'header_id', "Spare BOM"),
 		'suction_spool': fields.integer('Suction Spool'),
 		'flag_select_all': fields.boolean('Select All'),
-		'pumpseries_id': fields.many2one('kg.pumpseries.master', 'Pump Series'),
+		'pumpseries_id': fields.many2one('kg.pumpseries.master', 'Pump Series',domain="[('state','=','approved')]"),
 		
 	}
 	
@@ -1704,7 +1704,7 @@ class ch_work_order_details(osv.osv):
 							'flag_applicable' : applicable,
 							'order_category':	order_category,
 							'moc_id': moc_id,
-							'flag_standard':flag_standard,
+							'flag_standard':flag_standard,							
 							'entry_mode':'auto'	  
 							})
 							
@@ -3056,6 +3056,28 @@ class ch_order_bom_details(osv.osv):
 	_name = "ch.order.bom.details"
 	_description = "BOM Details"
 	
+	def _get_total_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		total_weight = 0.00		
+		for entry in self.browse(cr, uid, ids, context=context):			
+			total_weight = entry.qty * entry.weight
+		result[entry.id]= total_weight
+		return result
+		
+	def _get_rate_kg(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		total_weight = 0.00		
+		rate_value = 0.00		
+		for entry in self.browse(cr, uid, ids, context=context):			
+			total_weight = entry.qty * entry.weight
+			order_value = entry.header_id.unit_price
+			if total_weight != 0.00:
+				rate_value = order_value / total_weight
+			if total_weight == 0.00:
+				rate_value = 0.00
+		result[entry.id]= rate_value
+		return result
+	
 	_columns = {
 	
 		'header_id':fields.many2one('ch.work.order.details', 'Work Order Detail', required=1, ondelete='cascade'),
@@ -3065,19 +3087,21 @@ class ch_order_bom_details(osv.osv):
 		'order_ref_no': fields.related('header_id','order_ref_no', type='char', string='Work Order No', store=True, readonly=True),
 		'pump_model_id': fields.related('header_id','pump_model_id', type='many2one',relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
-		'order_qty': fields.related('header_id','qty', type='integer', string='Order Qty', store=True, readonly=True),
-		
+		'order_priority': fields.related('header_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
+		'order_qty': fields.related('header_id','qty', type='integer', string='Order Qty', store=True, readonly=True),		
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'bom_line_id': fields.many2one('ch.bom.line','BOM Line'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('active','=','t')]"),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('state','=','approved')]"),
 		'pattern_name': fields.char('Pattern Name'),
 		'weight': fields.float('Weight(kgs)'),
+		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float', readonly=True),
+		'rate_kg': fields.function(_get_rate_kg, string='Rate/KG', method=True, store=True, type='float', readonly=True),
 		#~ 'pcs_weight': fields.related('pattern_id','pcs_weight', type='float', string='SS Weight(kgs)', store=True),
 		#~ 'ci_weight': fields.related('pattern_id','ci_weight', type='float', string='CI Weight(kgs)', store=True),
 		#~ 'nonferous_weight': fields.related('pattern_id','nonferous_weight', type='float', string='Non-Ferrous Weight(kgs)', store=True),
 		'pos_no': fields.related('bom_line_id','pos_no', type='integer', string='Position No', store=True),
-		'position_id': fields.many2one('kg.position.number', string='Position No'),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'position_id': fields.many2one('kg.position.number', string='Position No',domain="[('state','=','approved')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'qty': fields.integer('Qty'),
 		'unit_price': fields.float('Unit Price'),
 		'schedule_qty': fields.integer('Schedule Pending Qty'),
@@ -3198,10 +3222,10 @@ class ch_order_machineshop_details(osv.osv):
 		'header_id':fields.many2one('ch.work.order.details', 'Work Order Detail', required=1, ondelete='cascade'),
 		'ms_line_id':fields.many2one('ch.machineshop.details', 'Machine Shop Id'),
 		'pos_no': fields.related('ms_line_id','pos_no', type='integer', string='Position No', store=True),
-		'position_id': fields.many2one('kg.position.number','Position No'),
+		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
 		'bom_id': fields.many2one('kg.bom','BOM'),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','ms')], ondelete='cascade',required=True),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','ms'),('state','=','approved')], ondelete='cascade',required=True),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t'),('state','=','approved')]"),
 		#~ 'name':fields.char('Item Name', size=128),
 		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True), 	  
 		'qty': fields.integer('Qty', required=True),
@@ -3237,8 +3261,26 @@ class ch_order_machineshop_details(osv.osv):
 		
 	}
 	
-	def onchange_qty(self, cr, uid, ids, qty):
-		return {'value': {'indent_qty': qty}}
+	def onchange_raw_qty(self,cr,uid,ids,ms_id,qty, context=None):
+		raw_vals=[]
+		if ms_id:
+			ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_id)
+			if ms_rec.line_ids:
+				for raw_line in ms_rec.line_ids:
+					raw_vals.append({
+							'product_id': raw_line.product_id.id,
+							'uom': raw_line.uom.id,
+							'od': raw_line.od,
+							'length': raw_line.length,
+							'breadth': raw_line.breadth,
+							'thickness': raw_line.thickness,
+							'weight': raw_line.weight * qty,
+							'uom_conversation_factor': raw_line.uom_conversation_factor,
+							'temp_qty': raw_line.temp_qty * qty,
+							'qty': raw_line.qty * qty,
+							'remarks': raw_line.remarks,
+							})
+		return {'value': {'line_ids': raw_vals}}
 	
 	def default_get(self, cr, uid, fields, context=None):
 		
@@ -3289,6 +3331,23 @@ class ch_wo_ms_raw(osv.osv):
 		
 	}
 	
+	def onchange_length(self, cr, uid, ids, length,breadth,qty,temp_qty,uom_conversation_factor,product_id, context=None):		
+		value = {'qty':0,'weight':0}
+		qty = 0
+		weight = 0
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		if uom_conversation_factor:
+			if uom_conversation_factor == 'one_dimension':
+				qty = length * temp_qty
+				if length == 0.00:
+					qty = temp_qty
+				weight = qty * prod_rec.po_uom_in_kgs
+			if uom_conversation_factor == 'two_dimension':
+				qty = length * breadth * temp_qty				
+				weight = qty * prod_rec.po_uom_in_kgs
+		value = {'qty': qty,'weight': weight}			
+		return {'value': value}
+	
 	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
 		value = {'qty': '','weight': '',}
 		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
@@ -3332,10 +3391,10 @@ class ch_order_bot_details(osv.osv):
 	
 		'header_id':fields.many2one('ch.work.order.details', 'Work Order Detail', required=1, ondelete='cascade'),
 		'bot_line_id':fields.many2one('ch.bot.details', 'BOT Line Id'),
-		'bot_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','bot')], ondelete='cascade',required=True),
+		'bot_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','bot'),('state','=','approved')], ondelete='cascade',required=True),
 		'item_name': fields.related('bot_id','name', type='char', size=128, string='Item Name', store=True, readonly=True),
 		'bom_id': fields.many2one('kg.bom','BOM'),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t'),('state','=','approved')]"),
 		'qty': fields.integer('Qty', required=True),
 		'unit_price': fields.float('Unit Price'),
 		'flag_applicable': fields.boolean('Is Applicable'),
@@ -3344,8 +3403,8 @@ class ch_order_bot_details(osv.osv):
 		'flag_standard': fields.boolean('Non Standard'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		'flag_is_bearing': fields.boolean('Is Bearing'),
-		'brand_id': fields.many2one('kg.brand.master','Brand'),	
-		'position_id': fields.many2one('kg.position.number','Position No'),
+		'brand_id': fields.many2one('kg.brand.master','Brand',domain="[('state','=','approved')]"),	
+		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
 		
 		### Offer Details ###
 		'spare_offer_line_id': fields.integer('Spare Offer'),
@@ -3435,9 +3494,9 @@ class ch_wo_accessories(osv.osv):
 		
 		'header_id':fields.many2one('ch.work.order.details', 'Header Id', ondelete='cascade'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
-		'access_id': fields.many2one('kg.accessories.master','Accessories',domain="[('active','=','t'),('state','not in',('draft','reject','cancal'))]"),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t'),('state','not in',('reject','cancal'))]"),
-		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction'),
+		'access_id': fields.many2one('kg.accessories.master','Accessories',domain="[('state','=','approved')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
+		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain="[('state','=','approved')]"),
 		'qty': fields.float('Qty'),
 		'oth_spec': fields.char('Other Specification'),
 		'load_access': fields.boolean('Load BOM'),
@@ -3580,17 +3639,17 @@ class ch_wo_accessories_foundry(osv.osv):
 		### Foundry Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
-		'pump_id':fields.many2one('kg.pumpmodel.master', 'Pump'),
+		'pump_id':fields.many2one('kg.pumpmodel.master', 'Pump',domain="[('state','=','approved')]"),
 		'qty':fields.integer('Quantity'),
 		'oth_spec':fields.char('Other Specification'),
-		'position_id': fields.many2one('kg.position.number','Position No'),
+		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
 		'csd_no': fields.char('CSD No.', size=128),
 		'pattern_name': fields.char('Pattern Name'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('state','=','approved')]"),
 		'remarks': fields.char('Remarks'),
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'prime_cost': fields.float('Prime Cost'),
 		'wo_prime_cost': fields.float('WO PC'),
 		'material_code': fields.char('Material Code'),
@@ -3625,17 +3684,17 @@ class ch_wo_accessories_ms(osv.osv):
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'pos_no': fields.related('position_id','name', type='char', string='Position No', store=True),
-		'position_id': fields.many2one('kg.position.number','Position No'),
+		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
 		'csd_no': fields.char('CSD No.'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms'),('state','=','approved')], ondelete='cascade',required=True),
 		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
 		
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'prime_cost': fields.float('Prime Cost'),
 		'wo_prime_cost': fields.float('WO PC'),
 		'indent_qty': fields.integer('Indent Creation Qty'),
@@ -3680,13 +3739,13 @@ class ch_wo_accessories_bot(osv.osv):
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'csd_no': fields.char('CSD No.'),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot')], ondelete='cascade',required=True),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot'),('state','=','approved')], ondelete='cascade',required=True),
 		'item_name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'prime_cost': fields.float('Prime Cost'),
 		'wo_prime_cost': fields.float('WO PC'),
 		'material_code': fields.char('Material Code'),
@@ -3727,9 +3786,9 @@ class ch_wo_spare_bom(osv.osv):
 		
 		## Module Requirement Fields
 		
-		'pump_id':fields.many2one('kg.pumpmodel.master','Pumpmodel'),
-		'moc_const_id':fields.many2one('kg.moc.construction','MOC Construction'),
-		'bom_id':fields.many2one('kg.bom','BOM Name',domain="[('pump_model_id','=',parent.pump_model_id),('category_type','=','part_list_bom')]"),
+		'pump_id':fields.many2one('kg.pumpmodel.master','Pumpmodel',domain="[('state','=','approved')]"),
+		'moc_const_id':fields.many2one('kg.moc.construction','MOC Construction',domain="[('state','=','approved')]"),
+		'bom_id':fields.many2one('kg.bom','BOM Name',domain="[('pump_model_id','=',parent.pump_model_id),('category_type','=','part_list_bom'),('state','=','approved')]"),
 		'qty':fields.integer('Qty'),
 		'off_name':fields.char('Offer Name'),
 		'load_bom':fields.boolean('Load BOM'),
@@ -3947,13 +4006,13 @@ class ch_wo_spare_foundry(osv.osv):
 		
 		'qty':fields.integer('Quantity'),
 		'oth_spec':fields.char('Other Specification'),
-		'position_id': fields.many2one('kg.position.number','Position No.'),
+		'position_id': fields.many2one('kg.position.number','Position No.',domain="[('state','=','approved')]"),
 		'csd_no': fields.char('CSD No.', size=128),
 		'pattern_name': fields.char('Pattern Name'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No.'),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No.',domain="[('state','=','approved')]"),
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'moc_name': fields.char('MOC Name'),
 		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
@@ -4033,10 +4092,10 @@ class ch_wo_spare_ms(osv.osv):
 		## Module Requirement Fields
 		
 		'pos_no': fields.related('position_id','name', type='char', string='Position No.', store=True),
-		'position_id': fields.many2one('kg.position.number','Position No.'),
+		'position_id': fields.many2one('kg.position.number','Position No.',domain="[('state','=','approved')]"),
 		'csd_no': fields.char('CSD No.'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms'),('state','=','approved')], ondelete='cascade',required=True),
 		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
 		#~ 'ms_line_id':fields.many2one('ch.machineshop.details', 'Item Name'),
 		'qty': fields.integer('Qty', required=True),
@@ -4044,7 +4103,7 @@ class ch_wo_spare_ms(osv.osv):
 		#'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'moc_name': fields.char('MOC Name'),
 		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
@@ -4094,6 +4153,27 @@ class ch_wo_spare_ms(osv.osv):
 			else:
 				value = {'moc_changed_flag': True}
 		return {'value': value}
+		
+	def onchange_raw_qty(self,cr,uid,ids,ms_id,qty, context=None):
+		raw_vals=[]
+		if ms_id:
+			ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_id)
+			if ms_rec.line_ids:
+				for raw_line in ms_rec.line_ids:
+					raw_vals.append({
+							'product_id': raw_line.product_id.id,
+							'uom': raw_line.uom.id,
+							'od': raw_line.od,
+							'length': raw_line.length,
+							'breadth': raw_line.breadth,
+							'thickness': raw_line.thickness,
+							'weight': raw_line.weight * qty,
+							'uom_conversation_factor': raw_line.uom_conversation_factor,
+							'temp_qty': raw_line.temp_qty * qty,
+							'qty': raw_line.qty * qty,
+							'remarks': raw_line.remarks,
+							})
+		return {'value': {'line_ids': raw_vals}}
 	
 	_constraints = [
 		
@@ -4138,6 +4218,23 @@ class ch_wo_spare_ms_raw(osv.osv):
 		
 		
 	}
+	
+	def onchange_length(self, cr, uid, ids, length,breadth,qty,temp_qty,uom_conversation_factor,product_id, context=None):		
+		value = {'qty':0,'weight':0}
+		qty = 0
+		weight = 0
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		if uom_conversation_factor:
+			if uom_conversation_factor == 'one_dimension':
+				qty = length * temp_qty
+				if length == 0.00:
+					qty = temp_qty
+				weight = qty * prod_rec.po_uom_in_kgs
+			if uom_conversation_factor == 'two_dimension':
+				qty = length * breadth * temp_qty				
+				weight = qty * prod_rec.po_uom_in_kgs
+		value = {'qty': qty,'weight': weight}			
+		return {'value': value}
 	
 	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
 		value = {'qty': '','weight': '',}
@@ -4188,9 +4285,9 @@ class ch_wo_spare_bot(osv.osv):
 		
 		## Module Requirement Fields
 		
-		'product_temp_id':fields.many2one('product.product', 'Product Name',domain = [('type','=','bot')], ondelete='cascade'),
+		'product_temp_id':fields.many2one('product.product', 'Product Name',domain = [('type','=','bot'),('state','=','approved')], ondelete='cascade'),
 		#~ 'bot_line_id':fields.many2one('ch.bot.details', 'Item Name'),
-		'position_id': fields.many2one('kg.position.number','Position No.'),
+		'position_id': fields.many2one('kg.position.number','Position No.',domain="[('state','=','approved')]"),
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot')], ondelete='cascade',required=True),
 		'item_name': fields.related('ms_id','name', type='char', size=128, string='Item Name', store=True, readonly=True),
@@ -4200,11 +4297,11 @@ class ch_wo_spare_bot(osv.osv):
 		#'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'moc_name': fields.char('MOC Name'),
 		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
-		'brand_id': fields.many2one('kg.brand.master','Brand '),
+		'brand_id': fields.many2one('kg.brand.master','Brand ',domain="[('state','=','approved')]"),
 		'flag_is_bearing': fields.boolean('Is Bearing'),
 		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
 		'material_code': fields.char('Material Code'),

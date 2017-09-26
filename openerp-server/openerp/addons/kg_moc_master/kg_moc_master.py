@@ -161,6 +161,11 @@ class kg_moc_master(osv.osv):
 			else:
 				res = True				
 		return res	
+	def _check_line(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.line_ids:			
+			return False
+		return True	
 		
 	def send_to_dms(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -234,7 +239,8 @@ class kg_moc_master(osv.osv):
 		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'MOC name must be unique !!', ['name']),		
-		(_code_validate, 'MOC code must be unique !!', ['code']),	
+		(_code_validate, 'MOC code must be unique !!', ['code']),
+		(_check_line,'You can not save this with out Raw Materials  Details !',['Raw Materials']),	
 	]
 	
 kg_moc_master()
@@ -404,7 +410,7 @@ class ch_fettling_process(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.moc.master', 'Fettling Entry', required=True, ondelete='cascade'),							
-		'stage_id': fields.many2one('kg.stage.master','Name', required=True,domain="[('active','=','t')]"),			
+		'stage_id': fields.many2one('kg.stage.master','Name', required=True,domain="[('state','=','approved')]"),			
 		'name':fields.char('Stage Name'),
 		'seq_no':fields.integer('Sequence',required=True),
 		'remarks':fields.text('Remarks'),

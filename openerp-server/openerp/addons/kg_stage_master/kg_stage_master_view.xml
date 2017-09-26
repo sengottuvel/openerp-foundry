@@ -8,7 +8,7 @@
 			<field name="name">stage Master Form</field>
 			<field name="model">kg.stage.master</field>
 			<field name="arch" type="xml">
-				<form string="Stage Master" version="7.0">					
+				<form string="Stage Master" version="7.0" create="false" delete="false">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -18,13 +18,13 @@
 					</header>					
 					<group>
 						<group>						
-							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+							<field name="name" readonly="1"/>								
 							<field name="category" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" />								
 							<!--<field name="stage_seq_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>-->
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 						</group>
 						<group>
-							<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="code" readonly="1"/>
 							
 							<field name="modify" invisible="1"/>	
 							<field name="state" style="width: 30%%" class="att_state_change"/>								
@@ -43,8 +43,8 @@
 							<field name="line_ids" nolabel="1" >
 								<tree string="Rate Details Entry Tree" editable="top" >									
 									<field name="moc_cate_id" />											
-									<field name="min_val" />				   
-									<field name="max_val" />
+									<field name="min_val" required="1"/>				   
+									<field name="max_val" required="1"/>
 									<field name="rate" />
 									<field name="remarks" widget="char"/>														
 								</tree>
@@ -87,7 +87,7 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Stage Master Tree">				
+								toolbar="True" string="Stage Master Tree" create="false" delete="false">				
 					<field name="code"/>
 					<field name="name"/>
 					<field name="category"/>

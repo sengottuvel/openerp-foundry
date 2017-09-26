@@ -93,6 +93,17 @@ class kg_production(osv.osv):
 		
 		result[entry.id]= pending_qty
 		return result
+		
+	def _get_mould_mc(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}		
+		for entry in self.browse(cr, uid, ids, context=context):
+			if entry.total_mould_qty != entry.pour_qty:
+				mould_mc_flag = 't'			
+			else:
+				mould_mc_flag = 'f'
+		print"mould_mc_flagmould_mc_flag",mould_mc_flag
+		result[entry.id]= mould_mc_flag
+		return result
 	
 	_columns = {
 	
@@ -168,11 +179,11 @@ class kg_production(osv.osv):
 		### Core Log ###
 		'core_no': fields.char('Core Log No.', size=128,readonly=True),
 		'core_date': fields.date('Date'),
-		'core_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'core_contractor':fields.many2one('res.partner','Contractor'),
+		'core_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'core_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'core_moulder': fields.integer('Moulder'),
 		'core_helper': fields.integer('Helper'),
-		'core_operator': fields.many2one('hr.employee','Operator'),
+		'core_operator': fields.many2one('hr.employee','Operator',domain="[('status','=','approved')]"),
 		'core_qty': fields.integer('Qty'),
 		'total_core_qty': fields.integer('Total Core Qty'),
 		'core_rem_qty': fields.integer('Remaining Qty', readonly=True),
@@ -186,12 +197,12 @@ class kg_production(osv.osv):
 		### Mould Log ###
 		'mould_no': fields.char('Mould Log No.', size=128,readonly=True),
 		'mould_date': fields.date('Date'),
-		'mould_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'mould_contractor':fields.many2one('res.partner','Contractor'),
+		'mould_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'mould_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'mould_moulder': fields.integer('Moulder'),
 		'mould_box_id': fields.related('pattern_id','box_id', type='many2one', relation='kg.box.master', string='Box Size', store=True),
 		'mould_helper': fields.integer('Helper'),
-		'mould_operator': fields.many2one('hr.employee','Operator'),
+		'mould_operator': fields.many2one('hr.employee','Operator',domain="[('status','=','approved')]"),
 		'mould_qty': fields.integer('Qty'),
 		'total_mould_qty': fields.integer('Total Mould Qty'),
 		'mould_rem_qty': fields.integer('Remaining Qty', readonly=True),
@@ -200,6 +211,8 @@ class kg_production(osv.osv):
 		'mould_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'mould_pan_no':fields.char('PAN No.', size=128),
 		'mould_remarks': fields.text('Remarks'),
+		'mould_mc_flag': fields.boolean('Mould MC'),
+		
 		
 		### Pouring Log ###
 		'pour_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done')],'Status', readonly=True),
@@ -255,6 +268,7 @@ class kg_production(osv.osv):
 		'mould_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'difference_qty': 0,
 		'pour_qty': 0,
+		'total_mould_qty': 0,
 		'flag_pattern_check': False,
 		
 		
@@ -689,9 +703,9 @@ class kg_core_batch(osv.osv):
 		'flag_issueline':fields.boolean('Issue Line Created'),
 		
 		'core_date': fields.date('Core Date'),
-		'core_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'core_contractor':fields.many2one('res.partner','Contractor'),
-		'core_operator': fields.many2one('hr.employee','Operator'),
+		'core_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'core_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'core_operator': fields.many2one('hr.employee','Operator',domain="[('status','=','approved')]"),
 		'core_helper': fields.integer('Helper'),
 		'core_hardness': fields.char('Core Hardness'),
 		'core_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
@@ -843,9 +857,9 @@ class ch_core_batch_line(osv.osv):
 		'order_delivery_date': fields.related('production_id','order_delivery_date', type='date', string='Delivery Date', store=True, readonly=True),
 		
 		'core_date': fields.date('Core Date'),
-		'core_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'core_contractor':fields.many2one('res.partner','Contractor'),
-		'core_operator': fields.many2one('hr.employee','Operator'),
+		'core_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'core_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'core_operator': fields.many2one('hr.employee','Operator',domain="[('status','=','approved')]"),
 		'core_helper': fields.integer('Helper'),
 		'core_qty': fields.integer('Completed Qty'),
 		'core_hardness': fields.char('Core Hardness'),
@@ -916,10 +930,10 @@ class kg_mould_batch(osv.osv):
 		'flag_issueline':fields.boolean('Issue Line Created'),
 		
 		'mould_date': fields.date('Mould Date'),
-		'mould_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'mould_contractor':fields.many2one('res.partner','Contractor'),
+		'mould_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'mould_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'mould_moulder': fields.integer('Moulder'),
-		'mould_operator': fields.many2one('hr.employee','Operator'),
+		'mould_operator': fields.many2one('hr.employee','Operator',domain="[('status','=','approved')]"),
 		'mould_helper': fields.integer('Helper Count'),
 		'mould_qty': fields.integer('Qty'),		
 		'mould_hardness': fields.char('Mould Hardness'),
@@ -1071,11 +1085,11 @@ class ch_mould_batch_line(osv.osv):
 		'order_delivery_date': fields.related('production_id','order_delivery_date', type='date', string='Delivery Date', store=True, readonly=True),
 				
 		'mould_date': fields.date('Mould Date'),
-		'mould_shift_id':fields.many2one('kg.shift.master','Shift'),
-		'mould_contractor':fields.many2one('res.partner','Contractor'),
+		'mould_shift_id':fields.many2one('kg.shift.master','Shift',domain="[('state','=','approved')]"),
+		'mould_contractor':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		'mould_moulder': fields.integer('Moulder'),
 		'mould_helper': fields.integer('Helper'),
-		'mould_operator': fields.many2one('hr.employee','Operator'),
+		'mould_operator': fields.many2one('hr.employee','Operator',domain="[('status','=','approved')]"),
 		'mould_qty': fields.integer('Completed Qty'),		
 		'mould_hardness': fields.char('Mould Hardness'),
 		'mould_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),

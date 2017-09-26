@@ -252,6 +252,281 @@
 		
 	<!-- Menu Action End-->
 	
+	
+	<!-- Fabrication code start here Karthikeyan -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_fabrication" model="ir.ui.view">
+			<field name="name">Fabrication Entry Form</field>
+			<field name="model">kg.fabrication.process</field>
+			<field name="arch" type="xml">
+				<form string="Schedule" version="7.0">
+					<header>
+						<button name="entry_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('state','in',['complete','accept'])]}"/>
+						
+						
+					</header>
+					<group>
+						<group>
+							<field name="order_line_id" readonly="1"/>
+							<field name="order_priority"/>
+							<field name="order_category" />
+							<field name="order_delivery_date"/>
+							<field name="schedule_qty" readonly="1"/>
+							<field name="pending_qty" readonly="1" attrs="{'invisible': [('state','in',['complete'])]}"/>
+							<field name="qty" attrs="{'readonly': [('state','in',['complete'])],'invisible': [('state','in',['complete'])],'required': [('state','in',['pending','partial'])]}"/>							
+							<field name="inward_qty" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending','partial'])],'required': [('state','in',['complete'])]}"/>
+							<field name="rej_reason" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending','partial'])],'required': [('inward_rej_qty','>',0)]}"/>
+							<field name="remarks" attrs="{'readonly': [('state','in',['complete'])]}"/>
+						</group>											
+						<group>
+							<field name="pump_model_id" />
+							<field name="ms_id" />
+							<field name="name" />
+							<field name="moc_id"/>
+							<field name="note"/>
+							<field name="shift_id" attrs="{'readonly': [('state','in',['complete'])],'required': [('state','in',['pending','partial'])]}"/>
+							<field name="operator" attrs="{'readonly': [('state','in',['complete'])],'required': [('state','in',['pending','partial'])]}"/>							
+							<field name="inward_rej_qty" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending','partial'])],'required': [('state','in',['complete'])]}"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>
+								</group>
+								<group>
+								<group>
+									<field name="user_id"/>									
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>									
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>							
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+	
+	
+	
+	<!-- Inward Form View Start -->
+
+		<record id="t_form_v_fabrication_inward" model="ir.ui.view">
+			<field name="name">Fabrication Entry Form</field>
+			<field name="model">kg.fabrication.process</field>
+			<field name="arch" type="xml">
+				<form string="Schedule" version="7.0">
+					<header>						
+						<button name="entry_inward" type="object" string="Inward" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('state','in',['pending','accept'])]}"/>
+						
+					</header>
+					<group>
+						<group>
+							<field name="order_line_id" readonly="1"/>
+							<field name="order_priority"/>
+							<field name="order_category" />
+							<field name="order_delivery_date"/>
+							<field name="schedule_qty" readonly="1"/>
+							<field name="pending_qty" readonly="1" attrs="{'invisible': [('state','in',['complete'])]}"/>											
+							<field name="inward_qty" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending'])],'required': [('state','in',['complete','partial'])]}"/>
+							<field name="rej_reason" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending'])],'required': [('inward_rej_qty','>',0)]}"/>
+							<field name="remarks" attrs="{'readonly': [('state','in',['complete'])]}"/>
+						</group>											
+						<group>
+							<field name="pump_model_id" />
+							<field name="ms_id" />
+							<field name="name" />
+							<field name="moc_id"/>
+							<field name="note"/>
+							<field name="shift_id" attrs="{'readonly': [('state','in',['complete','partial'])],'required': [('state','in',['pending','partial'])]}"/>
+							<field name="operator" attrs="{'readonly': [('state','in',['complete','partial'])],'required': [('state','in',['pending','partial'])]}"/>							
+							<field name="inward_rej_qty" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending'])],'required': [('state','in',['complete','partial'])]}"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>
+								</group>
+								<group>
+								<group>
+									<field name="user_id"/>									
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>									
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>							
+				</form>
+			</field>
+		</record>
+		
+	<!-- Inward Form View End -->	
+	
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_fabrication" model="ir.ui.view">
+			<field name="name">Fabrication Entry Tree</field>
+			<field name="model">kg.fabrication.process</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="red:state == 'pending';blue:state == 'partial';black:state == 'complete';black:state == 'accept'" 
+								toolbar="True" string="Fabrication Entry Tree" create="false">					
+					<field name="order_line_id"/>
+					<field name="order_priority"/>
+					<field name="order_category" />
+					<field name="pump_model_id"/>
+					<field name="ms_id" />
+					<field name="name" />
+					<field name="moc_id" />
+					<field name="order_delivery_date" />
+					<field name="schedule_qty" />
+					<field name="pending_qty" />
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- Inward Tree View Start -->
+		
+		<record id="t_tree_v_fabrication_inward" model="ir.ui.view">
+			<field name="name">Fabrication Entry Tree</field>
+			<field name="model">kg.fabrication.process</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="red:state == 'pending';blue:state == 'partial';black:state == 'complete';black:state == 'accept'" 
+								toolbar="True" string="Fabrication Entry Tree" create="false">					
+					<field name="order_line_id"/>
+					<field name="order_priority"/>
+					<field name="order_category" />
+					<field name="pump_model_id"/>
+					<field name="ms_id" />
+					<field name="name" />
+					<field name="moc_id" />
+					<field name="order_delivery_date" />
+					<field name="schedule_qty" />
+					<field name="pending_qty" />
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Inward Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_fabrication" model="ir.ui.view">
+			<field name="name">Fabrication Entry Search</field>
+			<field name="model">kg.fabrication.process</field>
+			<field name="arch" type="xml">
+				<search string="Fabrication Entry Search">
+					<field name="order_line_id" string="Transaction"  filter_domain="[('order_line_id','ilike',self)]" />
+					<field name="ms_id" string="Transaction"  filter_domain="[('ms_id','ilike',self)]" />
+					<field name="moc_id" string="Transaction"  filter_domain="[('moc_id','ilike',self)]" />
+					<filter icon="terp-check" name="pending" string="Pending" domain="[('state','=','pending')]"/>
+					<filter icon="terp-check" name="partial" string="Partial" domain="[('state','=','partial')]"/>
+					<filter icon="terp-check" name="complete" string="Completed" domain="[('state','=','complete')]"/>							
+					<separator/>
+					<group expand="0" string="Group By...">						
+						<filter string="Order No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_line_id'}"/>
+						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
+	
+	<!-- Menu Action Start-->
+		
+		
+		<record id="tma_fabrication" model="ir.actions.act_window">
+			<field name="name">Fabrication Pending</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fabrication.process</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('state','in',('pending','partial'))]</field>
+			<field name="search_view_id" ref="t_search_v_fabrication"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_fabrication_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_fabrication"/>
+            <field name="act_window_id" ref="tma_fabrication"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_fabrication_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_fabrication"/>
+            <field name="act_window_id" ref="tma_fabrication"/>
+        </record>	
+        
+        
+        
+        <record id="tma_fabrication_inward" model="ir.actions.act_window">
+			<field name="name">Fabrication Inward</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fabrication.process</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('state','in',('partial','complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_fabrication"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_fabrication_inward_action_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_fabrication_inward"/>
+            <field name="act_window_id" ref="tma_fabrication_inward"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_fabrication_inward_action_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_fabrication_inward"/>
+            <field name="act_window_id" ref="tma_fabrication_inward"/>
+        </record>		
+		
+		
+		
+		
+		<record id="tma_fabrication_completed" model="ir.actions.act_window">
+			<field name="name">Fabrication Completed</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fabrication.process</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_fabrication"/>
+			<field name="search_view_id" ref="t_search_v_fabrication"/>
+			<field name="domain">[('state','=','accept')]</field>
+		</record>
+		
+		
+	<!-- Menu Action End-->
+	
+	
 	<!-- Audit Log Xml Data Start   -->
 		
         <record id="audit_schedule" model="audittrail.rule">
@@ -299,6 +574,7 @@
 	
 		<!-- Schedule -->
 		<menuitem action="tma_schedule" id="tam_schedule" parent="kg_stock_inward.tpm_planning_transactions" sequence="5"/>
+		
 	
 	<!-- Menu Item End -->
 	

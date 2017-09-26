@@ -1373,8 +1373,7 @@ class kg_schedule(osv.osv):
 							
 							
 					
-						production_id = production_obj.create(cr, uid, production_vals)
-						
+						production_id = production_obj.create(cr, uid, production_vals)						
 					
 					if schedule_item.order_bomline_id.id != False:
 						position_id = schedule_item.order_bomline_id.position_id.id
@@ -1382,7 +1381,6 @@ class kg_schedule(osv.osv):
 					if schedule_item.order_bomline_id.id == False:
 						position_id = schedule_item.acc_bomline_id.position_id.id
 						spare_id = schedule_item.order_bomline_id.spare_id
-						
 					### Foundry Item Machine Shop Creation Process ###
 						
 					ms_fou_obj = self.pool.get('kg.machineshop')						
@@ -1753,6 +1751,8 @@ class kg_schedule(osv.osv):
 				
 				### Foundry Items ###
 				
+				### Foundry item only ##
+				
 				cr.execute("""
 					select order_line_id,pump_model_id,sum(indent_qty) as indent_qty from 
 
@@ -1767,21 +1767,11 @@ class kg_schedule(osv.osv):
 						ch_schedule_details where header_id = %s and qty > 0
 						)
 						
-						union
-
-						select (raw.qty * acc_order_bom.qty) as indent_qty,raw.product_id,wo_acc_line.header_id 
-						as order_line_id,wo_line.pump_model_id
-						from ch_moc_raw_material as raw
-						left join ch_wo_accessories_foundry acc_order_bom on raw.header_id = acc_order_bom.moc_id
-						left join ch_wo_accessories wo_acc_line on acc_order_bom.header_id = wo_acc_line.id
-						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
-						where acc_order_bom.is_applicable = 't' and wo_acc_line.header_id in (select order_line_id from 
-						ch_schedule_details where header_id = %s and qty > 0
-						)
+					
 
 						)
 						as sub_query
-						group by order_line_id,pump_model_id"""%(entry.id,entry.id))
+						group by order_line_id,pump_model_id"""%(entry.id))
 				foundry_pumpmodel_details = cr.dictfetchall();
 				print"foundry_pumpmodel_details",foundry_pumpmodel_details
 				if foundry_pumpmodel_details:
@@ -1827,32 +1817,21 @@ class kg_schedule(osv.osv):
 									(
 
 									select (raw.qty * order_bom.qty) as indent_qty,raw.product_id,wo_line.pump_model_id,order_bom.pattern_id,
-									order_bom.header_id as order_line_id,order_bom.position_id as position_id,order_bom.moc_id as moc_id,'foun' as type
+									order_bom.header_id as order_line_id,order_bom.position_id as position_id,order_bom.moc_id as moc_id,'foun'::text as type
 									from ch_moc_raw_material as raw
 									left join ch_order_bom_details order_bom on raw.header_id = order_bom.moc_id
 									left join ch_work_order_details wo_line on order_bom.header_id = wo_line.id
 									where order_bom.flag_applicable = 't' and order_bom.header_id in (select distinct order_line_id 
 									from ch_schedule_details  where header_id = %s and qty > 0
-									)
-									
-									union
-
-									select (raw.qty * acc_order_bom.qty) as indent_qty,raw.product_id,wo_line.pump_model_id,acc_order_bom.pattern_id,
-									wo_acc_line.header_id as order_line_id,acc_order_bom.position_id as position_id,acc_order_bom.moc_id as moc_id,'acc' as type
-									from ch_moc_raw_material as raw
-									left join ch_wo_accessories_foundry acc_order_bom on raw.header_id = acc_order_bom.moc_id
-									left join ch_wo_accessories wo_acc_line on acc_order_bom.header_id = wo_acc_line.id
-									left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
-									where acc_order_bom.is_applicable = 't' and wo_acc_line.header_id in (select order_line_id from 
-									ch_schedule_details where header_id = %s and qty > 0
-									)
+									)								
+								
 
 									)
 
 									as sub_query
 									where pump_model_id = %s  and
 									order_line_id = %s
-									group by type,order_line_id,product_id,pump_model_id,pattern_id,position_id,moc_id """%(entry.id,entry.id,foundry_pm_item['pump_model_id'],order_line_rec.id))
+									group by type,order_line_id,product_id,pump_model_id,pattern_id,position_id,moc_id """%(entry.id,foundry_pm_item['pump_model_id'],order_line_rec.id))
 							foundry_product_details = cr.dictfetchall();
 							
 							for foundry_indent_item in foundry_product_details:
@@ -1885,39 +1864,145 @@ class kg_schedule(osv.osv):
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, foundry_dep_indent_line_vals)
 						
+				
+				
+				
+				
+				## Accessories Foundry Item Only ##
+				
+				cr.execute("""
+					select acc_line_id,order_line_id,pump_model_id,sum(indent_qty) as indent_qty from 
+
+						(					
+
+						select (raw.qty * acc_order_bom.qty) as indent_qty,raw.product_id,wo_acc_line.header_id 
+						as order_line_id,wo_line.pump_model_id,wo_acc_line.id as acc_line_id
+						from ch_moc_raw_material as raw
+						left join ch_wo_accessories_foundry acc_order_bom on raw.header_id = acc_order_bom.moc_id
+						left join ch_wo_accessories wo_acc_line on acc_order_bom.header_id = wo_acc_line.id
+						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+						where acc_order_bom.is_applicable = 't' and wo_acc_line.header_id in (select order_line_id from 
+						ch_schedule_details where header_id = %s and qty > 0
+						)
+
+						)
+						as sub_query
+						group by acc_line_id,order_line_id,pump_model_id"""%(entry.id))
+				acc_pumpmodel_details = cr.dictfetchall();
+				print"acc_pumpmodel_details",acc_pumpmodel_details
+				if acc_pumpmodel_details:
+				
+					for acc_pm_item in acc_pumpmodel_details:
 						
-				#### Machine shop Items ###		
+						### Getting Pump Model Qty ###
+						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, acc_pm_item['order_line_id'])
+						acc_line_rec = self.pool.get('ch.wo.accessories').browse(cr, uid, acc_pm_item['acc_line_id'])
+						acc_qty = int(acc_line_rec.qty)		
+						for indent_header in range(acc_qty): 
+						
+							### Creation of Department Indent Header ###
+						
+							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP15')])
+							
+							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+							
+							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+							seq_name = cr.fetchone();
+
+							dep_indent_obj = self.pool.get('kg.depindent')
+							acc_dep_indent_vals = {
+								'name':'',
+								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+								'dep_name':dep_id[0],
+								'entry_mode':'auto',
+								'state': 'approved',
+								'indent_type': 'production',
+								'name': seq_name[0],
+								'order_id': order_line_rec.header_id.id,
+								'order_line_id': order_line_rec.id,
+								'src_location_id': location.main_location.id,
+								'dest_location_id': location.stock_location.id
+								}
+								
+							indent_id = dep_indent_obj.create(cr, uid, acc_dep_indent_vals)
+						
+							cr.execute("""
+								select type,order_line_id,product_id,pump_model_id,pattern_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
+
+									(								
+
+									select (raw.qty * acc_order_bom.qty) as indent_qty,raw.product_id,wo_line.pump_model_id,acc_order_bom.pattern_id,
+									wo_acc_line.header_id as order_line_id,acc_order_bom.position_id as position_id,acc_order_bom.moc_id as moc_id,'acc'::text as type
+									from ch_moc_raw_material as raw
+									left join ch_wo_accessories_foundry acc_order_bom on raw.header_id = acc_order_bom.moc_id
+									left join ch_wo_accessories wo_acc_line on acc_order_bom.header_id = wo_acc_line.id
+									left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+									where acc_order_bom.is_applicable = 't' and wo_acc_line.header_id in (select order_line_id from 
+									ch_schedule_details where header_id = %s and qty > 0
+									)
+
+									)
+
+									as sub_query
+									where pump_model_id = %s  and
+									order_line_id = %s
+									group by type,order_line_id,product_id,pump_model_id,pattern_id,position_id,moc_id """%(entry.id,acc_pm_item['pump_model_id'],order_line_rec.id))
+							acc_product_details = cr.dictfetchall();
+							
+							for acc_indent_item in acc_product_details:
+								dep_indent_line_obj = self.pool.get('kg.depindent.line')
+								product_rec = self.pool.get('product.product').browse(cr, uid, acc_indent_item['product_id'])
+								
+								pattern_obj = self.pool.get('kg.pattern.master')
+								pattern_rec = pattern_obj.browse(cr, uid, acc_indent_item['pattern_id'])
+								
+								if acc_indent_item['type'] == 'foun':
+									indent_qty = acc_indent_item['indent_qty']/order_line_rec.qty
+								else:
+									indent_qty = acc_indent_item['indent_qty']
+								
+								acc_dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id':acc_indent_item['product_id'],
+									'dep_id':dep_id[0],
+									'line_state':'noprocess',
+									'line_date':entry.entry_date,
+									'pattern_id':acc_indent_item['pattern_id'],
+									'uom':product_rec.uom_id.id,
+									'qty': indent_qty,
+									'pending_qty': indent_qty,
+									'issue_pending_qty': indent_qty,
+									'fns_item_name':pattern_rec.pattern_name,
+									'position_id': acc_indent_item['position_id'],
+									'moc_id': acc_indent_item['moc_id'],
+								}
+								
+								indent_line_id = dep_indent_line_obj.create(cr, uid, acc_dep_indent_line_vals)
+				
+				
+				
+				
+						
+				#### Fabrication False Machine shop Items only ###		
 						
 				cr.execute("""
 					select pump_model_id,order_line_id,sum(indent_qty) as indent_qty from 
 
 						(
-						select (raw.qty * order_ms.indent_qty) as indent_qty,raw.product_id,wo_line.pump_model_id,
+						select raw.qty as indent_qty,raw.product_id,wo_line.pump_model_id,
 						order_ms.header_id as order_line_id
 						from ch_wo_ms_raw as raw
 						left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.id
+						left join kg_machine_shop ms_master on ms_master.id = order_ms.ms_id
 						left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
-						where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id
+						where ms_master.flag_fabrication = 'f' and order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id
 						from ch_schedule_details where header_id = %s
-						) 
-						
-						union
-
-						select (raw.qty * acc_order_ms.indent_qty) as indent_qty,raw.product_id,wo_line.pump_model_id,
-						wo_acc_line.header_id as order_line_id
-						from ch_ms_raw_material as raw
-						left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
-						left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
-						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
-						where acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
-						from ch_schedule_details  where header_id = %s
+						)					
 						)
-						
-						
-						)
-
 						as sub_query
-						group by order_line_id,pump_model_id"""%(entry.id,entry.id))
+						group by order_line_id,pump_model_id"""%(entry.id))
 				ms_pumpmodel_details = cr.dictfetchall();
 				
 				if ms_pumpmodel_details:
@@ -1961,34 +2046,22 @@ class kg_schedule(osv.osv):
 									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
 
 										(
-										select (raw.qty * order_ms.indent_qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
+										select raw.qty as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
 										order_ms.header_id as order_line_id, raw.id as ms_item, order_ms.id as order_ms_id,
-										order_ms.position_id as position_id,order_ms.moc_id as moc_id,'foun' as type
+										order_ms.position_id as position_id,order_ms.moc_id as moc_id,'foun'::text as type
 										from ch_wo_ms_raw as raw
 										left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.id
+										left join kg_machine_shop ms_master on ms_master.id = order_ms.ms_id
 										left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
-										where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
-										from ch_schedule_details  where header_id = %s)
-										
-										union
-
-										select (raw.qty * acc_order_ms.indent_qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
-										wo_acc_line.header_id as order_line_id, raw.id as ms_item, acc_order_ms.id as order_ms_id,
-										acc_order_ms.position_id as position_id,acc_order_ms.moc_id as moc_id,'acc' as type
-										from ch_ms_raw_material as raw
-										left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
-										left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
-										left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
-										where acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
-										from ch_schedule_details  where header_id = %s
-										)
+										where ms_master.flag_fabrication = 'f' and order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
+										from ch_schedule_details  where header_id = %s)							
 										
 										
 										)
 
 										as sub_query
 										where pump_model_id = %s and order_line_id = %s
-										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id,position_id,moc_id """%(entry.id,entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
+										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id,position_id,moc_id """%(entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
 								ms_product_details = cr.dictfetchall();
 								
 								for ms_indent_item in ms_product_details:
@@ -2090,8 +2163,622 @@ class kg_schedule(osv.osv):
 										}
 										
 										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
+										
+				#### Fabrication True Machine shop Items only ###		
+						
+				cr.execute("""
+					select pump_model_id,order_line_id,sum(indent_qty) as indent_qty from 
 
-				### BOT Items ###
+						(
+						select raw.qty as indent_qty,raw.product_id,wo_line.pump_model_id,
+						order_ms.header_id as order_line_id
+						from ch_wo_ms_raw as raw
+						left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.id
+						left join kg_machine_shop ms_master on ms_master.id = order_ms.ms_id
+						left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
+						where ms_master.flag_fabrication = 't' and order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id
+						from ch_schedule_details where header_id = %s
+						)					
+						)
+						as sub_query
+						group by order_line_id,pump_model_id"""%(entry.id))
+				ms_pumpmodel_details = cr.dictfetchall();
+				
+				if ms_pumpmodel_details:
+					
+					for ms_pm_item in ms_pumpmodel_details:
+						
+						### Getting Pump Model Qty ###
+						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, ms_pm_item['order_line_id'])
+						
+						for indent_header in range(order_line_rec.pump_rem_qty): 
+							### Creation of Department Indent Header ###
+							
+							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP25')])
+							
+							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+							
+							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+							seq_name = cr.fetchone();
+							
+							dep_indent_obj = self.pool.get('kg.depindent')
+							if ms_pm_item['indent_qty'] > 0:
+								ms_dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':dep_id[0],
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': order_line_rec.header_id.id,
+									'order_line_id': order_line_rec.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, ms_dep_indent_vals)
+								
+								cr.execute("""
+									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
+
+										(
+										select raw.qty as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
+										order_ms.header_id as order_line_id, raw.id as ms_item, order_ms.id as order_ms_id,
+										order_ms.position_id as position_id,order_ms.moc_id as moc_id,'foun'::text as type
+										from ch_wo_ms_raw as raw
+										left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.id
+										left join kg_machine_shop ms_master on ms_master.id = order_ms.ms_id
+										left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
+										where ms_master.flag_fabrication = 't' and order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
+										from ch_schedule_details  where header_id = %s)							
+										
+										
+										)
+
+										as sub_query
+										where pump_model_id = %s and order_line_id = %s
+										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id,position_id,moc_id """%(entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
+								ms_product_details = cr.dictfetchall();
+								
+								for ms_indent_item in ms_product_details:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, ms_indent_item['product_id'])
+									
+									if ms_indent_item['type'] == 'foun':
+										ms_raw_obj = self.pool.get('ch.wo.ms.raw')
+										ms_raw_rec = ms_raw_obj.browse(cr, uid, ms_indent_item['ms_item'])
+										ms_bot_id = ms_raw_rec.header_id.ms_id.id
+										fns_item_name = ms_raw_rec.header_id.name
+										
+										ms_order_obj = self.pool.get('ch.order.machineshop.details')
+										ms_order_rec = ms_order_obj.browse(cr, uid, ms_indent_item['order_ms_id'])
+										if ms_order_rec.header_id.pump_model_type == 'horizontal':
+											length = ms_raw_rec.length
+										else:
+											length = ms_order_rec.length
+											if length == 0:
+												length = ms_raw_rec.length
+										
+									elif ms_indent_item['type'] == 'acc':
+										ms_raw_obj = self.pool.get('ch.ms.raw.material')
+										ms_raw_rec = ms_raw_obj.browse(cr, uid, ms_indent_item['ms_item'])
+										ms_bot_id = ms_raw_rec.header_id.id
+										fns_item_name = ms_raw_rec.header_id.code
+										ms_acc_obj = self.pool.get('ch.wo.accessories.ms')
+										ms_order_rec = ms_acc_obj.browse(cr, uid, ms_indent_item['order_ms_id'])
+										length = ms_raw_rec.length
+									else:
+										indent_qty = ms_indent_item['indent_qty']
+										cutting_qty = 0
+										
+								
+									if length > 0:
+										
+										if ms_raw_rec.uom_conversation_factor == 'one_dimension':	
+											if product_rec.uom_id.id == product_rec.uom_po_id.id:
+												indent_qty = ms_indent_item['indent_qty']
+												cutting_qty = ms_indent_item['indent_qty']
+											else:				
+												indent_qty =  (length * ms_raw_rec.temp_qty)
+												cutting_qty = ms_raw_rec.temp_qty
+										if ms_raw_rec.uom_conversation_factor == 'two_dimension':
+											indent_qty = (length * ms_raw_rec.breadth * ms_raw_rec.temp_qty)
+											cutting_qty = ms_raw_rec.temp_qty
+									else:
+										if ms_indent_item['indent_qty'] == None:
+											indent_qty = 0
+										else:
+											indent_qty = ms_indent_item['indent_qty']
+										cutting_qty = 0
+									
+									
+									if indent_qty > 0:
+										
+										if ms_order_rec.flag_dynamic_length == True:
+											pending_qty = 0
+											issue_pending_qty = 0
+											flag_dynamic_length = True
+										else:
+											pending_qty = indent_qty
+											issue_pending_qty = indent_qty
+											flag_dynamic_length = False
+											
+										#~ ### Cutting qty division by qty ###
+										if ms_indent_item['type'] == 'foun':
+											if order_line_rec.order_category in ('pump','access'):
+												cutting_qty = cutting_qty/order_line_rec.qty
+												indent_qty = indent_qty/order_line_rec.qty
+											else:
+												cutting_qty = cutting_qty
+												indent_qty = indent_qty
+										else:
+											cutting_qty = cutting_qty
+											indent_qty = indent_qty
+											
+										
+										ms_dep_indent_line_vals = {
+											'indent_id':indent_id,
+											'product_id':ms_indent_item['product_id'],
+											'uom':ms_indent_item['uom'],
+											'dep_id':dep_id[0],
+											'line_state':'noprocess',
+											'line_date':entry.entry_date,
+											'qty':indent_qty,
+											'pending_qty':pending_qty,
+											'issue_pending_qty':issue_pending_qty,
+											'cutting_qty': cutting_qty,
+											'ms_bot_id':ms_bot_id,
+											'fns_item_name':fns_item_name,
+											#~ 'note': 'Each Item ' + str(ms_raw_rec.length),
+											'position_id': ms_indent_item['position_id'],
+											'moc_id': ms_indent_item['moc_id'],
+											'length': length,
+											'breadth': ms_raw_rec.breadth,
+											'flag_dynamic_length': flag_dynamic_length,
+											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
+										}
+										
+										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
+				
+				### Fabrication True Machine Shop Item only, Create for line item
+				
+				cr.execute("""
+					select 
+					wo_line.header_id as order_id,wo_line.id as order_line_id, order_ms.id as order_ms_id,order_ms.qty as qty,
+					order_ms.ms_id as ms_id,order_ms.moc_id as moc_id
+
+
+					from ch_order_machineshop_details as order_ms
+
+					left join kg_machine_shop ms_master on ms_master.id = order_ms.ms_id
+					left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
+					where ms_master.flag_fabrication = 't' and order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
+					from ch_schedule_details  where header_id = %s)"""%(entry.id))
+				
+				flag_fabrication_details = cr.dictfetchall();
+				
+				if flag_fabrication_details:
+					
+					for flag_fabrication_item in flag_fabrication_details:
+						fabrication_obj = self.pool.get('kg.fabrication.process')							
+						fabrication_vals = {
+							'order_id':flag_fabrication_item['order_id'],
+							'order_line_id':flag_fabrication_item['order_line_id'],
+							'ms_line_id':flag_fabrication_item['order_ms_id'],
+							'ms_id':flag_fabrication_item['ms_id'],
+							'moc_id':flag_fabrication_item['moc_id'],
+							'schedule_qty':flag_fabrication_item['qty'],
+							'pending_qty':flag_fabrication_item['qty'],
+							'entry_mode':'auto',
+							'state': 'pending',
+							
+							}
+							
+						fabrication_id = fabrication_obj.create(cr, uid, fabrication_vals)
+					
+						
+				### Fabrication False Accessories Machine Shop Item only
+				
+				cr.execute("""
+				select acc_line_id,pump_model_id,order_line_id,sum(indent_qty) as indent_qty from 
+						(
+						select raw.qty as indent_qty,raw.product_id,wo_line.pump_model_id,
+						wo_acc_line.header_id as order_line_id,wo_acc_line.id as acc_line_id
+						from ch_ms_raw_material as raw
+						left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
+						left join kg_machine_shop ms_master on ms_master.id = acc_order_ms.ms_id
+						left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
+						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+						where ms_master.flag_fabrication = 'f' and acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
+						from ch_schedule_details  where header_id = %s
+						)						
+						)
+						as sub_query
+						group by acc_line_id,order_line_id,pump_model_id"""%(entry.id))
+				acc_ms_pumpmodel_details = cr.dictfetchall();
+				
+				if acc_ms_pumpmodel_details:
+					
+					for acc_ms_pm_item in acc_ms_pumpmodel_details:
+						
+						### Getting Pump Model Qty ###
+						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, ms_pm_item['order_line_id'])
+						acc_line_rec = self.pool.get('ch.wo.accessories').browse(cr, uid, acc_ms_pm_item['acc_line_id'])
+						acc_qty = int(acc_line_rec.qty)						
+						for indent_header in range(acc_qty): 
+							### Creation of Department Indent Header ###
+							
+							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+							
+							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+							
+							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+							seq_name = cr.fetchone();
+							
+							dep_indent_obj = self.pool.get('kg.depindent')
+							if acc_ms_pm_item['indent_qty'] > 0:
+								acc_ms_dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':dep_id[0],
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': order_line_rec.header_id.id,
+									'order_line_id': order_line_rec.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, acc_ms_dep_indent_vals)
+								
+								cr.execute("""
+									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
+
+										(
+										select raw.qty as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
+										wo_acc_line.header_id as order_line_id, raw.id as ms_item, acc_order_ms.id as order_ms_id,
+										acc_order_ms.position_id as position_id,acc_order_ms.moc_id as moc_id,'acc'::text as type
+										from ch_ms_raw_material as raw
+										left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
+										left join kg_machine_shop ms_master on ms_master.id = acc_order_ms.ms_id
+										left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
+										left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+										where ms_master.flag_fabrication = 'f' and acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
+										from ch_schedule_details  where header_id = %s
+										)										
+										)
+										as sub_query
+										where pump_model_id = %s and order_line_id = %s
+										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id,position_id,moc_id """%(entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
+								acc_ms_product_details = cr.dictfetchall();
+								
+								for acc_ms_indent_item in acc_ms_product_details:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, acc_ms_indent_item['product_id'])
+									
+									if acc_ms_indent_item['type'] == 'foun':
+										ms_raw_obj = self.pool.get('ch.wo.ms.raw')
+										ms_raw_rec = ms_raw_obj.browse(cr, uid, acc_ms_indent_item['ms_item'])
+										ms_bot_id = ms_raw_rec.header_id.ms_id.id
+										fns_item_name = ms_raw_rec.header_id.name
+										
+										ms_order_obj = self.pool.get('ch.order.machineshop.details')
+										ms_order_rec = ms_order_obj.browse(cr, uid, acc_ms_indent_item['order_ms_id'])
+										if ms_order_rec.header_id.pump_model_type == 'horizontal':
+											length = ms_raw_rec.length
+										else:
+											length = ms_order_rec.length
+											if length == 0:
+												length = ms_raw_rec.length
+										
+									elif acc_ms_indent_item['type'] == 'acc':
+										ms_raw_obj = self.pool.get('ch.ms.raw.material')
+										ms_raw_rec = ms_raw_obj.browse(cr, uid, acc_ms_indent_item['ms_item'])
+										ms_bot_id = ms_raw_rec.header_id.id
+										fns_item_name = ms_raw_rec.header_id.code
+										ms_acc_obj = self.pool.get('ch.wo.accessories.ms')
+										ms_order_rec = ms_acc_obj.browse(cr, uid, acc_ms_indent_item['order_ms_id'])
+										length = ms_raw_rec.length
+									else:
+										indent_qty = acc_ms_indent_item['indent_qty']
+										cutting_qty = 0
+										
+								
+									if length > 0:
+										
+										if ms_raw_rec.uom_conversation_factor == 'one_dimension':	
+											if product_rec.uom_id.id == product_rec.uom_po_id.id:
+												indent_qty = acc_ms_indent_item['indent_qty']
+												cutting_qty = acc_ms_indent_item['indent_qty']
+											else:				
+												indent_qty =  (length * ms_raw_rec.temp_qty)
+												cutting_qty = ms_raw_rec.temp_qty
+										if ms_raw_rec.uom_conversation_factor == 'two_dimension':
+											indent_qty = (length * ms_raw_rec.breadth * ms_raw_rec.temp_qty)
+											cutting_qty = ms_raw_rec.temp_qty
+									else:
+										if acc_ms_indent_item['indent_qty'] == None:
+											indent_qty = 0
+										else:
+											indent_qty = acc_ms_indent_item['indent_qty']
+										cutting_qty = 0
+									
+									
+									if indent_qty > 0:
+										
+										if ms_order_rec.flag_dynamic_length == True:
+											pending_qty = 0
+											issue_pending_qty = 0
+											flag_dynamic_length = True
+										else:
+											pending_qty = indent_qty
+											issue_pending_qty = indent_qty
+											flag_dynamic_length = False
+											
+										#~ ### Cutting qty division by qty ###
+										if acc_ms_indent_item['type'] == 'foun':
+											if order_line_rec.order_category in ('pump','access'):
+												cutting_qty = cutting_qty/order_line_rec.qty
+												indent_qty = indent_qty/order_line_rec.qty
+											else:
+												cutting_qty = cutting_qty
+												indent_qty = indent_qty
+										else:
+											cutting_qty = cutting_qty
+											indent_qty = indent_qty
+											
+										
+										acc_ms_dep_indent_line_vals = {
+											'indent_id':indent_id,
+											'product_id':acc_ms_indent_item['product_id'],
+											'uom':acc_ms_indent_item['uom'],
+											'dep_id':dep_id[0],
+											'line_state':'noprocess',
+											'line_date':entry.entry_date,
+											'qty':indent_qty,
+											'pending_qty':pending_qty,
+											'issue_pending_qty':issue_pending_qty,
+											'cutting_qty': cutting_qty,
+											'ms_bot_id':ms_bot_id,
+											'fns_item_name':fns_item_name,
+											#~ 'note': 'Each Item ' + str(ms_raw_rec.length),
+											'position_id': acc_ms_indent_item['position_id'],
+											'moc_id': acc_ms_indent_item['moc_id'],
+											'length': length,
+											'breadth': ms_raw_rec.breadth,
+											'flag_dynamic_length': flag_dynamic_length,
+											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
+										}
+										
+										indent_line_id = dep_indent_line_obj.create(cr, uid, acc_ms_dep_indent_line_vals)
+				
+				
+				
+				
+				### Fabrication True Accessories Machine Shop Item only
+				
+				cr.execute("""
+				select acc_line_id,pump_model_id,order_line_id,sum(indent_qty) as indent_qty from 
+						(
+						select raw.qty as indent_qty,raw.product_id,wo_line.pump_model_id,
+						wo_acc_line.header_id as order_line_id,wo_acc_line.id as acc_line_id
+						from ch_ms_raw_material as raw
+						left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
+						left join kg_machine_shop ms_master on ms_master.id = acc_order_ms.ms_id
+						left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
+						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+						where ms_master.flag_fabrication = 't' and acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
+						from ch_schedule_details  where header_id = %s
+						)						
+						)
+						as sub_query
+						group by acc_line_id,order_line_id,pump_model_id"""%(entry.id))
+				acc_ms_pumpmodel_details = cr.dictfetchall();
+				
+				if acc_ms_pumpmodel_details:
+					
+					for acc_ms_pm_item in acc_ms_pumpmodel_details:
+						
+						### Getting Pump Model Qty ###
+						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, ms_pm_item['order_line_id'])
+						acc_line_rec = self.pool.get('ch.wo.accessories').browse(cr, uid, acc_ms_pm_item['acc_line_id'])
+						acc_qty = int(acc_line_rec.qty)						
+						for indent_header in range(acc_qty): 
+							### Creation of Department Indent Header ###
+							
+							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP25')])
+							
+							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+							
+							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+							seq_name = cr.fetchone();
+							
+							dep_indent_obj = self.pool.get('kg.depindent')
+							if acc_ms_pm_item['indent_qty'] > 0:
+								acc_ms_dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':dep_id[0],
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': order_line_rec.header_id.id,
+									'order_line_id': order_line_rec.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, acc_ms_dep_indent_vals)
+								
+								cr.execute("""
+									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
+
+										(
+										select raw.qty as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
+										wo_acc_line.header_id as order_line_id, raw.id as ms_item, acc_order_ms.id as order_ms_id,
+										acc_order_ms.position_id as position_id,acc_order_ms.moc_id as moc_id,'acc'::text as type
+										from ch_ms_raw_material as raw
+										left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
+										left join kg_machine_shop ms_master on ms_master.id = acc_order_ms.ms_id
+										left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
+										left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+										where ms_master.flag_fabrication = 't' and acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
+										from ch_schedule_details  where header_id = %s
+										)										
+										)
+										as sub_query
+										where pump_model_id = %s and order_line_id = %s
+										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id,position_id,moc_id """%(entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
+								acc_ms_product_details = cr.dictfetchall();
+								
+								for acc_ms_indent_item in acc_ms_product_details:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, acc_ms_indent_item['product_id'])
+									
+									if acc_ms_indent_item['type'] == 'foun':
+										ms_raw_obj = self.pool.get('ch.wo.ms.raw')
+										ms_raw_rec = ms_raw_obj.browse(cr, uid, acc_ms_indent_item['ms_item'])
+										ms_bot_id = ms_raw_rec.header_id.ms_id.id
+										fns_item_name = ms_raw_rec.header_id.name
+										
+										ms_order_obj = self.pool.get('ch.order.machineshop.details')
+										ms_order_rec = ms_order_obj.browse(cr, uid, acc_ms_indent_item['order_ms_id'])
+										if ms_order_rec.header_id.pump_model_type == 'horizontal':
+											length = ms_raw_rec.length
+										else:
+											length = ms_order_rec.length
+											if length == 0:
+												length = ms_raw_rec.length
+										
+									elif acc_ms_indent_item['type'] == 'acc':
+										ms_raw_obj = self.pool.get('ch.ms.raw.material')
+										ms_raw_rec = ms_raw_obj.browse(cr, uid, acc_ms_indent_item['ms_item'])
+										ms_bot_id = ms_raw_rec.header_id.id
+										fns_item_name = ms_raw_rec.header_id.code
+										ms_acc_obj = self.pool.get('ch.wo.accessories.ms')
+										ms_order_rec = ms_acc_obj.browse(cr, uid, acc_ms_indent_item['order_ms_id'])
+										length = ms_raw_rec.length
+									else:
+										indent_qty = acc_ms_indent_item['indent_qty']
+										cutting_qty = 0
+										
+								
+									if length > 0:
+										
+										if ms_raw_rec.uom_conversation_factor == 'one_dimension':	
+											if product_rec.uom_id.id == product_rec.uom_po_id.id:
+												indent_qty = acc_ms_indent_item['indent_qty']
+												cutting_qty = acc_ms_indent_item['indent_qty']
+											else:				
+												indent_qty =  (length * ms_raw_rec.temp_qty)
+												cutting_qty = ms_raw_rec.temp_qty
+										if ms_raw_rec.uom_conversation_factor == 'two_dimension':
+											indent_qty = (length * ms_raw_rec.breadth * ms_raw_rec.temp_qty)
+											cutting_qty = ms_raw_rec.temp_qty
+									else:
+										if acc_ms_indent_item['indent_qty'] == None:
+											indent_qty = 0
+										else:
+											indent_qty = acc_ms_indent_item['indent_qty']
+										cutting_qty = 0
+									
+									
+									if indent_qty > 0:
+										
+										if ms_order_rec.flag_dynamic_length == True:
+											pending_qty = 0
+											issue_pending_qty = 0
+											flag_dynamic_length = True
+										else:
+											pending_qty = indent_qty
+											issue_pending_qty = indent_qty
+											flag_dynamic_length = False
+											
+										#~ ### Cutting qty division by qty ###
+										if acc_ms_indent_item['type'] == 'foun':
+											if order_line_rec.order_category in ('pump','access'):
+												cutting_qty = cutting_qty/order_line_rec.qty
+												indent_qty = indent_qty/order_line_rec.qty
+											else:
+												cutting_qty = cutting_qty
+												indent_qty = indent_qty
+										else:
+											cutting_qty = cutting_qty
+											indent_qty = indent_qty
+											
+										
+										acc_ms_dep_indent_line_vals = {
+											'indent_id':indent_id,
+											'product_id':acc_ms_indent_item['product_id'],
+											'uom':acc_ms_indent_item['uom'],
+											'dep_id':dep_id[0],
+											'line_state':'noprocess',
+											'line_date':entry.entry_date,
+											'qty':indent_qty,
+											'pending_qty':pending_qty,
+											'issue_pending_qty':issue_pending_qty,
+											'cutting_qty': cutting_qty,
+											'ms_bot_id':ms_bot_id,
+											'fns_item_name':fns_item_name,
+											#~ 'note': 'Each Item ' + str(ms_raw_rec.length),
+											'position_id': acc_ms_indent_item['position_id'],
+											'moc_id': acc_ms_indent_item['moc_id'],
+											'length': length,
+											'breadth': ms_raw_rec.breadth,
+											'flag_dynamic_length': flag_dynamic_length,
+											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
+										}
+										
+										indent_line_id = dep_indent_line_obj.create(cr, uid, acc_ms_dep_indent_line_vals)
+				
+				
+				### Fabrication True Accessories Machine Shop Item only, Create for line item
+				
+				cr.execute("""
+					select wo_line.header_id as order_id,wo_line.id as order_line_id, acc_order_ms.id as order_ms_id,acc_order_ms.qty as qty,
+					acc_order_ms.ms_id as ms_id,acc_order_ms.moc_id as moc_id
+					
+					from ch_wo_accessories_ms as acc_order_ms
+					left join kg_machine_shop ms_master on ms_master.id = acc_order_ms.ms_id
+					left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
+					left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+					where ms_master.flag_fabrication = 't' and acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
+					from ch_schedule_details  where header_id = %s)"""%(entry.id))
+				
+				flag_fabrication_details = cr.dictfetchall();
+				
+				if flag_fabrication_details:
+					
+					for flag_fabrication_item in flag_fabrication_details:
+						fabrication_obj = self.pool.get('kg.fabrication.process')
+							
+						fabrication_vals = {
+							'order_id':flag_fabrication_item['order_id'],
+							'order_line_id':flag_fabrication_item['order_line_id'],
+							'acc_ms_line_id':flag_fabrication_item['order_ms_id'],
+							'ms_id':flag_fabrication_item['ms_id'],
+							'moc_id':flag_fabrication_item['moc_id'],
+							'schedule_qty':flag_fabrication_item['qty'],
+							'pending_qty':flag_fabrication_item['qty'],
+							'entry_mode':'auto',
+							'state': 'pending',
+							
+							}
+							
+						fabrication_id = fabrication_obj.create(cr, uid, fabrication_vals)
+				
+				
+				### BOT Items Only ###
 						
 				cr.execute("""
 					select order_line_id,pump_model_id,sum(indent_qty) as indent_qty from 
@@ -2107,24 +2794,13 @@ class kg_schedule(osv.osv):
 						from ch_schedule_details  where header_id = %s 
 						)
 						
-						union
-
-						select (raw.qty * acc_order_bot.qty) as indent_qty,raw.product_id,
-						wo_line.id as order_line_id,wo_line.pump_model_id
 						
-						from ch_ms_raw_material as raw
-						left join ch_wo_accessories_bot acc_order_bot on raw.header_id = acc_order_bot.ms_id
-						left join ch_wo_accessories wo_acc_line on acc_order_bot.header_id = wo_acc_line.id
-						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
-						where acc_order_bot.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
-						from ch_schedule_details  where header_id = %s
-						)
 
 						)
 
 						as sub_query
 						group by order_line_id,pump_model_id
-						 """%(entry.id,entry.id))
+						 """%(entry.id))
 				bot_pumpmodel_details = cr.dictfetchall();
 				print"bot_pumpmodel_details",bot_pumpmodel_details
 				if bot_pumpmodel_details:
@@ -2170,7 +2846,7 @@ class kg_schedule(osv.osv):
 
 									select (raw.qty * order_bot.qty) as indent_qty,raw.product_id,raw.uom,
 									order_bot.header_id as order_line_id,wo_line.pump_model_id,order_bot.id as order_bot_id,
-									raw.id as bot_item,order_bot.moc_id as moc_id,'foun' as type
+									raw.id as bot_item,order_bot.moc_id as moc_id,'foun'::text as type
 									from ch_ms_raw_material as raw
 									left join ch_order_bot_details order_bot on raw.header_id = order_bot.bot_id
 									left join ch_work_order_details wo_line on order_bot.header_id = wo_line.id
@@ -2178,25 +2854,14 @@ class kg_schedule(osv.osv):
 									from ch_schedule_details  where header_id = %s
 									)
 									
-									union
-
-									select (raw.qty * acc_order_bot.qty) as indent_qty,raw.product_id,raw.uom,
-									wo_acc_line.header_id as order_line_id,wo_line.pump_model_id,acc_order_bot.id as order_bot_id,
-									raw.id as bot_item,acc_order_bot.moc_id as moc_id,'acc' as type
-									from ch_ms_raw_material as raw
-									left join ch_wo_accessories_bot acc_order_bot on raw.header_id = acc_order_bot.ms_id
-									left join ch_wo_accessories wo_acc_line on acc_order_bot.header_id = wo_acc_line.id
-									left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
-									where acc_order_bot.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
-									from ch_schedule_details  where header_id = %s
-									)
+									
 
 									)
 
 									as sub_query
 									where pump_model_id = %s and order_line_id = %s
 									group by type,order_bot_id,order_line_id,pump_model_id,bot_item,product_id,uom,moc_id
-									 """%(entry.id,entry.id,bot_pm_item['pump_model_id'],order_line_rec.id))
+									 """%(entry.id,bot_pm_item['pump_model_id'],order_line_rec.id))
 							bot_product_details = cr.dictfetchall();
 							
 							for bot_indent_item in bot_product_details:
@@ -2257,6 +2922,154 @@ class kg_schedule(osv.osv):
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, bot_dep_indent_line_vals)
+				
+				
+				### Accessories BOT Items ###
+						
+				cr.execute("""
+					select acc_line_id,order_line_id,pump_model_id,sum(indent_qty) as indent_qty from 
+
+						(	
+
+						select (raw.qty * acc_order_bot.qty) as indent_qty,raw.product_id,
+						wo_line.id as order_line_id,wo_line.pump_model_id,wo_acc_line.id as acc_line_id
+						
+						from ch_ms_raw_material as raw
+						left join ch_wo_accessories_bot acc_order_bot on raw.header_id = acc_order_bot.ms_id
+						left join ch_wo_accessories wo_acc_line on acc_order_bot.header_id = wo_acc_line.id
+						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+						where acc_order_bot.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
+						from ch_schedule_details  where header_id = %s
+						)
+
+						)
+
+						as sub_query
+						group by acc_line_id,order_line_id,pump_model_id
+						 """%(entry.id))
+				acc_bot_pumpmodel_details = cr.dictfetchall();
+				print"bot_pumpmodel_details",acc_bot_pumpmodel_details
+				if acc_bot_pumpmodel_details:
+					
+					for acc_bot_pm_item in acc_bot_pumpmodel_details:
+						
+						### Getting Pump Model Qty ###
+						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, acc_bot_pm_item['order_line_id'])
+						acc_line_rec = self.pool.get('ch.wo.accessories').browse(cr, uid, acc_bot_pm_item['acc_line_id'])
+						acc_qty = int(acc_line_rec.qty)	
+						print "order_line_rec",order_line_rec
+						for indent_header in range(acc_qty): 
+				
+							### Creation of Department Indent Header ###
+							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP3')])
+							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+							
+							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+							seq_name = cr.fetchone();
+							
+							dep_indent_obj = self.pool.get('kg.depindent')
+							acc_bot_dep_indent_vals = {
+								'name':'',
+								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+								'dep_name':dep_id[0],
+								'entry_mode':'auto',
+								'state': 'approved',
+								'indent_type': 'production',
+								'name': seq_name[0],
+								'order_id': order_line_rec.header_id.id,
+								'order_line_id': order_line_rec.id,
+								'src_location_id': location.main_location.id,
+								'dest_location_id': location.stock_location.id
+								}
+						
+							indent_id = dep_indent_obj.create(cr, uid, acc_bot_dep_indent_vals)
+							
+							cr.execute("""
+								select type,order_bot_id,order_line_id,pump_model_id,bot_item,product_id,uom,moc_id,sum(indent_qty) as indent_qty from 
+
+									(								
+
+									select (raw.qty * acc_order_bot.qty) as indent_qty,raw.product_id,raw.uom,
+									wo_acc_line.header_id as order_line_id,wo_line.pump_model_id,acc_order_bot.id as order_bot_id,
+									raw.id as bot_item,acc_order_bot.moc_id as moc_id,'acc'::text as type
+									from ch_ms_raw_material as raw
+									left join ch_wo_accessories_bot acc_order_bot on raw.header_id = acc_order_bot.ms_id
+									left join ch_wo_accessories wo_acc_line on acc_order_bot.header_id = wo_acc_line.id
+									left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+									where acc_order_bot.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
+									from ch_schedule_details  where header_id = %s
+									)
+
+									)
+
+									as sub_query
+									where pump_model_id = %s and order_line_id = %s
+									group by type,order_bot_id,order_line_id,pump_model_id,bot_item,product_id,uom,moc_id
+									 """%(entry.id,acc_bot_pm_item['pump_model_id'],order_line_rec.id))
+							acc_bot_product_details = cr.dictfetchall();
+							
+							for acc_bot_indent_item in acc_bot_product_details:
+								dep_indent_line_obj = self.pool.get('kg.depindent.line')
+								product_rec = self.pool.get('product.product').browse(cr, uid, acc_bot_indent_item['product_id'])
+								
+								ms_raw_obj = self.pool.get('ch.ms.raw.material')
+								ms_raw_rec = ms_raw_obj.browse(cr, uid, acc_bot_indent_item['bot_item'])
+
+								if acc_bot_indent_item['type'] == 'foun':
+
+									bot_order_obj = self.pool.get('ch.order.bot.details')
+									bot_order_rec = bot_order_obj.browse(cr, uid, acc_bot_indent_item['order_bot_id'])
+									ms_bot_id = bot_order_rec.bot_id.id
+									fns_item_name = bot_order_rec.bot_id.code
+									brand_id = bot_order_rec.brand_id.id
+								
+								if acc_bot_indent_item['type'] == 'acc':
+
+									bot_order_obj = self.pool.get('ch.wo.accessories.bot')
+									bot_order_rec = bot_order_obj.browse(cr, uid, acc_bot_indent_item['order_bot_id']) 
+									ms_bot_id = bot_order_rec.ms_id.id
+									fns_item_name = bot_order_rec.ms_id.code
+									brand_id = False
+								
+								if acc_bot_indent_item['type'] == 'foun':
+									indent_qty = acc_bot_indent_item['indent_qty']/order_line_rec.qty
+								else:
+									indent_qty = acc_bot_indent_item['indent_qty']
+								
+								### Cutting qty calculation for Two dimensional product ###
+								length = 0
+								breadth = 0
+								cutting_qty = 0
+								if ms_raw_rec.uom_conversation_factor == 'two_dimension':
+									length = ms_raw_rec.length
+									breadth = ms_raw_rec.breadth
+									cutting_qty = ms_raw_rec.temp_qty
+								
+								acc_bot_dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id':acc_bot_indent_item['product_id'],
+									'uom':acc_bot_indent_item['uom'],
+									'dep_id':dep_id[0],
+									'line_state':'noprocess',
+									'line_date':entry.entry_date,
+									'qty': indent_qty,
+									'pending_qty': indent_qty,
+									'issue_pending_qty': indent_qty,
+									'ms_bot_id':ms_bot_id,
+									'fns_item_name':fns_item_name,
+									'brand_id':brand_id,
+									'moc_id': acc_bot_indent_item['moc_id'],
+									'cutting_qty': cutting_qty,
+									'length': length,
+									'breadth': ms_raw_rec.breadth,
+									'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
+								}
+								
+								indent_line_id = dep_indent_line_obj.create(cr, uid, acc_bot_dep_indent_line_vals)
+				
+				
 							
 			else:
 				raise osv.except_osv(_('Warning !'), _('System not allow to confirm an entry without Schedule details!!'))
@@ -2288,7 +3101,8 @@ class kg_schedule(osv.osv):
 					else:
 						accessories = 'no'
 					sch_vals = {
-						'order_id': order_line_rec.id,
+						'order_id': order_line_rec.header_id.id,
+						'order_line_id': order_line_rec.id,
 						'order_category': order_line_rec.order_category,		
 						'pump_model_type':order_line_rec.pump_model_type,
 						'order_priority': order_line_rec.order_priority,
@@ -2627,6 +3441,131 @@ class ch_stock_allocation_detail(osv.osv):
 	   ]
 	
 ch_stock_allocation_detail()
+
+
+
+class kg_fabrication_process(osv.osv):
+
+	_name = "kg.fabrication.process"
+	_description = "Fabrication Process"	
+	
+	_columns = {	
+		
+	   
+		'order_id': fields.many2one('kg.work.order','Order Id'),
+		'order_line_id': fields.many2one('ch.work.order.details','Order No.'),
+		'order_ref_no': fields.related('order_id','name', type='char', string='Order Reference', store=True, readonly=True),
+		'order_priority': fields.related('order_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
+		'order_category': fields.related('order_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Order Category', store=True, readonly=True),
+		'pump_model_id': fields.related('order_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
+		'order_delivery_date': fields.related('order_line_id','delivery_date', type='date', string='Delivery Date', store=True, readonly=True),
+		'note': fields.related('order_line_id','note',type='text',string='WO Remarks',store=True,readonly=True),	
+		
+		
+		'ms_id': fields.many2one('kg.machine.shop','Item Code',readonly=True),
+		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True,readonly=True), 		
+		'moc_id': fields.many2one('kg.moc.master','MOC',readonly=True),		
+		'ms_line_id': fields.many2one('ch.order.machineshop.details','MS Line Id'),		
+		'acc_ms_line_id': fields.many2one('ch.wo.accessories.ms','ACC MS Line Id'),		
+		'schedule_qty': fields.integer('Schedule Qty'),
+		'pending_qty': fields.integer('Pending Qty'),		
+		'pending_update_qty': fields.integer('Pending Update Qty'),		
+		'qty': fields.integer('Quantity'),
+		'inward_accept_qty': fields.integer('Accepted Qty'),
+		'inward_qty': fields.integer('Accepted Qty'),
+		'inward_rej_qty': fields.integer('Rejected Qty'),
+		'rej_reason': fields.char('Reason of Rejection'),
+		
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'operator': fields.many2one('hr.employee','Completed by'),	   
+		
+		'remarks': fields.text('Remarks'),
+		'active': fields.boolean('Active'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode',required=True,readonly=True),
+		
+		'state': fields.selection([('pending','Pending'),('partial','Partial'),('complete','Completed'),('accept','Accepted')],'State', readonly=True),
+		
+		### Entry Info ###
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	 
+		
+	
+	}
+
+	
+	_defaults = {   
+		
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.fabrication.process', context=c),
+		'active': True,
+		'state': 'pending',		
+		'entry_mode': 'manual',
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),		
+		'inward_qty':0,		
+		'qty':0,		
+	}
+	
+	def entry_update(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])			
+		if rec.qty <= 0.00:
+			raise osv.except_osv(_('Warning !'), _('System not allow to zero andless than zero qty .!!'))
+		if rec.pending_qty < rec.qty:
+			raise osv.except_osv(_('Warning !'), _('Excess Qty not update. Kindly check !!'))			
+		total_rem_qty = rec.pending_qty - rec.qty 
+		if total_rem_qty == 0.00:			
+			state = 'complete'
+		if total_rem_qty > 0.00:
+			state = 'partial'		
+		self.write(cr, uid, ids, {'state': state,'pending_qty':total_rem_qty,'pending_update_qty':rec.pending_update_qty + rec.qty})
+		return True
+		
+	def entry_inward(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		ms_shop_id = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',rec.order_line_id.id),('ms_id','=',rec.ms_id.id)])
+		if ms_shop_id != []:
+			ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])			
+			total_qty = rec.inward_accept_qty + rec.inward_rej_qty + rec.inward_qty					
+			if rec.schedule_qty < total_qty:
+				raise osv.except_osv(_('Warning !'), _('Excess Qty not update. Kindly check !!'))				
+			if (rec.pending_update_qty + rec.inward_accept_qty)  < (rec.inward_rej_qty + rec.inward_qty):
+				raise osv.except_osv(_('Warning !'), _('Excess Qty not update. Kindly check !!'))
+			if rec.inward_qty <= 0.00 and rec.inward_rej_qty <= 0.00:
+				raise osv.except_osv(_('Warning !'), _('System not allow to zero and less than zero qty .!!'))
+			if rec.inward_qty < 0.00 or rec.inward_rej_qty < 0.00:
+				raise osv.except_osv(_('Warning !'), _('System not allow to negative qty .!!'))			
+			if rec.schedule_qty == (rec.inward_accept_qty + rec.inward_qty):
+				self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':'accept'})
+				state = 'accept'	
+				pending_qty = rec.pending_qty
+			else:
+				state = 'pending'
+				pending_qty = rec.pending_qty + rec.inward_rej_qty		
+			
+		else:
+			raise osv.except_osv(_('Warning !'), _('Records not available in Machineshop Process !!'))
+		self.write(cr, uid, ids, {'state': state,'pending_qty':pending_qty,'inward_accept_qty':rec.inward_accept_qty + rec.inward_qty})
+		return True
+		
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.id:				
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_fabrication_process, self).write(cr, uid, ids, vals, context)
+	
+kg_fabrication_process()
+
+
+
 
 
 

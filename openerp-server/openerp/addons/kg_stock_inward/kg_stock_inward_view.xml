@@ -164,7 +164,7 @@
 			<field name="name">Stock Inward Details</field>
 			<field name="model">ch.stock.inward.details</field>
 			<field name="arch" type="xml">
-				<form string="Stock Inward Details" version="7.0">
+				<form string="Stock Inward Details" version="7.0" delete="false" create="false">
 					<header>
 						<button name="entry_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>					
@@ -389,7 +389,7 @@
 			<field name="name">Stk Items</field>
 			<field name="model">ch.stock.inward.details</field>
 			<field name="arch" type="xml">
-				<form string="Stock Inward" version="7.0">
+				<form string="Stock Inward" version="7.0" delete="false">
 					<header>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>					
