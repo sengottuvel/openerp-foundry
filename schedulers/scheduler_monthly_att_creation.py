@@ -13,4 +13,4 @@ sock = xmlrpclib.ServerProxy('http://localhost:8069/xmlrpc/object')
 ## Scheduler List#
 sock.execute(dbname, uid, pwd, 'kg.daily.attendance', 'month_att_entry_creation')
 sock.execute(dbname, uid, pwd, 'kg.monthly.attendance', 'month_att_entry_creation')
-sock.execute(dbname, uid, pwd, 'kg.monthly.attendance', 'update_monthly_att')
+#~ sock.execute(dbname, uid, pwd, 'kg.monthly.attendance', 'update_monthly_att')
