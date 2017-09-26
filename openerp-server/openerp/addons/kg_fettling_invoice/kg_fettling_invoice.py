@@ -14,11 +14,13 @@ dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 	
 ORDER_PRIORITY = [
    ('1','MS NC'),
-   ('2','NC'),
-   ('3','Service'),
-   ('4','Emergency'),
-   ('5','Spare'),
-   ('6','Normal'),
+   ('2','Break down'),
+   ('3','Emergency'),
+   ('4','Service'),
+   ('5','FDY-NC'),
+   ('6','Spare'),
+   ('7','Urgent'),
+   ('8','Normal'),
   
 ]
 
@@ -53,13 +55,16 @@ class kg_fettling_invoice(osv.osv):
 				'amount_total':0.0,
 				'payable_amt':0.0,
 				'additional_charges':0.0,
+				'advance_amt':0.0,
 			}
-			tax_amt = discount_value = final_other_charges = 0.00
+			tax_amt = discount_value = final_other_charges = advance_net_amt = 0.00
 			total_value_amt = 0.00
 			for line in order.line_ids:
-				total_value_amt += line.total_value
+				total_value_amt += line.total_value			
 			for item in order.line_ids_a:				
-				final_other_charges += item.expense_amt			
+				final_other_charges += item.expense_amt
+			for line in order.line_ids_b:
+				advance_net_amt += line.current_adv_amt 		
 			if order.discount > 0:
 				discount = order.discount
 			else:
@@ -82,9 +87,10 @@ class kg_fettling_invoice(osv.osv):
 			res[order.id]['total_discount'] = discount_value
 			res[order.id]['amount_tax'] = tax_amt
 			res[order.id]['additional_charges'] = final_other_charges
+			res[order.id]['advance_amt'] = advance_net_amt
 			res[order.id]['total_amt'] = final_other_charges + total_value_amt + tax_amt
-			res[order.id]['amount_total'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - discount_value
-			res[order.id]['payable_amt'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - discount_value
+			res[order.id]['amount_total'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - (discount_value + advance_net_amt)
+			res[order.id]['payable_amt'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - (discount_value + advance_net_amt)
 		return res	
 	_columns = {
 	
@@ -124,14 +130,14 @@ class kg_fettling_invoice(osv.osv):
 		
 		## Module Requirement Info	
 		
-		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True,domain="[('contractor','=','t')]"),		
+		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True,domain="[('contractor','=','t'),('partner_state','=','approve')]"),		
 		'phone': fields.char('Phone',size=64),
 		'contact_person': fields.char('Contact Person', size=128),
 				
 		'inward_fettling_line_ids': fields.many2many('ch.fettling.inward.line','m2m_fettling_invoice_details' , 'order_id', 'inward_id', 'SC Items',
 			domain="[('flag_invoice','=',False),('contractor_id','=',contractor_id)]"),	 		
 		
-		'division_id': fields.many2one('kg.division.master', 'Division',required=True),	
+		'division_id': fields.many2one('kg.division.master', 'Division',required=True,domain="[('state','=','approved')]"),	
 		
 		## Calculation process Start now 
 		
@@ -155,6 +161,7 @@ class kg_fettling_invoice(osv.osv):
 		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',store=True,multi="sums",help="Net Amount"),
 		'payable_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Payable Amount',store=True,multi="sums",help="Payable Amount"),
 		'additional_charges': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Additional Charges',store=True,multi="sums",help="Additional Charges"),
+		'advance_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Adjected Advance Amount(-)',multi="sums",store=True ,readonly=True),
 		'round_off_amt': fields.float('Round off(+/-)'),
 				
 		##Accounts Process
@@ -164,6 +171,7 @@ class kg_fettling_invoice(osv.osv):
 				
 		'line_ids': fields.one2many('ch.fettling.invoice.line', 'header_id', "Line Details"),
 		'line_ids_a': fields.one2many('ch.fettling.invoice.expense.track','header_id',"Expense Track"),
+		'line_ids_b': fields.one2many('ch.foundry.advance.details','header_id',"Advance Details"),
 				
 	}
 		
@@ -226,9 +234,11 @@ class kg_fettling_invoice(osv.osv):
 	   ]
 	   
 	def onchange_contractor(self, cr, uid, ids, contractor_id):
+		value = {'contact_person': '','phone':''}
 		if contractor_id:
 			contractor_rec = self.pool.get('res.partner').browse(cr, uid, contractor_id)
-		return {'value': {'contact_person':contractor_rec.contact_person,'phone':contractor_rec.phone  }}
+			value = {'contact_person':contractor_rec.contact_person,'phone':contractor_rec.phone  }		
+		return {'value': value}
 		
 	def update_line_items(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -363,7 +373,24 @@ class kg_fettling_invoice(osv.osv):
 			raise osv.except_osv(_('Book Configuration Warning !!'),
 				_('Type is purchase book should be created !!'))		
 		journal_rec = self.pool.get('account.journal').browse(cr,uid,journal_ids[0])
-		if rec.state == 'approved':	
+		if rec.state == 'approved':
+			
+			## Advance code added start ##
+			adjusted_amt = 0.00
+			balance_amt = 0.00
+			cus_adv_obj = self.pool.get('kg.subcontract.advance')			
+			cus_adv_inv_obj = self.pool.get('ch.foundry.advance.details')							
+			for line in rec.line_ids_b:	
+				print"line.order_id",line.order_id
+				adv_ids = self.pool.get('kg.subcontract.advance').search(cr, uid, [('fou_wo_id','=',line.order_id.id)])
+				print"adv_ids",adv_ids							
+				adv_rec = self.pool.get('kg.subcontract.advance').browse(cr, uid,adv_ids[0])				
+				adjusted_amt = adv_rec.adjusted_amt + line.current_adv_amt 
+				balance_amt = line.current_adv_amt - adjusted_amt
+				cus_adv_obj.write(cr, uid, line.sub_advance_id.id, {'adjusted_amt': adjusted_amt,'balance_amt':balance_amt})	
+			
+			## Advance code added end ##
+				
 			total_value_amt = 0.00
 			for line in rec.line_ids:
 				total_value_amt += line.total_value	
@@ -497,7 +524,32 @@ class kg_fettling_invoice(osv.osv):
 		else:
 			pass	
 		
-		
+	
+	
+	def load_advance(self, cr, uid, ids,context=None):
+		invoice_rec = self.browse(cr,uid,ids[0])
+		cus_adv_obj = self.pool.get('kg.subcontract.advance')		
+		cus_inadv_obj = self.pool.get('ch.foundry.advance.details')	
+		del_sql = """delete from ch_foundry_advance_details where header_id=%s"""%(ids[0])
+		cr.execute(del_sql)
+		for item in [x.id for x in invoice_rec.inward_fettling_line_ids]:			
+			work_rec_obj = self.pool.get('ch.fettling.inward.line').browse(cr,uid,item)							
+			adv_search = self.pool.get('kg.subcontract.advance').search(cr, uid, [('fou_wo_id','=',work_rec_obj.sub_wo_line_id.header_id.id)])
+			cr.execute(""" select * from kg_subcontract_advance where fou_wo_id = %s and balance_amt > 0 and state='confirmed'""" %(work_rec_obj.sub_wo_line_id.header_id.id))
+			adv_data = cr.dictfetchall()			
+			for adv in adv_data:
+				print"adv['order_id']0",adv['fou_wo_id']
+				cus_inadv_obj.create(cr,uid,{
+					'order_id' : adv['fou_wo_id'],
+					'sub_advance_id' : adv['id'],
+					'sub_advance_date' : adv['entry_date'],
+					'tot_advance_amt' : adv['advance_amt'],
+					'balance_amt' : adv['balance_amt'],
+					'current_adv_amt' : 0.0,
+					'header_id' : invoice_rec.id,
+					})
+				
+		return True	
 		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
@@ -552,13 +604,13 @@ class ch_fettling_invoice_line(osv.osv):
 		'contractor_id': fields.related('header_id','contractor_id', type='many2one', relation='res.partner', string='Contractor Name', store=True, readonly=True),
 		
 		'fettling_id': fields.many2one('kg.fettling','Fettling Id'),		
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number'),		
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',domain="[('state','=','approved')]"),		
 		'pattern_code': fields.char('Pattern Code'),
 		'pattern_name': fields.char('Pattern Name'),		
-		'moc_id': fields.many2one('kg.moc.master','MOC', required=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved')]"),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved')]"),
 		
-		'stage_id':fields.many2one('kg.stage.master','Stage'),
+		'stage_id':fields.many2one('kg.stage.master','Stage',domain="[('state','=','approved')]"),
 		'stage_name': fields.char('Stage Name'),
 		
 		'pour_id':fields.many2one('kg.pouring.log','Pour Id'),
@@ -583,7 +635,7 @@ class ch_fettling_invoice_line(osv.osv):
 		'schedule_line_id': fields.many2one('ch.schedule.details','Schedule Line Item'),
 		
 		'com_moc_stage_id': fields.many2many('ch.fettling.process', 'm2m_invoice_com_stage_details','com_invoice_sub_id','com_invoice_stage_id','Completed Stage', domain="[('header_id','=',moc_id)]"),	
-		
+		'each_weight': fields.related('fettling_id','each_weight', type='float', string='Weight(kgs)', store=True, readonly=True),
 		'actual_qty': fields.integer('Actual Qty',readonly=True),
 		'seq_no':fields.integer('Sequence'),
 		'qty': fields.integer('Quantity'),				
@@ -631,7 +683,7 @@ class ch_fettling_invoice_expense_track(osv.osv):
 		'description': fields.char('Description'),
 		'remark': fields.text('Remarks'),		
 		'expense_amt': fields.function(_get_total_amt, string='Total Amount',digits=(16,2), method=True, store=True, type='float'),		
-		'expense': fields.many2one('kg.expense.master','Expense'),
+		'expense': fields.many2one('kg.expense.master','Expense',domain="[('state','=','approved')]"),
 		
 	}
 	
@@ -643,4 +695,43 @@ class ch_fettling_invoice_expense_track(osv.osv):
 		}	
 	
 ch_fettling_invoice_expense_track()
+
+
+
+class ch_foundry_advance_details(osv.osv):
+
+	_name = "ch.foundry.advance.details"
+	_description = "Subcontract Advance Details"
+	_columns = {
+	
+		'header_id':fields.many2one('kg.fettling.invoice', 'Invoice advance', ondelete='cascade'),
+		'sub_advance_id' : fields.many2one('kg.subcontract.advance', 'Advance No', readonly=True),
+		'sub_advance_date': fields.date('Advance Date'),
+		'sub_advance_line_id' : fields.many2one('ch.subcontract.advance.line', 'Contractor Advance Line', readonly=True),		
+		'order_id': fields.many2one('kg.fettling.workorder','WO No.'),		
+		'order_amt': fields.float('Order Amount', readonly=True),
+		'tot_advance_amt': fields.float('Advance Amount', readonly=True),
+		'already_adjusted_amt': fields.float('Already Adjusted Advance Amount', readonly=True),
+		'balance_amt': fields.float('Balance Advance', readonly=True),
+		'current_adv_amt': fields.float('Current Adjustment Amount',required=True),
+		
+		
+	}
+	
+	def _current_adv_amt(self,cr,uid,ids,context = None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.current_adv_amt > rec.balance_amt:
+			return False
+		else:
+			return True
+			
+	_constraints = [		
+			  
+		
+		(_current_adv_amt, 'Please Check the Current Adjustment Amount. Balance amount should be less than Current Adjustment Amount!!',['Current Adjustment Amount']),
+
+	   ]
+				
+ch_foundry_advance_details()
+
 
