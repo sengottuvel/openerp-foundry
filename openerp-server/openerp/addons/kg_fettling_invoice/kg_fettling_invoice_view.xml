@@ -89,22 +89,6 @@
 								</tree>
 							</field>					
 							</group>
-							
-							<button name="load_advance" string="Load Advance" type="object"/>
-							    <group string = "Advance Adjustment Details">
-									 <field name="line_ids_b" nolabel="1" widget="one2many_list" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}">
-										<tree editable="bottom" create="false" >
-											<field name="order_id" required="1" readonly="1"/>
-											<field name="order_amt" invisible="1"/>
-											<field name="sub_advance_id"/>
-											<field name="sub_advance_date" readonly="1"/>
-											<field name="tot_advance_amt" />
-											<field name="already_adjusted_amt" invisible="1"/>
-											<field name="balance_amt"/>
-											<field name="current_adv_amt"/>
-										</tree>
-									  </field>
-							    </group>
 						</page>
 						
 						<page string="Entry Info">
@@ -150,7 +134,6 @@
 						<field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 						<field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>  
 						<field name="additional_charges" widget='monetary' options="{'currency_field': 'currency_id'}"/>                                  
-						<field name="advance_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>                                  
 						<field name="total_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>                   
 						<field name="round_off_amt" widget='monetary' attrs="{'readonly': [('state', 'not in', ['draft','confirm'])]}"
 								options="{'currency_field': 'currency_id'}"/>                                
@@ -279,22 +262,6 @@
 								</tree>
 							</field>					
 							</group>
-							
-							<button name="load_advance" string="Load Advance" type="object"/>
-							    <group string = "Advance Adjustment Details">
-									 <field name="line_ids_b" nolabel="1" widget="one2many_list" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}">
-										<tree editable="bottom" create="false" >
-											<field name="order_id" required="1" readonly="1"/>
-											<field name="order_amt" invisible="1"/>
-											<field name="sub_advance_id"/>
-											<field name="sub_advance_date" readonly="1"/>
-											<field name="tot_advance_amt" />
-											<field name="already_adjusted_amt" invisible="1"/>
-											<field name="balance_amt"/>
-											<field name="current_adv_amt"/>
-										</tree>
-									  </field>
-							    </group>
 						</page>
 						
 						<page string="Entry Info">
@@ -336,8 +303,7 @@
 					<group class="oe_subtotal_footer oe_right" colspan="2" name="Invoice Total">	
 						<field name="total_discount" widget='monetary' options="{'currency_field': 'currency_id'}"/>				
 						<field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>						
-						<field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/> 
-						<field name="advance_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>                                      
+						<field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>                                
 						<field name="total_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>    
 						<field name="additional_charges" widget='monetary' options="{'currency_field': 'currency_id'}"/>                   
 						<field name="round_off_amt" widget='monetary' attrs="{'readonly': [('state', 'not in', ['draft','confirm'])]}"
