@@ -65,13 +65,15 @@
 								<field name="term_data" readonly="1" width="100" filename="term_copy"/>
 							</group>
 							<group string="Breakups">
+								<field name="offer_prime_cost_tot"/>
 								<field name="offer_sam_ratio_tot"/>
+								<field name="sam_ratio_tot"/>
 								<field name="offer_dealer_discount_tot"/>
 								<field name="offer_spl_discount_tot"/>
-								<field name="offer_p_f_tot"/>
-								<field name="offer_insurance_tot"/>
 							</group>
 							<group>
+								<field name="offer_p_f_tot"/>
+								<field name="offer_insurance_tot"/>
 								<field name="offer_freight_tot"/>
 								<field name="offer_tax_tot"/>
 								<field name="offer_customer_discount_tot"/>
@@ -149,7 +151,7 @@
 								<div>
 									<div class="address_format">
 										<field name="r_o_customer_discount" style="width: 21%%"/>
-										<field name="r_o_cust_in_ex" style="width: 19%%" attrs="{'required': [('r_o_customer_discount','>',0)]}"/>
+										<field name="r_o_cust_in_ex" style="width: 19%%" attrs="{'required': [('r_o_customer_discount','>',0)]}" invisible="0"/>
 									</div>
 								</div>
 							</group>
@@ -174,6 +176,7 @@
 									<field name="r_freight"/>
 									<field name="r_insurance"/>
 									<field name="r_customer_discount"/>
+									<field name="r_net_amt_tot"/>
 									<field name="gst"/>
 									<field name="r_net_amount" sum="net_amount"/>
 <!--
@@ -236,6 +239,7 @@
 									<field name="r_freight"/>
 									<field name="r_insurance"/>
 									<field name="r_customer_discount"/>
+									<field name="r_net_amt_tot"/>
 									<field name="gst"/>
 									<field name="r_net_amount" sum="net_amount"/>
 									
@@ -284,6 +288,7 @@
 									<field name="r_freight"/>
 									<field name="r_insurance"/>
 									<field name="r_customer_discount"/>
+									<field name="r_net_amt_tot"/>
 									<field name="gst"/>
 									<field name="r_net_amount" sum="net_amount"/>
 									

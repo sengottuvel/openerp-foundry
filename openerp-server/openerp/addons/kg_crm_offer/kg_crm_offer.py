@@ -31,7 +31,7 @@ class kg_crm_offer(osv.osv):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
 		pump_net_amount = spare_net_amount = access_net_amount = offer_net_amount = component_net_amount = supervision_amount = 0.00
-		offer_sam_ratio_tot = offer_dealer_discount_tot = offer_spl_discount_tot = offer_p_f_tot = offer_insurance_tot = offer_freight_tot = offer_tax_tot = offer_customer_discount_tot = 0.00
+		offer_sam_ratio_tot = offer_dealer_discount_tot = offer_spl_discount_tot = offer_p_f_tot = offer_insurance_tot = offer_freight_tot = offer_tax_tot = offer_customer_discount_tot = offer_prime_cost_tot = sam_ratio_tot = 0.00
 		for order in self.browse(cr, uid, ids, context=context):
 			res[order.id] = {
 				'pump_net_amount': 0.0,
@@ -40,6 +40,7 @@ class kg_crm_offer(osv.osv):
 				'offer_net_amount': 0.0,
 				'component_net_amount': 0.0,
 				'supervision_amount': 0.0,
+				'offer_prime_cost_tot': 0.0,
 			}
 			
 			#~ cur = order.customer_id.property_product_pricelist_purchase.currency_id
@@ -50,7 +51,7 @@ class kg_crm_offer(osv.osv):
 				supervision_amount += line.supervision_amount
 				offer_sam_ratio_tot += line.r_sam_ratio_tot
 				print"pump_offer_sam_ratio_tot-------------------",offer_sam_ratio_tot
-				
+				offer_prime_cost_tot += line.prime_cost
 				offer_dealer_discount_tot += line.r_dealer_discount_tot
 				offer_spl_discount_tot += line.r_spl_discount_tot
 				offer_p_f_tot += line.r_p_f_tot
@@ -58,13 +59,14 @@ class kg_crm_offer(osv.osv):
 				offer_freight_tot += line.r_freight_tot
 				offer_tax_tot += line.r_tax_tot
 				offer_customer_discount_tot += line.r_customer_discount_tot
-				offer_net_amount += line.r_net_amount
+				offer_net_amount += line.r_net_amt_tot
 			for line in order.line_spare_ids:
 				spare_net_amount += line.net_amount
 				print"spare_net_amount",spare_net_amount
 				supervision_amount += line.supervision_amount
 				offer_sam_ratio_tot += line.r_sam_ratio_tot
 				print"sasasasaoffer_sam_ratio_tot",offer_sam_ratio_tot
+				offer_prime_cost_tot += line.prime_cost
 				offer_dealer_discount_tot += line.r_dealer_discount_tot
 				offer_spl_discount_tot += line.r_spl_discount_tot
 				offer_p_f_tot += line.r_p_f_tot
@@ -72,12 +74,13 @@ class kg_crm_offer(osv.osv):
 				offer_freight_tot += line.r_freight_tot
 				offer_tax_tot += line.r_tax_tot
 				offer_customer_discount_tot += line.r_customer_discount_tot
-				offer_net_amount += line.r_net_amount
+				offer_net_amount += line.r_net_amt_tot
 			for line in order.line_accessories_ids:
 				access_net_amount += line.net_amount
 				print"access_net_amount",access_net_amount
 				offer_sam_ratio_tot += line.r_sam_ratio_tot
 				print"acacaoffer_sam_ratio_tot",offer_sam_ratio_tot
+				offer_prime_cost_tot += line.prime_cost
 				offer_dealer_discount_tot += line.r_dealer_discount_tot
 				offer_spl_discount_tot += line.r_spl_discount_tot
 				offer_p_f_tot += line.r_p_f_tot
@@ -85,7 +88,7 @@ class kg_crm_offer(osv.osv):
 				offer_freight_tot += line.r_freight_tot
 				offer_tax_tot += line.r_tax_tot
 				offer_customer_discount_tot += line.r_customer_discount_tot
-				offer_net_amount += line.r_net_amount
+				offer_net_amount += line.r_net_amt_tot
 			for line in order.line_component_ids:
 				component_net_amount += line.net_amount
 				print"component_net_amount",component_net_amount
@@ -96,6 +99,9 @@ class kg_crm_offer(osv.osv):
 			print"pump_net_amount",pump_net_amount
 			print"access_net_amount",access_net_amount
 			#~ res[order.id]['offer_net_amount'] = pump_net_amount + spare_net_amount + access_net_amount
+			sam_ratio_tot = offer_sam_ratio_tot / offer_prime_cost_tot
+			res[order.id]['sam_ratio_tot'] = sam_ratio_tot
+			res[order.id]['offer_prime_cost_tot'] = offer_prime_cost_tot
 			res[order.id]['offer_sam_ratio_tot'] = offer_sam_ratio_tot
 			res[order.id]['offer_dealer_discount_tot'] = offer_dealer_discount_tot
 			res[order.id]['offer_spl_discount_tot'] = offer_spl_discount_tot
@@ -222,39 +228,41 @@ class kg_crm_offer(osv.osv):
 		'r_o_cust_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Customer Discount',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		# Pump Offer Fields
-		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
-		'pump_sam_ratio': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
-		'pump_dealer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
-		'pump_customer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
-		'pump_tax': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),	
-		'pump_p_f': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
-		'pump_freight': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
-		'pump_insurance': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
-		'pump_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
+		'offer_prime_cost_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Primecost',multi="sums",store=True),
+		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),
+		'pump_sam_ratio': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),
+		'pump_dealer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),
+		'pump_customer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),
+		'pump_tax': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),
+		'pump_p_f': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
+		'pump_freight': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),
+		'pump_insurance': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
+		'pump_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
 		
 		# Spare Offer Fields
-		'spare_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
-		'spare_sam_ratio': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
-		'spare_dealer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
-		'spare_customer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
-		'spare_tax': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),	
-		'spare_p_f': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
-		'spare_freight': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
-		'spare_insurance': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
-		'spare_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
+		'spare_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),
+		'spare_sam_ratio': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),
+		'spare_dealer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),
+		'spare_customer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),
+		'spare_tax': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),
+		'spare_p_f': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
+		'spare_freight': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),
+		'spare_insurance': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
+		'spare_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
 		
 		# Accessories Offer Fields
-		'access_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
-		'access_sam_ratio': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
-		'access_dealer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
-		'access_customer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
-		'access_tax': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),	
-		'access_p_f': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
-		'access_freight': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
-		'access_insurance': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
-		'access_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
+		'access_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),
+		'access_sam_ratio': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),
+		'access_dealer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),
+		'access_customer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),
+		'access_tax': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),
+		'access_p_f': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
+		'access_freight': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),
+		'access_insurance': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
+		'access_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
 		
 		'offer_sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Works Value',multi="sums",store=True),
+		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),
 		'offer_dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Dsicount',multi="sums",store=True),
 		'offer_spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount',multi="sums",store=True),
 		'offer_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
@@ -317,7 +325,7 @@ class kg_crm_offer(osv.osv):
 		'is_zero_offer': False,
 		'flag_data_bank': False,
 		'off_status': 'to_be_follow',
-		
+		'r_o_cust_in_ex':'inclusive',
 	}
 	
 	def _supervision(self, cr, uid, ids, context=None):		
@@ -2323,7 +2331,7 @@ class ch_pump_offer(osv.osv):
 		'r_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'r_supervision_amount': fields.float('Supervision(Rs.)'),
 		'r_additional_cost': fields.float('Additional Cost'),
-		'r_cpo_amount': fields.float('CPO Value'),
+		'r_cpo_amount': fields.float('CPO(Total Qty)'),
 		'r_cpo_amount_tot': fields.float('CPO',readonly=True),
 		'cpo_quote_cust': fields.selection([('quoted','Quoted price'),('cust_po','Customer price')],'CPO Value'),
 		
@@ -2925,7 +2933,7 @@ class ch_spare_offer(osv.osv):
 		'r_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'r_supervision_amount': fields.float('Supervision(Rs.)'),
 		'r_additional_cost': fields.float('Additional Cost'),
-		'r_cpo_amount': fields.float('CPO Value'),
+		'r_cpo_amount': fields.float('CPO(Total Qty)'),
 		'r_cpo_amount_tot': fields.float('CPO',readonly=True),
 		'cpo_quote_cust': fields.selection([('quoted','Quoted price'),('cust_po','Customer price')],'CPO Value'),
 		
@@ -3340,7 +3348,7 @@ class ch_accessories_offer(osv.osv):
 		'r_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'r_supervision_amount': fields.float('Supervision(Rs.)'),
 		'r_additional_cost': fields.float('Additional Cost'),
-		'r_cpo_amount': fields.float('CPO Value'),
+		'r_cpo_amount': fields.float('CPO(Total Qty)'),
 		'r_cpo_amount_tot': fields.float('CPO',readonly=True),
 		'cpo_quote_cust': fields.selection([('quoted','Quoted price'),('cust_po','Customer price')],'CPO Value'),
 		
