@@ -2370,8 +2370,7 @@ class kg_schedule(osv.osv):
 							'ms_line_id':flag_fabrication_item['order_ms_id'],
 							'ms_id':flag_fabrication_item['ms_id'],
 							'moc_id':flag_fabrication_item['moc_id'],
-							'schedule_qty':flag_fabrication_item['qty'],
-							'pending_qty':flag_fabrication_item['qty'],
+							'schedule_qty':flag_fabrication_item['qty'],							
 							'entry_mode':'auto',
 							'state': 'pending',
 							
@@ -2768,8 +2767,7 @@ class kg_schedule(osv.osv):
 							'acc_ms_line_id':flag_fabrication_item['order_ms_id'],
 							'ms_id':flag_fabrication_item['ms_id'],
 							'moc_id':flag_fabrication_item['moc_id'],
-							'schedule_qty':flag_fabrication_item['qty'],
-							'pending_qty':flag_fabrication_item['qty'],
+							'schedule_qty':flag_fabrication_item['qty'],							
 							'entry_mode':'auto',
 							'state': 'pending',
 							
@@ -3466,14 +3464,17 @@ class kg_fabrication_process(osv.osv):
 		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True,readonly=True), 		
 		'moc_id': fields.many2one('kg.moc.master','MOC',readonly=True),		
 		'ms_line_id': fields.many2one('ch.order.machineshop.details','MS Line Id'),		
-		'acc_ms_line_id': fields.many2one('ch.wo.accessories.ms','ACC MS Line Id'),		
+		'acc_ms_line_id': fields.many2one('ch.wo.accessories.ms','ACC MS Line Id'),
+				
 		'schedule_qty': fields.integer('Schedule Qty'),
 		'pending_qty': fields.integer('Pending Qty'),		
-		'pending_update_qty': fields.integer('Pending Update Qty'),		
+		'completed_qty': fields.integer('Completed Qty'),		
 		'qty': fields.integer('Quantity'),
-		'inward_accept_qty': fields.integer('Accepted Qty'),
-		'inward_qty': fields.integer('Accepted Qty'),
+		
+		'inward_accept_qty': fields.integer('Accepted Qty'),		
+		'inward_comple_qty': fields.integer('Inward Completed Qty'),		
 		'inward_rej_qty': fields.integer('Rejected Qty'),
+		
 		'rej_reason': fields.char('Reason of Rejection'),
 		
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
@@ -3503,23 +3504,27 @@ class kg_fabrication_process(osv.osv):
 		'state': 'pending',		
 		'entry_mode': 'manual',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),		
-		'inward_qty':0,		
-		'qty':0,		
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
+				
 	}
 	
 	def entry_update(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])			
+		rec = self.browse(cr,uid,ids[0])
+		print"rec.schedule_qty",rec.schedule_qty		
+		print"rec.pending_qty",rec.pending_qty		
+		print"rec.completed_qty",rec.completed_qty		
+		print"rec.qty	",rec.qty			
+		total_avil_qty = rec.schedule_qty - rec.completed_qty			
 		if rec.qty <= 0.00:
 			raise osv.except_osv(_('Warning !'), _('System not allow to zero andless than zero qty .!!'))
-		if rec.pending_qty < rec.qty:
+		if total_avil_qty < rec.qty:
 			raise osv.except_osv(_('Warning !'), _('Excess Qty not update. Kindly check !!'))			
-		total_rem_qty = rec.pending_qty - rec.qty 
+		total_rem_qty = rec.schedule_qty - (rec.completed_qty + rec.qty )
 		if total_rem_qty == 0.00:			
 			state = 'complete'
 		if total_rem_qty > 0.00:
 			state = 'partial'		
-		self.write(cr, uid, ids, {'state': state,'pending_qty':total_rem_qty,'pending_update_qty':rec.pending_update_qty + rec.qty})
+		self.write(cr, uid, ids, {'state': state,'pending_qty':rec.pending_qty + rec.qty,'completed_qty':rec.completed_qty + rec.qty})
 		return True
 		
 	def entry_inward(self,cr,uid,ids,context=None):
@@ -3527,26 +3532,31 @@ class kg_fabrication_process(osv.osv):
 		ms_shop_id = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',rec.order_line_id.id),('ms_id','=',rec.ms_id.id)])
 		if ms_shop_id != []:
 			ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])			
-			total_qty = rec.inward_accept_qty + rec.inward_rej_qty + rec.inward_qty					
-			if rec.schedule_qty < total_qty:
+			total_qty = rec.inward_accept_qty + rec.inward_rej_qty 
+			pending_qty = rec.pending_qty - (rec.inward_rej_qty	+ rec.inward_accept_qty)
+			print"rec.schedule_qty",rec.schedule_qty		
+			print"rec.pending_qty",rec.pending_qty		
+			print"rec.completed_qty",rec.completed_qty		
+			print"rec.inward_accept_qty	",rec.inward_accept_qty
+			print"rec.inward_rej_qty	",rec.inward_rej_qty
+							
+			if rec.pending_qty < total_qty:
 				raise osv.except_osv(_('Warning !'), _('Excess Qty not update. Kindly check !!'))				
-			if (rec.pending_update_qty + rec.inward_accept_qty)  < (rec.inward_rej_qty + rec.inward_qty):
-				raise osv.except_osv(_('Warning !'), _('Excess Qty not update. Kindly check !!'))
-			if rec.inward_qty <= 0.00 and rec.inward_rej_qty <= 0.00:
+			
+			if rec.inward_accept_qty <= 0.00 and rec.inward_rej_qty <= 0.00:
 				raise osv.except_osv(_('Warning !'), _('System not allow to zero and less than zero qty .!!'))
-			if rec.inward_qty < 0.00 or rec.inward_rej_qty < 0.00:
-				raise osv.except_osv(_('Warning !'), _('System not allow to negative qty .!!'))			
-			if rec.schedule_qty == (rec.inward_accept_qty + rec.inward_qty):
+			if rec.inward_accept_qty < 0.00 or rec.inward_rej_qty < 0.00:
+				raise osv.except_osv(_('Warning !'), _('System not allow to negative qty .!!'))		
+			
+			if rec.schedule_qty == (rec.inward_accept_qty + rec.inward_comple_qty):				
 				self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':'accept'})
-				state = 'accept'	
-				pending_qty = rec.pending_qty
+				state = 'accept'			
 			else:
-				state = 'pending'
-				pending_qty = rec.pending_qty + rec.inward_rej_qty		
+				state = 'partial'
 			
 		else:
 			raise osv.except_osv(_('Warning !'), _('Records not available in Machineshop Process !!'))
-		self.write(cr, uid, ids, {'state': state,'pending_qty':pending_qty,'inward_accept_qty':rec.inward_accept_qty + rec.inward_qty})
+		self.write(cr, uid, ids, {'state': state,'pending_qty':pending_qty,'inward_comple_qty':rec.inward_comple_qty + rec.inward_accept_qty,'completed_qty':rec.completed_qty - rec.inward_rej_qty})
 		return True
 		
 	def unlink(self,cr,uid,ids,context=None):

@@ -263,8 +263,7 @@
 			<field name="arch" type="xml">
 				<form string="Schedule" version="7.0">
 					<header>
-						<button name="entry_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('state','in',['complete','accept'])]}"/>
-						
+						<button name="entry_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('state','in',['complete','accept'])]}"/>					
 						
 					</header>
 					<group>
@@ -274,10 +273,8 @@
 							<field name="order_category" />
 							<field name="order_delivery_date"/>
 							<field name="schedule_qty" readonly="1"/>
-							<field name="pending_qty" readonly="1" attrs="{'invisible': [('state','in',['complete'])]}"/>
-							<field name="qty" attrs="{'readonly': [('state','in',['complete'])],'invisible': [('state','in',['complete'])],'required': [('state','in',['pending','partial'])]}"/>							
-							<field name="inward_qty" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending','partial'])],'required': [('state','in',['complete'])]}"/>
-							<field name="rej_reason" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending','partial'])],'required': [('inward_rej_qty','>',0)]}"/>
+							<field name="completed_qty" readonly="1" attrs="{'invisible': [('state','in',['complete'])]}"/>
+							<field name="qty" attrs="{'readonly': [('state','in',['complete'])],'invisible': [('state','in',['complete'])],'required': [('state','in',['pending','partial'])]}"/>						
 							<field name="remarks" attrs="{'readonly': [('state','in',['complete'])]}"/>
 						</group>											
 						<group>
@@ -287,8 +284,7 @@
 							<field name="moc_id"/>
 							<field name="note"/>
 							<field name="shift_id" attrs="{'readonly': [('state','in',['complete'])],'required': [('state','in',['pending','partial'])]}"/>
-							<field name="operator" attrs="{'readonly': [('state','in',['complete'])],'required': [('state','in',['pending','partial'])]}"/>							
-							<field name="inward_rej_qty" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending','partial'])],'required': [('state','in',['complete'])]}"/>
+							<field name="operator" attrs="{'readonly': [('state','in',['complete'])],'required': [('state','in',['pending','partial'])]}"/>								
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 						</group>					
 					</group>
@@ -336,8 +332,8 @@
 							<field name="order_category" />
 							<field name="order_delivery_date"/>
 							<field name="schedule_qty" readonly="1"/>
-							<field name="pending_qty" readonly="1" attrs="{'invisible': [('state','in',['complete'])]}"/>											
-							<field name="inward_qty" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending'])],'required': [('state','in',['complete','partial'])]}"/>
+							<field name="pending_qty" readonly="1"/>											
+							<field name="inward_accept_qty" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending'])],'required': [('state','in',['complete','partial'])]}"/>
 							<field name="rej_reason" attrs="{'readonly': [('state','in',['accept'])],'invisible': [('state','in',['pending'])],'required': [('inward_rej_qty','>',0)]}"/>
 							<field name="remarks" attrs="{'readonly': [('state','in',['complete'])]}"/>
 						</group>											
@@ -397,7 +393,7 @@
 					<field name="moc_id" />
 					<field name="order_delivery_date" />
 					<field name="schedule_qty" />
-					<field name="pending_qty" />
+					<field name="completed_qty" />
 					<field name="state"/>
 				</tree>
 			</field>
@@ -424,7 +420,7 @@
 					<field name="moc_id" />
 					<field name="order_delivery_date" />
 					<field name="schedule_qty" />
-					<field name="pending_qty" />
+					<field name="completed_qty" />
 					<field name="state"/>
 				</tree>
 			</field>

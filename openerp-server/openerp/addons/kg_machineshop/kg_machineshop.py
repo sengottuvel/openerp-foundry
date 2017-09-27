@@ -567,13 +567,13 @@ class kg_id_commitment(osv.osv):
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
 		
 		## After added
-		'ms_schedule_no': fields.char('MS Schedule No.',required=True),
-		'ms_schedule_date': fields.date('MS Schedule Date',required=True),				
+		'ms_schedule_no': fields.char('MS Schedule No.'),
+		'ms_schedule_date': fields.date('MS Schedule Date'),				
 		'order_priority': fields.selection(ORDER_WO_PRIORITY,'Priority'),
 		'delivery_date': fields.date('Delivery Date',required=True),
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
-		'packing_type': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Packing Type', required=True),
-		'rm_date': fields.date('R.M Completed Date',required=True),
+		'packing_type': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Packing Type'),
+		'rm_date': fields.date('R.M Completed Date'),
 		'sub_comple_date': fields.date('Sub.Con Completed Date'),
 		'sub_con_date': fields.date('Sub.Con commitment Date'),
 		'in_house_date': fields.date('IN-House commitment Date'),
