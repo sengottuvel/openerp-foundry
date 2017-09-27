@@ -14,6 +14,7 @@
 			'kg_foundry_invoice_view.xml',
 			'sequence_data.xml',
 			'onscreen_report_data.xml',
+			'kg_reports/wizard/kg_fettling_invoice_print_view.xml',
 			
 			],
 			

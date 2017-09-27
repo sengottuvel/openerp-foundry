@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Fettling Invoice" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.2396694214876032"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="12"/>
+	<subDataset name="dataset1">
+		<parameter name="header_id" class="java.lang.Integer"/>
+		<parameter name="contractor_id" class="java.lang.Integer"/>
+		<queryString>
+			<![CDATA[select fon_cont_id,head,exp_name,sum(expense_amt) as exp_amt from (
+select fon.contractor_id as fon_cont_id,
+'Additional Charge'::text as head,
+exp_mas.name as exp_name,
+exp_track.expense_amt as expense_amt
+from
+ch_foundry_invoice_expense_track exp_track
+left join kg_expense_master exp_mas on (exp_mas.id=exp_track.expense)
+left join kg_foundry_invoice fon on (fon.id=exp_track.header_id)
+where exp_track.header_id = $P{header_id} and fon.contractor_id = $P{contractor_id}
+) as sample group by 1,2,3]]>
+		</queryString>
+		<field name="fon_cont_id" class="java.lang.Integer"/>
+		<field name="head" class="java.lang.String"/>
+		<field name="exp_name" class="java.lang.String"/>
+		<field name="exp_amt" class="java.math.BigDecimal"/>
+	</subDataset>
+	<parameter name="wiz_id" class="java.lang.Integer"/>
+	<parameter name="printed_by" class="java.lang.String"/>
+	<parameter name="print_date" class="java.lang.String"/>
+	<parameter name="from_date" class="java.lang.String"/>
+	<parameter name="display_from_date" class="java.lang.String"/>
+	<parameter name="to_date" class="java.lang.String"/>
+	<parameter name="display_to_date" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select new_date,invoice_date,company_name,inv_cont_id,contractor,header_id,stage_name,moc_cate_name,
+trim(TO_CHAR(each_weight::float, '999G999G99G999G99G99G990D99'))  as each_weight,
+trim(TO_CHAR(total_value::float, '999G999G99G999G99G99G990D99'))  as total_value,
+trim(TO_CHAR(cont_each_weight_tot::float, '999G999G99G999G99G99G990D99'))  as cont_each_weight_tot,
+trim(TO_CHAR(cont_total_value_tot+add_ch::float, '999G999G99G999G99G99G990D99'))  as cont_total_value_tot,
+trim(TO_CHAR(g_each_weight_tot::float, '999G999G99G999G99G99G990D99'))  as g_each_weight_tot,
+trim(TO_CHAR(g_total_value_tot+add_ch::float, '999G999G99G999G99G99G990D99'))  as g_total_value_tot,
+add_ch,
+cont_no,stg_no, max(cont_no) over (partition by contractor) as cont_tot_no,
+
+
+case when stg_no = 1 then stage_name else ' ' end as ref_stage_name
+
+from (
+
+select new_date,invoice_date,company_name,inv_cont_id,header_id,contractor,stage_name,moc_cate_name,each_weight,total_value
+
+,row_number() over (partition by contractor) as cont_no
+,sum(each_weight) over (partition by contractor) as cont_each_weight_tot
+,(sum(total_value) over (partition by contractor)) as cont_total_value_tot,
+add_ch,
+sum(each_weight) over () as g_each_weight_tot
+,(sum(total_value) over ()) as g_total_value_tot
+,row_number() over (partition by contractor,stage_name) as stg_no
+
+from (
+
+select
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_date,
+inv.entry_date as invoice_date,
+company.name as company_name,
+inv.contractor_id as inv_cont_id,
+inv.id as header_id,
+partner.name as contractor,
+invoice_summary.stage_name as stage_name,
+moc_cate.name moc_cate_name,
+invoice_summary.each_weight  as each_weight,
+invoice_summary.total_value as total_value,
+(select coalesce((sum(expense_amt)),0.00) from ch_foundry_invoice_expense_track where header_id = inv.id)
+as add_ch
+from
+
+kg_foundry_invoice inv
+
+left join ch_foundry_invoice_line_summary invoice_summary on (invoice_summary.header_id=inv.id)
+left join res_partner partner on (partner.id=inv.contractor_id)
+left join kg_moc_master moc on (moc.id=invoice_summary.moc_id)
+left join kg_moc_category moc_cate on (moc_cate.id=moc.moc_cate_id)
+left join res_company company on (company.id = inv.company_id)
+
+where inv.entry_date >= $P{from_date}::date and inv.entry_date <= $P{to_date}::date and
+
+case
+when (select contractor_id from m2m_sc_invoice_details where invoice_wiz_id =$P{wiz_id}  limit 1) is not null
+then inv.contractor_id in (select contractor_id from m2m_sc_invoice_details where invoice_wiz_id = $P{wiz_id})
+else
+inv.contractor_id in (select  id from res_partner where  contractor = 't') end and
+
+inv.state='done'
+
+order by partner.name,invoice_summary.stage_name
+
+) as tem
+
+) as tem_1 order by invoice_date asc]]>
+	</queryString>
+	<field name="new_date" class="java.lang.String"/>
+	<field name="invoice_date" class="java.sql.Date"/>
+	<field name="company_name" class="java.lang.String"/>
+	<field name="inv_cont_id" class="java.lang.Integer"/>
+	<field name="contractor" class="java.lang.String"/>
+	<field name="header_id" class="java.lang.Integer"/>
+	<field name="stage_name" class="java.lang.String"/>
+	<field name="moc_cate_name" class="java.lang.String"/>
+	<field name="each_weight" class="java.lang.String"/>
+	<field name="total_value" class="java.lang.String"/>
+	<field name="cont_each_weight_tot" class="java.lang.String"/>
+	<field name="cont_total_value_tot" class="java.lang.String"/>
+	<field name="g_each_weight_tot" class="java.lang.String"/>
+	<field name="g_total_value_tot" class="java.lang.String"/>
+	<field name="add_ch" class="java.math.BigDecimal"/>
+	<field name="cont_no" class="java.lang.Long"/>
+	<field name="stg_no" class="java.lang.Long"/>
+	<field name="cont_tot_no" class="java.lang.Long"/>
+	<field name="ref_stage_name" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="86" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement mode="Transparent" x="1" y="31" width="555" height="15"/>
+				<box topPadding="3">
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Fettling Contractor Invoice"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="1" y="0" width="555" height="31"/>
+				<box topPadding="13"/>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="26" y="0" width="97" height="61"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
+			</image>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="1" y="61" width="186" height="25"/>
+				<box topPadding="2" leftPadding="2" bottomPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["From Date : "+$P{display_from_date}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="389" y="61" width="166" height="25"/>
+				<box topPadding="2" leftPadding="0" bottomPadding="2" rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["To Date : "+$P{display_to_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="26" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="242" y="0" width="89" height="26"/>
+				<box topPadding="2" leftPadding="0" bottomPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Weight(Kgs)"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="107" height="26"/>
+				<box topPadding="2" leftPadding="0" bottomPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Stage "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="415" y="0" width="141" height="26"/>
+				<box topPadding="2" leftPadding="0" bottomPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Signature"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="331" y="0" width="84" height="26"/>
+				<box topPadding="2" leftPadding="0" bottomPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Amount(Rs)"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="107" y="0" width="135" height="26"/>
+				<box topPadding="2" leftPadding="0" bottomPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["MOC Category"]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="82" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="556" height="20" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$F{cont_no} == 1]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{contractor}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="107" y="20" width="135" height="21"/>
+				<box topPadding="2" leftPadding="2" bottomPadding="0">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{moc_cate_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="242" y="20" width="89" height="21"/>
+				<box topPadding="2" leftPadding="0" bottomPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{each_weight}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="331" y="20" width="84" height="21"/>
+				<box topPadding="2" leftPadding="0" bottomPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_value}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="415" y="20" width="141" height="21"/>
+				<box topPadding="2" leftPadding="2" bottomPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["  "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="61" width="107" height="21">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="2" bottomPadding="0">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["  "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" stretchType="RelativeToTallestObject" mode="Transparent" x="107" y="61" width="135" height="21" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="2" bottomPadding="0">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Total"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" stretchType="RelativeToTallestObject" mode="Transparent" x="242" y="61" width="89" height="21" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="0" bottomPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cont_each_weight_tot}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" stretchType="RelativeToTallestObject" mode="Transparent" x="331" y="61" width="84" height="21" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="0" bottomPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cont_total_value_tot}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" stretchType="RelativeToTallestObject" mode="Transparent" x="415" y="61" width="141" height="21">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="2" bottomPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["  "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="20" width="107" height="21"/>
+				<box topPadding="2" leftPadding="2" bottomPadding="0">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ref_stage_name}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="41" width="556" height="20" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="dataset1">
+						<datasetParameter name="header_id">
+							<datasetParameterExpression><![CDATA[$F{header_id}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="contractor_id">
+							<datasetParameterExpression><![CDATA[$F{inv_cont_id}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="20" width="556">
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="107" y="0" width="135" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" leftPadding="2">
+								<topPen lineWidth="0.5"/>
+								<leftPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+								<rightPen lineWidth="0.5"/>
+							</box>
+							<textElement/>
+							<textFieldExpression><![CDATA[$F{exp_name}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="331" y="0" width="84" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" leftPadding="2" rightPadding="2">
+								<topPen lineWidth="0.5"/>
+								<leftPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+								<rightPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Right"/>
+							<textFieldExpression><![CDATA[$F{exp_amt}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="107" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" leftPadding="2">
+								<topPen lineWidth="0.5"/>
+								<leftPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+								<rightPen lineWidth="0.5"/>
+							</box>
+							<textElement/>
+							<textFieldExpression><![CDATA[$F{head}]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="415" y="0" width="141" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box leftPadding="2">
+								<topPen lineWidth="0.5"/>
+								<leftPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+								<rightPen lineWidth="0.5"/>
+							</box>
+							<textElement/>
+							<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+						</textField>
+						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+							<reportElement stretchType="RelativeToTallestObject" x="242" y="0" width="89" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+							<box topPadding="2" leftPadding="2">
+								<topPen lineWidth="0.5"/>
+								<leftPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+								<rightPen lineWidth="0.5"/>
+							</box>
+							<textElement/>
+							<textFieldExpression><![CDATA["-"]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="437" y="0" width="118" height="20"/>
+				<box topPadding="0">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="302" y="0" width="87" height="20"/>
+				<box topPadding="0">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="389" y="0" width="48" height="20"/>
+				<box topPadding="0">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="0" width="301" height="20"/>
+				<box topPadding="0">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$F{new_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="21">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="107" y="0" width="135" height="21" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="2" bottomPadding="0">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Grand Total"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="415" y="0" width="141" height="21">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="2" bottomPadding="0">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["  "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="331" y="0" width="84" height="21" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="0" bottomPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{g_total_value_tot}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="242" y="0" width="89" height="21" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="0" bottomPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{g_each_weight_tot}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="107" height="21">
+					<printWhenExpression><![CDATA[$F{cont_no} == $F{cont_tot_no}]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2" leftPadding="2" bottomPadding="0">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["  "]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+	<noData>
+		<band height="20">
+			<staticText>
+				<reportElement mode="Transparent" x="0" y="0" width="554" height="20"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[No Records Found]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>

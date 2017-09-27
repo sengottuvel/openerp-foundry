@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_fettling_invoice" model="ir.ui.view">
+            <field name="name">kg.fettling.invoice.print.form</field>
+            <field name="model">kg.fettling.invoice.print</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Fettling Invoice Details Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">										
+							<field name="from_date" options="{'datepicker':{'maxDate': '0'}}"/>												
+							<field name="to_date" options="{'datepicker':{'maxDate': '0'}}"/>												
+							<field name="contractor_id" widget="many2many_tags"/>	
+							
+														   				    			     
+						</page>	    
+                                                                         
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>        
+        
+        
+        <report string="Fettling Invoice Details Statement"
+		model="kg.fettling.invoice.print"
+		auto="True"
+		name="jasper_fettling_invoice_report"
+		rml="kg_foundry_invoice/kg_reports/report/kg_fettling_invoice_report.jrxml"
+		id="fettlinginvoicedetailsreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_fettling_invoice" model="ir.actions.act_window">  
+            <field name="name">Fettling Invoice Print</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.fettling.invoice.print</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+	<menuitem name="Fettling Invoice Print" parent="kg_fettling.tpm_fettling_process" action="rma_fettling_invoice" id="kg_fettling_invoice_details_reports" sequence="21"/>	
+      
+
+    </data>
+</openerp>
