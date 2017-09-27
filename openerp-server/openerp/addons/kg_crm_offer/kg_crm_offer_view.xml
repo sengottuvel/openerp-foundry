@@ -165,7 +165,7 @@
 									<field name="moc_const_id"/>
 									<field name="qty" sum="qty"/>
 									<field name="per_pump_prime_cost" sum="per_pump_prime_cost"/>
-									<field name="additional_cost"/>
+									<field name="additional_cost" invisible="1"/>
 									<field name="prime_cost" sum="prime_cost"/>
 									
 									<field name="r_sam_ratio"/>
@@ -277,7 +277,7 @@
 									<field name="moc_changed_flag" readonly="1" invisible="1"/>
 									<field name="qty" sum="qty"/>
 									<field name="per_access_prime_cost" sum="per_access_prime_cost" readonly="1"/>
-									<field name="additional_cost"/>
+									<field name="additional_cost" invisible="1"/>
 									<field name="prime_cost" sum="prime_cost" readonly="1"/>
 																		
 									<field name="r_sam_ratio"/>
@@ -333,7 +333,7 @@
 									<field name="moc_changed_flag" readonly="1"/>
 									<field name="moc_const_id" readonly="1"/>
 									<field name="qty" sum="qty"/>
-									<field name="additional_cost"/>
+									<field name="additional_cost" invisible="1"/>
 									<field name="prime_cost" sum="prime_cost"/>
 									<field name="sam_ratio"/>
 									<field name="sam_ratio_tot" string="Works Value"/>
@@ -528,8 +528,8 @@
 								</div>
 							</div>
 							<field name="supervision_amount" on_change="onchange_supervision(supervision_amount)" invisible="1"/>
-							<field name="additional_cost" on_change="onchange_additional_cost(additional_cost)"/>
-							<field name="additional_cost_remark" widget="char"/>
+							<field name="additional_cost" on_change="onchange_additional_cost(additional_cost)" invisible="1"/>
+							<field name="additional_cost_remark" widget="char" invisible="1"/>
 						</group>
 					</group>
 					<group string="Reverse">
@@ -577,7 +577,7 @@
 								</div>
 							</div>
 							<field name="r_supervision_amount" invisible="1"/>
-							<field name="r_additional_cost"/>
+							<field name="r_additional_cost" invisible="1"/>
 						</group>
 						<button name="entry_update" type="object" string="Update" class="oe_highlight"/>
 					</group>
@@ -704,6 +704,7 @@
 							<label for="r_net_amt_tot"/>
 							</div>
 							<field name="r_net_amt_tot" nolabel="1" class="oe_subtotal_footer_separator"/>
+							<field name="r_p_f_ex_tot"/>
 							<field name="r_tax_tot"/>
 							<field name="r_pump_price_tot" invisible="1"/>
 							<!--<field name="tot_price"/>-->
@@ -791,8 +792,8 @@
 								</div>
 							</div>
 							<field name="supervision_amount" on_change="onchange_supervision(supervision_amount)" invisible="1"/>
-							<field name="additional_cost" on_change="onchange_additional_cost(additional_cost)"/>
-							<field name="additional_cost_remark" widget="char"/>
+							<field name="additional_cost" on_change="onchange_additional_cost(additional_cost)" invisible="1"/>
+							<field name="additional_cost_remark" widget="char" invisible="1"/>
 						</group>
 					</group>
 					<group string="Reverse">
@@ -840,7 +841,7 @@
 								</div>
 							</div>
 							<field name="r_supervision_amount" invisible="1"/>
-							<field name="r_additional_cost"/>
+							<field name="r_additional_cost" invisible="1"/>
 						</group>
 						<button name="entry_update" type="object" string="Update" class="oe_highlight"/>
 					</group>
@@ -935,6 +936,7 @@
 								<label for="r_net_amt_tot"/>
 								</div>
 								<field name="r_net_amt_tot" nolabel="1" class="oe_subtotal_footer_separator"/>
+								<field name="r_p_f_ex_tot"/>
 								<field name="r_tax_tot"/>
 								<field name="r_pump_price_tot" invisible="1"/>
 								<!--<field name="tot_price"/>-->
@@ -970,8 +972,8 @@
 							<field name="moc_changed_flag" readonly="1"/>
 							<field name="qty" readonly="1"/>
 							<field name="prime_cost" readonly="1"/>
-							<field name="additional_cost"/>
-							<field name="additional_cost_remark" widget="char"/>
+							<field name="additional_cost" invisible="1"/>
+							<field name="additional_cost_remark" widget="char" invisible="1"/>
 							<label for="sam_ratio" string="Sam Ratio" class="append_percentage"/>
 							<div>
 								<div class="address_format">
@@ -1169,8 +1171,8 @@
 								</div>
 							</div>
 							<field name="supervision_amount" on_change="onchange_supervision(supervision_amount)" invisible="1"/>
-							<field name="additional_cost" on_change="onchange_additional_cost(additional_cost)"/>
-							<field name="additional_cost_remark" widget="char"/>
+							<field name="additional_cost" on_change="onchange_additional_cost(additional_cost)" invisible="1"/>
+							<field name="additional_cost_remark" widget="char" invisible="1"/>
 						</group>
 					</group>
 					<group string="Reverse">
@@ -1218,7 +1220,7 @@
 								</div>
 							</div>
 							<field name="r_supervision_amount" invisible="1"/>
-							<field name="r_additional_cost"/>
+							<field name="r_additional_cost" invisible="1"/>
 						</group>
 						<button name="entry_update" type="object" string="Update" class="oe_highlight"/>
 					</group>
@@ -1313,6 +1315,7 @@
 							<label for="r_net_amt_tot"/>
 							</div>
 							<field name="r_net_amt_tot" nolabel="1" class="oe_subtotal_footer_separator"/>
+							<field name="r_p_f_ex_tot"/>
 							<field name="r_tax_tot"/>
 							<field name="r_pump_price_tot" invisible="1"/>
 							<!--<field name="tot_price"/>-->

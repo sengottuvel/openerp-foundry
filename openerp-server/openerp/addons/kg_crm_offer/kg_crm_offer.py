@@ -2284,9 +2284,9 @@ class ch_pump_offer(osv.osv):
 			res[line.id]['r_tax_tot'] = r_tax_tot
 			#~ res[line.id]['r_tot_price'] = tot_price
 			if line.cust_in_ex == 'inclusive':
-				res[line.id]['r_net_amount'] = r_pump_price_tot + r_tax_tot
+				res[line.id]['r_net_amount'] = r_pump_price_tot + r_p_f_ex_tot + r_tax_tot
 			else:
-				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot + r_tax_tot
+				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot + r_p_f_ex_tot + r_tax_tot
 			res[line.id]['prime_cost'] = (line.per_pump_prime_cost * line.qty) + line.additional_cost
 			print"line.r_cpo_amount",line.r_cpo_amount
 			enq_no = line.header_id.enquiry_no
@@ -2396,8 +2396,8 @@ class ch_pump_offer(osv.osv):
 		'r_customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),
 		'r_spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),
 		'r_tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='GST',multi="sums",store=True),
-		'r_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
-		'r_p_f_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F Ex',multi="sums",store=True),
+		'r_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F(Inc)',multi="sums",store=True),
+		'r_p_f_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F(Exc)',multi="sums",store=True),
 		'r_freight_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight Ex',multi="sums",store=True),
 		'r_freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),
 		'r_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
@@ -2824,9 +2824,9 @@ class ch_spare_offer(osv.osv):
 			res[line.id]['r_tax_tot'] = r_tax_tot
 			#~ res[line.id]['r_tot_price'] = tot_price
 			if line.cust_in_ex == 'inclusive':
-				res[line.id]['r_net_amount'] = r_pump_price_tot + r_tax_tot
+				res[line.id]['r_net_amount'] = r_pump_price_tot + r_p_f_ex_tot + r_tax_tot
 			else:
-				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot + r_tax_tot
+				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot + r_p_f_ex_tot + r_tax_tot
 			res[line.id]['prime_cost'] = (line.per_spare_prime_cost * line.qty) + line.additional_cost
 			print"line.r_cpo_amount",line.r_cpo_amount
 			enq_no = line.header_id.enquiry_no
@@ -3003,8 +3003,8 @@ class ch_spare_offer(osv.osv):
 		'r_customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),
 		'r_spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),
 		'r_tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='GST',multi="sums",store=True),
-		'r_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
-		'r_p_f_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F Ex',multi="sums",store=True),
+		'r_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F(Inc)',multi="sums",store=True),
+		'r_p_f_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F(Exc)',multi="sums",store=True),
 		'r_freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),
 		'r_freight_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight Ex',multi="sums",store=True),
 		'r_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
@@ -3252,9 +3252,9 @@ class ch_accessories_offer(osv.osv):
 			res[line.id]['r_tax_tot'] = r_tax_tot
 			#~ res[line.id]['r_tot_price'] = tot_price
 			if line.cust_in_ex == 'inclusive':
-				res[line.id]['r_net_amount'] = r_pump_price_tot + r_tax_tot
+				res[line.id]['r_net_amount'] = r_pump_price_tot + r_p_f_ex_tot + r_tax_tot
 			else:
-				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot + r_tax_tot
+				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot + r_p_f_ex_tot + r_tax_tot
 			res[line.id]['prime_cost'] = (line.per_access_prime_cost * line.qty) + line.additional_cost
 			print"line.r_cpo_amount",line.r_cpo_amount
 			enq_no = line.header_id.enquiry_no
@@ -3425,8 +3425,8 @@ class ch_accessories_offer(osv.osv):
 		'r_customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),
 		'r_spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),
 		'r_tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='GST',multi="sums",store=True),
-		'r_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
-		'r_p_f_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F Ex',multi="sums",store=True),
+		'r_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F(Inc)',multi="sums",store=True),
+		'r_p_f_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F(Exc)',multi="sums",store=True),
 		'r_freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),
 		'r_freight_ex_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight Ex',multi="sums",store=True),
 		'r_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
