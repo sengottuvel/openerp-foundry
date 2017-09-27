@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/sam_turbo_dev/!svn/ver/4951/openerp-server/openerp/addons/kg_wind_solar_master
+END
+kg_wind_solar_master.py
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/sam_turbo_dev/!svn/ver/4954/openerp-server/openerp/addons/kg_wind_solar_master/kg_wind_solar_master.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/sam_turbo_dev/!svn/ver/4951/openerp-server/openerp/addons/kg_wind_solar_master/__init__.py
+END
+kg_wind_solar_master_view.xml
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/sam_turbo_dev/!svn/ver/4954/openerp-server/openerp/addons/kg_wind_solar_master/kg_wind_solar_master_view.xml
+END
+__openerp__.py
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/sam_turbo_dev/!svn/ver/4951/openerp-server/openerp/addons/kg_wind_solar_master/__openerp__.py
+END
+default_data.xml
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/sam_turbo_dev/!svn/ver/4951/openerp-server/openerp/addons/kg_wind_solar_master/default_data.xml
+END
