@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cd_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000008"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="19"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset1">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
@@ -1032,7 +1032,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{basic_cpo_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="218" y="0" width="38" height="14" isRemoveLineWhenBlank="true"/>
+								<reportElement x="218" y="0" width="40" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -1043,7 +1043,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{cust_dis_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="256" y="0" width="52" height="14" isRemoveLineWhenBlank="true"/>
+								<reportElement x="258" y="0" width="50" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" leftPadding="0" rightPadding="1">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -1293,7 +1293,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_cust_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="218" y="0" width="38" height="14"/>
+								<reportElement x="218" y="0" width="40" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -1304,7 +1304,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{cust_dis_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="256" y="0" width="52" height="14"/>
+								<reportElement x="258" y="0" width="50" height="14"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -1526,7 +1526,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_cust_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="218" y="0" width="38" height="14"/>
+								<reportElement x="218" y="0" width="40" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -1537,7 +1537,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{cust_dis_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="256" y="0" width="52" height="14"/>
+								<reportElement x="258" y="0" width="50" height="14"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -1754,7 +1754,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_cust_dis}]]></textFieldExpression>
 							</textField>
 							<textField>
-								<reportElement x="218" y="0" width="38" height="14"/>
+								<reportElement x="218" y="0" width="40" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -1765,7 +1765,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{cust_dis_val}]]></textFieldExpression>
 							</textField>
 							<textField>
-								<reportElement x="256" y="0" width="52" height="14"/>
+								<reportElement x="258" y="0" width="50" height="14"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -1962,7 +1962,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{basic_cpo_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="132" y="0" width="64" height="15"/>
+								<reportElement x="132" y="0" width="66" height="15"/>
 								<box topPadding="2" rightPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -1974,7 +1974,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{cust_dis_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="196" y="0" width="52" height="15"/>
+								<reportElement x="198" y="0" width="50" height="15"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2913,7 +2913,7 @@ where off.id = $P{offer_id}]]>
 				<textFieldExpression><![CDATA["Less special Discount(2)"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="244" y="0" width="52" height="16" isPrintWhenDetailOverflows="true"/>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="246" y="0" width="50" height="16" isPrintWhenDetailOverflows="true"/>
 				<box topPadding="2" leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -2923,7 +2923,7 @@ where off.id = $P{offer_id}]]>
 				<textFieldExpression><![CDATA["Book Value(1)"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="180" y="0" width="64" height="16" isPrintWhenDetailOverflows="true"/>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="180" y="0" width="66" height="16" isPrintWhenDetailOverflows="true"/>
 				<box topPadding="2" leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
