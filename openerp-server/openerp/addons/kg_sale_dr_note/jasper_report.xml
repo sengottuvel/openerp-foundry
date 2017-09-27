@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+		<report string="Debit Note Print"
+        model="kg.sale.dr.note"
+        auto="True"
+        name="onscreen_debit_note_print"
+        rml="kg_sale_dr_note/report/onscreen_debit_note_print.jrxml"
+        id="sales_dr_note_jasper_report_menu" 
+        menu="True"
+        header="False"
+        />
+
+    </data>
+</openerp>

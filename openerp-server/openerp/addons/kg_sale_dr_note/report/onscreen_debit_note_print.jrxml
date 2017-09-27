@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="onscreen_debit_note_print" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.3310000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="363"/>
+	<subDataset name="dataset1">
+		<parameter name="debit_note_id" class="java.lang.Integer"/>
+		<queryString>
+			<![CDATA[select (sum(a.amount)OVER ()) as amount_total,(sum(a.tax_amount)OVER ()) as tax_total,* from (select
+
+
+debit_note_line.description as description,
+debit_note_line.amount as amount,
+(taxes.amount)*100 as tax_percentage,
+debit_note_line.amount*(taxes.amount) as tax_amount,
+trim(TO_CHAR((coalesce(debit_note_line.amount,0.00)), '999999999999999990D99')) as amount_txt,
+trim(TO_CHAR((coalesce((taxes.amount)*100,0.00)), '999999999999999990D99')) as tax_per_txt,
+trim(TO_CHAR((coalesce(debit_note_line.amount*(taxes.amount),0.00)), '999999999999999990D99')) as tax_amount_txt
+
+
+
+from ch_sale_dr_note debit_note_line
+
+left join debit_note_tax note_tax on (note_tax.note_id = debit_note_line.id)
+left join account_tax taxes on (taxes.id = note_tax.tax_id)
+
+where debit_note_line.header_id = $P{debit_note_id} group by 1,2,3,4,5,6,7) as a]]>
+		</queryString>
+		<field name="amount_total" class="java.lang.Double"/>
+		<field name="tax_total" class="java.lang.Double"/>
+		<field name="description" class="java.lang.String"/>
+		<field name="amount" class="java.lang.Double"/>
+		<field name="tax_percentage" class="java.math.BigDecimal"/>
+		<field name="tax_amount" class="java.lang.Double"/>
+		<field name="amount_txt" class="java.lang.String"/>
+		<field name="tax_per_txt" class="java.lang.String"/>
+		<field name="tax_amount_txt" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="debit_note_id" class="java.lang.Integer"/>
+	<parameter name="net_amt" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select trim(TO_CHAR((coalesce((sum(line_amount)OVER()),0.00)), '999999999999999990D99')) as amount_txt,
+trim(TO_CHAR((coalesce((sum(a.tax_amount)OVER ()),0.00)), '999999999999999990D99')) as tax_amount_txt,
+(sum(line_amount)OVER()),(sum(a.tax_amount)OVER ()) as tax_total,
+trim(TO_CHAR((coalesce(((sum(line_amount)OVER())+(sum(tax_amount)OVER())),0.00)), '999999999999999990D99')) as grand_total
+,* from (select
+
+debit_note.name as debit_no,
+to_char(debit_note.debit_note_date,'dd-mm-YYYY') as debit_date,
+case when debit_note.dealer_po_no = ' ' then '-' else debit_note.dealer_po_no end as dealer_po_no,
+customer.name as customer,
+case when dealer.name is null then '-' else dealer.name end as dealer,
+invoice.name as invoice_no,
+work_order.name as work_order_no,
+dr_note_line.amount as line_amount,
+dr_note_line.amount*(taxes.amount) as tax_amount
+
+from kg_sale_dr_note debit_note
+
+left join res_partner customer on (customer.id = debit_note.customer_id)
+left join res_partner dealer on (dealer.id = debit_note.dealer_id)
+left join kg_sale_invoice invoice on (invoice.id = debit_note.invoice_id)
+left join kg_work_order work_order on (work_order.id = debit_note.work_order_id)
+left join ch_sale_dr_note dr_note_line on (dr_note_line.header_id = debit_note.id)
+left join debit_note_tax note_tax on (note_tax.note_id = dr_note_line.id)
+left join account_tax taxes on (taxes.id = note_tax.tax_id)
+
+where debit_note.id = $P{debit_note_id})as a]]>
+	</queryString>
+	<field name="amount_txt" class="java.lang.String"/>
+	<field name="tax_amount_txt" class="java.lang.String"/>
+	<field name="sum" class="java.lang.Double"/>
+	<field name="tax_total" class="java.lang.Double"/>
+	<field name="grand_total" class="java.lang.String"/>
+	<field name="debit_no" class="java.lang.String"/>
+	<field name="debit_date" class="java.lang.String"/>
+	<field name="dealer_po_no" class="java.lang.String"/>
+	<field name="customer" class="java.lang.String"/>
+	<field name="dealer" class="java.lang.String"/>
+	<field name="invoice_no" class="java.lang.String"/>
+	<field name="work_order_no" class="java.lang.String"/>
+	<field name="line_amount" class="java.lang.Double"/>
+	<field name="tax_amount" class="java.lang.Double"/>
+	<group name="debit_note_line">
+		<groupExpression><![CDATA[$F{debit_no}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<componentElement>
+					<reportElement x="0" y="0" width="555" height="20"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="dataset1">
+							<datasetParameter name="debit_note_id">
+								<datasetParameterExpression><![CDATA[$P{debit_note_id}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="20" width="555">
+							<textField>
+								<reportElement x="0" y="0" width="328" height="20"/>
+								<box leftPadding="2">
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="328" y="0" width="90" height="20"/>
+								<box rightPadding="2">
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{amount_txt}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="418" y="0" width="56" height="20"/>
+								<box rightPadding="2">
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{tax_per_txt}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="474" y="0" width="81" height="20"/>
+								<box rightPadding="2">
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{tax_amount_txt}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="207">
+				<textField>
+					<reportElement x="328" y="0" width="90" height="20"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{amount_txt}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="474" y="0" width="81" height="20"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{tax_amount_txt}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="328" y="20" width="227" height="20"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{grand_total}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="0" width="328" height="20"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Total"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="20" width="328" height="20"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Grand Total"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="418" y="0" width="56" height="20"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="40" width="555" height="20"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["(Sum of total value and total GST amount)"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="60" width="555" height="20"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Amount in Words : "+$P{net_amt}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="80" width="555" height="20"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="100" width="555" height="20"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["For SAM TURBO INDUSTRY PRIVATE LIMITED"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="187" width="555" height="20"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Authorised Signatory"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="120" width="555" height="67"/>
+					<box rightPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="58" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="555" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["SAM TURBO INDUSTRY PRIVATE LIMITED"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="19" width="555" height="20"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA["Avinashi Road, Neelambur, Coimbatore - 641062"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="38" width="555" height="20"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA["Tel:3053555, 3053556,Fax : 0422-3053535"]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="0" y="0" width="206" height="58"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_reports/logo.jpg"]]></imageExpression>
+			</image>
+			<image>
+				<reportElement x="487" y="0" width="68" height="58"/>
+				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="211" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="555" height="20"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DEBIT NOTE"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="19" width="555" height="20"/>
+				<box leftPadding="2">
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Debit Note No : "+$F{debit_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="39" width="555" height="20"/>
+				<box leftPadding="2">
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Debit Note date : "+$F{debit_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="58" width="555" height="20"/>
+				<box leftPadding="2">
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TO"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="97" width="555" height="18"/>
+				<box leftPadding="20">
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Dealer Name : "+$F{dealer}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="77" width="555" height="20"/>
+				<box leftPadding="20">
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Customer Name : "+$F{customer}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="115" width="555" height="20"/>
+				<box leftPadding="2">
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Dear Sirs,"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="134" width="73" height="20"/>
+				<box leftPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Ref : DPO No :"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="153" width="555" height="20"/>
+				<box leftPadding="20">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Our Invoice No : "+$F{invoice_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="172" width="555" height="20"/>
+				<box leftPadding="20">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Order Reference : "+$F{work_order_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="191" width="555" height="20"/>
+				<box leftPadding="2">
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["We wish to advise having debited your account with us as follows:"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="73" y="134" width="482" height="20"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dealer_po_no}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="328" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Description"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="418" y="0" width="56" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["GST %"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="474" y="0" width="81" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["GST Value"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="328" y="0" width="90" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Value"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<pageFooter>
+		<band height="14">
+			<textField>
+				<reportElement x="233" y="0" width="76" height="14"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="309" y="0" width="40" height="14"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="233" height="14"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="349" y="0" width="206" height="14"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
