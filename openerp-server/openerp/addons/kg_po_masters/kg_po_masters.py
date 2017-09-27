@@ -6,7 +6,7 @@ from datetime import datetime
 import openerp.addons.decimal_precision as dp
 
 class kg_payment_master(osv.osv):
-
+	
 	_name = "kg.payment.master"
 	_description = "Payment Masters"
 	
@@ -97,7 +97,7 @@ class kg_payment_master(osv.osv):
 		if rec.state == 'draft':
 			self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-
+	
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
@@ -109,7 +109,7 @@ class kg_payment_master(osv.osv):
 		if rec.state == 'approved':
 			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
-		
+	
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
@@ -129,22 +129,20 @@ class kg_payment_master(osv.osv):
 				raise osv.except_osv(_('Cancel remark is must !!'),
 					_('Enter the remarks in Cancel remarks field !!'))
 		return True
-		
+	
 	def write(self, cr, uid, ids, vals, context=None):	  
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_payment_master, self).write(cr, uid, ids, vals, context)
-	
 	
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
 			if rec.state != 'draft':			
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
+				raise osv.except_osv(_('Warning!'),_('You can not delete this entry !!'))
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
+	
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
 		name_special_char = ''.join( c for c in flds.name if  c in '!@#$^~*{}?+/=' )		
@@ -153,11 +151,10 @@ class kg_payment_master(osv.osv):
 		return True	
 	
 	_constraints = [
-	
+		
 		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
 		(_name_validate, 'Payment Name must be unique !!', ['Payment Name']),
 	]
-	
 	
 kg_payment_master()
 
@@ -192,7 +189,7 @@ class kg_delivery_master(osv.osv):
 							if out_data['cnt'] > 0:
 								res[h.id] = 'yes'
 		return res
-		
+	
 	_columns = {
 		
 		'name': fields.char('Name', size=128, required=True,readonly=False,states={'approved':[('readonly',True)],'reject':[('readonly',True)]}),
@@ -242,7 +239,7 @@ class kg_delivery_master(osv.osv):
 		if rec.state == 'draft':
 			self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-
+	
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
@@ -254,7 +251,7 @@ class kg_delivery_master(osv.osv):
 		if rec.state == 'approved':
 			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
-		
+	
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
@@ -274,7 +271,7 @@ class kg_delivery_master(osv.osv):
 				raise osv.except_osv(_('Cancel remark is must !!'),
 					_('Enter the remarks in Cancel remarks field !!'))
 		return True
-			
+	
 	def write(self, cr, uid, ids, vals, context=None):	  
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_delivery_master, self).write(cr, uid, ids, vals, context)
@@ -295,12 +292,10 @@ class kg_delivery_master(osv.osv):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
 			if rec.state != 'draft':			
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
+				raise osv.except_osv(_('Warning!'),_('You can not delete this entry !!'))
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-	
 	
 kg_delivery_master()
 
@@ -427,8 +422,7 @@ class kg_brand_master(osv.osv):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
 			if rec.state != 'draft':			
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
+				raise osv.except_osv(_('Warning!'),_('You can not delete this entry !!'))
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
@@ -446,7 +440,7 @@ class kg_brand_master(osv.osv):
 		if rec.name:
 			division_name = rec.name
 			name=division_name.upper()			
-			cr.execute(""" select upper(name) from kg_division_master where upper(name)  = '%s' """ %(name))
+			cr.execute(""" select upper(name) from kg_brand_master where upper(name)  = '%s' """ %(name))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
 				res = False
@@ -456,8 +450,8 @@ class kg_brand_master(osv.osv):
 	
 	_constraints = [
 	
-		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
-		(_name_dup_validate, 'Division name must be unique !!', ['name']),		
+		#~ (_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
+		(_name_dup_validate, 'Brand name must be unique !!', ['name']),		
 	]
 
 kg_brand_master()
