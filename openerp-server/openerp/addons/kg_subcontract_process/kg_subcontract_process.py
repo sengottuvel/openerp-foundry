@@ -48,7 +48,7 @@ class kg_subcontract_process(osv.osv):
 		
 		
 		'active': fields.boolean('Active'),
-		'contractor_id': fields.many2one('res.partner','Contractor Name',required=True,domain="[('contractor','=','t'),('partner_state','=','approve')]"),
+		'contractor_id': fields.many2one('res.partner','Contractor Name',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		
 		'ms_plan_id': fields.many2one('kg.ms.daily.planning','Planning Id'),
 		'ms_plan_line_id': fields.many2one('ch.ms.daily.planning.details','Planning Line Id'),

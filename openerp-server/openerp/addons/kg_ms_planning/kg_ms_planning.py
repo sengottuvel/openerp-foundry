@@ -235,7 +235,7 @@ class kg_ms_daily_planning(osv.osv):
 				
 				if (line_item.inhouse_qty + line_item.sc_qty) > line_item.schedule_qty:
 					raise osv.except_osv(_('Warning!'),
-								_('In house qty and sc qty should not be more than Required Qty !!! '))
+								_('In house qty and sc qty should not be more than Required Qty, Item Name - %s !!! ')%(line_item.item_name))
 								
 								
 				ms_obj.write(cr, uid, line_item.ms_id.id,{
