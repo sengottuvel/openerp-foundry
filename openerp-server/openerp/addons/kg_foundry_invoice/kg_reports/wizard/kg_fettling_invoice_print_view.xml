@@ -48,7 +48,7 @@
             <field name="target">new</field>
         </record>
             
-	<menuitem name="Fettling Invoice Print" parent="kg_fettling.tpm_fettling_process" action="rma_fettling_invoice" id="kg_fettling_invoice_details_reports" sequence="21"/>	
+	<menuitem name="Fettling Invoice Print" parent="kg_fettling.tpm_fettling_process" action="rma_fettling_invoice" id="kg_fettling_invoice_details_reports123" sequence="21"/>	
       
 
     </data>
