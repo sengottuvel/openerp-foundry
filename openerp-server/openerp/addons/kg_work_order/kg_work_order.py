@@ -120,6 +120,11 @@ class kg_work_order(osv.osv):
 		'project_name':fields.char('Project Name'),
 		'stock_check': fields.selection([('yes','Yes'),('no','No')],'Stock Check'),
 		
+		## WO Copy 
+		
+		'rep_data':fields.binary("WO Copy",readonly=True),
+		'wo_copy': fields.char('WO Copy'),
+		
 		### Entry Info ####
 		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -166,7 +171,7 @@ class kg_work_order(osv.osv):
 		else:
 			priority = 'emergency'
 		return {'value': {'order_priority': priority}}
-
+	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		today = date.today()
@@ -175,13 +180,10 @@ class kg_work_order(osv.osv):
 		entry_date = rec.entry_date
 		entry_date = str(entry_date)
 		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
-		
 		if entry_date > today:
 			return False
 		return True
-		
-		
-		
+	
 	def _check_duplicates(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		cr.execute(''' select id from kg_work_order where entry_date = %s
@@ -190,14 +192,14 @@ class kg_work_order(osv.osv):
 		if duplicate_id:
 			return False
 		return True 
-		
+	
 	def _check_lineitems(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.entry_mode == 'manual':
 			if not entry.line_ids:
 				return False
 		return True
-		
+	
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
 		if flds.name == False:
@@ -207,7 +209,7 @@ class kg_work_order(osv.osv):
 		if special_char:
 			return False
 		return True
-		
+	
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])		
 		res = True
@@ -226,22 +228,20 @@ class kg_work_order(osv.osv):
 		else:
 			res = True				
 		return res
-		
+	
 	def _check_name(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		res = True	
 		if entry.entry_mode == 'manual':
 			cr.execute(""" select name from kg_work_order where name  = '%s' """ %(entry.name))
 			data = cr.dictfetchall()
-				
 			if len(data) > 1:
 				res = False
 			else:
 				res = True	
 		return res 
-			
 	
-	_constraints = [		
+	_constraints = [
 		
 		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
 		#(_check_duplicates, 'System not allow to do duplicate entry !!',['']),
@@ -249,10 +249,9 @@ class kg_work_order(osv.osv):
 		(_Validation, 'Special Character Not Allowed in Work Order No.', ['']),
 		(_check_name, 'Work Order No. must be Unique', ['']),
 		(_name_validate, 'Work Order No. must be Unique', ['']),
-	   
 		
-	   ]	   
-	   
+	   ]
+   
 	def onchange_delivery_date(self, cr, uid, ids, delivery_date,order_category,order_priority):
 		today = date.today()
 		today = str(today)
@@ -266,8 +265,7 @@ class kg_work_order(osv.osv):
 				del_date = str(end_date)
 				ex_del_date = datetime.strptime(del_date, '%Y-%m-%d')				
 				if delivery_date < ex_del_date:
-					raise osv.except_osv(_('Warning!'),
-						_('Delivery Date should not be less than 56 days!!'))
+					raise osv.except_osv(_('Warning!'),_('Delivery Date should not be less than 56 days!!'))
 				else:
 					pass
 			elif order_category == 'pump' and order_priority == 'normal':				
@@ -276,15 +274,13 @@ class kg_work_order(osv.osv):
 				del_date = str(end_date)
 				ex_del_date = datetime.strptime(del_date, '%Y-%m-%d')	
 				if delivery_date < ex_del_date:
-					raise osv.except_osv(_('Warning!'),
-						_('Delivery Date should not be less than 84 days!!'))
+					raise osv.except_osv(_('Warning!'),_('Delivery Date should not be less than 84 days!!'))
 				else:
 					pass			
 			elif delivery_date < today:
-				raise osv.except_osv(_('Warning!'),
-						_('Delivery Date should not be less than current date!!'))
+				raise osv.except_osv(_('Warning!'),_('Delivery Date should not be less than current date!!'))
 		return True
-		
+	
 	def onchange_order_category_delivery_date(self, cr, uid, ids, order_category,order_priority):
 		today = time.strftime('%Y-%m-%d')	
 		value = {'delivery_date': '','delivery_date_flag': ''}
@@ -301,13 +297,11 @@ class kg_work_order(osv.osv):
 				value = {'delivery_date': end_date,'delivery_date_flag': delivery_date_flag}			
 			else:				
 				delivery_date_flag = False
-				value = {'delivery_date': today,'delivery_date_flag': delivery_date_flag}		
-				
+				value = {'delivery_date': today,'delivery_date_flag': delivery_date_flag}
 			return {'value': value}
 		else:
 			return {'value': value}
-		
-		
+	
 	def onchange_order_priority_delivery_date(self, cr, uid, ids, order_category,order_priority):
 		today = time.strftime('%Y-%m-%d')	
 		value = {'delivery_date': '','delivery_date_flag': ''}
@@ -338,7 +332,494 @@ class kg_work_order(osv.osv):
 			#~ [],[],'Test',body,'')
 		#~ ###
 		#~ return True
+	
+	def wo_copy(self,cr,uid,ids,context=None):
+		import StringIO
+		import base64
+		import string
+		try:
+			import xlwt
+		except:
+		   raise osv.except_osv('Warning !','Please download python xlwt module from\nhttp://pypi.python.org/packages/source/x/xlwt/xlwt-0.7.2.tar.gz\nand install it')
+		record={}
+		wbk = xlwt.Workbook()
+		style_mast_header = xlwt.easyxf('font: height 320;font: bold off;align: wrap on;align: wrap off, vert bottom, horiz center;border: top thin, bottom thin, left thin, right thin;')
+		style_header1 = xlwt.easyxf('font: bold on,height 200;align: wrap off, vert bottom, horiz center;border: top thin, bottom thin, left thin, right thin;')
+		style_center = xlwt.easyxf('font: height 180,name Calibri;align: wrap off, vert bottom, horiz center;border: top thin, bottom thin, left thin, right thin;')		
+		style_left_header = xlwt.easyxf('font: bold on,height 220,color_index 0X36;align: wrap off, vert center, horiz left;border: top thin, bottom thin, left thin, right thin;')			
+		style_left = xlwt.easyxf('font: height 180,name Calibri;align: wrap off, vert bottom, horiz left;border: top thin, bottom thin, left thin, right thin;')		
+		style_sub_left = xlwt.easyxf('font: height 180,underline on,bold on,name Calibri;align: wrap off, vert bottom, horiz left;border: top thin, bottom thin, left thin, right thin;')		
+		style_highlight = xlwt.easyxf('font: height 200,bold on,name Calibri,color_index black;align: wrap off, vert bottom, horiz left;border: top thin, bottom thin, left thin, right thin;')
+		style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')
+		style2 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
+		style3 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
+		style41 = xlwt.easyxf('font: height 200,bold on,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')		
+		style5 = xlwt.easyxf('font: height 200,bold on,color_index black;' 'align: horiz left;''borders: left thin, right thin, top thin, bottom thin')		
+		style4 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')
+		cmp_obj = self.pool.get('res.company')
+		rec =self.browse(cr,uid,ids[0])
+		enq_ids = self.pool.get('kg.crm.enquiry').search(cr,uid,[('name','=',rec.enquiry_no),('state','!=','revised')])
+		if enq_ids:
+			enq_rec = self.pool.get('kg.crm.enquiry').browse(cr,uid,enq_ids[0])
+		else:
+			raise osv.except_osv(_('Warning!'),_('You cannot get WO copy'))
+		pass_id = ids
+		#~ pass_id = [223,199,15,23]
+		pass_param = '(' +",".join([str(s) for s in list(pass_id)])+ ')'
 		
+		rpt_type = ['horizontal','vertical']
+		
+		hz_dictn = {
+		'01#TECHNICAL SPECIFICATION:':[('W.O Ref','order_no'),('Equipment /Tag No.','tag_no'),('Description','description'),('Model / Alias name','model'),('Quantity in Nos.','qty'),('Delivery Pipe Size (mm)','delivery_pipe_size'),('Flange standard','flange_standard')
+		,('Liquid ','liquid_handled'),('Specific Gravity ','specific_gravity'),('Viscosity in CST','viscosity_in_cst'),('Viscosity correction factors','viscosity_crt_factor'),('Temperature in C','temperature_in_c'),('Capacity in m3/Hr','capacity_in_m3hr'),('Total Head in Mlc(Water)','head_in_water'),('Total Head in Mlc(Liquid)','head_in_liquid'),('Efficiency in % W/L','efficiency'),('BKW Water','bkw_water'),('BKW Liq','bkw_liquid'),('Motor KW ','motor_kw'),('Speed - RPM (P/M)','speed_rpm_mot'),('Type of Drive','type_of_drive'),('Motor Make ','motor_make'),('Motor Frame size','framesize'),('NPSH R - M','npsh_r_m'),('Shaft Sealing','shaft_sealing'),('Seal Make / Seal Type','seal_ref'),('Face Combination / API Plan','face_api_ref')],
+		'02#MATERIAL: ':[('Purpose','order_category')],
+		'03#Spares: ':[('Spares','spare')],
+		'04#Accessories: ':[('W.O Ref','order_no'),('Accessories','acces')],
+		}
+		vz_dictn = {
+		'01#TECHNICAL SPECIFICATION:':[('W.O Ref','order_no'),('Equipment /Tag No.','tag_no'),('Description','description'),('Model / Alias name','model'),('Quantity in Nos.','qty'),('Delivery Pipe Size (mm)','delivery_pipe_size'),('Flange standard','flange_standard')
+		,('Liquid ','liquid_handled'),('Specific Gravity ','specific_gravity'),('Viscosity in CST','viscosity_in_cst'),('Viscosity correction factors','viscosity_crt_factor'),('Suction condition','suction_condition'),('Temperature in C','temperature_in_c'),('Solid Size','solid_concen'),('Capacity in m3/Hr','capacity_in_m3hr'),('Total Head in Mlc(Water)','head_in_water'),('Total Head in Mlc(Liquid)','head_in_liquid'),('Efficiency in % W/L','efficiency'),('BKW Water','bkw_water'),('BKW Liq','bkw_liquid'),('Motor KW ','motor_kw'),('Speed - RPM (P/M)','speed_rpm_mot'),('Type of Drive','type_of_drive'),('Motor Make ','motor_make'),('Motor Frame size','framesize'),('NPSH R - M','npsh_r_m'),('Shaft Sealing','shaft_sealing'),('Seal Make / Seal Type','seal_ref'),('Face Combination / API Plan','face_api_ref'),('Setting Height','setting_height'),('Sump Depth','sump_depth')],
+		'02#MATERIAL: ':[('Purpose','order_category')],
+		'03#Spares: ':[('Spares','spare')],
+		'04#Accessories: ':[('Accessories','acces')],
+		}
+		self_obj = self.pool.get('ch.kg.crm.pumpmodel')
+		sqltwo = """ select wo_line_id,order_category,pump_type,acces,spare,order_no,tag_no,description,model,qty,delivery_pipe_size,flange_standard,liquid_handled,specific_gravity,viscosity_in_cst,viscosity_crt_factor,suction_condition,temperature_in_c,solid_concen,solid_concen_vol,capacity_in_m3hr,head_in_water,head_in_liquid,efficiency,bkw_water,bkw_liquid,motor_kw,(speed_pump || ' $ ' || speed_motor) as speed_rpm_mot,
+		type_of_drive,motor_make,framesize,npsh_r_m,shaft_sealing,(mech_seal_make || ' $ ' || seal_type) as seal_ref,
+		(face_combination || ' $ ' || api_plan) as face_api_ref,setting_height,sump_depth from (
+		"""
+		sqlone = """ select
+		wo_line.id as wo_line_id,
+		coalesce(wo_line.order_category,'-') as order_category,
+		coalesce(wo_line.pump_model_type,'-') as pump_type,
+		coalesce(pump_crm.acces,'-') as acces,
+		'spare'::text as spare,
+		coalesce(wo_line.order_no,'-') as order_no,
+		case when pump_crm.equipment_no_flag = 't' then pump_crm.equipment_no else '-' end as tag_no,
+		case when pump_crm.description_flag = 't' then pump_crm.description else '-' end as description,
+		coalesce(pump.name,'-') as model,
+		coalesce(wo_line.qty,0) as qty,
+		coalesce(wo_line.delivery_pipe_size,'0') as delivery_pipe_size,
+		coalesce(flange.name,'-') as flange_standard,
+		coalesce(liquid.name,'-') as liquid_handled,
+		coalesce(pump_crm.specific_gravity,0) as specific_gravity,
+		coalesce(pump_crm.viscosity,0) as viscosity_in_cst,
+		coalesce(pump_crm.viscosity_crt_factor,'-') as viscosity_crt_factor,
+		case when pump_crm.suction_condition_flag = 't' then
+		(case
+		when pump_crm.suction_condition = 'positive' then 'Positive'
+		when pump_crm.suction_condition = 'negative' then 'Negative'
+		when pump_crm.suction_condition = 'flooded' then 'Flooded'
+		when pump_crm.suction_condition = 'sub_merged' then 'Submerged'
+		when pump_crm.suction_condition = 'suction_lift' then 'Suction Lift'
+		end )
+		else '-' end as suction_condition,
+		coalesce(pump_crm.temperature_in_c,'-') as temperature_in_c,
+		case when pump_crm.solid_concen_flag = 't' then (
+		case when pump_crm.solid_concen > 0 then pump_crm.solid_concen::text else '-' end)
+		else '-' end as solid_concen,
+		case when pump_crm.solid_concen_vol_flag  = 't' then (
+		case when pump_crm.solid_concen_vol > 0 then pump_crm.solid_concen_vol::text else '-' end )
+		else '-' end as solid_concen_vol,
+		coalesce(pump_crm.capacity_in_liquid,0) as capacity_in_m3hr,
+		case when pump_crm.head_in > 0 then round(cast(pump_crm.head_in as numeric),2)::text else '-' end as head_in_water,
+		case when pump_crm.head_in_liquid > 0 then round(cast(pump_crm.head_in_liquid as numeric),2)::text else '-' end as head_in_liquid,
+		case when pump_crm.efficiency_in > 0 then round(cast(pump_crm.efficiency_in as numeric),2)::text else '-' end as efficiency,
+		case when pump_crm.bkw_water is null then 0 else coalesce(pump_crm.bkw_water,0.00) end as bkw_water,
+		case when pump_crm.bkw_liq is null then 0 else coalesce(pump_crm.bkw_liq,0.00) end as bkw_liquid,
+		case when pump_crm.motor_kw > 0 then round(cast(pump_crm.motor_kw as numeric),2)::text else '-' end as motor_kw,
+		case when pump_crm.speed_in_rpm > 0 then pump_crm.speed_in_rpm::text else '-' end as speed_pump,
+		case when pump_crm.speed_in_motor > 0 then pump_crm.speed_in_motor::text else '-' end as speed_motor,
+		case
+		when type_of_drive = 'motor_direct' then 'Direct'
+		when type_of_drive = 'belt_drive' then 'Belt drive'
+		when type_of_drive = 'fc_gb' then 'Fluid Coupling Gear Box'
+		else
+		null end as type_of_drive,
+		case when pump_crm.motor_make_flag  = 't' then (
+		case when brand_motor.name is not null then brand_motor.name::text else '-' end)
+		else '-' end as motor_make,
+		case when pump_crm.framesize is not null then pump_crm.framesize else '-' end as framesize,
+		case when pump_crm.npsh_r_m > 0 then round(cast(pump_crm.npsh_r_m as numeric),2)::text else '-' end as npsh_r_m,
+
+		---case when (wo_line.shaft_sealing is null or wo_line.shaft_sealing = '') then '-' else wo_line.shaft_sealing end as shaft_sealing,
+		case when wo_line.shaft_sealing = 'gld_packing_tiga' then 'Gland Packing-TIGA'
+		when wo_line.shaft_sealing = 'gld_packing_ptfe' then 'Gland Packing-PTFE'
+		when wo_line.shaft_sealing = 'mc_seal' then 'M/C Seal'
+		when wo_line.shaft_sealing = 'dynamic_seal' then 'Dynamic Seal'
+		else '-' end as shaft_sealing,		
+		
+		coalesce(brand_mech.name,'-') as mech_seal_make,
+		--coalesce(pump_crm.seal_type,'-') as seal_type,
+		
+		case
+		when pump_crm.seal_type = 'sums' then 'Single Unbalanced Multiple Spring'
+		when pump_crm.seal_type = 'suss' then 'Single Unbalanced Single Spring'
+		when pump_crm.seal_type = 'sbsm' then 'Single Balanced Spring Stationary Mounted'
+		when pump_crm.seal_type = 'cs' then 'Cartridge Seal'
+		when pump_crm.seal_type = 'sbms' then 'Single Balanced Multiple Spring'
+		when pump_crm.seal_type = 'sbss' then 'Single Balanced Single Spring'
+		when pump_crm.seal_type = 'sc' then 'Single Cartridge'
+		when pump_crm.seal_type = 'dubtb' then 'Double Unbalanced Back to Back'
+		when pump_crm.seal_type = 'dbbtb' then 'Double Balanced Back to Back'
+		when pump_crm.seal_type = 'ts' then 'Tandem Seal'
+		when pump_crm.seal_type = 'dc' then 'Double Cartridge'
+		when pump_crm.seal_type = 'drsu' then 'Dry Running - Single Unbalanced'
+		when pump_crm.seal_type = 'mbi' then 'Metallic Bellow Inside'
+		when pump_crm.seal_type = 'tbs' then 'Teflon Bellow Seal-Outside Mounted Dry Running'
+		else '-' end as seal_type,		
+		
+		---coalesce(pump_crm.face_combination,'-') as face_combination,
+		
+		case
+		when pump_crm.face_combination = 'c_vs_sic' then 'C VS SIC'
+		when pump_crm.face_combination = 'sic_vs_sic' then 'SIC VS SIC'
+		when pump_crm.face_combination = 'c_vs_sic' then 'SIC VS SIC / C VS SIC'
+		when pump_crm.face_combination = 'gft_vs_ceramic' then 'GFT VS CERAMIC'
+		else '-' end as face_combination,		
+		
+		coalesce(pump_crm.api_plan,'-') as api_plan
+		,case when pump_crm.setting_height > 0 then pump_crm.setting_height::text else '-' end as setting_height,
+		coalesce(pump_crm.sump_depth,'-') as sump_depth
+		from ch_work_order_details wo_line
+		left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
+		left join ch_kg_crm_pumpmodel pump_crm on pump_crm.id = wo_line.enquiry_line_id
+		left join kg_crm_enquiry enq on enq.id = pump_crm.header_id
+		left join ch_work_order_details pump_crm_wo_line on pump_crm.wo_line_id = pump_crm_wo_line.id
+		left join kg_fluid_master liquid on liquid.id = pump_crm.fluid_id
+		left join kg_work_order wo on wo.id = wo_line.header_id
+		left join res_partner cust on cust.id = wo.partner_id
+		left join res_partner dealer on dealer.id = enq.dealer_id
+		left join res_company comp on comp.id = wo.company_id
+		left join kg_brand_master brand_mech on brand_mech.id = pump_crm.mech_seal_make
+		left join kg_brand_master brand_motor on brand_motor.id = pump_crm.motor_make
+		left join kg_brand_master brand_bearing on brand_bearing.id = pump_crm.bearing_make
+		left join ch_pumpseries_flange flange on flange.id = pump_crm.flange_standard
+		left join kg_qap_plan qap on qap.id = pump_crm.qap_plan_id
+		left join kg_pumpseries_master pumpseries on pumpseries.id = pump_crm.pumpseries_id
+		left join kg_primemover_master primemover on primemover.id = pump_crm.primemover_id """
+		sqlone_cond = """ where wo_line.id in (select id from ch_work_order_details where header_id in %s )
+		and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null """%(pass_param)
+		sqltwo_end = """ ) as sql_one"""
+		
+		for report in rpt_type:
+			print " --- Starts Here ----"
+			wo_line_obj = self.pool.get('ch.work.order.details')
+			count_sql = """ select 
+			(select name from kg_pumpmodel_master where id = pump_model_id) as pump_name,
+			id as wo_line_id,order_category as purpose_categ,
+			count(*) OVER () from ch_work_order_details where header_id in %s and pump_model_type = '%s' and pump_model_type is not null and pump_model_type != '' order by pump_model_type,order_category,id """%(pass_param,report)
+			cr.execute(count_sql)
+			count_data = cr.dictfetchone()
+			if not count_data:
+				pass
+			else:
+				print " = RRRRRRRR TTTTTT =============",report
+				if report == 'horizontal':
+					sheet1 = wbk.add_sheet('Horizontal')
+					dictn = hz_dictn
+				elif report == 'vertical':
+					sheet1 = wbk.add_sheet('Vertical')			
+					dictn = vz_dictn
+				count = count_data['count']
+				pump_sql = count_sql
+				cr.execute(pump_sql)
+				pump_data = cr.dictfetchall()
+				s1 = 0
+				c1=0
+				s2 = s1+1	
+				c2 = c1+count				
+				sheet1.col(0).width = 20000
+				cmp_ids = cmp_obj.browse(cr, uid, 1)
+				sheet1.write_merge(s2, s2, c1, c2,"SAM TURBO INDUSTRY PRIVATE LIMITED",style1)
+				sheet1.row(0).height = 400
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, c1, c2,"Avinashi Road, Neelambur, Coimbatore - 641062",style4)
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, c1, c2,"Tel:3053555, 3053556,Fax : 0422-3053535",style4)				
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, c1, c1, 'Pump Type: '+report.upper(), style41)
+				sheet1.write_merge(s2, s2, c1+1, c2, 'WORK ORDER REF: '+rec.name, style5)
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, c1, c1, 'Customer: '+rec.partner_id.name, style5)
+				dealer = '-'
+				if rec.dealer_id.id:
+					dealer = rec.dealer_id.name
+				sheet1.write_merge(s2, s2, c1+1, c2, 'Dealer: '+dealer, style5)
+				s2 = s2+1
+				order_date = datetime.strptime(rec.entry_date, '%Y-%m-%d').strftime('%d/%m/%Y')
+				sheet1.write_merge(s2, s2, c1, c1, 'Order Date: '+order_date, style_left)
+				due_date = '-'
+				if rec.enquiry_no:
+					enq_ids = self.pool.get('kg.crm.enquiry').search(cr,uid,[('name','=',rec.enquiry_no),('state','!=','revised')])
+					if enq_ids:
+						enq_rec = self.pool.get('kg.crm.enquiry').browse(cr,uid,enq_ids[0])
+						due_date = datetime.strptime(enq_rec.due_date, '%Y-%m-%d').strftime('%d/%m/%Y')
+				sheet1.write_merge(s2, s2, c1+1, c2, 'Due Date: '+due_date, style_left)
+				s2 = s2+1
+				order_priority = dict(self._columns['order_priority'].selection)
+				order_priority = order_priority.get(str(rec.order_priority))
+				sheet1.write_merge(s2, s2, c1, c2,"CATEGORY: "+str(order_priority or '-'),style41)
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, c1, c1,"Penalty: "+(rec.l_d_clause or '-'),style5)
+				inspection = dict(self._columns['inspection'].selection)
+				inspection = inspection.get(str(rec.inspection))
+				sheet1.write_merge(s2, s2, c1+1, c2,"Inspection: "+(inspection or '-'),style5)
+				s2 = s2+1
+				road_permit = dict(self._columns['road_permit'].selection)
+				road_permit = road_permit.get(str(rec.road_permit))
+				sheet1.write_merge(s2, s2, c1, c1,"Road permit: "+(road_permit or '-'),style_left)
+				drawing_approval = dict(self._columns['drawing_approval'].selection)
+				drawing_approval = drawing_approval.get(str(rec.drawing_approval))
+				sheet1.write_merge(s2, s2, c1+1, c2,"Drg. Appr.: "+(drawing_approval or '-'),style_left)
+				s2 = s2+1
+				cpo_ref = ''
+				if rec.offer_no:
+					off_ids = self.pool.get('kg.crm.offer').search(cr,uid,[('name','=',rec.offer_no)])
+					if off_ids:
+						off_rec = self.pool.get('kg.crm.offer').browse(cr,uid,off_ids[0])
+						cpo_ref = (off_rec.customer_po_no or '-') + ' / ' + (off_rec.dealer_po_no or '-')
+				sheet1.write_merge(s2, s2, c1, c2,"CPO Ref / Dealer Po Ref: "+cpo_ref,style5)
+				sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+				sheet1.row(0).height = 400
+				sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,c2)
+				for key in sorted(dictn):
+					s2 = s2+1
+					c1 = c1+1
+					c1 = 0
+					if key.split('#')[1] not in ('Accessories: ','Spares: '):
+						sheet1.write_merge(s2, s2, c1, c1+count, key.split('#')[1], style_left_header)
+					else:
+						s2 = s2-1
+					for var in (dictn[key]):
+						s2 = s2+1
+						c1 = c1+1
+						c1 = 0
+						if var[0] == 'Purpose':
+							moc_com_query = """ select wo_line.id as wo_line_id,moc_const.offer_id,moc_const.moc_id,offer_mat.name as moc_offer_name,moc.name as moc_offer_value 
+							from ch_moc_construction moc_const
+							left join kg_offer_materials offer_mat on offer_mat.id = moc_const.offer_id
+							left join kg_moc_master moc on  moc.id = moc_const.moc_id
+							left join ch_work_order_details wo_line on  wo_line.id = moc_const.header_id """
+							moc_cond = """where moc_const.header_id
+							in (select pump_offer.enquiry_line_id
+							from ch_work_order_details wo_line
+							left join ch_pump_offer pump_offer on pump_offer.id = wo_line.pump_offer_line_id
+							where wo_line.header_id in %s
+							and wo_line.pump_model_type = '%s'
+							and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null
+							and pump_offer.enquiry_line_id is not null
+							) """%(pass_param,report)
+							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
+							cr.execute(moc_query)
+							moc_query_data = cr.dictfetchall()
+							if not moc_query_data:
+								sheet1.write_merge(s2, s2, c1, c2, '-', style_center)
+								s2 += 1
+							for moc in moc_query_data:
+								sheet1.write_merge(s2, s2, c1, c1, moc['moc_offer_name'], style_left)
+								if pump_data:
+									for pump in pump_data:
+										wo_line_rec = wo_line_obj.browse(cr, uid, pump['wo_line_id'])
+										c1 += 1
+										moc_pump_query = moc_com_query+ """where moc_const.header_id
+										in (select pump_offer.enquiry_line_id
+										from ch_work_order_details wo_line
+										left join ch_pump_offer pump_offer on pump_offer.id = wo_line.pump_offer_line_id
+										where wo_line.header_id in %s
+										and wo_line.pump_model_type = '%s'
+										and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null
+										and pump_offer.enquiry_line_id is not null
+										) and wo_line.id = %s and moc_const.offer_id = %s """%(pass_param,report,pump['wo_line_id'],moc['offer_id'])
+										cr.execute(moc_pump_query)
+										moc_pump_data = cr.dictfetchall()
+										if moc_pump_data:
+											for moc_val in moc_pump_data:
+												sheet1.write_merge(s2, s2, c1, c1, moc_val['moc_offer_value'], style_left)
+										else:
+											sheet1.write_merge(s2, s2, c1, c1, '-', style_left)
+								s2 += 1
+								c1 = 0
+							s2 = s2-1
+						elif var[0] == 'Accessories':
+							access_query = """ select header_id,access_name,yes,oth_spec from (
+							select
+							wo_access.header_id,
+							access.name as access_name,
+							'Yes' as yes,
+							wo_access.oth_spec as oth_spec
+							from ch_wo_accessories wo_access
+							left join kg_accessories_master access on access.id = wo_access.access_id
+							left join ch_work_order_details wo_line on wo_line.id = wo_access.header_id
+							order by wo_access.id asc
+							) as sql_access """							
+							access_cond_query = """ where header_id in (select id from ch_work_order_details where header_id in %s and pump_model_type = '%s' and pump_model_type != '' and pump_model_type is not null
+							) """%(pass_param,report)
+							access_cnt_query = """ select count(*) from ( """ + access_query + access_cond_query + """ )  as sql_access """
+							cr.execute(access_cnt_query)
+							access_cnt_data = cr.dictfetchone()
+							access_cnt = 0
+							if access_cnt_data:
+								access_cnt = access_cnt_data['count']
+							if access_cnt > 0 :
+								sheet1.write_merge(s2, s2, c1, c1+count, var[0], style_sub_left)
+							else:
+								pass							
+							pump_cnt = 1
+							if pump_data:
+								s2 = s2
+								for pump in pump_data:
+									c1 += 1
+									wo_line_rec = wo_line_obj.browse(cr, uid, pump['wo_line_id'])
+									acc_cond = """where header_id = %s"""%(pump['wo_line_id'])
+									access_pump_query = access_query+acc_cond
+									cr.execute(access_pump_query)
+									access_pump_data = cr.dictfetchall()
+									heada_s2 = s2
+									if access_pump_data:
+										for access in access_pump_data:
+											s2 = heada_s2 + access_pump_data.index(access) + 1
+											if access['access_name']:
+												acc = access['access_name']
+											else:
+												acc = '-'
+											sheet1.write_merge(s2, s2, 0, 0, acc, style_left)
+											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, access['oth_spec'], style_left)
+											for c in range(1,count+1):
+												if (c != pump_cnt and c != 0):
+													sheet1.write_merge(s2, s2, c, c, 0.00, style_left)
+									else:
+										s2 -= 1
+									s2 += 1
+									pump_cnt += 1	
+								c1 = 0
+							else:
+								s2 -= 1
+							s2 = s2 - 1
+						elif var[0] == 'Spares':
+							spare_query = """ select pump_model,pattern_name,qty,oth_spec,header_id from (
+							select pump.name as pump_model,foundry_line.pattern_name,foundry_line.qty,foundry_line.add_spec as oth_spec,foundry_line.header_id
+							from ch_order_bom_details foundry_line
+							left join kg_pumpmodel_master pump on pump.id = foundry_line.pump_model_id
+							where foundry_line.order_category = 'spare'  and foundry_line.flag_applicable = 't'
+							union
+							select pump.name as pump_model,ms_line.name,ms_line.qty,ms_line.remarks as oth_spec,ms_line.header_id
+							from ch_order_machineshop_details ms_line
+							left join ch_work_order_details wo_line on wo_line.id = ms_line.header_id
+							left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
+							where wo_line.order_category = 'spare' and ms_line.flag_applicable = 't'
+							and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null
+							union
+							select
+							pump.name as pump_model,bot_line.item_name,bot_line.qty,bot_line.remarks as oth_spec,bot_line.header_id
+							from ch_order_bot_details bot_line
+							left join ch_work_order_details wo_line on wo_line.id = bot_line.header_id
+							left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
+							where wo_line.order_category = 'spare' and bot_line.flag_applicable = 't'
+							and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null 
+							) as sql_overall  """
+							spare_cond_query = """ where header_id in (select id from ch_work_order_details where header_id in %s and pump_model_type = '%s' and pump_model_type != '' and pump_model_type is not null
+							) """%(pass_param,report)
+							spare_cnt_query = """ select count(*) from ( """ + spare_query + spare_cond_query + """ )  as sql_spare """
+							cr.execute(spare_cnt_query)
+							spare_cnt_data = cr.dictfetchone()
+							spare_cnt = 0
+							if spare_cnt_data:
+								spare_cnt = spare_cnt_data['count']
+							if spare_cnt > 0 :
+								sheet1.write_merge(s2, s2, c1, c1+count, var[0], style_sub_left)
+								#~ s2 += 1
+							else:
+								pass
+							pump_cnt = 1
+							if pump_data:
+								s2 = s2
+								for pump in pump_data:
+									c1 += 1
+									wo_line_rec = wo_line_obj.browse(cr, uid, pump['wo_line_id'])
+									spa_cond = """where header_id = %s"""%(pump['wo_line_id'])
+									spare_pump_query = spare_query+spa_cond
+									cr.execute(spare_pump_query)
+									spare_pump_data = cr.dictfetchall()
+									head_s2 = s2
+									if spare_pump_data:
+										for spare in spare_pump_data:
+											s2 = head_s2 + spare_pump_data.index(spare) + 1
+											if spare['pattern_name']:
+												spa = spare['pattern_name']
+												sheet1.write_merge(s2, s2, 0, 0, spa, style_left)
+											else:
+												spa = '-'
+												sheet1.write_merge(s2, s2, 0, 0, spa, style_left)
+											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, spare['qty'], style_left)
+											for c in range(1,count+1):
+												if (c != pump_cnt and c != 0):
+													sheet1.write_merge(s2, s2, c, c, 0.00, style_left)
+									else:
+										s2 -= 1
+									s2 += 1
+									pump_cnt += 1	
+								c1 = 0
+							else:
+								s2 -= 1
+							s2 = s2 - 1
+						else:
+							if var[0] in ('Model / Alias name','Capacity in m3/Hr'):
+								sheet1.write_merge(s2, s2, c1, c1, var[0], style_highlight)							
+							else:
+								sheet1.write_merge(s2, s2, c1, c1, var[0], style_left)
+						if pump_data:
+							for pump in pump_data:
+								wo_line_rec = wo_line_obj.browse(cr, uid, pump['wo_line_id'])
+								c1 += 1
+								if var[1] in ('order_category','acces','spare'):
+									pass
+								else:
+									sqltwo_query = """
+									 where wo_line_id in (select id from ch_work_order_details where header_id in %s and pump_model_type = '%s' and pump_model_type != '' and pump_model_type is not null and id = %s ) """%(pass_param,report,pump['wo_line_id'])
+									sql_query = sqltwo+sqlone+sqltwo_end+sqltwo_query
+									cr.execute(sql_query)
+									sql_query_data = cr.dictfetchall()
+									if sql_query_data:
+										for loop in sql_query_data:
+											if loop[var[1]] != '-':
+												replace_str = str(loop[var[1]])
+												values = string.replace(replace_str, '$', '/')
+												if var[1] == 'pump_pmodtype':
+													ref_value = dict(self_obj._columns['pump_model_type'].selection)
+													values = str(ref_value[loop[var[1]]])
+												if var[1] == 'pump_impeller_type':
+													ref_value = dict(self_obj._columns['impeller_type'].selection)
+													if loop[var[1]] != '-':
+														values = str(ref_value[loop[var[1]]])
+											else:
+												values = loop[var[1]]
+											if var[1] in ('model','capacity_in_m3hr','order_no','capacity_in_m3hr','head_in_liquid','npsh_r_m'):
+												sheet1.write_merge(s2, s2, c1, c1, values, style_highlight)
+											else:
+												sheet1.write_merge(s2, s2, c1, c1, values, style_left)
+									else:
+										sheet1.write_merge(s2, s2, c1, c1, '', style_left)
+				if pump_data:
+					s1 = 5
+					c1 = 0
+					for pump in pump_data:
+						c1 += 1
+						sheet1.col(c1).width = 3000
+						#~ sheet1.write_merge(s1, s1, c1, c1, '', style_left)
+				
+				print " --- Ends Here ----"				
+		
+		"""Parsing data as string """
+		file_data=StringIO.StringIO()
+		o=wbk.save(file_data)		
+		"""string encode of data in wksheet"""		
+		out=base64.encodestring(file_data.getvalue())
+		"""returning the output xls as binary"""
+		report_name = 'WO Copy' + '.' + 'xls'
+		
+		return self.write(cr, uid, ids, {'rep_data':out,'wo_copy':report_name},context=context)
+	
 	def mkt_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':

@@ -20,6 +20,7 @@
 						<button name="entry_confirm" type="object" string="WFMD Approval" class="oe_highlight" confirm="Are you sure to proceed ?"
 							attrs="{'invisible': ['|',('state','!=','design_approved'),('wo_spc_app_flag','=',True)]}"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
+						<button name="wo_copy" type="object" string="WO Copy" class="oe_highlight"/>
 					</header>
 					<group>
 						<group>
@@ -51,6 +52,7 @@
 							<field name="order_value" string="WO Value" readonly="1"/>
 							<field name="state"  style="width: 30%%" class="att_state_change"/>
 							<field name="remarks" string="Remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="rep_data" readonly="1" width="100" filename="wo_copy"/>
 						</group>					
 					</group>
 					<notebook>
