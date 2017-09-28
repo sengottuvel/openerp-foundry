@@ -249,9 +249,7 @@ class kg_melting(osv.osv):
 										moc_line.header_id = %s and moc_line.mechanical_id = %s
 								  ''',[entry.mech_value,entry.mech_value,entry.mech_value,entry.mpa_value,entry.mpa_value,entry.mpa_value,entry.moc_id.id,entry.mechanical_id.id])
 				values= cr.fetchone()			
-				if values:
-					return True
-				else:
+				if values is None:					
 					raise osv.except_osv(_('Mechanical Chart'),
 							_('Specified Mechanical Properties has not available in MOC Master and check the values !!'))
 			
