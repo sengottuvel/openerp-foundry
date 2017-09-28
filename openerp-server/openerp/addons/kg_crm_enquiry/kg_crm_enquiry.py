@@ -1231,6 +1231,7 @@ class kg_crm_enquiry(osv.osv):
 															  'qty': qty,
 															  'hsn_no': hsn,
 															  'gst': gst,
+															  'material_code': bom_item.material_code,
 															   })
 		
 		spare_rec = self.pool.get('ch.spare.offer').browse(cr,uid,spare_id)
