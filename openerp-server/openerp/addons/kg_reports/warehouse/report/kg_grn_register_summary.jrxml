@@ -686,7 +686,7 @@ order by gen_grn.name)) as a
 where
 CASE
 WHEN (select division from kg_grn_wiz_pro where order_id = $P{wiz_id}) is not null THEN division in
-(select division from kg_grn_wiz_pro where order_id = $P{wiz_id})
+(select division from kg_grn_wiz_pro where order_id = $P{wiz_id} )
 ELSE
 division != ''
 end
