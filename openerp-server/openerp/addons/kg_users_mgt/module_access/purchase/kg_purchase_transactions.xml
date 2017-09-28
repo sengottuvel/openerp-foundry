@@ -632,6 +632,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
 		</record>
 		
+		<record id="t_purchase_ch_invoice_line" model="ir.model.access">
+			<field name="model_id" ref="kg_purchase_invoice.model_ch_invoice_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Invoice Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
 		
  </data>
 </openerp>
