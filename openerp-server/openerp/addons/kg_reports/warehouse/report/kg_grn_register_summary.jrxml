@@ -590,7 +590,7 @@ when (select status from kg_grn_register_wiz where id = $P{wiz_id}) is not null 
 else
 po_grn.state !='draft' end
 
-and po_grn.grn_date >=to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and po_grn.grn_date <= to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
+and po_grn.grn_date >=(to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '') and (po_grn.grn_date <= to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = '')
 order by po_grn.name)
 
 UNION ALL
@@ -680,7 +680,7 @@ when (select status from kg_grn_register_wiz where id = $P{wiz_id}) is not null 
 else
 gen_grn.state ='approved' end
 
-and gen_grn.grn_date >= to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and gen_grn.grn_date <=to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
+and gen_grn.grn_date >= (to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '') and (gen_grn.grn_date <=to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = '')
 order by gen_grn.name)) as a
 ) as sub
 where
