@@ -1004,7 +1004,7 @@ class kg_purchase_amendment(osv.osv):
 						#~ grn_sql = """ select sum(po_qty) - sum(po_grn_qty) as bal_po_grn_qty from po_grn_line where po_id = %s and product_id = %s """%(amend_obj.po_id.id,amend_line.product_id.id)
 						grn_sql = """ select sum(line.po_qty) - sum(line.po_grn_qty) as bal_po_grn_qty 
 										from po_grn_line line
-										join kg_po_grn grn
+										join kg_po_grn grn on(grn.id=line.po_grn_id)
 										where line.po_id = %s and line.product_id = %s and grn.state in ('done','inv') """%(amend_obj.po_id.id,amend_line.product_id.id)
 						cr.execute(grn_sql)		
 						grn_data = cr.dictfetchall()
