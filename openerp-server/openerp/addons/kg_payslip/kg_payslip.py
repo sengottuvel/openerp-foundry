@@ -473,6 +473,7 @@ class kg_payslip(osv.osv):
 				
 				empr_esi_ids = employee_cont.search(cr , uid ,[('active','=',True),('state','=','approved')])
 				emp_esi_rec = employee_cont.browse(cr,uid,empr_esi_ids[0])
+				emp_esi_config = self.pool.get('hr.employee').browse(cr,uid,slip_rec.employee_id.id)
 				if esi_amt_sal:
 					print "esi_amt_salesi_amt_salesi_amt_sal",esi_amt_sal + acc_vda_value
 					if emp_esi_config.esi_config_flag is False:
