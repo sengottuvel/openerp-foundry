@@ -2368,14 +2368,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	def _template_name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		data=''
-		print"recrec",rec.id
 		if rec.template_name:
-			template_name = rec.template_name
-			cr.execute(""" select template_name from ch_kg_crm_pumpmodel where template_name = '%s' and id != %s """ %(template_name,rec.id))
+			template_name = str(rec.template_name)
+			cr.execute(""" select template_name,id from ch_kg_crm_pumpmodel where template_name = '%s' and template_flag = False and id != %s """ %(template_name,rec.id))
 			data = cr.dictfetchall()
-			print"datadata",data
 			if data:
-				raise osv.except_osv(_('Warning!'),_('%s this template name already exits'%(rec.template_name)))
+				if len(data) > 1:
+					raise osv.except_osv(_('Warning!'),_('%s this template name already exits'%(rec.template_name)))
 		return True
 	
 	def _ms_raw_length_validate(self, cr, uid,ids, context=None):
