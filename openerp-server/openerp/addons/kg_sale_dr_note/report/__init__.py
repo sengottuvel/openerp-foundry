@@ -20,6 +20,7 @@
 ##############################################################################
 
 import onscreen_debit_note_print
+import onscreen_credit_note_print
 
 
 

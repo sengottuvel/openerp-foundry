@@ -11,6 +11,16 @@
         menu="True"
         header="False"
         />
+        
+         <report string="Credit Note Print"
+        model="kg.sale.cr.note"
+        auto="True"
+        name="onscreen_credit_note_print"
+        rml="kg_sale_dr_note/report/onscreen_credit_note_print.jrxml"
+        id="sales_cr_note_jasper_report_menu" 
+        menu="True"
+        header="False"
+        />
 
     </data>
 </openerp>

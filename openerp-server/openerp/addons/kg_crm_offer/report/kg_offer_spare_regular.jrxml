@@ -10,7 +10,7 @@
 coalesce(spare.material_code,'-') as material_code,
 coalesce(spare.off_name,'-') as off_name,
 pattern.name as pattern_no,
-case when moc.name = 'N/A' then moc_const.code else moc.name end as moc_name,
+case when moc.name = 'N/A' then moc_const.name else moc.name end as moc_name,
 spare.qty as qty,
 'No' as unit,
 'A' as type,
@@ -62,31 +62,14 @@ to_char(offer.offer_date::date,'dd-mm-YYYY') as offer_date,
 partner.name as customer,
 pump.name as pump_name,
 enquiry.s_no as serial_no,
-case when spare.enquiry_line_id is not null then
-(select coalesce((sum(coalesce(total_price::numeric,0.00))),0.00) as gnd_tot from (
-select
-coalesce(spare.material_code,'-') as material_code,
-coalesce(spare.off_name,'-') as off_name,
-pattern.name as pattern_no,
-case when moc.name = 'N/A' then moc_const.code else moc.name end as moc_name,
-spare.qty as qty,
-'No' as unit,
-'A' as type,
-spare.r_net_amount / spare.qty as each_price,
-coalesce(hsn.name::text,'-') as hsn_code,
-coalesce(tax.description,'-') as tax_per,
-spare.r_net_amount as total_price
+case when offer.id is not null then
+(select coalesce((sum(coalesce(r_net_amount::numeric,0.00))),0.00) as gnd_tot from
 
-from
-ch_spare_offer spare
-left join kg_pattern_master pattern on (pattern.id = spare.pattern_id)
-left join kg_hsn_master hsn on (hsn.id = spare.hsn_no)
-left join account_tax tax on (tax.id = hsn.igst_id)
-left join kg_moc_master moc on (moc.id = spare.moc_id)
-left join kg_moc_construction moc_const on (moc_const.id = spare.moc_const_id)
-where spare.enquiry_line_id=spare.enquiry_line_id
-) as subone
+(select r_net_amount from
 
+ch_spare_offer
+
+where header_id = offer.id ) as sub
 )
 else 0.00 end as line_tot
 

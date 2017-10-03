@@ -1,2 +1,3 @@
 import kg_sale_dr_note
+import kg_sale_cr_note
 import report
