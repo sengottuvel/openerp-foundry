@@ -166,7 +166,7 @@ class kg_depindent(osv.osv):
 					seq_name = cr.fetchone();
 					seq_name = seq_name[0]
 				else:
-					seq_name = t.seq_name
+					seq_name = t.name
 				self.write(cr,uid,ids,{'state': 'confirm',
 									   'confirmed_by': uid,
 									   'confirmed_date': dt_time,
