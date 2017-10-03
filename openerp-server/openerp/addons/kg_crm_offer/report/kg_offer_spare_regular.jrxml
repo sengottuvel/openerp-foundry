@@ -49,7 +49,7 @@ where spare.enquiry_line_id=$P{enquiry_line_id}]]>
 	<parameter name="printed_by" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[select offer_ref_id,enquiry_line_id,
-trim(TO_CHAR((coalesce((sum(line_tot) OVER ()),0.00)), '999G999G99G999G99G99G990D99')) as line_tot_txt,
+trim(TO_CHAR((coalesce((line_tot),0.00)), '999G999G99G999G99G99G990D99')) as line_tot_txt,
 company_name,to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
 pump_id,offer_ref,offer_date,customer,pump_name,serial_no from (
 select
