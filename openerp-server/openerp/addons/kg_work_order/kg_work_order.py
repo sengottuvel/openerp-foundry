@@ -1993,7 +1993,7 @@ class ch_work_order_details(osv.osv):
 		### Prime Cost ###
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
-		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',domain="[('state','=','approved')]"),
+		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard'),
 		'trimming_dia': fields.char('Trimming Dia'),
 		'cc_drill': fields.selection([('basic_design','BASIC DESIGN'),('basic_design_a','BASIC DESIGN+A'),
 			('basic_design_c','BASIC DESIGN+C'),('nill','NILL')],' C.C. Drill'),
