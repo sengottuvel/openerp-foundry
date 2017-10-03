@@ -2373,6 +2373,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			template_name = rec.template_name
 			cr.execute(""" select template_name from ch_kg_crm_pumpmodel where template_name = '%s' and id != %s """ %(template_name,rec.id))
 			data = cr.dictfetchall()
+			print"datadata",data
 			if data:
 				raise osv.except_osv(_('Warning!'),_('%s this template name already exits'%(rec.template_name)))
 		return True
