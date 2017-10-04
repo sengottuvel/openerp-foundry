@@ -701,8 +701,9 @@ class kg_po_grn(osv.osv):
 							if line.product_id.tolerance_applicable == True:
 								product_qty=po_line_id.product_qty+po_line_id.product_qty/100.00*line.product_id.tolerance_plus
 							if line.po_grn_qty <= product_qty:
-								po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id),('id','!=',line.id)])
+								po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id),('id','!=',line.id),('product_id','=',line.product_id.id)])
 								po_grn_qty= 0
+								print"po_recpo_rec",po_rec
 								if po_rec:
 									for ele in po_rec:
 										po_recc = self.pool.get('po.grn.line').browse(cr,uid,ele)
@@ -1630,7 +1631,7 @@ class po_grn_line(osv.osv):
 		
 		## Basic Info
 		
-		'po_grn_id':fields.many2one('kg.po.grn','PO GRN Entry'),
+		'po_grn_id':fields.many2one('kg.po.grn','PO GRN Entry', ondelete='cascade'),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
 		'line_state': fields.selection([('draft', 'Draft'),('confirmed', 'Confirmed'),('done', 'Done')], 'Status',readonly=True),
 		'remark':fields.text('Notes'),
@@ -1770,7 +1771,7 @@ class kg_po_exp_batch(osv.osv):
 		
 		## Basic Info
 		
-		'po_grn_line_id':fields.many2one('po.grn.line','PO GRN Entry Line'),
+		'po_grn_line_id':fields.many2one('po.grn.line','PO GRN Entry Line', ondelete='cascade'),
 		
 		## Module Requirement Fields
 		
@@ -1796,7 +1797,7 @@ class kg_po_grn_expense_track(osv.osv):
 		
 		## Basic Info
 		
-		'expense_id': fields.many2one('kg.po.grn', 'Expense Track'),
+		'expense_id': fields.many2one('kg.po.grn', 'Expense Track', ondelete='cascade'),
 		
 		## Module Requirement Fields
 		
@@ -1826,7 +1827,7 @@ class ch_po_grn_wo(osv.osv):
 		
 		## Basic Info
 		
-		'header_id': fields.many2one('po.grn.line', 'PO Line'),
+		'header_id': fields.many2one('po.grn.line', 'PO Line', ondelete='cascade'),
 		
 		## Module Requirement Fields
 		
