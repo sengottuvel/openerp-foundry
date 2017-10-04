@@ -54,7 +54,7 @@ class kg_melting(osv.osv):
 		'remark': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'active': fields.boolean('Active'),
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled'),('reject','Rejected')],'Status', readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approved','Approved'),('cancel','Cancelled'),('reject','Rejected')],'Status', readonly=True),
 		
 		'line_ids':fields.one2many('ch.melting.charge.details', 'header_id', "Charge Details"),
 		'line_ids_a':fields.one2many('ch.melting.chemistry.details', 'header_id', "Chemistry Details"),
@@ -113,6 +113,9 @@ class kg_melting(osv.osv):
 		
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		
+		'ap_date': fields.datetime('Approved Date', readonly=True),
+		'ap_user_id': fields.many2one('res.users', 'Approved By', readonly=True),	
 		
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
@@ -219,6 +222,13 @@ class kg_melting(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])	
 		if entry.state == 'draft':	
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		
+		return True
+	
+	def entry_approve(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])	
+		if entry.state == 'confirmed':	
 			line_ids =entry.line_ids
 			grand_total =0.00
 			melt_cost =0.00
@@ -249,7 +259,9 @@ class kg_melting(osv.osv):
 										moc_line.header_id = %s and moc_line.mechanical_id = %s
 								  ''',[entry.mech_value,entry.mech_value,entry.mech_value,entry.mpa_value,entry.mpa_value,entry.mpa_value,entry.moc_id.id,entry.mechanical_id.id])
 				values= cr.fetchone()			
-				if values is None:					
+				if values:
+					return True
+				else:
 					raise osv.except_osv(_('Mechanical Chart'),
 							_('Specified Mechanical Properties has not available in MOC Master and check the values !!'))
 			
@@ -269,8 +281,9 @@ class kg_melting(osv.osv):
 				if entry.remark == False:
 					raise osv.except_osv(_('Warning!'),
 							_('Various above 3% Remarks is must !!'))			
-			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-			'various': various_formula,'melt_cost': melting_total_rate})
+			self.write(cr, uid, ids, {'state': 'approved','ap_user_id': uid, 'ap_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+			'various': various_formula,'melt_cost': melting_total_rate})		
+		
 		return True
 	
 		
