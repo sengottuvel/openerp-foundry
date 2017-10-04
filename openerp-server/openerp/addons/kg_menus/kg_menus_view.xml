@@ -319,7 +319,9 @@
 				<menuitem  name="Special Approval POA"   parent="menu_mgmt_masters" action="kg_purchase_amendment.action_kg_poamendment_form" id="tam_po_amend_apl_view_mgmt" sequence='4'/>
 				<menuitem name="Stock Statement"   parent="menu_mgmt_masters" action="stock.action_production_lot_form" id="wma_kg_stock_list_mgmt" sequence='5'/>
 				<menuitem  name="Offer - MD approval" parent="menu_mgmt_masters" action="kg_crm_offer.tma_crm_offer_spl_apl" id="tam_offer_apl_view_mgmt" sequence='6'/>
-				
+			<menuitem name="Enquiry &amp; Offer" id="tpm_mgmt_enq_offer" parent="menu_mgmt" sequence="1"/>
+				<menuitem name="Enquiry" parent="tpm_mgmt_enq_offer" action="kg_crm_enquiry.tma_crm_enquiry_mgmt_md" id="tam_mgmt_enq" sequence='1'/>
+				<menuitem name="Offer" parent="tpm_mgmt_enq_offer" action="kg_crm_offer.tma_crm_offer_mgmt_md" id="tam_mgmt_offer" sequence='2'/>
 		<!--MGMT menus-->
 		<!--HR menus-->
 			<menuitem name="HR Master" id="menu_hr_master" sequence="91"/>
