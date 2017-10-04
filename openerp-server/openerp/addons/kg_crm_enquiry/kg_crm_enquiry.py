@@ -2043,6 +2043,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		print"coupling_make",coupling_make
 		print"coupling_type_id",coupling_type_id
 		print"service_factor",service_factor
+		print"moc_const_id",moc_const_id
 		access_obj = self.pool.get('kg.accessories.master')
 		access_vals = []
 		coupling_access_id = ''

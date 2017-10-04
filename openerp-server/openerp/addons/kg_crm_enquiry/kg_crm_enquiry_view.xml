@@ -99,6 +99,7 @@
 									<field name="pump_id"/>
 									<field name="flange_type"/>
 									<field name="acces"/>
+									<field name="template_flag"/>
 									<field name="quantity_in_no" required="1" invisible="1"/>
 								</tree>
 								
@@ -984,6 +985,10 @@
 					<field name="customer_id"/>	
 					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>							
 					<field name="state"/>
+					<field name="zone" invisible="1"/>
+					<field name="division_id" invisible="1"/>
+					<field name="segment" invisible="1"/>
+					<field name="source" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -1035,6 +1040,28 @@
 					<filter icon="terp-check" name="call" string="Call Back" domain="[('state','=','call')]"/>					
 					<separator/>
                     <group expand="0" string="Group By...">
+						<filter string="Customer" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'customer_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+		<record id="t_search_v_crm_enquiry_mgmt" model="ir.ui.view">
+            <field name="name">Enquiry Entry Search</field>
+            <field name="model">kg.crm.enquiry</field>
+            <field name="arch" type="xml">
+                <search string="Enquiry Entry Search">
+					<field name="name" string="Enquiry No"  filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="moved_to_offer" string="Moved To Offer" domain="[('state','=','moved_to_offer')]"/>					
+					<filter icon="terp-check" name="call" string="Call Back" domain="[('state','=','call')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Zone" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'zone'}"/>
+						<filter string="Segment" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'segment'}"/>
+						<filter string="Division" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'division_id'}"/>
+						<filter string="Source" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'source'}"/>
 						<filter string="Customer" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'customer_id'}"/>
                         <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
 					</group>
@@ -1133,6 +1160,17 @@
 			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
 			<field name="context">{'default_source':'market','default_segment':'dom','default_division_id':30}</field>
 			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('division_id','=',30)]</field>
+		</record>
+		
+		<record id="tma_crm_enquiry_mgmt_md" model="ir.actions.act_window">
+			<field name="name">Enquiry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.enquiry</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
+			<field name="search_view_id" ref="t_search_v_crm_enquiry_mgmt"/>
+			<field name="context">{}</field>
+			<field name="domain">[('state','!=','revised')]</field>
 		</record>
 		
 	<!-- Menu Action End-->
@@ -1680,7 +1718,7 @@
 								<field name="access_id" required="1" attrs="{'readonly':['|',('load_access','=',True),('access_categ_id','=',False)]}"/>
 								<field name="accessories_type" required="1" attrs="{'readonly':['|',('load_access','=',True),('access_categ_id','=',False)]}"/>
 								<field name="moc_id" attrs="{'readonly':[('load_access','=',True)]}" invisible="1"/>
-								<field name="moc_const_id" attrs="{'readonly':[('load_access','=',True)]}" invisible="1"/>
+								<field name="moc_const_id" invisible="1"/>
 							</group>
 							<group>
 								<field name="qty" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
