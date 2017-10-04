@@ -16,7 +16,7 @@
 						<button name="entry_reject_md" type="object" string="Reject" states="wfa_md" class="oe_highlight"/>
 						<button name="wo_creation" type="object" string="WO Creation" attrs="{'invisible':['|',('state','!=','moved_to_offer'),('purpose','=','in_development')]}" class="oe_highlight"/>
 						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible':['|',('state','!=','wo_created'),('is_zero_offer','!=',True)]}" class="oe_highlight"/>
-						<button name="offer_copy" type="object" states="moved_to_offer,approved_md,wo_created" string="Offer Copy" class="oe_highlight"/>
+						<button name="offer_copy" type="object"  string="Offer Copy" class="oe_highlight"/>
 						<button name="term_copy" type="object" states="moved_to_offer,approved_md,wo_created" string="Terms Copy" class="oe_highlight"/>
 						<button name="send_by_email" type="object" states="approved_md,wo_created" string="Send by Email" class="oe_highlight" invisible="1"/>
 					</header>
@@ -169,14 +169,14 @@
 									<field name="prime_cost" sum="prime_cost"/>
 									
 									<field name="r_sam_ratio"/>
-									<field name="r_works_value"/>
+									<field name="r_works_value" sum="r_works_value"/>
 									<field name="r_dealer_discount"/>
 									<field name="r_special_discount"/>
 									<field name="r_p_f"/>
 									<field name="r_freight"/>
 									<field name="r_insurance"/>
 									<field name="r_customer_discount"/>
-									<field name="r_net_amt_tot"/>
+									<field name="r_net_amt_tot" sum="r_net_amt_tot"/>
 									<field name="gst"/>
 									<field name="r_net_amount" sum="net_amount"/>
 <!--
@@ -232,14 +232,14 @@
 									<field name="prime_cost" sum="prime_cost"/>
 									
 									<field name="r_sam_ratio"/>
-									<field name="r_works_value"/>
+									<field name="r_works_value" sum="r_works_value"/>
 									<field name="r_dealer_discount"/>
 									<field name="r_special_discount"/>
 									<field name="r_p_f"/>
 									<field name="r_freight"/>
 									<field name="r_insurance"/>
 									<field name="r_customer_discount"/>
-									<field name="r_net_amt_tot"/>
+									<field name="r_net_amt_tot" sum="r_net_amt_tot"/>
 									<field name="gst"/>
 									<field name="r_net_amount" sum="net_amount"/>
 									
@@ -281,14 +281,14 @@
 									<field name="prime_cost" sum="prime_cost" readonly="1"/>
 																		
 									<field name="r_sam_ratio"/>
-									<field name="r_works_value"/>
+									<field name="r_works_value" sum="r_works_value"/>
 									<field name="r_dealer_discount"/>
 									<field name="r_special_discount"/>
 									<field name="r_p_f"/>
 									<field name="r_freight"/>
 									<field name="r_insurance"/>
 									<field name="r_customer_discount"/>
-									<field name="r_net_amt_tot"/>
+									<field name="r_net_amt_tot" sum="r_net_amt_tot"/>
 									<field name="gst"/>
 									<field name="r_net_amount" sum="net_amount"/>
 									
@@ -1347,6 +1347,9 @@
 					<field name="customer_id"/>	
 					<field name="state"/>
 					<field name="wo_flag" invisible="1"/>
+					<field name="zone" invisible="1"/>
+					<field name="division_id" invisible="1"/>
+					<field name="segment" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -1363,6 +1366,26 @@
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<separator/>
                     <group expand="0" string="Group By...">
+						<filter string="Customer" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'customer_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+		<record id="t_search_v_crm_offer_mgmt" model="ir.ui.view">
+            <field name="name">Offer Entry Search</field>
+            <field name="model">kg.crm.offer</field>
+            <field name="arch" type="xml">
+                <search string="Offer Entry Search">
+					<field name="name" string="Offer No" filter_domain="[('name','ilike',self)]" />
+					<field name="enquiry_no" string="Enquiry No" filter_domain="[('enquiry_no','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Zone" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'zone'}"/>
+						<filter string="Segment" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'segment'}"/>
+						<filter string="Division" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'division_id'}"/>
 						<filter string="Customer" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'customer_id'}"/>
                         <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
 					</group>
@@ -1393,7 +1416,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_crm_offer"/>
 			<field name="search_view_id" ref="t_search_v_crm_offer"/>
-			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('zone','=','north')]</field>			
+			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('zone','=','north')]</field>
 		</record>
 		
 		<record id="tma_crm_offer_south" model="ir.actions.act_window">
@@ -1404,7 +1427,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_crm_offer"/>
 			<field name="search_view_id" ref="t_search_v_crm_offer"/>
-			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('zone','=','south')]</field>			
+			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('zone','=','south')]</field>
 		</record>
 		
 		<record id="tma_crm_offer_east" model="ir.actions.act_window">
@@ -1415,7 +1438,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_crm_offer"/>
 			<field name="search_view_id" ref="t_search_v_crm_offer"/>
-			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('zone','=','east')]</field>			
+			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('zone','=','east')]</field>
 		</record>
 		
 		<record id="tma_crm_offer_west" model="ir.actions.act_window">
@@ -1426,7 +1449,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_crm_offer"/>
 			<field name="search_view_id" ref="t_search_v_crm_offer"/>
-			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('zone','=','west')]</field>			
+			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('zone','=','west')]</field>
 		</record>
 		
 		<record id="tma_crm_offer_exp" model="ir.actions.act_window">
@@ -1437,7 +1460,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_crm_offer"/>
 			<field name="search_view_id" ref="t_search_v_crm_offer"/>
-			<field name="domain">[('state','!=','revised'),('segment','=','exp')]</field>			
+			<field name="domain">[('state','!=','revised'),('segment','=','exp')]</field>
 		</record>
 		
 		<record id="tma_crm_offer_ipd" model="ir.actions.act_window">
@@ -1448,7 +1471,18 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_crm_offer"/>
 			<field name="search_view_id" ref="t_search_v_crm_offer"/>
-			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('division_id','=',30)]</field>			
+			<field name="domain">[('state','!=','revised'),('segment','=','dom'),('division_id','=',30)]</field>
+		</record>
+		
+		<record id="tma_crm_offer_mgmt_md" model="ir.actions.act_window">
+			<field name="name">Offer</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.offer</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_crm_offer"/>
+			<field name="search_view_id" ref="t_search_v_crm_offer_mgmt"/>
+			<field name="domain">[('state','!=','revised')]</field>
 		</record>
 		
 	<!-- Menu Action End-->

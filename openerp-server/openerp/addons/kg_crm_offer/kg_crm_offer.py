@@ -344,19 +344,35 @@ class kg_crm_offer(osv.osv):
 	
 	def _line_validations(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
-		if rec.is_zero_offer != True:
-			if rec.line_pump_ids:
-				for item in rec.line_pump_ids:
-					if item.cpo_quote_cust == 'quoted' and item.net_amount == 0.00:
-						raise osv.except_osv(_('Warning!'),_('Pump %s Kindly verify quoted price is zero!'%(item.pump_id.name)))
-			if rec.line_spare_ids:
-				for item in rec.line_spare_ids:
-					if item.cpo_quote_cust == 'quoted' and item.net_amount == 0.00:
-						raise osv.except_osv(_('Warning!'),_('Sapre %s %s Kindly verify quoted price is zero!'%(item.pump_id.name,item.item_name)))
-			if rec.line_accessories_ids:
-				for item in rec.line_accessories_ids:
-					if item.cpo_quote_cust == 'quoted' and item.net_amount == 0.00:
-						raise osv.except_osv(_('Warning!'),_('Accessories %s %s Kindly verify quoted price is zero!'%(item.pump_id.name,item.access_id.name)))
+		if rec.line_pump_ids:
+			for item in rec.line_pump_ids:
+				if item.hsn_no.id:
+					print"item.hsn_no.id",item.hsn_no.id
+					sql_check = """ select hsn_id from hsn_no_product where hsn_id = %s and pump_id = %s """ %(item.hsn_no.id,item.pump_id.id)
+					cr.execute(sql_check)
+					data = cr.dictfetchall()
+					if not data:
+						sql_check_1 = """ select hsn_id from hsn_no_product where hsn_id != %s and pump_id = %s""" %(item.hsn_no.id,item.pump_id.id)
+						cr.execute(sql_check_1)
+						data_1 = cr.dictfetchall()
+						hsn = ''
+						for ele in data_1:
+							hsn_rec = self.pool.get('kg.hsn.master').browse(cr,uid,ele['hsn_id'])
+							hsn = str(hsn_rec.name) + ',' + hsn
+						raise osv.except_osv(_('Warning!'),_('You can choose only HSN %s'%(hsn)))
+		#~ if rec.is_zero_offer != True:
+			#~ if rec.line_pump_ids:
+				#~ for item in rec.line_pump_ids:
+					#~ if item.cpo_quote_cust == 'quoted' and item.net_amount == 0.00:
+						#~ raise osv.except_osv(_('Warning!'),_('Pump %s Kindly verify quoted price is zero!'%(item.pump_id.name)))
+			#~ if rec.line_spare_ids:
+				#~ for item in rec.line_spare_ids:
+					#~ if item.cpo_quote_cust == 'quoted' and item.net_amount == 0.00:
+						#~ raise osv.except_osv(_('Warning!'),_('Sapre %s %s Kindly verify quoted price is zero!'%(item.pump_id.name,item.item_name)))
+			#~ if rec.line_accessories_ids:
+				#~ for item in rec.line_accessories_ids:
+					#~ if item.cpo_quote_cust == 'quoted' and item.net_amount == 0.00:
+						#~ raise osv.except_osv(_('Warning!'),_('Accessories %s %s Kindly verify quoted price is zero!'%(item.pump_id.name,item.access_id.name)))
 		return True
 	
 	def _exceed_discount(self, cr, uid, ids, context=None):		
@@ -425,7 +441,7 @@ class kg_crm_offer(osv.osv):
 	
 	_constraints = [
 		(_supervision, 'Supervision more than one not allowed!', ['']),
-		#~ (_line_validations, 'Kindly check Line details!', ['']),
+		(_line_validations, 'Kindly check Line details!', ['']),
 		#~ (_exceed_discount, 'Discount more than confirgured not allowed!', ['']),
 		]
 	
@@ -738,7 +754,7 @@ class kg_crm_offer(osv.osv):
 				if entry.line_spare_ids:
 					groups = []
 					#~ for item in entry.line_spare_ids:
-					for key, group in groupby(entry.line_spare_ids, lambda x: x.pump_id.id):
+					for key, group in groupby(entry.line_spare_ids, lambda x: x.enquiry_line_id.id):
 						groups.append(map(lambda r:r,group))
 					for key,group in enumerate(groups):
 						enquiry_line_id = group[0].enquiry_line_id.id
@@ -774,7 +790,7 @@ class kg_crm_offer(osv.osv):
 				
 				if entry.line_accessories_ids:
 					groups = []
-					for key, group in groupby(entry.line_accessories_ids, lambda x: x.pump_id.id):
+					for key, group in groupby(entry.line_accessories_ids, lambda x: x.enquiry_line_id.id):
 						groups.append(map(lambda r:r,group))
 					print"ffffffffffffffffffff",groups
 					for key,group in enumerate(groups):
@@ -1455,20 +1471,19 @@ class kg_crm_offer(osv.osv):
 		rpt_type = ['horizontal','vertical']
 		hz_dictn = {
 		'01#Item Details:':[('Equipment No','item_eqno'),('Description','item_desc'),('Quantity in No','item_qty')],
-		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in 0C','lspec_temp'),('Specific Gravity -SLURRY/SOLID','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Slurry Correction in - kq/kh/kn ','lspec_slur'),('Suction Condition','lspec_suct')],
-		'03#Duty Parameters:':[('Capacity in M3','duty_cap'),('Head in Mtr Water','duty_water_head'),('Head in Mtr  Liquid','duty_liquid_head')],
-		'04#Pump Specification:':[('Pump Type','pump_pmodtype'), ('Pump Model','pump_pmodel'), ('Number of stages','pump_stgno'), ('Size-SuctionX Delivery- in mm','pump_sizex'), ('Flange Standard','pump_flange'), ('Efficiency in % Wat/Liq','pump_eff'), ('BKW  Water	  ','pump_water_bkw'),('BKW  Liquid	  ','pump_liquid_bkw'), ('End of the curve - KW(Rated)','pump_eoc'), ('Motor KW ','pump_motor_kw'), ('Speed in RPM- Motor','pump_rpm_motor'),('Speed in RPM- Pump','pump_rpm_pump'), ('Type of Drive','pump_tod'), ('NPSH R - M','pump_npsh'), ('Impeller Type','pump_impeller_type'), ('Impeller Dia Rated / Max / Min - mm','pump_impeller_dia'), ('Maximum Allowable Soild Size - MM','pump_max_solid'), ('Hydrostatic Test Pressure - Kg/cm2','pump_hydro'), ('Shut off Head in M','pump_shut'), ('Minimum Contionuous Flow - M3/hr','pump_mini'), ('Motor KW ','pump_motor_kw1'), ('Impeller Tip Speed -M/Sec','pump_impeller_tip'), ('Sealing Water Requirement-Pressure/Flow-Kg/cm^2&m3/hr','pump_seal_press'), ('Sealing Water Capcity- m3/hr','pump_seal_cap')],
+		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in C','lspec_temp'),('Specific Gravity - Liquid','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Slurry Correction in - kq/kh/kn ','lspec_slur'),('Suction Condition','lspec_suct')],
+		'03#Duty Parameters:':[('Capacity in M3/hr','duty_cap'),('Head in Mtr','duty_water_head')],
+		'04#Pump Specification:':[('Pump Type','pump_pmodtype'), ('Pump Model','pump_pmodel'), ('Number of stages','pump_stgno'), ('Size-SuctionX Delivery- in mm','pump_sizex'), ('Flange Standard','pump_flange'), ('Efficiency in % Wat/Liq','pump_eff'), ('BKW  Water	 ','pump_water_bkw'),('BKW  Liquid   ','pump_liquid_bkw'), ('End of the curve - KW(Rated)','pump_eoc'), ('Motor KW ','pump_motor_kw'), ('Speed in RPM- Motor','pump_rpm_motor'),('Speed in RPM- Pump','pump_rpm_pump'), ('Type of Drive','pump_tod'), ('NPSH R - M','pump_npsh'), ('Impeller Type','pump_impeller_type'), ('Impeller Dia Rated / Max / Min - mm','pump_impeller_dia'), ('Maximum Allowable Soild Size - MM','pump_max_solid'), ('Hydrostatic Test Pressure - Kg/cm2','pump_hydro'), ('Shut off Head in M','pump_shut'), ('Minimum Contionuous Flow - M3/hr','pump_mini'), ('Impeller Tip Speed -M/Sec','pump_impeller_tip'), ('Sealing Water Requirement-Pressure','pump_seal_press'), ('Sealing Water Capcity- m3/hr','pump_seal_cap')],
 		'05#Material of Construction: ':[('Purpose','purp_categ')],
-		#~ '05#Material of Construction: ':[('Access','acces')],
 		'06#Mechanical Seal: Make: Eagle / Flowserve / Leak Proof / Hifab: ':[('Type / Face combination','mech_type_face'),('Gland Plate / API Plan','mech_gld_api')],
 		'07#Motor: Make: KEC / ABB / CGL :':[('Type / Mounting','mot_type_mount'),('Insulation / Protection','mot_ins_prot'),('Voltage / Phase / Frequency','mot_volt_ph_frq')],
 		'08#Scope of Supply / Price per each in Rs:':[('Bare Pump','bare_pump'),('All Accessories','acces'),('Spares','spare')]
 		}
 		vz_dictn = {
 		'01#Item Details:':[('Equipment No','item_eqno'),('Description','item_desc'),('Quantity in No','item_qty')],
-		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in 0C','lspec_temp'),('Specific Gravity ','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Suction Condition','lspec_suct')],
-		'03#Duty Parameters:':[('Capacity in M3','duty_cap'),('Head in Mtr Water','duty_water_head'),('Head in Mtr  Liquid','duty_liquid_head'),('Suction Condition','duty_suct')],
-		'04#Pump Specification:':[('Pump Type','pump_pmodtype'), ('Pump Model','pump_pmodel'), ('Number of stages','pump_stgno'), ('Size-SuctionX Delivery- in mm','pump_sizex'), ('Flange Standard','pump_flange'), ('Efficiency in % Wat/Liq','pump_eff'), ('BKW  Water	  ','pump_water_bkw'),('BKW  Liquid	  ','pump_liquid_bkw'), ('End of the curve - KW(Rated)','pump_eoc'), ('Motor KW ','pump_motor_kw'), ('Speed in RPM- Motor','pump_rpm_motor'),('Speed in RPM- Pump','pump_rpm_pump'), ('Type of Drive','pump_tod'), ('NPSH R - M','pump_npsh'), ('Impeller Type','pump_impeller_type'), ('Impeller Dia Rated / Max / Min - mm','pump_impeller_dia'), ('Maximum Allowable Soild Size - MM','pump_max_solid'), ('Hydrostatic Test Pressure - Kg/cm2','pump_hydro'), ('Shut off Head in M','pump_shut'), ('Minimum Contionuous Flow - M3/hr','pump_mini'), ('Setting Height in MM ','pump_setting_height'), ('Sump Depth in MM','pump_sump_depth')],
+		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in C','lspec_temp'),('Specific Gravity ','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Suction Condition','lspec_suct')],
+		'03#Duty Parameters:':[('Capacity in M3/hr','duty_cap'),('Head in Mtr','duty_water_head'),('Suction Condition','duty_suct')],
+		'04#Pump Specification:':[('Pump Type','pump_pmodtype'), ('Pump Model','pump_pmodel'), ('Number of stages','pump_stgno'), ('Size-SuctionX Delivery- in mm','pump_sizex'), ('Flange Standard','pump_flange'), ('Efficiency in % Wat/Liq','pump_eff'), ('BKW  Water	 ','pump_water_bkw'),('BKW  Liquid   ','pump_liquid_bkw'), ('End of the curve - KW(Rated)','pump_eoc'), ('Motor KW ','pump_motor_kw'), ('Speed in RPM- Motor','pump_rpm_motor'),('Speed in RPM- Pump','pump_rpm_pump'), ('Type of Drive','pump_tod'), ('NPSH R - M','pump_npsh'), ('Impeller Type','pump_impeller_type'), ('Impeller Dia Rated / Max / Min - mm','pump_impeller_dia'), ('Maximum Allowable Soild Size - MM','pump_max_solid'), ('Hydrostatic Test Pressure - Kg/cm2','pump_hydro'), ('Shut off Head in M','pump_shut'), ('Minimum Contionuous Flow - M3/hr','pump_mini'), ('Setting Height in MM ','pump_setting_height'), ('Sump Depth in MM','pump_sump_depth')],
 		'05#Material of Construction: ':[('Purpose','purp_categ')],
 		'06#Mechanical Seal: Make: Eagle / Flowserve / Leak Proof / Hifab: ':[('Type / Face combination','mech_type_face'),('Gland Plate / API Plan','mech_gld_api')],
 		'07#Motor: Make: KEC / ABB / CGL :':[('Type / Mounting','mot_type_mount'),('Insulation / Protection','mot_ins_prot'),('Voltage / Phase / Frequency','mot_volt_ph_frq')],
@@ -1730,10 +1745,10 @@ class kg_crm_offer(osv.osv):
 			else:
 				print " = RRRRRRRR TTTTTT =============",report
 				if report == 'horizontal':
-					sheet1 = wbk.add_sheet('Horizontal')
+					sheet1 = wbk.add_sheet('Horizontal', cell_overwrite_ok=True)
 					dictn = hz_dictn
 				elif report == 'vertical':
-					sheet1 = wbk.add_sheet('Vertical')			
+					sheet1 = wbk.add_sheet('Vertical', cell_overwrite_ok=True)			
 					dictn = vz_dictn
 				count = count_data['count']
 				pump_sql = count_sql
@@ -1745,7 +1760,6 @@ class kg_crm_offer(osv.osv):
 				c2 = c1+count				
 				sheet1.col(0).width = 20000
 				cmp_ids = cmp_obj.browse(cr, uid, 1)
-				#~ sheet1.write_merge(s2, s2, c1, c2, str(cmp_ids.name or ''), style_mast_header)
 				sheet1.write_merge(s2, s2, c1, c2,"SAM TURBO INDUSTRY PRIVATE LIMITED",style1)
 				sheet1.row(0).height = 400
 				s2 = s2+1
@@ -1764,71 +1778,11 @@ class kg_crm_offer(osv.osv):
 					c1 = c1+1
 					c1 = 0
 					sheet1.write_merge(s2, s2, c1, c1+count, key.split('#')[1], style_left_header)
-					print "key.split('#')[1]======================",key.split('#')[1]
 					for var in (dictn[key]):
 						s2 = s2+1
 						c1 = c1+1
 						c1 = 0
-						print "ssss @@@@@@@@@@@@@@@@@@@@@",s2
 						if var[0] == 'Purpose':
-							#~ moc_query = """ select offer_mat.name as mat,moc.name as moc from ch_moc_construction moc_const
-							#~ left join kg_offer_materials offer_mat on offer_mat.id = moc_const.offer_id
-							#~ left join kg_moc_master moc on  moc.id = moc_const.moc_id
-							#~ left join ch_kg_crm_pumpmodel enq_line on  enq_line.id = moc_const.header_id  """							
-							#~ moc_cond_query = """ where enq_line.id in (select id from ch_kg_crm_pumpmodel where header_id in %s and pump_model_type = '%s') """%(pass_param,report)
-							#~ moc_cnt_query = """ select count(*) from ( """ + moc_query + moc_cond_query + """ )  as sql_moc """
-							#~ cr.execute(moc_cnt_query)
-							#~ moc_cnt_data = cr.dictfetchone()
-							#~ moc_cnt = 0
-							#~ if moc_cnt_data:
-								#~ moc_cnt = moc_cnt_data['count']
-							#~ if not (moc_cnt > 0) :
-								#~ s2 = s2 + 1
-								#~ sheet1.write_merge(s2, s2, c1, c2, '-', style_center)
-								#~ print "ff"
-							#~ else:
-								#~ s2 -= 1
-							#~ print "fffff @@@@@@@@@@@@@@@@@",s2
-							#~ pump_cnt = 1
-							#~ print "lelelelelle pumpppp",len(pump_data)
-							#~ if pump_data:
-								#~ moc_s2 = s2
-								#~ for pump in pump_data:
-									#~ print "pump ======================",pump
-									#~ c1 += 1
-									#~ crm_line_rec = crm_line_obj.browse(cr, uid, pump['crm_id'])
-									#~ acc_cond = """where enq_line.id = %s"""%(pump['crm_id'])
-									#~ moc_pump_query = moc_query+acc_cond
-									#~ cr.execute(moc_pump_query)
-									#~ moc_pump_data = cr.dictfetchall()
-									#~ print "pppppp ========",pump['crm_id']
-									#~ print "moc_pump_data ======",moc_pump_data
-									#~ if moc_pump_data:
-										#~ print "###### $$$$$$$$$$$$$ Starts Here ====="
-										#~ for moc in moc_pump_data:
-											#~ print "moc @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",moc
-											#~ print "moc_s2moc_s2moc_s2moc_s2moc_s2moc_s2",moc_s2
-											#~ s2 = moc_s2 + moc_pump_data.index(moc) + 1
-											#~ print "sssssssssssssssss222222222222222",s2
-											#~ if moc['moc']:
-												#~ moc_name = moc['moc']
-											#~ else:
-												#~ moc_name = '-'
-											#~ sheet1.write_merge(s2, s2, 0, 0, moc['mat'], style_left)
-											#~ sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, moc['moc'], style_left)
-											#~ for c in range(1,count+1):
-												#~ if (c != pump_cnt and c != 0):
-													#~ print "cccc",c
-													#~ sheet1.write_merge(s2, s2, c, c, 444, style_left)
-										#~ print "###### $$$$$$$$$$$$$ Ends Here ====="
-									#~ else:
-										#~ s2 -= 1
-									#~ s2 += 1
-									#~ pump_cnt += 1	
-								#~ c1 = 0
-							#~ else:
-								#~ s2 -= 1
-							#~ s2 -= 1
 							moc_com_query = """ select crm.id as crm_id,
 							moc.offer_id,moc.moc_id,
 							(select name from kg_offer_materials where id = moc.offer_id) as moc_offer_name,
@@ -1839,29 +1793,22 @@ class kg_crm_offer(osv.osv):
 							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
 							cr.execute(moc_query)
 							moc_cond = """where crm.header_id in  %s and crm.pump_model_type = '%s' """%(pass_param,report)
-							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
+							moc_query = """ select distinct offer_id,moc_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
 							cr.execute(moc_query)
-							print "ERERERERER ",moc_query
 							moc_query_data = cr.dictfetchall()
 							if not moc_query_data:
 								sheet1.write_merge(s2, s2, c1, c2, '-', style_center)
 								s2 += 1
 							for moc in moc_query_data:
 								sheet1.write_merge(s2, s2, c1, c1, moc['moc_offer_name'], style_left)
-								print "dddff 45454545454",s2
 								if pump_data:
 									for pump in pump_data:
-										crm_line_rec = crm_line_obj.browse(cr, uid, pump['crm_id'])
 										c1 += 1
-										moc_pump_query = moc_com_query+ """where crm.header_id in  %s and crm.pump_model_type = '%s' and crm.id = %s and moc.offer_id = %s """%(pass_param,report,pump['crm_id'],moc['offer_id'])
+										moc_pump_query = moc_com_query+ """where crm.header_id in  %s and crm.pump_model_type = '%s' and crm.id = %s and moc.offer_id = %s and moc.moc_id = %s order by moc.id"""%(pass_param,report,pump['crm_id'],moc['offer_id'],moc['moc_id'])
 										cr.execute(moc_pump_query)
-										print "moc_pump_query ================",moc_pump_query
 										moc_pump_data = cr.dictfetchall()
-										print "ssssss33333333333333333333",s2
 										if moc_pump_data:
 											for moc_val in moc_pump_data:
-												print "ininiinii s22222",s2
-												print "ffff iniiinii",moc_pump_data.index(moc_val)
 												sheet1.write_merge(s2, s2, c1, c1, moc_val['moc_offer_value'], style_left)
 										else:
 											sheet1.write_merge(s2, s2, c1, c1, '-', style_left)
@@ -1869,70 +1816,81 @@ class kg_crm_offer(osv.osv):
 								c1 = 0
 							s2 = s2-1
 						elif var[0] == 'All Accessories':
-							access_query = """ select
-							acc.name ||' ('|| case when hsn.name is not null then hsn.name else '-' end ||')'||'('|| tax.name||')' as access_name,
-							---access_offer.net_amount as net_amount
+							access_one_query_st =  """  select 
+							array_to_string(array_agg(access_name), ',') as access_name,
+							array_to_string(array_agg(comb), ';') as line_amt ,
+							array_to_string(array_agg(line_amt), ',') as ref_line_amt 
+							from ( """
+							acc_sub_one = """ 
+							select 
+							access_name,enquiry_line_id,enquiry_line_id||'#'||line_amt as comb,line_amt
+							from (
+							select distinct access_name,enquiry_line_id,line_amt,gnd_amt from (
+							select access_name,enquiry_line_id,
+							sum(net_amount) OVER (PARTITION by enquiry_line_id) as line_amt,
+							sum(net_amount) OVER () as gnd_amt from (
+							select
+							access_offer.off_name as access_name,
+							access_offer.enquiry_line_id,
 							case when (access_offer.qty > 0 and access_offer.r_net_amt_tot > 0) then 
 							(access_offer.r_net_amt_tot/access_offer.qty) else 0.00 end as net_amount							
 							from ch_accessories_offer access_offer
 							left join kg_accessories_master acc on(acc.id=access_offer.access_id)
 							left join kg_accessories_category categ on(categ.id=acc.access_cate_id)
 							left join kg_hsn_master hsn on(hsn.id=access_offer.hsn_no)
-							left join account_tax tax on(tax.id=access_offer.gst) """							
+							left join account_tax tax on(tax.id=access_offer.gst) """
 							access_cond_query = """ where access_offer.enquiry_line_id in (select id from ch_kg_crm_pumpmodel where header_id in %s and pump_model_type = '%s') """%(pass_param,report)
-							access_cnt_query = """ select count(*) from ( """ + access_query + access_cond_query + """ )  as sql_access """
+							access_two_query = """ ) as sam
+							) as sam_ref
+							) as test """
+							access_one_query_ed = """) as ref """
+							access_query = access_one_query_st+acc_sub_one+access_cond_query+access_two_query+access_one_query_ed
+							access_cnt_query = """ select access_name,count(access_name) from ( """ + access_query + """ )  as sql_access group by 1 """
 							cr.execute(access_cnt_query)
 							access_cnt_data = cr.dictfetchone()
 							access_cnt = 0
+							acc_name = ''
 							if access_cnt_data:
+								acc_name = access_cnt_data['access_name']
 								access_cnt = access_cnt_data['count']
+							acc_name = acc_name
 							if access_cnt > 0 :
 								sheet1.write_merge(s2, s2, c1, c1+count, var[0], style_sub_left)
 							else:
-								pass							
+								s2 = s2-1
 							pump_cnt = 1
-							if pump_data:
-								s2 = s2
-								for pump in pump_data:
-									print "dfffffffffffffffff =============",pump_data
-									c1 += 1
-									crm_line_rec = crm_line_obj.browse(cr, uid, pump['crm_id'])
-									print "acccc pump _id =========================",pump['crm_id']
-									acc_cond = """where access_offer.enquiry_line_id = %s"""%(pump['crm_id'])
-									access_pump_query = access_query+acc_cond
-									cr.execute(access_pump_query)
-									access_pump_data = cr.dictfetchall()
-									if access_pump_data:
-										for access in access_pump_data:
-											s2 = s2 + access_pump_data.index(access) + 1
-											if access['access_name']:
-												acc = access['access_name']
-											else:
-												acc = '-'
-											print "affff ssss222222",s2
-											sheet1.write_merge(s2, s2, 0, 0, acc, style_left)
-											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, access['net_amount'], style_left)
-											for c in range(1,count+1):
-												if (c != pump_cnt and c != 0):
-													sheet1.write_merge(s2, s2, c, c, 0.00, style_left)
-									else:
-										s2 -= 1
-									s2 += 1
-									pump_cnt += 1	
-								c1 = 0
-							else:
-								s2 -= 1
-							s2 = s2 - 1
+							if access_cnt > 0 :
+								if pump_data:
+									s2 = s2
+									s2 = s2+1
+									sheet1.write_merge(s2, s2, 0, 0, acc_name, style_left)
+									for pump in pump_data:
+										c1 += 1
+										acc_sub_val_st = """ select enquiry_line_id,sum(line_amt) as sum_line_amt from ( """
+										acc_sub_val_ed = """ ) as sample group by 1 """
+										acc_cond = """and  /* $$$$$$ */
+										access_offer.enquiry_line_id = %s """%(pump['crm_id'])
+										access_pump_query = acc_sub_val_st+acc_sub_one+access_cond_query+acc_cond+access_two_query+acc_sub_val_ed
+										cr.execute(access_pump_query)
+										access_pump_data = cr.dictfetchall()
+										if access_pump_data:
+											for access in access_pump_data:
+												print "access ===",access
+												ref_val = access['sum_line_amt']
+												acc = ref_val
+												sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, acc, style_left)
+										else:
+											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, '-', style_left)
+										pump_cnt += 1
 						elif var[0] == 'Spares':
+							print "SPARE STATTATAT HERER"
 							spare_query = """ select
 							spare_offer.item_name ||' ('|| case when hsn.name is not null then hsn.name else '-' end ||')'||'('|| tax.name||')' as spare_name,
 							pmm.name as pump_name,
 							---spare_offer.net_amount as net_amount
 							case when (spare_offer.qty > 0 and spare_offer.r_net_amt_tot > 0) then 
 							(spare_offer.r_net_amt_tot/spare_offer.qty) else 0.00 end as net_amount
-
 							from ch_spare_offer spare_offer
-
 							left join kg_pumpmodel_master pmm on(pmm.id=spare_offer.pump_id)
 							left join kg_hsn_master hsn on(hsn.id=spare_offer.hsn_no)
 							left join account_tax tax on(tax.id=spare_offer.gst) """
@@ -1945,49 +1903,71 @@ class kg_crm_offer(osv.osv):
 								spare_cnt = spare_cnt_data['count']
 							if spare_cnt > 0 :
 								sheet1.write_merge(s2, s2, c1, c1+count, var[0], style_sub_left)
-								#~ s2 += 1
+								s2 += 1
 							else:
-								pass
+								s2 = s2
+							print "ddddd",s2
 							pump_cnt = 1
 							if pump_data:
-								s2 = s2
 								for pump in pump_data:
 									c1 += 1
-									crm_line_rec = crm_line_obj.browse(cr, uid, pump['crm_id'])
-									print "acccc pump _id =========================",pump['crm_id']
+									spare_count = 0
 									spa_cond = """where spare_offer.enquiry_line_id = %s"""%(pump['crm_id'])
 									spare_pump_query = spare_query+spa_cond
 									cr.execute(spare_pump_query)
 									spare_pump_data = cr.dictfetchall()
-									print "22222222222222222 ##################",s2
-									head_s2 = s2
+									spare_cnt = """ select count(*) from ( """+spare_pump_query+""" )  as sample"""
+									cr.execute(spare_cnt)
+									spare_cnt = cr.dictfetchone()
+									spare_count = int(spare_cnt['count'])
 									if spare_pump_data:
-										for spare in spare_pump_data:
-											s2 = s2 + spare_pump_data.index(spare) + 1
-											print "inidnedieidi sss sdd ds222222",s2
+										for i in range(0,spare_count):
+											head_s2 = s2+i
+											spa = ''
+											spare = spare_pump_data[i]
 											if spare['spare_name']:
 												spa = spare['spare_name']
-												sheet1.write_merge(s2, s2, 0, 0, spa, style_left)
-											else:
-												spa = '-'
-												sheet1.write_merge(s2, s2, 0, 0, spa, style_left)
-											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, spare['net_amount'], style_left)
+											sheet1.write_merge(head_s2, head_s2, 0, 0, spa, style_left)											
+											sheet1.write_merge(head_s2, head_s2, pump_cnt, pump_cnt, spare['net_amount'], style_left)									
 											for c in range(1,count+1):
 												if (c != pump_cnt and c != 0):
-													sheet1.write_merge(s2, s2, c, c, 0.00, style_left)
+													sheet1.write_merge(head_s2, head_s2, c, c, 0.00, style_left)
+									if spare_count > 0:
+										s2 = s2 + spare_count-1
 									else:
-										s2 -= 1
-									s2 += 1
-									pump_cnt += 1	
-								c1 = 0
-							else:
-								s2 -= 1
-							s2 = s2 - 1
+										s2 = s2
+									#~ if spare_pump_data:
+										#~ for spare in spare_pump_data:
+											#~ sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, s2, style_left)									
+											#~ s2 = s2+1
+									#~ s2 = s2+1
+									#~ head_s2 = s2
+									#~ if spare_pump_data:
+										#~ for spare in spare_pump_data:
+											#~ if count == 1:
+												#~ s2 = head_s2 + spare_pump_data.index(spare) + 1
+											#~ else:
+												#~ s2 = s2 + spare_pump_data.index(spare)
+											#~ if spare['spare_name']:
+												#~ spa = spare['spare_name']
+												#~ sheet1.write_merge(s2, s2, 0, 0, spa, style_left)
+												#~ sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, spare['net_amount'], style_left)
+											#~ else:
+												#~ spa = '-'
+												#~ sheet1.write_merge(s2, s2, 0, 0, spa, style_left)
+												#~ sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, spare['net_amount'], style_left)
+											#~ sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, spare['net_amount'], style_left)
+											#~ for c in range(1,count+1):
+												#~ if (c != pump_cnt and c != 0):
+													#~ sheet1.write_merge(s2, s2, c, c, 0.00, style_left)
+										#~ s2 += 1
+									pump_cnt += 1   
+							print "SPARE ENDNDNDNDNND HERER"
 						else:
 							sheet1.write_merge(s2, s2, c1, c1, var[0], style_left)
 						if pump_data:
 							for pump in pump_data:
-								crm_line_rec = crm_line_obj.browse(cr, uid, pump['crm_id'])
+ 
 								c1 += 1
 								if var[1] in ('purp_categ','acces','spare'):
 									pass
@@ -1995,7 +1975,7 @@ class kg_crm_offer(osv.osv):
 									bare_pump_query = """ select
 									---pump_offer.tot_price as tot_price
 									case when (pump_offer.qty > 0 and pump_offer.r_net_amt_tot > 0) then 
-									round(((pump_offer.r_net_amt_tot/pump_offer.qty)),0) else 0.00 end as tot_price									
+									round(((pump_offer.r_net_amt_tot/pump_offer.qty)),0) else 0.00 end as tot_price								 
 									from ch_pump_offer pump_offer
 									left join kg_hsn_master hsn on(hsn.id=pump_offer.hsn_no)
 									left join account_tax tax on(tax.id=pump_offer.gst)
@@ -2004,8 +1984,8 @@ class kg_crm_offer(osv.osv):
 									bare_pump_data = cr.dictfetchone()
 									bare_pump = 0.00
 									if bare_pump_data:
-										bare_pump = bare_pump_data['tot_price']									
-									sheet1.write_merge(s2, s2, c1, c1, bare_pump, style_left)								
+										bare_pump = bare_pump_data['tot_price']								 
+									sheet1.write_merge(s2, s2, c1, c1, bare_pump, style_left)							   
 								else:
 									sqltwo_query = """
 									from ch_kg_crm_pumpmodel where header_id in %s and pump_model_type = '%s' and id = %s
@@ -2033,16 +2013,14 @@ class kg_crm_offer(osv.osv):
 												sheet1.write_merge(s2, s2, c1, c1, values, style_left)
 									else:
 										sheet1.write_merge(s2, s2, c1, c1, '', style_left)
+									s2 = s2
 				if pump_data:
 					s1 = 5
 					c1 = 0
 					for pump in pump_data:
 						c1 += 1
 						sheet1.col(c1).width = 3000
-						print "ERRRRRRRRRRRRRRRRRRRR REEEEEEEEEEEEEEEEe",str(pump['crm_id'])
-						#~ sheet1.write_merge(s1, s1, c1, c1, '', style_left)
-				
-				print " --- Ends Here ----"				
+				print " --- Ends Here ----"			   		
 		
 		"""Parsing data as string """
 		file_data=StringIO.StringIO()
@@ -2965,7 +2943,6 @@ class ch_spare_offer(osv.osv):
 		'spare_offer_line_id': fields.many2one('ch.spare.offer','Spare Offer Line Id'),
 		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'off_name': fields.char('Offer Name'),
-		'material_code': fields.char('Material Code'),
 		
 		'r_agent_com': fields.float('Agent Commission(%)'),
 		'r_dealer_discount': fields.float('Dealer Discount(%)'),
