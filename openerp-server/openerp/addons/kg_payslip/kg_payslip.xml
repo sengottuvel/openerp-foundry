@@ -161,6 +161,7 @@
 						<field name="date_start"  class="att_month_change" attrs="{'readonly': [('state','in',['done','ac_accept','approved','cancel','reject'])]}"/>
 						<field name="date_end"  class="att_month_change" attrs="{'readonly': [('state','in',['done','ac_accept','approved','cancel','reject'])]}"/>
 						<field name="tot_val"/>
+						<field name="tot_othr_val"/>
 						<field name="state" style="width: 30%%" class="att_state_change"/>
 						<field name="credit_note" invisible="1"/>
 						 <group string='Remarks' attrs="{'invisible':[('state','=','draft')]}" colspan="4">
@@ -182,6 +183,7 @@
 				<field name="arch" type="xml">
 					<field name="name" position="after">
 						<field name="tot_val"/>
+						<field name="tot_othr_val"/>
 					</field>
 				</field>
 			</record>
@@ -203,6 +205,7 @@
 						<group>
 							<field name="date_start" attrs="{'readonly': [('state','in',['done','ac_accept','approved','cancel','reject'])]}"/>/>
 							<field name="tot_val"/>
+							<field name="tot_othr_val"/>
 							<field name="credit_note" invisible="1"/>
 						</group>
 						<group>
@@ -233,6 +236,7 @@
 								toolbar="True" string="Employee Payslip" create="false">				
 					<field name="name"/>
 					<field name="tot_val"/>
+					<field name="tot_othr_val"/>
 					<field name="state"/>
 				</tree>
 			</field>

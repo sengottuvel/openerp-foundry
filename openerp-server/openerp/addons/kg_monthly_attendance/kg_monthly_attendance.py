@@ -221,6 +221,27 @@ class kg_monthly_attendance(osv.osv):
 		res = test.strftime('%Y-%m-%d')
 		return res
 		
+	def _get_month_name(self, cr, uid, context=None):
+		
+		today = datetime.date.today()
+		first = datetime.date(day=1, month=today.month, year=today.year)
+		mon = today.month - 1
+		if mon == 0:
+			mon = 12
+		else:
+			mon = mon
+		tot_days = calendar.monthrange(today.year,mon)[1]
+		test = first - datetime.timedelta(days=tot_days)
+		
+		
+		res = test.strftime('%Y-%m-%d')
+		monthinteger = int(res[5:7])
+		month = datetime.date(1900, monthinteger, 1).strftime('%B')
+		print "________________________________________________________________________________",res[5:7]
+		print "________________________________________________________________________________",month
+		res = month
+		return res
+		
 	def _get_last_month_end(self, cr, uid, context=None):
 		today = datetime.date.today()
 		first = datetime.date(day=1, month=today.month, year=today.year)
@@ -425,6 +446,7 @@ class kg_monthly_attendance(osv.osv):
 		'start_date': _get_last_month_first,
 		'end_date': _get_last_month_end,
 		'total_days': _month_total_day,
+		'month': _get_month_name,
 		
 	}
 		 

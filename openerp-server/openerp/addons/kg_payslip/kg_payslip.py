@@ -1388,6 +1388,21 @@ class kg_batch_payslip(osv.osv):
 			res[order.id]['tot_val'] = tot_val or 0.00
 		return res	
 	
+	def _tot_othr_sal_amt(self, cr, uid, ids, field_name, arg, context=None):
+		res = {}
+		tot_othr_val = 0
+		for order in self.browse(cr, uid, ids, context=context):
+			res[order.id] = {
+				'tot_othr_val': 0.0,
+			}
+			if order.slip_ids:
+				for item in order.slip_ids:
+					tot_othr_val += item.othr_sal_amt
+			else:
+				tot_othr_val = 0
+			res[order.id]['tot_othr_val'] = tot_othr_val or 0.00
+		return res
+	
 	_columns = {
 	
 	'name': fields.char('Month', size=64, readonly=True),
@@ -1397,6 +1412,7 @@ class kg_batch_payslip(osv.osv):
 	'slip_ids': fields.one2many('hr.payslip', 'payslip_run_id', 'Payslips', required=False, readonly=True),
 	'state': fields.selection([('draft', 'Draft'),('confirmed','WFA'),('approved','AC ACK Pending'),('done','Done'),('ac_accept','AC Accepted'),('reject','AC Rejected'),('cancel','Cancelled')], 'Status', select=True, readonly=True),
 	'tot_val':fields.function(_tot_sal_amt, string='Total Value',multi="sums",store=True),
+	'tot_othr_val':fields.function(_tot_othr_sal_amt, string='Total Other Salary',multi="sums",store=True),
 	'remark': fields.text('Approve/Reject'),
 	'cancel_remark': fields.text('Cancel'),
 	
