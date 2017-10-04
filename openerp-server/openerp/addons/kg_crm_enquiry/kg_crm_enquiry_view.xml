@@ -639,7 +639,7 @@
 					
 						<group string="Accessories" attrs="{'invisible':[('purpose_categ','=','in_development')]}">
 							<group>
-								<field name="acces" on_change="onchange_access_load(acces,pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,service_factor,framesize,speed_in_rpm)" attrs="{'required':[('purpose_categ','in',('pump','spare','access'))],'readonly':[('purpose_categ','=','access')]}" colspan="1"/>
+								<field name="acces" on_change="onchange_access_load(acces,pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,service_factor,framesize,speed_in_rpm,moc_const_id)" attrs="{'required':[('purpose_categ','in',('pump','spare','access'))],'readonly':[('purpose_categ','=','access')]}" colspan="1"/>
 							</group>
 							<group>
 			<!--
@@ -1679,7 +1679,8 @@
 								<field name="access_categ_id" on_change="onchange_access_id(access_categ_id,access_id)" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
 								<field name="access_id" required="1" attrs="{'readonly':['|',('load_access','=',True),('access_categ_id','=',False)]}"/>
 								<field name="accessories_type" required="1" attrs="{'readonly':['|',('load_access','=',True),('access_categ_id','=',False)]}"/>
-								<field name="moc_id" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
+								<field name="moc_id" attrs="{'readonly':[('load_access','=',True)]}" invisible="1"/>
+								<field name="moc_const_id" attrs="{'readonly':[('load_access','=',True)]}" invisible="1"/>
 							</group>
 							<group>
 								<field name="qty" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>

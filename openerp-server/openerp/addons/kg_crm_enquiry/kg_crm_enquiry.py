@@ -2035,7 +2035,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		
 	}
 	
-	def onchange_access_load(self, cr, uid, ids, acces,pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,service_factor,framesize,speed_in_rpm):
+	def onchange_access_load(self, cr, uid, ids, acces,pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,service_factor,framesize,speed_in_rpm,moc_const_id):
 		value = {'access_categ_id':'',}
 		print"pump_id",pump_id
 		print"motor_kw",motor_kw
@@ -2219,7 +2219,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							else:
 								pump_pulley_access_id = ''
 							pump_pulley_value = {'access_id':pump_pulley_access_id,'access_categ_id':pump_pulley_cate_id,
-										'qty':1,'accessories_type':pump_pulley_type,'off_name':pump_pulley_offer_name,}
+										'qty':1,'accessories_type':pump_pulley_type,'off_name':pump_pulley_offer_name,'moc_const_id':moc_const_id}
 							access_vals.append(pump_pulley_value)
 							loop_count = loop_count + 1
 							print"loop_countloop_count",loop_count
