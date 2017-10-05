@@ -1512,6 +1512,8 @@ class kg_schedule(osv.osv):
 								item_name = "'"+ms_item['item_name']+"'"
 								print "item_code",item_code
 								print "item_name",item_name
+								print "ms_item['moc_id']",ms_item['moc_id']
+								print "ms_item['order_no']",ms_item['order_no']
 								cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
 									from ch_stock_inward_details  
 									where item_code = %s and item_name= %s and moc_id = %s and stock_item = 'ms_item'
