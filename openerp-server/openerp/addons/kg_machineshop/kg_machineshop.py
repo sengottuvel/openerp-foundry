@@ -124,6 +124,7 @@ class kg_machineshop(osv.osv):
 		
 		#### MS Inward ####
 		'inward_accept_qty': fields.integer('Accepted Qty'),
+		'inward_qty': fields.integer('Inward Qty'),
 		'inward_reject_qty': fields.integer('Rejected Qty'),
 		'inward_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'inward_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
@@ -200,7 +201,7 @@ class kg_machineshop(osv.osv):
 	
 	def _check_qty(self, cr, uid, ids, context=None):		
 		entry_rec = self.browse(cr, uid, ids[0])
-		if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) > entry_rec.fettling_qty:
+		if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) > entry_rec.inward_qty:
 			return False
 		#~ if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) < entry_rec.fettling_qty:
 			#~ return False					
@@ -208,13 +209,13 @@ class kg_machineshop(osv.osv):
 		
 	_constraints = [
 	
-		(_check_qty,'Accept and Reject qty should not exceed Schedule Qty !',['Accept and Reject Qty']),
+		#~ (_check_qty,'Accept and Reject qty should not exceed Inward Qty !',['Accept and Reject Qty']),
 		
 		]
 	
 	def ms_accept(self,cr,uid,ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
-		reject_qty = entry_rec.fettling_qty - entry_rec.inward_accept_qty 
+		reject_qty = entry_rec.inward_reject_qty
 		production_obj = self.pool.get('kg.production')
 		
 		if entry_rec.state == 'waiting':
@@ -225,15 +226,15 @@ class kg_machineshop(osv.osv):
 						
 			if entry_rec.inward_accept_qty < 0:
 				raise osv.except_osv(_('Warning!'),
-							_('System not allow to save negative values !!'))
+							_('System not allow to save negative values !!'))		
 			
-			if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) > entry_rec.fettling_qty:
+			if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) > entry_rec.inward_qty:
 				raise osv.except_osv(_('Warning!'),
-							_('Accept and Reject qty should not exceed Schedule Qty !!'))
+							_('Accept and Reject qty should not exceed Inward Qty !!'))
 							
-			if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) < entry_rec.fettling_qty:
+			if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) < entry_rec.inward_qty:
 				raise osv.except_osv(_('Warning!'),
-							_('Accept and Reject qty should be equal to Schedule Qty !!'))
+							_('Accept and Reject qty should be equal to Inward Qty !!'))
 							
 			if entry_rec.inward_reject_qty > 0 and not entry_rec.inward_reject_remarks_id:
 				raise osv.except_osv(_('Warning!'),
@@ -305,7 +306,13 @@ class kg_machineshop(osv.osv):
 					'mould_state': 'pending',		
 				}
 				production_id = production_obj.create(cr, uid, production_vals) 
-			
+				
+				self.write(cr,uid, ids,{
+				
+				
+				'fettling_qty':entry_rec.fettling_qty -  entry_rec.inward_reject_qty,
+				
+				})
 			
 			### Updatation in MS Rejection List ###
 			if entry_rec.ms_type == 'foundry_item':
@@ -315,12 +322,18 @@ class kg_machineshop(osv.osv):
 					and order_line_id = %s and reject_state = 'not_received' and ms_type = 'foundry_item'
 					and pattern_id = %s and moc_id = %s limit 1) """%(entry_rec.order_line_id.id,entry_rec.pattern_id.id,entry_rec.moc_id.id))
 			
+			if entry_rec.ms_sch_qty == (entry_rec.fettling_qty - entry_rec.inward_reject_qty):
+				state= 'accept'				
+			else:
+				state= 'waiting'
+				
 			self.write(cr,uid, ids,{
-				'state':'accept',
+				'state':state,
 				'ms_state':'in_plan',
-				'ms_sch_qty':entry_rec.inward_accept_qty,
-				'ms_plan_rem_qty':entry_rec.inward_accept_qty,
-				'inward_reject_qty':reject_qty,
+				'inward_qty':entry_rec.inward_qty - (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty),
+				#~ 'ms_sch_qty':entry_rec.inward_accept_qty,
+				#~ 'ms_plan_rem_qty':entry_rec.inward_accept_qty,
+				#~ 'inward_reject_qty':reject_qty,
 				'accept_date':today})
 		else:
 			pass

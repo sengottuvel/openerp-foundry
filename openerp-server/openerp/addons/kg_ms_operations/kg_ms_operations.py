@@ -812,7 +812,10 @@ class kg_ms_operations(osv.osv):
 	def operation1_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-
+		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		
 		if entry_rec.op1_state == 'pending':
 			if entry_rec.op1_flag_sc != True:
@@ -1511,7 +1514,9 @@ class kg_ms_operations(osv.osv):
 	def operation2_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op2_state == 'pending':
 			if entry_rec.op2_flag_sc != True:
 			
@@ -2196,7 +2201,9 @@ class kg_ms_operations(osv.osv):
 	def operation3_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op3_state == 'pending':
 			if entry_rec.op3_flag_sc != True:
 			
@@ -2884,7 +2891,9 @@ class kg_ms_operations(osv.osv):
 	def operation4_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op4_state == 'pending':
 			if entry_rec.op4_flag_sc != True:
 			
@@ -3571,7 +3580,9 @@ class kg_ms_operations(osv.osv):
 	def operation5_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op5_state == 'pending':
 			if entry_rec.op5_flag_sc != True:
 			
@@ -4256,7 +4267,9 @@ class kg_ms_operations(osv.osv):
 	def operation6_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op6_state == 'pending':
 			if entry_rec.op6_flag_sc != True:
 			
@@ -4941,7 +4954,9 @@ class kg_ms_operations(osv.osv):
 	def operation7_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op7_state == 'pending':
 			if entry_rec.op7_flag_sc != True:
 			
@@ -5626,7 +5641,9 @@ class kg_ms_operations(osv.osv):
 	def operation8_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op8_state == 'pending':
 			if entry_rec.op8_flag_sc != True:
 			
@@ -6311,7 +6328,9 @@ class kg_ms_operations(osv.osv):
 	def operation9_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op9_state == 'pending':
 			if entry_rec.op9_flag_sc != True:
 			
@@ -6999,7 +7018,9 @@ class kg_ms_operations(osv.osv):
 	def operation10_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op10_state == 'pending':
 			if entry_rec.op10_flag_sc != True:
 			
@@ -7687,7 +7708,9 @@ class kg_ms_operations(osv.osv):
 	def operation11_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op11_state == 'pending':
 			if entry_rec.op11_flag_sc != True:
 			
@@ -8373,7 +8396,9 @@ class kg_ms_operations(osv.osv):
 	def operation12_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		
+		if entry_rec.ms_id.state != 'accept':
+			raise osv.except_osv(_('Warning!'),
+				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op12_state == 'pending':
 			if entry_rec.op12_flag_sc != True:
 			

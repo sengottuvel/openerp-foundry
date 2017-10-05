@@ -239,7 +239,9 @@ class kg_subcontract_wo(osv.osv):
 		
 		if entry.sc_line_ids:		
 			for item in entry.sc_line_ids:	
-			
+				if item.ms_id.state != 'accept':
+					raise osv.except_osv(_('Warning!'),
+						_('Still %s item has not yet inwarded, Kindly check and update !!')%(item.item_code))
 				if item.ms_op_id:
 					vals = {								
 						'header_id': entry.id,

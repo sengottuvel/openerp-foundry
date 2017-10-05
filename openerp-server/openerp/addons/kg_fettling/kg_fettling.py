@@ -571,7 +571,7 @@ class kg_fettling(osv.osv):
 			ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])
 			
 			
-			self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'fettling_id':entry_rec.id,'fettling_qty':ms_shop_rec.fettling_qty + inward_qty,'state':'waiting',})
+			self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'fettling_id':entry_rec.id,'inward_accept_qty':0,'inward_reject_qty':0,'inward_qty':ms_shop_rec.inward_qty + inward_qty,'fettling_qty':ms_shop_rec.fettling_qty + inward_qty,'state':'waiting',})
 
 			#~ ### Sequence Number Generation ###
 			#~ ms_name = ''	
@@ -2652,6 +2652,9 @@ class kg_fettling(osv.osv):
 				cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(welding_seq_id[0],seq_rec.code))
 				welding_name = cr.fetchone();
 				welding_stage_id = self.pool.get('kg.stage.master').search(cr, uid, [('name','=','WELDING')])
+				print"welding_stage_id[0]",welding_stage_id[0]
+				print"welding_name[0]",welding_name[0]
+				
 				self.write(cr, uid, ids, {'welding_date':time.strftime('%Y-%m-%d'),'welding_state':'progress','welding_stage_id':welding_stage_id[0], 'welding_qty': welding_qty,'welding_accept_qty': welding_qty,'welding_name':welding_name[0]})
 			
 			self.write(cr, uid, ids, {'rough_grinding_state':'complete','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
