@@ -21,6 +21,9 @@ STATE_SELECTION = [
 MARKET_SELECTION = [
 	('cp','CP'),('ip','IP')
 ]
+ENQUIRY_CATEGORY_SELECTION = [
+	('project','Project'),('budgetary','Budgetary'),('tender','Tender'),('spare','Spares'),('pump','Pumps')
+]
 
 def roundPartial (value, resolution):
 	return round (value / resolution) * resolution
@@ -42,6 +45,7 @@ class kg_crm_enquiry(osv.osv):
 		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'revision_remarks': fields.text('Revision Remarks'),
+		'design_remarks': fields.text('Design Remarks',readonly=True, states={'draft':[('readonly',False)]}),
 		'state': fields.selection(STATE_SELECTION,'Status', readonly=True),
 		'schedule_no': fields.char('Schedule No', size=128,select=True),
 		'enquiry_date': fields.date('Customer Enquiry Date',required=True,readonly=True, states={'draft':[('readonly',False)]}),
@@ -52,6 +56,7 @@ class kg_crm_enquiry(osv.osv):
 		'call_type': fields.selection(CALL_TYPE_SELECTION,'Call Type', required=True),
 		'ref_mode': fields.selection([('direct','Direct'),('dealer','Dealer')],'Reference Mode', required=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'market_division': fields.selection(MARKET_SELECTION,'Marketing Division',readonly=True, states={'draft':[('readonly',False)]}),
+		'enquiry_categ': fields.selection(ENQUIRY_CATEGORY_SELECTION,'Enquiry Category',readonly=True, states={'draft':[('readonly',False)]}),
 		'division_id': fields.many2one('kg.division.master','Division',readonly=True, states={'draft':[('readonly',False)]},domain="[('state','not in',('reject','cancel')),('code','in',('CPD','IPD'))]"),
 		'ref_no': fields.char('Reference Number'),
 		'segment': fields.selection([('dom','Domestic'),('exp','Export')],'Segment',readonly=True, states={'draft':[('readonly',False)]}),
@@ -1823,6 +1828,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'save_as_template': fields.boolean('Save As Template'),
 		'line_state': fields.selection([('draft','Draft'),('approve','Approved')],'Status',readonly=True),
 		'customer_id': fields.many2one('res.partner','Customer Name'),
+		'design_remarks': fields.text('Design Remarks'),
+		
 		## Module Requirement Fields
 		
 		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
@@ -1928,7 +1935,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'suction_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Suction Size'),
 		'speed_in_rpm': fields.float('Speed in RPM - Pump'),
 		'rpm': fields.selection([('1450','1450'),('2900','2900')],'RPM'),
-		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal')], 'Pump Type'),
+		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], 'Pump Type'),
 		'bush_bearing_lubrication':fields.selection([('grease','Grease'),('external','External'),('self','Self'),('ex_pressure','External Under Pressure')], 'Bush Bearing Lubrication'),
 		'del_pipe_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Delivery Pipe Size(MM)'),
 		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard'),

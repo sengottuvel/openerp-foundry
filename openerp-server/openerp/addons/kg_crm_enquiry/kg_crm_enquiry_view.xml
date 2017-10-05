@@ -34,6 +34,7 @@
 								<field name="division_id" required="1"/>
 								<field name="dealer_id" attrs="{'invisible': [('ref_mode','=','direct')],'required': [('ref_mode','=','dealer')]}"/>
 								<field name="note"/>
+								<field name="enquiry_categ"/>
 								<field name="purpose" attrs="{'invisible': [('call_type','=','service')],'required': [('call_type','!=','service')]}"/>
 								<!--<field name="order_type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>-->		
 								<field name="revision_remarks" attrs="{'invisible': [('state','not in',('moved_to_offer','revised'))],'readonly':[('state','=','revised')]}"/>
@@ -52,6 +53,7 @@
 								<field name="service_det" attrs="{'invisible': [('call_type','!=','service')],'required': [('call_type','=','service')]}"/>
 								<field name="enq_status"/>
 								<field name="reminder_date" attrs="{'invisible': [('enq_status','!=','to_be_follow')]}" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
+								<field name="design_remarks" widget="char"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 								<field name="drive" invisible="1"/>
 								<field name="transmision" invisible="1"/>
@@ -117,6 +119,7 @@
 											<field name="pump_model_type" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 											<field name="wo_line_id" on_change="onchange_wo_line(wo_line_id,purpose_categ)" attrs="{'invisible':[('purpose_categ','=','access')],'readonly':[('load_bom','=',True)]}"/>
 											<field name="order_summary"/>
+											<field name="design_remarks" widget="char"/>
 										</group>
 									</group>	
 			<!--	<notebook>
