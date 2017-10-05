@@ -215,6 +215,84 @@ class kg_work_order(osv.osv):
 				return False
 		return True
 	
+	def _check_is_applicable(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.line_ids:
+				for line in entry.line_ids:
+					if line.line_ids:
+						for ele in line.line_ids:
+							if ele.flag_applicable == True and not ele.moc_id:
+								raise osv.except_osv(_('Warning!'),
+									_('Pump %s Pattern %s Kindly configure MOC'%(line.pump_model_id.name,ele.pattern_id.pattern_name)))
+					else:
+						pass
+					if line.line_ids_a:
+						for ele in line.line_ids_a:
+							if ele.flag_applicable == True and not ele.moc_id:
+								raise osv.except_osv(_('Warning!'),					
+									_('Pump %s Item Name %s Kindly configure MOC'%(line.pump_model_id.name,ele.ms_id.name)))
+					else:
+						pass
+					if line.line_ids_b:
+						for ele in line.line_ids_b:
+							if ele.flag_applicable == True and not ele.moc_id:
+								raise osv.except_osv(_('Warning!'),
+									_('Pump %s Item Name %s Kindly configure MOC'%(line.pump_model_id.name,ele.bot_id.name)))
+					else:
+						pass
+					if line.line_ids_d:
+						for acc_line in line.line_ids_d:
+							if acc_line.line_ids:
+								for ele in acc_line.line_ids:
+									if ele.is_applicable == True and not ele.moc_id:
+										raise osv.except_osv(_('Warning!'),
+											_('Pump %s Pattern %s Kindly configure MOC'%(line.pump_model_id.name,ele.pattern_id.pattern_name)))
+							else:
+								pass
+							if acc_line.line_ids_a:
+								for ele in acc_line.line_ids_a:
+									if ele.is_applicable == True and not ele.moc_id:
+										raise osv.except_osv(_('Warning!'),					
+											_('Pump %s Item Name %s Kindly configure MOC'%(line.pump_model_id.name,ele.ms_id.name)))
+							else:
+								pass
+							if acc_line.line_ids_b:
+								for ele in acc_line.line_ids_b:
+									if ele.is_applicable == True and not ele.moc_id:
+										raise osv.except_osv(_('Warning!'),
+											_('Pump %s Item Name %s Kindly configure MOC'%(line.pump_model_id.name,ele.bot_id.name)))
+							else:
+								pass
+					else:
+						pass
+					if line.line_ids_e:
+						for spare_line in line.line_ids_e:
+							if spare_line.line_ids:
+								for ele in spare_line.line_ids:
+									if ele.is_applicable == True and not ele.moc_id:
+										raise osv.except_osv(_('Warning!'),
+											_('Pump %s Pattern %s Kindly configure MOC'%(line.pump_model_id.name,ele.pattern_id.pattern_name)))
+							else:
+								pass
+							if spare_line.line_ids_a:
+								for ele in spare_line.line_ids_a:
+									if ele.is_applicable == True and not ele.moc_id:
+										raise osv.except_osv(_('Warning!'),					
+											_('Pump %s Item Name %s Kindly configure MOC'%(line.pump_model_id.name,ele.ms_id.name)))
+							else:
+								pass
+							if spare_line.line_ids_b:
+								for ele in spare_line.line_ids_b:
+									if ele.is_applicable == True and not ele.moc_id:
+										raise osv.except_osv(_('Warning!'),
+											_('Pump %s Item Name %s Kindly configure MOC'%(line.pump_model_id.name,ele.bot_id.name)))
+							else:
+								pass
+					else:
+						pass		
+		return True
+	
+	
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
 		if flds.name == False:
@@ -265,6 +343,7 @@ class kg_work_order(osv.osv):
 		(_check_name, 'Work Order No. must be Unique', ['']),
 		(_name_validate, 'Work Order No. must be Unique', ['']),
 		(_check_delivery_date, 'Delivery Date should not be less than current date!!', ['']),
+		(_check_is_applicable, 'Moc Check!!', ['']),
 		
 	   ]
    
