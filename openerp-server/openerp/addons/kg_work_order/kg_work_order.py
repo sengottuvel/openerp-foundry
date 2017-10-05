@@ -193,6 +193,21 @@ class kg_work_order(osv.osv):
 			return False
 		return True 
 	
+	def _check_delivery_date(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')
+		if entry.delivery_date:
+			delivery_date = str(entry.delivery_date)
+			delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
+			if delivery_date < today:
+				raise osv.except_osv(_('Warning!'),
+						_('Delivery Date should not be less than current date!!'))
+			else:
+				pass
+		return True
+	
 	def _check_lineitems(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.entry_mode == 'manual':
@@ -249,6 +264,7 @@ class kg_work_order(osv.osv):
 		(_Validation, 'Special Character Not Allowed in Work Order No.', ['']),
 		(_check_name, 'Work Order No. must be Unique', ['']),
 		(_name_validate, 'Work Order No. must be Unique', ['']),
+		(_check_delivery_date, 'Delivery Date should not be less than current date!!', ['']),
 		
 	   ]
    
@@ -862,7 +878,8 @@ class kg_work_order(osv.osv):
 			#~ else:
 				#~ raise osv.except_osv(_('Warning!'),_('Update GS TIN no. in Customer master and Proceed for approval!'))
 			# Customer TIN No validation end
-			
+			for line in entry.line_ids:
+				self.pool.get('ch.work.order.details').write(cr, uid, line.id,{'delivery_date': entry.delivery_date})
 			self.write(cr,uid,ids,{'state':'mkt_approved','design_flag':True})
 		return True
 		
@@ -939,13 +956,16 @@ class kg_work_order(osv.osv):
 				
 				if wo_spc_app_flag == True:
 					self.write(cr,uid,ids,{'wo_spc_app_flag':True})
-					
+			for line in entry.line_ids:
+				self.pool.get('ch.work.order.details').write(cr, uid, line.id,{'delivery_date': entry.delivery_date})		
 			self.write(cr,uid,ids,{'state':'design_approved'})
 		return True
 		
 	def special_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'design_approved':
+			for line in entry.line_ids:
+				self.pool.get('ch.work.order.details').write(cr, uid, line.id,{'delivery_date': entry.delivery_date})
 			self.write(cr,uid,ids,{'wo_spc_app_flag':False})
 		return True
 	
