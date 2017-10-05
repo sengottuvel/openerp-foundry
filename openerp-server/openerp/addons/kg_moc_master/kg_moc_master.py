@@ -80,7 +80,7 @@ class kg_moc_master(osv.osv):
 		
 		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type' ,required=True),
 		'alias_name': fields.char('Alias Name', size=128),
-		'moc_type': fields.selection([('foundry_moc','Foundry MOC'),('purchase_moc','Purchase MOC'),('both','Both')],'Type'),
+		'moc_type': fields.selection([('foundry_moc','Foundry MOC'),('purchase_moc','Purchase MOC'),('both','Both')],'Type',required=True),
 		'product_id': fields.many2one('product.product','Equivalent Rejection Material'),	
 		'moc_cate_id': fields.many2one('kg.moc.category','MS MOC Category',domain="[('state','not in',('reject','cancel')),('type_moc_cate','=','ms')]"),	
 		'moc_cate_fetting': fields.many2one('kg.moc.category','Fettling MOC Category',domain="[('state','not in',('reject','cancel')),('type_moc_cate','=','fettling')]"),	
@@ -163,8 +163,11 @@ class kg_moc_master(osv.osv):
 		return res	
 	def _check_line(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.line_ids:			
-			return False
+		if rec.moc_type != 'purchase_moc':
+			if not rec.line_ids:			
+				return False
+			else:
+				pass
 		return True	
 		
 	def send_to_dms(self,cr,uid,ids,context=None):
