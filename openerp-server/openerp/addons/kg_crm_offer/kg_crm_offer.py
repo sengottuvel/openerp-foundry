@@ -2943,6 +2943,7 @@ class ch_spare_offer(osv.osv):
 		'spare_offer_line_id': fields.many2one('ch.spare.offer','Spare Offer Line Id'),
 		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'off_name': fields.char('Offer Name'),
+		'material_code': fields.char('Material Code'),
 		
 		'r_agent_com': fields.float('Agent Commission(%)'),
 		'r_dealer_discount': fields.float('Dealer Discount(%)'),
