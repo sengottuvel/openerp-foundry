@@ -49,6 +49,13 @@ class kg_pouring_log(osv.osv):
 		'mould_remarks': fields.text('Remarks'),
 		'line_ids_a':fields.one2many('ch.mould.details', 'header_id', "Mould Details"),
 		
+		
+		'flag_pour': fields.boolean('Pour Flag'),
+		## Many2Many field added			
+			 
+		'pour_line_ids': fields.many2many('kg.production','m2m_pour_details' , 'production_id', 'pour_id', 'Pour Items',
+			 domain="[('mould_state','in',('partial','done')),('pour_state','in',('pending','partial')),('moc_id','=',moc_id),('pour_pending_qty','>',0)]"),
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -74,7 +81,8 @@ class kg_pouring_log(osv.osv):
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'entry_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'mould_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-		'active': True,
+		'active': True,		
+		'flag_pour': False,
 		'state':'draft'
 		
 		
@@ -91,6 +99,37 @@ class kg_pouring_log(osv.osv):
 			
 			} 
 		return {'value': value}
+		
+	
+	def update_line_items(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		
+		pour_line_obj = self.pool.get('ch.pouring.details')
+		
+		if entry.type == 'pour':
+			
+			del_sql = """ delete from ch_pouring_details where header_id=%s """ %(ids[0])
+			cr.execute(del_sql)
+			
+			for item in entry.pour_line_ids:			
+				
+				
+				vals = {
+				
+					'header_id': entry.id,
+					'order_line_id':item.order_line_id.id,
+					'production_id':item.id,								
+					'pattern_name':item.pattern_name,								
+					'qty':item.total_mould_qty - item.pour_qty,				
+					
+				}
+				
+				pour_line_id = pour_line_obj.create(cr, uid,vals)	
+				self.write(cr, uid, ids, {'flag_pour': True})	
+			
+		return True
+	
+	
 	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -166,6 +205,8 @@ class kg_pouring_log(osv.osv):
 	def mould_entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
+			if not entry.line_ids_a:
+				raise osv.except_osv(_('Mould Item Details !!'),_('Enter the mould item Details !!'))
 			for line_item in entry.line_ids_a:
 				
 				if line_item.order_line_id and line_item.order_line_id.id != False:
@@ -486,7 +527,7 @@ class kg_pouring_log(osv.osv):
 							mould_state in ('partial','pending') and
 							order_priority = '1'and
 							mould_rem_qty > 0
-							order by id asc
+							order by order_delivery_date asc
 							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
 					msnc_production_ids = cr.dictfetchall()
 					if msnc_production_ids:
@@ -503,7 +544,7 @@ class kg_pouring_log(osv.osv):
 							mould_state in ('partial','pending') and
 							order_priority = '2' and
 							mould_rem_qty > 0
-							order by id asc
+							order by order_delivery_date asc
 							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
 						bd_production_ids = cr.dictfetchall()
 						print "bd_production_ids",bd_production_ids
@@ -523,7 +564,7 @@ class kg_pouring_log(osv.osv):
 							order_priority = '3' and
 							mould_rem_qty > 0
 							
-							order by id asc
+							order by order_delivery_date asc
 							
 							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
 						emer_production_ids = cr.dictfetchall()
@@ -541,7 +582,7 @@ class kg_pouring_log(osv.osv):
 							mould_state in ('partial','pending') and
 							order_priority = '4' and
 							mould_rem_qty > 0
-							order by id asc
+							order by order_delivery_date asc
 							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
 						service_production_ids = cr.dictfetchall()
 						if service_production_ids:
@@ -557,7 +598,7 @@ class kg_pouring_log(osv.osv):
 							mould_state in ('partial','pending') and
 							order_priority = '5' and
 							mould_rem_qty > 0
-							order by id asc
+							order by order_delivery_date asc
 							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
 						fdync_production_ids = cr.dictfetchall()
 						if fdync_production_ids:
@@ -574,7 +615,7 @@ class kg_pouring_log(osv.osv):
 							mould_state in ('partial','pending') and
 							order_priority = '6' and
 							mould_rem_qty > 0
-							order by id asc
+							order by order_delivery_date asc
 							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
 						spare_production_ids = cr.dictfetchall()
 						if spare_production_ids:
@@ -591,7 +632,7 @@ class kg_pouring_log(osv.osv):
 							mould_state in ('partial','pending') and
 							order_priority = '7'and
 							mould_rem_qty > 0
-							order by id asc
+							order by order_delivery_date asc
 							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
 						urgent_production_ids = cr.dictfetchall()
 						if urgent_production_ids:
@@ -608,7 +649,7 @@ class kg_pouring_log(osv.osv):
 							mould_state in ('partial','pending') and
 							order_priority = '8' and
 							mould_rem_qty > 0
-							order by id asc
+							order by order_delivery_date asc
 							''',[line_item.production_id.pattern_id.id,line_item.production_id.moc_id.id ])
 						normal_production_ids = cr.dictfetchall()
 						if normal_production_ids:
@@ -752,6 +793,8 @@ class kg_pouring_log(osv.osv):
 	def pour_entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
+			if not entry.line_ids:
+				raise osv.except_osv(_('Pour Item Details !!'),_('Enter the Pour item Details !!'))
 			for line_item in entry.line_ids:				
 				if line_item.order_line_id and line_item.order_line_id.id != False:
 					pour_qty = line_item.production_id.total_mould_qty						
@@ -855,7 +898,10 @@ class ch_pouring_details(osv.osv):
 		'weight':fields.float('Weight(Kgs)'),
 		'remarks':fields.text('Remarks'),
 		
+		
 	}
+	
+	
 	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
@@ -937,6 +983,7 @@ class ch_mould_details(osv.osv):
 		'weight':fields.float('Weight(Kgs)'),
 		'remarks':fields.text('Remarks'),
 		'flag_pattern_check': fields.boolean('Pattern Check'),
+		
 		
 	}
 	

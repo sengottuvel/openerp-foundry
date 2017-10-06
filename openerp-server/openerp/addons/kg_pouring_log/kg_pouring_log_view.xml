@@ -27,12 +27,13 @@
 							<field name="supervisor" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
 							<field name="type" invisible="1"/>	
+							<field name="flag_pour" invisible="1"/>	
 						</group>					
 					</group>
 					<notebook>
-						<page string="Pouring Details">	
+						<page string="Pouring Details" attrs="{'invisible': [('flag_pour','=',False)]}">	
 							<field name="line_ids"  context="{'moc_id':moc_id}" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
-								<tree string="Pouring Details Entry Tree" editable="top" >																													
+								<tree string="Pouring Details Entry Tree" editable="top" create="false" >																													
 									<field name="production_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>
 									<field name="order_line_id" readonly="1"/>																				
 									<field name="pattern_name" readonly="1"/>				   
@@ -43,7 +44,24 @@
 								</tree>
 							</field>																								
 						</page>
-						
+						<page string="Select Items">
+							<field name="pour_line_ids" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Pour Items" create="false" editable="top">
+									<field name="order_no"/>
+									<field name="order_delivery_date"/>
+									<field name="order_priority" string="Category"/>
+									<field name="pump_model_id"/>
+									<field name="pattern_code" />
+									<field name="pattern_name"/>
+									<field name="moc_id"/>
+									<field name="schedule_qty"/>
+									<field name="pour_pending_qty"/>
+									<field name="pour_state"/>									
+									
+								</tree>
+							</field>
+							<button name="update_line_items" class="proceed_button" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
+						</page>
 						<page string="Entry Info">
 							<group>
 								<field name="company_id"/>
@@ -145,6 +163,7 @@
 <!--
 							<field name="mould_box_id" readonly="1"/>
 -->
+							
 							<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
 							<field name="type" invisible="1"/>	
 						</group>										
@@ -160,7 +179,7 @@
 									<field name="qty" required="1"/>
 									<field name="weight"/>
 									<field name="remarks" widget="char"/>														
-									<field name="flag_pattern_check" invisible="1"/>														
+									<field name="flag_pattern_check" invisible="1"/>																						
 								</tree>
 							</field>																								
 						</page>
@@ -273,8 +292,8 @@
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.pouring.log</field>
 			<field name="view_type">form</field>
-			<field name="search_view_id" ref="t_search_v_mould_update"/>
-			<field name="context">{"search_default_draft":1}</field>
+			<field name="search_view_id" ref="t_search_v_mould_update"/>			
+			<field name="context">{"search_default_draft":1}</field>			
 			<field name="domain">[('type','=',False)]</field>
 		</record>
 		
