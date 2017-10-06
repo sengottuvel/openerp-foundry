@@ -2063,10 +2063,11 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				## Coupling portion starts
 				cr.execute('''select
 				line.coupling_access_id as access_id,am.access_cate_id as access_cate_id,
-				am.accessories_type as accessories_type,am.name as offer_name
+				am.accessories_type as accessories_type,acm.name as offer_name
 				from kg_pumpmodel_master pump
 				join ch_coupling_config line on(line.header_id=pump.id)
 				left join kg_accessories_master am on(am.id=line.coupling_access_id)
+				left join kg_accessories_category acm on(acm.id=am.access_cate_id)
 				where pump.id = %s and line.power_kw = %s and line.speed = %s and line.brand_id = %s and line.coupling_type_id = %s
 				and line.coupling_ser_factor = %s
 				''',[pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,str(service_factor)])
@@ -2090,10 +2091,11 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				## Baseplate portion starts
 				cr.execute('''select
 						line.baseplate_id as access_id,am.access_cate_id as access_cate_id,
-						am.accessories_type as accessories_type,am.name as offer_name
+						am.accessories_type as accessories_type,acm.name as offer_name
 						from kg_pumpmodel_master pump
 						join ch_coupling_config line on(line.header_id=pump.id)
 						left join kg_accessories_master am on(am.id=line.baseplate_id)
+						left join kg_accessories_category acm on(acm.id=am.access_cate_id)
 						where pump.id = %s and line.power_kw = %s and line.speed = %s and line.brand_id = %s and line.coupling_type_id = %s
 						and line.coupling_ser_factor = %s
 						''',[pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,str(service_factor)])
@@ -2114,10 +2116,11 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				## Coupling Guard portion starts
 				cr.execute('''select
 						line.coupling_guard_id as access_id,am.access_cate_id as access_cate_id,
-						am.accessories_type as accessories_type,am.name as offer_name
+						am.accessories_type as accessories_type,acm.name as offer_name
 						from kg_pumpmodel_master pump
 						join ch_coupling_config line on(line.header_id=pump.id)
 						left join kg_accessories_master am on(am.id=line.coupling_guard_id)
+						left join kg_accessories_category acm on(acm.id=am.access_cate_id)
 						where pump.id = %s and line.power_kw = %s and line.speed = %s and line.brand_id = %s and line.coupling_type_id = %s
 						and line.coupling_ser_factor = %s
 						''',[pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,str(service_factor)])
@@ -2139,10 +2142,11 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				if base_access_id:
 					cr.execute('''select
 						line.foundation_bolt_id as access_id,am.access_cate_id as access_cate_id,
-						am.accessories_type as accessories_type,am.name as offer_name
+						am.accessories_type as accessories_type,acm.name as offer_name
 						from kg_pumpmodel_master pump
 						join ch_coupling_config line on(line.header_id=pump.id)
 						left join kg_accessories_master am on(am.id=line.foundation_bolt_id)
+						left join kg_accessories_category acm on(acm.id=am.access_cate_id)
 						where pump.id = %s and line.power_kw = %s and line.speed = %s and line.brand_id = %s and line.coupling_type_id = %s
 						and line.coupling_ser_factor = %s
 						''',[pump_id,motor_kw,speed_in_motor,coupling_make,coupling_type_id,str(service_factor)])
@@ -2187,7 +2191,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									pump_pulley_access_id = ac_rec.id
 									pump_pulley_cate_id = ac_rec.access_cate_id.id
 									pump_pulley_type = ac_rec.accessories_type
-									pump_pulley_offer_name = ac_rec.name
+									pump_pulley_offer_name = ac_rec.access_cate_id.name
 							elif loop_count == 1:
 								pump_pulley_access_id = pump_pulley['motor_pulley_access_id']
 								ac_id = access_obj.search(cr,uid,[('accessories_type','=','motor_pulley'),('id','=',pump_pulley_access_id)])
@@ -2196,7 +2200,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									pump_pulley_access_id = ac_rec.id
 									pump_pulley_cate_id = ac_rec.access_cate_id.id
 									pump_pulley_type = ac_rec.accessories_type
-									pump_pulley_offer_name = ac_rec.name
+									pump_pulley_offer_name = ac_rec.access_cate_id.name
 							elif loop_count == 2:
 								pump_pulley_access_id = pump_pulley['slide_rail_access_id']
 								ac_id = access_obj.search(cr,uid,[('accessories_type','=','slide_rail'),('id','=',pump_pulley_access_id)])
@@ -2205,7 +2209,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									pump_pulley_access_id = ac_rec.id
 									pump_pulley_cate_id = ac_rec.access_cate_id.id
 									pump_pulley_type = ac_rec.accessories_type
-									pump_pulley_offer_name = ac_rec.name
+									pump_pulley_offer_name = ac_rec.access_cate_id.name
 							elif loop_count == 3:
 								pump_pulley_access_id = pump_pulley['belt_access_id']
 								ac_id = access_obj.search(cr,uid,[('accessories_type','=','belt'),('id','=',pump_pulley_access_id)])
@@ -2214,7 +2218,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									pump_pulley_access_id = ac_rec.id
 									pump_pulley_cate_id = ac_rec.access_cate_id.id
 									pump_pulley_type = ac_rec.accessories_type
-									pump_pulley_offer_name = ac_rec.name
+									pump_pulley_offer_name = ac_rec.access_cate_id.name
 							elif loop_count == 4:
 								pump_pulley_access_id = pump_pulley['belt_guard_access_id']
 								ac_id = access_obj.search(cr,uid,[('accessories_type','=','belt_guard'),('id','=',pump_pulley_access_id)])
@@ -2223,7 +2227,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									pump_pulley_access_id = ac_rec.id
 									pump_pulley_cate_id = ac_rec.access_cate_id.id
 									pump_pulley_type = ac_rec.accessories_type
-									pump_pulley_offer_name = ac_rec.name
+									pump_pulley_offer_name = ac_rec.access_cate_id.name
 							else:
 								pump_pulley_access_id = ''
 							pump_pulley_value = {'access_id':pump_pulley_access_id,'access_categ_id':pump_pulley_cate_id,
