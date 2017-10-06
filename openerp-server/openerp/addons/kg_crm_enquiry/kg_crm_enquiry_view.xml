@@ -671,7 +671,7 @@
 												<field name="access_categ_id" on_change="onchange_access_id(access_categ_id,access_id)" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
 												<field name="access_id" required="1" attrs="{'readonly':['|',('load_access','=',True),('access_categ_id','=',False)]}"/>
 												<field name="accessories_type" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
-												<field name="moc_const_id" required="1" attrs="{'readonly':[('load_access','=',True)]}" invisible="1"/>
+												<field name="moc_const_id" required="1" attrs="{'readonly':[('load_access','=',True)]}" invisible="0"/>
 												<field name="flag_standard"/>
 												<field name="moc_id" invisible="1"/>
 											</group>
