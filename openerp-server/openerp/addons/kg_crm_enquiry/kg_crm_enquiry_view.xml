@@ -326,6 +326,7 @@
 											<field name="offer_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
 											<field name="moc_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
 											<field name="remarks" widget="char"/>
+											<field name="seq_no" invisible="1"/>
 											<field name="flag_standard" invisible="1"/>
 										</tree>
 									</field>	

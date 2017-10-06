@@ -214,7 +214,8 @@ class kg_work_order(osv.osv):
 			if not entry.line_ids:
 				return False
 		return True
-	
+		
+		
 	def _check_is_applicable(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.line_ids:
@@ -291,7 +292,6 @@ class kg_work_order(osv.osv):
 					else:
 						pass		
 		return True
-	
 	
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
@@ -691,7 +691,8 @@ class kg_work_order(osv.osv):
 						c1 = c1+1
 						c1 = 0
 						if var[0] == 'Purpose':
-							moc_com_query = """ select wo_line.id as wo_line_id,moc_const.offer_id,moc_const.moc_id,offer_mat.name as moc_offer_name,moc.name as moc_offer_value 
+							print "PUIURURUURRUR STATTATAT HERER ============",s2
+							moc_com_query = """ select wo_line.id as wo_line_id,moc_const.offer_id,moc_const.moc_id,offer_mat.name as moc_offer_name,moc.name as moc_offer_value ,moc_const.seq_no
 							from ch_moc_construction moc_const
 							left join kg_offer_materials offer_mat on offer_mat.id = moc_const.offer_id
 							left join kg_moc_master moc on  moc.id = moc_const.moc_id
@@ -705,7 +706,7 @@ class kg_work_order(osv.osv):
 							and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null
 							and pump_offer.enquiry_line_id is not null
 							) """%(pass_param,report)
-							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
+							moc_query = """ select distinct offer_id,moc_offer_name,seq_no from ( """+moc_com_query + moc_cond +""" ) as sample order by seq_no"""
 							cr.execute(moc_query)
 							moc_query_data = cr.dictfetchall()
 							if not moc_query_data:
@@ -717,15 +718,16 @@ class kg_work_order(osv.osv):
 									for pump in pump_data:
 										wo_line_rec = wo_line_obj.browse(cr, uid, pump['wo_line_id'])
 										c1 += 1
-										moc_pump_query = moc_com_query+ """where moc_const.header_id
-										in (select pump_offer.enquiry_line_id
+										moc_pump_query = moc_com_query+ """where moc_const.header_id in 
+										(select pump_offer.enquiry_line_id
 										from ch_work_order_details wo_line
 										left join ch_pump_offer pump_offer on pump_offer.id = wo_line.pump_offer_line_id
 										where wo_line.header_id in %s
 										and wo_line.pump_model_type = '%s'
 										and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null
 										and pump_offer.enquiry_line_id is not null
-										) and wo_line.id = %s and moc_const.offer_id = %s """%(pass_param,report,pump['wo_line_id'],moc['offer_id'])
+										and wo_line.id = %s
+										) and moc_const.offer_id = %s """%(pass_param,report,pump['wo_line_id'],moc['offer_id'])
 										cr.execute(moc_pump_query)
 										moc_pump_data = cr.dictfetchall()
 										if moc_pump_data:
@@ -736,8 +738,10 @@ class kg_work_order(osv.osv):
 								s2 += 1
 								c1 = 0
 							s2 = s2-1
+							print "PUIURURUURRUR ENDNNDND HERER ============",s2
 						elif var[0] == 'Accessories':
-							access_query = """ select header_id,access_name,yes,oth_spec from (
+							print "ACCCCCCCC STATTATAT HERER ============",s2
+							access_one_query = """ select header_id,access_name,yes,oth_spec from (
 							select
 							wo_access.header_id,
 							access.name as access_name,
@@ -748,50 +752,55 @@ class kg_work_order(osv.osv):
 							left join ch_work_order_details wo_line on wo_line.id = wo_access.header_id
 							order by wo_access.id asc
 							) as sql_access """							
-							access_cond_query = """ where header_id in (select id from ch_work_order_details where header_id in %s and pump_model_type = '%s' and pump_model_type != '' and pump_model_type is not null
-							) """%(pass_param,report)
-							access_cnt_query = """ select count(*) from ( """ + access_query + access_cond_query + """ )  as sql_access """
+							access_cond_query = """ where header_id in (select id from ch_work_order_details where header_id in %s and pump_model_type = '%s' and pump_model_type != '' and pump_model_type is not null ) """%(pass_param,report)
+							access_query = access_one_query+access_cond_query
+							access_cnt_query = """ select array_to_string(array_agg(distinct access_name), ',') as access_name,count(*) OVER () from ( """+access_query+""" ) as acc_head"""							
 							cr.execute(access_cnt_query)
 							access_cnt_data = cr.dictfetchone()
 							access_cnt = 0
+							acc_name = ''
 							if access_cnt_data:
 								access_cnt = access_cnt_data['count']
+								acc_name = access_cnt_data['access_name']
+							acc_name = acc_name
 							if access_cnt > 0 :
 								sheet1.write_merge(s2, s2, c1, c1+count, var[0], style_sub_left)
 							else:
-								pass							
+								s2 = s2-1
+							acc_hd = ''
+							access_cond_query = """ where header_id in (select id from ch_work_order_details where header_id in %s and pump_model_type = '%s' and pump_model_type != '' and pump_model_type is not null
+							) """%(pass_param,report)
+							access_query = access_one_query+access_cond_query
+							acc_head = """ select array_to_string(array_agg(access_name), ',') as access_name from ( """+access_query+""" ) as acc_head"""
+							cr.execute(acc_head)
+							acc_head_data = cr.dictfetchone()
+							acc_hd = acc_head_data['access_name']
 							pump_cnt = 1
-							if pump_data:
-								s2 = s2
-								for pump in pump_data:
-									c1 += 1
-									wo_line_rec = wo_line_obj.browse(cr, uid, pump['wo_line_id'])
-									acc_cond = """where header_id = %s"""%(pump['wo_line_id'])
-									access_pump_query = access_query+acc_cond
-									cr.execute(access_pump_query)
-									access_pump_data = cr.dictfetchall()
-									heada_s2 = s2
-									if access_pump_data:
-										for access in access_pump_data:
-											s2 = heada_s2 + access_pump_data.index(access) + 1
-											if access['access_name']:
-												acc = access['access_name']
-											else:
-												acc = '-'
-											sheet1.write_merge(s2, s2, 0, 0, acc, style_left)
-											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, access['oth_spec'], style_left)
-											for c in range(1,count+1):
-												if (c != pump_cnt and c != 0):
-													sheet1.write_merge(s2, s2, c, c, 0.00, style_left)
-									else:
-										s2 -= 1
-									s2 += 1
-									pump_cnt += 1	
-								c1 = 0
-							else:
-								s2 -= 1
-							s2 = s2 - 1
+							if access_cnt > 0 :
+								if pump_data:
+									s2 = s2
+									s2 = s2+1
+									sheet1.write_merge(s2, s2, 0, 0, acc_name, style_left)
+									for pump in pump_data:
+										c1 += 1
+										acc_loop_cond = """ and header_id = %s """%(pump['wo_line_id'])
+										acc_loop_val = """ select array_to_string(array_agg(oth_spec::text), ',') as oth_spec from ( """+access_one_query+access_cond_query+acc_loop_cond+""" ) as acc_head"""										
+										access_pump_query = acc_loop_val
+										cr.execute(access_pump_query)
+										access_pump_data = cr.dictfetchall()
+										if access_pump_data:
+											for access in access_pump_data:
+												if access['oth_spec']:
+													ref_val = access['oth_spec']
+												else:
+													ref_val = '-'
+												sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, ref_val, style_left)
+										else:
+											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, '-', style_left)
+										pump_cnt += 1																				
+							print "ACCCCCCCC ENDNDNDND HERER ============",s2
 						elif var[0] == 'Spares':
+							print "SPARE STATTATAT HERER ============",s2
 							spare_query = """ select pump_model,pattern_name,qty,oth_spec,header_id from (
 							select pump.name as pump_model,foundry_line.pattern_name,foundry_line.qty,foundry_line.add_spec as oth_spec,foundry_line.header_id
 							from ch_order_bom_details foundry_line
@@ -813,56 +822,67 @@ class kg_work_order(osv.osv):
 							where wo_line.order_category = 'spare' and bot_line.flag_applicable = 't'
 							and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null 
 							) as sql_overall  """
-							spare_cond_query = """ where header_id in (select id from ch_work_order_details where header_id in %s and pump_model_type = '%s' and pump_model_type != '' and pump_model_type is not null
+							spare_cond_query = """ where header_id in 
+							(select pump_offer.enquiry_line_id
+							from ch_work_order_details wo_line
+							left join ch_pump_offer pump_offer on pump_offer.id = wo_line.pump_offer_line_id
+							where wo_line.header_id in %s
+							and wo_line.pump_model_type = '%s'
+							and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null
+							and pump_offer.enquiry_line_id is not null
 							) """%(pass_param,report)
 							spare_cnt_query = """ select count(*) from ( """ + spare_query + spare_cond_query + """ )  as sql_spare """
 							cr.execute(spare_cnt_query)
 							spare_cnt_data = cr.dictfetchone()
+							print "spare_cnt_data ==================",spare_cnt_data
 							spare_cnt = 0
 							if spare_cnt_data:
 								spare_cnt = spare_cnt_data['count']
 							if spare_cnt > 0 :
 								sheet1.write_merge(s2, s2, c1, c1+count, var[0], style_sub_left)
-								#~ s2 += 1
+								s2 += 1
 							else:
-								pass
-							pump_cnt = 1
-							if pump_data:
 								s2 = s2
-								for pump in pump_data:
-									c1 += 1
-									wo_line_rec = wo_line_obj.browse(cr, uid, pump['wo_line_id'])
-									spa_cond = """where header_id = %s"""%(pump['wo_line_id'])
-									spare_pump_query = spare_query+spa_cond
-									cr.execute(spare_pump_query)
-									spare_pump_data = cr.dictfetchall()
-									head_s2 = s2
-									if spare_pump_data:
-										for spare in spare_pump_data:
-											s2 = head_s2 + spare_pump_data.index(spare) + 1
-											if spare['pattern_name']:
-												spa = spare['pattern_name']
-												sheet1.write_merge(s2, s2, 0, 0, spa, style_left)
-											else:
-												spa = '-'
-												sheet1.write_merge(s2, s2, 0, 0, spa, style_left)
-											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, spare['qty'], style_left)
-											for c in range(1,count+1):
-												if (c != pump_cnt and c != 0):
-													sheet1.write_merge(s2, s2, c, c, 0.00, style_left)
-									else:
-										s2 -= 1
-									s2 += 1
-									pump_cnt += 1	
-								c1 = 0
+							pump_cnt = 1
+							if spare_cnt > 0:
+								if pump_data:
+									for pump in pump_data:
+										c1 += 1
+										spare_count = 0
+										spa_cond = """where header_id = %s"""%(pump['wo_line_id'])
+										spare_pump_query = spare_query+spa_cond
+										cr.execute(spare_pump_query)
+										spare_pump_data = cr.dictfetchall()
+										spare_cnt = """ select count(*) from ( """+spare_pump_query+""" )  as sample"""
+										cr.execute(spare_cnt)
+										spare_cnt = cr.dictfetchone()
+										spare_count = int(spare_cnt['count'])
+										if spare_pump_data:
+											for i in range(0,spare_count):
+												head_s2 = s2+i
+												spa = ''
+												spare = spare_pump_data[i]
+												if spare['pattern_name']:
+													spa = spare['pattern_name']
+												sheet1.write_merge(head_s2, head_s2, 0, 0, spa, style_left)											
+												sheet1.write_merge(head_s2, head_s2, pump_cnt, pump_cnt, spare['qty'], style_left)									
+												for c in range(1,count+1):
+													if (c != pump_cnt and c != 0):
+														sheet1.write_merge(head_s2, head_s2, c, c, 0.00, style_left)
+										if spare_count > 0:
+											s2 = s2 + spare_count-1
+										else:
+											s2 = s2
+										pump_cnt += 1   
 							else:
-								s2 -= 1
-							s2 = s2 - 1
+								s2 = s2-1
+							print "SPARE ENDNDNDNDNND HERER ============",s2
 						else:
 							if var[0] in ('Model / Alias name','Capacity in m3/Hr'):
 								sheet1.write_merge(s2, s2, c1, c1, var[0], style_highlight)							
 							else:
 								sheet1.write_merge(s2, s2, c1, c1, var[0], style_left)
+						print "bbbfbffbbf puuuuu",s2
 						if pump_data:
 							for pump in pump_data:
 								wo_line_rec = wo_line_obj.browse(cr, uid, pump['wo_line_id'])
@@ -878,7 +898,11 @@ class kg_work_order(osv.osv):
 									if sql_query_data:
 										for loop in sql_query_data:
 											if loop[var[1]] != '-':
-												replace_str = str(loop[var[1]])
+												replace_str = ''
+												if isinstance(loop[var[1]], unicode):
+													replace_str = loop[var[1]]
+												else:
+													replace_str = str(loop[var[1]])
 												values = string.replace(replace_str, '$', '/')
 												if var[1] == 'pump_pmodtype':
 													ref_value = dict(self_obj._columns['pump_model_type'].selection)
@@ -895,14 +919,13 @@ class kg_work_order(osv.osv):
 												sheet1.write_merge(s2, s2, c1, c1, values, style_left)
 									else:
 										sheet1.write_merge(s2, s2, c1, c1, '', style_left)
+						print "AFAFAFAFAF puuuuu ENDDDNDN",s2				
 				if pump_data:
 					s1 = 5
 					c1 = 0
 					for pump in pump_data:
 						c1 += 1
 						sheet1.col(c1).width = 3000
-						#~ sheet1.write_merge(s1, s1, c1, c1, '', style_left)
-				
 				print " --- Ends Here ----"				
 		
 		"""Parsing data as string """
@@ -2092,7 +2115,7 @@ class ch_work_order_details(osv.osv):
 		### Prime Cost ###
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
-		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard'),
+		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',domain="[('state','=','approved')]"),
 		'trimming_dia': fields.char('Trimming Dia'),
 		'cc_drill': fields.selection([('basic_design','BASIC DESIGN'),('basic_design_a','BASIC DESIGN+A'),
 			('basic_design_c','BASIC DESIGN+C'),('nill','NILL')],' C.C. Drill'),

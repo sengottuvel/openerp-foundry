@@ -1217,7 +1217,7 @@ class kg_crm_enquiry(osv.osv):
 			if bom_item.header_id.header_id.segment == 'dom':
 				hsn = bom_item.ms_id.hsn_no.id
 				gst = bom_item.ms_id.hsn_no.igst_id.id
-			
+		
 		spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{'header_id': offer_id,
 															  'pumpseries_id': order_item.pumpseries_id.id,
 															  'pump_id': order_item.pump_id.id,
@@ -2551,19 +2551,22 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	def onchange_moc(self, cr, uid, ids, moc_const_id,flag_standard,purpose_categ):
 		moc_const_vals=[]
 		load_bom = ''
+		seq_no = 0
 		if moc_const_id != False:
 			if purpose_categ != 'pump':
 				return True
 				load_bom = True
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr, uid, moc_const_id)
 			for item in moc_const_rec.line_ids:
+				seq_no = seq_no + 1 
 				print"flag_standardflag_standard---------",flag_standard
 				moc_const_vals.append({
 								
 								'moc_id': item.moc_id.id,
 								'offer_id': item.offer_id.id,
 								'remarks': item.remarks,
-								'flag_standard':flag_standard,
+								'flag_standard': flag_standard,
+								'seq_no': seq_no,
 								
 								})
 		return {'value': {'line_ids_moc_a': moc_const_vals,'moc_construction_name':moc_const_rec.name}}
@@ -5224,6 +5227,7 @@ class ch_moc_construction(osv.osv):
 		#~ 'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True), 		
 		#~ 'pattern_name': fields.char('Pattern Name'), 	
 		'flag_standard': fields.boolean('Non Standard'),
+		'seq_no': fields.integer('Seq No.'),
 		
 	}
 	
