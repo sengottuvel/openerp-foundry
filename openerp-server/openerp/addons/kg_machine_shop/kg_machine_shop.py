@@ -443,7 +443,7 @@ class ch_ms_raw_material(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.machine.shop', 'MS Entry', required=True, ondelete='cascade'),	
-		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
+		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu','coupling','mechanical_seal'])]"),			
 		'uom':fields.many2one('product.uom','UOM',size=128 ,required=True),
 		'od': fields.float('OD'),
 		'length': fields.float('Length'),
