@@ -2080,7 +2080,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						coupling_accessories_type = coup_data['accessories_type']
 						coupling_offer_name = coup_data['offer_name']
 						coupling_value = {'access_id':coupling_access_id,'access_categ_id':coupling_access_cate_id,
-											'qty':1,'accessories_type':coupling_accessories_type,'off_name':coupling_offer_name,}
+											'qty':1,'accessories_type':coupling_accessories_type,'off_name':coupling_offer_name,'moc_const_id':moc_const_id}
 						access_vals.append(coupling_value)
 						#~ value = {'line_ids_access_a': access_vals}
 				#~ else:
@@ -2107,7 +2107,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						base_accessories_type = base_data['accessories_type']
 						base_offer_name = base_data['offer_name']
 						base_value = {'access_id':base_access_id,'access_categ_id':base_access_cate_id,
-									'qty':1,'accessories_type':base_accessories_type,'off_name':base_offer_name,}
+									'qty':1,'accessories_type':base_accessories_type,'off_name':base_offer_name,'moc_const_id':moc_const_id}
 						access_vals.append(base_value)
 						#~ value = {'line_ids_access_a': access_vals}
 				## Baseplate portion ends
@@ -2131,7 +2131,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						guard_accessories_type = guard_data['accessories_type']
 						guard_offer_name = guard_data['offer_name']
 						guard_value = {'access_id':guard_access_id,'access_categ_id':guard_access_cate_id,
-									'qty':1,'accessories_type':guard_accessories_type,'off_name':guard_offer_name,}
+									'qty':1,'accessories_type':guard_accessories_type,'off_name':guard_offer_name,'moc_const_id':moc_const_id}
 						access_vals.append(guard_value)
 						#~ value = {'line_ids_access_a': access_vals}
 				## Coupling Guard portion ends
@@ -2156,7 +2156,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							found_accessories_type = found_data['accessories_type']
 							found_offer_name = found_data['offer_name']
 							found_value = {'access_id':found_access_id,'access_categ_id':found_access_cate_id,
-									'qty':1,'accessories_type':found_accessories_type,'off_name':found_offer_name,}
+									'qty':1,'accessories_type':found_accessories_type,'off_name':found_offer_name,'moc_const_id':moc_const_id}
 							access_vals.append(found_value)
 							#~ value = {'line_ids_access_a': access_vals}
 				## Foundation Bolt portion ends
