@@ -1468,7 +1468,7 @@ class kg_crm_offer(osv.osv):
 			raise osv.except_osv(_('Warning!'),_('You cannot get offer copy'))
 		pass_id = enq_ids
 		pass_param = '(' +",".join([str(s) for s in list(pass_id)])+ ')'
-		rpt_type = ['horizontal','vertical']
+		rpt_type = ['horizontal','vertical','others']
 		hz_dictn = {
 		'01#Item Details:':[('Equipment No','item_eqno'),('Description','item_desc'),('Quantity in No','item_qty')],
 		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in C','lspec_temp'),('Specific Gravity - Liquid','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Slurry Correction in - kq/kh/kn ','lspec_slur'),('Suction Condition','lspec_suct')],
@@ -1744,7 +1744,7 @@ class kg_crm_offer(osv.osv):
 				pass
 			else:
 				print " = RRRRRRRR TTTTTT =============",report
-				if report == 'horizontal':
+				if report in ('horizontal','others'):
 					sheet1 = wbk.add_sheet('Horizontal', cell_overwrite_ok=True)
 					dictn = hz_dictn
 				elif report == 'vertical':
