@@ -59,6 +59,7 @@
 				<field name="punch_date" />
 				<field name="punch_time"/>
 				<field name="att_code"/>
+				<field name="entry_mode"/>
 			</tree>
 		</field>
 	</record>

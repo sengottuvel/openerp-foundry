@@ -87,7 +87,7 @@ class kg_attendance_device_info(osv.osv):
 		'active': True,
 		'date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'modify': 'no',
-		'entry_mode': 'auto',
+		'entry_mode': 'manual',
 	
 	}
 	
