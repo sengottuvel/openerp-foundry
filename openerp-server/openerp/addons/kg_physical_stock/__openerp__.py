@@ -16,7 +16,7 @@
 This module allows you to manage your Item Details.
 ===========================================================
 """,
-    'depends' : ['base', 'product'],
+    'depends' : ['base', 'product','stock'],
     'data': ['kg_physical_stock_view.xml',
 			'physical_stock_report_view.xml'],
 		
