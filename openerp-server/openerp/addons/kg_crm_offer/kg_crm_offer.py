@@ -99,8 +99,8 @@ class kg_crm_offer(osv.osv):
 			print"pump_net_amount",pump_net_amount
 			print"access_net_amount",access_net_amount
 			#~ res[order.id]['offer_net_amount'] = pump_net_amount + spare_net_amount + access_net_amount
-			sam_ratio_tot = round(offer_sam_ratio_tot / (offer_prime_cost_tot or 1))
-			res[order.id]['sam_ratio_tot'] = round(sam_ratio_tot)
+			sam_ratio_tot = round((offer_sam_ratio_tot / (offer_prime_cost_tot or 1)),2)
+			res[order.id]['sam_ratio_tot'] = sam_ratio_tot
 			res[order.id]['offer_prime_cost_tot'] = round(offer_prime_cost_tot)
 			res[order.id]['offer_sam_ratio_tot'] = round(offer_sam_ratio_tot)
 			res[order.id]['offer_dealer_discount_tot'] = round(offer_dealer_discount_tot)
