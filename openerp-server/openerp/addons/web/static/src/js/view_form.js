@@ -2309,10 +2309,37 @@ instance.web.form.FieldChar = instance.web.form.AbstractField.extend(instance.we
     initialize_content: function() {
         this.setupFocus(this.$('input'));
         var myString = $('body').find('.append_percentage').text();
-	var lastChar = myString.substr(myString.length -3);
-	if(lastChar !== '(%)'){
-		$('body').find('.append_percentage').append('(%)');
-	}
+		var lastChar = myString.substr(myString.length -3);
+		if(lastChar !== '(%)'){
+			$('body').find('.append_percentage').append('(%)');
+		}
+		/***** Ticket 3237 */
+		//For Except alphabetic and numbers
+		$('.aplhanumonly input').attr('onkeypress','return aplhanumonly(event);');
+		
+		//For Except Special Character
+		$('.aplhanum_expect input').attr('onkeypress','return aplhanum_expect(event);');
+
+		//For Email Validation
+		//$('.email_validation input').attr('onkeypress','return email_validation(event,this);');
+		$('.email_validation input').attr('onblur','return email_validationn(event,this);');
+		
+		//For Only numbers
+		$('.numberonly input').attr('onkeypress','return numberonly(event);');
+		
+		//For Only Alphabets
+		$('.lettersOnly input').attr('onkeypress','return lettersOnly(event);');
+		/***** End Ticket 3237 */
+		
+		/***** Start Ticket  */ /*Apply Readonly if field has class "apply_readonly" */
+		if($('body').find('.apply_readonly').hasClass("apply_readonly")){			
+			$('body').find('.apply_readonly input').attr('readonly',true)
+		}
+		/***** End Ticket  */ /*Apply Readonly if field has class "apply_readonly" */
+		
+		/***** Start Ticket 3315  */ /*Apply Field Validation */
+		//field_validation();
+		/***** End Ticket 3315 */ /*Apply Field Validation */
     },
     store_dom_value: function () {
         if (!this.get('effective_readonly')
