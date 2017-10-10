@@ -692,7 +692,7 @@ class kg_work_order(osv.osv):
 						c1 = 0
 						if var[0] == 'Purpose':
 							print "PUIURURUURRUR STATTATAT HERER ============",s2
-							moc_com_query = """ select wo_line.id as wo_line_id,moc_const.offer_id,moc_const.moc_id,offer_mat.name as moc_offer_name,moc.name as moc_offer_value ,moc_const.seq_no
+							moc_com_query = """ select wo_line.id as wo_line_id,moc_const.offer_id,moc_const.moc_id,offer_mat.name as moc_offer_name,moc.name as moc_offer_value --,moc_const.seq_no
 							from ch_moc_construction moc_const
 							left join kg_offer_materials offer_mat on offer_mat.id = moc_const.offer_id
 							left join kg_moc_master moc on  moc.id = moc_const.moc_id
@@ -706,7 +706,7 @@ class kg_work_order(osv.osv):
 							and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null
 							and pump_offer.enquiry_line_id is not null
 							) """%(pass_param,report)
-							moc_query = """ select distinct offer_id,moc_offer_name,seq_no from ( """+moc_com_query + moc_cond +""" ) as sample order by seq_no"""
+							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
 							cr.execute(moc_query)
 							moc_query_data = cr.dictfetchall()
 							if not moc_query_data:
