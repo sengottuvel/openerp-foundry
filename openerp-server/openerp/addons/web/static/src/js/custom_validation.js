@@ -48,7 +48,7 @@ function email_validationn(e,ele) {
 function aplhanum_expect(e) {	
 	var keyCode = e.keyCode == 0 ? e.charCode : e.keyCode;
 	var ret = ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 65 && keyCode <= 90) || (keyCode >= 97 && keyCode <= 122) || (specialKeys.indexOf(e.keyCode) != -1 && e.charCode != e.keyCode));
-	if(keyCode == 46 || keyCode == 40 || keyCode == 41 || keyCode == 45){ //allowed keyCode . ( ) -
+	if(keyCode == 46 || keyCode == 40 || keyCode == 41 || keyCode == 45 || keyCode == 32){ //allowed keyCode . ( ) -
 		return true;
 	}
 	return ret;
