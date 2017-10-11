@@ -1272,6 +1272,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
 		</record>
 		
+		<record id="t_crm_access_categ" model="ir.model.access">
+			<field name="model_id" ref="kg_accessories_category.model_kg_accessories_category"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Accessories Category</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	

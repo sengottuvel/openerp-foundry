@@ -462,7 +462,7 @@ class kg_work_order(osv.osv):
 		#~ pass_id = [223,199,15,23]
 		pass_param = '(' +",".join([str(s) for s in list(pass_id)])+ ')'
 		
-		rpt_type = ['horizontal','vertical']
+		rpt_type = ['horizontal','vertical','others']
 		
 		hz_dictn = {
 		'01#TECHNICAL SPECIFICATION:':[('W.O Ref','order_no'),('Equipment /Tag No.','tag_no'),('Description','description'),('Model / Alias name','model'),('Quantity in Nos.','qty'),('Delivery Pipe Size (mm)','delivery_pipe_size'),('Flange standard','flange_standard')
@@ -610,7 +610,7 @@ class kg_work_order(osv.osv):
 				pass
 			else:
 				print " = RRRRRRRR TTTTTT =============",report
-				if report == 'horizontal':
+				if report in ('horizontal','others'):
 					sheet1 = wbk.add_sheet('Horizontal')
 					dictn = hz_dictn
 				elif report == 'vertical':
@@ -675,9 +675,9 @@ class kg_work_order(osv.osv):
 						off_rec = self.pool.get('kg.crm.offer').browse(cr,uid,off_ids[0])
 						cpo_ref = (off_rec.customer_po_no or '-') + ' / ' + (off_rec.dealer_po_no or '-')
 				sheet1.write_merge(s2, s2, c1, c2,"CPO Ref / Dealer Po Ref: "+cpo_ref,style5)
-				sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+				sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
 				sheet1.row(0).height = 400
-				sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,c2)
+				sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,c2)
 				for key in sorted(dictn):
 					s2 = s2+1
 					c1 = c1+1
@@ -692,7 +692,7 @@ class kg_work_order(osv.osv):
 						c1 = 0
 						if var[0] == 'Purpose':
 							print "PUIURURUURRUR STATTATAT HERER ============",s2
-							moc_com_query = """ select wo_line.id as wo_line_id,moc_const.offer_id,moc_const.moc_id,offer_mat.name as moc_offer_name,moc.name as moc_offer_value --,moc_const.seq_no
+							moc_com_query = """ select wo_line.id as wo_line_id,moc_const.offer_id,moc_const.moc_id,offer_mat.name as moc_offer_name,moc.name as moc_offer_value ,moc_const.seq_no
 							from ch_moc_construction moc_const
 							left join kg_offer_materials offer_mat on offer_mat.id = moc_const.offer_id
 							left join kg_moc_master moc on  moc.id = moc_const.moc_id
@@ -706,7 +706,7 @@ class kg_work_order(osv.osv):
 							and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null
 							and pump_offer.enquiry_line_id is not null
 							) """%(pass_param,report)
-							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
+							moc_query = """ select distinct offer_id,moc_offer_name,seq_no from ( """+moc_com_query + moc_cond +""" ) as sample order by seq_no"""
 							cr.execute(moc_query)
 							moc_query_data = cr.dictfetchall()
 							if not moc_query_data:
@@ -940,7 +940,37 @@ class kg_work_order(osv.osv):
 	
 	def mkt_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state == 'draft':
+		if entry.state == 'draft':			
+			if entry.name:
+				wo_name = entry.name				
+				name=wo_name.upper()			
+				cr.execute(""" select upper(name) from kg_work_order where upper(name)  = '%s' """ %(name))
+				data = cr.dictfetchall()			
+				if len(data) > 1:
+					raise osv.except_osv(_('Warning!'),
+						_('Work Order No. must be Unique !!'))
+				else:
+					pass			
+			else:
+				raise osv.except_osv(_('Warning!'),
+						_('Work Order No. is must !!'))
+			for line in entry.line_ids:				
+				if line.order_no == False:
+					raise osv.except_osv(_('Warning!'),
+							_('Line Work Order No. is must !!'))				
+				if line.order_no:				
+					cr.execute(""" select wo_order.id as order_id from kg_work_order wo_order
+						left join ch_work_order_details ch_work on ch_work.header_id = wo_order.id 
+						where ch_work.order_no  = '%s' and ch_work.header_id not in ('%s')   """ %(line.order_no,line.header_id.id))
+					data = cr.dictfetchall()			
+					if len(data) >= 1:
+						raise osv.except_osv(_('Warning!'),
+							_('Line Work Order No. must be Unique !!'))
+					else:
+						pass
+				else:
+					pass		
+			
 			today = time.strftime('%Y-%m-%d')
 			todays_date = str(today)
 			today_date = datetime.strptime(todays_date, '%Y-%m-%d')		
@@ -992,6 +1022,34 @@ class kg_work_order(osv.osv):
 		today = datetime.strptime(today, '%Y-%m-%d')
 		wo_spc_app_flag = False
 		if entry.state in ('draft','mkt_approved'):
+			if entry.name:
+				wo_name = entry.name
+				name=wo_name.upper()			
+				cr.execute(""" select upper(name) from kg_work_order where upper(name)  = '%s' """ %(name))
+				data = cr.dictfetchall()			
+				if len(data) > 1:
+					raise osv.except_osv(_('Warning!'),
+						_('Work Order No. must be Unique !!'))
+				else:
+					pass			
+			else:
+				pass
+			for line in entry.line_ids:
+				if line.order_no == False:
+					raise osv.except_osv(_('Warning!'),
+							_('Line Work Order No. is must !!'))
+				if line.order_no:				
+					cr.execute(""" select wo_order.id as order_id from kg_work_order wo_order
+						left join ch_work_order_details ch_work on ch_work.header_id = wo_order.id 
+						where ch_work.order_no  = '%s' and ch_work.header_id not in ('%s')   """ %(line.order_no,line.header_id.id))
+					data = cr.dictfetchall()			
+					if len(data) >= 1:
+						raise osv.except_osv(_('Warning!'),
+							_('Line Work Order No. must be Unique !!'))
+					else:
+						pass
+				else:
+					pass		
 			delivery_date = str(entry.delivery_date)
 			delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
 			print "delivery_date",delivery_date
@@ -1084,8 +1142,7 @@ class kg_work_order(osv.osv):
 		assembly_ms_obj = self.pool.get('ch.assembly.machineshop.details')
 		assembly_bot_obj = self.pool.get('ch.assembly.bot.details')
 		
-		if entry.state in ('design_approved'):
-			
+		if entry.state in ('design_approved'):			
 			if entry.name:
 				wo_name = entry.name
 				name=wo_name.upper()			
@@ -1107,6 +1164,9 @@ class kg_work_order(osv.osv):
 			else:
 				pass
 			for line in entry.line_ids:
+				if line.order_no == False:
+					raise osv.except_osv(_('Warning!'),
+							_('Line Work Order No. is must !!'))
 				if line.order_no:				
 					cr.execute(""" select wo_order.id as order_id from kg_work_order wo_order
 						left join ch_work_order_details ch_work on ch_work.header_id = wo_order.id 

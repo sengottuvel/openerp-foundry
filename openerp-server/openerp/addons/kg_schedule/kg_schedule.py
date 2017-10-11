@@ -1755,6 +1755,8 @@ class kg_schedule(osv.osv):
 				
 				### Foundry item only ##
 				
+				indent_id = 0
+				
 				cr.execute("""
 					select order_line_id,pump_model_id,sum(indent_qty) as indent_qty from 
 
@@ -1811,7 +1813,7 @@ class kg_schedule(osv.osv):
 								'dest_location_id': location.stock_location.id
 								}
 								
-							indent_id = dep_indent_obj.create(cr, uid, foundry_dep_indent_vals)
+							#~ indent_id = dep_indent_obj.create(cr, uid, foundry_dep_indent_vals)
 						
 							cr.execute("""
 								select type,order_line_id,product_id,pump_model_id,pattern_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
@@ -1864,7 +1866,7 @@ class kg_schedule(osv.osv):
 									'moc_id': foundry_indent_item['moc_id'],
 								}
 								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, foundry_dep_indent_line_vals)
+								#~ indent_line_id = dep_indent_line_obj.create(cr, uid, foundry_dep_indent_line_vals)
 						
 				
 				
@@ -1928,7 +1930,7 @@ class kg_schedule(osv.osv):
 								'dest_location_id': location.stock_location.id
 								}
 								
-							indent_id = dep_indent_obj.create(cr, uid, acc_dep_indent_vals)
+							#~ indent_id = dep_indent_obj.create(cr, uid, acc_dep_indent_vals)
 						
 							cr.execute("""
 								select type,order_line_id,product_id,pump_model_id,pattern_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
@@ -1981,7 +1983,7 @@ class kg_schedule(osv.osv):
 									'moc_id': acc_indent_item['moc_id'],
 								}
 								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, acc_dep_indent_line_vals)
+								#~ indent_line_id = dep_indent_line_obj.create(cr, uid, acc_dep_indent_line_vals)
 				
 				
 				
@@ -2042,7 +2044,7 @@ class kg_schedule(osv.osv):
 									'dest_location_id': location.stock_location.id
 									}
 									
-								indent_id = dep_indent_obj.create(cr, uid, ms_dep_indent_vals)
+								#~ indent_id = dep_indent_obj.create(cr, uid, ms_dep_indent_vals)
 								
 								cr.execute("""
 									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
@@ -2164,7 +2166,7 @@ class kg_schedule(osv.osv):
 											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
 										}
 										
-										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
+										#~ indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
 										
 				#### Fabrication True Machine shop Items only ###		
 						
@@ -2221,7 +2223,7 @@ class kg_schedule(osv.osv):
 									'dest_location_id': location.stock_location.id
 									}
 									
-								indent_id = dep_indent_obj.create(cr, uid, ms_dep_indent_vals)
+								#~ indent_id = dep_indent_obj.create(cr, uid, ms_dep_indent_vals)
 								
 								cr.execute("""
 									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
@@ -2343,7 +2345,7 @@ class kg_schedule(osv.osv):
 											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
 										}
 										
-										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
+										#~ indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
 				
 				### Fabrication True Machine Shop Item only, Create for line item
 				
@@ -2437,7 +2439,7 @@ class kg_schedule(osv.osv):
 									'dest_location_id': location.stock_location.id
 									}
 									
-								indent_id = dep_indent_obj.create(cr, uid, acc_ms_dep_indent_vals)
+								#~ indent_id = dep_indent_obj.create(cr, uid, acc_ms_dep_indent_vals)
 								
 								cr.execute("""
 									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
@@ -2558,7 +2560,7 @@ class kg_schedule(osv.osv):
 											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
 										}
 										
-										indent_line_id = dep_indent_line_obj.create(cr, uid, acc_ms_dep_indent_line_vals)
+										#~ indent_line_id = dep_indent_line_obj.create(cr, uid, acc_ms_dep_indent_line_vals)
 				
 				
 				
@@ -2619,7 +2621,7 @@ class kg_schedule(osv.osv):
 									'dest_location_id': location.stock_location.id
 									}
 									
-								indent_id = dep_indent_obj.create(cr, uid, acc_ms_dep_indent_vals)
+								#~ indent_id = dep_indent_obj.create(cr, uid, acc_ms_dep_indent_vals)
 								
 								cr.execute("""
 									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
@@ -2740,7 +2742,7 @@ class kg_schedule(osv.osv):
 											'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
 										}
 										
-										indent_line_id = dep_indent_line_obj.create(cr, uid, acc_ms_dep_indent_line_vals)
+										#~ indent_line_id = dep_indent_line_obj.create(cr, uid, acc_ms_dep_indent_line_vals)
 				
 				
 				### Fabrication True Accessories Machine Shop Item only, Create for line item
@@ -2837,7 +2839,7 @@ class kg_schedule(osv.osv):
 								'dest_location_id': location.stock_location.id
 								}
 						
-							indent_id = dep_indent_obj.create(cr, uid, bot_dep_indent_vals)
+							#~ indent_id = dep_indent_obj.create(cr, uid, bot_dep_indent_vals)
 							
 							cr.execute("""
 								select type,order_bot_id,order_line_id,pump_model_id,bot_item,product_id,uom,moc_id,sum(indent_qty) as indent_qty from 
@@ -2921,7 +2923,7 @@ class kg_schedule(osv.osv):
 									'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
 								}
 								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, bot_dep_indent_line_vals)
+								#~ indent_line_id = dep_indent_line_obj.create(cr, uid, bot_dep_indent_line_vals)
 				
 				
 				### Accessories BOT Items ###
@@ -2984,7 +2986,7 @@ class kg_schedule(osv.osv):
 								'dest_location_id': location.stock_location.id
 								}
 						
-							indent_id = dep_indent_obj.create(cr, uid, acc_bot_dep_indent_vals)
+							#~ indent_id = dep_indent_obj.create(cr, uid, acc_bot_dep_indent_vals)
 							
 							cr.execute("""
 								select type,order_bot_id,order_line_id,pump_model_id,bot_item,product_id,uom,moc_id,sum(indent_qty) as indent_qty from 
@@ -3067,7 +3069,7 @@ class kg_schedule(osv.osv):
 									'uom_conversation_factor': ms_raw_rec.uom_conversation_factor,
 								}
 								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, acc_bot_dep_indent_line_vals)
+								#~ indent_line_id = dep_indent_line_obj.create(cr, uid, acc_bot_dep_indent_line_vals)
 				
 				
 							
