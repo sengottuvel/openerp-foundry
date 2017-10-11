@@ -801,7 +801,8 @@ class kg_payslip(osv.osv):
 						
 				#### Creation of Fixed Incentive for the employee ####
 				
-				fix_inc_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',38)])
+				get_fix_inc_id = self.pool.get('hr.salary.rule').search(cr,uid,[('code','=','FI')])
+				fix_inc_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',get_fix_inc_id[0])])
 				fix_inc_pay_id = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','FI'),('slip_id','=',slip_rec.id)])
 				fix_inc_pay_id_othr = self.pool.get('ch.other.salary.comp').search(cr,uid,[('code','=','FI'),('slip_id','=',slip_rec.id)])
 				if fix_inc_id:
@@ -838,7 +839,8 @@ class kg_payslip(osv.osv):
 				
 				#### Creation of Marketing Incentive for the employee ####
 				
-				mar_inc_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',40)])
+				get_mar_inc_id = self.pool.get('hr.salary.rule').search(cr,uid,[('code','=','MKG INCEN')])
+				mar_inc_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',get_mar_inc_id[0])])
 				mar_inc_pay_id = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','MKG INCEN'),('slip_id','=',slip_rec.id)])
 				mar_inc_pay_id_othr = self.pool.get('ch.other.salary.comp').search(cr,uid,[('code','=','MKG INCEN'),('slip_id','=',slip_rec.id)])
 				if mar_inc_id:
@@ -875,7 +877,8 @@ class kg_payslip(osv.osv):
 				
 				#### Creation of Marketing Special Incentive for the employee ####
 				
-				mar_spl_inc_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',43)])
+				get_mar_spl_inc_id = self.pool.get('hr.salary.rule').search(cr,uid,[('code','=','SPLINCMKG')])
+				mar_spl_inc_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',get_mar_spl_inc_id[0])])
 				mar_spl_inc_pay_id = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','SPLINCMKG'),('slip_id','=',slip_rec.id)])
 				mar_spl_inc_pay_id_othr = self.pool.get('ch.other.salary.comp').search(cr,uid,[('code','=','SPLINCMKG'),('slip_id','=',slip_rec.id)])
 				if mar_spl_inc_id:
@@ -925,8 +928,10 @@ class kg_payslip(osv.osv):
 						if emp_categ_rec.bonus_categ == 'attendance':
 							print "absentabsentabsentabsentabsent",absent
 							print "leave_daysleave_daysleave_daysleave_days",leave_days
-							pay_line_ids_bas = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids_1.id),('salary_type','=',1)])
-							pay_line_ids_fda = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids_1.id),('salary_type','=',8)])
+							get_pay_basic_id= self.pool.get('hr.salary.rule').search(cr,uid,[('code','=','BASIC')])
+							get_pay_fda_id = self.pool.get('hr.salary.rule').search(cr,uid,[('code','=','FDA')])
+							pay_line_ids_bas = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids_1.id),('salary_type','=',get_pay_basic_id[0])])
+							pay_line_ids_fda = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids_1.id),('salary_type','=',get_pay_fda_id[0])])
 							pay_line_ids_vda = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','VDA')])
 							if pay_line_ids_bas:
 								pay_line_rec_ba = self.pool.get('ch.kg.contract.salary').browse(cr,uid,pay_line_ids_bas[0])
@@ -1038,8 +1043,9 @@ class kg_payslip(osv.osv):
 				
 				
 				serc_coff_allow_con	= self.pool.get('hr.contract').search(cr,uid,[('employee_id','=',emp_id)])
+				get_coffee_allow_id= self.pool.get('hr.salary.rule').search(cr,uid,[('code','=','COFFEE ALL')])
 				if serc_coff_allow_con:
-					src_salry = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',serc_coff_allow_con[0]),('salary_type','=',22)])
+					src_salry = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',serc_coff_allow_con[0]),('salary_type','=',get_coffee_allow_id[0])])
 					if src_salry:
 						src_slary_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,src_salry[0])
 						if worked_days <= 13.00:
@@ -1070,7 +1076,9 @@ class kg_payslip(osv.osv):
 				#### Creation of Worker Allowance per month for the employee ####	
 				
 				#### Creation of Painting Allowance #####
-				paint_sal_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',51)])
+				
+				get_painting_allow_id= self.pool.get('hr.salary.rule').search(cr,uid,[('code','=','PAINT ALL')])
+				paint_sal_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',get_painting_allow_id[0])])
 				if paint_sal_id:
 					paint_sal_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,paint_sal_id[0])
 					print "-----------Painting Allowance-----------------",paint_sal_rec.salary_amt
@@ -1095,7 +1103,9 @@ class kg_payslip(osv.osv):
 				#### Creation of Painting Allowance #####
 				
 				#### Creation of NI Hard Allowance #####
-				ni_hard_sal_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',52)])
+				
+				get_ni_hard_allow_id= self.pool.get('hr.salary.rule').search(cr,uid,[('code','=','NIHARD ALL')])
+				ni_hard_sal_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',get_ni_hard_allow_id[0])])
 				if ni_hard_sal_id:
 					ni_hard_sal_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,ni_hard_sal_id[0])
 					print "-----------NIHARD ALL Allowance-----------------",ni_hard_sal_rec.salary_amt
@@ -1121,7 +1131,8 @@ class kg_payslip(osv.osv):
 				
 				#### Creation of Night Allowance #####
 				
-				night_allo_sal_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',57)])
+				get_night_allow_id= self.pool.get('hr.salary.rule').search(cr,uid,[('code','=','NIGHT ALL')])
+				night_allo_sal_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',get_night_allow_id[0])])
 				if night_allo_sal_id:
 					night_allow_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,night_allo_sal_id[0])
 					daily_att_ids = self.pool.get('ch.daily.attendance').search(cr,uid,[('employee_id','=',emp_id),('date','>=', slip_rec.date_from),('date','<=', slip_rec.date_to)])

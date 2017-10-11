@@ -196,6 +196,9 @@ class kg_leave_request(osv.osv):
 		leave_allocation = self.pool.get('kg.leave.allocation')
 		leave_allocation_line = self.pool.get('ch.leave.allocation')
 		
+		get_on_duty_id= self.pool.get('hr.holidays.status').search(cr,uid,[('code','=','OD')])
+		get_lop_id= self.pool.get('hr.holidays.status').search(cr,uid,[('code','=','LOP')])
+		
 		emp_leave_allo = leave_allocation.search(cr,uid,[('employee_id','=',rec.employee_id.id),
 						('valid_from','<=',rec.from_date),('valid_to','>=',rec.to_date),('state','=','approved')])
 		print "emp_leave_alloemp_leave_alloemp_leave_alloemp_leave_alloemp_leave_allo",emp_leave_allo
@@ -214,7 +217,7 @@ class kg_leave_request(osv.osv):
 				else:
 					raise osv.except_osv(_('Warning'),
 					_('%s is not allocated for the this employee !!'%(rec.holiday_status_id.name)))
-		elif rec.holiday_status_id.id == 8 or rec.holiday_status_id.id == 31:
+		elif rec.holiday_status_id.id == get_on_duty_id[0] or rec.holiday_status_id.id == get_lop_id[0]:
 			pass
 		else:
 			raise osv.except_osv(_('Warning'),
@@ -248,6 +251,11 @@ class kg_leave_request(osv.osv):
 		
 		
 		### Updating leaves in daily attendance #####
+		get_permission_id= self.pool.get('hr.holidays.status').search(cr,uid,[('code','=','PR')])
+		get_on_duty_id= self.pool.get('hr.holidays.status').search(cr,uid,[('code','=','OD')])
+		get_lop_id= self.pool.get('hr.holidays.status').search(cr,uid,[('code','=','LOP')])
+		get_hd_id= self.pool.get('hr.holidays.status').search(cr,uid,[('code','=','HD')])
+		
 		print "From date ----------------------------------->>>>>>>>>>>>>",rec.from_date
 		print "To date ----------------------------------->>>>>>>>>>>>>",rec.to_date
 		d1 = datetime.strptime(rec.from_date, "%Y-%m-%d")
@@ -262,15 +270,15 @@ class kg_leave_request(osv.osv):
 				for d_rec in daily_rec:
 					daily_rec_1 = self.pool.get('ch.daily.attendance').browse(cr,uid,d_rec)
 					wk_hrs_f = str(daily_rec_1.wk_time) .replace(':', '.')
-					if rec.holiday_status_id.id == 12:
+					if rec.holiday_status_id.id == get_permission_id[0]:
 						tot_times = float(wk_hrs_f) + rec.permission_hrs
 						wk_hrs_s = str(tot_times) .replace('.', ';')
 						daily_rec_1.write({'wk_time':tot_times ,'remarks':rec.holiday_status_id.name +'='+str(rec.permission_hrs)})
-					elif rec.holiday_status_id.id == 8:
+					elif rec.holiday_status_id.id == get_on_duty_id[0]:
 						daily_rec_1.write({'status': 'onduty','remarks':rec.holiday_status_id.name})
-					elif rec.holiday_status_id.id == 31:
+					elif rec.holiday_status_id.id == get_lop_id[0]:
 						daily_rec_1.write({'status': 'absent','remarks':rec.holiday_status_id.name})
-					elif rec.holiday_status_id.id == 17:
+					elif rec.holiday_status_id.id == get_hd_id[0]:
 						daily_rec_1.write({'status': 'halfday','remarks':rec.holiday_status_id.name})
 					else:
 						daily_rec_1.write({'status': 'leave','remarks':rec.holiday_status_id.name})

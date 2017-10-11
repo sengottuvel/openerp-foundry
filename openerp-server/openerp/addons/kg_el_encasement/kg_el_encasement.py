@@ -340,6 +340,7 @@ class kg_el_encasement(osv.osv):
 			bon_val = 0.00
 			
 			for cont_ids in con_ids:
+				get_emp_categ_id= self.pool.get('kg.employee.category').search(cr,uid,[('code','=','WKP')])
 				con_rec = con_obj.browse(cr,uid,cont_ids)
 				cr.execute('''select sum(worked_days+od_days) from kg_monthly_attendance where start_date >= '%s' and end_date <= '%s' and employee_id = %s'''%(str(year_start),str(year_end),con_rec.employee_id.id))
 				work_days = cr.dictfetchone()
@@ -388,7 +389,7 @@ class kg_el_encasement(osv.osv):
 									print "Salary components..............................",pay_line_rec.name,pay_line_rec.amount
 									sal_comp_amt += pay_line_rec.amount
 								el_amt = (sal_comp_amt/30)*el_eligible_days
-					if rec.emp_categ_id.id == 15:
+					if rec.emp_categ_id.id == get_emp_categ_id[0]:
 						if rec.sal_base == 'gross':
 							el_amt = (payslip_rec.cross_amt/26)*el_eligible_days
 							print "payslip gross amount and el eligible days.......................",payslip_rec.cross_amt,el_eligible_days

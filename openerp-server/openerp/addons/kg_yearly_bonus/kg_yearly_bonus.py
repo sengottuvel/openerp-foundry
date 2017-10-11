@@ -226,6 +226,7 @@ class kg_yearly_bonus(osv.osv):
 		payslip_obj=self.pool.get('hr.payslip')
 		payslip_line_obj=self.pool.get('hr.payslip.line')
 		con_ids = con_obj.search(cr,uid,[('emp_categ_id','=',rec.emp_categ_id.id),('active','=',True)])
+		get_emp_categ_id= self.pool.get('kg.employee.category').search(cr,uid,[('code','=','STS')])
 		if rec.line_id:
 			cr.execute('''delete from ch_yearly_bonus where header_id='%s' '''%(rec.id))
 		else:
@@ -237,7 +238,7 @@ class kg_yearly_bonus(osv.osv):
 				con_rec = con_obj.browse(cr,uid,cont_ids)
 				pay_slip_ids = payslip_obj.search(cr,uid,[('date_from','>=',rec.from_date),('date_to','<=',rec.to_date),('employee_id','=',con_rec.employee_id.id)])
 				if pay_slip_ids:
-					if con_rec.emp_categ_id.id == 13:
+					if con_rec.emp_categ_id.id == get_emp_categ_id[0]:
 						tot_gross_amt=0
 						bonus_amt=0
 						for pay_ids in pay_slip_ids:
