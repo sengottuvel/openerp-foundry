@@ -14,7 +14,7 @@
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_draft" type="object" attrs="{'invisible':['|',('entry_mode','=','auto'),('state','!=','approved')]}"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</button>
 					<field name="code" position="replace">
 					</field>	
@@ -57,7 +57,12 @@
 					<xpath expr = "//page[@string='General']" position="before">
 						<page string="Entry Info">
 							<group>
+							<group>
 								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
 							</group>
 							<group>
 								<group>
@@ -73,7 +78,7 @@
 									<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
 									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
 									<field name="update_date"/>
-									<field name="active"/>
+									<field name="entry_mode"/>
 								</group>
 							</group>
 						</page>

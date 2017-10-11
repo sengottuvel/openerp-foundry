@@ -12,7 +12,7 @@
     'depends' : ['base','hr_holidays'],
     'data': [
 			'kg_leave_type_view.xml',
-			'default_data.xml'
+			#~ 'default_data.xml'
 			],
 			
     'css': ['static/src/css/state.css'], 

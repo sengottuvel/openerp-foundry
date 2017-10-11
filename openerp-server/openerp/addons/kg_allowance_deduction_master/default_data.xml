@@ -2,11 +2,92 @@
 <openerp>
     <data noupdate="1">
 
-		<record id="default_master_data_I" model="product.uom">
-            <field name="name">1st Master</field>
-            <field name="code">MAS</field>            
+		<record id="default_kg_allowance_ded_data_I" model="hr.salary.rule">
+			<field name="name">Special Incentive</field>
+            <field name="code">SPI</field>            
             <field name="state">approved</field>            
             <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
+        </record>    
+           
+		<record id="default_kg_allowance_ded_data_2" model="hr.salary.rule">
+			<field name="name">Incentive</field>
+            <field name="code">INC</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
+        </record>    
+           
+		<record id="default_kg_allowance_ded_data_3" model="hr.salary.rule">
+			<field name="name">Fixed Incentive</field>
+            <field name="code">FI</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
+        </record>     
+          
+		<record id="default_kg_allowance_ded_data_4" model="hr.salary.rule">
+			<field name="name">MARKETING INCENTIVE</field>
+            <field name="code">MKG INCEN</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
+        </record>       
+        
+		<record id="default_kg_allowance_ded_data_5" model="hr.salary.rule">
+			<field name="name">SPECIAL INCENTIVE-MKG</field>
+            <field name="code">SPLINCMKG</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
+        </record>       
+        
+		<record id="default_kg_allowance_ded_data_6" model="hr.salary.rule">
+			<field name="name">Basic</field>
+            <field name="code">BASIC</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
+        </record>       
+        
+		<record id="default_kg_allowance_ded_data_7" model="hr.salary.rule">
+			<field name="name">FDA</field>
+            <field name="code">FDA</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
+        </record>       
+        
+		<record id="default_kg_allowance_ded_data_8" model="hr.salary.rule">
+			<field name="name">COFFEE ALLOW</field>
+            <field name="code">COFFEE ALL</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
+        </record>       
+        
+		<record id="default_kg_allowance_ded_data_9" model="hr.salary.rule">
+			<field name="name">PAINT ALLOW</field>
+            <field name="code">PAINT ALL</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
+        </record>       
+        
+		<record id="default_kg_allowance_ded_data_10" model="hr.salary.rule">
+			<field name="name">NIHARD ALLOW</field>
+            <field name="code">NIHARD ALL</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
+        </record>       
+        
+		<record id="default_kg_allowance_ded_data_11" model="hr.salary.rule">
+			<field name="name">NIGHT ALLOW</field>
+            <field name="code">NIGHT ALL</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
         </record>       
         
     </data>

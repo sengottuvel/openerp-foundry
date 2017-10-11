@@ -7,6 +7,7 @@
             <field name="code">CL</field>            
             <field name="state">approved</field>            
             <field name="modify">no</field>            
+            <field name="entry_mode">auto</field>            
         </record> 
               
 		<record id="default_kg_leave_type_data_II" model="hr.holidays.status">
@@ -14,41 +15,63 @@
             <field name="code">EL</field>            
             <field name="state">approved</field>            
             <field name="modify">no</field>  
+            <field name="entry_mode">auto</field>      
         </record>
                
 		<record id="default_kg_leave_type_data_III" model="hr.holidays.status">
 			<field name="name">On Duty</field>
             <field name="code">OD</field>            
             <field name="state">approved</field>            
-            <field name="modify">no</field>         
+            <field name="modify">no</field> 
+            <field name="entry_mode">auto</field>              
         </record>
                
 		<record id="default_kg_leave_type_data_IV" model="hr.holidays.status">
 			<field name="name">Sick Leave</field>
             <field name="code">SL</field>            
             <field name="state">approved</field>            
-            <field name="modify">no</field>         
+            <field name="modify">no</field>
+            <field name="entry_mode">auto</field>               
         </record>   
             
 		<record id="default_kg_leave_type_data_V" model="hr.holidays.status">
 			<field name="name">Over Time</field>
             <field name="code">OT</field>            
             <field name="state">approved</field>            
-            <field name="modify">no</field>           
+            <field name="modify">no</field> 
+            <field name="entry_mode">auto</field>                
         </record>    
            
 		<record id="default_kg_leave_type_data_VI" model="hr.holidays.status">
 			<field name="name">Medical Leave</field>
             <field name="code">ML</field>            
             <field name="state">approved</field>            
-            <field name="modify">no</field>              
+            <field name="modify">no</field>
+            <field name="entry_mode">auto</field>                    
         </record>  
              
 		<record id="default_kg_leave_type_data_VII" model="hr.holidays.status">
 			<field name="name">Permission</field>
             <field name="code">PR</field>            
             <field name="state">approved</field>            
-            <field name="modify">no</field>        
+            <field name="modify">no</field> 
+            <field name="entry_mode">auto</field>             
+        </record>
+               
+		<record id="default_kg_leave_type_data_VIII" model="hr.holidays.status">
+			<field name="name">Loss Of Pay</field>
+            <field name="code">LOP</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field> 
+            <field name="entry_mode">auto</field>             
+        </record>   
+            
+		<record id="default_kg_leave_type_data_IX" model="hr.holidays.status">
+			<field name="name">Half Day</field>
+            <field name="code">HD</field>            
+            <field name="state">approved</field>            
+            <field name="modify">no</field> 
+            <field name="entry_mode">auto</field>             
         </record>       
         
     </data>
