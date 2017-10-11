@@ -1793,7 +1793,7 @@ class kg_crm_offer(osv.osv):
 							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
 							cr.execute(moc_query)
 							moc_cond = """where crm.header_id in  %s and crm.pump_model_type = '%s' """%(pass_param,report)
-							moc_query = """ select distinct offer_id,moc_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
+							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
 							cr.execute(moc_query)
 							moc_query_data = cr.dictfetchall()
 							if not moc_query_data:
@@ -1804,7 +1804,7 @@ class kg_crm_offer(osv.osv):
 								if pump_data:
 									for pump in pump_data:
 										c1 += 1
-										moc_pump_query = moc_com_query+ """where crm.header_id in  %s and crm.pump_model_type = '%s' and crm.id = %s and moc.offer_id = %s and moc.moc_id = %s """%(pass_param,report,pump['crm_id'],moc['offer_id'],moc['moc_id'])
+										moc_pump_query = moc_com_query+ """where crm.header_id in  %s and crm.pump_model_type = '%s' and crm.id = %s and moc.offer_id = %s """%(pass_param,report,pump['crm_id'],moc['offer_id'])
 										cr.execute(moc_pump_query)
 										moc_pump_data = cr.dictfetchall()
 										if moc_pump_data:
