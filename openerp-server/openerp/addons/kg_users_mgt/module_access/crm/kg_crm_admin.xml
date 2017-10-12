@@ -1282,6 +1282,7 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
 		</record>
 		
+		
     </data>
 </openerp>
 	
