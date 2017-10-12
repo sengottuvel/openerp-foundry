@@ -1104,11 +1104,13 @@ class kg_crm_enquiry(osv.osv):
 		return True
 	
   	def spare_bom_creation(self,cr,uid,offer_id,orde_item,spare_bom_prime_cost,context=None):
-		moc_obj = self.pool.get('kg.moc.master').search(cr,uid,[('name','=','N/A')])
-		if moc_obj:
-			moc_id = moc_obj[0]
-		else:
-			moc_id = ''
+		#~ moc_obj = self.pool.get('kg.moc.master').search(cr,uid,[('name','=','N/A')])
+		#~ if moc_obj:
+			#~ moc_id = moc_obj[0]
+		#~ else:
+			#~ moc_id = ''
+		moc_id = ''
+		moc_id = orde_item.moc_id.id
 		hsn = ''
 		gst = ''
 		if orde_item.header_id.header_id.segment == 'dom':
@@ -4702,6 +4704,7 @@ class ch_kg_crm_spare_bom(osv.osv):
 		'off_name':fields.char('Offer Name'),
 		'load_bom':fields.boolean('Load BOM'),
 		'prime_cost': fields.float('Prime Cost'),
+		'moc_id': fields.many2one('kg.moc.master','MOC Name'),
 		
 		## Child Tables Declaration
 		

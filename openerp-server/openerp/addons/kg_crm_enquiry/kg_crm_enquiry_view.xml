@@ -517,6 +517,7 @@
 											<field name="load_bom" on_change="onchange_spare_bom(bom_id,off_name,moc_const_id,qty)" attrs="{'invisible':[('bom_id','=',False)]}"/>
 										</group>
 										<group>
+											<field name="moc_id" required="1"/>
 											<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 											<field name="prime_cost" readonly="1"/>
 											<field name="moc_const_id" invisible="1"/>
