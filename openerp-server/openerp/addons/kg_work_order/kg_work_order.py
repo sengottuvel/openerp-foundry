@@ -675,9 +675,9 @@ class kg_work_order(osv.osv):
 						off_rec = self.pool.get('kg.crm.offer').browse(cr,uid,off_ids[0])
 						cpo_ref = (off_rec.customer_po_no or '-') + ' / ' + (off_rec.dealer_po_no or '-')
 				sheet1.write_merge(s2, s2, c1, c2,"CPO Ref / Dealer Po Ref: "+cpo_ref,style5)
-				sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+				sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
 				sheet1.row(0).height = 400
-				sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,c2)
+				sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,c2)
 				for key in sorted(dictn):
 					s2 = s2+1
 					c1 = c1+1
