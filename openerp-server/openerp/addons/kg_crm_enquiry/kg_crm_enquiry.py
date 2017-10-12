@@ -2380,7 +2380,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	def _template_name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		data=''
-		if rec.template_name:
+		print"rec.staterec.state",rec.state
+		if rec.template_name and rec.state != 'moved_to_offer':
 			template_name = str(rec.template_name)
 			cr.execute(""" select template_name,id from ch_kg_crm_pumpmodel where template_name = '%s' and template_flag = False and id != %s """ %(template_name,rec.id))
 			data = cr.dictfetchall()
