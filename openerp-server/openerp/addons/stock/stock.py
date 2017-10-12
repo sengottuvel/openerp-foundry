@@ -1614,6 +1614,7 @@ class stock_production_lot(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company', select=True),
 		'move_ids': fields.one2many('stock.move', 'prodlot_id', 'Moves for this serial number', readonly=True),
 		'lot_type':fields.selection([('in','in'),('out','out')],'Lot Type'),
+		'location_code': fields.char('Location Code'),
 		
 	}
 	_defaults = {

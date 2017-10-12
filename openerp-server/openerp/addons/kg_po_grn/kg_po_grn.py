@@ -212,6 +212,7 @@ class kg_po_grn(osv.osv):
 		'insp_ref_no':fields.char('Insp.Ref.No.', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division',readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'location_dest_id': fields.many2one('stock.location', 'Destination Location'),
+		'location_dest_code': fields.char('Location Code'),
 		
 		## Child Tables Declaration
 		
@@ -272,11 +273,14 @@ class kg_po_grn(osv.osv):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_po_grn, self).write(cr, uid, ids, vals, context)
 	
-	def onchange_created_by(self, cr, uid, ids, created_by, context=None):
-		value = {'department_id': ''}
-		if created_by:
+	def onchange_created_by(self, cr, uid, ids, created_by, location_dest_code, context=None):
+		value = {'department_id': '','location_dest_id':''}
+		if created_by and location_dest_code:
 			user = self.pool.get('res.users').browse(cr, uid, created_by, context=context)
-			value = {'department_id': user.dep_name.id}
+			loc_ids = self.pool.get('stock.location').search(cr, uid, [('code','=',location_dest_code)])
+			if loc_ids:
+				loc_rec = self.pool.get('stock.location').browse(cr, uid, loc_ids[0])
+				value = {'department_id':user.dep_name.id,'location_dest_id':loc_rec.id}
 		return {'value': value}	
 	
 	def onchange_grn_date(self, cr, uid, ids, grn_date):
@@ -622,11 +626,11 @@ class kg_po_grn(osv.osv):
 			#if grn_entry.grn_type == 'from_so':	
 				#so_obj.write(cr,uid,grn_entry.so_id.id, {'grn_flag': True})
 			if not grn_entry.name:
-				if grn_entry.location_dest_id.id == 14:
+				if grn_entry.location_dest_id.code == 'FOU_Main':
 					seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn.fou')])
-				elif grn_entry.location_dest_id.id == 75:
+				elif grn_entry.location_dest_id.code == 'MS_Main':
 					seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn.ms')])
-				elif grn_entry.location_dest_id.id == 76:
+				elif grn_entry.location_dest_id.code == 'GEN_Main':
 					seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn.gen')])
 				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
 				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.creation_date))
@@ -1312,6 +1316,7 @@ class kg_po_grn(osv.osv):
 								'brand_id':line.brand_id.id,
 								'moc_id':line.moc_id.id,
 								'location_id':line.location_dest_id.id,
+								'location_code': line.location_dest_id.code,
 								'product_uom':line.product_id.uom_id.id,
 								'product_qty':product_qty,
 								'pending_qty':product_qty,
@@ -1374,6 +1379,7 @@ class kg_po_grn(osv.osv):
 							'brand_id':line.brand_id.id,
 							'moc_id':line.moc_id.id,
 							'location_id':line.location_dest_id.id,
+							'location_code': line.location_dest_id.code,
 							'product_uom':line.product_id.uom_id.id,
 							'product_qty':product_qty,
 							'pending_qty':product_qty,
@@ -1419,6 +1425,7 @@ class kg_po_grn(osv.osv):
 								'brand_id':line.brand_id.id,
 								'moc_id':line.moc_id.id,
 								'location_id':line.location_dest_id.id,
+								'location_code': line.location_dest_id.code,
 								'product_uom':line.product_id.uom_id.id,
 								'product_qty':product_qty,
 								'pending_qty':product_qty,
@@ -1463,6 +1470,7 @@ class kg_po_grn(osv.osv):
 							'brand_id':line.brand_id.id,
 							'moc_id':line.moc_id.id,
 							'location_id':line.location_dest_id.id,
+							'location_code': line.location_dest_id.code,
 							'product_uom':line.product_id.uom_id.id,
 							'product_qty':product_qty,
 							'pending_qty':product_qty,
@@ -1496,6 +1504,7 @@ class kg_po_grn(osv.osv):
 								'brand_id':line.brand_id.id,
 								'moc_id':line.moc_id.id,
 								'location_id':line.location_dest_id.id,
+								'location_code': line.location_dest_id.code,
 								'product_uom':line.product_id.uom_id.id,
 								'product_qty':product_qty,
 								'pending_qty':product_qty,
@@ -1528,6 +1537,7 @@ class kg_po_grn(osv.osv):
 							'brand_id':line.brand_id.id,
 							'moc_id':line.moc_id.id,
 							'location_id':line.location_dest_id.id,
+							'location_code': line.location_dest_id.code,
 							'product_uom':line.product_id.uom_id.id,
 							'product_qty':line.po_grn_qty,
 							'pending_qty':line.po_grn_qty,

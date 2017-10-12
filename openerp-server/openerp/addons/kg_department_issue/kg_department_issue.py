@@ -6,7 +6,6 @@ from openerp.tools.translate import _
 import time
 import openerp.addons.decimal_precision as dp
 from itertools import groupby
-
 import datetime
 import calendar
 from datetime import date
@@ -72,6 +71,7 @@ class kg_department_issue(osv.osv):
 					readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'wo_line_id': fields.many2one('ch.work.order.details','WO No.',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'location_id': fields.many2one('stock.location', 'Source Location',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'location_code': fields.char('Location Code'),
 		
 		## Child Tables Declaration
 		
@@ -175,6 +175,15 @@ class kg_department_issue(osv.osv):
 		if dep_iss_type == 'direct':
 			state = 'confirmed'
 		return {'value':{'products_flag':product_flag,'state':state}}
+	
+	def onchange_created_by(self, cr, uid, ids, location_code, context=None):
+		value = {'location_id':''}
+		if location_code:
+			loc_ids = self.pool.get('stock.location').search(cr, uid, [('code','=',location_code)])
+			if loc_ids:
+				loc_rec = self.pool.get('stock.location').browse(cr, uid, loc_ids[0])
+				value = {'location_id':loc_rec.id}
+		return {'value': value}	
 	
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
@@ -634,9 +643,6 @@ class kg_department_issue(osv.osv):
 					main_location = stock_main_store[0]
 					dep_stock_location = issue_record.department_id.stock_location.id
 			
-			#~ if line_ids.issue_qty > line_ids.issue_qty_2:
-				#~ raise osv.except_osv(_('Warning!'),
-					#~ _('%s Qty is exceeding store issue qty'%(line_ids.product_id.name)))
 			print"line_ids.wo_stateline_ids.wo_state",line_ids.wo_state
 			
 			#~ if line_ids.wo_state == 'accept':

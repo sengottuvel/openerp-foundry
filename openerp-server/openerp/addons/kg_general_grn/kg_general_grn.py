@@ -105,25 +105,25 @@ class kg_general_grn(osv.osv):
 		## Basic Info
 		
 		'name': fields.char('GRN NO',readonly=True),
-		'grn_date':fields.date('GRN Date',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'grn_date': fields.date('GRN Date',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'WFA'), ('done', 'Approved'), ('cancel', 'Cancelled'),('inv','Invoiced'),('reject','Rejected')], 'Status',readonly=True),
-		'remark':fields.text('Remarks'),
-		'notes':fields.text('Notes'),
-		'can_remark':fields.text('Cancel Remarks'),
-		'reject_remark':fields.text('Reject Remarks'),
+		'remark': fields.text('Remarks'),
+		'notes': fields.text('Notes'),
+		'can_remark': fields.text('Cancel Remarks'),
+		'reject_remark': fields.text('Reject Remarks'),
 		
 		## Module Requirement Info
 		
 		'supplier_id':fields.many2one('res.partner','Supplier',domain=[('supplier','=',True)],readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'dc_no': fields.char('DC NO', required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-		'dc_date':fields.date('DC Date',required=True, readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'dc_date': fields.date('DC Date',required=True, readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'bill': fields.selection([
 			('applicable', 'Applicable'),
 			('not_applicable', 'Not Applicable')], 'Bill',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'other_charge': fields.float('Other Charges',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'amount_total': fields.float('Total Amount',readonly=True),
 		'sub_total': fields.float('Line Total',readonly=True),
-		'expiry_flag':fields.boolean('Expiry Flag'),
+		'expiry_flag': fields.boolean('Expiry Flag'),
 		'dep_name': fields.many2one('kg.depmaster','Department',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'other_charge': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Other Charges(+)',
@@ -145,44 +145,45 @@ class kg_general_grn(osv.osv):
 			}, multi="sums", help="The tax amount"),
 		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total',
 			store=True,multi="sums",help="The total amount"),
-		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist'),
+		'pricelist_id': fields.many2one('product.pricelist', 'Pricelist'),
 		'currency_id': fields.many2one('res.currency', 'Currency', readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'po_expenses_type1': fields.selection([('freight','Freight Charges'),('others','Others')], 'Expenses Type1',
 										readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'po_expenses_type2': fields.selection([('freight','Freight Charges'),('others','Others')], 'Expenses Type2',
 								readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-		'value1':fields.float('Value1', readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-		'value2':fields.float('Value2', readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-		'type':fields.selection([('out','out'),('in','in')], 'Type'),
-		'invoice_flag':fields.boolean('Invoice Flag'),
-		'po_id':fields.many2one('purchase.order', 'PO NO',
+		'value1': fields.float('Value1', readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'value2': fields.float('Value2', readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'type': fields.selection([('out','out'),('in','in')], 'Type'),
+		'invoice_flag': fields.boolean('Invoice Flag'),
+		'po_id': fields.many2one('purchase.order', 'PO NO',
 					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]"),
-		'po_date':fields.date('PO Date',readonly=True),
+		'po_date': fields.date('PO Date',readonly=True),
 		'order_no': fields.char('Order NO'),
-		'order_date':fields.char('Order Date'),
+		'order_date': fields.char('Order Date'),
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True,states={'confirmed':[('readonly',False)],'draft': [('readonly', False)]}),
 		
 		#~ 'grn_dc': fields.selection([('dc_invoice','DC & Invoice'),('only_grn','Only grn')], 'GRN Type',
 										#~ required=True, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'grn_dc': fields.selection([('only_grn','Only grn')], 'GRN Type',required=True),
-		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
-		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
-		'vehicle_details':fields.char('Vehicle Details', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
-		'insp_ref_no':fields.char('Insp.Ref.No.', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
-		'location_dest_id': fields.many2one('stock.location','Location',domain="[('location_type','=','main')]"),
+		'sup_invoice_no': fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'sup_invoice_date': fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'vehicle_details': fields.char('Vehicle Details', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'insp_ref_no': fields.char('Insp.Ref.No.', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'location_dest_id': fields.many2one('stock.location','Location'),
+		'location_dest_code': fields.char('Location Code'),
 		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division'),
-		
+				
 		## Child Tables Declaration
 		
-		'grn_line':fields.one2many('kg.general.grn.line','grn_id','Line Entry',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'grn_line': fields.one2many('kg.general.grn.line','grn_id','Line Entry',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'expense_line_id': fields.one2many('kg.gen.grn.expense.track','expense_id','Expense Track',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		
 		## Entry Info
 		
 		'active': fields.boolean('Active'),
-		'company_id':fields.many2one('res.company','Company',readonly=True),
-		'user_id':fields.many2one('res.users','Created By',readonly=True),
-		'creation_date':fields.datetime('Created Date',required=True,readonly=True),
+		'company_id': fields.many2one('res.company','Company',readonly=True),
+		'user_id': fields.many2one('res.users','Created By',readonly=True),
+		'creation_date': fields.datetime('Created Date',required=True,readonly=True),
 		'confirmed_by' : fields.many2one('res.users', 'Confirmed By',readonly=True),
 		'approved_by' : fields.many2one('res.users', 'Approved By',readonly=True),
 		'confirmed_date' : fields.datetime('Confirmed date',readonly=True),
@@ -195,7 +196,7 @@ class kg_general_grn(osv.osv):
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
 		
 	}
-
+	
 	"""def create(self, cr, uid, vals,context=None):
 		print "vals........hhhhhhhhhhhhhhhh......................",vals
 				if vals.get('name','')=='':
@@ -208,22 +209,25 @@ class kg_general_grn(osv.osv):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_general_grn, self).write(cr, uid, ids, vals, context)
 	
-	def onchange_user_id(self, cr, uid, ids, user_id, context=None):
-		value = {'dep_name': ''}
-		if user_id:
+	def onchange_user_id(self, cr, uid, ids, user_id, location_dest_code, context=None):
+		value = {'dep_name': '','location_dest_id': ''}
+		if user_id and location_dest_code:
 			user = self.pool.get('res.users').browse(cr, uid, user_id, context=context)
-			value = {'dep_name': user.dep_name.id}
+			loc_ids = self.pool.get('stock.location').search(cr, uid, [('code','=',location_dest_code)])
+			if loc_ids:
+				loc_rec = self.pool.get('stock.location').browse(cr, uid, loc_ids[0])
+				value = {'dep_name': user.dep_name.id,'location_dest_id':loc_rec.id}
 		return {'value': value}		
 	
 	def entry_confirm(self, cr, uid, ids,context=None):
 		grn_entry = self.browse(cr, uid, ids[0])
 		if grn_entry.state == 'draft':
 			if not grn_entry.name:
-				if grn_entry.location_dest_id.id == 14:
+				if grn_entry.location_dest_id.code == 'FOU_Main':
 					seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gen.grn.fou')])
-				elif grn_entry.location_dest_id.id == 75:
+				elif grn_entry.location_dest_id.code == 'MS_Main':
 					seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gen.grn.ms')])
-				elif grn_entry.location_dest_id.id == 76:
+				elif grn_entry.location_dest_id.code == 'GEN_Main':
 					seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gen.grn.gen')])
 				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
 				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.creation_date))
@@ -514,6 +518,7 @@ class kg_general_grn(osv.osv):
 							'brand_id':line.brand_id.id,
 							'moc_id':line.moc_id.id,
 							'location_id':line.location_dest_id.id,
+							'location_code': line.location_dest_id.code,
 							'product_uom':line.product_id.uom_id.id,
 							'product_qty':product_qty,
 							'pending_qty':pending_qty,
@@ -562,6 +567,7 @@ class kg_general_grn(osv.osv):
 						'brand_id':line.brand_id.id,
 						'moc_id':line.moc_id.id,
 						'location_id':line.location_dest_id.id,
+						'location_code': line.location_dest_id.code,
 						'product_uom':line.product_id.uom_id.id,
 						'product_qty':product_qty,
 						'pending_qty':pending_qty,
