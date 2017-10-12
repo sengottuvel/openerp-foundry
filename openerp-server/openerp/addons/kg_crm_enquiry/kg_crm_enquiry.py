@@ -2381,7 +2381,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		data=''
 		print"rec.staterec.state",rec.header_id.state
-		if rec.template_name and rec.header_id.state != 'moved_to_offer':
+		if rec.template_name and rec.header_id.state != 'draft':
 			template_name = str(rec.template_name)
 			cr.execute(""" select template_name,id from ch_kg_crm_pumpmodel where template_name = '%s' and template_flag = False and id != %s """ %(template_name,rec.id))
 			data = cr.dictfetchall()
