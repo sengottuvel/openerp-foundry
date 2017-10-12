@@ -1586,6 +1586,11 @@ class kg_stock_move(osv.osv):
 	'billing_type': fields.selection([('free', 'Free'), ('cost', 'Cost')], 'Billing Type'),
 	'brand_id':fields.many2one('kg.brand.master','Brand Name'),
 	
+	# Store Issue
+	
+	'dept_issue_id':fields.many2one('kg.department.issue','Department Issue'),
+	'dept_issue_line_id':fields.many2one('kg.department.issue.line','Department Issue Line'),
+	
     }
     
     _defaults = {
