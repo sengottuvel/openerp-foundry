@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="spare_offer_regular" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.2100000000000002"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="31"/>
 	<property name="ireport.y" value="48"/>
 	<subDataset name="dataset1">
 		<parameter name="enquiry_line_id" class="java.lang.Integer"/>
@@ -10,7 +10,7 @@
 coalesce(spare.material_code,'-') as material_code,
 coalesce(spare.off_name,'-') as off_name,
 pattern.name as pattern_no,
-case when moc.name = 'N/A' then moc_const.name else moc.name end as moc_name,
+moc.name as moc_name,
 spare.qty as qty,
 'No' as unit,
 'A' as type,
@@ -19,8 +19,8 @@ coalesce(hsn.name::text,'-') as hsn_code,
 coalesce(tax.description,'-') as tax_per,
 
 
-trim(TO_CHAR((coalesce(spare.r_net_amount / spare.qty,0.00)), '999G999G99G999G99G99G990D99')) as each_price_txt,
-trim(TO_CHAR((coalesce(spare.r_net_amount,0.00)), '999G999G99G999G99G99G990D99')) as total_price_txt
+trim(TO_CHAR((coalesce(spare.r_net_amt_tot / spare.qty,0.00)), '999G999G99G999G99G99G990D99')) as each_price_txt,
+trim(TO_CHAR((coalesce(spare.r_net_amt_tot,0.00)), '999G999G99G999G99G99G990D99')) as total_price_txt
 
 from
 ch_spare_offer spare
@@ -63,9 +63,9 @@ partner.name as customer,
 pump.name as pump_name,
 enquiry.s_no as serial_no,
 case when offer.id is not null then
-(select coalesce((sum(coalesce(r_net_amount::numeric,0.00))),0.00) as gnd_tot from
+(select coalesce((sum(coalesce(r_net_amt_tot::numeric,0.00))),0.00) as gnd_tot from
 
-(select r_net_amount from
+(select r_net_amt_tot from
 
 ch_spare_offer
 
