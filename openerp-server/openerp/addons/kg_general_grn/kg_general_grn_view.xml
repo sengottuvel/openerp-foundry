@@ -28,6 +28,7 @@
 						<field name="bill" string="Bill Type"/>
                         <field name="payment_type" attrs="{'required': [('bill','=','applicable')]}"/>
                         <field name="grn_dc" readonly="1"/>
+                        <field name="location_dest_code" required="1" invisible="1" readonly="1"/>
                         <field name="location_dest_id" required="1" invisible="1"/>
                         <field name="dep_name" invisible="1"/>
                         <field name="invoice_flag" invisible="1"/>
@@ -142,7 +143,7 @@
 								<field name="active"/>
 							</group>
 							<group>
-								<field name="user_id" on_change="onchange_user_id(user_id)"/>
+								<field name="user_id" on_change="onchange_user_id(user_id,location_dest_code)"/>
 								<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
 								<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
 								<field name="approved_by" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
@@ -335,7 +336,7 @@
 								<field name="active"/>
 							</group>
 							<group>
-								<field name="user_id" on_change="onchange_user_id(user_id)"/>
+								<field name="user_id" on_change="onchange_user_id(user_id,location_dest_code)"/>
 								<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
 								<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
 								<field name="approved_by" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
@@ -438,8 +439,8 @@
 			<field name="res_model">kg.general.grn</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="context">{'default_location_dest_id':76,'default_division':'ipd'}</field>
-			<field name="domain">[('location_dest_id','=',76),('division','=','ipd')]</field>
+			<field name="context">{'default_location_dest_code':'GEN_Main','default_division':'ipd'}</field>
+			<field name="domain">[('location_dest_code','=','GEN_Main'),('division','=','ipd')]</field>
 			<field name="search_view_id" ref="t_search_v_general_grn"/>
 		</record>
 		
@@ -474,8 +475,8 @@
 			<field name="res_model">kg.general.grn</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="context">{'default_location_dest_id':75,'default_division':'ppd'}</field>
-			<field name="domain">[('location_dest_id','=',75),('division','=','ppd')]</field>
+			<field name="context">{'default_location_dest_code':'MS_Main','default_division':'ppd'}</field>
+			<field name="domain">[('location_dest_code','=','MS_Main'),('division','=','ppd')]</field>
 			<field name="search_view_id" ref="t_search_v_general_grn"/>
 		</record>
 		
@@ -504,8 +505,8 @@
 			<field name="res_model">kg.general.grn</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="context">{'default_location_dest_id':14,'default_division':'foundry'}</field>
-			<field name="domain">[('location_dest_id','=',14),('division','=','foundry')]</field>
+			<field name="context">{'default_location_dest_code':'FOU_Main','default_division':'foundry'}</field>
+			<field name="domain">[('location_dest_code','=','FOU_Main'),('division','=','foundry')]</field>
 			<field name="search_view_id" ref="t_search_v_general_grn"/>
 		</record>
 		

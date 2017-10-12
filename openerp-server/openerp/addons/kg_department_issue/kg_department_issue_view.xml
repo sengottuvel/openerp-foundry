@@ -34,6 +34,7 @@
 						<group> 
 							<field name="issue_date" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
 							<field name="location_id" required="1" attrs="{'readonly':[('location_id','!=',False)]}"/>
+							<field name="location_code" required="1" readonly="1" invisible="1"/>
 							<field name="outward_type" invisible="1"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="building" invisible="1"/>
@@ -161,7 +162,7 @@
 								<field name="active"/>
 							</group>
 							<group>
-								<field name="created_by"/>
+								<field name="created_by" on_change="onchange_created_by(location_code)"/>
 								<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft','confirmed'])]}"/>
 								<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
 								<field name="approved_by" attrs="{'invisible':[('state','in',['draft','confirmed','approve'])]}"/>
@@ -320,8 +321,8 @@
 			<field name="res_model">kg.department.issue</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="domain">[(('location_id','=',76))]</field>
-			<field name="context">{'search_default_issue_type':1,'default_location_id':76 }</field>
+			<field name="domain">[(('location_code','=','GEN_Main'))]</field>
+			<field name="context">{'search_default_issue_type':1,'default_location_code':'GEN_Main' }</field>
 			<field name="search_view_id" ref="t_search_v_department_issue"/>
 		</record>
 		
@@ -350,8 +351,8 @@
 			<field name="res_model">kg.department.issue</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="domain">[(('location_id','=',75))]</field>
-			<field name="context">{'search_default_issue_type':1,'default_location_id':75 }</field>
+			<field name="domain">[(('location_code','=','MS_Main'))]</field>
+			<field name="context">{'search_default_issue_type':1,'default_location_code':'MS_Main' }</field>
 			<field name="search_view_id" ref="t_search_v_department_issue"/>
 		</record>
 		
@@ -380,8 +381,8 @@
 			<field name="res_model">kg.department.issue</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="domain">[(('location_id','=',14))]</field>
-			<field name="context">{'search_default_issue_type':1,'default_location_id':14 }</field>
+			<field name="domain">[(('location_code','=','FOU_Main'))]</field>
+			<field name="context">{'search_default_issue_type':1,'default_location_code':'FOU_Main' }</field>
 			<field name="search_view_id" ref="t_search_v_department_issue"/>
 		</record>
 		
@@ -484,7 +485,7 @@
 					</group>
 					<group>
 						<group>
-							<field name="created_by"/>
+							<field name="created_by" on_change="onchange_created_by(location_code)"/>
 							<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft','confirmed'])]}"/>
 							<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
 							<field name="approved_by" attrs="{'invisible':[('state','in',['draft','confirmed','approve'])]}"/>

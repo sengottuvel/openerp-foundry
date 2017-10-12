@@ -665,8 +665,8 @@
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form</field>
 		<field name="domain"></field>
-		<field name="context">{'search_default_group_product_id':1,'default_location_id':75}</field>
-		<field name="domain">[('pending_qty','>',0),('location_id','=',75)]</field>
+		<field name="context">{'search_default_group_product_id':1,'default_location_code':'MS_Main'}</field>
+		<field name="domain">[('pending_qty','>',0),('location_code','=','MS_Main')]</field>
 		<field name="search_view_id" ref="stock.search_product_lot_filter"/>
 	</record>
 	
@@ -696,8 +696,8 @@
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form</field>
 		<field name="domain"></field>
-		<field name="context">{'search_default_group_product_id':1,'default_location_id':14}</field>
-		<field name="domain">[('pending_qty','>',0),('location_id','=',14)]</field>
+		<field name="context">{'search_default_group_product_id':1,'default_location_code':'FOU_Main'}</field>
+		<field name="domain">[('pending_qty','>',0),('location_code','=','GEN_Main')]</field>
 		<field name="search_view_id" ref="stock.search_product_lot_filter"/>
 	</record>
 	

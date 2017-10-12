@@ -26,6 +26,7 @@
 						<field name="insp_ref_no"/>
 						<field name="payment_type" invisible="1"/>
 						<field name="inward_type"/>
+						<field name="location_dest_code" required="1" invisible="1" readonly="1"/>
 						<field name="location_dest_id" required="1" invisible="1"/>
 						<field name="invoice_flag" invisible="1"/>
 						<field name="department_id" invisible="1"/>
@@ -227,7 +228,7 @@
 								<field name="active"/>
 							</group>
 							<group>
-								<field name="created_by" on_change="onchange_created_by(created_by)"/>
+								<field name="created_by" on_change="onchange_created_by(created_by,location_dest_code)"/>
 								<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft','item_load'])]}"/>
 								<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
 								<field name="approved_by" attrs="{'invisible':[('state','in',['draft','item_load','reject','confirmed'])]}"/>
@@ -516,7 +517,7 @@
 								<field name="active"/>
 							</group>
 							<group>
-								<field name="created_by" on_change="onchange_created_by(created_by)"/>
+								<field name="created_by" on_change="onchange_created_by(created_by,location_dest_code)"/>
 								<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft','item_load'])]}"/>
 								<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
 								<field name="approved_by" attrs="{'invisible':[('state','in',['draft','item_load','reject','confirmed'])]}"/>
@@ -596,7 +597,7 @@
         </record>
         
         <!-- Search View Start -->
-
+		
 		<record id="t_search_v_po_grn" model="ir.ui.view">
             <field name="name">PO GRN Search</field>
             <field name="model">kg.po.grn</field>
@@ -630,8 +631,8 @@
 			<field name="res_model">kg.po.grn</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="context">{'default_location_dest_id':76}</field>
-			<field name="domain">[('location_dest_id','=',76)]</field>
+			<field name="context">{'default_location_dest_code':'GEN_Main'}</field>
+			<field name="domain">[('location_dest_code','=','GEN_Main')]</field>
 			<field name="search_view_id" ref="t_search_v_po_grn"/>
 		</record>
 		
@@ -660,8 +661,8 @@
 			<field name="res_model">kg.po.grn</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="context">{'default_location_dest_id':75}</field>
-			<field name="domain">[('location_dest_id','=',75)]</field>
+			<field name="context">{'default_location_dest_code':'MS_Main'}</field>
+			<field name="domain">[('location_dest_code','=','MS_Main')]</field>
 			<field name="search_view_id" ref="t_search_v_po_grn"/>
 		</record>
 		
@@ -690,8 +691,8 @@
 			<field name="res_model">kg.po.grn</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="context">{'default_location_dest_id':14}</field>
-			<field name="domain">[('location_dest_id','=',14)]</field>
+			<field name="context">{'default_location_dest_code':'FOU_Main'}</field>
+			<field name="domain">[('location_dest_code','=','FOU_Main')]</field>
 			<field name="search_view_id" ref="t_search_v_po_grn"/>
 		</record>
 		
@@ -713,7 +714,7 @@
         =====================
         GRN QC Form Action
         ===================== -->
-
+		
 		<record id="tma_grn_qc" model="ir.actions.act_window">
 			<field name="name">PO/SO GRN QC</field>
 			<field name="type">ir.actions.act_window</field>
@@ -740,12 +741,12 @@
         </record>
         
        <!-- Sequence Number Setting Starts Here -->
-       
+		
 		<record forcecreate="1" id="seq_po_grn" model="ir.sequence.type">	
 			<field name="name">PO GRN</field>
 			<field name="code">kg.po.grn</field>
 		</record>
-
+		
 		<record forcecreate="1" id="po_grn_id" model="ir.sequence">
 			<field name="name">PO GRN</field>
 			<field name="code">kg.po.grn</field>
@@ -758,7 +759,7 @@
 			<field name="name">PO GRN Fou</field>
 			<field name="code">kg.po.grn.fou</field>
 		</record>
-
+		
 		<record forcecreate="1" id="po_grn_fou" model="ir.sequence">
 			<field name="name">PO GRN Fou</field>
 			<field name="code">kg.po.grn.fou</field>
@@ -771,7 +772,7 @@
 			<field name="name">PO GRN Ms</field>
 			<field name="code">kg.po.grn.ms</field>
 		</record>
-
+		
 		<record forcecreate="1" id="po_grn_ms" model="ir.sequence">
 			<field name="name">PO GRN Ms</field>
 			<field name="code">kg.po.grn.ms</field>
@@ -784,7 +785,7 @@
 			<field name="name">PO GRN Gen</field>
 			<field name="code">kg.po.grn.gen</field>
 		</record>
-
+		
 		<record forcecreate="1" id="po_grn_gen" model="ir.sequence">
 			<field name="name">PO GRN Gen</field>
 			<field name="code">kg.po.grn.gen</field>
