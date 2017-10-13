@@ -1869,12 +1869,11 @@ class kg_crm_offer(osv.osv):
 									sheet1.write_merge(s2, s2, 0, 0, acc_name, style_left)
 									for pump in pump_data:
 										c1 += 1
-										acc_sub_val_st = """ select enquiry_line_id,sum(line_amt) as sum_line_amt from ( """
+										acc_sub_val_st = """ select enquiry_line_id,max(line_amt) as sum_line_amt from ( """
 										acc_sub_val_ed = """ ) as sample group by 1 """
 										acc_cond = """and  /* $$$$$$ */
 										access_offer.enquiry_line_id = %s """%(pump['crm_id'])
 										access_pump_query = acc_sub_val_st+acc_sub_one+access_cond_query+acc_cond+access_two_query+acc_sub_val_ed
-										print"access_pump_query",access_pump_query
 										cr.execute(access_pump_query)
 										access_pump_data = cr.dictfetchall()
 										if access_pump_data:
