@@ -2557,23 +2557,18 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	
 	def onchange_moc(self, cr, uid, ids, moc_const_id,flag_standard,purpose_categ):
 		moc_const_vals=[]
-		load_bom = ''
-		seq_no = 0
 		if moc_const_id != False:
-			if purpose_categ != 'pump':
-				return True
-				load_bom = True
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr, uid, moc_const_id)
+			if purpose_categ != 'pump':
+				if purpose_categ in ('spare','access'):
+					return {'value': {'moc_construction_name':moc_const_rec.name}}
 			for item in moc_const_rec.line_ids:
-				seq_no = seq_no + 1 
-				print"flag_standardflag_standard---------",flag_standard
 				moc_const_vals.append({
 								
 								'moc_id': item.moc_id.id,
 								'offer_id': item.offer_id.id,
 								'remarks': item.remarks,
 								'flag_standard': flag_standard,
-								'seq_no': seq_no,
 								
 								})
 		return {'value': {'line_ids_moc_a': moc_const_vals,'moc_construction_name':moc_const_rec.name}}
