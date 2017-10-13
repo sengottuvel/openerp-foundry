@@ -1126,6 +1126,7 @@ class kg_crm_enquiry(osv.osv):
 															  'item_code': orde_item.bom_id.name,
 															  'item_name': orde_item.bom_id.name,
 															  'off_name': orde_item.off_name,
+															  'material_code': orde_item.material_code,
 															  'pattern_id': '',
 															  'ms_id': '',
 															  'bot_id': '',
