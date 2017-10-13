@@ -1567,8 +1567,10 @@ class kg_crm_offer(osv.osv):
 		(pump_bkw_water::text||'$'||pump_bkw_liq::text) else '-' end ) end as pump_bkw,*/
 		pump_eoc,pump_motor_kw,
 		
-		case when (pump_full_load_rpm is not null and pump_full_load_rpm != '') then pump_full_load_rpm::text else '-' end as pump_rpm_pump, -- Testing
-		case when (pump_speed_in_rpm is not null and pump_speed_in_rpm != '') then pump_speed_in_rpm::text else '-' end as pump_rpm_motor, -- Testing
+		/* case when (pump_full_load_rpm is not null and pump_full_load_rpm != '') then pump_full_load_rpm::text else '-' end as pump_rpm_pump, -- Testing 
+		*/
+		case when (pump_speed_in_motor is not null and pump_speed_in_motor != '') then pump_speed_in_motor::text else '-' end as pump_rpm_motor, -- Testing
+		case when (pump_speed_in_rpm is not null and pump_speed_in_rpm != '') then pump_speed_in_rpm::text else '-' end as pump_rpm_pump, -- Testing
 		
 		/*case when ((pump_full_load_rpm is not null and pump_full_load_rpm != '') and 
 		(pump_speed_in_rpm is not null and pump_speed_in_rpm != '')) then 
@@ -1633,7 +1635,7 @@ class kg_crm_offer(osv.osv):
 		item_eqno,item_desc, item_qty,lspec_lqd,lspec_temp, lspec_sgvt,lspec_ph,lspec_viscst,lspec_visfact,solid_concern_vol,solid_concern,
 		lspec_slur,lspec_suct,duty_cap_wat,duty_cap_lqd,duty_head_wat,duty_head_lqd,
 		duty_suct,pump_pmodtype,pump_pmodel,pump_stgno,pump_sizex,pump_flange,pump_eff,
-		pump_bkw_water,pump_bkw_liq,pump_eoc,pump_motor_kw,pump_full_load_rpm,pump_speed_in_rpm,pump_tod,pump_npsh,
+		pump_bkw_water,pump_bkw_liq,pump_eoc,pump_motor_kw,pump_full_load_rpm,pump_speed_in_rpm,pump_speed_in_motor,pump_tod,pump_npsh,
 		pump_impeller_type,
 		pump_imp_dia_rate,pump_impeller_dia_max,pump_impeller_dia_min,pump_max_solid,pump_hydro,pump_shut,pump_setting_height,pump_sump_depth,
 		pump_mini,pump_belt,pump_motor_kw as pump_motor_kw1,pump_impeller_tip,pump_seal_press,pump_seal_cap,acces,
@@ -1674,7 +1676,7 @@ class kg_crm_offer(osv.osv):
 		(select name from kg_pumpmodel_master where id = pump_id) as pump_pmodel,
 		number_of_stages as pump_stgno,
 		size_suctionx as pump_sizex,
-		(select name from kg_flange_master where id = flange_standard) as pump_flange,
+		(select name from ch_pumpseries_flange where id = flange_standard) as pump_flange,
 		efficiency_in as pump_eff,
 		case when bkw_liq>0 then bkw_liq::text else ''::text end as pump_bkw_liq,
 		case when bkw_water>0 then bkw_water::text else ''::text end as pump_bkw_water,
@@ -1682,6 +1684,7 @@ class kg_crm_offer(osv.osv):
 		motor_kw as pump_motor_kw,
 		case when full_load_rpm>0 then full_load_rpm::text else ''::text end as pump_full_load_rpm,
 		case when speed_in_rpm>0 then speed_in_rpm::text else ''::text end as pump_speed_in_rpm,
+		case when speed_in_motor>0 then speed_in_motor::text else ''::text end as pump_speed_in_motor,
 		npsh_r_m as pump_npsh,
 		impeller_type as pump_impeller_type,
 		
@@ -1767,7 +1770,7 @@ class kg_crm_offer(osv.osv):
 				s2 = s2+1
 				sheet1.write_merge(s2, s2, c1, c2,"Tel:3053555, 3053556,Fax : 0422-3053535",style4)				
 				s2 = s2+1
-				sheet1.write_merge(s2, s2, c1, c2, report.upper()+'SLURRY-CENTRIFUGAL PUMP OFFER SHEET ', style41)
+				sheet1.write_merge(s2, s2, c1, c2, report.upper()+' SLURRY-CENTRIFUGAL PUMP OFFER SHEET', style41)
 				s2 = s2+1
 				sheet1.write_merge(s2, s2, c1, c2, 'Offer No: '+str(rec.name or '-'), style_highlight)
 				sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
@@ -1871,6 +1874,7 @@ class kg_crm_offer(osv.osv):
 										acc_cond = """and  /* $$$$$$ */
 										access_offer.enquiry_line_id = %s """%(pump['crm_id'])
 										access_pump_query = acc_sub_val_st+acc_sub_one+access_cond_query+acc_cond+access_two_query+acc_sub_val_ed
+										print"access_pump_query",access_pump_query
 										cr.execute(access_pump_query)
 										access_pump_data = cr.dictfetchall()
 										if access_pump_data:
