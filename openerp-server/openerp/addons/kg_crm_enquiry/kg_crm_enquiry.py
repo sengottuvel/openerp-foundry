@@ -1134,6 +1134,7 @@ class kg_crm_enquiry(osv.osv):
 															  'qty': orde_item.qty,
 															  'hsn_no': hsn,
 															  'gst': gst,
+															  'uom_id': orde_item.uom_id.id,
 															   })
 		
 		#~ spare_rec = self.pool.get('ch.spare.offer').browse(cr,uid,spare_id)
@@ -2382,7 +2383,6 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	def _template_name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		data=''
-		print"rec.staterec.state",rec.header_id.state
 		if rec.template_name and rec.header_id.state != 'draft':
 			template_name = str(rec.template_name)
 			cr.execute(""" select template_name,id from ch_kg_crm_pumpmodel where template_name = '%s' and template_flag = False and id != %s """ %(template_name,rec.id))
@@ -4699,7 +4699,9 @@ class ch_kg_crm_spare_bom(osv.osv):
 		'off_name':fields.char('Offer Name'),
 		'load_bom':fields.boolean('Load BOM'),
 		'prime_cost': fields.float('Prime Cost'),
-		'moc_id': fields.many2one('kg.moc.master','MOC Name'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'uom_id': fields.many2one('product.uom','UOM'),
+		'material_code': fields.char('Material Code'),
 		
 		## Child Tables Declaration
 		

@@ -514,11 +514,13 @@
 										<group>
 											<field name="bom_id" required="1" on_change="onchange_spare_off_name(bom_id)"/>
 											<field name="off_name"/>
+											<field name="uom_id" required="1"/>
 											<field name="load_bom" on_change="onchange_spare_bom(bom_id,off_name,moc_const_id,qty)" attrs="{'invisible':[('bom_id','=',False)]}"/>
 										</group>
 										<group>
 											<field name="moc_id" required="1"/>
 											<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+											<field name="material_code" class="aplhanum_expect"/>
 											<field name="prime_cost" readonly="1"/>
 											<field name="moc_const_id" invisible="1"/>
 										</group>
@@ -799,7 +801,6 @@
 						</notebook>
 						
 					</form>
-								
 								
 							</field>
 						</group>

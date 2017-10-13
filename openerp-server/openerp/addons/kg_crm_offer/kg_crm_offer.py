@@ -2905,6 +2905,7 @@ class ch_spare_offer(osv.osv):
 		## Module Requirement Fields
 		
 		'offer_id':fields.many2one('kg.crm.offer', 'Offer'),
+		'uom_id':fields.many2one('product.uom','UOM'),
 		'qty':fields.integer('Quantity'),
 		'item_code': fields.char('Item Code'),
 		'item_name': fields.char('Item Name'),
