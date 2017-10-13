@@ -175,6 +175,7 @@ class stock_location(osv.osv):
 		
 	_columns = {
 		'name': fields.char('Name', size=64, required=True, translate=True),
+		'code': fields.char('Code', size=64),
 		'active': fields.boolean('Active', help="By unchecking the active field, you may hide a location without deleting it."),
 		'usage': fields.selection([('supplier', 'Supplier Location'), ('view', 'View'), ('internal', 'Internal Location'), ('customer', 'Customer Location'), ('inventory', 'Inventory'), ('procurement', 'Procurement'), ('production', 'Production'), ('transit', 'Transit Location for Inter-Companies Transfers'),('consumption','Consumption'),('scrap','Scrap')], 'Location Type', required=True,
 				 help="""* Supplier Location: Virtual location representing the source location for products coming from your suppliers

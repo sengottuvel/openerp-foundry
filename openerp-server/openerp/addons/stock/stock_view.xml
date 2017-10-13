@@ -575,6 +575,7 @@
 						<field name="custom" invisible="1"/>
                     </group>
                     <group>
+						<field name="code" readonly="1"/>
 						<field name="location_id" attrs="{'readonly': [('state','=', 'approved')],'invisible':[('is_parent','=',True)]}"/>
 						<field name="location_type" string="Location Category" attrs="{'readonly': [('state','=', 'approved')]}"/>
 						<field name="state" style="width: 30%%" class="att_state_change"/>
