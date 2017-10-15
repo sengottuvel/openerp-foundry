@@ -142,6 +142,18 @@ class kg_crm_enquiry(osv.osv):
 		
 	}
 	
+	def onchange_division(self, cr, uid, ids, division_id, division_code, context=None):
+		value = {'division_id': '','division_code':''}
+		if division_id:
+			div_rec = self.pool.get('kg.division.master').browse(cr, uid, division_id, context=context)
+			value = {'division_id':div_rec.id,'division_code':div_rec.code}
+		elif division_code:
+			div_ids = self.pool.get('kg.division.master').search(cr, uid, [('code','=',division_code)])
+			if div_ids:
+				div_rec = self.pool.get('kg.division.master').browse(cr, uid, div_ids[0])
+				value = {'division_id':div_rec.id,'division_code':div_rec.code}
+		return {'value': value}
+	
 	def onchange_due_date(self,cr,uid,ids,due_date,context=None):
 		today = date.today()
 		today = str(today)
@@ -751,6 +763,7 @@ class kg_crm_enquiry(osv.osv):
 																		'dealer_id': entry.dealer_id.id,
 																		'ref_mode': entry.ref_mode,
 																		'division_id': entry.division_id.id,
+																		'division_code': entry.division_code,
 																		'zone': entry.zone,
 																		'purpose': entry.purpose,
 																		'segment': entry.segment,

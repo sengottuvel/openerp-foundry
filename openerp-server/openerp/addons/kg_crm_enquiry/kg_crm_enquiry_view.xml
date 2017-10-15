@@ -31,7 +31,7 @@
 								<field name="industry_id"/>
 								<field name="call_type" readonly="1"/>
 								<field name="ref_mode"/>
-								<field name="division_id" required="1"/>
+								<field name="division_id" required="1" on_change="onchange_division(division_id,division_code)"/>
 								<field name="dealer_id" attrs="{'invisible': [('ref_mode','=','direct')],'required': [('ref_mode','=','dealer')]}"/>
 								<field name="note"/>
 								<field name="enquiry_categ"/>
@@ -55,6 +55,7 @@
 								<field name="reminder_date" attrs="{'invisible': [('enq_status','!=','to_be_follow')]}" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="design_remarks" widget="char"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>
+								<field name="division_code" invisible="1"/>
 								<field name="drive" invisible="1"/>
 								<field name="transmision" invisible="1"/>
 								<field name="acces" invisible="1" />
@@ -954,7 +955,7 @@
 											<field name="active"/>
 										</group>
 										<group>
-											<field name="user_id"/>
+											<field name="user_id" on_change="onchange_division(division_id,division_code)"/>
 											<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
 											<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
 											<field name="update_user_id"/>
@@ -1098,8 +1099,8 @@
 			<field name="view_type">form</field>
 			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
 			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
-			<field name="context">{'default_source':'market','default_segment':'dom','default_division_id':36}</field>
-			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('division_id','=',36)]</field>
+			<field name="context">{'default_source':'market','default_segment':'dom','default_division_code':'CPD'}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('division_code','=','CPD')]</field>
 		</record>
 		
 		<record id="tma_crm_enquiry_mkt_north" model="ir.actions.act_window">
@@ -1164,8 +1165,8 @@
 			<field name="view_type">form</field>
 			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
 			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
-			<field name="context">{'default_source':'market','default_segment':'dom','default_division_id':30}</field>
-			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('division_id','=',30)]</field>
+			<field name="context">{'default_source':'market','default_segment':'dom','default_division_code':'IPD'}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('division_code','=','IPD')]</field>
 		</record>
 		
 		<record id="tma_crm_enquiry_mgmt_md" model="ir.actions.act_window">
