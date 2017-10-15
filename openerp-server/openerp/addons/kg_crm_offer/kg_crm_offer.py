@@ -162,6 +162,7 @@ class kg_crm_offer(osv.osv):
 		'ref_mode': fields.selection([('direct','Direct'),('dealer','Dealer')],'Reference Mode', required=True),
 		'market_division': fields.selection(MARKET_SELECTION,'Marketing Division'),
 		'division_id': fields.many2one('kg.division.master','Division',domain="[('state','not in',('reject','cancel'))]",required=True),
+		'division_code': fields.char('Division Code',readonly=True,required=True),
 		'ref_no': fields.char('Reference Number'),
 		'segment': fields.selection([('dom','Domestic'),('exp','Export')],'Segment', required=True),
 		'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True),('contact','=',False)]),

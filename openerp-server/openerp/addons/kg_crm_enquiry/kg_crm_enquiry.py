@@ -58,6 +58,7 @@ class kg_crm_enquiry(osv.osv):
 		'market_division': fields.selection(MARKET_SELECTION,'Marketing Division',readonly=True, states={'draft':[('readonly',False)]}),
 		'enquiry_categ': fields.selection(ENQUIRY_CATEGORY_SELECTION,'Enquiry Category',readonly=True, states={'draft':[('readonly',False)]}),
 		'division_id': fields.many2one('kg.division.master','Division',readonly=True, states={'draft':[('readonly',False)]},domain="[('state','not in',('reject','cancel')),('code','in',('CPD','IPD'))]"),
+		'division_code': fields.char('Division Code',readonly=True,required=True),
 		'ref_no': fields.char('Reference Number'),
 		'segment': fields.selection([('dom','Domestic'),('exp','Export')],'Segment',readonly=True, states={'draft':[('readonly',False)]}),
 		'customer_id': fields.many2one('res.partner','Customer Name',domain=[('customer','=',True),('contact','=',False)],readonly=True, states={'draft':[('readonly',False)]}),
