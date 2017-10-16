@@ -490,8 +490,8 @@ class kg_work_order(osv.osv):
 		coalesce(pump_crm.acces,'-') as acces,
 		'spare'::text as spare,
 		coalesce(wo_line.order_no,'-') as order_no,
-		case when pump_crm.equipment_no_flag = 't' then pump_crm.equipment_no else '-' end as tag_no,
-		case when pump_crm.description_flag = 't' then pump_crm.description else '-' end as description,
+		case when pump_crm.equipment_no is not null then pump_crm.equipment_no else '-' end as tag_no,
+		case when pump_crm.description is not null then pump_crm.description else '-' end as description,
 		coalesce(pump.name,'-') as model,
 		coalesce(wo_line.qty,0) as qty,
 		coalesce(wo_line.delivery_pipe_size,'0') as delivery_pipe_size,
@@ -538,10 +538,10 @@ class kg_work_order(osv.osv):
 		case when pump_crm.npsh_r_m > 0 then round(cast(pump_crm.npsh_r_m as numeric),2)::text else '-' end as npsh_r_m,
 
 		---case when (wo_line.shaft_sealing is null or wo_line.shaft_sealing = '') then '-' else wo_line.shaft_sealing end as shaft_sealing,
-		case when wo_line.shaft_sealing = 'gld_packing_tiga' then 'Gland Packing-TIGA'
-		when wo_line.shaft_sealing = 'gld_packing_ptfe' then 'Gland Packing-PTFE'
-		when wo_line.shaft_sealing = 'mc_seal' then 'M/C Seal'
-		when wo_line.shaft_sealing = 'dynamic_seal' then 'Dynamic Seal'
+		case when wo_line.shaft_sealing = 'g_p' then 'Gland Packing'
+		when wo_line.shaft_sealing = 'm_s' then 'mechanical_seal'
+		when wo_line.shaft_sealing = 'f_s' then 'Felt Seal'
+		when wo_line.shaft_sealing = 'd_s' then 'Dynamic Seal'
 		else '-' end as shaft_sealing,		
 		
 		coalesce(brand_mech.name,'-') as mech_seal_make,
@@ -589,7 +589,7 @@ class kg_work_order(osv.osv):
 		left join kg_brand_master brand_mech on brand_mech.id = pump_crm.mech_seal_make
 		left join kg_brand_master brand_motor on brand_motor.id = pump_crm.motor_make
 		left join kg_brand_master brand_bearing on brand_bearing.id = pump_crm.bearing_make
-		left join ch_pumpseries_flange flange on flange.id = pump_crm.flange_standard
+		left join ch_pumpseries_flange flange on flange.id = wo_line.flange_standard
 		left join kg_qap_plan qap on qap.id = pump_crm.qap_plan_id
 		left join kg_pumpseries_master pumpseries on pumpseries.id = pump_crm.pumpseries_id
 		left join kg_primemover_master primemover on primemover.id = pump_crm.primemover_id """
@@ -636,12 +636,12 @@ class kg_work_order(osv.osv):
 				sheet1.write_merge(s2, s2, c1, c1, 'Pump Type: '+report.upper(), style41)
 				sheet1.write_merge(s2, s2, c1+1, c2, 'WORK ORDER REF: '+rec.name, style5)
 				s2 = s2+1
-				sheet1.write_merge(s2, s2, c1, c1, 'Customer: '+rec.partner_id.name, style5)
-				dealer = '-'
-				if rec.dealer_id.id:
-					dealer = rec.dealer_id.name
-				sheet1.write_merge(s2, s2, c1+1, c2, 'Dealer: '+dealer, style5)
-				s2 = s2+1
+				#~ sheet1.write_merge(s2, s2, c1, c1, 'Customer: '+rec.partner_id.name, style5)
+				#~ dealer = '-'
+				#~ if rec.dealer_id.id:
+					#~ dealer = rec.dealer_id.name
+				#~ sheet1.write_merge(s2, s2, c1+1, c2, 'Dealer: '+dealer, style5)
+				#~ s2 = s2+1
 				order_date = datetime.strptime(rec.entry_date, '%Y-%m-%d').strftime('%d/%m/%Y')
 				sheet1.write_merge(s2, s2, c1, c1, 'Order Date: '+order_date, style_left)
 				due_date = '-'
@@ -692,7 +692,7 @@ class kg_work_order(osv.osv):
 						c1 = 0
 						if var[0] == 'Purpose':
 							print "PUIURURUURRUR STATTATAT HERER ============",s2
-							moc_com_query = """ select wo_line.id as wo_line_id,moc_const.offer_id,moc_const.moc_id,offer_mat.name as moc_offer_name,moc.name as moc_offer_value ,moc_const.seq_no
+							moc_com_query = """ select wo_line.id as wo_line_id,moc_const.offer_id,moc_const.moc_id,offer_mat.name as moc_offer_name,moc.name as moc_offer_value --,moc_const.seq_no
 							from ch_moc_construction moc_const
 							left join kg_offer_materials offer_mat on offer_mat.id = moc_const.offer_id
 							left join kg_moc_master moc on  moc.id = moc_const.moc_id
@@ -706,7 +706,7 @@ class kg_work_order(osv.osv):
 							and wo_line.pump_model_type != '' and wo_line.pump_model_type is not null
 							and pump_offer.enquiry_line_id is not null
 							) """%(pass_param,report)
-							moc_query = """ select distinct offer_id,moc_offer_name,seq_no from ( """+moc_com_query + moc_cond +""" ) as sample order by seq_no"""
+							moc_query = """ select distinct offer_id,moc_offer_name from ( """+moc_com_query + moc_cond +""" ) as sample """
 							cr.execute(moc_query)
 							moc_query_data = cr.dictfetchall()
 							if not moc_query_data:
