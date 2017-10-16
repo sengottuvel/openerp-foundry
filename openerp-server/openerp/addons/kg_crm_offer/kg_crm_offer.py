@@ -1507,9 +1507,9 @@ class kg_crm_offer(osv.osv):
 		rpt_type = ['horizontal','vertical','others']
 		hz_dictn = {
 		'01#Item Details:':[('Equipment No','item_eqno'),('Description','item_desc'),('Quantity in No','item_qty')],
-		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in C','lspec_temp'),('Specific Gravity - Liquid','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Slurry Correction in - kq/kh/kn ','lspec_slur'),('Suction Condition','lspec_suct')],
+		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in C','lspec_temp'),('Specific Gravity - Liquid','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Slurry Correction in - kq/kh/kn ','lspec_slur'),('Consistency In %','lspec_consi'),('Suction Condition','lspec_suct')],
 		'03#Duty Parameters:':[('Capacity in M3/hr','duty_cap'),('Head in Mtr','duty_water_head')],
-		'04#Pump Specification:':[('Pump Type','pump_pmodtype'), ('Pump Model','pump_pmodel'), ('Number of stages','pump_stgno'), ('Size-SuctionX Delivery- in mm','pump_sizex'), ('Flange Standard','pump_flange'), ('Efficiency in % Wat/Liq','pump_eff'), ('BKW  Water	 ','pump_water_bkw'),('BKW  Liquid   ','pump_liquid_bkw'), ('End of the curve - KW(Rated)','pump_eoc'), ('Motor KW ','pump_motor_kw'), ('Speed in RPM- Motor','pump_rpm_motor'),('Speed in RPM- Pump','pump_rpm_pump'), ('Type of Drive','pump_tod'), ('NPSH R - M','pump_npsh'), ('Impeller Type','pump_impeller_type'), ('Impeller Dia Rated / Max / Min - mm','pump_impeller_dia'), ('Maximum Allowable Soild Size - MM','pump_max_solid'), ('Hydrostatic Test Pressure - Kg/cm2','pump_hydro'), ('Shut off Head in M','pump_shut'), ('Minimum Contionuous Flow - M3/hr','pump_mini'), ('Impeller Tip Speed -M/Sec','pump_impeller_tip'), ('Sealing Water Requirement-Pressure','pump_seal_press'), ('Sealing Water Capcity- m3/hr','pump_seal_cap')],
+		'04#Pump Specification:':[('Pump Type','pump_pmodtype'), ('Pump Model','pump_pmodel'), ('Number of stages','pump_stgno'), ('Size-SuctionX Delivery- in mm','pump_sizex'), ('Flange Standard','pump_flange'), ('Efficiency in % Wat/Liq','pump_eff'), ('BKW  Water	 ','pump_water_bkw'),('BKW  Liquid   ','pump_liquid_bkw'), ('End of the curve - KW(Rated)','pump_eoc'), ('Motor KW ','pump_motor_kw'), ('Speed in RPM - Motor','pump_rpm_motor'),('Speed in RPM - Pump','pump_rpm_pump'),('Shaft Sealing','pump_shaft_sealing'),('Type of Drive','pump_tod'), ('NPSH R - M','pump_npsh'),('Impeller Type','pump_impeller_type'),('Impeller Numberr of vanes','pump_impeller_number'),('Impeller Dia Rated / Max / Min - mm','pump_impeller_dia'), ('Maximum Allowable Soild Size - MM','pump_max_solid'), ('Hydrostatic Test Pressure - Kg/cm2','pump_hydro'), ('Shut off Head in M','pump_shut'), ('Minimum Contionuous Flow - M3/hr','pump_mini'), ('Impeller Tip Speed -M/Sec','pump_impeller_tip'), ('Sealing Water Requirement-Pressure','pump_seal_press'),('Sealing Water Capcity- m3/hr','pump_seal_cap'),('Motor Frame Size','pump_framesize')],
 		'05#Material of Construction: ':[('Purpose','purp_categ')],
 		'06#Mechanical Seal: Make: Eagle / Flowserve / Leak Proof / Hifab: ':[('Type / Face combination','mech_type_face'),('Gland Plate / API Plan','mech_gld_api')],
 		'07#Motor: Make: KEC / ABB / CGL :':[('Type / Mounting','mot_type_mount'),('Insulation / Protection','mot_ins_prot'),('Voltage / Phase / Frequency','mot_volt_ph_frq')],
@@ -1517,9 +1517,9 @@ class kg_crm_offer(osv.osv):
 		}
 		vz_dictn = {
 		'01#Item Details:':[('Equipment No','item_eqno'),('Description','item_desc'),('Quantity in No','item_qty')],
-		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in C','lspec_temp'),('Specific Gravity ','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Suction Condition','lspec_suct')],
+		'02#Liquid Specifications:': [('Liquid Handled','lspec_lqd'),('Temperature in C','lspec_temp'),('Specific Gravity ','lspec_sgvt'),('PH value','lspec_ph'),('Viscosity in cp/cst','lspec_viscst'),('Viscosity correction factors - kq/kh/kn ','lspec_visfact'),('Solid Concentration in % /Max Size-mm','lspec_solid'),('Consistency In %','lspec_consi'),('Suction Condition','lspec_suct')],
 		'03#Duty Parameters:':[('Capacity in M3/hr','duty_cap'),('Head in Mtr','duty_water_head'),('Suction Condition','duty_suct')],
-		'04#Pump Specification:':[('Pump Type','pump_pmodtype'), ('Pump Model','pump_pmodel'), ('Number of stages','pump_stgno'), ('Size-SuctionX Delivery- in mm','pump_sizex'), ('Flange Standard','pump_flange'), ('Efficiency in % Wat/Liq','pump_eff'), ('BKW  Water	 ','pump_water_bkw'),('BKW  Liquid   ','pump_liquid_bkw'), ('End of the curve - KW(Rated)','pump_eoc'), ('Motor KW ','pump_motor_kw'), ('Speed in RPM- Motor','pump_rpm_motor'),('Speed in RPM- Pump','pump_rpm_pump'), ('Type of Drive','pump_tod'), ('NPSH R - M','pump_npsh'), ('Impeller Type','pump_impeller_type'), ('Impeller Dia Rated / Max / Min - mm','pump_impeller_dia'), ('Maximum Allowable Soild Size - MM','pump_max_solid'), ('Hydrostatic Test Pressure - Kg/cm2','pump_hydro'), ('Shut off Head in M','pump_shut'), ('Minimum Contionuous Flow - M3/hr','pump_mini'), ('Setting Height in MM ','pump_setting_height'), ('Sump Depth in MM','pump_sump_depth')],
+		'04#Pump Specification:':[('Pump Type','pump_pmodtype'), ('Pump Model','pump_pmodel'), ('Number of stages','pump_stgno'), ('Size-SuctionX Delivery- in mm','pump_sizex'), ('Flange Standard','pump_flange'), ('Efficiency in % Wat/Liq','pump_eff'), ('BKW  Water	 ','pump_water_bkw'),('BKW  Liquid   ','pump_liquid_bkw'), ('End of the curve - KW(Rated)','pump_eoc'), ('Motor KW ','pump_motor_kw'), ('Speed in RPM - Motor','pump_rpm_motor'),('Speed in RPM - Pump','pump_rpm_pump'),('Shaft Sealing','pump_shaft_sealing'),('Type of Drive','pump_tod'), ('NPSH R - M','pump_npsh'), ('Impeller Type','pump_impeller_type'),('Impeller Numberr of vanes','pump_impeller_number'),('Impeller Dia Rated / Max / Min - mm','pump_impeller_dia'), ('Maximum Allowable Soild Size - MM','pump_max_solid'), ('Hydrostatic Test Pressure - Kg/cm2','pump_hydro'), ('Shut off Head in M','pump_shut'), ('Minimum Contionuous Flow - M3/hr','pump_mini'), ('Setting Height in MM ','pump_setting_height'), ('Sump Depth in MM','pump_sump_depth'),('Motor Frame Size','pump_framesize')],
 		'05#Material of Construction: ':[('Purpose','purp_categ')],
 		'06#Mechanical Seal: Make: Eagle / Flowserve / Leak Proof / Hifab: ':[('Type / Face combination','mech_type_face'),('Gland Plate / API Plan','mech_gld_api')],
 		'07#Motor: Make: KEC / ABB / CGL :':[('Type / Mounting','mot_type_mount'),('Insulation / Protection','mot_ins_prot'),('Voltage / Phase / Frequency','mot_volt_ph_frq')],
@@ -1531,6 +1531,7 @@ class kg_crm_offer(osv.osv):
 		coalesce(lspec_lqd,'-') as lspec_lqd,coalesce(lspec_temp,'-') as lspec_temp,coalesce(lspec_sgvt,0) as lspec_sgvt,coalesce(lspec_ph,'-') as lspec_ph,coalesce(lspec_viscst,0) as lspec_viscst,coalesce(lspec_visfact,'-') as lspec_visfact,
 		coalesce(lspec_solid,'-') as lspec_solid,
 		coalesce(lspec_slur,0) as lspec_slur,
+		coalesce(lspec_consi,'0') as lspec_consi,
 		coalesce(lspec_suct,'-') as lspec_suct,
 		coalesce(duty_cap,'-') as duty_cap,coalesce(duty_head,'-') as duty_head,
 		duty_water_head,duty_liquid_head,
@@ -1546,20 +1547,23 @@ class kg_crm_offer(osv.osv):
 		coalesce(pump_eoc,0) as pump_eoc,coalesce(pump_motor_kw,0) as pump_motor_kw,
 		
 		coalesce(pump_rpm_pump,'-') as pump_rpm_pump, -- Testing
+		coalesce(pump_shaft_sealing,'-') as pump_shaft_sealing, -- Testing
 		coalesce(pump_rpm_motor,'-') as pump_rpm_motor, -- Testing
 		
 		--- coalesce(pump_speed,'-') as pump_speed,
 		
 		coalesce(pump_tod1,'-') as pump_tod,
 		coalesce(pump_npsh1,0) as pump_npsh,coalesce(pump_impeller_type,'-') as pump_impeller_type,
+		coalesce(pump_impeller_number,0) as pump_impeller_number,
 		coalesce(pump_impeller_dia,'-') as pump_impeller_dia,
 		coalesce(pump_max_solid,0) as pump_max_solid,coalesce(pump_hydro,0) as pump_hydro,
 		coalesce(pump_shut,0) as pump_shut,coalesce(pump_setting_height,0) as pump_setting_height,
 		coalesce(pump_sump_depth,'-') as pump_sump_depth,
 		coalesce(pump_mini,0) as pump_mini,coalesce(pump_belt,0) as pump_belt,
-		coalesce(pump_motor_kw,0) as pump_motor_kw1,coalesce(pump_speed1,'-') as pump_speed1,
+		coalesce(pump_motor_kw,0) as pump_motor_kw1,coalesce(pump_speed1,'-') as pump_speed1,coalesce(pump_shaft1,'-') as pump_shaft1,
 		coalesce(pump_tod1,'-') as pump_tod1,coalesce(pump_impeller_tip,0) as pump_impeller_tip,
 		coalesce(pump_seal_press,0) as pump_seal_press,coalesce(pump_seal_cap,0) as pump_seal_cap,
+		coalesce(pump_framesize,'-') as pump_framesize,
 		acces,coalesce(mech_type_face,'-') as mech_type_face,coalesce(mech_gld_api,'-') as mech_gld_api,
 		coalesce(mot_type_mount,'-') as mot_type_mount,coalesce(mot_ins_prot,'-') as mot_ins_prot,
 		coalesce(mot_volt_ph_frq,'-') as mot_volt_ph_frq,'bare_pump'::text as bare_pump,'spare'::text as spare from (
@@ -1571,7 +1575,7 @@ class kg_crm_offer(osv.osv):
 		else ( case when ((solid_concern_vol is not null and solid_concern_vol != '') or 
 		(solid_concern is not null and solid_concern != '')) then 
 		(solid_concern_vol::text||'$'||solid_concern::text) else '-' end ) end as lspec_solid,
-		lspec_slur,lspec_suct,
+		lspec_slur,lspec_consi,lspec_suct,
 		
 		case when (duty_cap_lqd is not null and duty_cap_lqd >0) then duty_cap_lqd::text else '-' end as duty_cap, -- Testing
 		/*case when ((duty_cap_wat is not null and duty_cap_wat >0) and 
@@ -1580,7 +1584,6 @@ class kg_crm_offer(osv.osv):
 		else ( case when ((duty_cap_wat is not null and duty_cap_wat >0) or 
 		(duty_cap_lqd is not null and duty_cap_lqd >0)) then 
 		(duty_cap_wat::text||'$'||duty_cap_lqd::text) else '-' end ) end as duty_cap,*/
-		
 		
 		case when (duty_head_wat is not null and duty_head_wat >0) then duty_head_wat::text else '-' end as duty_water_head, -- Testing
 		case when (duty_head_lqd is not null and duty_head_lqd >0) then duty_head_lqd::text else '-' end as duty_liquid_head, -- Testing
@@ -1607,6 +1610,7 @@ class kg_crm_offer(osv.osv):
 		*/
 		case when (pump_speed_in_motor is not null and pump_speed_in_motor != '') then pump_speed_in_motor::text else '-' end as pump_rpm_motor, -- Testing
 		case when (pump_speed_in_rpm is not null and pump_speed_in_rpm != '') then pump_speed_in_rpm::text else '-' end as pump_rpm_pump, -- Testing
+		case when (pump_shaft_sealing is not null and pump_shaft_sealing != '') then pump_shaft_sealing::text else '-' end as pump_shaft_sealing, -- Testing
 		
 		/*case when ((pump_full_load_rpm is not null and pump_full_load_rpm != '') and 
 		(pump_speed_in_rpm is not null and pump_speed_in_rpm != '')) then 
@@ -1614,7 +1618,7 @@ class kg_crm_offer(osv.osv):
 		else ( case when ((pump_full_load_rpm is not null and pump_full_load_rpm != '') or 
 		(pump_speed_in_rpm is not null and pump_speed_in_rpm != '')) then 
 		(pump_full_load_rpm::text||'$'||pump_speed_in_rpm::text) else '-' end ) end as pump_speed,*/
-		pump_tod,pump_npsh,pump_impeller_type,
+		pump_tod,pump_npsh,pump_impeller_type,pump_impeller_number,
 		case when ((pump_imp_dia_rate is not null and pump_imp_dia_rate > 0) and 
 		(pump_impeller_dia_max is not null and pump_impeller_dia_max != '') and (pump_impeller_dia_min is not null and pump_impeller_dia_min != '')) then 
 		(pump_imp_dia_rate::text||'$'||pump_impeller_dia_max||'$'||pump_impeller_dia_min::text)
@@ -1630,8 +1634,14 @@ class kg_crm_offer(osv.osv):
 		else ( case when ((pump_full_load_rpm is not null and pump_full_load_rpm != '') or 
 		(pump_speed_in_rpm is not null and pump_speed_in_rpm != '')) then 
 		(pump_full_load_rpm::text||'$'||pump_speed_in_rpm::text) else '-' end ) end as pump_speed1,
+		
+		case when (pump_shaft_sealing is not null and pump_shaft_sealing != '') then pump_shaft_sealing
+		else ( case when (pump_shaft_sealing is not null and pump_shaft_sealing != '') then 
+		pump_shaft_sealing::text else '-' end ) end as pump_shaft1,
+		
 		pump_tod,pump_npsh as pump_npsh1,pump_impeller_type as pump_impeller_type1,
-		pump_tod as pump_tod1,pump_impeller_tip,pump_seal_press,pump_seal_cap,acces,
+		pump_impeller_number as pump_impeller_number1,
+		pump_tod as pump_tod1,pump_impeller_tip,pump_seal_press,pump_seal_cap,pump_framesize,acces,
 		case when ((mech_type is not null and mech_type != '') and 
 		(mech_face is not null and mech_face != '')) then 
 		(mech_type::text||'$'||mech_face::text)
@@ -1669,12 +1679,12 @@ class kg_crm_offer(osv.osv):
 		"""
 		sqlone_query = """ select crm_id,pump_mod_type,purp_categ,
 		item_eqno,item_desc, item_qty,lspec_lqd,lspec_temp, lspec_sgvt,lspec_ph,lspec_viscst,lspec_visfact,solid_concern_vol,solid_concern,
-		lspec_slur,lspec_suct,duty_cap_wat,duty_cap_lqd,duty_head_wat,duty_head_lqd,
+		lspec_slur,lspec_consi,lspec_suct,duty_cap_wat,duty_cap_lqd,duty_head_wat,duty_head_lqd,
 		duty_suct,pump_pmodtype,pump_pmodel,pump_stgno,pump_sizex,pump_flange,pump_eff,
-		pump_bkw_water,pump_bkw_liq,pump_eoc,pump_motor_kw,pump_full_load_rpm,pump_speed_in_rpm,pump_speed_in_motor,pump_tod,pump_npsh,
-		pump_impeller_type,
+		pump_bkw_water,pump_bkw_liq,pump_eoc,pump_motor_kw,pump_full_load_rpm,pump_speed_in_rpm,pump_shaft_sealing,pump_speed_in_motor,pump_tod,pump_npsh,
+		pump_impeller_type,pump_impeller_number,
 		pump_imp_dia_rate,pump_impeller_dia_max,pump_impeller_dia_min,pump_max_solid,pump_hydro,pump_shut,pump_setting_height,pump_sump_depth,
-		pump_mini,pump_belt,pump_motor_kw as pump_motor_kw1,pump_impeller_tip,pump_seal_press,pump_seal_cap,acces,
+		pump_mini,pump_belt,pump_motor_kw as pump_motor_kw1,pump_impeller_tip,pump_seal_press,pump_seal_cap,pump_framesize,acces,
 		mech_type,mech_face,mech_gland_plate,mech_api_plan,motor_type,motor_mounting,motor_insulation,motor_protection,
 		motor_voltage,motor_phase,motor_Frequency,'bare_pump'::text as bare_pump,
 		'spare'::text as spare
@@ -1693,6 +1703,8 @@ class kg_crm_offer(osv.osv):
 		case when solid_concen_vol>0 then solid_concen_vol::text else ''::text end as solid_concern_vol,
 		case when solid_concen>0 then solid_concen::text else ''::text end as solid_concern,
 		slurry_correction_in as lspec_slur, --- not for vertical
+		
+		consistency as lspec_consi,
 		
 		case when suction_condition = 'positive' then 'Positive' else
 		(case when suction_condition = 'negative' then 'Negative' else
@@ -1720,9 +1732,21 @@ class kg_crm_offer(osv.osv):
 		motor_kw as pump_motor_kw,
 		case when full_load_rpm>0 then full_load_rpm::text else ''::text end as pump_full_load_rpm,
 		case when speed_in_rpm>0 then speed_in_rpm::text else ''::text end as pump_speed_in_rpm,
+		
+		--case when shaft_sealing is not null then shaft_sealing::text else ''::text end as pump_shaft_sealing,
+		case when shaft_sealing is not null then (case when shaft_sealing = 'gld_packing_tiga' then 'Gland Packing-TIGA'
+		when shaft_sealing = 'gld_packing_ptfe' then 'Gland Packing-PTFE'
+		when shaft_sealing = 'gld_packing_tiwa' then 'Gland Packing-TIWA'
+		when shaft_sealing = 'gld_packing_tiba' then 'Gland Packing-TIBA'
+		when shaft_sealing = 'mc_seal' then 'M/C Seal'
+		when shaft_sealing = 'f_s' then 'Felt Seal'
+		when shaft_sealing = 'dynamic_seal' then 'Dynamic Seal'
+		else ''::text end) else ''::text end as pump_shaft_sealing,
+		
 		case when speed_in_motor>0 then speed_in_motor::text else ''::text end as pump_speed_in_motor,
 		npsh_r_m as pump_npsh,
 		impeller_type as pump_impeller_type,
+		impeller_number as pump_impeller_number,
 		
 		case when type_of_drive = 'motor_direct' then ('Direct') else
 		(case when type_of_drive = 'belt_drive' then ('Belt drive') else
@@ -1742,6 +1766,7 @@ class kg_crm_offer(osv.osv):
 		impeller_tip_speed as pump_impeller_tip,
 		sealing_water_pressure as pump_seal_press,
 		sealing_water_capacity as pump_seal_cap,
+		framesize as pump_framesize,
 		---- Pump Specification Ends Here
 		---- MOC Starts Here
 		acces as acces,
@@ -1771,7 +1796,6 @@ class kg_crm_offer(osv.osv):
 		"""
 		sql_twoend = """ ) as sample ) as sample"""
 		for report in rpt_type:
-			print " --- Starts Here ----"
 			crm_line_obj = self.pool.get('ch.kg.crm.pumpmodel')
 			count_sql = """ select 
 			(select name from kg_pumpmodel_master where id = pump_id) as pump_name,
@@ -1782,7 +1806,6 @@ class kg_crm_offer(osv.osv):
 			if not count_data:
 				pass
 			else:
-				print " = RRRRRRRR TTTTTT =============",report
 				if report in ('horizontal','others'):
 					sheet1 = wbk.add_sheet('Horizontal', cell_overwrite_ok=True)
 					dictn = hz_dictn
@@ -1806,7 +1829,7 @@ class kg_crm_offer(osv.osv):
 				s2 = s2+1
 				sheet1.write_merge(s2, s2, c1, c2,"Tel:3053555, 3053556,Fax : 0422-3053535",style4)				
 				s2 = s2+1
-				sheet1.write_merge(s2, s2, c1, c2, report.upper()+' SLURRY-CENTRIFUGAL PUMP OFFER SHEET', style41)
+				sheet1.write_merge(s2, s2, c1, c2, report.upper()+' - CENTRIFUGAL PUMP OFFER SHEET', style41)
 				s2 = s2+1
 				sheet1.write_merge(s2, s2, c1, c2, 'Offer No: '+str(rec.name or '-'), style_highlight)
 				sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
@@ -1914,7 +1937,6 @@ class kg_crm_offer(osv.osv):
 										access_pump_data = cr.dictfetchall()
 										if access_pump_data:
 											for access in access_pump_data:
-												print "access ===",access
 												ref_val = access['sum_line_amt']
 												acc = ref_val
 												sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, acc, style_left)
@@ -1922,7 +1944,6 @@ class kg_crm_offer(osv.osv):
 											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, '-', style_left)
 										pump_cnt += 1
 						elif var[0] == 'Spares':
-							print "SPARE STATTATAT HERER"
 							spare_query = """ select
 							spare_offer.item_name ||' ('|| case when hsn.name is not null then hsn.name else '-' end ||')'||'('|| tax.name||')' as spare_name,
 							pmm.name as pump_name,
@@ -1945,7 +1966,6 @@ class kg_crm_offer(osv.osv):
 								s2 += 1
 							else:
 								s2 = s2
-							print "ddddd",s2
 							pump_cnt = 1
 							if pump_data:
 								for pump in pump_data:
@@ -2001,7 +2021,6 @@ class kg_crm_offer(osv.osv):
 													#~ sheet1.write_merge(s2, s2, c, c, 0.00, style_left)
 										#~ s2 += 1
 									pump_cnt += 1   
-							print "SPARE ENDNDNDNDNND HERER"
 						else:
 							sheet1.write_merge(s2, s2, c1, c1, var[0], style_left)
 						if pump_data:
@@ -2059,7 +2078,6 @@ class kg_crm_offer(osv.osv):
 					for pump in pump_data:
 						c1 += 1
 						sheet1.col(c1).width = 3000
-				print " --- Ends Here ----"			   		
 		
 		"""Parsing data as string """
 		file_data=StringIO.StringIO()
