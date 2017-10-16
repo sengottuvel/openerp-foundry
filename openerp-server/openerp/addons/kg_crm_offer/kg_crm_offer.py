@@ -2141,6 +2141,7 @@ class kg_crm_offer(osv.osv):
 			sheet1.col(4).width = sheet1.col(5).width = 7000
 			sheet1.col(8).width = sheet1.col(9).width = 4000			
 			for pump in pump_data:
+				print"1111111111111111111"
 				gnd_tot.append(pump['line_total_net'])
 				if pump_data.index(pump) == 0:
 					sheet1.write_merge(s2, s2, c1, c1+4, 'CUSTOMER : ', style_highlight)
