@@ -877,7 +877,7 @@ class kg_crm_enquiry(osv.osv):
 					## Spare BOM Prime cost end
 					print"order_item.pump_id.hsn_noorder_item.pump_id.hsn_no",order_item.pump_id.hsn_no
 					gst = ''
-					hsn = ''
+					hsn_no = ''
 					if entry.segment == 'dom':
 						if order_item.pump_id.id and order_item.pump_id.hsn_no:
 							if len(order_item.pump_id.hsn_no) > 1:
