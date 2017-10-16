@@ -11,6 +11,34 @@ import re
 
 from PIL import Image
 
+import StringIO
+import base64
+import string
+try:
+	import xlwt
+except:
+   raise osv.except_osv('Warning !','Please download python xlwt module from\nhttp://pypi.python.org/packages/source/x/xlwt/xlwt-0.7.2.tar.gz\nand install it')
+
+record={}
+wbk = xlwt.Workbook()
+style_mast_header = xlwt.easyxf('font: height 320;font: bold off;align: wrap on;align: wrap off, vert bottom, horiz center;border: top thin, bottom thin, left thin, right thin;')
+style_header1 = xlwt.easyxf('font: bold on,height 200;align: wrap off, vert bottom, horiz center;border: top thin, bottom thin, left thin, right thin;')
+style_center = xlwt.easyxf('font: height 180,name Calibri;align: wrap off, vert bottom, horiz center;border: top thin, bottom thin, left thin, right thin;')		
+style_left_header = xlwt.easyxf('font: bold on,height 220,color_index 0X36;align: wrap off, vert center, horiz left;border: top thin, bottom thin, left thin, right thin;')			
+style_left = xlwt.easyxf('font: height 180,name Calibri;align: wrap off, vert bottom, horiz left;border: top thin, bottom thin, left thin, right thin;')
+style_right = xlwt.easyxf('font: height 180,name Calibri;align: wrap off, vert bottom, horiz right;border: top thin, bottom thin, left thin, right thin;',num_format_str='#,##,##0.00')             		
+style_sub_left = xlwt.easyxf('font: height 180,underline on,bold on,name Calibri;align: wrap off, vert bottom, horiz left;border: top thin, bottom thin, left thin, right thin;')		
+style_highlight = xlwt.easyxf('font: height 180,bold on,name Calibri,color_index black;align: wrap off, vert bottom, horiz left;border: top thin, bottom thin, left thin, right thin;')		
+style_right_header = xlwt.easyxf('font: height 180,bold on,name Calibri,color_index black;align: wrap off, vert bottom, horiz right;border: top thin, bottom thin, left thin, right thin;')     
+style_center_header = xlwt.easyxf('font: height 180,bold on,name Calibri,color_index black;align: wrap off, vert bottom, horiz center;border: top thin, bottom thin, left thin, right thin;')
+style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')
+style2 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
+style3 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
+style41 = xlwt.easyxf('font: height 200,bold on,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')		
+style4 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')
+
+
+
 CALL_TYPE_SELECTION = [
 	('service','Service'),
 	('new_enquiry','New Enquiry')
@@ -303,6 +331,13 @@ class kg_crm_offer(osv.osv):
 		
 		'rep_data':fields.binary("Offer Copy",readonly=True),
 		'term_data':fields.binary("Terms Copy",readonly=True),
+		
+		### Spare Reports Purpose
+		
+		'spare_reg_data':fields.binary("Sapre Regular Copy",readonly=True),
+		'spare_bud_data':fields.binary("Spare Budgetary Copy",readonly=True),
+		'spare_reg_copy': fields.char('Spare Regular Copy'),
+		'spare_bud_copy': fields.char('Spare Budgetary Copy'),
 		
 	}
 	
@@ -2035,6 +2070,257 @@ class kg_crm_offer(osv.osv):
 		report_name = 'Offer Copy' + '.' + 'xls'
 		
 		return self.write(cr, uid, ids, {'rep_data':out,'offer_copy':report_name},context=context)
+	
+	def spare_regular_copy(self,cr,uid,ids,context=None):
+		pump_sql = """ 
+		select offer_ref_id,enquiry_line_id,
+		coalesce((line_tot),0.00) as ref_tot,
+		coalesce((line_total_net),0.00) as line_total_net,
+		trim(TO_CHAR((coalesce((line_tot),0.00)), '999G999G99G999G99G99G990D99')) as line_tot_txt,
+		company_name,to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
+		pump_id,offer_ref,offer_date,customer,pump_name,serial_no from (
+		select distinct spare.enquiry_line_id, offer.id as offer_ref_id,company.name as company_name,
+		spare.pump_id as pump_id,offer.name as offer_ref,to_char(offer.offer_date::date,'dd-mm-YYYY') as offer_date,
+		partner.name as customer,pump.name as pump_name,enquiry.s_no as serial_no,spare.r_net_amt_tot as line_total_net,
+		case when offer.id is not null then
+		(select coalesce((sum(coalesce(r_net_amt_tot::numeric,0.00))),0.00) as gnd_tot from
+		(select r_net_amt_tot from ch_spare_offer 
+		where header_id = offer.id ) as sub ) else 0.00 end as line_tot from kg_crm_offer offer
+		left join ch_spare_offer spare on(spare.header_id = offer.id)
+		left join kg_pumpmodel_master pump on(pump.id = spare.pump_id)
+		left join ch_kg_crm_pumpmodel enquiry on(enquiry.id = spare.enquiry_line_id)
+		left join res_partner partner on(partner.id=offer.customer_id)
+		left join res_company company on(company.id=offer.company_id) 
+		where offer.id=%s and offer.state != 'draft' and spare.enquiry_line_id is not null
+		) as sample		
+		"""%(ids[0])
+		cr.execute(pump_sql)
+		pump_data = cr.dictfetchall()
+		pass_id = []
+		cmp_obj = self.pool.get('res.company')
+		wbk = xlwt.Workbook()
+		sheet1 = wbk.add_sheet('Spare Regular Copy')
+		report_name = 'Spare Regular Copy' + '.' + 'xls'
+		s1 = 0
+		c1=0
+		s2 = s1+1	
+		count = 9		
+		if pump_data:
+			gnd_tot = []
+			cmp_ids = cmp_obj.browse(cr, uid, 1)
+			c2 = c1+count				
+			sheet1.write_merge(s2, s2, c1, c2,"SAM TURBO INDUSTRY PRIVATE LIMITED",style1)
+			sheet1.row(0).height = 400
+			s2 = s2+1
+			sheet1.write_merge(s2, s2, c1, c2,"Avinashi Road, Neelambur, Coimbatore - 641062",style4)
+			s2 = s2+1
+			sheet1.write_merge(s2, s2, c1, c2,"Tel:3053555, 3053556,Fax : 0422-3053535",style4)				
+			s2 = s2+1
+			sheet1.write_merge(s2, s2, c1, c2, 'SPARE REGULAR COPY', style41)
+			s2 = s2+1			
+			sheet1.col(0).width = sheet1.col(3).width = sheet1.col(6).width = sheet1.col(7).width = 3000
+			sheet1.col(1).width = sheet1.col(2).width = 5000
+			sheet1.col(4).width = sheet1.col(5).width = 7000
+			sheet1.col(8).width = sheet1.col(9).width = 4000			
+			for pump in pump_data:
+				gnd_tot.append(pump['line_total_net'])
+				if pump_data.index(pump) == 0:
+					sheet1.write_merge(s2, s2, c1, c1+4, 'CUSTOMER : ', style_highlight)
+					sheet1.write_merge(s2, s2, c1+4+1, count, pump['customer'], style_highlight)
+					s2 = s2+1					
+				sheet1.write_merge(s2, s2, c1, c1+4, 'PUMP MODEL : ', style_highlight)
+				sheet1.write_merge(s2, s2, c1+4+1, count, pump['pump_name'], style_highlight)
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, c1, c1+4, 'EARLIER PUMP SERIAL NO : ', style_highlight)
+				sheet1.write_merge(s2, s2, c1+4+1, count, pump['serial_no'], style_highlight)
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, 0, 0, 'ITEM NO', style_highlight)
+				sheet1.write_merge(s2, s2, 1, 1, 'MATERIAL CODE', style_highlight)
+				sheet1.write_merge(s2, s2, 2, 2, 'HSN Code', style_highlight)
+				sheet1.write_merge(s2, s2, 3, 3, 'GST %', style_highlight)
+				sheet1.write_merge(s2, s2, 4, 4, 'PART NAME / PART NO', style_highlight)
+				sheet1.write_merge(s2, s2, 5, 5, 'MATERIAL', style_highlight)
+				sheet1.write_merge(s2, s2, 6, 6, 'QTY', style_right_header)
+				sheet1.write_merge(s2, s2, 7, 7, 'UNIT', style_highlight)
+				sheet1.write_merge(s2, s2, 8, 8, 'PRICE /EACH IN Rs.', style_right_header)
+				sheet1.write_merge(s2, s2, 9, 9, 'TOTAL PRICE', style_right_header)
+				s2 = s2+1
+				det_sql = """ select
+				coalesce(spare.material_code,'-') as material_code,coalesce(spare.off_name,'-') as off_name,
+				pattern.name as pattern_no,moc.name as moc_name,spare.qty as qty,case when uom.name is not null then uom.name else 'No' end as unit,'A' as type,
+				coalesce(hsn.name::text,'-') as hsn_code,coalesce(tax.description,'-') as tax_per,
+				trim(TO_CHAR((coalesce(spare.r_net_amt_tot / spare.qty,0.00)), '999G999G99G999G99G99G990D99')) as each_price_txt,
+				trim(TO_CHAR((coalesce(spare.r_net_amt_tot,0.00)), '999G999G99G999G99G99G990D99')) as total_price_txt
+				from ch_spare_offer spare
+				left join kg_pattern_master pattern on (pattern.id = spare.pattern_id)
+				left join kg_hsn_master hsn on (hsn.id = spare.hsn_no)
+				left join product_uom uom on (uom.id = spare.uom_id)
+				left join account_tax tax on (tax.id = hsn.igst_id)
+				left join kg_moc_master moc on (moc.id = spare.moc_id)
+				left join kg_moc_construction moc_const on (moc_const.id = spare.moc_const_id)
+				where spare.enquiry_line_id=%s """%(pump['enquiry_line_id'])
+				cr.execute(det_sql)
+				det_data = cr.dictfetchall()
+				if det_data:
+					sno = 1
+					for var in det_data:
+						sheet1.write_merge(s2, s2, 0, 0, sno, style_left)
+						sheet1.write_merge(s2, s2, 1, 1, var['material_code'], style_left)
+						sheet1.write_merge(s2, s2, 2, 2, var['hsn_code'], style_left)
+						sheet1.write_merge(s2, s2, 3, 3, var['tax_per'], style_left)
+						sheet1.write_merge(s2, s2, 4, 4, var['off_name'], style_left)
+						sheet1.write_merge(s2, s2, 5, 5, var['moc_name'], style_left)
+						sheet1.write_merge(s2, s2, 6, 6, var['qty'], style_right)
+						sheet1.write_merge(s2, s2, 7, 7, var['unit'], style_left)
+						sheet1.write_merge(s2, s2, 8, 8, var['each_price_txt'], style_right)
+						sheet1.write_merge(s2, s2, 9, 9, var['total_price_txt'], style_right)
+						s2 = s2+1
+						sno = sno + 1
+			user_rec = self.pool.get('res.users').browse(cr,uid,uid)
+			sheet1.write_merge(s2, s2, 0, count-1,"Total",style_center_header)
+			sheet1.write_merge(s2, s2, count, count,sum(gnd_tot),style_right_header)
+			s2 = s2+2
+			sheet1.write_merge(s2, s2, 6, count,"FOR SAM TURBO INDUSTRY PVT LTD",style_center_header)
+			s2 = s2+3
+			sheet1.write_merge(s2, s2, 6, count,user_rec.login,style_center_header)
+			s2 = s2+1
+			sheet1.write_merge(s2, s2, 6, count,"Authorized Signature",style_center_header)
+			s2 = s2+1
+			#~ sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			#~ sheet1.row(0).height = 400
+			#~ sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,c2)
+		else:
+			sheet1.write_merge(0, s2, 0, count, 'No record Exists', xlwt.easyxf('font: height 220,name Calibri;font: bold on;align: wrap on, horiz center;border: top thin, bottom thin, left thin, right thin;'))
+		"""Parsing data as string """
+		file_data=StringIO.StringIO()
+		o=wbk.save(file_data)		
+		"""string encode of data in wksheet"""		
+		out=base64.encodestring(file_data.getvalue())
+		"""returning the output xls as binary"""
+		print "fffff",report_name
+		return self.write(cr, uid, ids, {'spare_reg_data':out,'spare_reg_copy':report_name},context=context)
+		
+	def spare_budgetary_copy(self,cr,uid,ids,context=None):
+		pump_sql = """ 
+		select offer_ref_id,enquiry_line_id,
+		coalesce((line_tot),0.00) as ref_tot,
+		coalesce((line_total_net),0.00) as line_total_net,
+		trim(TO_CHAR((coalesce((line_tot),0.00)), '999G999G99G999G99G99G990D99')) as line_tot_txt,		
+		company_name,to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
+		pump_id,offer_ref,offer_date,customer,pump_name,serial_no from (
+		select distinct spare.enquiry_line_id, offer.id as offer_ref_id,company.name as company_name,
+		spare.pump_id as pump_id,offer.name as offer_ref,to_char(offer.offer_date::date,'dd-mm-YYYY') as offer_date,
+		partner.name as customer,pump.name as pump_name,enquiry.s_no as serial_no,spare.r_net_amt_tot as line_total_net,
+		case when offer.id is not null then
+		(select coalesce((sum(coalesce(r_net_amt_tot::numeric,0.00))),0.00) as gnd_tot from
+		(select r_net_amt_tot from ch_spare_offer 
+		where header_id = offer.id ) as sub ) else 0.00 end as line_tot from kg_crm_offer offer
+		left join ch_spare_offer spare on(spare.header_id = offer.id)
+		left join kg_pumpmodel_master pump on(pump.id = spare.pump_id)
+		left join ch_kg_crm_pumpmodel enquiry on(enquiry.id = spare.enquiry_line_id)
+		left join res_partner partner on(partner.id=offer.customer_id)
+		left join res_company company on(company.id=offer.company_id) 
+		where offer.id=%s and offer.state != 'draft' and spare.enquiry_line_id is not null
+		) as sample		
+		"""%(ids[0])
+		cr.execute(pump_sql)
+		pump_data = cr.dictfetchall()
+		pass_id = []
+		cmp_obj = self.pool.get('res.company')
+		wbk = xlwt.Workbook()
+		sheet1 = wbk.add_sheet('Spare Budgetary Copy')
+		report_name = 'Spare Budgetary Copy' + '.' + 'xls'
+		s1 = 0
+		c1=0
+		s2 = s1+1	
+		count = 6	
+		if pump_data:
+			gnd_tot = []
+			cmp_ids = cmp_obj.browse(cr, uid, 1)
+			c2 = c1+count				
+			sheet1.write_merge(s2, s2, c1, c2,"SAM TURBO INDUSTRY PRIVATE LIMITED",style1)
+			sheet1.row(0).height = 400
+			s2 = s2+1
+			sheet1.write_merge(s2, s2, c1, c2,"Avinashi Road, Neelambur, Coimbatore - 641062",style4)
+			s2 = s2+1
+			sheet1.write_merge(s2, s2, c1, c2,"Tel:3053555, 3053556,Fax : 0422-3053535",style4)				
+			s2 = s2+1
+			sheet1.write_merge(s2, s2, c1, c2, 'SPARE REGULAR COPY', style41)
+			s2 = s2+1			
+			sheet1.col(0).width = sheet1.col(3).width = 3000
+			sheet1.col(1).width = sheet1.col(2).width = 5000
+			sheet1.col(4).width = 7000
+			sheet1.col(5).width = sheet1.col(6).width = 6000			
+			for pump in pump_data:
+				gnd_tot.append(pump['line_total_net'])
+				if pump_data.index(pump) == 0:
+					sheet1.write_merge(s2, s2, c1, c1+4, 'CUSTOMER : ', style_highlight)
+					sheet1.write_merge(s2, s2, c1+4+1, count, pump['customer'], style_highlight)
+					s2 = s2+1					
+				sheet1.write_merge(s2, s2, c1, c1+4, 'PUMP MODEL : ', style_highlight)
+				sheet1.write_merge(s2, s2, c1+4+1, count, pump['pump_name'], style_highlight)
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, c1, c1+4, 'EARLIER PUMP SERIAL NO : ', style_highlight)
+				sheet1.write_merge(s2, s2, c1+4+1, count, pump['serial_no'], style_highlight)
+				s2 = s2+1
+				sheet1.write_merge(s2, s2, 0, 0, 'ITEM NO', style_highlight)
+				sheet1.write_merge(s2, s2, 1, 1, 'MATERIAL CODE', style_highlight)
+				sheet1.write_merge(s2, s2, 2, 2, 'HSN Code', style_highlight)
+				sheet1.write_merge(s2, s2, 3, 3, 'GST %', style_highlight)
+				sheet1.write_merge(s2, s2, 4, 4, 'PART NAME', style_highlight)
+				sheet1.write_merge(s2, s2, 5, 5, 'MATERIAL', style_highlight)
+				sheet1.write_merge(s2, s2, 6, 6, 'PRICE /EACH IN Rs.', style_right_header)
+				s2 = s2+1
+				det_sql = """ select
+				coalesce(spare.material_code,'-') as material_code,coalesce(spare.off_name,'-') as off_name,
+				pattern.name as pattern_no,moc.name as moc_name,spare.qty as qty,case when uom.name is not null then uom.name else 'No' end as unit,'A' as type,
+				coalesce(hsn.name::text,'-') as hsn_code,coalesce(tax.description,'-') as tax_per,
+				trim(TO_CHAR((coalesce(spare.r_net_amt_tot / spare.qty,0.00)), '999G999G99G999G99G99G990D99')) as each_price_txt,
+				trim(TO_CHAR((coalesce(spare.r_net_amt_tot,0.00)), '999G999G99G999G99G99G990D99')) as total_price_txt
+				from ch_spare_offer spare
+				left join kg_pattern_master pattern on (pattern.id = spare.pattern_id)
+				left join kg_hsn_master hsn on (hsn.id = spare.hsn_no)
+				left join product_uom uom on (uom.id = spare.uom_id)
+				left join account_tax tax on (tax.id = hsn.igst_id)
+				left join kg_moc_master moc on (moc.id = spare.moc_id)
+				left join kg_moc_construction moc_const on (moc_const.id = spare.moc_const_id)
+				where spare.enquiry_line_id=%s """%(pump['enquiry_line_id'])
+				cr.execute(det_sql)
+				det_data = cr.dictfetchall()
+				if det_data:
+					sno = 1
+					for var in det_data:
+						sheet1.write_merge(s2, s2, 0, 0, sno, style_left)
+						sheet1.write_merge(s2, s2, 1, 1, var['material_code'], style_left)
+						sheet1.write_merge(s2, s2, 2, 2, var['hsn_code'], style_left)
+						sheet1.write_merge(s2, s2, 3, 3, var['tax_per'], style_left)
+						sheet1.write_merge(s2, s2, 4, 4, var['off_name'], style_left)
+						sheet1.write_merge(s2, s2, 5, 5, var['moc_name'], style_left)
+						sheet1.write_merge(s2, s2, 6, 6, var['each_price_txt'], style_right)
+						s2 = s2+1
+						sno = sno + 1
+			user_rec = self.pool.get('res.users').browse(cr,uid,uid)
+			sheet1.write_merge(s2, s2, 0, count-1,"Total",style_center_header)
+			sheet1.write_merge(s2, s2, count, count,sum(gnd_tot),style_right_header)
+			s2 = s2+2
+			sheet1.write_merge(s2, s2, 5, count,"FOR SAM TURBO INDUSTRY PVT LTD",style_center_header)
+			s2 = s2+3
+			sheet1.write_merge(s2, s2, 5, count,user_rec.login,style_center_header)
+			s2 = s2+1
+			sheet1.write_merge(s2, s2, 5, count,"Authorized Signature",style_center_header)
+			s2 = s2+1
+			#~ sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			#~ sheet1.row(0).height = 400
+			#~ sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,c2)
+		else:
+			sheet1.write_merge(0, s2, 0, count, 'No record Exists', xlwt.easyxf('font: height 220,name Calibri;font: bold on;align: wrap on, horiz center;border: top thin, bottom thin, left thin, right thin;'))
+		"""Parsing data as string """
+		file_data=StringIO.StringIO()
+		o=wbk.save(file_data)		
+		"""string encode of data in wksheet"""		
+		out=base64.encodestring(file_data.getvalue())
+		"""returning the output xls as binary"""
+		return self.write(cr, uid, ids, {'spare_bud_data':out,'spare_bud_copy':report_name},context=context)
 	
 	def onchange_term(self, cr, uid, ids, load_term,line_term_ids):
 		term_vals=[]
