@@ -157,7 +157,7 @@
 		</record>
 		
 		 <record id="mma_brandmocrate_design_master" model="ir.actions.act_window">
-			<field name="name">Brand/Moc/Rate-Design</field>
+			<field name="name">Brand/Moc/Rate</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.brandmoc.rate</field>
 			<field name="view_type">form</field>
@@ -189,6 +189,8 @@
 		
 			<menuitem action="mma_brandmocrate_design_master" name="Brand/Moc/Rate-Design" id="mam_brandmocrate_design_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="15"/> 
 		
+			<menuitem action="mma_brandmocrate_design_master" name="Brand/Moc/Rate-Marketing" id="mam_brandmocrate_marketing_master" parent="kg_menus.cpm_crm_master_menu" sequence="17"/> 
+			
 		<!-- Brand/Moc/Rate-Purchase Master  --> 
 			<menuitem action="mma_brandmocrate_purchase_master" name="Brand/Moc/Rate-Purchase" id="mam_brandmocrate_purchase_master" parent="kg_menus.ppm_master_menu" sequence="13"/>
 				 

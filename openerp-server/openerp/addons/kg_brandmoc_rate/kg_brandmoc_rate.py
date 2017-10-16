@@ -47,7 +47,7 @@ class kg_brandmoc_rate(osv.osv):
 	
 	_columns = {
 			
-		'product_id': fields.many2one('product.product','Product Name', required=True),
+		'product_id': fields.many2one('product.product','Product Name', required=True,domain="[('product_type','in',['primemover','mechanical_seal'])]"),
 		'uom_id': fields.many2one('product.uom','UOM',required=True),
 		'name': fields.char('Name'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
