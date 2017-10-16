@@ -26,7 +26,19 @@ class onscreen_spare_regular_report(JasperDataParser.JasperDataParser):
 	def generate_parameters(self, cr, uid, ids, data, context):
 		val={}	
 		user_rec = self.pool.get('res.users').browse(cr,uid,uid)
-			
+		if user_rec.signature:
+			signature = user_rec.signature
+			myfile = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/SIGN.jpg'
+			if os.path.isfile(myfile) == True:
+				os.remove(myfile)
+			else:
+				pass
+			filepath = os.path.join('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img','SIGN.jpg')
+			f = open(filepath, "a")
+			f.write(signature.decode('base64'))
+			val['sign'] = '/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/SIGN.jpg'
+		else:
+			val['sign'] = ''	
 		val['offer_id'] = ids[0]
 		val['printed_by'] = user_rec.name
 		print "val....................", val
