@@ -986,19 +986,19 @@ class kg_crm_offer(osv.osv):
 		if pump_off_ids:
 			for ele in pump_off_ids:
 				pump_off_rec = self.pool.get('ch.pump.offer').browse(cr,uid,ele)
-				wrk_val = pump_off_rec.works_value
+				wrk_val = pump_off_rec.r_sam_ratio_tot
 				works_value += wrk_val
 		spare_off_ids = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
 		if spare_off_ids:
 			for ele in spare_off_ids:
 				spare_off_rec = self.pool.get('ch.spare.offer').browse(cr,uid,ele)
-				wrk_val = spare_off_rec.works_value
+				wrk_val = spare_off_rec.r_sam_ratio_tot
 				works_value += wrk_val
 		access_off_ids = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
 		if access_off_ids:
 			for ele in access_off_ids:
 				access_off_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,ele)
-				wrk_val = access_off_rec.works_value
+				wrk_val = access_off_rec.r_sam_ratio_tot
 				works_value += wrk_val
 		
 		pump_vals = {
@@ -2093,13 +2093,13 @@ class kg_crm_offer(osv.osv):
 		pump_sql = """ 
 		select offer_ref_id,enquiry_line_id,
 		coalesce((line_tot),0.00) as ref_tot,
-		coalesce((line_total_net),0.00) as line_total_net,
+		
 		trim(TO_CHAR((coalesce((line_tot),0.00)), '999G999G99G999G99G99G990D99')) as line_tot_txt,
 		company_name,to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
 		pump_id,offer_ref,offer_date,customer,pump_name,serial_no from (
 		select distinct spare.enquiry_line_id, offer.id as offer_ref_id,company.name as company_name,
 		spare.pump_id as pump_id,offer.name as offer_ref,to_char(offer.offer_date::date,'dd-mm-YYYY') as offer_date,
-		partner.name as customer,pump.name as pump_name,enquiry.s_no as serial_no,spare.r_net_amt_tot as line_total_net,
+		partner.name as customer,pump.name as pump_name,enquiry.s_no as serial_no,		
 		case when offer.id is not null then
 		(select coalesce((sum(coalesce(r_net_amt_tot::numeric,0.00))),0.00) as gnd_tot from
 		(select r_net_amt_tot from ch_spare_offer 
@@ -2140,9 +2140,7 @@ class kg_crm_offer(osv.osv):
 			sheet1.col(1).width = sheet1.col(2).width = 5000
 			sheet1.col(4).width = sheet1.col(5).width = 7000
 			sheet1.col(8).width = sheet1.col(9).width = 4000			
-			for pump in pump_data:
-				print"1111111111111111111"
-				gnd_tot.append(pump['line_total_net'])
+			for pump in pump_data:				
 				if pump_data.index(pump) == 0:
 					sheet1.write_merge(s2, s2, c1, c1+4, 'CUSTOMER : ', style_highlight)
 					sheet1.write_merge(s2, s2, c1+4+1, count, pump['customer'], style_highlight)
@@ -2195,9 +2193,15 @@ class kg_crm_offer(osv.osv):
 						sheet1.write_merge(s2, s2, 9, 9, var['total_price_txt'], style_right)
 						s2 = s2+1
 						sno = sno + 1
+			data_sql = pump_sql
+			cr.execute(data_sql)
+			pump_one_data = cr.dictfetchone()
+			pump_one_tot = 0.00
+			if pump_one_data:
+				pump_one_tot = pump_one_data['ref_tot']
 			user_rec = self.pool.get('res.users').browse(cr,uid,uid)
 			sheet1.write_merge(s2, s2, 0, count-1,"Total",style_center_header)
-			sheet1.write_merge(s2, s2, count, count,sum(gnd_tot),style_right_header)
+			sheet1.write_merge(s2, s2, count, count,pump_one_tot,style_right_header)
 			s2 = s2+2
 			sheet1.write_merge(s2, s2, 6, count,"FOR SAM TURBO INDUSTRY PVT LTD",style_center_header)
 			s2 = s2+3
@@ -2222,8 +2226,7 @@ class kg_crm_offer(osv.osv):
 	def spare_budgetary_copy(self,cr,uid,ids,context=None):
 		pump_sql = """ 
 		select offer_ref_id,enquiry_line_id,
-		coalesce((line_tot),0.00) as ref_tot,
-		coalesce((line_total_net),0.00) as line_total_net,
+		coalesce((line_tot),0.00) as ref_tot,		
 		trim(TO_CHAR((coalesce((line_tot),0.00)), '999G999G99G999G99G99G990D99')) as line_tot_txt,		
 		company_name,to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
 		pump_id,offer_ref,offer_date,customer,pump_name,serial_no from (
@@ -2270,8 +2273,7 @@ class kg_crm_offer(osv.osv):
 			sheet1.col(1).width = sheet1.col(2).width = 5000
 			sheet1.col(4).width = 7000
 			sheet1.col(5).width = sheet1.col(6).width = 6000			
-			for pump in pump_data:
-				gnd_tot.append(pump['line_total_net'])
+			for pump in pump_data:				
 				if pump_data.index(pump) == 0:
 					sheet1.write_merge(s2, s2, c1, c1+4, 'CUSTOMER : ', style_highlight)
 					sheet1.write_merge(s2, s2, c1+4+1, count, pump['customer'], style_highlight)
@@ -2318,9 +2320,15 @@ class kg_crm_offer(osv.osv):
 						sheet1.write_merge(s2, s2, 6, 6, var['each_price_txt'], style_right)
 						s2 = s2+1
 						sno = sno + 1
+			data_sql = pump_sql
+			cr.execute(data_sql)
+			pump_one_data = cr.dictfetchone()
+			pump_one_tot = 0.00
+			if pump_one_data:
+				pump_one_tot = pump_one_data['ref_tot']
 			user_rec = self.pool.get('res.users').browse(cr,uid,uid)
 			sheet1.write_merge(s2, s2, 0, count-1,"Total",style_center_header)
-			sheet1.write_merge(s2, s2, count, count,sum(gnd_tot),style_right_header)
+			sheet1.write_merge(s2, s2, count, count,pump_one_tot,style_right_header)
 			s2 = s2+2
 			sheet1.write_merge(s2, s2, 5, count,"FOR SAM TURBO INDUSTRY PVT LTD",style_center_header)
 			s2 = s2+3

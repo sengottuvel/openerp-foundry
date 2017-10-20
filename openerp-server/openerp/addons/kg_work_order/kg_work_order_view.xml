@@ -65,7 +65,7 @@
 									<field name="order_category" />
 									<field name="pump_model_id" />
 									<field name="qty" sum="Total Qty"/>
-									<field name="unit_price" sum="Total Price"/>
+									<field name="unit_price" sum="unit_price"/>
 									<field name="delivery_date"/>
 								</tree>
 							</field>
