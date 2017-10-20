@@ -2092,8 +2092,7 @@ class kg_crm_offer(osv.osv):
 	def spare_regular_copy(self,cr,uid,ids,context=None):
 		pump_sql = """ 
 		select offer_ref_id,enquiry_line_id,
-		coalesce((line_tot),0.00) as ref_tot,
-		
+		coalesce((line_tot),0.00) as ref_tot,		
 		trim(TO_CHAR((coalesce((line_tot),0.00)), '999G999G99G999G99G99G990D99')) as line_tot_txt,
 		company_name,to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
 		pump_id,offer_ref,offer_date,customer,pump_name,serial_no from (
@@ -2198,7 +2197,7 @@ class kg_crm_offer(osv.osv):
 			pump_one_data = cr.dictfetchone()
 			pump_one_tot = 0.00
 			if pump_one_data:
-				pump_one_tot = pump_one_data['ref_tot']
+				pump_one_tot = pump_one_data['line_tot_txt']
 			user_rec = self.pool.get('res.users').browse(cr,uid,uid)
 			sheet1.write_merge(s2, s2, 0, count-1,"Total",style_center_header)
 			sheet1.write_merge(s2, s2, count, count,pump_one_tot,style_right_header)
@@ -2232,7 +2231,7 @@ class kg_crm_offer(osv.osv):
 		pump_id,offer_ref,offer_date,customer,pump_name,serial_no from (
 		select distinct spare.enquiry_line_id, offer.id as offer_ref_id,company.name as company_name,
 		spare.pump_id as pump_id,offer.name as offer_ref,to_char(offer.offer_date::date,'dd-mm-YYYY') as offer_date,
-		partner.name as customer,pump.name as pump_name,enquiry.s_no as serial_no,spare.r_net_amt_tot as line_total_net,
+		partner.name as customer,pump.name as pump_name,enquiry.s_no as serial_no,
 		case when offer.id is not null then
 		(select coalesce((sum(coalesce(r_net_amt_tot::numeric,0.00))),0.00) as gnd_tot from
 		(select r_net_amt_tot from ch_spare_offer 
@@ -2325,7 +2324,7 @@ class kg_crm_offer(osv.osv):
 			pump_one_data = cr.dictfetchone()
 			pump_one_tot = 0.00
 			if pump_one_data:
-				pump_one_tot = pump_one_data['ref_tot']
+				pump_one_tot = pump_one_data['line_tot_txt']
 			user_rec = self.pool.get('res.users').browse(cr,uid,uid)
 			sheet1.write_merge(s2, s2, 0, count-1,"Total",style_center_header)
 			sheet1.write_merge(s2, s2, count, count,pump_one_tot,style_right_header)
