@@ -2326,8 +2326,8 @@ class kg_crm_offer(osv.osv):
 			if pump_one_data:
 				pump_one_tot = pump_one_data['line_tot_txt']
 			user_rec = self.pool.get('res.users').browse(cr,uid,uid)
-			sheet1.write_merge(s2, s2, 0, count-1,"Total",style_center_header)
-			sheet1.write_merge(s2, s2, count, count,pump_one_tot,style_right_header)
+			#~ sheet1.write_merge(s2, s2, 0, count-1,"Total",style_center_header)
+			#~ sheet1.write_merge(s2, s2, count, count,pump_one_tot,style_right_header)
 			s2 = s2+2
 			sheet1.write_merge(s2, s2, 5, count,"FOR SAM TURBO INDUSTRY PVT LTD",style_center_header)
 			s2 = s2+3
