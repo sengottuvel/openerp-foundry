@@ -58,7 +58,21 @@ class kg_production(osv.osv):
 		result[entry.id]= wgt
 		
 		return result
-		
+	
+	def _get_mould_total_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		total_weight = 0.00
+		wgt = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			if entry.moc_id.weight_type == 'ci':
+				wgt = entry.pattern_id.ci_weight
+			if entry.moc_id.weight_type == 'ss':
+				wgt = entry.pattern_id.pcs_weight
+			if entry.moc_id.weight_type == 'non_ferrous':
+				wgt = entry.pattern_id.nonferous_weight			
+			total_weight = entry.mould_rem_qty * wgt
+		result[entry.id]= total_weight
+		return result	
 	def _get_total_weight(self, cr, uid, ids, field_name, arg, context=None):
 		result = {}
 		total_weight = 0.00
@@ -133,7 +147,7 @@ class kg_production(osv.osv):
 		'order_date': fields.related('order_id','entry_date', type='date', string='Order Date', store=True, readonly=True),
 		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'order_priority': fields.selection(ORDER_PRIORITY, string='Priority', store=True, readonly=True),
-		'order_value': fields.related('order_id','order_value', type='float', string='WO Value', store=True, readonly=True),
+		'order_value': fields.float('WO Value', readonly=True),
 		
 		'pump_model_id': fields.related('order_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.many2one('kg.pattern.master', 'Pattern Number', readonly=True),
@@ -212,6 +226,7 @@ class kg_production(osv.osv):
 		'mould_pan_no':fields.char('PAN No.', size=128),
 		'mould_remarks': fields.text('Remarks'),
 		'mould_mc_flag': fields.boolean('Mould MC'),
+		'mould_total_weight': fields.function(_get_mould_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
 		
 		
 		### Pouring Log ###

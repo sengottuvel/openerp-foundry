@@ -9,7 +9,7 @@
 			<field name="name">Work Order Entry Form</field>
 			<field name="model">kg.work.order</field>
 			<field name="arch" type="xml">
-				<form string="Work Order" version="7.0">
+				<form string="Work Order" version="7.0" create="false">
 					<header>
 						<button name="mkt_approve" type="object" string="WFMKT Approval" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"
 							/>
@@ -108,7 +108,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
-								toolbar="True" string="Work Order Entry Tree">					
+								toolbar="True" string="Work Order Entry Tree" create="false">					
 					<field name="name"/>
 					<field name="enquiry_no"/>
 					<field name="offer_no"/>
@@ -899,8 +899,8 @@
 	<!-- Menu Item Start -->
 	
 		<!-- Work Order -->
-		<menuitem  action="tma_work_order" id="tam_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
-		<menuitem  action="tma_crm_work_order" id="tam_crm_work_order" parent="kg_menus.cpm_crm_enquiry_menu" sequence="3"/>
+		<menuitem  action="tma_work_order" name="Work order Design" id="tam_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
+		<menuitem  action="tma_crm_work_order" name="Work order Marketing" id="tam_crm_work_order" parent="kg_menus.cpm_crm_enquiry_menu" sequence="3"/>
 		<menuitem  action="tma_wo_special_approval" id="tam_wo_special_approval" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
 		<!-- Un Scheduled Work Order -->
 		<menuitem  action="tma_unscheduled_wo_list" id="tam_unscheduled_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="4"/>

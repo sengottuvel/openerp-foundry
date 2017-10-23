@@ -1341,6 +1341,7 @@ class kg_schedule(osv.osv):
 								'location' : entry.location,
 								'schedule_line_id': schedule_item.id,
 								'order_id': schedule_item.order_id.id,
+								'order_value': schedule_item.order_line_id.unit_price,
 								'order_line_id': schedule_item.order_line_id.id,
 								'order_bomline_id': schedule_item.order_bomline_id.id,
 								'qty' : schedule_qty,			  
@@ -3090,6 +3091,18 @@ class kg_schedule(osv.osv):
 			
 			self.write(cr, uid, ids, {'state': 'confirmed','flag_cancel':1,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
 				})
+				
+			
+			## Order Value Zero update code start
+			
+			cr.execute("""select distinct order_line_id from ch_schedule_details where header_id = %s"""%(entry.id))
+			work_order = cr.fetchall();				
+			for order_no in work_order:							
+				cr.execute(''' update kg_production set order_value = 0 where order_line_id  = %s and id not in (select id from kg_production  where order_line_id  = %s order by id desc limit 1) ''',[order_no[0],order_no[0]])
+			
+			## Order Value Zero update code End
+			
+			
 			cr.execute(''' update ch_schedule_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
 			
 			### ID Commitment screen update ###
