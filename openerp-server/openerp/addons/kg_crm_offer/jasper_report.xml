@@ -34,7 +34,7 @@
 				name="onscreen_offer_copy_report"
 				rml="kg_crm_offer/report/offer_copy_report.jrxml"
 				id="offer_copy_jasper_report_menu" 
-				menu="True"
+				menu="False"
 				header="False"
         />
         
