@@ -87,6 +87,7 @@ class kg_depmaster(osv.osv):
 		'is_parent': fields.boolean('Is Parent',readonly=False,states={'approved':[('readonly',True)]}),
 		'parent_dept': fields.many2one('kg.depmaster','Parent Department',domain="[('is_parent','=',True)]",readonly=False,states={'approved':[('readonly',True)]}),
 		'item_request': fields.boolean('Item Request Applicable',readonly=False,states={'approved':[('readonly',True)]}),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
 		
 		# Entry Info
 		
@@ -117,6 +118,7 @@ class kg_depmaster(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'modify': 'no',
 		'item_request': True,
+		'entry_mode': 'manual',
 		
 	}
 	

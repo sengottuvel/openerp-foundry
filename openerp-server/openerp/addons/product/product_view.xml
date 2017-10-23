@@ -600,7 +600,7 @@
 						<button name="entry_approve" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('dummy_state','!=','confirm')]}" />
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 <!--					<button name="entry_cancel" type="object" attrs="{'invisible':[('dummy_state','!=','cancel')]}" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>-->
-						<button name="entry_draft" type="object"  attrs="{'invisible':[('dummy_state','!=','approved')]}" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_draft" type="object"  attrs="{'invisible':['|',('entry_mode','=','auto'),('dummy_state','!=','approved')]}" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
                     <group>
                         <group>
@@ -661,6 +661,7 @@
 										<field name="cancel_date" attrs="{'invisible':[('dummy_state','in',['draft', 'confirm','reject','approved'])]}"/>
 										<field name="ap_rej_date" attrs="{'invisible':[('dummy_state','in',['draft', 'confirm'])]}"/>										
 										<field name="update_date"/>
+										<field name="entry_mode"/>
 									</group>
 								</group>
 							</page>

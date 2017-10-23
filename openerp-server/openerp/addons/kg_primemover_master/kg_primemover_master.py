@@ -79,6 +79,7 @@ class kg_primemover_master(osv.osv):
 		'temprise_class': fields.char('TempRise Class'),
 		'primemover_categ': fields.selection([('engine','Engine'),('motor','Motor')],'Primemover Category'),
 		'product_id': fields.many2one('product.product','Item Name',domain="[('product_type','not in',('raw','capital','service'))]"),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
 		
 		## Entry Info
 		
@@ -105,153 +106,54 @@ class kg_primemover_master(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
 		'modify': 'no',
+		'entry_mode': 'manual',
 		
 	}
-	
-	_sql_constraints = [
-	
-		('name', 'unique(name)', 'Name must be unique!!'),
-	]
-	
-	"""def _Validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
-		if name_special_char:
-			return False		
-		return True	
-		
-	def _CodeValidation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])	
-		if flds.code:		
-			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
-			if code_special_char:
-				return False
-		return True		"""
-	
+
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		res = True
 		if rec.name:
 			prime_name = rec.name
 			name=prime_name.upper()			
 			cr.execute(""" select upper(name) from kg_primemover_master where upper(name)  = '%s' """ %(name))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
-		
-	def _check_pole(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.pole <= 0:
-			return False					
-		return True	
-	def _check_power_kw(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.power_kw <= 0:
-			return False					
-		return True	
-	def _check_efficiency(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.efficiency <= 0:
-			return False					
-		return True	
-	def _check_speed(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.power_kw <= 0:
-			return False					
-		return True	
-	def _check_power_hp(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.power_hp <= 0:
-			return False	
-		return True				
-	def _check_ambient_temp(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.ambient_temp <= 0:
-			return False					
-		return True	
-	def _check_price(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.price<= 0:
-			return False					
-		return True	
-	def _check_shaft_dia(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.shaft_dia <= 0:
-			return False					
-		return True	
-	
-	def _spl_name(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.name:
-			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
-			if name_special_char:
 				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Name!'))
-		if rec.effclass:
-			eff_special_char = ''.join(c for c in rec.effclass if c in '!@#$%^~*{}?+/=')
-			if eff_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Effclass!'))
-		if rec.series:
-			series_special_char = ''.join(c for c in rec.series if c in '!@#$%^~*{}?+/=')
-			if series_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Series!'))
-		if rec.mounting:
-			mount_special_char = ''.join(c for c in rec.mounting if c in '!@#$%^~*{}?+/=')
-			if mount_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Mounting!'))
-		if rec.specification:
-			spe_special_char = ''.join(c for c in rec.specification if c in '!@#$%^~*{}?+/=')
-			if spe_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Specification!'))
-		if rec.temprise_class:
-			temp_special_char = ''.join(c for c in rec.temprise_class if c in '!@#$%^~*{}?+/=')
-			if temp_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Temprise Class!'))
-		if rec.gd2:
-			gd2_special_char = ''.join(c for c in rec.gd2 if c in '!@#$%^~*{}?+/=')
-			if gd2_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Gd2!'))
-		if rec.space_heater:
-			space_special_char = ''.join(c for c in rec.space_heater if c in '!@#$%^~*{}?+/=')
-			if space_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Space Heater!'))
-		if rec.characteristics:
-			cha_special_char = ''.join(c for c in rec.characteristics if c in '!@#$%^~*{}?+/=')
-			if cha_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Characteristics!'))
-		if rec.noise_level:
-			noise_special_char = ''.join(c for c in rec.noise_level if c in '!@#$%^~*{}?+/=')
-			if noise_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Noise level (DB)!'))
-		
+					_('Name already exists !'))
 		return True
 		
+	def _validations(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.pole <= 0:
+			raise osv.except_osv(_('Warning!'),
+					_('Pole should be greater than zero !'))			
+		if rec.power_kw <= 0:
+			raise osv.except_osv(_('Warning!'),
+					_('Power(Kw) should be greater than zero !'))
+		if rec.efficiency <= 0:
+			raise osv.except_osv(_('Warning!'),
+					_('Efficiency should be greater than zero !'))	
+		if rec.speed <= 0:
+			raise osv.except_osv(_('Warning!'),
+					_('Speed(Rpm) should be greater than zero !'))	
+		if rec.power_hp <= 0:
+			raise osv.except_osv(_('Warning!'),
+					_('PowerHp(Hp) should be greater than zero !'))
+		if rec.price<= 0:
+			raise osv.except_osv(_('Warning!'),
+					_('Price should be greater than zero !'))
+		if rec.ambient_temp <= 0:
+			raise osv.except_osv(_('Warning!'),
+					_('Ambient Temp should be greater than zero !'))
+		if rec.shaft_dia <= 0:
+			raise osv.except_osv(_('Warning!'),
+					_('Shaft Dia should be greater than zero !'))
+		return True	
+
 	_constraints = [
 		
-		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
-		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Primemover name must be unique !!', ['name']),		
-		(_check_pole,'You can not save this Pole with Zero value !',['Pole']),
-		(_check_power_kw,'You can not save this Power KW with Zero value !',['Power KW']),
-		(_check_efficiency,'You can not save this Efficiency with Zero value !',['Efficiency']),
-		(_check_speed,'You can not save this Speed with Zero value !',['Speed']),
-		(_check_power_hp,'You can not save this Power HP with Zero value !',['Power HP']),
-		(_check_ambient_temp,'You can not save this Ambient Temp with Zero value !',['Ambient Temp']),
-		(_check_price,'You can not save this Price with Zero value !',['Price']),
-		(_check_shaft_dia,'You can not save this Shaft Dia with Zero value !',['Shaft Dia']),
-		(_spl_name, 'Special Character Not Allowed!', ['']),
+		(_validations, ' ', ['name']),		
 		
 	]
 		

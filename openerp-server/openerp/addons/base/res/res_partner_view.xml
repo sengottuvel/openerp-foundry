@@ -106,7 +106,7 @@
                             <field name="is_company" on_change="onchange_type(is_company)" class="oe_inline"/> <label for="is_company" string="Is a Company?"/>)
                         </div>
                         <h1>
-                            <field name="name" default_focus="1" placeholder="Name" />
+                            <field name="name" default_focus="1" placeholder="Name" class = "aplhanum_expect" />
                         </h1>
                         <field name="parent_id"
                             placeholder="Company"
@@ -139,8 +139,8 @@
                         <group>
                         <group>
                         
-                            <field name="name" placeholder="Name" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-                            <field name="alias_name" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('customer','!=',True),('dealer','!=',True),('supplier','!=',True)]}"/>
+                            <field name="name" placeholder="Name" attrs="{'readonly':[('partner_state','=','approve')]}" class = "aplhanum_expect"/>
+                            <field name="alias_name" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('customer','!=',True),('dealer','!=',True),('supplier','!=',True)]}" class = "aplhanum_expect"/>
 							<field name="code" placeholder="Code"  invisible="1" attrs="{'readonly':[('partner_state','=','approve')]}"/>
                         </group>
                         <group>
@@ -162,9 +162,9 @@
                                 attrs="{'invisible': [('is_company','=', True)]}"/>
                               <field name="mobile" attrs="{'required': [('sms_applicable','=','yes')],'invisible': [('sms_applicable','!=','yes')],'readonly': [('partner_state','=','approve')]}"/>
                               <field name="fax" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-                              <field name="street" string="Street" placeholder="Street..."  attrs="{'readonly': ['|',('use_parent_address','=',True),('partner_state','=','approve')]}"/>
+                              <field name="street" string="Street" placeholder="Street..."  attrs="{'readonly': ['|',('use_parent_address','=',True),('partner_state','=','approve')]}" class = "aplhanum_expect"/>
                               <field name="city" placeholder="City" attrs="{'readonly': [('use_parent_address','=',True)]}"/>
-                              <field name="zip" placeholder="ZIP" attrs="{'readonly': [('use_parent_address','=',True)]}"/>
+                              <field name="zip" placeholder="ZIP" attrs="{'readonly': [('use_parent_address','=',True)]}" class = "aplhanum_expect"/>
                               <field name="type" invisible="1"/>
                               <field name="use_parent_address" invisible="1"/>
                               <button name="open_parent" type="object" string="(edit company address)" class="oe_link oe_edit_only"
@@ -188,10 +188,10 @@
 -->
                         </group>
                         <group>
-                            <field name="phone" placeholder="e.g. +32.81.81.37.00" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-                            <field name="email" widget="email" attrs="{'required': [('email_applicable','=','yes')],'invisible': [('email_applicable','!=','yes')],'readonly': [('partner_state','=','approve')]}"/>
-                            <field name="website" widget="url" placeholder="e.g. www.openerp.com" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-                            <field name="street2" placeholder="Street2..." attrs="{'readonly': [('use_parent_address','=',True)]}" invisible="1"/>
+                            <field name="phone" placeholder="e.g. +32.81.81.37.00" attrs="{'readonly':[('partner_state','=','approve')]}" class="numberonly"/>
+                            <field name="email" widget="email" attrs="{'required': [('email_applicable','=','yes')],'invisible': [('email_applicable','!=','yes')],'readonly': [('partner_state','=','approve')]}" class="email_validation"/>
+                            <field name="website" widget="url" placeholder="e.g. www.openerp.com" attrs="{'readonly':[('partner_state','=','approve')]}" class = "aplhanum_expect"/>
+                            <field name="street2" placeholder="Street2..." attrs="{'readonly': [('use_parent_address','=',True)]}" invisible="1" class = "aplhanum_expect"/>
                             <field name="state_id" class="oe_no_button" placeholder="State" style="width: 37%%" options='{"no_open": True}' on_change="onchange_state(state_id)" attrs="{'readonly': ['|',('use_parent_address','=',True),('partner_state','=','approve')]}"/>
                             <field name="country_id" placeholder="Country" class="oe_no_button" options='{"no_open": True}' attrs="{'readonly': ['|',('use_parent_address','=',True),('partner_state','=','approve')]}"/>
                             <field name="partner_state" style="width: 30%%" class="att_state_change" readonly="1"/>

@@ -200,6 +200,7 @@ class product_uom(osv.osv):
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'remark': fields.text('Remarks',readonly=False),
 		'cancel_remark': fields.text('Cancel Remarks'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
 		
 			### Entry Info ###
 		'crt_date': fields.datetime('Created Date',readonly=True),
@@ -228,6 +229,7 @@ class product_uom(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.uom', context=c),
 		'modify': 'yes',
+		'entry_mode': 'manual',
 		
 	}
 
