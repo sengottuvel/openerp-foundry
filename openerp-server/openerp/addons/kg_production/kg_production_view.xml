@@ -1063,7 +1063,7 @@
 					<field name="location" invisible="1"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
 					<field name="each_weight" sum="Total Each Weight"/>
-					<field name="total_weight" sum="Total Weight"/>
+					<field name="mould_total_weight" sum="Total Weight"/>
 					<field name="mould_rem_qty" string="Remaining Qty"/>
 					<field name="sch_remarks"/>
 					<field name="mould_remarks"/>

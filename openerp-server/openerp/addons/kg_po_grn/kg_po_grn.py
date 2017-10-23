@@ -440,6 +440,7 @@ class kg_po_grn(osv.osv):
 								'grn_tax_ids': [(6, 0, [x.id for x in order_line.taxes_id])],
 								'kg_discount_per':order_line.kg_discount_per,
 								'kg_discount': order_line.kg_discount,
+								'price_subtotal': order_line.price_subtotal,
 								'po_grn_date':grn_entry_obj.grn_date,
 								'po_flag':'True',
 								'billing_type':'cost',
