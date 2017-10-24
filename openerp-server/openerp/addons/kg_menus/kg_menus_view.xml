@@ -310,19 +310,57 @@
 				<menuitem id="spm_mail_form_sub_menu" name="Forms Scheduler" parent="spm_mail_menu" sequence="2" action="kg_scheduler.export_sch_action_form" />
 		<!--MGMT menus-->
 			
-		<menuitem name="MGMT" id="menu_mgmt" sequence="92"/>
-			<menuitem name="MGMT" id="menu_mgmt_masters"  parent="menu_mgmt"  sequence="0"/>
-				<menuitem action="kg_work_order.tma_wo_special_approval" id="tam_wo_special_approval_mgmt" parent="menu_mgmt_masters" sequence="0"/>
-				<menuitem name="WO MD Approval"   parent="menu_mgmt_masters" action="kg_work_order.tma_crm_work_order_mgmt" id="tam_work_order_md_mgmt" sequence='1'/>
-				<menuitem action="kg_subcontract_process.tma_sc_wo_spl" id="tam_sc_wo_spl_mgmt" parent="menu_mgmt_masters" sequence="2" name="SC Special Approval WO" />
-				<menuitem action="purchase.purchase_rfq_spl_approval" id="pam_purchase_order_spl_approvals_mgmt" name="Special Approval PO" parent="menu_mgmt_masters" sequence="3"/>
-				<menuitem  name="Special Approval POA"   parent="menu_mgmt_masters" action="kg_purchase_amendment.action_kg_poamendment_form" id="tam_po_amend_apl_view_mgmt" sequence='4'/>
-				<menuitem name="Stock Statement"   parent="menu_mgmt_masters" action="stock.action_production_lot_form" id="wma_kg_stock_list_mgmt" sequence='5'/>
-				<menuitem  name="Offer - MD approval" parent="menu_mgmt_masters" action="kg_crm_offer.tma_crm_offer_spl_apl" id="tam_offer_apl_view_mgmt" sequence='6'/>
-			<menuitem name="Enquiry &amp; Offer" id="tpm_mgmt_enq_offer" parent="menu_mgmt" sequence="1"/>
-				<menuitem name="Enquiry" parent="tpm_mgmt_enq_offer" action="kg_crm_enquiry.tma_crm_enquiry_mgmt_md" id="tam_mgmt_enq" sequence='1'/>
-				<menuitem name="Offer" parent="tpm_mgmt_enq_offer" action="kg_crm_offer.tma_crm_offer_mgmt_md" id="tam_mgmt_offer" sequence='2'/>
-		<!--MGMT menus-->
+			<menuitem name="MGMT" id="menu_mgmt" sequence="92"/>
+				<menuitem name="Purchase" id="menu_mgmt_masters"  parent="menu_mgmt"  sequence="0"/>
+				
+					<menuitem action="purchase.purchase_rfq_spl_approval" id="mgmt_pam_purchase_order_spl_approvals" name="Special Approval PO" parent="menu_mgmt_masters" sequence="0"/>
+					<menuitem action="purchase.tma_wfamd_po" id="mgmt_tam_wfamd_po" name="WFAMD PO" parent="menu_mgmt_masters" sequence="1"/>
+				
+				<menuitem name="Warehouse" id="menu_mgmt_masters_ware"  parent="menu_mgmt"  sequence="1"/>
+				
+					<menuitem name="GRN" id="menu_mgmt_masters_ware_grn"  parent="menu_mgmt"  sequence="0"/>
+						
+						<menuitem action="kg_general_grn.tma_fou_grn" id="mgmt_tam_fou_grn" name="GRN - Foundry" parent="menu_mgmt_masters_ware_grn" sequence="0"/>
+						<menuitem action="kg_general_grn.tma_ms_grn" id="mgmt_tam_ms_grn" name="GRN - MS" parent="menu_mgmt_masters_ware_grn" sequence="1"/>
+						<menuitem action="kg_general_grn.action_kg_general_grn" id="mgmt_gam_general_grn" name="GRN - IPD" parent="menu_mgmt_masters_ware_grn" sequence="2"/>						
+						<menuitem action="kg_po_grn.tma_fou_po_grn" id="tam_fou_po_grn_mgmt" name="PO/SO GRN - Foundry" parent="menu_mgmt_masters_ware_grn" sequence="3"/>
+						<menuitem action="kg_po_grn.tma_ms_po_grn" id="tam_ms_po_grn_mgmt" name="PO/SO GRN - MS" parent="menu_mgmt_masters_ware_grn" sequence="4"/>
+						<menuitem action="kg_po_grn.tma_po_grn" id="gam_po_grn_mgmt" name="PO/SO GRN - IPD" parent="menu_mgmt_masters_ware_grn" sequence="5"/>
+						
+
+					<menuitem name="Stock View" id="menu_mgmt_masters_ware_stock_view"  parent="menu_mgmt"  sequence="1"/>
+					
+						<menuitem action="stock.action_production_lot_form" id="menu_action_production_lot_form_mgmt" parent="menu_mgmt_masters_ware_stock_view" sequence="0"/> 
+						<menuitem action="kg_grn.tma_ms_stock_list" id="tam_ms_stock_list_mgmt" parent="menu_mgmt_masters_ware_stock_view" sequence="2"/>
+						<menuitem action="kg_grn.tma_fou_stock_list" id="tam_fou_stock_list_mgmt" parent="menu_mgmt_masters_ware_stock_view" sequence="3"/>
+						
+					<menuitem name="Reports" id="menu_mgmt_masters_ware_rpt"  parent="menu_mgmt"  sequence="1"/>
+					
+						<menuitem name="Closing Stock" parent="menu_mgmt_masters_ware_rpt" action="kg_reports.ram_close_stock_report" id="wma_closing_stock_mgmt_rpt" sequence='0'/>
+						<menuitem name="PO Register" parent="menu_mgmt_masters_ware_rpt" action="kg_reports.action_po_stm_report" id="ram_po_register_reports_mgmt" sequence="1"/>
+
+					
+				<menuitem name="Transactions" id="menu_mgmt_masters_ppc_trans"  parent="menu_mgmt"  sequence="2"/>	
+				
+					<menuitem  action="kg_work_order.tma_work_order" name="Work order Design" id="tam_work_order_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="0"/>
+					<menuitem  action="kg_work_order.tma_work_order_app" id="tam_wo_approval_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="1"/>
+					<menuitem  action="kg_work_order.tma_unscheduled_wo_list" id="tam_unscheduled_work_order_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="2"/>
+					<menuitem action="kg_production.tma_production" id="tam_production_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="3"/>
+					<menuitem action="kg_production.tma_pouring_pending" id="tam_pouring_pending_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="4"/>
+					<menuitem action="kg_production.tma_pouring_completed" id="tam_pouring_completed_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="5"/>
+				
+				<menuitem name="MS Transactions" id="menu_mgmt_masters_ms_trans"  parent="menu_mgmt"  sequence="3"/>	
+				
+					<menuitem action="kg_machineshop.tma_ms_inward" id="tam_ms_inward_ms_mgmt" parent="menu_mgmt_masters_ms_trans" sequence="0" />	
+					
+				<menuitem name="CRM" id="tpm_mgmt_enq_offer" parent="menu_mgmt" sequence="4"/>
+				
+					<menuitem action="kg_crm_enquiry.tma_crm_enquiry" name="Service Enquiry" id="tma_crm_enquiry_service_ms_mgmt" parent="tpm_mgmt_enq_offer" sequence="0"/>					
+					<menuitem action="kg_crm_enquiry.tma_crm_enquiry_marketing" name="Marketing Enquiry" id="tma_crm_enquiry_marketings_ms_mgmt" parent="tpm_mgmt_enq_offer" sequence="1"/>					
+					<menuitem action="kg_crm_offer.tma_crm_offer" name="Offer" id="tam_crm_offer_ms_mgmt" parent="tpm_mgmt_enq_offer" sequence="2"/>					
+					<menuitem  action="kg_work_order.tma_crm_work_order" name="Work order Marketing" id="tam_crm_work_order_ms_mgmt" parent="tpm_mgmt_enq_offer" sequence="3"/>				
+					
+			<!--MGMT menus-->
 		<!--HR menus-->
 			<menuitem name="HR Master" id="menu_hr_master" sequence="91"/>
 				
