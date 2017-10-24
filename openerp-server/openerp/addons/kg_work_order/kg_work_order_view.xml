@@ -919,7 +919,7 @@
 		<field name="res_model">ch.order.bom.details</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree</field>
-		<field name="domain">[('order_id.order_priority','in',('normal','urgent')),('header_id.schedule_status','=','allow'),('flag_applicable','=','t')]</field>		
+		<field name="domain">[('header_id.schedule_status','=','allow'),('flag_applicable','=','t')]</field>		
 		<field name="search_view_id" ref="t_search_v_unscheduled_bom"/>
 		<field name="context">{'search_default_group_header_id': 1}</field>
 	</record>
