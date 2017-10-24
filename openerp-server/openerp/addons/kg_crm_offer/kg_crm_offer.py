@@ -380,6 +380,16 @@ class kg_crm_offer(osv.osv):
 	
 	def _line_validations(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
+		if rec.name:
+			cr.execute(""" select upper(name) from kg_crm_offer where upper(name)  = '%s' and state != 'revised' """ %(rec.name.upper()))
+			data = cr.dictfetchall()
+			if rec.revision_remarks:
+				if len(data) > 2:
+					raise osv.except_osv(_('Warning'), _('Offer No. must be unique !!'))
+			elif len(data) > 1:
+				raise osv.except_osv(_('Warning'), _('Offer No. must be unique !!'))
+			else:
+				pass
 		if rec.line_pump_ids:
 			for item in rec.line_pump_ids:
 				if item.hsn_no.id:

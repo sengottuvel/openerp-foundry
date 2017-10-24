@@ -322,6 +322,16 @@ class kg_crm_enquiry(osv.osv):
 	
 	def _check_lineitems(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
+		if entry.name:
+			cr.execute(""" select upper(name) from kg_crm_enquiry where upper(name)  = '%s' and state != 'revised' """ %(entry.name.upper()))
+			data = cr.dictfetchall()
+			if entry.revision_remarks:
+				if len(data) > 2:
+					raise osv.except_osv(_('Warning'), _('Enquiry No. must be unique !!'))
+			elif len(data) > 1:
+				raise osv.except_osv(_('Warning'), _('Enquiry No. must be unique !!'))
+			else:
+				pass
 		if entry.entry_mode == 'manual':
 			if not entry.ch_line_ids:
 				return False
