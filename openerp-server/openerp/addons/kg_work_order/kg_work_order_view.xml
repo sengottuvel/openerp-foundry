@@ -9,7 +9,7 @@
 			<field name="name">Work Order Entry Form</field>
 			<field name="model">kg.work.order</field>
 			<field name="arch" type="xml">
-				<form string="Work Order" version="7.0" create="false">
+				<form string="Work Order" version="7.0">
 					<header>
 						<button name="mkt_approve" type="object" string="WFMKT Approval" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"
 							/>
@@ -108,7 +108,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
-								toolbar="True" string="Work Order Entry Tree" create="false">					
+								toolbar="True" string="Work Order Entry Tree" >					
 					<field name="name"/>
 					<field name="enquiry_no"/>
 					<field name="offer_no"/>
