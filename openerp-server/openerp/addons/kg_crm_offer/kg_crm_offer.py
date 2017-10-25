@@ -2214,7 +2214,7 @@ class kg_crm_offer(osv.osv):
 			s2 = s2+2
 			sheet1.write_merge(s2, s2, 6, count,"FOR SAM TURBO INDUSTRY PVT LTD",style_center_header)
 			s2 = s2+3
-			sheet1.write_merge(s2, s2, 6, count,user_rec.login,style_center_header)
+			sheet1.write_merge(s2, s2, 6, count,user_rec.name,style_center_header)
 			s2 = s2+1
 			sheet1.write_merge(s2, s2, 6, count,"Authorized Signature",style_center_header)
 			s2 = s2+1
@@ -2341,7 +2341,7 @@ class kg_crm_offer(osv.osv):
 			s2 = s2+2
 			sheet1.write_merge(s2, s2, 5, count,"FOR SAM TURBO INDUSTRY PVT LTD",style_center_header)
 			s2 = s2+3
-			sheet1.write_merge(s2, s2, 5, count,user_rec.login,style_center_header)
+			sheet1.write_merge(s2, s2, 5, count,user_rec.name,style_center_header)
 			s2 = s2+1
 			sheet1.write_merge(s2, s2, 5, count,"Authorized Signature",style_center_header)
 			s2 = s2+1
