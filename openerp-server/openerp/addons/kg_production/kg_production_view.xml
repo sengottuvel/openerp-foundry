@@ -656,7 +656,7 @@
 					<field name="location" invisible="1"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
 					<field name="each_weight" sum="Total Each Weight"/>
-					<field name="total_weight" sum="Total Weight"/>
+					<field name="core_total_weight" sum="Total Weight"/>
 					<field name="core_rem_qty" string="Remaining Qty"/>
 					<field name="sch_remarks"/>
 					<field name="core_remarks"/>
@@ -1675,7 +1675,7 @@
 				<field name="moc_id"/>
 				<field name="qty" string="Schedule Qty" sum="Total Qty"/>
 				<field name="each_weight" sum="Total Each Weight"/>
-				<field name="total_weight" sum="Total Weight"/>
+				<field name="pour_total_weight" sum="Total Weight"/>
 				<field name="mould_qty" string="Mould Completed Qty" sum="Qty" invisible="1"/>
 				<field name="total_mould_qty" string="Mould Completed Qty" sum="Qty"/>
 				<field name="pour_qty" string="Pouring Completed Qty" sum="Qty"/>

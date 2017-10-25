@@ -1786,63 +1786,66 @@ class kg_work_order(osv.osv):
 						#~ ### Schedule Confirmation ###
 						#~ 
 						#~ schedule_obj.entry_confirm(cr, uid, [schedule_id])
+					
+					
+				# Karthikeyan Command code 
 						
-				if order_line_ids != []:
-					if entry.order_priority in ('emergency','breakdown') and entry.order_category in ('pump','spare','pump_spare','service','access'):
-						
-						### Schedule Creation ###
-						
-						schedule_item_vals = {
-														
-							'name': '',
-							'location' : entry.location,
-							'order_priority': entry.order_priority,
-							'delivery_date': entry.delivery_date,
-							'order_line_ids': [(6, 0, order_line_ids)],
-							'state' : 'draft',			   
-							'entry_mode' : 'auto',			   
-						}
-						
-						schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-						
-						### Schedule Line Item Creation ###
-						
-						if item.order_category == 'pump':
-						
-							schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-						else:
-							schedule_obj.update_line_items(cr, uid, [schedule_id],0)
-						
-						### Schedule Confirmation ###
-						
-						schedule_obj.entry_confirm(cr, uid, [schedule_id])
-						
-					if entry.order_priority in ('emergency','breakdown') and entry.order_category in ('project'):
-						
-						### Schedule Creation ###
-						
-						schedule_item_vals = {
-														
-							'name': '',
-							'location' : entry.location,
-							'order_priority': entry.order_priority,
-							'delivery_date': entry.delivery_date,
-							'order_line_ids': [(6, 0, order_line_ids)],
-							'state' : 'draft',
-							'entry_mode' : 'auto',				   
-						}
-						
-						schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-						
-						### Schedule Line Item Creation ###
-						
-						if item.order_category == 'pump':
-						
-							schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-						else:
-							schedule_obj.update_line_items(cr, uid, [schedule_id],0)
-				else:
-					pass
+				#~ if order_line_ids != []:
+					#~ if entry.order_priority in ('emergency','breakdown') and entry.order_category in ('pump','spare','pump_spare','service','access'):
+						#~ 
+						#~ ### Schedule Creation ###
+						#~ 
+						#~ schedule_item_vals = {
+														#~ 
+							#~ 'name': '',
+							#~ 'location' : entry.location,
+							#~ 'order_priority': entry.order_priority,
+							#~ 'delivery_date': entry.delivery_date,
+							#~ 'order_line_ids': [(6, 0, order_line_ids)],
+							#~ 'state' : 'draft',			   
+							#~ 'entry_mode' : 'auto',			   
+						#~ }
+						#~ 
+						#~ schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+						#~ 
+						#~ ### Schedule Line Item Creation ###
+						#~ 
+						#~ if item.order_category == 'pump':
+						#~ 
+							#~ schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+						#~ else:
+							#~ schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+						#~ 
+						#~ ### Schedule Confirmation ###
+						#~ 
+						#~ schedule_obj.entry_confirm(cr, uid, [schedule_id])
+						#~ 
+					#~ if entry.order_priority in ('emergency','breakdown') and entry.order_category in ('project'):
+						#~ 
+						#~ ### Schedule Creation ###
+						#~ 
+						#~ schedule_item_vals = {
+														#~ 
+							#~ 'name': '',
+							#~ 'location' : entry.location,
+							#~ 'order_priority': entry.order_priority,
+							#~ 'delivery_date': entry.delivery_date,
+							#~ 'order_line_ids': [(6, 0, order_line_ids)],
+							#~ 'state' : 'draft',
+							#~ 'entry_mode' : 'auto',				   
+						#~ }
+						#~ 
+						#~ schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+						#~ 
+						#~ ### Schedule Line Item Creation ###
+						#~ 
+						#~ if item.order_category == 'pump':
+						#~ 
+							#~ schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+						#~ else:
+							#~ schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+				#~ else:
+					#~ pass
 			
 			if entry.flag_data_bank == True:
 				

@@ -73,6 +73,37 @@ class kg_production(osv.osv):
 			total_weight = entry.mould_rem_qty * wgt
 		result[entry.id]= total_weight
 		return result	
+	
+	def _get_core_total_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		total_weight = 0.00
+		wgt = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			if entry.moc_id.weight_type == 'ci':
+				wgt = entry.pattern_id.ci_weight
+			if entry.moc_id.weight_type == 'ss':
+				wgt = entry.pattern_id.pcs_weight
+			if entry.moc_id.weight_type == 'non_ferrous':
+				wgt = entry.pattern_id.nonferous_weight			
+			total_weight = entry.core_rem_qty * wgt
+		result[entry.id]= total_weight
+		return result
+		
+	def _get_pour_total_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		total_weight = 0.00
+		wgt = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			if entry.moc_id.weight_type == 'ci':
+				wgt = entry.pattern_id.ci_weight
+			if entry.moc_id.weight_type == 'ss':
+				wgt = entry.pattern_id.pcs_weight
+			if entry.moc_id.weight_type == 'non_ferrous':
+				wgt = entry.pattern_id.nonferous_weight			
+			total_weight = entry.pour_pending_qty * wgt
+		result[entry.id]= total_weight
+		return result
+	
 	def _get_total_weight(self, cr, uid, ids, field_name, arg, context=None):
 		result = {}
 		total_weight = 0.00
@@ -206,6 +237,7 @@ class kg_production(osv.osv):
 		'core_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'core_pan_no':fields.char('PAN No.', size=128),
 		'core_remarks': fields.text('Remarks'),
+		'core_total_weight': fields.function(_get_core_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
 		
 		
 		### Mould Log ###
@@ -237,6 +269,7 @@ class kg_production(osv.osv):
 		'pour_remarks': fields.text('Remarks'),
 		'pour_date': fields.datetime('Pouring Date'),
 		'pour_pending_qty': fields.function(_get_pour_pending_qty, string='Pending Qty', store=True, type='integer'),
+		'pour_total_weight': fields.function(_get_pour_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
 		'fettling_reject_qty': fields.integer('Rejected Qty'),
 		
 		'pour_pending_remarks': fields.text('Remarks'),

@@ -35,8 +35,8 @@
 									<field name="partner_id" attrs="{'readonly': [('employee_flag','=',True)]}" on_change="onchange_partner_id(partner_id)" required="0"/>
 									<field name="employee_id" attrs="{'readonly': [('partner_flag','=',True)]}" on_change="onchange_employee_id(employee_id)" required="0"/>
 									<field name="narration" required="1" class="aplhanum_expect"/>
-									<field name="debit" required="1"/>
-									<field name="credit" required="1"/>
+									<field name="debit" required="1" sum="debit"/>
+									<field name="credit" required="1" sum="credit"/>
 									<field name="partner_flag" invisible="1"/>
 									<field name="employee_flag" invisible="1"/>
 								</tree>
