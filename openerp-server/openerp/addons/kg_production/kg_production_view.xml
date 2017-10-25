@@ -1639,7 +1639,7 @@
 				<field name="pour_pending_qty" string="Pending Qty" sum="Total Pending Qty"/>
 				<field name="pour_qty" invisible="1" string="Completed Qty" sum="Total Completed Qty"/>
 				<field name="each_weight" sum="Total Each Weight"/>
-				<field name="total_weight" sum="Total Weight"/>
+				<field name="pour_total_weight" sum="Total Weight"/>
 				<field name="order_value" sum="Total WO Value" invisible="1"/>
 				<field name="pour_remarks" string="Pour Remarks"/>
 				<field name="pour_pending_remarks" string="Remarks"/>
