@@ -1395,6 +1395,58 @@ class kg_spare_assembly(osv.osv):
 			
 		return True
 		
+	def spare_entry_approve(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'confirmed':
+		
+			### Checking Test process Remaining ###
+			cr.execute(''' select id from kg_part_qap where spare_assembly_id = %s and order_id=%s and order_line_id =%s
+				and db_state = 'pending' and db_flag='t' ''',[ids[0],entry.order_line_id.header_id.id,entry.order_line_id.id])
+			db_test_process_rem = cr.fetchone()
+			
+			cr.execute(''' select id from kg_part_qap where spare_assembly_id = %s and order_id=%s and order_line_id =%s
+				and hs_state='pending' and hs_flag='t' ''',[ids[0],entry.order_line_id.header_id.id,entry.order_line_id.id])
+			hs_test_process_rem = cr.fetchone()
+			
+			if db_test_process_rem == None and hs_test_process_rem == None:
+				#### Updating pump serial number in Part qap ###
+				cr.execute(''' update kg_part_qap set pump_serial_no = %s where spare_assembly_id = %s ''',[entry.name,ids[0]])
+				### Dimensional Inspection Creation ###
+				pump_qap_header_vals = {
+				
+					'qap_plan_id': entry.qap_plan_id.id,
+					'order_id': entry.order_line_id.header_id.id,
+					'order_line_id':  entry.order_line_id.id,
+					'order_no': entry.order_line_id.order_no,
+					'order_category': entry.order_category,
+					'pump_model_id': entry.pump_model_id.id,
+					'spare_assembly_id': entry.id,
+					'moc_construction_id': entry.order_line_id.moc_construction_id.id,
+					'test_state':'di',
+					'di_state': 'pending',
+					'spare_assembly_id': ids[0]
+				}
+				pump_qap_id = self.pool.get('kg.pump.qap').create(cr, uid, pump_qap_header_vals)
+				
+				dim_inspection_id = self.pool.get('ch.dimentional.inspection').search(cr,uid,[('pump_model_id','=',entry.pump_model_id.id)])
+				if dim_inspection_id:
+					dim_inspection_rec = self.pool.get('ch.dimentional.inspection').browse(cr,uid,dim_inspection_id[0])
+					for dim_item in dim_inspection_rec.line_ids:
+						pump_dimension_vals = {
+							'header_id': pump_qap_id, 		
+							'dimentional_details': dim_item.dimentional_details,
+							'min_weight': dim_item.min_weight,
+							'max_weight': dim_item.max_weight,	
+						}
+						pump_dimension_id = self.pool.get('ch.pump.dimentional.details').create(cr, uid, pump_dimension_vals)
+						
+				self.write(cr, uid, ids, {'state': 'approve','approve_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Warning !!'),
+				_('Test process remaining !!'))		
+			
+		return True
+		
 	
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		

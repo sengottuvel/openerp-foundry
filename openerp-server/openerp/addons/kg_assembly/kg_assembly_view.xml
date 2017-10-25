@@ -806,7 +806,7 @@
 				<form string="Spare Assembly Inward" version="7.0">
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
-						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight"/>						
+						<button name="spare_entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight"/>						
 					</header>
 					<group>
 						<group>
