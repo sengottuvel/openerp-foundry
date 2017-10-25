@@ -49,7 +49,7 @@ class kg_schedule(osv.osv):
 		'line_ids': fields.one2many('ch.schedule.details', 'header_id', "Schedule Details"),
 		
 		'order_line_ids':fields.many2many('ch.work.order.details','m2m_work_order_details' , 'schedule_id', 'order_id', 'Work Order Lines',
-			domain="[('schedule_status','=','allow'),'&',('header_id.order_priority','in',('normal','urgent')),'&',('header_id.order_category','in',('pump','pump_spare','project','spare','service','access')),'&',('header_id.state','=','confirmed'),'&',('state','=','confirmed'),'&',('header_id.division_id','=',division_id),('header_id.location','=',location)]"),
+			domain="[('schedule_status','=','allow'),'&',('header_id.state','=','confirmed'),'&',('state','=','confirmed'),('header_id.location','=',location)]"),
 		'flag_schedule': fields.boolean('Schedule'),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'cancel_remark': fields.text('Cancel Remarks'),
