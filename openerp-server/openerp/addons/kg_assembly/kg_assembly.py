@@ -1190,7 +1190,7 @@ class kg_spare_assembly(osv.osv):
 	def update_list(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		
-		if entry.spare_bom_id == False:
+		if entry.spare_bom_id.id == False:
 			### Checking bot items completed for that WO ##
 			
 			cr.execute(""" select id from kg_ms_stores where ms_type = 'bot_item'
