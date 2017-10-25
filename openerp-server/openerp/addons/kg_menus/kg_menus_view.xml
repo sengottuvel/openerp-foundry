@@ -343,11 +343,12 @@
 				<menuitem name="Transactions" id="menu_mgmt_masters_ppc_trans"  parent="menu_mgmt"  sequence="2"/>	
 				
 					<menuitem  action="kg_work_order.tma_work_order" name="Work order Design" id="tam_work_order_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="0"/>
-					<menuitem  action="kg_work_order.tma_work_order_app" id="tam_wo_approval_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="1"/>
-					<menuitem  action="kg_work_order.tma_unscheduled_wo_list" id="tam_unscheduled_work_order_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="2"/>
-					<menuitem action="kg_production.tma_production" id="tam_production_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="3"/>
-					<menuitem action="kg_production.tma_pouring_pending" id="tam_pouring_pending_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="4"/>
-					<menuitem action="kg_production.tma_pouring_completed" id="tam_pouring_completed_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="5"/>
+					<menuitem  action="kg_work_order.tma_work_md_order_mgmt" id="tam_wo_md_approval_mgmts" parent="menu_mgmt_masters_ppc_trans" sequence="1"/>
+					<menuitem  action="kg_work_order.tma_work_order_app" id="tam_wo_approval_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="2"/>
+					<menuitem  action="kg_work_order.tma_unscheduled_wo_list" id="tam_unscheduled_work_order_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="3"/>
+					<menuitem action="kg_production.tma_production" id="tam_production_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="4"/>
+					<menuitem action="kg_production.tma_pouring_pending" id="tam_pouring_pending_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="5"/>
+					<menuitem action="kg_production.tma_pouring_completed" id="tam_pouring_completed_ppc_mgmt" parent="menu_mgmt_masters_ppc_trans" sequence="6"/>
 				
 				<menuitem name="MS Transactions" id="menu_mgmt_masters_ms_trans"  parent="menu_mgmt"  sequence="3"/>	
 				

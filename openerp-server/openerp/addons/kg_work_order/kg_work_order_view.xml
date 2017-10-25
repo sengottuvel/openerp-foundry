@@ -734,8 +734,8 @@
 			
 		</record>
 		
-		<record id="tma_crm_work_order_mgmt" model="ir.actions.act_window">
-			<field name="name">WO MD Approval</field>
+		<record id="tma_work_md_order_mgmt" model="ir.actions.act_window">
+			<field name="name">WF MD Approval</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.work.order</field>
 			<field name="view_type">form</field>
@@ -942,6 +942,7 @@
 		<menuitem  action="tma_crm_work_order" name="Work order Marketing" id="tam_crm_work_order" parent="kg_menus.cpm_crm_enquiry_menu" sequence="3"/>
 		<menuitem  action="tma_wo_special_approval" id="tam_wo_special_approval" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
 		<menuitem  action="tma_work_order_app" id="tam_wo_approval" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
+		<menuitem  action="tma_work_md_order_mgmt" id="tam_wo_md_approval" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
 
 		<!-- Un Scheduled Work Order -->
 		<menuitem  action="tma_unscheduled_wo_list" id="tam_unscheduled_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="4"/>

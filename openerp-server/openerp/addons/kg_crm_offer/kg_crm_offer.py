@@ -334,7 +334,7 @@ class kg_crm_offer(osv.osv):
 		
 		### Spare Reports Purpose
 		
-		'spare_reg_data':fields.binary("Sapre Regular Copy",readonly=True),
+		'spare_reg_data':fields.binary("Spare Regular Copy",readonly=True),
 		'spare_bud_data':fields.binary("Spare Budgetary Copy",readonly=True),
 		'spare_reg_copy': fields.char('Spare Regular Copy'),
 		'spare_bud_copy': fields.char('Spare Budgetary Copy'),
