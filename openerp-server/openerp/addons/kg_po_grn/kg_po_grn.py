@@ -964,6 +964,8 @@ class kg_po_grn(osv.osv):
 							
 							if line.uom_conversation_factor == 'two_dimension':
 								if line.uom_id.id == line.product_id.uom_id.id:
+									if line.product_id.po_uom_in_kgs == 0:
+										raise osv.except_osv(_('Warning!'),_('PO UOM in Kgs should be grater than zero for Product (%s) check with Product Master !!'%(line.product_id.name)))
 									po_line_pending_qty = (po_line_id.pending_qty) - ((line.po_grn_qty)/(float(line.length)/float(line.breadth)/float(line.product_id.po_uom_in_kgs)))
 									rec_qty = line.po_line_id.received_qty + (line.po_grn_qty / (float(line.length) / float(line.breadth) / float(line.product_id.po_uom_in_kgs)))
 								elif line.uom_id.id == line.product_id.uom_po_id.id:
