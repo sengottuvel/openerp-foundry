@@ -310,6 +310,8 @@ class kg_purchase_order(osv.osv):
 			back_list = []
 			approval = ''
 			for item in obj.order_line:
+				if item.price_unit <= 0:
+					raise osv.except_osv(_('Warning!'),_('Unit price should be greater than zero for Product (%s) Brand (%s) MOC (%s) !!'%(item.product_id.name,item.brand_id.name,item.moc_id.name)))
 				prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id),('state','=','approved')])
 				if not prod_obj:
 					raise osv.except_osv(_('Warning!'),_('Kindly check and approve %s in Brand/Moc/Rate master !'%(item.product_id.name)))
@@ -434,8 +436,11 @@ class kg_purchase_order(osv.osv):
 		return True
 	
 	def verify_po(self,cr,uid,ids, context=None):
-		obj = self.browse(cr,uid,ids[0])
+		obj = self.browse(cr,uid,ids[0]) 
 		if obj.state == 'confirmed':
+			for item in obj.order_line:
+				if item.price_unit <= 0:
+					raise osv.except_osv(_('Warning!'),_('Unit price should be greater than zero for Product (%s) Brand (%s) MOC (%s) !!'%(item.product_id.name,item.brand_id.name,item.moc_id.name)))
 			user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
 			user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
 			if user_rec.special_approval == True:
@@ -462,6 +467,8 @@ class kg_purchase_order(osv.osv):
 				pass
 		
 		for item in obj.order_line:
+			if item.price_unit <= 0:
+				raise osv.except_osv(_('Warning!'),_('Unit price should be greater than zero for Product (%s) Brand (%s) MOC (%s) !!'%(item.product_id.name,item.brand_id.name,item.moc_id.name)))
 			price_sql = """ 
 						select line.price_unit
 						from purchase_order_line line

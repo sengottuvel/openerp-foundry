@@ -25,7 +25,7 @@
 						<group>
 							<group>
 								<field name="name" required="1"/>
-								<field name="offer_date"/>
+								<field name="offer_date" options="{'datepicker':{'minDate': -10,'maxDate': 0,}}"/>
 								<field name="customer_id" required="1"/>
 								<field name="prj_name"/>
 								<field name="industry_id"/>
@@ -43,7 +43,7 @@
 							</group>											
 							<group>
 								<field name="enquiry_no" required="1"/>
-								<field name="enquiry_date"/>
+								<field name="enquiry_date" options="{'datepicker':{'minDate': -10,'maxDate': 0,}}"/>
 								<field name="due_date" on_change="onchange_due_date(due_date)" required="1" options="{'datepicker':{'minDate': 1,'maxDate': null,}}"/>
 								<field name="del_date" on_change="onchange_del_date(del_date)" required="1" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="expected_value"/>								

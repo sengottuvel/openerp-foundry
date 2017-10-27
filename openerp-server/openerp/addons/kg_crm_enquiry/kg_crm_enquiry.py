@@ -2442,12 +2442,16 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		]
 	
 	def onchange_purpose_categ(self, cr, uid, ids, purpose_categ, context=None):
-		value = {'acces':''}
-		if purpose_categ == 'access':
-			value = {'acces': 'yes'}
-		elif purpose_categ:
-			value = {'acces': ''}
-		print"valuevalue",value
+		value = {'acces':'','is_selectable_all':''}
+		if purpose_categ:
+			if purpose_categ == 'access':
+				value = {'acces': 'yes','is_selectable_all':False}
+			elif purpose_categ == 'pump':
+				value = {'acces': '','is_selectable_all':True}
+			elif purpose_categ == 'spare':
+				value = {'acces': '','is_selectable_all':False}
+			else:
+				value = {'acces': ''}
 		return {'value': value}
 	
 	def onchange_capacity_in_liquid(self, cr, uid, ids, capacity_in_liquid, head_in_liquid, context=None):

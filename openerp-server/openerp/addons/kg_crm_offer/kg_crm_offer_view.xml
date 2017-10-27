@@ -730,7 +730,6 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<form string="Spare Offer Details" version="7.0" create="false" delete="false">
-				<sheet>
 					<group string="Spare Offer Details">
 						<group>
 							<field name="pumpseries_id" required="1" readonly="1"/>
@@ -951,7 +950,6 @@
 								<field name="r_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 							</group>
 						</group>
-				</sheet>
 				</form>
 			</field>
 		</record>
@@ -962,7 +960,6 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<form string="Component Offer Details" version="7.0" create="false" delete="false">
-				<sheet>
 					<group string="Component Offer Details">
 						<group>
 <!--						<field name="pumpseries_id" readonly="1"/>
@@ -1103,7 +1100,6 @@
 								<field name="net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 							</group>
 						</group>
-				</sheet>
 				</form>
 			</field>
 		</record>
@@ -1114,7 +1110,6 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<form string="Accessories Offer Details" version="7.0" create="false" delete="false">
-				<sheet>
 					<group string="Accessories Offer Details">
 						<group>
 							<field name="access_id" required="1" readonly="1"/>
@@ -1330,10 +1325,6 @@
 							<field name="r_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 						</group>
 						</group>
-						
-						
-						
-				</sheet>
 				</form>
 			</field>
 		</record>
