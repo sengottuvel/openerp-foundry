@@ -403,7 +403,7 @@ class kg_painting(osv.osv):
 		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True,required=True),
 		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Order Category', store=True, readonly=True,required=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',readonly=True),
-		'pump_serial_no': fields.char('Pump Serial No.',required=True,readonly=True),
+		'pump_serial_no': fields.char('Pump Serial No.',readonly=True),
 		'moc_construction_id': fields.many2one('kg.moc.construction','MOC Construction', readonly=True,required=True),
 		'assembly_id': fields.many2one('kg.assembly.inward','Assembly'),
 		
@@ -573,7 +573,7 @@ class kg_packing(osv.osv):
 		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True,required=True),
 		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Order Category', store=True, readonly=True,required=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',readonly=True),
-		'pump_serial_no': fields.char('Pump Serial No.',required=True,readonly=True),
+		'pump_serial_no': fields.char('Pump Serial No.',readonly=True),
 		'moc_construction_id': fields.many2one('kg.moc.construction','MOC Construction', readonly=True,required=True),
 		'assembly_id': fields.many2one('kg.assembly.inward','Assembly'),
 		
