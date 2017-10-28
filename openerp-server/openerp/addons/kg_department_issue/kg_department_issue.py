@@ -515,12 +515,9 @@ class kg_department_issue(osv.osv):
 										#~ raise osv.except_osv(_('Stock not available!'),
 											#~ _('Associated GRN have less Qty compare to issue Qty for Product %s.'%(lot_datas[0]['product'])))
 							## Mapped Lot qty checking process ends
-							if dep_issue_line_rec.length == 0:
-								line_length = 1
-							if dep_issue_line_rec.breadth == 0:
-								line_breadth = 1
+							
 							if obj_rec.department_id.name == 'DP2':
-								crnt_qty = dep_issue_line_rec.issue_qty * line_length
+								crnt_qty = dep_issue_line_rec.issue_qty * dep_issue_line_rec.length
 							elif obj_rec.department_id.name != 'DP2':
 								if dep_issue_line_rec.uom_conversation_factor == 'one_dimension':
 									if dep_issue_line_rec.uom_id.id == lot_rec.po_uom.id:
@@ -531,7 +528,7 @@ class kg_department_issue(osv.osv):
 									if dep_issue_line_rec.uom_id.id == lot_rec.po_uom.id:
 										crnt_qty = dep_issue_line_rec.issue_qty
 									elif dep_issue_line_rec.uom_id.id == lot_rec.product_uom.id:
-										crnt_qty = dep_issue_line_rec.issue_qty / dep_issue_line_rec.product_id.po_uom_in_kgs / line_length / line_breadth
+										crnt_qty = dep_issue_line_rec.issue_qty / dep_issue_line_rec.product_id.po_uom_in_kgs / dep_issue_line_rec.length / dep_issue_line_rec.breadth
 							print"tottot",round(tot,2)
 							print"crnt_qty",round(crnt_qty,2)
 							if round(tot,2) < round(crnt_qty,2):
@@ -737,12 +734,8 @@ class kg_department_issue(osv.osv):
 					for i in val:
 						lot_rec = lot_obj.browse(cr, uid, i)
 						tot += lot_rec.pending_qty
-					if line_ids.length == 0:
-						line_length = 1
-					if line_ids.breadth == 0:
-						line_breadth = 1
 					if line_ids.issue_id.department_id.name == 'DP2':
-						crnt_qty = line_ids.issue_qty * line_length
+						crnt_qty = line_ids.issue_qty * line_ids.length
 					elif line_ids.issue_id.department_id.name != 'DP2':
 						if line_ids.uom_conversation_factor == 'one_dimension':
 							if line_ids.uom_id.id == lot_rec.po_uom.id:
@@ -753,7 +746,7 @@ class kg_department_issue(osv.osv):
 							if line_ids.uom_id.id == lot_rec.po_uom.id:
 								crnt_qty = line_ids.issue_qty
 							elif line_ids.uom_id.id == lot_rec.product_uom.id:
-								crnt_qty = line_ids.issue_qty / line_ids.product_id.po_uom_in_kgs / line_length / line_breadth
+								crnt_qty = line_ids.issue_qty / line_ids.product_id.po_uom_in_kgs / line_ids.length / line_ids.breadth
 					print"tottot",round(tot,2)
 					print"crnt_qty",round(crnt_qty,2)
 					if round(tot,2) < round(crnt_qty,2):
@@ -849,11 +842,7 @@ class kg_department_issue(osv.osv):
 									else:
 										pending_depindent_qty =  0.0
 										if line_ids.uom_conversation_factor == 'two_dimension':
-											if line_ids.length == 0:
-												line_length = 1
-											if line_ids.breadth == 0:
-												line_breadth = 1
-											pending_depindent_qty = issue_pending_qty - (line_ids.issue_qty / line_length / line_breadth / line_ids.product_id.po_uom_in_kgs)
+											pending_depindent_qty = issue_pending_qty - (line_ids.issue_qty / line_ids.length / line_ids.breadth / line_ids.product_id.po_uom_in_kgs)
 										elif line_ids.uom_conversation_factor == 'one_dimension':
 											pending_depindent_qty = issue_pending_qty - (line_ids.issue_qty * line_ids.product_id.po_uom_coeff)
 									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
@@ -946,21 +935,19 @@ class kg_department_issue(osv.osv):
 						issue_qty = line_ids.issue_qty
 						remain_qty = 0
 						reserved_qty_in_po_uom = 0
-						if line_ids.length == 0:
-							line_length = 1
-						if line_ids.length == 0:
-							line_breadth = 1
+						length = 1
+						breadth = 1
 						if issue_record.department_id.name == 'DP2':
 							if line_ids.uom_conversation_factor == 'one_dimension':
-								line_qty = (line_ids.issue_qty * line_length)*line_ids.product_id.po_uom_coeff
-								line_lot_pending_qty = line_ids.issue_qty * line_length
-								line_store_pending_qty = (line_ids.issue_qty * line_length)*line_ids.product_id.po_uom_coeff
+								line_qty = (line_ids.issue_qty * line_ids.length)*line_ids.product_id.po_uom_coeff
+								line_lot_pending_qty = line_ids.issue_qty * line_ids.length
+								line_store_pending_qty = (line_ids.issue_qty * line_ids.length)*line_ids.product_id.po_uom_coeff
 							elif line_ids.uom_conversation_factor == 'two_dimension':
-								line_qty = line_ids.issue_qty * line_length * line_breadth * line_ids.product_id.po_uom_in_kgs
-								line_lot_pending_qty = line_ids.issue_qty * line_length * line_breadth
-								line_store_pending_qty = line_ids.issue_qty * line_length * line_breadth * line_ids.product_id.po_uom_in_kgs
-							length = line_length
-							breadth = line_breadth
+								line_qty = line_ids.issue_qty * line_ids.length * line_ids.breadth * line_ids.product_id.po_uom_in_kgs
+								line_lot_pending_qty = line_ids.issue_qty * line_ids.length * line_ids.breadth
+								line_store_pending_qty = line_ids.issue_qty * line_ids.length * line_ids.breadth * line_ids.product_id.po_uom_in_kgs
+							length = line_ids.length
+							breadth = line_ids.breadth
 						elif issue_record.department_id.name != 'DP2':
 							if line_ids.uom_conversation_factor == 'one_dimension':
 								if line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
@@ -974,15 +961,15 @@ class kg_department_issue(osv.osv):
 							elif line_ids.uom_conversation_factor == 'two_dimension':
 								if line_ids.product_id.po_uom_in_kgs > 0:
 									if line_ids.uom_id.id == line_ids.product_id.uom_id.id:
-										line_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_length * line_breadth
-										line_store_pending_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_length * line_breadth
-										line_lot_pending_qty = line_ids.issue_qty * line_length * line_breadth
+										line_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+										line_store_pending_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+										line_lot_pending_qty = line_ids.issue_qty * line_ids.length * line_ids.breadth
 									elif line_ids.uom_id.id == line_ids.product_id.uom_po_id.id:
-										line_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_length * line_breadth
-										line_store_pending_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_length * line_breadth
-										line_lot_pending_qty = line_ids.issue_qty * line_length * line_breadth
-									length = line_length
-									breadth = line_breadth
+										line_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+										line_store_pending_qty = line_ids.issue_qty * line_ids.product_id.po_uom_in_kgs * line_ids.length * line_ids.breadth
+										line_lot_pending_qty = line_ids.issue_qty * line_ids.length * line_ids.breadth
+									length = line_ids.length
+									breadth = line_ids.breadth
 						print"line_qtyline_qty",line_qty
 						for i in val:
 							print'aaaaaaaaaaaaaaaaaa'
@@ -1051,8 +1038,8 @@ class kg_department_issue(osv.osv):
 								'price_unit': line_ids.price_unit or 0.0,
 								'stock_rate': line_ids.price_unit or 0.0,
 								'uom_conversation_factor': line_ids.uom_conversation_factor,
-								'length': line_length,
-								'breadth': line_breadth,
+								'length': length,
+								'breadth': breadth,
 								'trans_date': issue_record.issue_date,
 								
 								})
