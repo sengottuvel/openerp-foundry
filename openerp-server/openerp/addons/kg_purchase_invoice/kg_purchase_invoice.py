@@ -868,6 +868,7 @@ class kg_purchase_invoice(osv.osv):
 				raise osv.except_osv(_('Remarks Needed !!'),
 					_('Enter Remark in Remarks ....'))
 		self.write(cr,uid,ids,{'state': 'draft',
+							   'inv_flag': False,
 							   'rej_user_id': uid,
 							   'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
 								})

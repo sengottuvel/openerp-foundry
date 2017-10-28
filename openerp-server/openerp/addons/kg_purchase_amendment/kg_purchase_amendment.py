@@ -1075,7 +1075,7 @@ class kg_purchase_amendment(osv.osv):
 				if amend_line.product_qty != amend_line.product_qty_amend:
 					po_line_obj.write(cr,uid,po_line_id,{'product_qty': amend_line.product_qty_amend})
 				if amend_line.product_uom != amend_line.product_uom_amend:
-					po_line_obj.write(cr,uid,po_line_id,{'product_uom': amend_line.product_uom_amend})
+					po_line_obj.write(cr,uid,po_line_id,{'product_uom': amend_line.product_uom_amend.id})
 				if amend_line.price_unit != amend_line.price_unit_amend:
 					po_line_obj.write(cr,uid,po_line_id,{'price_unit': amend_line.price_unit_amend})
 				if amend_line.quantity != amend_line.quantity_amend:
