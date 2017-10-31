@@ -474,21 +474,21 @@ class kg_work_order(osv.osv):
 		rpt_type = ['horizontal','vertical','others']
 		
 		hz_dictn = {
-		'01#TECHNICAL SPECIFICATION:':[('W.O Ref','order_no'),('Equipment /Tag No.','tag_no'),('Description','description'),('Model / Alias name','model'),('Quantity in Nos.','qty'),('Delivery Pipe Size (mm)','delivery_pipe_size'),('Flange standard','flange_standard')
-		,('Liquid ','liquid_handled'),('Specific Gravity ','specific_gravity'),('Viscosity in CST','viscosity_in_cst'),('Viscosity correction factors','viscosity_crt_factor'),('Temperature in C','temperature_in_c'),('Capacity in m3/Hr','capacity_in_m3hr'),('Total Head in Mlc(Water)','head_in_water'),('Total Head in Mlc(Liquid)','head_in_liquid'),('Efficiency in % W/L','efficiency'),('BKW Water','bkw_water'),('BKW Liq','bkw_liquid'),('Motor KW ','motor_kw'),('Speed - RPM (P/M)','speed_rpm_mot'),('Type of Drive','type_of_drive'),('Motor Make ','motor_make'),('Motor Frame size','framesize'),('NPSH R - M','npsh_r_m'),('Shaft Sealing','shaft_sealing'),('Seal Make / Seal Type','seal_ref'),('Face Combination / API Plan','face_api_ref')],
+		'01#TECHNICAL SPECIFICATION:':[('W.O Ref','order_no'),('Equipment /Tag No.','tag_no'),('Description','description'),('Model / Alias name','model'),('Quantity in Nos.','qty'),('Size-SuctionX Delivery(mm)','size_suction'),('Flange standard','flange_standard')
+		,('Liquid ','liquid_handled'),('Specific Gravity ','specific_gravity'),('Viscosity in CST','viscosity_in_cst'),('Viscosity correction factors','viscosity_crt_factor'),('Temperature in C','temperature_in_c'),('Capacity in m3/Hr','capacity_in_m3hr'),('Total Head in Mlc(Water)','head_in_water'),('Total Head in Mlc(Liquid)','head_in_liquid'),('Efficiency in % W/L','efficiency'),('BKW Water','bkw_water'),('BKW Liq','bkw_liquid'),('Motor KW ','motor_kw'),('Consistency In %','consistency'),('Speed - RPM (P/M)','speed_rpm_mot'),('Type of Drive','type_of_drive'),('Motor Make ','motor_make'),('Motor Frame size','framesize'),('NPSH R - M','npsh_r_m'),('Shaft Sealing','shaft_sealing'),('Seal Make / Seal Type','seal_ref'),('Face Combination / API Plan','face_api_ref')],
 		'02#MATERIAL: ':[('Purpose','order_category')],
 		'03#Spares: ':[('Spares','spare')],
 		'04#Accessories: ':[('W.O Ref','order_no'),('Accessories','acces')],
 		}
 		vz_dictn = {
-		'01#TECHNICAL SPECIFICATION:':[('W.O Ref','order_no'),('Equipment /Tag No.','tag_no'),('Description','description'),('Model / Alias name','model'),('Quantity in Nos.','qty'),('Delivery Pipe Size (mm)','delivery_pipe_size'),('Flange standard','flange_standard')
-		,('Liquid ','liquid_handled'),('Specific Gravity ','specific_gravity'),('Viscosity in CST','viscosity_in_cst'),('Viscosity correction factors','viscosity_crt_factor'),('Suction condition','suction_condition'),('Temperature in C','temperature_in_c'),('Solid Size','solid_concen'),('Capacity in m3/Hr','capacity_in_m3hr'),('Total Head in Mlc(Water)','head_in_water'),('Total Head in Mlc(Liquid)','head_in_liquid'),('Efficiency in % W/L','efficiency'),('BKW Water','bkw_water'),('BKW Liq','bkw_liquid'),('Motor KW ','motor_kw'),('Speed - RPM (P/M)','speed_rpm_mot'),('Type of Drive','type_of_drive'),('Motor Make ','motor_make'),('Motor Frame size','framesize'),('NPSH R - M','npsh_r_m'),('Shaft Sealing','shaft_sealing'),('Seal Make / Seal Type','seal_ref'),('Face Combination / API Plan','face_api_ref'),('Setting Height','setting_height'),('Sump Depth','sump_depth')],
+		'01#TECHNICAL SPECIFICATION:':[('W.O Ref','order_no'),('Equipment /Tag No.','tag_no'),('Description','description'),('Model / Alias name','model'),('Quantity in Nos.','qty'),('Size-SuctionX Delivery(mm)','size_suction'),('Flange standard','flange_standard')
+		,('Liquid ','liquid_handled'),('Specific Gravity ','specific_gravity'),('Viscosity in CST','viscosity_in_cst'),('Viscosity correction factors','viscosity_crt_factor'),('Suction condition','suction_condition'),('Temperature in C','temperature_in_c'),('Solid Size','solid_concen'),('Capacity in m3/Hr','capacity_in_m3hr'),('Total Head in Mlc(Water)','head_in_water'),('Total Head in Mlc(Liquid)','head_in_liquid'),('Efficiency in % W/L','efficiency'),('BKW Water','bkw_water'),('BKW Liq','bkw_liquid'),('Motor KW ','motor_kw'),('Consistency In %','consistency'),('Speed - RPM (P/M)','speed_rpm_mot'),('Type of Drive','type_of_drive'),('Motor Make ','motor_make'),('Motor Frame size','framesize'),('NPSH R - M','npsh_r_m'),('Shaft Sealing','shaft_sealing'),('Seal Make / Seal Type','seal_ref'),('Face Combination / API Plan','face_api_ref'),('Setting Height','setting_height'),('Sump Depth','sump_depth')],
 		'02#MATERIAL: ':[('Purpose','order_category')],
 		'03#Spares: ':[('Spares','spare')],
 		'04#Accessories: ':[('Accessories','acces')],
 		}
 		self_obj = self.pool.get('ch.kg.crm.pumpmodel')
-		sqltwo = """ select wo_line_id,order_category,pump_type,acces,spare,order_no,tag_no,description,model,qty,delivery_pipe_size,flange_standard,liquid_handled,specific_gravity,viscosity_in_cst,viscosity_crt_factor,suction_condition,temperature_in_c,solid_concen,solid_concen_vol,capacity_in_m3hr,head_in_water,head_in_liquid,efficiency,bkw_water,bkw_liquid,motor_kw,(speed_pump || ' $ ' || speed_motor) as speed_rpm_mot,
+		sqltwo = """ select wo_line_id,order_category,pump_type,acces,spare,order_no,tag_no,description,model,qty,size_suction,flange_standard,liquid_handled,specific_gravity,viscosity_in_cst,viscosity_crt_factor,suction_condition,temperature_in_c,solid_concen,solid_concen_vol,capacity_in_m3hr,head_in_water,head_in_liquid,efficiency,bkw_water,bkw_liquid,motor_kw,consistency,(speed_pump || ' $ ' || speed_motor) as speed_rpm_mot,
 		type_of_drive,motor_make,framesize,npsh_r_m,shaft_sealing,(mech_seal_make || ' $ ' || seal_type) as seal_ref,
 		(face_combination || ' $ ' || api_plan) as face_api_ref,setting_height,sump_depth from (
 		"""
@@ -503,7 +503,7 @@ class kg_work_order(osv.osv):
 		case when pump_crm.description is not null then pump_crm.description else '-' end as description,
 		coalesce(pump.name,'-') as model,
 		coalesce(wo_line.qty,0) as qty,
-		coalesce(wo_line.delivery_pipe_size,'0') as delivery_pipe_size,
+		coalesce(wo_line.size_suctionx,'0') as size_suction,
 		coalesce(flange.name,'-') as flange_standard,
 		coalesce(liquid.name,'-') as liquid_handled,
 		coalesce(pump_crm.specific_gravity,0) as specific_gravity,
@@ -532,6 +532,7 @@ class kg_work_order(osv.osv):
 		case when pump_crm.bkw_water is null then 0 else coalesce(pump_crm.bkw_water,0.00) end as bkw_water,
 		case when pump_crm.bkw_liq is null then 0 else coalesce(pump_crm.bkw_liq,0.00) end as bkw_liquid,
 		case when pump_crm.motor_kw > 0 then round(cast(pump_crm.motor_kw as numeric),2)::text else '-' end as motor_kw,
+		case when wo_line.consistency > 0 then round(cast(wo_line.consistency as numeric),2)::text else '0.0' end as consistency,
 		case when pump_crm.speed_in_rpm > 0 then pump_crm.speed_in_rpm::text else '-' end as speed_pump,
 		case when pump_crm.speed_in_motor > 0 then pump_crm.speed_in_motor::text else '-' end as speed_motor,
 		case
@@ -607,7 +608,6 @@ class kg_work_order(osv.osv):
 		sqltwo_end = """ ) as sql_one"""
 		
 		for report in rpt_type:
-			print " --- Starts Here ----"
 			wo_line_obj = self.pool.get('ch.work.order.details')
 			count_sql = """ select 
 			(select name from kg_pumpmodel_master where id = pump_model_id) as pump_name,
@@ -618,7 +618,6 @@ class kg_work_order(osv.osv):
 			if not count_data:
 				pass
 			else:
-				print " = RRRRRRRR TTTTTT =============",report
 				if report in ('horizontal','others'):
 					sheet1 = wbk.add_sheet('Horizontal')
 					dictn = hz_dictn
@@ -658,8 +657,8 @@ class kg_work_order(osv.osv):
 					enq_ids = self.pool.get('kg.crm.enquiry').search(cr,uid,[('name','=',rec.enquiry_no),('state','!=','revised')])
 					if enq_ids:
 						enq_rec = self.pool.get('kg.crm.enquiry').browse(cr,uid,enq_ids[0])
-						due_date = datetime.strptime(enq_rec.due_date, '%Y-%m-%d').strftime('%d/%m/%Y')
-				sheet1.write_merge(s2, s2, c1+1, c2, 'Due Date: '+due_date, style_left)
+						del_date = datetime.strptime(rec.delivery_date, '%Y-%m-%d').strftime('%d/%m/%Y')
+				sheet1.write_merge(s2, s2, c1+1, c2, 'Delivery Date: '+del_date, style_left)
 				s2 = s2+1
 				order_priority = dict(self._columns['order_priority'].selection)
 				order_priority = order_priority.get(str(rec.order_priority))
@@ -700,7 +699,6 @@ class kg_work_order(osv.osv):
 						c1 = c1+1
 						c1 = 0
 						if var[0] == 'Purpose':
-							print "PUIURURUURRUR STATTATAT HERER ============",s2
 							moc_com_query = """ select wo_line.id as wo_line_id,moc_const.offer_id,moc_const.moc_id,offer_mat.name as moc_offer_name,moc.name as moc_offer_value --,moc_const.seq_no
 							from ch_moc_construction moc_const
 							left join kg_offer_materials offer_mat on offer_mat.id = moc_const.offer_id
@@ -747,9 +745,7 @@ class kg_work_order(osv.osv):
 								s2 += 1
 								c1 = 0
 							s2 = s2-1
-							print "PUIURURUURRUR ENDNNDND HERER ============",s2
 						elif var[0] == 'Accessories':
-							print "ACCCCCCCC STATTATAT HERER ============",s2
 							access_one_query = """ select header_id,access_name,yes,oth_spec from (
 							select
 							wo_access.header_id,
@@ -807,9 +803,7 @@ class kg_work_order(osv.osv):
 										else:
 											sheet1.write_merge(s2, s2, pump_cnt, pump_cnt, '-', style_left)
 										pump_cnt += 1																				
-							print "ACCCCCCCC ENDNDNDND HERER ============",s2
 						elif var[0] == 'Spares':
-							print "SPARE STATTATAT HERER ============",s2
 							spare_query = """ select pump_model,pattern_name,qty,oth_spec,header_id from (
 							select pump.name as pump_model,foundry_line.pattern_name,foundry_line.qty,foundry_line.add_spec as oth_spec,foundry_line.header_id
 							from ch_order_bom_details foundry_line
@@ -843,7 +837,6 @@ class kg_work_order(osv.osv):
 							spare_cnt_query = """ select count(*) from ( """ + spare_query + spare_cond_query + """ )  as sql_spare """
 							cr.execute(spare_cnt_query)
 							spare_cnt_data = cr.dictfetchone()
-							print "spare_cnt_data ==================",spare_cnt_data
 							spare_cnt = 0
 							if spare_cnt_data:
 								spare_cnt = spare_cnt_data['count']
@@ -885,13 +878,11 @@ class kg_work_order(osv.osv):
 										pump_cnt += 1   
 							else:
 								s2 = s2-1
-							print "SPARE ENDNDNDNDNND HERER ============",s2
 						else:
 							if var[0] in ('Model / Alias name','Capacity in m3/Hr'):
 								sheet1.write_merge(s2, s2, c1, c1, var[0], style_highlight)							
 							else:
 								sheet1.write_merge(s2, s2, c1, c1, var[0], style_left)
-						print "bbbfbffbbf puuuuu",s2
 						if pump_data:
 							for pump in pump_data:
 								wo_line_rec = wo_line_obj.browse(cr, uid, pump['wo_line_id'])
@@ -928,14 +919,12 @@ class kg_work_order(osv.osv):
 												sheet1.write_merge(s2, s2, c1, c1, values, style_left)
 									else:
 										sheet1.write_merge(s2, s2, c1, c1, '', style_left)
-						print "AFAFAFAFAF puuuuu ENDDDNDN",s2				
 				if pump_data:
 					s1 = 5
 					c1 = 0
 					for pump in pump_data:
 						c1 += 1
 						sheet1.col(c1).width = 3000
-				print " --- Ends Here ----"				
 		
 		"""Parsing data as string """
 		file_data=StringIO.StringIO()
@@ -2191,7 +2180,8 @@ class ch_work_order_details(osv.osv):
 		'line_ids_d': fields.one2many('ch.wo.accessories', 'header_id', "Accessories"),
 		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval'),
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
-		
+		'size_suctionx': fields.char('Size-SuctionX Delivery(mm)'),
+		'consistency': fields.float('Consistency In %'),
 		
 		## QAP ##
 		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',required=True,domain="[('state','=','approved')]"),

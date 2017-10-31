@@ -1044,6 +1044,8 @@ class kg_crm_offer(osv.osv):
 			'framesize': item.motor_power,
 			'pumpseries_id': item.pumpseries_id.id,
 			'unit_price': works_value,
+			'size_suctionx': item.size_suctionx,
+			'consistency': item.consistency,
 			}
 		
 		return pump_vals

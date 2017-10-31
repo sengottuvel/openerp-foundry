@@ -206,7 +206,8 @@
 							<field name="m_power" attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="drawing_approval" attrs="{'readonly': [('flag_load_bom','!=',False)],'invisible': [('order_category','=','access')]}"/>
 							<field name="inspection" attrs="{'readonly': [('flag_load_bom','!=',False)],'invisible': [('order_category','=','access')]}"/>
-							
+							<field name="size_suctionx"/>
+							<field name="consistency"/>
 							<field name="unit_price"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="flag_standard"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="state" invisible="1"/>
