@@ -42,27 +42,31 @@ class kg_po_grn(osv.osv):
 		else:
 			qty = line.po_grn_qty
 		
-		#~ amt_to_per = (line.kg_discount / (qty * line.price_unit or 1.0 )) * 100
 		if line.po_qty == 0.0:
 			po_qty = 1.0
 		else:
 			po_qty = line.po_qty
-		dis_amt = (line.kg_discount / po_qty) * qty
-		print"dis_amt",dis_amt
-		amt_to_per = dis_amt / ((po_qty * line.price_unit) / 100)
-			
-		kg_discount_per = line.kg_discount_per
-		tot_discount_per = amt_to_per + kg_discount_per
-		price = line.price_unit - (line.kg_discount / po_qty)
-		print"priceprice",price
-		print"qtyqtyqty",qty
-		print"line.price_unitline.price_unit",line.price_unit
-		print"tot_discount_pertot_discount_per",tot_discount_per
-		for c in self.pool.get('account.tax').compute_all(cr, uid, line.grn_tax_ids,
-			price, qty, line.product_id,
-			 line.po_grn_id.supplier_id)['taxes']:			 
+		
+		if line.po_grn_id.grn_type == 'from_po':
+			dis_amt = (line.po_line_id.kg_discount / po_qty) * qty
+			amt_to_per = dis_amt / ((po_qty * line.po_line_id.price_unit) / 100)
+			kg_discount_per = line.po_line_id.kg_discount_per
+			tot_discount_per = amt_to_per + kg_discount_per
+			price = line.po_line_id.price_unit - (line.po_line_id.kg_discount / po_qty)
+			tax_ids = line.po_line_id.taxes_id
+			supplier_id = line.po_id.partner_id
+		else:
+			dis_amt = (line.kg_discount / po_qty) * qty
+			amt_to_per = dis_amt / ((po_qty * line.price_unit) / 100)
+			kg_discount_per = line.kg_discount_per
+			tot_discount_per = amt_to_per + kg_discount_per
+			price = line.price_unit - (line.kg_discount / po_qty)
+			tax_ids = line.grn_tax_ids
+			supplier_id = line.supplier_id
+		
+		for c in self.pool.get('account.tax').compute_all(cr, uid, tax_ids,
+			price, qty, line.product_id,supplier_id)['taxes']:			 
 			val += c.get('amount', 0.0)
-		print"valaallalalalal=-------------------",val
 		return val
 	
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
@@ -92,18 +96,23 @@ class kg_po_grn(osv.osv):
 					qty = 1.0
 				else:
 					qty = line.po_qty
-				per_to_amt = (line.po_grn_qty * line.price_unit) * line.kg_discount_per / 100.00
-				tot_discount = ((line.kg_discount / qty) * line.po_grn_qty )+ per_to_amt
-				val1 += line.price_subtotal
-				val += self._amount_line_tax(cr, uid, line, context=context)
-				val3 += tot_discount
+				if line.po_grn_id.grn_type == 'from_po':
+					per_to_amt = (line.po_grn_qty * line.po_line_id.price_unit) * line.po_line_id.kg_discount_per / 100.00
+					tot_discount = ((line.po_line_id.kg_discount / qty) * line.po_grn_qty )+ per_to_amt
+					val1 += line.po_line_id.price_subtotal
+					val += self._amount_line_tax(cr, uid, line, context=context)
+					val3 += tot_discount
+				else:
+					per_to_amt = (line.po_grn_qty * line.price_unit) * line.kg_discount_per / 100.00
+					tot_discount = ((line.kg_discount / qty) * line.po_grn_qty )+ per_to_amt
+					val1 += line.price_subtotal
+					val += self._amount_line_tax(cr, uid, line, context=context)
+					val3 += tot_discount
 			res[order.id]['other_charge'] = (round(other_charges_amt,0))
 			res[order.id]['amount_tax'] = val
 			res[order.id]['amount_untaxed'] = val1 - val + val3
-			print"res[order.id]['amount_untaxed']",res[order.id]['amount_untaxed']
 			res[order.id]['discount'] = val3
 			res[order.id]['amount_total'] = res[order.id]['amount_untaxed'] - res[order.id]['discount'] + res[order.id]['amount_tax'] + res[order.id]['other_charge']
-			print"res[order.id]['amount_total']",res[order.id]['amount_total']
 		
 		return res
 	
@@ -1618,23 +1627,28 @@ class po_grn_line(osv.osv):
 			# Price Calculation
 			price_amt = 0
 			amt_to_per = 0.00
-			if line.price_type == 'per_kg':
-				if line.product_id.po_uom_in_kgs > 0:
-					price_amt = line.po_grn_qty / line.product_id.po_uom_in_kgs * line.price_unit
+			if line.po_grn_id.grn_type == 'from_po':
+				if line.po_line_id.price_type == 'per_kg':
+					if line.product_id.po_uom_in_kgs > 0:
+						price_amt = line.po_grn_qty / line.product_id.po_uom_in_kgs * line.price_unit
+				else:
+					price_amt = qty * line.po_line_id.price_unit
+				dis_amt = (line.po_line_id.kg_discount / line.po_grn_qty or 1) * qty
+				kg_discount_per = line.po_line_id.kg_discount_per
+				tot_discount_per = amt_to_per + kg_discount_per
+				price = line.po_line_id.price_unit - (line.po_line_id.kg_discount / line.po_grn_qty)
+				taxes = tax_obj.compute_all(cr, uid, line.po_line_id.taxes_id, price, qty, line.product_id, line.po_grn_id.supplier_id)
 			else:
-				price_amt = qty * line.price_unit
-				
-			#~ amt_to_per = (line.kg_discount / (qty * line.price_unit or 1.0 )) * 100
-			dis_amt = (line.kg_discount / line.po_grn_qty or 1) * qty
-			#~ amt_to_per = 0.00
-			#~ if line.po_qty:
-			#~ amt_to_per = dis_amt / ((line.po_qty * line.price_unit ) / 100)
-			kg_discount_per = line.kg_discount_per
-			tot_discount_per = amt_to_per + kg_discount_per
-			#~ price = line.price_unit * (1 - (tot_discount_per or 0.0) / 100.0)
-			price = line.price_unit - (line.kg_discount / line.po_grn_qty)
-			taxes = tax_obj.compute_all(cr, uid, line.grn_tax_ids, price, qty, line.product_id, line.po_grn_id.supplier_id)
-			#~ cur = line.po_grn_id.supplier_id.property_product_pricelist_purchase.currency_id
+				if line.price_type == 'per_kg':
+					if line.product_id.po_uom_in_kgs > 0:
+						price_amt = line.po_grn_qty / line.product_id.po_uom_in_kgs * line.price_unit
+				else:
+					price_amt = qty * line.price_unit
+				dis_amt = (line.kg_discount / line.po_grn_qty or 1) * qty
+				kg_discount_per = line.kg_discount_per
+				tot_discount_per = amt_to_per + kg_discount_per
+				price = line.price_unit - (line.kg_discount / line.po_grn_qty)
+				taxes = tax_obj.compute_all(cr, uid, line.grn_tax_ids, price, qty, line.product_id, line.po_grn_id.supplier_id)
 			cur = self.pool.get('res.currency').browse(cr,uid,1)
 			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total_included'])
 			
