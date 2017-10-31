@@ -687,6 +687,11 @@ class kg_po_grn(osv.osv):
 				if line.inward_type.id == False:
 					raise osv.except_osv(_('Warning!'), _('Kindly Give Inward Type for %s !!' %(line.product_id.name)))
 				
+				if line.uom_conversation_factor == 'two_dimension':
+					if line.uom_id.id == line.product_id.uom_id.id:
+						if line.product_id.po_uom_in_kgs == 0:
+							raise osv.except_osv(_('Warning!'),_('PO UOM in Kgs should be grater than zero for Product (%s) check with Product Master !!'%(line.product_id.name)))
+				
 				# Expiry date validation start
 				
 				if line.product_id.flag_expiry_alert == True:
