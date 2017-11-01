@@ -1066,6 +1066,8 @@ class kg_po_grn(osv.osv):
 						if line.uom_id.id != line.product_id.uom_id.id:
 							product_uom = line.product_id.uom_id.id
 							po_coeff = line.product_id.po_uom_coeff
+							if po_coeff == 0.0:
+								po_coeff = 1.0
 							product_qty = line.po_grn_qty * po_coeff
 							price_unit =  line.po_line_id.price_subtotal / product_qty
 						elif line.uom_id.id == line.product_id.uom_id.id:
@@ -1081,6 +1083,8 @@ class kg_po_grn(osv.osv):
 						if line.uom_id.id != line.product_id.uom_id.id:
 							product_uom = line.product_id.uom_id.id
 							po_coeff = line.product_id.po_uom_coeff
+							if po_coeff == 0.0:
+								po_coeff = 1.0
 							product_qty = line.po_grn_qty * po_coeff
 							price_unit =  line.price_subtotal / product_qty
 						elif line.uom_id.id == line.product_id.uom_id.id:
@@ -1161,6 +1165,8 @@ class kg_po_grn(osv.osv):
 						if line.uom_id.id != line.product_id.uom_id.id:
 							product_uom = line.product_id.uom_id.id
 							po_coeff = line.product_id.po_uom_coeff
+							if po_coeff == 0.0:
+								po_coeff = 1.0
 							product_qty = line.po_grn_qty * po_coeff
 							price_unit =  line.so_line_id.price_subtotal / product_qty
 						elif line.uom_id.id == line.product_id.uom_id.id:
@@ -1171,6 +1177,8 @@ class kg_po_grn(osv.osv):
 						if line.uom_id.id != line.product_id.uom_id.id:
 							product_uom = line.product_id.uom_id.id
 							po_coeff = line.product_id.po_uom_coeff
+							if po_coeff == 0.0:
+								po_coeff = 1.0
 							product_qty = line.po_grn_qty * po_coeff
 							price_unit =  line.price_subtotal / product_qty
 						elif line.uom_id.id == line.product_id.uom_id.id:
