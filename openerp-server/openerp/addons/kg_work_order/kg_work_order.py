@@ -653,6 +653,7 @@ class kg_work_order(osv.osv):
 				order_date = datetime.strptime(rec.entry_date, '%Y-%m-%d').strftime('%d/%m/%Y')
 				sheet1.write_merge(s2, s2, c1, c1, 'Order Date: '+order_date, style_left)
 				due_date = '-'
+				del_date = '-'
 				if rec.enquiry_no:
 					enq_ids = self.pool.get('kg.crm.enquiry').search(cr,uid,[('name','=',rec.enquiry_no),('state','!=','revised')])
 					if enq_ids:
