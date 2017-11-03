@@ -194,9 +194,12 @@ class kg_brandmoc_rate(osv.osv):
 			obj_ids = self.search(cr,uid,[('product_id','=',rec.product_id.id),('id','!=',rec.id),('state','=','approved')])
 			if obj_ids:
 				obj_rec = self.browse(cr,uid,obj_ids[0])
+				print"obj_rec",obj_rec.id
 				for item in obj_rec.line_ids:
 					#~ obj_rec = self.browse(cr,uid,obj_ids[0])
-					brand_rec = self.pool.get('kg.brand.master').browse(cr,uid,item.brand_id.id)				
+					print"item.brand_id.id",item.brand_id.id
+					brand_rec = self.pool.get('kg.brand.master').browse(cr,uid,item.brand_id.id)
+					print"brand_rec.id",brand_rec.id			
 					sql_check = """ select brd_id,prod_id from prod_brnd where brd_id=%s and prod_id=%s""" %(brand_rec.id,obj_rec.product_id.id)
 					cr.execute(sql_check)
 					data = cr.dictfetchall()
