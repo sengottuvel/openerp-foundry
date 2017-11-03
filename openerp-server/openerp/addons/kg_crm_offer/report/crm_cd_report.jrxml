@@ -49,7 +49,13 @@ sum((COALESCE((COALESCE(pump.prime_cost,0)),0))),2) as ratio,
 
 round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
 round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
-round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
+
+trim(TO_CHAR((COALESCE(((
+select avg(ref) as ref from (
+select
+case when pp.r_p_f_in_ex = 'inclusive' then r_p_f else 0.00 end as ref
+ from ch_pump_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_dis,
+
 round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
 round (avg(COALESCE(pump.r_insurance,0))::DECIMAL,2)::TEXT as avg_ins_dis,
 round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
@@ -125,7 +131,13 @@ sum((COALESCE((COALESCE(pump.prime_cost,0)),0))),2) as ratio,
 
 round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
 round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
-round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
+
+trim(TO_CHAR((COALESCE(((
+select avg(ref) as ref from (
+select
+case when pp.r_p_f_in_ex = 'inclusive' then r_p_f else 0.00 end as ref
+ from ch_spare_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_dis,
+
 round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
 round (avg(COALESCE(pump.r_insurance,0))::DECIMAL,2)::TEXT as avg_ins_dis,
 round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
@@ -200,7 +212,13 @@ sum((COALESCE((COALESCE(pump.prime_cost,0)),0))),2) as ratio,
 
 round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
 round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
-round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
+
+trim(TO_CHAR((COALESCE(((
+select avg(ref) as ref from (
+select
+case when pp.r_p_f_in_ex = 'inclusive' then r_p_f else 0.00 end as ref
+ from ch_accessories_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_dis,
+
 round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
 round (avg(COALESCE(pump.r_insurance,0))::DECIMAL,2)::TEXT as avg_ins_dis,
 round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
@@ -477,6 +495,12 @@ group by access.name,pump.cust_in_ex)) as tot]]>
 -- Book val
 sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
+trim(TO_CHAR((COALESCE(((
+select avg(ref) as ref from (
+select
+case when pp.r_p_f_in_ex = 'exclusive' then r_p_f else 0.00 end as ref
+ from ch_pump_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_ex_dis,
+
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
@@ -513,6 +537,7 @@ where header_id = $P{offer_id}
 group by pump.cust_in_ex]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
+		<field name="avg_pf_ex_dis" class="java.lang.String"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="tax" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
@@ -526,6 +551,12 @@ group by pump.cust_in_ex]]>
 
 -- Book val
 sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
+
+trim(TO_CHAR((COALESCE(((
+select avg(ref) as ref from (
+select
+case when pp.r_p_f_in_ex = 'exclusive' then r_p_f else 0.00 end as ref
+ from ch_spare_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_ex_dis,
 
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
@@ -563,6 +594,7 @@ where header_id = $P{offer_id}
 group by pump.cust_in_ex]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
+		<field name="avg_pf_ex_dis" class="java.lang.String"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="tax" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
@@ -576,6 +608,12 @@ group by pump.cust_in_ex]]>
 
 -- Book val
 sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
+
+trim(TO_CHAR((COALESCE(((
+select avg(ref) as ref from (
+select
+case when pp.r_p_f_in_ex = 'exclusive' then r_p_f else 0.00 end as ref
+ from ch_accessories_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_ex_dis,
 
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
@@ -615,6 +653,7 @@ where header_id = $P{offer_id} and access.is_pump_acc_flag = True
 group by pump.cust_in_ex]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
+		<field name="avg_pf_ex_dis" class="java.lang.String"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="tax" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
@@ -858,7 +897,13 @@ sum((COALESCE((COALESCE(pump.prime_cost,0)),0))),2) as ratio,
 
 round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
 round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
-round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
+
+trim(TO_CHAR((COALESCE(((
+select avg(ref) as ref from (
+select
+case when pp.r_p_f_in_ex = 'inclusive' then r_p_f else 0.00 end as ref
+ from ch_accessories_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_dis,
+
 round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
 round (avg(COALESCE(pump.r_insurance,0))::DECIMAL,2)::TEXT as avg_ins_dis,
 round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
@@ -901,6 +946,12 @@ access.name as acc_name,
 -- Book val
 sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
+trim(TO_CHAR((COALESCE(((
+select avg(ref) as ref from (
+select
+case when pp.r_p_f_in_ex = 'exclusive' then r_p_f else 0.00 end as ref
+ from ch_accessories_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_ex_dis,
+
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
@@ -940,6 +991,7 @@ group by access.name,pump.cust_in_ex]]>
 		</queryString>
 		<field name="acc_name" class="java.lang.String"/>
 		<field name="book_val" class="java.lang.Integer"/>
+		<field name="avg_pf_ex_dis" class="java.lang.String"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="tax" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
@@ -975,7 +1027,8 @@ end ) as comp_zip,
 
 partner.name as customer,
 to_char(off.offer_date, 'dd/mm/yyyy') as offer_date,
-to_char(off.del_date, 'dd/mm/yyyy') as del_date,
+case when wo.state = 'confirmed' then to_char(wo.delivery_date,'dd/mm/yyyy') else
+to_char(off.del_date,'dd/mm/yyyy') end as del_date,
 (CASE WHEN off.l_d_clause = '5_1' THEN '0.5 - 1.0% of total order value'
 WHEN off.l_d_clause = '1_10' THEN '1 - 10% of total order value'
 WHEN off.l_d_clause is null THEN ''
@@ -2141,7 +2194,7 @@ where off.id = $P{offer_id}]]>
 					<textFieldExpression><![CDATA["Basic (Book Value)"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="237" y="17" width="59" height="17"/>
+					<reportElement x="237" y="17" width="85" height="17"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2150,7 +2203,7 @@ where off.id = $P{offer_id}]]>
 					<textFieldExpression><![CDATA["P&F"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="296" y="17" width="74" height="17"/>
+					<reportElement x="322" y="17" width="48" height="17"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2219,7 +2272,7 @@ where off.id = $P{offer_id}]]>
 						</datasetRun>
 						<jr:listContents height="14" width="825">
 							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="109" height="14"/>
+								<reportElement x="140" y="0" width="118" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2286,7 +2339,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA["Pump"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="249" y="0" width="59" height="14"/>
+								<reportElement x="286" y="0" width="48" height="14"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2295,6 +2348,17 @@ where off.id = $P{offer_id}]]>
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="258" y="0" width="28" height="14"/>
+								<box topPadding="2" rightPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_pf_ex_dis}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
@@ -2329,7 +2393,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA["Spare"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="109" height="14"/>
+								<reportElement x="140" y="0" width="118" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2340,7 +2404,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="308" y="0" width="74" height="14"/>
+								<reportElement x="334" y="0" width="48" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2384,7 +2448,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{nett_sam}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="249" y="0" width="59" height="14"/>
+								<reportElement x="286" y="0" width="48" height="14"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2393,6 +2457,17 @@ where off.id = $P{offer_id}]]>
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="258" y="0" width="28" height="14"/>
+								<box topPadding="2" rightPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_pf_ex_dis}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
@@ -2427,7 +2502,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA["Accessories"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="109" height="14"/>
+								<reportElement x="140" y="0" width="118" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2438,7 +2513,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="308" y="0" width="74" height="14"/>
+								<reportElement x="334" y="0" width="48" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2482,7 +2557,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{nett_sam}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="249" y="0" width="59" height="14"/>
+								<reportElement x="286" y="0" width="48" height="14"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2491,6 +2566,20 @@ where off.id = $P{offer_id}]]>
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="258" y="0" width="28" height="14"/>
+								<box topPadding="2" rightPadding="1">
+									<pen lineWidth="0.0"/>
+									<topPen lineWidth="0.0"/>
+									<leftPen lineWidth="0.0"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_pf_ex_dis}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
@@ -2523,7 +2612,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{acc_name}]]></textFieldExpression>
 							</textField>
 							<textField>
-								<reportElement x="140" y="0" width="109" height="14"/>
+								<reportElement x="140" y="0" width="118" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2534,7 +2623,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField>
-								<reportElement x="249" y="0" width="59" height="14"/>
+								<reportElement x="286" y="0" width="48" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2545,7 +2634,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField>
-								<reportElement x="308" y="0" width="74" height="14"/>
+								<reportElement x="334" y="0" width="48" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2588,6 +2677,17 @@ where off.id = $P{offer_id}]]>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{nett_sam}]]></textFieldExpression>
 							</textField>
+							<textField>
+								<reportElement x="258" y="0" width="28" height="14"/>
+								<box topPadding="2" rightPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_pf_ex_dis}]]></textFieldExpression>
+							</textField>
 						</jr:listContents>
 					</jr:list>
 				</componentElement>
@@ -2609,7 +2709,7 @@ where off.id = $P{offer_id}]]>
 						</datasetRun>
 						<jr:listContents height="14" width="685">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="109" height="14"/>
+								<reportElement x="0" y="0" width="118" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2620,7 +2720,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="109" y="0" width="59" height="14"/>
+								<reportElement x="118" y="0" width="76" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2631,7 +2731,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="168" y="0" width="74" height="14"/>
+								<reportElement x="194" y="0" width="48" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>

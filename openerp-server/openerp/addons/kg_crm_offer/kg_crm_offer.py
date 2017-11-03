@@ -2515,7 +2515,7 @@ class ch_pump_offer(osv.osv):
 			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot)
 			print"r_pump_price_tot",r_pump_price_tot
 			if line.gst:
-				r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00)
+				r_tax_tot = round(((r_pump_price_tot + line.r_p_f_ex_tot)*(line.gst.amount*100))/100.00)
 			else:
 				r_tax_tot = 0 
 			print"r_tax_tot",r_tax_tot
@@ -3055,7 +3055,7 @@ class ch_spare_offer(osv.osv):
 			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot)
 			print"r_pump_price_tot",r_pump_price_tot
 			if line.gst:
-				r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00)
+				r_tax_tot = round(((r_pump_price_tot + line.r_p_f_ex_tot)*(line.gst.amount*100))/100.00)
 			else:
 				r_tax_tot = 0 
 			print"r_tax_tot",r_tax_tot
@@ -3485,7 +3485,7 @@ class ch_accessories_offer(osv.osv):
 			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot)
 			print"r_pump_price_tot",r_pump_price_tot
 			if line.gst:
-				r_tax_tot = round((r_pump_price_tot*(line.gst.amount*100))/100.00)
+				r_tax_tot = round(((r_pump_price_tot + line.r_p_f_ex_tot)*(line.gst.amount*100))/100.00)
 			else:
 				r_tax_tot = 0 
 			print"r_tax_tot",r_tax_tot
