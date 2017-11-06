@@ -25,9 +25,7 @@
 					<button name="auto_scheduler_in_house_date" string="IN House Date" type="object" class="oe_highlight"/>
 					<button name="auto_scheduler_sc_wo_date" string="SUB Completed Date" type="object" class="oe_highlight"/>
 					<button name="auto_scheduler_rm_date" string="RM Date" type="object" class="oe_highlight"/>
-					<button name="trans_update" string="Stock Move" type="object" class="oe_highlight"/>
 				</group>
-				<field name="trans_id"/>
 				</form>
 			</field>
 		</record>

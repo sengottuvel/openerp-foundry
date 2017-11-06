@@ -14,30 +14,6 @@ class kg_scheduler(osv.osv):
 	_name = "kg.scheduler"
 	_description = "Scheduler Time Master"
 	
-	_columns = {
-		
-		## Basic Info
-		
-		'trans_id': fields.integer('Trans ID'),
-		
-		}
-			
-	def trans_update(self, cr, uid, ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.trans_id:
-			print"rec.trans_idrec.trans_id",rec.trans_id
-			grn_ids = self.pool.get('kg.po.grn').search(cr,uid,[('id','=',rec.trans_id)])
-			if grn_ids:
-				grn_rec = self.pool.get('kg.po.grn').browse(cr,uid,grn_ids[0])
-				for item in grn_rec.line_ids:
-					product_qty = item.po_grn_qty * item.product_id.po_uom_coeff
-					stk_ids = self.pool.get('stock.move').search(cr,uid,[('po_grn_line_id','=',item.id)])
-					if stk_ids:
-						stk_rec = self.pool.get('stock.move').browse(cr,uid,stk_ids[0])
-						self.pool.get('stock.move').write(cr,uid,stk_rec.id,{'product_qty':product_qty,'po_to_stock_qty':product_qty})
-					print"product_qtyproduct_qtyproduct_qtyproduct_qty",product_qty
-		return True
-	
 	#~ def planning_vs_production_register_scheduler_mail(self,cr,uid,ids=0,context = None):		
 		#~ cr.execute("""select all_daily_scheduler_mails('Planning Vs Production')""")
 		#~ data = cr.fetchall();
