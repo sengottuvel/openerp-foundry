@@ -168,7 +168,9 @@
 -->
 				
 				<!-- Issue Return Transaction Menu -->
+<!--
 				<menuitem action="kg_issue_return.action_kg_issuereturn_form" id="iam_issue_return" name="Issue Return" parent="tpm_store_issue" sequence="4"/>
+-->
 				
 				<!-- Physical Stock -->
 				<menuitem id="tpm_physical_stock" name="Physical Stock" parent="stock.menu_stock_root" sequence="4"/>

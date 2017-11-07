@@ -224,11 +224,13 @@
         =====================
         -->
         
+<!--
         	<menuitem
             name="Issue Return"
             id="menu_mrp_bom_form_action1"
             parent="base.menu_mrp_root"
             sequence="12"/>
+-->
         
 	
     </data>
