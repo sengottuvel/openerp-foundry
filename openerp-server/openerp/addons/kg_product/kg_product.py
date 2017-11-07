@@ -47,6 +47,7 @@ class kg_product(osv.osv):
 		'weight': fields.float('Weight'),
 		'po_uom_in_kgs': fields.float('PO UOM in kgs',digits=(16,10)),
 		'uom_conversation_factor': fields.selection(UOM_CONVERSATION,'UOM Conversation Factor',required=True),
+		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
 		'coupling_type': fields.selection([('rss','RRS'),('sw','SW'),('rrl','RRL'),('swq','SWQ'),('rst','RST'),('l','L'),('lm','LM'),('lmk','LMK'),('lbc','LBC'),('f','F'),('f_0','F-0'),('sm','SM'),('bc','BC'),('ph_spacer','PH SPACER'),('ph_non_spacer','PH NON SPACER'),('metaflex_series_80','METAFLEX SERIES 80'),('e','E'),('em','EM'),('sam','SAM'),('a','A')],'Coupling Type'),
 		'service_factor': fields.float('Service Factor'),
 		'power_kw': fields.float('Power in KW'),
@@ -178,6 +179,9 @@ class kg_product(osv.osv):
 	
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
+		if rec.price_type:
+			if rec.price_type == 'per_kg' and rec.po_uom_in_kgs <= 0.00:
+				raise osv.except_osv(_('Warning!'),_('Configure PO UOM in kgs in (%s) !!'%(rec.name)))
 		res = True
 		return res 
 	

@@ -30,6 +30,9 @@
 		<field name="tolerance_applicable" position="after">
 		<field name="is_depreciation" attrs="{'invisible':[('product_type','not in',['capital'])]}"/>
 		</field>
+		<field name="tolerance_plus" position="after">
+		<field name="price_type" required="1"/>
+		</field>
 		<field name="variants" position="replace">
 		<field name="variants" invisible="1"/>
 		</field>
@@ -63,7 +66,7 @@
 		<field name="uom_po_id" position="after">
 		<field name="po_copy_uom" required = "1" attrs="{'readonly':[('state','=','approved')]}"/>
 		<field name="po_uom_coeff" placeholder="UOM * PO Coeff = 1 POM" attrs="{'readonly':[('state','=','approved')]}"/>
-		<field name="po_uom_in_kgs"/>
+		<field name="po_uom_in_kgs" attrs="{'required':[('price_type','=','per_kg')]}"/>
 		</field>
 		
 		<field name="list_price" position="replace">

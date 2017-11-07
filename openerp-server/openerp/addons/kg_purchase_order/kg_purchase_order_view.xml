@@ -289,7 +289,7 @@
                 <field name="cancel_qty" readonly="1" attrs="{'invisible': [('cancel_qty','=',0)]}"/>				
 				<field name="received_qty" readonly="1"	attrs="{'invisible': [('received_qty','=',0)]}" />
 				<field name="quantity" readonly="1"/>
-				<field name="price_type" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" required="1"/>
+				<field name="price_type" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" required="1" readonly="1"/>
                 </field>
 				<field name="product_uom" position="after">
 				<field name="cancel_flag" invisible="1"/>
