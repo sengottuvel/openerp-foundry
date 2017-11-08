@@ -58,7 +58,7 @@
 					</group>
 					<group>
 					<group>
-						<field name="moc_id" attrs="{'invisible':[('category_type','=','pump_bom')],'required': [('category_type','=','part_list_bom')]}"/>
+						<field name="moc_id" attrs="{'invisible':[('category_type','=','pump_bom')],'required': ['|',('category_type','=','part_list_bom'),('state','in',['draft','confirmed'])]}"/>
 					</group>
 					<group>
 						<field name="moc_const_type" widget="many2many_tags" attrs="{'invisible':[('category_type','=','pump_bom')]}"/>
