@@ -1424,7 +1424,7 @@ class kg_purchase_amendment_line(osv.osv):
 		return {'value': value}
 	
 	def onchange_price_type(self, cr, uid, ids,product_qty_amend,uom_conversation_factor_amend,length_amend,breadth_amend,price_type_amend,product_id_amend):
-		value = {'quantity': 0}
+		value = {'quantity_amend': 0}
 		quantity = 0
 		if price_type_amend == 'per_kg':
 			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id_amend)
@@ -1440,7 +1440,7 @@ class kg_purchase_amendment_line(osv.osv):
 				quantity = product_qty_amend
 		else:
 			quantity = product_qty_amend
-		value = {'quantity': quantity}
+		value = {'quantity_amend': quantity}
 		return {'value': value}
 		
 	def onchange_moc(self, cr, uid, ids, moc_id_temp_amend):
@@ -1459,7 +1459,7 @@ class kg_purchase_amendment_line(osv.osv):
 		if product_id_amend:
 			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id_amend)
 			product_uom = prod_rec.uom_po_id.id
-		value = {'brand_id_amend':'','moc_id_amend':'','moc_id_temp_amend':'','product_uom_amend':product_uom}
+		value = {'brand_id_amend':'','moc_id_amend':'','moc_id_temp_amend':'','product_uom_amend':product_uom,'price_type_amend':prod_rec.price_type}
 		return {'value': value}
 		
 	def pol_cancel(self, cr, uid, ids, context=None):

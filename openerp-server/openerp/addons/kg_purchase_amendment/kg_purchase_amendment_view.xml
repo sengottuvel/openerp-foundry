@@ -192,7 +192,7 @@
 						<field name="price_unit_amend" required="1" attrs="{'readonly': [('line_bill','=',True)]}"
 							on_change="onchange_price_unit(price_unit_amend,kg_discount_per_amend,kg_discount_per_value_amend,product_qty_amend)" />
 						<field name="quantity_amend" readonly="1"/>
-						<field name="price_type_amend" on_change="onchange_price_type(product_qty_amend,uom_conversation_factor_amend,length_amend,breadth_amend,price_type_amend,product_id_amend)" required="1"/>
+						<field name="price_type_amend" on_change="onchange_price_type(product_qty_amend,uom_conversation_factor_amend,length_amend,breadth_amend,price_type_amend,product_id_amend)" required="1" readonly="1"/>
 						<field name="kg_discount_amend" attrs="{'readonly': ['|','|',('line_bill','=',True),('kg_discount_per_amend','=',False),('discount_flag', '=', True)]}" on_change="onchange_disc_amt(kg_discount_amend,product_qty_amend,price_unit_amend,kg_disc_amt_per_amend)"/>
 						<field name="kg_disc_amt_per_amend" invisible="1"/>
 						<field name="kg_discount_per_amend" attrs="{'readonly': ['|','|',('line_bill','=',True),('kg_discount_amend','=',False),('discount_per_flag', '=', True)]}"

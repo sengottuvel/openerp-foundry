@@ -56,6 +56,16 @@
 							<field name="state" style="width: 30%%" class="att_state_change"/>								
 						</group>
 					</group>
+					<group>
+					<group>
+						<field name="moc_id" attrs="{'invisible':[('category_type','=','pump_bom')],'required': [('category_type','=','part_list_bom')]}"/>
+					</group>
+					<group>
+						<field name="moc_const_type" widget="many2many_tags" attrs="{'invisible':[('category_type','=','pump_bom')]}"/>
+					</group>
+					</group>
+					<button name="list_moc" type="object" string="List MOC Construction" class="oe_highlight"  confirm="Are you sure to proceed ?" attrs="{'invisible':['|',('category_type','=','pump_bom'),('state','in',['approved','confirmed','cancel'])]}"/>
+					
 					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
 						<group>	
 							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
@@ -65,6 +75,16 @@
 						</group>
 					</group>
 					<notebook>
+						
+					<page string="MOC Construction Mapping" attrs="{'invisible':[('category_type','=','pump_bom')]}">	
+							<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
+								<tree string="MOC Rate Details Entry Tree" editable="top" create="false" >	
+									<field name="code" readonly="1"/>								
+									<field name="moc_id"/>										
+									<field name="remarks" widget="char"/>														
+								</tree>
+							</field>																								
+						</page>
 					<page string="Foundry Items">
 					<field name="line_ids" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 						<tree string="BOM Details Entry Tree" editable="top" >					

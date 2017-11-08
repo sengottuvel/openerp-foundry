@@ -54,7 +54,8 @@ class kg_bom(osv.osv):
 		'line_ids_a':fields.one2many('ch.machineshop.details', 'header_id', "Machine Shop Line"),
 		'line_ids_b':fields.one2many('ch.bot.details', 'header_id', "BOT Line"),
 		'line_ids_c':fields.one2many('ch.consu.details', 'header_id', "Consumable Line"),		
-		'line_ids_d':fields.one2many('ch.base.plate', 'header_id', "Base Plate"),		
+		'line_ids_d':fields.one2many('ch.base.plate', 'header_id', "Base Plate"),	
+		'line_ids_c':fields.one2many('ch.bom.mocwise', 'header_id', "Machine Shop MOC Wise"),		
 		'type': fields.selection([('new','New'),('copy','Copy'),('amendment','Amendment')],'Type', required=True),
 		'bom_type': fields.selection([('new_bom','New BOM'),('copy_bom','Copy BOM')],'Type', required=True),
 		
@@ -213,7 +214,19 @@ class kg_bom(osv.osv):
 				if consu_item.qty == 0:
 					raise osv.except_osv(
 						_('Warning !'),
-						_('Please Consumable items zero qty not accepted!!'))		 
+						_('Please Consumable items zero qty not accepted!!'))
+						
+			if rec.line_ids_c:
+				cr.execute('''SELECT code, COUNT(code) 
+									FROM ch_bom_mocwise where header_id = %s
+									GROUP BY code
+									HAVING ( COUNT(code) > 1  )''',[rec.id])
+				dup_ids = cr.fetchall()
+				if dup_ids:
+					for ii in dup_ids:
+						moc_con_rec = self.pool.get('kg.moc.construction').browse(cr,uid,ii[0])
+						raise osv.except_osv(_('Warning!'),
+									_('Duplicate Moc construction code(%s) are not allowed !!')%(moc_con_rec.code))			 
 			old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])
 			#~ if old_ids:
 				#~ bom_rec = bom_obj.browse(cr, uid, old_ids[0])			  
@@ -442,6 +455,18 @@ class kg_bom(osv.osv):
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
+			if rec.line_ids_c:
+				cr.execute('''SELECT code, COUNT(code) 
+									FROM ch_bom_mocwise where header_id = %s
+									GROUP BY code
+									HAVING ( COUNT(code) > 1 )''',[rec.id])
+				dup_ids = cr.fetchall()
+				if dup_ids:
+					for ii in dup_ids:
+						moc_con_rec = self.pool.get('kg.moc.construction').browse(cr,uid,ii[0])
+						raise osv.except_osv(_('Warning!'),
+									_('Duplicate Moc construction code (%s) are not allowed !!')%(moc_con_rec.code))
+			
 			cr.execute(""" select count(pump_model_id) from kg_bom where pump_model_id = %s	 """ %(rec.pump_model_id.id))
 			data = cr.dictfetchone()							
 			pump_ids = self.pool.get('kg.pumpmodel.master').search(cr,uid,[('id','=',rec.pump_model_id.id)])
@@ -487,6 +512,33 @@ class kg_bom(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_bom, self).write(cr, uid, ids, vals, context)
+		
+		
+	def list_moc(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		cr.execute('''delete from ch_bom_mocwise where header_id = %s '''%(rec.id))
+		if rec.moc_const_type:				
+			moc_type_ids = []
+			for moc_type in rec.moc_const_type:	
+				moc_type_ids.append(moc_type.id)			
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('constuction_type_id','in',moc_type_ids)]))
+		else:
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))		
+		for item in moc_const_obj:			
+			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)
+			sql_check = """ select code from ch_machine_mocwise where code=%s and header_id  = %s """ %(moc_const_rec.id,ids[0])
+			cr.execute(sql_check)
+			data = cr.dictfetchall()
+			if data == []:					
+				line = self.pool.get('ch.bom.mocwise').create(cr,uid,{
+					   'header_id':rec.id,
+					   'moc_id':rec.moc_id.id,
+					   'code':moc_const_rec.id,
+							})	
+			else:
+				pass
+		self.write(cr, uid, ids, {'list_moc_flag': True})			
+		return True
 		
 	_constraints = [
 		
@@ -779,5 +831,22 @@ class ch_base_plate(osv.osv):
 	   ]
 
 ch_base_plate()
+
+
+class ch_bom_mocwise(osv.osv):
+	
+	_name = "ch.bom.mocwise"
+	_description = "BOM MOC Wise"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.bom', 'Moc Construction', required=True, ondelete='cascade'),	
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]" ),	
+		'code':fields.many2one('kg.moc.construction','MOC Construction Code'),			
+		'remarks':fields.text('Remarks'),
+		
+	}
+	
+ch_bom_mocwise()
 
 
