@@ -77,7 +77,7 @@
 					<notebook>
 						
 					<page string="MOC Construction Mapping" attrs="{'invisible':[('category_type','=','pump_bom')]}">	
-							<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
+							<field name="line_ids_e" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
 								<tree string="MOC Rate Details Entry Tree" editable="top" create="false" >	
 									<field name="code" readonly="1"/>								
 									<field name="moc_id"/>										
@@ -126,7 +126,18 @@
 								</tree>
 							</field>
 						</page>							
-					
+						<page string="Consumable" invisible="1">
+							<field name="line_ids_c" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+								<tree string="Consumable Details Entry Tree" editable="top" >					
+									
+									<field name="product_temp_id" on_change="onchange_consu_code(product_temp_id)"/>
+									<field name="code" readonly="1"/>											
+									<field name="qty"/>
+									<field name="remarks"  widget="char"/>
+								</tree>
+							</field>
+						</page>
+						
 						<page string="Base Plate" attrs="{'invisible':[('category_type','in',['part_list_bom'])]}">
 							<field name="line_ids_d" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 								<tree string="Base Plate Details Entry Tree" editable="top" >										

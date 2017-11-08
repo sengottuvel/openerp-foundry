@@ -52,9 +52,10 @@ class kg_bom(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled'),('expire','Expired')],'Status', readonly=True),   
 		'line_ids': fields.one2many('ch.bom.line', 'header_id', "BOM Line"),		
 		'line_ids_a':fields.one2many('ch.machineshop.details', 'header_id', "Machine Shop Line"),
-		'line_ids_b':fields.one2many('ch.bot.details', 'header_id', "BOT Line"),			
+		'line_ids_b':fields.one2many('ch.bot.details', 'header_id', "BOT Line"),
+		'line_ids_c':fields.one2many('ch.consu.details', 'header_id', "Consumable Line"),		
 		'line_ids_d':fields.one2many('ch.base.plate', 'header_id', "Base Plate"),	
-		'line_ids_c':fields.one2many('ch.bom.mocwise', 'header_id', "Machine Shop MOC Wise"),		
+		'line_ids_e':fields.one2many('ch.bom.mocwise', 'header_id', "Machine Shop MOC Wise"),		
 		'type': fields.selection([('new','New'),('copy','Copy'),('amendment','Amendment')],'Type', required=True),
 		'bom_type': fields.selection([('new_bom','New BOM'),('copy_bom','Copy BOM')],'Type', required=True),
 		
@@ -73,10 +74,10 @@ class kg_bom(osv.osv):
 		'cancel_remark': fields.text('Cancel'),
 		'revision': fields.integer('Revision'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
-		'category_type': fields.selection([('pump_bom','Pump BOM'),('part_list_bom','Part list BOM')],'Category', required=True),
+		'category_type': fields.selection([('pump_bom','Pump BOM'),('part_list_bom','Part list BOM')],'Category', required=True),	
 		'moc_id': fields.many2one('kg.moc.master','Default MOC', domain="[('active','=','t')]" ),	
 		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_bom_moc_details', 'moc_const_id', 'const_type_id','Type', domain="[('active','=','t')]"),
-		'list_moc_flag':fields.boolean('List MOC Flag'),	
+		'list_moc_flag':fields.boolean('List MOC Flag'),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -218,7 +219,7 @@ class kg_bom(osv.osv):
 						_('Warning !'),
 						_('Please Consumable items zero qty not accepted!!'))
 						
-			if rec.line_ids_c:
+			if rec.line_ids_e:
 				cr.execute('''SELECT code, COUNT(code) 
 									FROM ch_bom_mocwise where header_id = %s
 									GROUP BY code
@@ -457,7 +458,7 @@ class kg_bom(osv.osv):
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
-			if rec.line_ids_c:
+			if rec.line_ids_e:
 				cr.execute('''SELECT code, COUNT(code) 
 									FROM ch_bom_mocwise where header_id = %s
 									GROUP BY code
@@ -760,6 +761,47 @@ class ch_bot_details(osv.osv):
 	
 ch_bot_details()
 
+class ch_consu_details(osv.osv):
+	
+	_name = "ch.consu.details"
+	_description = "BOM Consumable Details" 
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('product_type','=','consu')], ondelete='cascade',required=True),		
+		'code':fields.char('Item Code', size=128),  
+		'qty': fields.integer('Qty',required=True), 
+		'remarks':fields.text('Remarks'),
+	
+	}
+	
+	def onchange_consu_code(self, cr, uid, ids, product_temp_id, context=None):
+		
+		value = {'code': ''}
+		if product_temp_id:
+			pro_rec = self.pool.get('product.product').browse(cr, uid, product_temp_id, context=context)
+			value = {'code': pro_rec.product_code}
+			
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):	  
+		product_obj = self.pool.get('product.product')
+		if vals.get('product_temp_id'):		 
+			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
+			product_code = product_rec.product_code		 
+			vals.update({'code':product_code })
+		return super(ch_consu_details, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		product_obj = self.pool.get('product.product')
+		if vals.get('product_temp_id'):		 
+			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
+			product_code = product_rec.product_code
+			vals.update({'code':product_code })
+		return super(ch_consu_details, self).write(cr, uid, ids, vals, context) 
+
+ch_consu_details()
 
 
 class ch_base_plate(osv.osv):
