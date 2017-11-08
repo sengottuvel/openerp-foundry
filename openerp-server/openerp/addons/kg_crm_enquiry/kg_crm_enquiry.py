@@ -606,6 +606,7 @@ class kg_crm_enquiry(osv.osv):
 									else:
 										raise osv.except_osv(_('Warning!'),_('UOM mismatched for MS (%s) Item (%s) check with Product Master !!'%(ms_rec.name,brandmoc_rec.product_id.name)))
 							else:
+								raise osv.except_osv(_('Warning!'),_('MS (%s) Item (%s) add to Brand/MOC/Rate master !!'%(ms_rec.name,raw_line.product_id.name)))
 								qty = design_rate = price = 0
 							tot_price += price
 							prime_cost = tot_price
@@ -646,6 +647,7 @@ class kg_crm_enquiry(osv.osv):
 									#~ qty = raw_line.weight
 								#~ price = design_rate * qty
 							else:
+								raise osv.except_osv(_('Warning!'),_('MS (%s) Item (%s) add to Brand/MOC/Rate master !!'%(ms_raw.name,raw_line.product_id.name)))
 								qty = design_rate = price = 0
 							tot_price += price
 							prime_cost = tot_price
@@ -700,6 +702,8 @@ class kg_crm_enquiry(osv.osv):
 						tot_price += price
 						prime_cost = tot_price
 						print"prime_costprime_cost",prime_cost
+					else:
+						raise osv.except_osv(_('Warning!'),_('BOT (%s) Item (%s) add to Brand/MOC/Rate master !!'%(bot_rec.name,raw_line.product_id.name)))
 		elif item_type == 'primemover':
 			if moc_id > 0:
 				design_rate = 0
