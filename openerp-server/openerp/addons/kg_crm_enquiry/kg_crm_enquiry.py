@@ -38,7 +38,7 @@ class kg_crm_enquiry(osv.osv):
 		
 		## Basic Info
 		
-		'name': fields.char('Enquiry No.', size=128,select=True,readonly=True, states={'draft':[('readonly',False)]}),
+		'name': fields.char('Enquiry No.', size=128,select=True),
 		'offer_date': fields.date('Enquiry Date',required=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'note': fields.char('Notes',readonly=True, states={'draft':[('readonly',False)]}),
 		'service_det': fields.char('Service Details'),
@@ -4758,7 +4758,26 @@ class ch_kg_crm_spare_bom(osv.osv):
 	}
 	
 	def default_get(self, cr, uid, fields, context=None):
-		print"contextcontextcontext",context
+		if not context['moc_const_id']:
+			raise osv.except_osv(_('Warning!'),_('Select MOC Construction to proceed further !!'))
+		if not context['pump_id']:
+			raise osv.except_osv(_('Warning!'),_('Select Pump Model to proceed further !!'))
+		pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr,uid,context['pump_id'])
+		bom_ids = self.pool.get('kg.bom').search(cr,uid,[('pump_model_id','=',context['pump_id']),('category_type','=','part_list_bom'),('state','=','approved')])
+		if bom_ids:
+			bom_rec = self.pool.get('kg.bom').browse(cr,uid,bom_ids[0])
+			moc_ids = self.pool.get('kg.moc.construction').search(cr,uid,[('id','=',context['moc_const_id']),('state','=','approved')])
+			if moc_ids:
+				moc_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_ids[0])
+			if bom_rec.line_ids_c:
+				for item in bom_rec.line_ids_c:
+					if item.code.code == moc_rec.code:
+						context['moc_id'] = item.moc_id.id
+						break;
+			else:
+				raise osv.except_osv(_('Warning!'),_('Bom (%s) Kindly configure MOC Construction Mapping in Part List BOM !!'%(bom_rec.name)))
+		else:
+			raise osv.except_osv(_('Warning!'),_('Spare (%s) Kindly configure or Approve in Part List BOM !!'%(pump_rec.name)))
 		return context
 	
 	def write(self, cr, uid, ids, vals, context=None):

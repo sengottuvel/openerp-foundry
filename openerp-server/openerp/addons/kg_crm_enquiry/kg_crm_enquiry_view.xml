@@ -503,7 +503,7 @@
 							</page>
 							
 							<page string = "Spare BOM" attrs="{'invisible':[('purpose_categ','!=','spare')]}">
-								<field name="line_ids_spare_bom" context="{'moc_const_id':moc_const_id}">
+								<field name="line_ids_spare_bom" context="{'moc_const_id':moc_const_id,'pump_id':pump_id}">
 								<tree string="BOM Tree">
 									<field name="bom_id" required="1"/>
 									<field name="qty" required="1"/>
@@ -519,7 +519,7 @@
 											<field name="load_bom" on_change="onchange_spare_bom(bom_id,off_name,moc_const_id,qty)" attrs="{'invisible':[('bom_id','=',False)]}"/>
 										</group>
 										<group>
-											<field name="moc_id" required="1"/>
+											<field name="moc_id" required="1" attrs="{'readonly':[('moc_id','!=',False)]}"/>
 											<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 											<field name="material_code" class="aplhanum_expect"/>
 											<field name="prime_cost" readonly="1"/>
