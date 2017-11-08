@@ -52,8 +52,7 @@ class kg_bom(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled'),('expire','Expired')],'Status', readonly=True),   
 		'line_ids': fields.one2many('ch.bom.line', 'header_id', "BOM Line"),		
 		'line_ids_a':fields.one2many('ch.machineshop.details', 'header_id', "Machine Shop Line"),
-		'line_ids_b':fields.one2many('ch.bot.details', 'header_id', "BOT Line"),
-		'line_ids_c':fields.one2many('ch.consu.details', 'header_id', "Consumable Line"),		
+		'line_ids_b':fields.one2many('ch.bot.details', 'header_id', "BOT Line"),			
 		'line_ids_d':fields.one2many('ch.base.plate', 'header_id', "Base Plate"),	
 		'line_ids_c':fields.one2many('ch.bom.mocwise', 'header_id', "Machine Shop MOC Wise"),		
 		'type': fields.selection([('new','New'),('copy','Copy'),('amendment','Amendment')],'Type', required=True),
@@ -758,47 +757,6 @@ class ch_bot_details(osv.osv):
 	
 ch_bot_details()
 
-class ch_consu_details(osv.osv):
-	
-	_name = "ch.consu.details"
-	_description = "BOM Consumable Details" 
-	
-	_columns = {
-	
-		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('product_type','=','consu')], ondelete='cascade',required=True),		
-		'code':fields.char('Item Code', size=128),  
-		'qty': fields.integer('Qty',required=True), 
-		'remarks':fields.text('Remarks'),
-	
-	}
-	
-	def onchange_consu_code(self, cr, uid, ids, product_temp_id, context=None):
-		
-		value = {'code': ''}
-		if product_temp_id:
-			pro_rec = self.pool.get('product.product').browse(cr, uid, product_temp_id, context=context)
-			value = {'code': pro_rec.product_code}
-			
-		return {'value': value}
-		
-	def create(self, cr, uid, vals, context=None):	  
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code		 
-			vals.update({'code':product_code })
-		return super(ch_consu_details, self).create(cr, uid, vals, context=context)
-		
-	def write(self, cr, uid, ids, vals, context=None):
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code
-			vals.update({'code':product_code })
-		return super(ch_consu_details, self).write(cr, uid, ids, vals, context) 
-
-ch_consu_details()
 
 
 class ch_base_plate(osv.osv):
