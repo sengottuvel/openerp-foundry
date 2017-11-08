@@ -73,7 +73,10 @@ class kg_bom(osv.osv):
 		'cancel_remark': fields.text('Cancel'),
 		'revision': fields.integer('Revision'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
-		'category_type': fields.selection([('pump_bom','Pump BOM'),('part_list_bom','Part list BOM')],'Category', required=True),	
+		'category_type': fields.selection([('pump_bom','Pump BOM'),('part_list_bom','Part list BOM')],'Category', required=True),
+		'moc_id': fields.many2one('kg.moc.master','Default MOC', domain="[('active','=','t')]" ),	
+		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_bom_moc_details', 'moc_const_id', 'const_type_id','Type', domain="[('active','=','t')]"),
+		'list_moc_flag':fields.boolean('List MOC Flag'),	
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
