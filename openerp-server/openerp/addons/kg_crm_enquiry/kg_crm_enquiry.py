@@ -4769,11 +4769,18 @@ class ch_kg_crm_spare_bom(osv.osv):
 			moc_ids = self.pool.get('kg.moc.construction').search(cr,uid,[('id','=',context['moc_const_id']),('state','=','approved')])
 			if moc_ids:
 				moc_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_ids[0])
-			if bom_rec.line_ids_c:
-				for item in bom_rec.line_ids_c:
-					if item.code.code == moc_rec.code:
-						context['moc_id'] = item.moc_id.id
-						break;
+			if bom_rec.line_ids_e:
+				moc_map_sql = """ select moc_id from ch_bom_mocwise where header_id = %s """%(bom_rec.id)
+				cr.execute(moc_map_sql)
+				moc_map_data = cr.dictfetchall()
+				if moc_map_data:
+					context['moc_id'] = moc_map_data[0]['moc_id']
+				else:
+					raise osv.except_osv(_('Warning!'),_('Bom (%s) MOC (%s) Kindly configure MOC Construction Mapping in Part List BOM !!'%(bom_rec.name,moc_rec.code)))
+				#~ for item in bom_rec.line_ids_e:
+					#~ if item.code.code == moc_rec.code:
+						#~ context['moc_id'] = item.moc_id.id
+						#~ break;
 			else:
 				raise osv.except_osv(_('Warning!'),_('Bom (%s) Kindly configure MOC Construction Mapping in Part List BOM !!'%(bom_rec.name)))
 		else:
