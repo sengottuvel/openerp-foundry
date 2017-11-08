@@ -834,7 +834,7 @@ class kg_pouring_log(osv.osv):
 					self.fettling_inward_update(cr, uid, ids, production_rec.id,entry.id,line_item.id,line_item.qty)
 					tot_pour_qty = production_rec.pour_qty + line_item.qty				
 						
-					pending_qty = production_rec.pour_pending_qty - tot_pour_qty
+					pending_qty = production_rec.pour_pending_qty - line_item.qty
 					if pending_qty > 0:					
 						pour_status = 'partial'
 						status = 'pour_pending'					
