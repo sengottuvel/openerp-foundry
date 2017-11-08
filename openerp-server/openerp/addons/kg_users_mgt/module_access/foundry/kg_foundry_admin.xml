@@ -121,6 +121,17 @@
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<record id="m_foundry_bom_mocwise_load" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_ch_bom_mocwise"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM MOC Wise</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>		
 		
 		
