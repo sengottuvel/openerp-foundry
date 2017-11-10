@@ -2610,7 +2610,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								'flag_standard': flag_standard,
 								
 								})
-		return {'value': {'line_ids_moc_a': moc_const_vals,'moc_construction_name':moc_const_rec.name}}
+			return {'value': {'line_ids_moc_a': moc_const_vals,'moc_construction_name':moc_const_rec.name}}
+		else:
+			return {'value': {'line_ids_moc_a': moc_const_vals}}
 	
 	def onchange_load_bom(self, cr, uid, ids, load_bom,pump_id,wo_line_id,purpose_categ,flag_standard,moc_const_id,qty,
 		motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm,is_selectable_all):
@@ -4770,7 +4772,7 @@ class ch_kg_crm_spare_bom(osv.osv):
 			if moc_ids:
 				moc_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_ids[0])
 			if bom_rec.line_ids_e:
-				moc_map_sql = """ select moc_id from ch_bom_mocwise where header_id = %s """%(bom_rec.id)
+				moc_map_sql = """ select moc_id from ch_bom_mocwise where header_id = %s and code = %s """%(bom_rec.id,moc_rec.id)
 				cr.execute(moc_map_sql)
 				moc_map_data = cr.dictfetchall()
 				if moc_map_data:
