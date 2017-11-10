@@ -529,7 +529,7 @@ class kg_bom(osv.osv):
 			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))		
 		for item in moc_const_obj:			
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)
-			sql_check = """ select code from ch_machine_mocwise where code=%s and header_id  = %s """ %(moc_const_rec.id,ids[0])
+			sql_check = """ select code from ch_bom_mocwise where code=%s and header_id  = %s """ %(moc_const_rec.id,ids[0])
 			cr.execute(sql_check)
 			data = cr.dictfetchall()
 			if data == []:					
