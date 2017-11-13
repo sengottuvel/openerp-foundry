@@ -541,9 +541,7 @@ class kg_work_order(osv.osv):
 		when type_of_drive = 'fc_gb' then 'Fluid Coupling Gear Box'
 		else
 		null end as type_of_drive,
-		case when pump_crm.motor_make_flag  = 't' then (
-		case when brand_motor.name is not null then brand_motor.name::text else '-' end)
-		else '-' end as motor_make,
+		case when brand_motor.name is not null then brand_motor.name::text else '-' end as motor_make,
 		case when pump_crm.framesize is not null then pump_crm.framesize else '-' end as framesize,
 		case when pump_crm.npsh_r_m > 0 then round(cast(pump_crm.npsh_r_m as numeric),2)::text else '-' end as npsh_r_m,
 
