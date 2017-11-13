@@ -349,9 +349,9 @@ class kg_crm_enquiry(osv.osv):
 							if bom.line_ids:
 								for fou in bom.line_ids:
 									if fou.is_applicable == True and fou.qty == 0:
-										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in Spare BOM FOU'%(line.pump_id.name,bom.bom_id.name,fou.pattner_id.pattern_name)))
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without Qty in Spare BOM FOU'%(line.pump_id.name,bom.bom_id.name,fou.pattern_id.pattern_name)))
 									if fou.is_applicable == True and not fou.moc_id:
-										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without MOC in Spare BOM FOU'%(line.pump_id.name,bom.bom_id.name,fou.pattner_id.pattern_name)))
+										raise osv.except_osv(_('Warning!'),_('%s %s %s You cannot save without MOC in Spare BOM FOU'%(line.pump_id.name,bom.bom_id.name,fou.pattern_id.pattern_name)))
 							if bom.line_ids_a:
 								for ms in bom.line_ids_a:
 									if not ms.line_ids and ms.is_applicable == True:
@@ -4760,6 +4760,7 @@ class ch_kg_crm_spare_bom(osv.osv):
 	}
 	
 	def default_get(self, cr, uid, fields, context=None):
+		print"context-------------------------",context
 		if not context['moc_const_id']:
 			raise osv.except_osv(_('Warning!'),_('Select MOC Construction to proceed further !!'))
 		if not context['pump_id']:
