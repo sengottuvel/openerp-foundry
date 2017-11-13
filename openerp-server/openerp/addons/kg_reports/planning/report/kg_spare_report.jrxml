@@ -83,7 +83,7 @@ where ch_bom.flag_applicable = True and
 
 work_order.id = $P{header_id}
 
-UNION
+UNION ALL
 
 SELECT
 
@@ -132,7 +132,7 @@ where ch_machineshop.flag_applicable = True and
 work_order.id = $P{header_id}
 
 
-UNION
+UNION ALL
 
 SELECT
 
