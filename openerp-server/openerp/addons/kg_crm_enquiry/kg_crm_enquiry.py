@@ -4805,13 +4805,26 @@ class ch_kg_crm_spare_bom(osv.osv):
 		
 		]
 	
-	def onchange_spare_off_name(self, cr, uid, ids, bom_id):
-		value = {'off_name':'','qty':0}
-		if bom_id:
+	def onchange_spare_off_name(self, cr, uid, ids, bom_id, moc_const_id):
+		value = {'off_name':'','qty':0,'moc_id':''}
+		if bom_id and moc_const_id:
 			bom_obj = self.pool.get('kg.bom').search(cr,uid,([('id','=',bom_id)]))
 			if bom_obj:
 				bom_rec = self.pool.get('kg.bom').browse(cr,uid,bom_obj[0])
-				value = {'off_name':bom_rec.name,'qty':bom_rec.qty}
+				moc_ids = self.pool.get('kg.moc.construction').search(cr,uid,[('id','=',moc_const_id),('state','=','approved')])
+				if moc_ids:
+					moc_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_ids[0])
+				if bom_rec.line_ids_e:
+					moc_map_sql = """ select moc_id from ch_bom_mocwise where header_id = %s and code = %s """%(bom_rec.id,moc_rec.id)
+					cr.execute(moc_map_sql)
+					moc_map_data = cr.dictfetchall()
+					if moc_map_data:
+						moc_id = moc_map_data[0]['moc_id']
+						value = {'off_name':bom_rec.name,'qty':bom_rec.qty,'moc_id':moc_id}
+					else:
+						raise osv.except_osv(_('Warning!'),_('Bom (%s) MOC (%s) Kindly configure MOC Construction Mapping in Part List BOM !!'%(bom_rec.name,moc_rec.code)))
+				else:
+					raise osv.except_osv(_('Warning!'),_('Bom (%s) Kindly configure MOC Construction Mapping in Part List BOM !!'%(bom_rec.name)))		
 		return {'value': value}
 	
 	def onchange_spare_bom(self, cr, uid, ids, bom_id,off_name,moc_const_id,qty):

@@ -513,7 +513,7 @@
 								<form string="MS Details Entry Tree" create="false">					
 									<group colspan="4">
 										<group>
-											<field name="bom_id" required="1" on_change="onchange_spare_off_name(bom_id)"/>
+											<field name="bom_id" required="1" on_change="onchange_spare_off_name(bom_id,moc_const_id)"/>
 											<field name="off_name"/>
 											<field name="uom_id" required="1"/>
 											<field name="load_bom" on_change="onchange_spare_bom(bom_id,off_name,moc_const_id,qty)" attrs="{'invisible':[('bom_id','=',False)]}"/>
@@ -1608,7 +1608,7 @@
 				<form string="MS Details Entry Tree" create="false" delete="false">					
 					<group colspan="4">
 						<group>
-							<field name="bom_id" required="1" on_change="onchange_spare_off_name(bom_id)"/>
+							<field name="bom_id" required="1" on_change="onchange_spare_off_name(bom_id,moc_const_id)"/>
 							<field name="off_name"/>
 							<field name="load_bom" on_change="onchange_spare_bom(bom_id,off_name,moc_const_id,qty)" attrs="{'invisible':[('bom_id','=',False)]}"/>
 						</group>
