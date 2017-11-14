@@ -647,7 +647,7 @@ class kg_crm_enquiry(osv.osv):
 									#~ qty = raw_line.weight
 								#~ price = design_rate * qty
 							else:
-								raise osv.except_osv(_('Warning!'),_('MS (%s) Item (%s) add to Brand/MOC/Rate master !!'%(ms_raw.name,raw_line.product_id.name)))
+								raise osv.except_osv(_('Warning!'),_('MS (%s) Item (%s) add to Brand/MOC/Rate master !!'%(ms_raw.ms_id.name,raw_line.product_id.name)))
 								qty = design_rate = price = 0
 							tot_price += price
 							prime_cost = tot_price
