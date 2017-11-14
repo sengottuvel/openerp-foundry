@@ -53,6 +53,7 @@
 								<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="del_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="segment" readonly="1"/>
+								<field name="freight" attrs="{'invisible':[('segment','!=','exp')],'required':[('segment','=','exp')]}"/>
 								<field name="del_term" attrs="{'invisible':[('segment','!=','exp')]}"/>
 								<field name="mode_of_dispatch" attrs="{'invisible':[('segment','!=','exp')]}"/>
 								<field name="flag_data_bank" attrs="{'invisible':['|','|',('zone','!=',False),('segment','!=','dom'),('division_id','!=',36)]}"/>

@@ -173,6 +173,7 @@ class kg_crm_offer(osv.osv):
 		'md_approved_date': fields.date('MD Approved Date',readonly=True),
 		'service_det': fields.char('Service Details'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
+		'freight': fields.selection([('topay','Topay'),('paid','Paid')],'Freight',readonly=False,states={'wo_created':[('readonly',True)]}),
 		'offer_copy': fields.char('Offer Copy'),
 		'term_copy': fields.char('Terms Copy'),
 		'customer_po_no': fields.char('Customer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)],'approved_md':[('readonly',False)]}),
