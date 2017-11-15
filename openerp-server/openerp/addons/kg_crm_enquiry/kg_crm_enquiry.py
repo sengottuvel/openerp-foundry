@@ -633,10 +633,10 @@ class kg_crm_enquiry(osv.osv):
 										price = raw_line.weight * design_rate
 									elif brandmoc_rec.uom_id.id == raw_line.product_id.uom_po_id.id:
 										if raw_line.product_id.po_uom_coeff <= 0:
-											raise osv.except_osv(_('Warning!'),_('Configure PO Coeff for MS (%s) Item (%s) in Product Master !!'%(ms_rec.name,brandmoc_rec.product_id.name)))
+											raise osv.except_osv(_('Warning!'),_('Configure PO Coeff for MS (%s) Item (%s) in Product Master !!'%(ms_raw.ms_id.name,brandmoc_rec.product_id.name)))
 										price = (design_rate / raw_line.product_id.po_uom_coeff) * qty
 									else:
-										raise osv.except_osv(_('Warning!'),_('UOM mismatched for MS (%s) Item (%s) check with Product Master !!'%(ms_rec.name,brandmoc_rec.product_id.name)))
+										raise osv.except_osv(_('Warning!'),_('UOM mismatched for MS (%s) Item (%s) check with Product Master !!'%(ms_raw.ms_id.name,brandmoc_rec.product_id.name)))
 								#~ price = design_rate * qty
 								#~ if brandmoc_line_data:
 									#~ design_rate = brandmoc_line_data[0]['rate']
