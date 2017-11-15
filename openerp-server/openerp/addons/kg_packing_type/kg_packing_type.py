@@ -166,8 +166,10 @@ class kg_packing_type(osv.osv):
 		
 	def _check_rate(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])			
-		if rec.rate_cft <= 0.00 or rec.rate_box <= 0.00:
-			return False					
+		if rec.rate_cft <= 0.00:
+			raise osv.except_osv(_('Warning'), _('Packing Closing Rate/CFT should be greater than zero !!'))	
+		if rec.rate_box <= 0.00:
+			raise osv.except_osv(_('Warning'), _('SC WO Rate/Box should be greater than zero !!'))				
 		return True
 		
 	_constraints = [

@@ -936,52 +936,43 @@ class kg_crm_offer(osv.osv):
 		pump_model_type = item.pump_model_type
 		suction_spool = item.suction_spool
 		works_value = 0
+		if item.push_bearing == 'grease_bronze':
+			 bush_bearing = 'grease'
+		elif item.push_bearing == 'cft':
+			 bush_bearing = 'cft_self'
+		elif item.push_bearing == 'cut':
+			 bush_bearing = 'cut_less_rubber'
+		if item.shaft_sealing == 'gld_packing_tiga':
+			 shaft_sealing = 'g_p'
+		elif item.shaft_sealing == 'mc_seal':
+			 shaft_sealing = 'm_s'
+		elif item.shaft_sealing == 'dynamic_seal':
+			 shaft_sealing = 'd_s'
+		elif item.shaft_sealing == 'f_s':
+			 shaft_sealing = 'f_s'
+		if item.lubrication_type == 'grease':
+			 lubrication_type = 'grease'
+		if item.bush_bearing_lubrication == 'grease':
+			 lubrication = 'grease'
+		elif item.bush_bearing_lubrication == 'external':
+			 lubrication = 'cft_ext'
+		elif item.bush_bearing_lubrication == 'self':
+			 lubrication = 'cft_self'
+		elif item.bush_bearing_lubrication == 'ex_pressure':
+			 lubrication = 'cut_less_rubber'
+		if item.rpm:
+			rpm = item.rpm
+		setting_height = item.setting_height
 		if purpose == 'pump':
 			qty = item.qty
 			moc_const_id = item.moc_const_id.id
-			pump_id = item.pump_id.id
-			rpm = item.rpm
 			drawing_approval = off_line_id.drawing_approval
 			inspection = off_line_id.inspection
-			#~ works_value = off_line_id.works_value
-			if item.push_bearing == 'grease_bronze':
-				 bush_bearing = 'grease'
-			elif item.push_bearing == 'cft':
-				 bush_bearing = 'cft_self'
-			elif item.push_bearing == 'cut':
-				 bush_bearing = 'cut_less_rubber'
-			#~ m_power = item.mototr_output_power_rated
 			m_power = item.motor_kw
-			setting_height = item.setting_height
 			qap_plan_id = item.qap_plan_id.id
-			if item.shaft_sealing == 'gld_packing_tiga':
-				 shaft_sealing = 'g_p'
-			elif item.shaft_sealing == 'mc_seal':
-				 shaft_sealing = 'm_s'
-			elif item.shaft_sealing == 'dynamic_seal':
-				 shaft_sealing = 'd_s'
-			elif item.shaft_sealing == 'f_s':
-				 shaft_sealing = 'f_s'
-			if item.lubrication_type == 'grease':
-				 lubrication_type = 'grease'
-			if item.bush_bearing_lubrication == 'grease':
-				 lubrication = 'grease'
-			elif item.bush_bearing_lubrication == 'external':
-				 lubrication = 'cft_ext'
-			elif item.bush_bearing_lubrication == 'self':
-				 lubrication = 'cft_self'
-			elif item.bush_bearing_lubrication == 'ex_pressure':
-				 lubrication = 'cut_less_rubber'
-			if item.rpm:
-				rpm = item.rpm
-				#~ if float(item.rpm) <= 1800 or float(item.rpm) == 0.00:
-					#~ rpm = '1450'
-				#~ elif float(item.rpm) >= 1801 and float(item.rpm) <= 3600:
-					#~ rpm = '2900'
 		elif purpose == 'spare':
 			purpose == 'spare'
 			moc_const_id = item.moc_const_id.id
-			pump_id = item.pump_id.id
 			qap_plan_id = item.qap_plan_id.id
 			drawing_approval = entry.drawing_approval
 			inspection = entry.inspection
@@ -989,10 +980,9 @@ class kg_crm_offer(osv.osv):
 			purpose == 'access'
 			if item.purpose_categ == 'pump':
 				moc_const_id = item.moc_const_id.id
-				pump_id = item.pump_id.id
 			elif item.purpose_categ in ('spare','access'):
 				moc_const_id = item.moc_const_id.id
-				pump_id = item.pump_id.id
+		pump_id = item.pump_id.id
 		pump_off_ids = self.pool.get('ch.pump.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
 		if pump_off_ids:
 			for ele in pump_off_ids:
