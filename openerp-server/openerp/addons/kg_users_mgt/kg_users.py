@@ -38,6 +38,7 @@ class kg_users(osv.osv):
 	'user_menu_access': fields.many2many('ir.ui.menu', 'ir_ui_menu_user_rel', 'user_id', 'menu_id', 'Access Menu', domain = [('name','!=','')]),
 	'groups_id': fields.many2many('res.groups', 'res_groups_users_rel', 'uid', 'gid', 'Groups'),
 	'signature': fields.binary('Signature'),
+	'dms_flag': fields.boolean('DMS Flag'),
 	
 	}
 	
@@ -46,6 +47,7 @@ class kg_users(osv.osv):
 	'user_id': lambda obj, cr, uid, context: uid,
 	'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 	'entry_mode': 'manual',
+	'dms_flag': False,
 	
 	 }
 	
@@ -88,7 +90,7 @@ class kg_users(osv.osv):
 				raise osv.except_osv('Invalid Email', 'Please enter a valid email address')  
 	
 	def write(self, cr, uid, ids, vals, context=None):
-		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid,'dms_flag':True})
 		return super(kg_users, self).write(cr, uid, ids, vals, context)
 	
 	_constraints = [
