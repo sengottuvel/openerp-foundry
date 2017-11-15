@@ -24,7 +24,7 @@
 							<field name="modify" invisible="1"/>
 						</group>
 						<group>
-							<field name="term_category" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="term_category" invisible="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 						</group>						
 					</group>	

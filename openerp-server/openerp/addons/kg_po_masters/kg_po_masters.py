@@ -46,7 +46,7 @@ class kg_payment_master(osv.osv):
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'term_category': fields.selection([('advance','Advance'),('payment','Payment'),('invoice_process','Invoice Process'),
-				('others','Others')],'Term Category',required=True,readonly=False,states={'approved':[('readonly',True)]}),
+				('others','Others')],'Term Category',required=False,readonly=False,states={'approved':[('readonly',True)]}),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		
 		# Entry Info

@@ -175,7 +175,7 @@ class kg_fluid_master(osv.osv):
 		rec = self.browse(cr, uid, ids[0])
 			
 		if rec.specific_gravity <= 0:
-			return False					
+			raise osv.except_osv(_('Warning!'),_('Specific Gravity should be greater than zero!! '))	
 		return True
 	
 	def _spl_name(self, cr, uid, ids, context=None):		

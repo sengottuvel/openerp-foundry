@@ -28,7 +28,7 @@
 							<field name="density" invisible="1"/>				
 						</group>
 						<group>
-							<field name="specific_gravity" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="specific_gravity" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="fluid_level" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="checmical_concentration" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="temperature" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>

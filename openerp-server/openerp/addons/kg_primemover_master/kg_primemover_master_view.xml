@@ -13,24 +13,23 @@
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
-<!--					<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<group>
 						<group>
-							<field name="name" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="name" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="primemover_categ" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="frequency" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="pole" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="framesize" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="mounting" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="framesize" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="mounting" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="efficiency" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="power_hp" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="specification" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="specification" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="price" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="shaft_dia" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="temprise_class" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="temprise_class" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="product_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="radiator_mtg" invisible="1"/>
@@ -38,17 +37,17 @@
 						</group>
 						<group>
 							<field name="manufacturer" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="effclass" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="series" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="effclass" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="series" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="terminal_box_loc" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="power_kw" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="speed" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="article_no" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="article_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="ambient_temp" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="gd2" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="space_heater" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="characteristics" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="noise_level" class = "aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="gd2" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="space_heater" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="characteristics" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="noise_level" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="moc_id" invisible="1"/>
@@ -151,17 +150,20 @@
 		
 		<!-- Menu Action End-->
 		
-		 <!-- Audit Log Xml Data Start
+		 <!-- Audit Log Xml Data Start -->
 		
+<!--
         <record id="primemover_model" model="audittrail.rule">
-            <field name="name">Audit Log Primemover Composition Master</field>
+            <field name="name">Primemover Master</field>
             <field name="object_id" eval="ref('kg_primemover_master.model_kg_primemover_master')"/>       
             <field name="state">subscribed</field>              
-        </record> -->
+        </record> 
+-->
         
         <!-- Audit Log Xml Data End-->
         
-		<!--Primemover Master Menu -->
+		<!--Menu item -->
+		
 		<menuitem name="Prime Mover" parent="kg_menus.cpm_crm_master_menu" action="mma_primemover_master" id="mam_primemover_master_menu" sequence="10"/>
 
 	</data>
