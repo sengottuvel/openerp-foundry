@@ -106,6 +106,7 @@
 					<field name="name"/>
 					<field name="manufacturer"/>
 					<field name="moc_id"/>
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="state"/>
 				</tree>
 			</field>
