@@ -13,6 +13,7 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approved" type="object" string="Move To A/C" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_cancel" type="object" string="Cancel" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 					<group>
 						<group>
@@ -178,6 +179,7 @@
 			<field name="arch" type="xml">
 					<tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'done';blue:state == 'approved';gray:state == 'cancel'" 
 						toolbar="True" string="Fettling Subcontract Invoice Tree">							
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="name"/>
 					<field name="entry_date"/>					
 					<field name="con_invoice_no"/>					

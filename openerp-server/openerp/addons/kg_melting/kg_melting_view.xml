@@ -13,6 +13,7 @@
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_cancel" type="object" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?" states="confirmed"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 					<group string="Melting Details">
 						<group>
@@ -255,6 +256,7 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';black:state == 'confirmed';grey:state == 'cancel'" 
 								toolbar="True" string="Melting Log">					
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>					
 					<field name="name"/>					
 					<field name="moc_id"/>
 					<field name="entry_date"/>					
