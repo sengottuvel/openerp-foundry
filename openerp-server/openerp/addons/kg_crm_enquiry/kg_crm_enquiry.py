@@ -1152,7 +1152,7 @@ class kg_crm_enquiry(osv.osv):
 		if orde_item.header_id.header_id.segment == 'dom':
 			hsn = orde_item.bom_id.hsn_no.id
 			if not orde_item.bom_id.hsn_no.igst_id:
-				raise osv.except_osv(_('Warning!'), _('Configure IGST Tax in HSN master for %s !!' %(orde_item.bom_id.hsn_no.name)))
+				raise osv.except_osv(_('Warning!'), _('Configure IGST Tax in HSN master for BOM %s and HSN %s !!' %(orde_item.bom_id.name,orde_item.bom_id.hsn_no.name)))
 			gst = orde_item.bom_id.hsn_no.igst_id.id
 		spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{'header_id': offer_id,
 															  'pumpseries_id': orde_item.header_id.pumpseries_id.id,
