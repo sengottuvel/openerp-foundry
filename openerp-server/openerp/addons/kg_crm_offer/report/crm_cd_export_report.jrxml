@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cd_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.1000000000000008"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="96"/>
+	<property name="ireport.zoom" value="1.6105100000000014"/>
+	<property name="ireport.x" value="125"/>
+	<property name="ireport.y" value="245"/>
 	<subDataset name="dataset1">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
@@ -45,8 +45,10 @@ sum((COALESCE((COALESCE(pump.prime_cost,0)),0))),2) as ratio,
 
 round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
 round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
-round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
-round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
+(select case when r_p_f_in_ex = 'inclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
+from ch_pump_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'inclusive' group by r_p_f_in_ex) as avg_pf_dis,
+(select case when r_freight_in_ex = 'inclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
+from ch_pump_offer where header_id = $P{offer_id} and r_freight_in_ex = 'inclusive' group by r_freight_in_ex) as avg_freight_dis,
 round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
 
 from ch_pump_offer pump
@@ -68,8 +70,8 @@ group by pump.cust_in_ex]]>
 		<field name="ratio" class="java.math.BigDecimal"/>
 		<field name="avg_cust_dis" class="java.lang.String"/>
 		<field name="avg_spl_dis" class="java.lang.String"/>
-		<field name="avg_pf_dis" class="java.lang.String"/>
-		<field name="avg_freight_dis" class="java.lang.String"/>
+		<field name="avg_pf_dis" class="java.math.BigDecimal"/>
+		<field name="avg_freight_dis" class="java.math.BigDecimal"/>
 		<field name="avg_deal_dis" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dataset2">
@@ -115,8 +117,10 @@ sum((COALESCE((COALESCE(pump.prime_cost,0)),0))),2) as ratio,
 
 round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
 round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
-round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
-round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
+(select case when r_p_f_in_ex = 'inclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
+from ch_spare_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'inclusive' group by r_p_f_in_ex) as avg_pf_dis,
+(select case when r_freight_in_ex = 'inclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
+from ch_spare_offer where header_id = $P{offer_id} and r_freight_in_ex = 'inclusive' group by r_freight_in_ex) as avg_freight_dis,
 round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
 
 from ch_spare_offer pump
@@ -138,8 +142,8 @@ group by pump.cust_in_ex]]>
 		<field name="ratio" class="java.math.BigDecimal"/>
 		<field name="avg_cust_dis" class="java.lang.String"/>
 		<field name="avg_spl_dis" class="java.lang.String"/>
-		<field name="avg_pf_dis" class="java.lang.String"/>
-		<field name="avg_freight_dis" class="java.lang.String"/>
+		<field name="avg_pf_dis" class="java.math.BigDecimal"/>
+		<field name="avg_freight_dis" class="java.math.BigDecimal"/>
 		<field name="avg_deal_dis" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dataset3">
@@ -185,8 +189,10 @@ sum((COALESCE((COALESCE(pump.prime_cost,0)),0))),2) as ratio,
 
 round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
 round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
-round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
-round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
+(select case when r_p_f_in_ex = 'inclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'inclusive' group by r_p_f_in_ex) as avg_pf_dis,
+(select case when r_freight_in_ex = 'inclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer where header_id = $P{offer_id} and r_freight_in_ex = 'inclusive' group by r_freight_in_ex) as avg_freight_dis,
 round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
 
 from ch_accessories_offer pump
@@ -210,8 +216,8 @@ group by pump.cust_in_ex]]>
 		<field name="ratio" class="java.math.BigDecimal"/>
 		<field name="avg_cust_dis" class="java.lang.String"/>
 		<field name="avg_spl_dis" class="java.lang.String"/>
-		<field name="avg_pf_dis" class="java.lang.String"/>
-		<field name="avg_freight_dis" class="java.lang.String"/>
+		<field name="avg_pf_dis" class="java.math.BigDecimal"/>
+		<field name="avg_freight_dis" class="java.math.BigDecimal"/>
 		<field name="avg_deal_dis" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dataset4">
@@ -389,60 +395,6 @@ where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is
 
 group by access.name,pump.cust_in_ex)
 
------------Freight
-union all
-
-(select sum(freight_val)::integer as basic_cpo_val,0 as cust_dis_val,sum(freight_val)::integer as book_val,0 as spl_val,
-0 as pf_val,0 as freight_val,0 as dealer_val,0 as les_dealer_val,0 as works_val,0 as prime_cost
-from(
-
-select sum(freight_val)::integer as freight_val
-from(
-
--- Pump Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.cust_in_ex
-
-union
-
--- Spare Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.cust_in_ex
-
-union
-
--- Access Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
-from ch_accessories_offer pump
-left join kg_accessories_master access on(access.id=pump.access_id)
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.cust_in_ex
-
-union
-
--- Access False Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
-from ch_accessories_offer pump
-left join kg_accessories_master access on(access.id=pump.access_id)
-where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
-group by pump.cust_in_ex
-
-)as tot
-
-)as tot
-)
-
-
 )as tot]]>
 		</queryString>
 		<field name="basic_cpo_val" class="java.lang.Long"/>
@@ -467,10 +419,15 @@ sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
+-- Freight val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val,
+
 -- Total
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer) as total,
 
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
@@ -480,11 +437,17 @@ sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_dea
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer)  -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam,
+(select case when r_p_f_in_ex = 'exclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
+from ch_pump_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'exclusive' group by r_p_f_in_ex) as avg_pf_ex_dis,
+(select case when r_freight_in_ex = 'exclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
+from ch_pump_offer where header_id = $P{offer_id} and r_freight_in_ex = 'exclusive' group by r_freight_in_ex) as avg_freight_ex_dis
 
 from ch_pump_offer pump
 
@@ -494,9 +457,12 @@ group by pump.cust_in_ex]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
+		<field name="freight_val" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
 		<field name="les_deal_dis" class="java.lang.Integer"/>
 		<field name="nett_sam" class="java.lang.Integer"/>
+		<field name="avg_pf_ex_dis" class="java.math.BigDecimal"/>
+		<field name="avg_freight_ex_dis" class="java.math.BigDecimal"/>
 	</subDataset>
 	<subDataset name="dataset6">
 		<parameter name="offer_id" class="java.lang.Integer"/>
@@ -509,10 +475,15 @@ sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
+-- Freight val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val,
+
 -- Total
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer) as total,
 
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
@@ -522,11 +493,17 @@ sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_dea
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer)  -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam,
+(select case when r_p_f_in_ex = 'exclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
+from ch_spare_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'exclusive' group by r_p_f_in_ex) as avg_pf_ex_dis,
+(select case when r_freight_in_ex = 'exclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
+from ch_spare_offer where header_id = $P{offer_id} and r_freight_in_ex = 'exclusive' group by r_freight_in_ex) as avg_freight_ex_dis
 
 from ch_spare_offer pump
 
@@ -536,9 +513,12 @@ group by pump.cust_in_ex]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
+		<field name="freight_val" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
 		<field name="les_deal_dis" class="java.lang.Integer"/>
 		<field name="nett_sam" class="java.lang.Integer"/>
+		<field name="avg_pf_ex_dis" class="java.math.BigDecimal"/>
+		<field name="avg_freight_ex_dis" class="java.math.BigDecimal"/>
 	</subDataset>
 	<subDataset name="dataset7">
 		<parameter name="offer_id" class="java.lang.Integer"/>
@@ -551,10 +531,15 @@ sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
 
+-- Freight val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val,
+
 -- Total
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer) as total,
 
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
@@ -564,11 +549,18 @@ sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_dea
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer)  -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam,
+
+(select case when r_p_f_in_ex = 'exclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'exclusive' group by r_p_f_in_ex) as avg_pf_ex_dis,
+(select case when r_freight_in_ex = 'exclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer where header_id = $P{offer_id} and r_freight_in_ex = 'exclusive' group by r_freight_in_ex) as avg_freight_ex_dis
 
 from ch_accessories_offer pump
 
@@ -579,14 +571,17 @@ group by pump.insurance_in_ex]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
+		<field name="freight_val" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
 		<field name="les_deal_dis" class="java.lang.Integer"/>
 		<field name="nett_sam" class="java.lang.Integer"/>
+		<field name="avg_pf_ex_dis" class="java.math.BigDecimal"/>
+		<field name="avg_freight_ex_dis" class="java.math.BigDecimal"/>
 	</subDataset>
 	<subDataset name="dataset8">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
-			<![CDATA[select sum(book_val) as book_val,sum(pf_val) as pf_val,sum(total) as total,
+			<![CDATA[select sum(book_val) as book_val,sum(pf_val) as pf_val,sum(freight_val) as freight_val,sum(total) as total,
 sum(les_deal_dis) as les_deal_dis,sum(nett_sam) as nett_sam from
 ((select
 
@@ -594,12 +589,17 @@ sum(les_deal_dis) as les_deal_dis,sum(nett_sam) as nett_sam from
 sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer as pf_val,
+
+-- Freight val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer as freight_val,
 
 -- Total
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer) as total,
 
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
@@ -609,7 +609,9 @@ sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_dea
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer)  -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
@@ -630,12 +632,17 @@ union all
 sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer as pf_val,
+
+-- Freight val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer as freight_val,
 
 -- Total
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer) as total,
 
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
@@ -645,7 +652,9 @@ sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_dea
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer)  -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
@@ -666,12 +675,17 @@ union all
 sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer as pf_val,
+
+-- Freight val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer as freight_val,
 
 -- Total
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer) as total,
 
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
@@ -681,7 +695,9 @@ sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_dea
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer)  -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
@@ -705,12 +721,17 @@ union all
 sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer as pf_val,
+
+-- Freight val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer as freight_val,
 
 -- Total
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer) as total,
 
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
@@ -720,7 +741,9 @@ sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_dea
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer)  -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
@@ -734,65 +757,11 @@ where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is
 
 group by pump.cust_in_ex)
 
--------------Freight
-union all
-
-(select sum(freight_val)::integer as book_val,0,sum(freight_val)::integer as total,0,sum(freight_val)::integer as nett_sam
-from(
-
-select sum(freight_val)::integer as freight_val
-from(
-
--- Pump Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.cust_in_ex
-
-union
-
--- Spare Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.cust_in_ex
-
-union
-
--- Access Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
-from ch_accessories_offer pump
-left join kg_accessories_master access on(access.id=pump.access_id)
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.cust_in_ex
-
-union
-
--- Access False Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
-from ch_accessories_offer pump
-left join kg_accessories_master access on(access.id=pump.access_id)
-where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
-group by pump.cust_in_ex
-
-)as tot
-
-)as tot
-
-
-
-)
-
 ) as ttaota]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Long"/>
 		<field name="pf_val" class="java.lang.Long"/>
+		<field name="freight_val" class="java.lang.Long"/>
 		<field name="total" class="java.lang.Long"/>
 		<field name="les_deal_dis" class="java.lang.Long"/>
 		<field name="nett_sam" class="java.lang.Long"/>
@@ -840,8 +809,10 @@ sum((COALESCE((COALESCE(pump.prime_cost,0)),0))),2) as ratio,
 
 round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
 round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
-round (avg(COALESCE(pump.r_p_f,0))::DECIMAL,2)::TEXT as avg_pf_dis,
-round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
+(select case when r_p_f_in_ex = 'inclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'inclusive' group by r_p_f_in_ex) as avg_pf_dis,
+(select case when r_freight_in_ex = 'inclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer where header_id = $P{offer_id} and r_freight_in_ex = 'inclusive' group by r_freight_in_ex) as avg_freight_dis,
 round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
 
 from ch_accessories_offer pump
@@ -866,8 +837,8 @@ group by access.name,pump.cust_in_ex]]>
 		<field name="ratio" class="java.math.BigDecimal"/>
 		<field name="avg_cust_dis" class="java.lang.String"/>
 		<field name="avg_spl_dis" class="java.lang.String"/>
-		<field name="avg_pf_dis" class="java.lang.String"/>
-		<field name="avg_freight_dis" class="java.lang.String"/>
+		<field name="avg_pf_dis" class="java.math.BigDecimal"/>
+		<field name="avg_freight_dis" class="java.math.BigDecimal"/>
 		<field name="avg_deal_dis" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dataset10">
@@ -881,12 +852,17 @@ access.name as acc_name,
 sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer as book_val,
 
 -- PF val
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer as pf_val,
+
+-- Freight val
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer as freight_val,
 
 -- Total
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer) as total,
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer) as total,
 
 -- Les deal dis
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
@@ -896,11 +872,19 @@ sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as les_dea
 -- Nett sam
 (sum((COALESCE((COALESCE(pump.r_net_amt_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer)  -
+sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer +
+
+sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer)  -
 
 (sum((COALESCE((COALESCE(pump.r_spl_discount_tot,0)),0)))::integer +
 
-sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam
+sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam,
+
+(select case when r_p_f_in_ex = 'exclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'exclusive' group by r_p_f_in_ex) as avg_pf_ex_dis,
+(select case when r_freight_in_ex = 'exclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer where header_id = $P{offer_id} and r_freight_in_ex = 'exclusive' group by r_freight_in_ex) as avg_freight_ex_dis
+
 
 from ch_accessories_offer pump
 
@@ -913,105 +897,12 @@ group by access.name,pump.cust_in_ex]]>
 		<field name="acc_name" class="java.lang.String"/>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
+		<field name="freight_val" class="java.lang.Integer"/>
 		<field name="total" class="java.lang.Integer"/>
 		<field name="les_deal_dis" class="java.lang.Integer"/>
 		<field name="nett_sam" class="java.lang.Integer"/>
-	</subDataset>
-	<subDataset name="dataset11">
-		<parameter name="offer_id" class="java.lang.Integer"/>
-		<queryString>
-			<![CDATA[select sum(freight_val)::integer as freight_val
-from(
-
--- Pump Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.cust_in_ex
-
-union
-
--- Spare Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.cust_in_ex
-
-union
-
--- Access Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
-from ch_accessories_offer pump
-left join kg_accessories_master access on(access.id=pump.access_id)
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.cust_in_ex
-
-union
-
--- Access False Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_tot,0)),0)))::integer freight_val
-from ch_accessories_offer pump
-left join kg_accessories_master access on(access.id=pump.access_id)
-where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
-group by pump.cust_in_ex
-
-)as tot]]>
-		</queryString>
-		<field name="freight_val" class="java.lang.Integer"/>
-	</subDataset>
-	<subDataset name="dataset12">
-		<parameter name="offer_id" class="java.lang.Integer"/>
-		<queryString>
-			<![CDATA[select sum(freight_val)::integer as freight_val
-from(
-
--- Pump Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
-from ch_pump_offer pump
-
-where header_id = $P{offer_id}
-group by pump.cust_in_ex
-
-union
-
--- Spare Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
-from ch_spare_offer pump
-
-where header_id = $P{offer_id}
-group by pump.cust_in_ex
-
-union
-
--- Access Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
-from ch_accessories_offer pump
-left join kg_accessories_master access on(access.id=pump.access_id)
-where header_id = $P{offer_id} and access.is_pump_acc_flag = True
-group by pump.cust_in_ex
-
-union
-
--- Access False Freight val
-select
-sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer freight_val
-from ch_accessories_offer pump
-left join kg_accessories_master access on(access.id=pump.access_id)
-where header_id = $P{offer_id} and (access.is_pump_acc_flag != True or access.is_pump_acc_flag is null)
-group by pump.cust_in_ex
-
-)as tot]]>
-		</queryString>
-		<field name="freight_val" class="java.lang.Integer"/>
+		<field name="avg_pf_ex_dis" class="java.math.BigDecimal"/>
+		<field name="avg_freight_ex_dis" class="java.math.BigDecimal"/>
 	</subDataset>
 	<parameter name="offer_id" class="java.lang.Integer"/>
 	<queryString>
@@ -1054,7 +945,10 @@ WHEN off.del_term = 'cfr' THEN 'CFR' WHEN off.del_term = 'cif' THEN 'CIF' WHEN o
 ELSE off.del_term end) as del_term,
 (CASE WHEN off.mode_of_dispatch = 'sea' THEN 'Sea Worthy' WHEN off.mode_of_dispatch = 'air' THEN 'Air Worthy'
 ELSE off.mode_of_dispatch end) as mode_of_dispatch,
-'C.P.O Ref No : '||(case when off.customer_po_no is not null then off.customer_po_no else '-' end)||' Dt: '||(case when off.cust_po_date is not null then to_char(off.cust_po_date, 'dd/mm/yyyy') else '-' end) as cpo_no
+(CASE WHEN off.freight = 'topay' THEN 'Topay' WHEN off.freight = 'paid' THEN 'Paid'
+ELSE off.freight end) as freight,
+'C.P.O Ref No : '||(case when off.customer_po_no is not null then off.customer_po_no else '-' end) as cpo_no,
+'C.P.O Date : '||(case when off.cust_po_date is not null then to_char(off.cust_po_date, 'dd/mm/yyyy') else '-' end) as cpo_date
 
 from kg_crm_offer off
 
@@ -1085,7 +979,9 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 	<field name="penality" class="java.lang.String"/>
 	<field name="del_term" class="java.lang.String"/>
 	<field name="mode_of_dispatch" class="java.lang.String"/>
+	<field name="freight" class="java.lang.String"/>
 	<field name="cpo_no" class="java.lang.String"/>
+	<field name="cpo_date" class="java.lang.String"/>
 	<group name="Pump_detail">
 		<groupExpression><![CDATA[$P{offer_id}]]></groupExpression>
 		<groupHeader>
@@ -1928,80 +1824,6 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 			</band>
 		</groupHeader>
 	</group>
-	<group name="Freight_Details">
-		<groupExpression><![CDATA[$P{offer_id}]]></groupExpression>
-		<groupHeader>
-			<band height="14">
-				<componentElement>
-					<reportElement x="-12" y="0" width="825" height="14" isRemoveLineWhenBlank="true"/>
-					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
-						<datasetRun subDataset="dataset11">
-							<datasetParameter name="offer_id">
-								<datasetParameterExpression><![CDATA[$P{offer_id}]]></datasetParameterExpression>
-							</datasetParameter>
-							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-						</datasetRun>
-						<jr:listContents height="14" width="825">
-							<textField>
-								<reportElement x="0" y="0" width="140" height="14"/>
-								<box topPadding="2">
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textElement textAlignment="Center"/>
-								<textFieldExpression><![CDATA["Freight"]]></textFieldExpression>
-							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="47" height="14"/>
-								<box topPadding="2" rightPadding="2">
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textElement textAlignment="Right">
-									<font size="8"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{freight_val}]]></textFieldExpression>
-							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="270" y="0" width="52" height="14"/>
-								<box topPadding="2" rightPadding="2">
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textElement textAlignment="Right">
-									<font size="8"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{freight_val}]]></textFieldExpression>
-							</textField>
-						</jr:listContents>
-					</jr:list>
-				</componentElement>
-				<textField isBlankWhenNull="true">
-					<reportElement x="175" y="0" width="83" height="14"/>
-					<box topPadding="2" rightPadding="2">
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement textAlignment="Right">
-						<font size="8"/>
-					</textElement>
-					<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="310" y="0" width="503" height="14"/>
-					<box topPadding="2" rightPadding="2">
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement textAlignment="Right">
-						<font size="8"/>
-					</textElement>
-					<textFieldExpression><![CDATA[" "]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupHeader>
-	</group>
 	<group name="Supervision_detail">
 		<groupExpression><![CDATA[$P{offer_id}]]></groupExpression>
 		<groupHeader>
@@ -2174,7 +1996,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 					<textFieldExpression><![CDATA["Description"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="128" y="17" width="109" height="17"/>
+					<reportElement x="128" y="17" width="93" height="17"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2185,7 +2007,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 					<textFieldExpression><![CDATA["Basic Value"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="237" y="17" width="73" height="17"/>
+					<reportElement x="221" y="17" width="89" height="17"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2194,7 +2016,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 					<textFieldExpression><![CDATA["P&F"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="310" y="17" width="189" height="17"/>
+					<reportElement x="371" y="17" width="128" height="17"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -2243,7 +2065,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 						</datasetRun>
 						<jr:listContents height="14" width="825">
 							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="109" height="14"/>
+								<reportElement x="140" y="0" width="93" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2254,7 +2076,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="249" y="0" width="73" height="14"/>
+								<reportElement x="262" y="0" width="60" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2265,7 +2087,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="322" y="0" width="189" height="14"/>
+								<reportElement x="383" y="0" width="128" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2309,9 +2131,51 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								</textElement>
 								<textFieldExpression><![CDATA["Pump"]]></textFieldExpression>
 							</textField>
+							<textField>
+								<reportElement x="347" y="0" width="36" height="14"/>
+								<box topPadding="2" rightPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{freight_val}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="322" y="0" width="25" height="14"/>
+								<box topPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_freight_ex_dis}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="233" y="0" width="29" height="14"/>
+								<box topPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_pf_ex_dis}]]></textFieldExpression>
+							</textField>
 						</jr:listContents>
 					</jr:list>
 				</componentElement>
+				<textField>
+					<reportElement x="310" y="17" width="61" height="17"/>
+					<box topPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA["Freight"]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 	</group>
@@ -2342,7 +2206,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA["Spare"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="109" height="14"/>
+								<reportElement x="140" y="0" width="93" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2353,7 +2217,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="249" y="0" width="73" height="14"/>
+								<reportElement x="262" y="0" width="60" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2364,7 +2228,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="322" y="0" width="189" height="14"/>
+								<reportElement x="383" y="0" width="128" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2395,6 +2259,39 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{nett_sam}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="322" y="0" width="25" height="14"/>
+								<box topPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_freight_ex_dis}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="347" y="0" width="36" height="14"/>
+								<box topPadding="2" rightPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{freight_val}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="233" y="0" width="29" height="14"/>
+								<box topPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_pf_ex_dis}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
@@ -2429,7 +2326,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA["Accessories"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="109" height="14"/>
+								<reportElement x="140" y="0" width="93" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2440,7 +2337,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="249" y="0" width="73" height="14"/>
+								<reportElement x="262" y="0" width="60" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2451,7 +2348,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="322" y="0" width="189" height="14"/>
+								<reportElement x="383" y="0" width="128" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2482,6 +2379,39 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{nett_sam}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="322" y="0" width="25" height="14"/>
+								<box topPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_freight_ex_dis}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="347" y="0" width="36" height="14"/>
+								<box topPadding="2" rightPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{freight_val}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="233" y="0" width="29" height="14"/>
+								<box topPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_pf_ex_dis}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
@@ -2514,7 +2444,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{acc_name}]]></textFieldExpression>
 							</textField>
 							<textField>
-								<reportElement x="140" y="0" width="109" height="14"/>
+								<reportElement x="140" y="0" width="93" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2525,7 +2455,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField>
-								<reportElement x="249" y="0" width="73" height="14"/>
+								<reportElement x="262" y="0" width="60" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2536,7 +2466,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField>
-								<reportElement x="322" y="0" width="189" height="14"/>
+								<reportElement x="383" y="0" width="128" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2568,39 +2498,20 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{nett_sam}]]></textFieldExpression>
 							</textField>
-						</jr:listContents>
-					</jr:list>
-				</componentElement>
-			</band>
-		</groupHeader>
-	</group>
-	<group name="Child_Freight">
-		<groupExpression><![CDATA[$F{off_no}]]></groupExpression>
-		<groupHeader>
-			<band height="14">
-				<componentElement>
-					<reportElement x="-12" y="0" width="825" height="14" isRemoveLineWhenBlank="true"/>
-					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
-						<datasetRun subDataset="dataset12">
-							<datasetParameter name="offer_id">
-								<datasetParameterExpression><![CDATA[$P{offer_id}]]></datasetParameterExpression>
-							</datasetParameter>
-							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-						</datasetRun>
-						<jr:listContents height="14" width="825">
 							<textField>
-								<reportElement x="0" y="0" width="140" height="14"/>
+								<reportElement x="322" y="0" width="25" height="14"/>
 								<box topPadding="2">
-									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textElement textAlignment="Center"/>
-								<textFieldExpression><![CDATA["Freight"]]></textFieldExpression>
+								<textElement textAlignment="Center">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{avg_freight_ex_dis}]]></textFieldExpression>
 							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="109" height="14"/>
-								<box topPadding="2" rightPadding="2">
+							<textField>
+								<reportElement x="347" y="0" width="36" height="14"/>
+								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
@@ -2609,49 +2520,16 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{freight_val}]]></textFieldExpression>
 							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="249" y="0" width="73" height="14"/>
-								<box topPadding="2" rightPadding="2">
+							<textField>
+								<reportElement x="233" y="0" width="29" height="14"/>
+								<box topPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textElement textAlignment="Right">
+								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA["--"]]></textFieldExpression>
-							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="322" y="0" width="189" height="14"/>
-								<box topPadding="2" rightPadding="2">
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textElement textAlignment="Right">
-									<font size="8"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{freight_val}]]></textFieldExpression>
-							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="511" y="0" width="224" height="14"/>
-								<box topPadding="2" rightPadding="2">
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textElement textAlignment="Right">
-									<font size="8"/>
-								</textElement>
-								<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="735" y="0" width="90" height="14"/>
-								<box topPadding="2" rightPadding="2">
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textElement textAlignment="Right">
-									<font size="8"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{freight_val}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{avg_pf_ex_dis}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
@@ -2674,7 +2552,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 						</datasetRun>
 						<jr:listContents height="14" width="685">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="109" height="14"/>
+								<reportElement x="0" y="0" width="93" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2685,7 +2563,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="109" y="0" width="73" height="14"/>
+								<reportElement x="93" y="0" width="89" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2696,7 +2574,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="182" y="0" width="189" height="14"/>
+								<reportElement x="243" y="0" width="128" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2728,6 +2606,17 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{nett_sam}]]></textFieldExpression>
 							</textField>
+							<textField>
+								<reportElement x="182" y="0" width="61" height="14"/>
+								<box topPadding="2" rightPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="8" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{freight_val}]]></textFieldExpression>
+							</textField>
 						</jr:listContents>
 					</jr:list>
 				</componentElement>
@@ -2750,7 +2639,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="106" splitType="Stretch">
+		<band height="124" splitType="Stretch">
 			<textField>
 				<reportElement x="168" y="0" width="448" height="24"/>
 				<box topPadding="4"/>
@@ -2802,7 +2691,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="-12" y="56" width="103" height="25"/>
+				<reportElement x="-12" y="56" width="103" height="23"/>
 				<box topPadding="5" leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -2815,7 +2704,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 				<textFieldExpression><![CDATA["Delivery Terms     : "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="-12" y="81" width="103" height="25"/>
+				<reportElement x="-12" y="79" width="103" height="21"/>
 				<box topPadding="5" leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -2828,7 +2717,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 				<textFieldExpression><![CDATA["Mode of Dispatch : "]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="91" y="56" width="97" height="25"/>
+				<reportElement x="91" y="56" width="97" height="23"/>
 				<box topPadding="5" leftPadding="2">
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
@@ -2839,7 +2728,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 				<textFieldExpression><![CDATA[$F{del_term}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="91" y="81" width="97" height="25"/>
+				<reportElement x="91" y="79" width="97" height="21"/>
 				<box topPadding="5" leftPadding="2">
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
@@ -2913,6 +2802,50 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{wo_no}]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement x="-12" y="100" width="103" height="24"/>
+				<box topPadding="5" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Freight : "]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="91" y="100" width="97" height="24"/>
+				<box topPadding="3" leftPadding="2">
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{freight}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="616" y="106" width="197" height="18"/>
+				<box topPadding="2" leftPadding="2">
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cpo_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="188" y="106" width="428" height="18"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>
@@ -2975,7 +2908,7 @@ where off.id = $P{offer_id} and off.segment = 'exp']]>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA["Freight (Topay / Paid)"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Freight"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="371" y="0" width="67" height="16" isPrintWhenDetailOverflows="true"/>
