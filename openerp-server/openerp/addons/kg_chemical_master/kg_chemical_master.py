@@ -6,6 +6,7 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import re
 import math
+import base64
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_chemical_master(osv.osv):
