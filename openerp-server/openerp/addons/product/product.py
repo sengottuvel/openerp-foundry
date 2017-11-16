@@ -1261,6 +1261,26 @@ class product_product(osv.osv):
 		if context and context.get('search_default_categ_id', False):
 			args.append((('categ_id', 'child_of', context['search_default_categ_id'])))
 		return super(product_product, self).search(cr, uid, args, offset=offset, limit=limit, order=order, context=context, count=False)
+	
+	def send_to_dms(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
+		rec_user = str(res_rec.login)
+		rec_pwd = str(res_rec.password)
+		rec_code = str(rec.name)		
+		encoded_user = base64.b64encode(rec_user)
+		encoded_pwd = base64.b64encode(rec_pwd)
+			
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Product_Master-Design='+rec_code
+
+
+		return {
+					  'name'	 : 'Go to website',
+					  'res_model': 'ir.actions.act_url',
+					  'type'	 : 'ir.actions.act_url',
+					  'target'   : 'current',
+					  'url'	  : url
+			   }
 
 product_product()
 

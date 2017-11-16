@@ -17,6 +17,7 @@ from openerp import tools
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
+import base64
 
 UOM_CONVERSATION = [
     ('one_dimension','One Dimension'),('two_dimension','Two Dimension')
@@ -272,7 +273,7 @@ class kg_product(osv.osv):
 			else:
 				pass
 		return super(kg_product, self).write(cr, uid, ids,vals, context)
-	
+
 kg_product()
 
 class kg_product_category(osv.osv):

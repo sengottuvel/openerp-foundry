@@ -16,6 +16,7 @@
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes')]}" class="oe_highlight" confirm="Are you sure to proceed ?" inivsible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" groups="kg_users_mgt.group_set_to_draft"/>	
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 					<group>
 						<group>
@@ -149,7 +150,8 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Accessories Master Tree">				
+								toolbar="True" string="Accessories Master Tree">
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="code"/>
 					<field name="name"/>
 					<field name="access_cate_id"/>

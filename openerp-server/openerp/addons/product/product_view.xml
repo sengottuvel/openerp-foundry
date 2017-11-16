@@ -45,6 +45,7 @@
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" string="Products">
                     <field name="default_code" invisible="1"/>
                     <field name="product_code" invisible="1"/>
+                   <button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
                     <field name="name"/>
                     <field name="categ_id"/>
                     <field name="type" invisible="1"/>
@@ -77,6 +78,7 @@
 					<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 <!--				<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 					<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 				</header>
 					<group>
 						<group>
