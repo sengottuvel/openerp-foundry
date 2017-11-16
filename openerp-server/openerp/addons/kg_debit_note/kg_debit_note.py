@@ -18,6 +18,7 @@ from datetime import datetime
 from datetime import timedelta
 from dateutil import relativedelta
 import calendar
+import base64
 today = datetime.now()
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
@@ -225,6 +226,26 @@ class kg_debit_note(osv.osv):
 				raise osv.except_osv(('Invalid action !'),('System not allow to delete a UN-DRAFT state !!'))
 		osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		return True
+	
+	def send_to_dms(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
+		rec_user = str(res_rec.login)
+		rec_pwd = str(res_rec.password)
+		rec_code = str(rec.name)		
+		encoded_user = base64.b64encode(rec_user)
+		encoded_pwd = base64.b64encode(rec_pwd)
+			
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Debit_Note='+rec_code
+
+
+		return {
+					  'name'	 : 'Go to website',
+					  'res_model': 'ir.actions.act_url',
+					  'type'	 : 'ir.actions.act_url',
+					  'target'   : 'current',
+					  'url'	  : url
+			   }
 	
 	_constraints = [
 					(_check_lineitem,'Please enter the Item Details',['']),

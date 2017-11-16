@@ -15,6 +15,7 @@
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_confirm" type="object" string="Confirm"  class="oe_highlight" attrs="{'invisible':[('status','in',['approved','confirmed','cancel','reject'])]}"/>
 						<button name="entry_draft" type="object"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','approved','reject'])]}"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 				</button>
 				<field name = "description" postion="replace">
 					<field name="description" attrs="{'readonly':[('status','in',['approved','cancel','reject'])]}"/>
@@ -144,6 +145,7 @@
 						<field name="code" string="Code" invisible="1"/>
 					</field>	
 					<field name="partner_name" position="replace">
+						<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 						<field name="partner_name" string="Applicant"/>
 					</field>
 					<field name="stage_id" position="after"	>

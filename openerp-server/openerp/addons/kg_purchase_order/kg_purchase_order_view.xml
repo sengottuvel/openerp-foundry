@@ -70,6 +70,7 @@
 			<button name="confirm_po" states="draft" string="Confirm" type="object" confirm="Are you sure to proceed ?"/>
 			<button name="verify_po" states="confirmed" string="Verify" type="object" confirm="Are you sure to proceed ?"/>
 			<button name="entry_approve" states="verified" string="Approve" type="object" confirm="Are you sure to proceed ?"/>
+			<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 		</button>
 		<field name="origin" position="replace">
 			<field name="bill_type" invisible="1"/>
@@ -349,6 +350,7 @@
         <field name="inherit_id" ref="purchase.purchase_order_tree"/>
         <field name="arch" type="xml">
 			<field name="name" position="replace">
+			<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 			<field name="name" string="PO.No."/>
 			</field>
 			<field name="date_order" position="after">

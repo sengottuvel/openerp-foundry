@@ -6,6 +6,7 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import re
 import math
+import base64
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_recruitment(osv.osv):
@@ -182,6 +183,26 @@ class kg_recruitment(osv.osv):
 		if flds.salary_expected <= 0 or flds.salary_proposed <= 0:
 			return False		
 		return True
+	
+	def send_to_dms(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
+		rec_user = str(res_rec.login)
+		rec_pwd = str(res_rec.password)
+		rec_code = str(rec.partner_name)		
+		encoded_user = base64.b64encode(rec_user)
+		encoded_pwd = base64.b64encode(rec_pwd)
+			
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Resume_Bank='+rec_code
+
+
+		return {
+					  'name'	 : 'Go to website',
+					  'res_model': 'ir.actions.act_url',
+					  'type'	 : 'ir.actions.act_url',
+					  'target'   : 'current',
+					  'url'	  : url
+			   }
 	
 	
 	

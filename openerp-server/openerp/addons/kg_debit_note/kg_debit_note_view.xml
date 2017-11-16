@@ -13,6 +13,7 @@
 					<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>			
 					<button name="entry_confirm" type="object" string="Confirm" attrs="{'invisible':[('state','!=','draft')]}" class="oe_highlight"/>
 					<button name="entry_draft" type="object" string="Set To Draft" attrs="{'invisible':[('state','!=','cancel')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 				</header>				
 					<group>
 						<group>								
@@ -103,6 +104,7 @@
 			<field eval='8' name='priority'/>
 			<field name ='arch' type='xml'>
 				<tree colors="Blue:state=='draft';gray:state in ('reject','cancel');black:state=='approved';red:state=='confirm'" toolbar="True" string="debit Note">
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name='name'/>
 					<field name='date'/>
 					<field name='supplier_id'/>

@@ -1083,6 +1083,25 @@ class kg_purchase_order(osv.osv):
 				raise osv.except_osv(_('Warning'),_('Quotation date should not be accept past date!'))
 		return True
 	
+	def send_to_dms(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
+		rec_user = str(res_rec.login)
+		rec_pwd = str(res_rec.password)
+		rec_code = str(rec.name)		
+		encoded_user = base64.b64encode(rec_user)
+		encoded_pwd = base64.b64encode(rec_pwd)
+			
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Generate_PO='+rec_code
+
+		return {
+					  'name'	 : 'Go to website',
+					  'res_model': 'ir.actions.act_url',
+					  'type'	 : 'ir.actions.act_url',
+					  'target'   : 'current',
+					  'url'	  : url
+			   }
+	
 	_constraints = [
 		
 		(_check_line,'You can not save this Purchase Order with out Line and Zero Qty !',['order_line']),

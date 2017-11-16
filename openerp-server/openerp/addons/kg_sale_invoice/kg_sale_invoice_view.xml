@@ -13,7 +13,7 @@
 						<button name="invoice_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="invoice_approve" type="object" string="Approve" states="confirmed" class="oe_highlight"/>
 						<button name="invoice_process" type="object" string="Create Invoice" states="approved" class="oe_highlight"/>
-						
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
@@ -266,6 +266,7 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
 								toolbar="True" string="Enquiry Entry Tree" >					
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="name"/>
 					<field name="invoice_date"/>
 					<field name="invoice_no"/>

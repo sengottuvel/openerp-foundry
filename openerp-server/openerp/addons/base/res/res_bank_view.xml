@@ -13,6 +13,7 @@
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" class="oe_highlight" attrs="{'invisible':[('status','in',['approved','confirmed','cancel','reject'])]}"/>
 						<button name="entry_draft" type="object" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','reject'])]}"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
                     <group col="4">
                         <field name="name" class="aplhanum_expect" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
@@ -87,6 +88,7 @@
                 <tree colors="blue:status == 'draft';red:status == 'confirmed'
 						;black:status == 'approved';gray:status == 'reject';gray:status == 'cancel'" 
 								toolbar="True" string="Bank" >
+                    <button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
                     <field name="name"/>
                     <field name="bic"/>
                     <field name="status"/>

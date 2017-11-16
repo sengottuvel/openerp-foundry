@@ -18,6 +18,7 @@
 						<button name="entry_draft" type="object"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','reject'])]}"/>
 						<button name="emp_relieve" type="object"  string="Relieve" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','cancel','reject','resigned'])]}"/>
 						<button name="emp_resigned" type="object"  string="Resign" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','cancel','reject','approved'])]}"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</button>
 					
 					<field name="name" position="replace">
@@ -235,7 +236,10 @@
 				<field name="model">hr.employee</field>
 				<field name="inherit_id" ref="hr.view_employee_tree"/>
 				<field name="arch" type="xml">
-					
+					<field name="name" position="before">
+						<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
+					</field>
+
 					<field name="name" position="after">
 						<field name="code" />
 						<field name="emp_categ_id" />

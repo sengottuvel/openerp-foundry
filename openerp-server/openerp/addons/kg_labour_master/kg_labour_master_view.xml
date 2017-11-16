@@ -15,6 +15,7 @@
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>						
@@ -84,6 +85,7 @@
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								toolbar="True" string="Labour" >				
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="name"/>
 					<field name="code"/>
 					<field name="type"/>

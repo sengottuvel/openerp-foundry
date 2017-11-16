@@ -19,6 +19,7 @@
                 <button name="approve_order" states="confirm" string="Approve" type="object"/>
                 <button name="cancel_order" states="done" string="Cancle" type="object" class="oe_highlight"/>
                 <button name="so_direct_print" states="done" string="Print SO" type="object" class="oe_highlight"/>
+                <button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
                 <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done,cancel" statusbar_colors='{"draft":"blue"}'/>
 			</header>
                 <group>
@@ -168,6 +169,7 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Service Invoice">
+                    <button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
                     <field name="name"/>
 					<field name="date"/>
                     <field name="dep_name"/>

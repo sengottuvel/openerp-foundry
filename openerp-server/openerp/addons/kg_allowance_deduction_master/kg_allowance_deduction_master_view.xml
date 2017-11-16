@@ -15,6 +15,7 @@
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" attrs="{'invisible':['|',('entry_mode','=','auto'),('state','!=','approved')]}"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</button>
 					<field name="code" position="replace">
 					</field>	
@@ -106,6 +107,7 @@
 					<field name="register_id" invisible="1"/>
 				</field>
 				<field name="name" position="replace">
+						<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 						<field name="name"/>
 						<field name="code"/>
 						<field name="categ_type"/>

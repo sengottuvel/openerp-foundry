@@ -526,7 +526,7 @@ class kg_crm_enquiry(osv.osv):
 		
 		if rec.source == 'market':
 		
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Marketing_Enquiry='+rec_code
+			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Marketing_Enquiry='+rec_number
 		
 		if rec.source == 'service':
 			

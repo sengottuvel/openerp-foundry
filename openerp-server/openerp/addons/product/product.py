@@ -1270,8 +1270,10 @@ class product_product(osv.osv):
 		rec_code = str(rec.name)		
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
-			
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Product_Master-Design='+rec_code
+		
+		if rec.product_type == 'ms':
+			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Product_Master-Design='+rec_code
+		
 
 
 		return {

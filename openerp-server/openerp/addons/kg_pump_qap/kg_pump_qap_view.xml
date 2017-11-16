@@ -14,6 +14,7 @@
 					<header>
 						<button name="di_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
 						attrs="{'invisible': [('di_state','=','completed')]}"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 						<group string="Dimensional Inspection">
 							<group>
@@ -105,6 +106,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Dimensional Inspection" create="false" delete="false">					
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="order_no"/>
 					<field name="order_category"/>
 					<field name="pump_model_id"/>

@@ -17,6 +17,7 @@
                 <button name="reject_amend" states="confirm" string="Reject" type="object" class="oe_highlight"/>
                 <button name="approve_amend" states="confirm" string="Approve" type="object" class="oe_highlight" />
                 <button name="make_amend" string="Load PO Data" type="object" class="oe_highlight" attrs = "{'invisible':[('amend_flag','=',True)]}"/>
+                <button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 			</header>
 				<group>
                     <group>
@@ -235,6 +236,7 @@
             <field name="arch" type="xml">
                 <tree colors="blue:state == 'draft';red:state == 'confirm';black:state == 'approved';gray:state == 'cancel'" 
 								toolbar="True" string="Purchase Order Amendment">
+                    <button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
                     <field name="name"/>
 					<field name="date"/>
                     <field name="po_id"/>
