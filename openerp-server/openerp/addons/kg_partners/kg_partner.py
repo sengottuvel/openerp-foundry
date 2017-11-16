@@ -11,6 +11,7 @@ from openerp.osv import fields,osv
 from openerp.osv.orm import browse_record
 from openerp.tools.translate import _
 import re
+import base64
 
 class kg_partner(osv.osv):
 	
@@ -455,6 +456,25 @@ class kg_partner(osv.osv):
 		else:
 			return True
 		return False
+	
+	def send_to_dms(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
+		rec_user = str(res_rec.login)
+		rec_pwd = str(res_rec.password)
+		rec_code = str(rec.name)		
+		encoded_user = base64.b64encode(rec_user)
+		encoded_pwd = base64.b64encode(rec_pwd)
+		
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Customer='+rec_code
+		
+		return {
+					  'name'	 : 'Go to website',
+					  'res_model': 'ir.actions.act_url',
+					  'type'	 : 'ir.actions.act_url',
+					  'target'   : 'current',
+					  'url'	  : url
+			   }
 	
 	_constraints = [
 	
