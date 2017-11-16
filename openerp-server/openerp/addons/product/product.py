@@ -34,6 +34,7 @@ from openerp import tools
 from openerp.tools import float_compare, DEFAULT_SERVER_DATETIME_FORMAT
 import openerp.addons.decimal_precision as dp
 import logging
+import base64
 _logger = logging.getLogger(__name__)
 
 def ean_checksum(eancode):
