@@ -36,7 +36,6 @@
 							<group>
 								<field name="login" string="Login Name"/>
 								<field name="email" string="Email"/>
-								<field name="signature" string="Signature" />
 								<field name="scaned_signature" string="Signature" />
 							</group>
 							<group>
