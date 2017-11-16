@@ -1333,7 +1333,7 @@
 		</record>
 		
 		<record id="t_crm_ch_bom_mocwise" model="ir.model.access">
-			<field name="model_id" ref="kg_bom.model_ch_bom_mocwises"/>
+			<field name="model_id" ref="kg_bom.model_ch_bom_mocwise"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">ch bom mocwise</field>
 			<field eval="1" name="perm_unlink"/>
