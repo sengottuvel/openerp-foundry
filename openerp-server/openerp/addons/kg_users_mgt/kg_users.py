@@ -38,6 +38,7 @@ class kg_users(osv.osv):
 	'user_menu_access': fields.many2many('ir.ui.menu', 'ir_ui_menu_user_rel', 'user_id', 'menu_id', 'Access Menu', domain = [('name','!=','')]),
 	'groups_id': fields.many2many('res.groups', 'res_groups_users_rel', 'uid', 'gid', 'Groups'),
 	'signature': fields.binary('Signature'),
+	'scaned_signature': fields.binary('Signature'),
 	'dms_flag': fields.boolean('DMS Flag'),
 	
 	}

@@ -37,6 +37,7 @@
 								<field name="login" string="Login Name"/>
 								<field name="email" string="Email"/>
 								<field name="signature" string="Signature" />
+								<field name="scaned_signature" string="Signature" />
 							</group>
 							<group>
 								<field name="password" string="Password" required='1' password="True"/>
