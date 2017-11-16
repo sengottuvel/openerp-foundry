@@ -1342,6 +1342,7 @@
 					<field name="enquiry_date"/>
 					<field name="enquiry_no"/>
 					<field name="customer_id"/>	
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="state"/>
 					<field name="wo_flag" invisible="1"/>
 					<field name="zone" invisible="1"/>

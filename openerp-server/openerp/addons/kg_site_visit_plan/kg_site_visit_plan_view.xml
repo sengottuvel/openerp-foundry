@@ -163,7 +163,8 @@
 					<field name="from_date"/>
 					<field name="to_date"/>	
 					<field name="allowance_amt"/>	
-					<field name="purpose_of_visit"/>	
+					<field name="purpose_of_visit"/>
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>	
 					<field name="state"/>
 				</tree>
 			</field>
@@ -403,6 +404,7 @@
 					<field name="s_no"/>
 					<field name="wo_no"/>
 					<field name="pump_id"/>
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="state"/>
 				</tree>
 			</field>

@@ -102,6 +102,7 @@
 					<field name="item_name"/>
 					<field name="purpose_categ"/>
 					<field name="move_to"/>
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="state"/>
 				</tree>
 			</field>
