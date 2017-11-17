@@ -226,7 +226,7 @@
 							<field name="qty"  required="1" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="setting_height"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="suction_spool"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
-							<field name="shaft_sealing"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="shaft_sealing" />
 							<field name="lubrication"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="shaft_ext" invisible="1"/>
 							<field name="trimming_dia"/>
