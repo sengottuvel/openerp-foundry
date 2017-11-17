@@ -28,6 +28,7 @@
 							<field name="transport_id"/>
 							<field name="vehicle_details"/>
 							<field name="remark"/>
+							<field name="note" string="Notes"/>
 							<field name="entry_mode" invisible="1"/>
 							<field name="division" invisible="1"/>
 							<field name="received_by" invisible="1"/>
@@ -36,10 +37,11 @@
 						</group>						
 						<group>
 							<field name="date"/>
-							<field name="return_date" on_change="onchange_return_date(return_date)"/>
+							<field name="return_date" options="{'datepicker':{'minDate': 0}}" on_change="onchange_return_date(return_date)"/>
 							<field name="dep_id" required="1"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>	
-							<field name="in_state"/>						
+							<field name="in_state"/>				
+							<field name="cancel_remarks" attrs="{'readonly':[('state','=','cancel')],'invisible':[('state','not in',('done','cancel'))]}"/>				
 							<field name="indent_flag" invisible="1"/>
 							<field name="taken_by" invisible="1"/>
 							<field name="approve_flag" invisible="1"/>						
@@ -117,7 +119,6 @@
 							</group>
 						</page>
 					</notebook>                     
-                    <field name="note" placeholder="Remarks"/>
                </form>
            </field>
         </record>

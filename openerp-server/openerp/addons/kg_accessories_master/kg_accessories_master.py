@@ -175,6 +175,8 @@ class kg_accessories_master(osv.osv):
 	def copy_accessories(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr,uid,ids[0])	
 		line_obj = self.pool.get('ch.kg.accessories.master')				
+		line_obj_ms = self.pool.get('ch.accessories.ms')				
+		line_obj_fou = self.pool.get('ch.accessories.fou')				
 		cr.execute(""" delete from ch_kg_accessories_master where header_id  = %s """ %(ids[0]))
 				
 		for line_item in rec.access_id.line_ids:	
@@ -182,16 +184,26 @@ class kg_accessories_master(osv.osv):
 				'header_id' : ids[0]
 				}			
 			copy_rec = line_obj.copy(cr, uid, line_item.id, vals, context) 			
+			
+		for line_item in rec.access_id.line_ids_b:	
+			vals = {
+				'header_id' : ids[0]
+				}			
+			copy_rec = line_obj_fou.copy(cr, uid, line_item.id, vals, context) 		
+				
+		for line_item in rec.access_id.line_ids_a:	
+			vals = {
+				'header_id' : ids[0]
+				}			
+			copy_rec = line_obj_ms.copy(cr, uid, line_item.id, vals, context) 			
 		
 		if rec.name == rec.access_id.name:
 			raise osv.except_osv(_('Warning !!'),
 				_('Kindly Change Accessories !!'))
 			
 		self.write(cr, uid, ids[0], {
-									'copy_flag': True,
-									#~ 'name':rec.position_no.name,
-									'notes':rec.access_id.notes,
-									
+									'copy_flag': True,									
+									'notes':rec.access_id.notes,									
 									})		
 									
 		return True

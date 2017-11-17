@@ -74,6 +74,7 @@ class kg_gate_pass(osv.osv):
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'cancel_remarks': fields.text('Cancel Remarks'),
 		
 	}
 	
@@ -124,11 +125,11 @@ class kg_gate_pass(osv.osv):
 		return super(kg_gate_pass, self).write(cr, uid, ids, vals, context)
 	
 	def cancel_entry(self, cr, uid, ids, context=None):
-		rec = self.browse(cr.uid.ids[0])
+		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'done':
-			if not rec.remark:
-				raise osv.except_osv(_('Rejection remark is must !!'),
-					_('Enter rejection remark in remark field !!'))
+			if not rec.cancel_remarks:
+				raise osv.except_osv(_('Warning'),
+					_('Enter Cancel remark !!'))
 			self.write(cr, uid,ids,{'state' : 'cancel',
 									'cancel_user_id': uid,
 									'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -140,7 +141,7 @@ class kg_gate_pass(osv.osv):
 			if not rec.remark:
 				raise osv.except_osv(_('Rejection remark is must !!'),
 					_('Enter rejection remark in remark field !!'))
-			self.write(cr, uid,ids,{'state' : 'cancel',
+			self.write(cr, uid,ids,{'state' : 'draft',
 									'rej_user_id': uid,
 									'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
 									})
@@ -148,19 +149,19 @@ class kg_gate_pass(osv.osv):
 	def confirm_entry(self, cr, uid, ids, context=None):	
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
-			#~ if entry.name == '':
-				#~ pass_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.gate.pass') or ''
-			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gate.pass')])
-			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.date))
-			seq_name = cr.fetchone();
+			if not entry.name:
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gate.pass')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.date))
+				seq_name = cr.fetchone();
+				self.write(cr,uid,ids[0],{'name':seq_name[0]})
 			if entry.mode == 'frm_indent':
 				for line in entry.gate_line:
 					if line.qty > line.indent_qty:
 						raise osv.except_osv(_('Warning!'),
 								_('You cannot increase qty more than indent qty'))	
 				
-			self.write(cr,uid,ids[0],{'state':'confirmed','name':seq_name[0],'confirmed_by':uid,
+			self.write(cr,uid,ids[0],{'state':'confirmed','confirmed_by':uid,
 							'confirm_flag':True,'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 						
 		return True
