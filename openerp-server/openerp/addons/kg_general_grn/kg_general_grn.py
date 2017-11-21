@@ -408,7 +408,8 @@ class kg_general_grn(osv.osv):
 						#~ _('%s already exists with same combination of Brand: %s and MOC: %s'%(line.product_id.name,line.brand_id.name,line.moc_id.name)))
 				print"line.uom_id.id",line.uom_id.id
 				print"line.product_id.uom_po_id.id",line.product_id.uom_po_id.id
-				
+				if not line.product_id.po_uom_coeff or line.product_id.po_uom_coeff <= 0:
+					raise osv.except_osv(_('Warning!'),_('%s Kindly configure PO coeff in Product Master !!'%(line.product_id.name)))
 				if line.uom_id.id != line.product_id.uom_id.id:
 					print"*************************"
 					po_coeff = line.product_id.po_uom_coeff
