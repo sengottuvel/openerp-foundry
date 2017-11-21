@@ -179,13 +179,13 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Pattern Master Tree">		
+								toolbar="True" string="Pattern Master Tree">	
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="name"/>						
 					<field name="pattern_name"/>
 					<field name="ci_weight"/>					
 					<field name="pcs_weight"/>										
 					<field name="nonferous_weight"/>	
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>								
 					<field name="state"/>
 				</tree>
 			</field>

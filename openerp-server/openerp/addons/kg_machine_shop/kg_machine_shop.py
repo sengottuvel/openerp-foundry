@@ -436,9 +436,11 @@ class kg_machine_shop(osv.osv):
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
 		if rec.type == 'ms':
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&MS_Items='+rec_code
+			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&ms_items='+rec_code
+
 		if rec.type == 'bot':
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&BOT_Items='+rec_code
+			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&bot_items='+rec_code
+
 			
 		return {
 					  'name'	 : 'Go to website',

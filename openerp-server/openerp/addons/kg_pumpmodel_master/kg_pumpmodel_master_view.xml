@@ -138,12 +138,12 @@
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								toolbar="True" string="Pump Model Master Tree">		
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="code"/>			
 					<field name="name"/>					
 					<field name="alias_name"/>					
 					<field name="pump_mode"/>	
 					<field name="bom"/>	
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>				
 					<field name="state"/>
 				</tree>
 			</field>

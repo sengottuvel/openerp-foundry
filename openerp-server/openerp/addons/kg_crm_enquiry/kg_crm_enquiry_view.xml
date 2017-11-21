@@ -15,6 +15,7 @@
 						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible': [('state','not in',('moved_to_offer'))]}" class="oe_highlight"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 						<!--<field name="state" widget="statusbar" 
 						statusbar_visible="draft,moved_to_offer,call,quote"
 						statusbar_colors='{
@@ -985,12 +986,12 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';black:state == 'moved_to_offer';gray:state == 'call'" 
-								toolbar="True" string="Enquiry Entry Tree">					
+								toolbar="True" string="Enquiry Entry Tree">			
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>		
 					<field name="name"/>
 					<field name="revision"/>
 					<field name="enquiry_date"/>
 					<field name="customer_id"/>	
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>							
 					<field name="state"/>
 					<field name="zone" invisible="1"/>
 					<field name="division_id" invisible="1"/>

@@ -211,12 +211,13 @@ class kg_pumpmodel_master(osv.osv):
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
 		rec_user = str(res_rec.login)
 		rec_pwd = str(res_rec.password)
-		rec_code = str(rec.code)
+		rec_code = str(rec.name)
 		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Product_Model='+rec_code
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&product_model='+rec_code
+
 
 		
 		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)

@@ -134,7 +134,8 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
-								toolbar="True" string="Work Order Entry Tree" create="false" >					
+								toolbar="True" string="Work Order Entry Tree" create="false" >	
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="name"/>
 					<field name="enquiry_no"/>
 					<field name="offer_no"/>
@@ -146,7 +147,6 @@
 					<field name="order_category"/>
 					<field name="delivery_date"/>
 					<field name="order_value" sum="Total Value"/>
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="state"/>
 				</tree>
 			</field>
