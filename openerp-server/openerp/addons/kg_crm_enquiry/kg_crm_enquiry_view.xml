@@ -1888,6 +1888,9 @@
 	<!-- Marketing Enquiry West--> 
 	<menuitem action="tma_crm_enquiry_mkt_west" name="West Enquiry" id="tam_crm_enquiry_west" parent="kg_menus.tpm_crm_enquiry_west" sequence="1"/>
 	
+	<!-- Marketing Enquiry Mines--> 
+	<menuitem action="tma_crm_enquiry_mkt_mines" name="Mines Enquiry" id="tam_crm_enquiry_mines" parent="kg_menus.tpm_crm_enquiry_mines" sequence="1"/>
+	
 	<!-- Marketing Enquiry Export--> 
 	<menuitem action="tma_crm_enquiry_mkt_exp" name="Export Enquiry" id="tam_crm_enquiry_exp" parent="kg_menus.tpm_crm_enquiry_export" sequence="1"/>
 	
