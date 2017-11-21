@@ -244,7 +244,7 @@ class kg_crm_offer(osv.osv):
 		'prj_name': fields.char('Project Name',readonly=True, states={'draft':[('readonly',False)]}),
 		'del_term': fields.selection([('ex_works','Ex-Works'),('fob','FOB'),('cfr','CFR'),('cif','CIF'),('cpt','CPT')],'Delivery Term',readonly=True, states={'draft':[('readonly',False)]}),
 		'mode_of_dispatch': fields.selection([('sea','Sea Worthy'),('air','Air Worthy')],'Mode Of Dispatch',readonly=True, states={'draft':[('readonly',False)]}),
-		'zone': fields.selection([('north','North'),('south','South'),('east','East'),('west','West')],'Zone',readonly=True, states={'draft':[('readonly',False)]}),
+		'zone': fields.selection([('north','North'),('south','South'),('east','East'),('west','West'),('mines','Mines')],'Zone',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		'r_o_dealer_discount': fields.float('Dealer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'r_o_special_discount': fields.float('Special Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),

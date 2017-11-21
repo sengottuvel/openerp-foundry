@@ -1147,6 +1147,17 @@
 			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('zone','=','west')]</field>
 		</record>
 		
+		<record id="tma_crm_enquiry_mkt_mines" model="ir.actions.act_window">
+			<field name="name">Mines Enquiry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.enquiry</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
+			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
+			<field name="context">{'default_source':'market','default_segment':'dom','default_zone':'mines'}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market'),('segment','=','dom'),('zone','=','mines')]</field>
+		</record>
+		
 		<record id="tma_crm_enquiry_mkt_exp" model="ir.actions.act_window">
 			<field name="name">Export Enquiry</field>
 			<field name="type">ir.actions.act_window</field>

@@ -52,11 +52,14 @@
 			<!-- CRM Enquiry West Menu -->
             <menuitem name="West" id="tpm_crm_enquiry_west" parent = "cpm_crm" sequence="6"/>
             
+            <!-- CRM Enquiry Mines Menu -->
+            <menuitem name="Mines" id="tpm_crm_enquiry_mines" parent = "cpm_crm" sequence="7"/>
+            
 			<!-- CRM Enquiry Export Menu -->
-            <menuitem name="Export" id="tpm_crm_enquiry_export" parent = "cpm_crm" sequence="7"/>
+            <menuitem name="Export" id="tpm_crm_enquiry_export" parent = "cpm_crm" sequence="8"/>
             
 			<!-- CRM Enquiry IPD Menu -->
-            <menuitem name="IPD" id="tpm_crm_enquiry_ipd" parent = "cpm_crm" sequence="8"/>
+            <menuitem name="IPD" id="tpm_crm_enquiry_ipd" parent = "cpm_crm" sequence="9"/>
             
 				<!-- Country -->
 <!--

@@ -90,7 +90,7 @@ class kg_crm_enquiry(osv.osv):
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
 		'flag_data_bank': fields.boolean('Is Data WO',readonly=True, states={'draft':[('readonly',False)]}),
 		'enq_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Enquiry Status',readonly=True, states={'draft':[('readonly',False)]}),
-		'zone': fields.selection([('north','North'),('south','South'),('east','East'),('west','West')],'Zone',readonly=True, states={'draft':[('readonly',False)]}),
+		'zone': fields.selection([('north','North'),('south','South'),('east','East'),('west','West'),('mines','Mines')],'Zone',readonly=True, states={'draft':[('readonly',False)]}),
 		'prj_name': fields.char('Project Name',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		## Child Tables Declaration
