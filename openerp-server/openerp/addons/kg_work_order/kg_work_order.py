@@ -3897,6 +3897,7 @@ class ch_order_machineshop_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('ch.work.order.details', 'Work Order Detail', required=1, ondelete='cascade'),
+		'order_id': fields.related('header_id','header_id', type='many2one',relation='kg.work.order', string='Order No', store=True, readonly=True),
 		'ms_line_id':fields.many2one('ch.machineshop.details', 'Machine Shop Id'),
 		'pos_no': fields.related('ms_line_id','pos_no', type='integer', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
@@ -4067,6 +4068,7 @@ class ch_order_bot_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('ch.work.order.details', 'Work Order Detail', required=1, ondelete='cascade'),
+		'order_id': fields.related('header_id','header_id', type='many2one',relation='kg.work.order', string='Order No', store=True, readonly=True),
 		'bot_line_id':fields.many2one('ch.bot.details', 'BOT Line Id'),
 		'bot_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','bot'),('state','=','approved')], ondelete='cascade',required=True),
 		'item_name': fields.related('bot_id','name', type='char', size=128, string='Item Name', store=True, readonly=True),
@@ -4170,6 +4172,7 @@ class ch_wo_accessories(osv.osv):
 	
 		
 		'header_id':fields.many2one('ch.work.order.details', 'Header Id', ondelete='cascade'),
+		'order_id': fields.related('header_id','header_id', type='many2one',relation='kg.work.order', string='Order No', store=True, readonly=True),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'access_id': fields.many2one('kg.accessories.master','Accessories',domain="[('state','=','approved')]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
@@ -4315,6 +4318,7 @@ class ch_wo_accessories_foundry(osv.osv):
 	
 		### Foundry Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
+		'order_id': fields.related('header_id','order_id', type='many2one',relation='kg.work.order', string='Order No', store=True, readonly=True),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'pump_id':fields.many2one('kg.pumpmodel.master', 'Pump',domain="[('state','=','approved')]"),
 		'qty':fields.integer('Quantity'),
@@ -4359,6 +4363,7 @@ class ch_wo_accessories_ms(osv.osv):
 	
 		### machineshop Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
+		'order_id': fields.related('header_id','order_id', type='many2one',relation='kg.work.order', string='Order No', store=True, readonly=True),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'pos_no': fields.related('position_id','name', type='char', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
@@ -4413,6 +4418,7 @@ class ch_wo_accessories_bot(osv.osv):
 	
 		### BOT Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
+		'order_id': fields.related('header_id','order_id', type='many2one',relation='kg.work.order', string='Order No', store=True, readonly=True),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'csd_no': fields.char('CSD No.'),
