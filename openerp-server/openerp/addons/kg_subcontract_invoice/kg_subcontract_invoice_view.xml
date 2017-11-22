@@ -35,6 +35,7 @@
 							<field name="discount_per_flag" invisible="1"/>
 							<field name="invoice_date" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>	
 							<field name="invoice_amt" required="1" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>                           
+							<field name="debit_note_flag" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>                           
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>		
 								
 						</group>					
@@ -109,6 +110,10 @@
 									  </field>
 							    </group>
 						</page>
+						<page string="Debit Note">
+							<field name="line_ids_c" nolabel="1" widget="one2many_list" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}">
+							</field>
+						</page>
 						
 						<page string="Entry Info">
 							<group>
@@ -154,6 +159,7 @@
 						<field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/> 
 						<field name="advance_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>        
 						<field name="additional_charges" widget='monetary' options="{'currency_field': 'currency_id'}"/>                                  
+						<field name="debit_amount" widget='monetary' options="{'currency_field': 'currency_id'}"/>                                  
 						<field name="total_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>                   
 						<field name="round_off_amt" widget='monetary' attrs="{'readonly': [('state', 'not in', ['draft','confirm'])]}"
 								options="{'currency_field': 'currency_id'}"/>                                
@@ -300,10 +306,6 @@
 										</tree>
 									  </field>
 							    </group>
-						</page>
-						<page string="Debit Note">
-							<field name="line_ids_c" nolabel="1" widget="one2many_list" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}">
-							</field>
 						</page>
 						
 						<page string="Entry Info">

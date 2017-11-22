@@ -57,7 +57,7 @@ class kg_subcontract_invoice(osv.osv):
 				'payable_amt':0.0,
 				'additional_charges':0.0,
 			}
-			tax_amt = discount_value = final_other_charges = advance_net_amt = 0.00
+			tax_amt = discount_value = final_other_charges = advance_net_amt = debit_amount = 0.00
 			total_value_amt = 0.00
 			for line in order.line_ids:
 				total_value_amt += line.total_value
@@ -65,6 +65,8 @@ class kg_subcontract_invoice(osv.osv):
 				final_other_charges += item.expense_amt
 			for line in order.line_ids_b:
 				advance_net_amt += line.current_adv_amt 				
+			for debit_line in order.line_ids_c:
+				debit_amount += debit_line.debit_amt 				
 			if order.discount > 0:
 				discount = order.discount
 			else:
@@ -89,8 +91,9 @@ class kg_subcontract_invoice(osv.osv):
 			res[order.id]['additional_charges'] = final_other_charges
 			res[order.id]['advance_amt'] = advance_net_amt
 			res[order.id]['total_amt'] = final_other_charges + total_value_amt + tax_amt
-			res[order.id]['amount_total'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - (discount_value + advance_net_amt)
-			res[order.id]['payable_amt'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - (discount_value + advance_net_amt)
+			res[order.id]['debit_amount'] = debit_amount
+			res[order.id]['amount_total'] = ((final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - (discount_value + advance_net_amt)) - debit_amount
+			res[order.id]['payable_amt'] = ((final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - (discount_value + advance_net_amt)) - - debit_amount
 		return res	
 	_columns = {
 	
@@ -163,12 +166,14 @@ class kg_subcontract_invoice(osv.osv):
 		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',store=True,multi="sums",help="Net Amount"),
 		'payable_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Payable Amount',store=True,multi="sums",help="Payable Amount"),
 		'additional_charges': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Additional Charges',store=True,multi="sums",help="Additional Charges"),
+		'debit_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Debit Amount',store=True,multi="sums",help="Additional Charges"),
 		'advance_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Adjected Advance Amount(-)',multi="sums",store=True ,readonly=True),
 		'round_off_amt': fields.float('Round off(+/-)'),
 				
 		##Accounts Process
 		'balance_receivable': fields.float('Balance Receivable'),		
 		'accounts_state': fields.selection([('pending','Pending'),('paid','Paid')],'Accounts State', readonly=True),
+		'debit_note_flag': fields.boolean('Debit Note Not Applicable'),
 		## Child Tables Declaration 
 				
 		'line_ids': fields.one2many('ch.subcontract.invoice.line', 'header_id', "Line Details"),
@@ -276,8 +281,14 @@ class kg_subcontract_invoice(osv.osv):
 	   
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		
 		entry = self.browse(cr,uid,ids[0])		
+		if entry.debit_note_flag is False:
+			ser_debit_note = self.pool.get('kg.ms.sc.debit.note').search(cr,uid,[('sc_invoice_id','=',entry.id),('state','=','confirmed')])
+			if ser_debit_note:
+				for debit_ids in ser_debit_note:
+					debit_rec = self.pool.get('kg.ms.sc.debit.note').browse(cr,uid,debit_ids)
+					raise osv.except_osv(_('Warning !! '),
+				_('Kindly approve the Debit note (%s) that is raised against this invoice !!'%(debit_rec.name)))
 		final_other_charges = 0.00
 		for item in entry.line_ids_a:				
 			final_other_charges += item.expense_amt
@@ -350,6 +361,13 @@ class kg_subcontract_invoice(osv.osv):
 		
 	def entry_approved(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
+		if entry.debit_note_flag is False:
+			ser_debit_note = self.pool.get('kg.ms.sc.debit.note').search(cr,uid,[('sc_invoice_id','=',entry.id),('state','=','confirmed')])
+			if ser_debit_note:
+				for debit_ids in ser_debit_note:
+					debit_rec = self.pool.get('kg.ms.sc.debit.note').browse(cr,uid,debit_ids)
+					raise osv.except_osv(_('Warning !! '),
+				_('Kindly approve the Debit note (%s) that is raised against this invoice !!'%(debit_rec.name)))
 		final_other_charges = 0.00
 		for item in entry.line_ids_a:				
 			final_other_charges += item.expense_amt
@@ -579,7 +597,7 @@ class kg_subcontract_invoice(osv.osv):
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 			
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Subcontract_Invoice='+rec_code
+		url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&subcontract_invoice='+rec_code
 
 
 		return {
