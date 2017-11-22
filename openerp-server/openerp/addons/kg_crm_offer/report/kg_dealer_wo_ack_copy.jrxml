@@ -74,7 +74,7 @@ left join res_partner customer on(customer.id=crm.customer_id)
 left join res_city customercity on(customercity.id=customer.city_id)
 left join res_country_state customerstate on(customerstate.id=customer.state_id)
 
-where crm.id=$P{offer_id} and work_order.state='mkt_approved']]>
+where crm.id=$P{offer_id} and work_order.state='confirmed']]>
 	</queryString>
 	<field name="company" class="java.lang.String"/>
 	<field name="new_date" class="java.lang.String"/>
