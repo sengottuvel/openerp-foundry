@@ -301,6 +301,10 @@
 									  </field>
 							    </group>
 						</page>
+						<page string="Debit Note">
+							<field name="line_ids_c" nolabel="1" widget="one2many_list" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}">
+							</field>
+						</page>
 						
 						<page string="Entry Info">
 							<group>

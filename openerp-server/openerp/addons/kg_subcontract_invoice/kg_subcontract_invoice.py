@@ -174,6 +174,7 @@ class kg_subcontract_invoice(osv.osv):
 		'line_ids': fields.one2many('ch.subcontract.invoice.line', 'header_id', "Line Details"),
 		'line_ids_a': fields.one2many('ch.subcontract.invoice.expense.track','header_id',"Expense Track"),
 		'line_ids_b': fields.one2many('ch.ms.advance.details','header_id',"Advance Details"),
+		'line_ids_c': fields.one2many('ch.sc.kg.debit.note','header_id',"Debit Details"),
 				
 	}
 		
@@ -756,5 +757,23 @@ class ch_ms_advance_details(osv.osv):
 	   ]
 				
 ch_ms_advance_details()
+
+class ch_sc_kg_debit_note(osv.osv):
+	
+	_name = 'ch.sc.kg.debit.note'
+	_description = 'This module is about the details of Debit note'
+	
+	_columns = {
+		
+		'header_id':fields.many2one('kg.subcontract.invoice','Header_id'),
+		'debit_date':fields.date('Debit Note Date'),
+		'subcontract_id':fields.many2one('res.partner','Subcontract',domain="[('contractor','=','t'),('partner_state','=','approve')]",readonly=True),
+		'sc_invoice_no':fields.char('Subcontract Invoice No',readonly=True),
+		'sc_invoice_date':fields.date('Debit Invoice Date',readonly=True),	
+		'debit_amt':fields.float('Debit Note Amount'),
+		
+	}
+	
+ch_sc_kg_debit_note()
 
 

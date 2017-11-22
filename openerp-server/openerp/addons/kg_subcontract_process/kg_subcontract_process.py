@@ -3111,7 +3111,33 @@ class kg_subcontract_inspection(osv.osv):
 			else:
 				entry_name = rec.name				
 			
-								
+			######################### Creation MS SC Rejection List For raising Credit Note ####################################
+			
+			ms_rejection_list = self.pool.get('kg.ms.sc.rejection.list')
+			if entry.line_ids:
+				for insp_ids in entry.line_ids:
+					if insp_ids.reject_qty != 0:
+						print "insp_ids.rejection_remarksinsp_ids.rejection_remarksinsp_ids.rejection_remarks",insp_ids.rejection_remarks
+						if not insp_ids.rejection_remarks:
+							raise osv.except_osv(_('Warning!'),
+								_('Rejection Remarks is needed for WO No (%s) !!'%(insp_ids.order_id.name)))
+						else:
+							pass
+						rejection_ms_vals = {
+														
+														'sub_wo_id': insp_ids.wo_line_id.header_id.id,
+														'inspection_id': insp_ids.header_id.id,
+														'order_id': insp_ids.order_id.id,
+														'item_code': insp_ids.item_code,
+														'item_name': insp_ids.item_name,
+														'moc_id': insp_ids.moc_id.id,
+														'rejected_qty': insp_ids.reject_qty,
+														'rejection_remarks': insp_ids.rejection_remarks,
+														
+														}
+
+						rejection_creation = ms_rejection_list.create(cr, uid,rejection_ms_vals)				
+
 			self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 								
 							
