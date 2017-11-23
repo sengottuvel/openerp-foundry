@@ -228,6 +228,9 @@ class kg_machine_shop(osv.osv):
 			if rec.list_moc_flag == False:
 				raise osv.except_osv(_('List MOC Construction !!'),
 					_('Click the List MOC Construction Button !!'))
+			if not rec.line_ids:
+				raise osv.except_osv(_('Warning'),
+					_('Raw materials should not be empty !!'))
 			for item in rec.line_ids:
 				prod = self.pool.get('product.product').browse(cr, uid, item.product_id.id, context=context)	
 				print"item.uom.id",item.uom.id				
@@ -536,47 +539,26 @@ class ch_ms_raw_material(osv.osv):
 		cr.execute(""" select product_id from ch_ms_raw_material where product_id  = '%s' and length = '%s' and breadth = '%s' and header_id = '%s' """ %(entry.product_id.id,entry.length,entry.breadth,entry.header_id.id))
 		data = cr.dictfetchall()			
 		if len(data) > 1:		
-			return False
-		return True	
-		
-	def _check_one_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
+			raise osv.except_osv(_('Warning'), _('Duplicate with same length and breadth are not allowed for Raw Materials (%s) !!')%(entry.product_id.name))
 		prod_rec = self.pool.get('product.product').browse(cr,uid,entry.product_id.id)
 		if entry.uom_conversation_factor =='one_dimension':
 			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
 				if entry.qty == 0:				
-					return False
-				return True	
+					raise osv.except_osv(_('Warning'), _('Qty Should be greater than zero for (%s) !!')%(entry.product_id.name))
 			else:
 				if entry.qty == 0 or entry.length == 0:				
-					return False				
-				return True				
-		return True
-		
-	def _check_two_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
-		if entry.uom_conversation_factor =='two_dimension':
+					raise osv.except_osv(_('Warning'), _('Qty or Length Should be greater than zero for (%s) !!')%(entry.product_id.name))
+		elif entry.uom_conversation_factor =='two_dimension':
 			if entry.length == 0 or entry.qty == 0 or entry.breadth == 0:				
-				return False
-			return True
-		return True
-		
-	def _check_uom_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
-		prod = self.pool.get('product.product').browse(cr, uid, entry.product_id.id)		
-		print"item.uom.id",entry.uom.id				
-		print"prod.uom_po_id.id",prod.uom_po_id.id				
-		if entry.uom.id != prod.uom_id.id:
-			if entry.uom.id  != prod.uom_po_id.id:
-				return False			
-		return True	
+				raise osv.except_osv(_('Warning'), _('Qty or Length or Breadth Should be greater than zero for (%s) !!')%(entry.product_id.name))
+		if entry.uom.id != prod_rec.uom_id.id:
+			if entry.uom.id  != prod_rec.uom_po_id.id:
+				raise osv.except_osv(_('Warning'), _('Wrong UOM is choosen for (%s) !!')%(entry.product_id.name))
+		return True		
 		
 	_constraints = [		
 			  
-		(_check_one_values, 'Check the zero values not allowed..!!',['Qty or Length']),	
-		(_check_two_values, 'Check the zero values not allowed..!!',['Breadth or Length or Qty']),
-		(_check_values, 'Please Check the same Raw Material not allowed..!!',['Raw Material']),	
-		(_check_uom_values, 'UOM Mismatching Error, You choosed wrong UOM !!!',['UOM']),	
+		(_check_values, ' ',['Raw Material']),	
 		
 	   ]
 	
