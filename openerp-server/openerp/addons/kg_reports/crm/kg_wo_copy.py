@@ -101,7 +101,7 @@ class kg_wo_copy(osv.osv):
 						'model':'kg.wo.copy',
 						'id': context.get('active_ids') and context.get('active_ids')[0] or False,
 						'ids': context.get('active_ids') and context.get('active_ids') or [],
-						'report_type': 'pdf',
+						'report_type': 'xls',
 						'form':data
 					},
 				'nodestroy': False

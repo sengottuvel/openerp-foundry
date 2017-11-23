@@ -73,8 +73,9 @@ class Report:
 		self.reportPath = None
 		self.report = None
 		self.temporaryFiles = []
-		self.outputFormat = 'pdf'
-
+		#~ self.outputFormat = 'pdf'
+		self.outputFormat = self.data['report_type']
+		
 	def execute(self):
 		"""
 		If self.context contains "return_pages = True" it will return the number of pages
