@@ -3138,6 +3138,39 @@ class kg_schedule(osv.osv):
 		else:
 			pass
 		
+		self.sch_approval_mail(cr,uid,ids,rec,context)
+		
+		return True
+	
+	def sch_approval_mail(self,cr,uid,ids,obj,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		mail_queue = self.pool.get('kg.mail.queue')
+		cr.execute("""select trans_sch_approved('approved schedule',"""+str(rec.id)+""")""")
+		data = cr.fetchall();
+		if data[0][0] is None:
+			return False
+		if data[0][0] is not None:	
+			maildet = (str(data[0])).rsplit('~');
+			cont = data[0][0].partition('UNWANTED.')		
+			email_from = maildet[1]	
+			if maildet[2]:	
+				email_to = [maildet[2]][0]
+			else:
+				email_to = ['']			
+			if maildet[3]:
+				email_cc = [maildet[3]][0]
+			else:
+				email_cc = ['']
+			mail_queue.create(cr,uid,{'source': 'approved schedule',
+									  'mail_to': email_to,
+									  'mail_cc': email_cc,
+									  'subject': maildet[4],
+									  'body': cont[0],
+									  'body_1': cont[0],
+									  'user_id': uid,
+									  'transaction_id': rec.id,
+									})
+		
 		return True
 		
 		
