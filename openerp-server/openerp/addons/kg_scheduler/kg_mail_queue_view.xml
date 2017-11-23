@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>	
+
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_mail_queue" model="ir.ui.view">
+			<field name="name">Mail Queuing Form</field>
+			<field name="model">kg.mail.queue</field>
+			<field name="arch" type="xml">
+				<form string="Mail Queuing" version="7.0" create="false" delete="false" edit="false">					
+					<header>
+						<button name="send_mail" states="pending" type="object" string="Send Mail" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+						<group>
+							<group>	
+								<field name="source"/>					
+								<field name="mail_to"/>	
+								<field name="mail_cc"/>															
+								<field name="mail_bcc"/>
+								<field name="attachment" invisible="1"/>																
+								<field name="subject"/>																
+								<field name="body"/>															
+								<field name="body_1" invisible="1"/>																
+							</group>
+							<group>
+								<field name="created_date"/>	
+								<field name="sent_time"/>
+								<field name="user_id"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+								<field name="entry_mode" invisible="1"/>								
+							</group>
+						</group>																				
+				</form>
+			</field> 
+		</record>
+		
+		<!-- Form View End -->
+
+		<!-- Tree View Start -->
+		
+		<record id="t_tree_v_mail_queue" model="ir.ui.view">
+			<field name="name">Mail Queuing Tree</field>
+			<field name="model">kg.mail.queue</field>
+			<field name="arch" type="xml">
+				<tree colors="red:state == 'pending';black:state == 'sent'" toolbar="True" string="Mail Queuing" create="false" delete="false" edit="false">				
+					<field name="created_date"/>
+					<field name="source"/>
+					<field name="mail_to"/>
+					<field name="mail_cc"/>
+					<field name="mail_bcc"/>
+					<field name="subject"/>
+					<field name="state"/>
+					<field name="sent_time"/>
+				</tree>
+			</field>
+		</record>
+		
+		<!-- Tree View End -->
+
+		<!-- Search View Start -->
+
+		<record id="t_search_v_mail_queue" model="ir.ui.view">
+            <field name="name">Mail Queuing Search</field>
+            <field name="model">kg.mail.queue</field>
+            <field name="arch" type="xml">
+                <search string="Mail Queuing">
+					<field name="source" string="Mail Queuing" filter_domain="[('source','ilike',self)]" />
+					<field name="mail_to" string="Mail To" filter_domain="[('mail_to','ilike',self)]" />
+					<filter icon="terp-check" name="pending" string="Pending" domain="[('state','=','pending')]"/>
+					<filter icon="terp-check" name="sent" string="Sent" domain="[('state','=','sent')]"/>				
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Source" icon="terp-personal" domain="[]" context="{'group_by':'source'}"/> 
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'created_date'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+		<!-- Search View End -->
+
+		<!-- Menu Action Start-->
+		
+		 <record id="tma_mail_queue" model="ir.actions.act_window">
+			<field name="name">Mail Queuing</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.mail.queue</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_mail_queue"/>
+			<field name="search_view_id" ref="t_search_v_mail_queue"/>
+		</record>			
+		
+		<!-- Menu Action End-->
+		
+		 <!-- Audit Log Xml Data Start -->
+		
+<!--
+        <record id="kg_mail_queue" model="audittrail.rule">
+            <field name="name">Audit Log Mail Queuing</field>
+            <field name="object_id" eval="ref('kg_mail_queue.model_kg_mail_queue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+-->
+        
+        <!-- Audit Log Xml Data End-->
+		
+		<!-- Menu Name Start here --> 
+		
+			<menuitem action="tma_mail_queue" name="Mail Queuing" id="tam_mail_queue" parent="kg_menus.spm_mail_menu" sequence="2"/>
+
+		<!-- Menu Name End here --> 
+
+	</data>
+</openerp>
