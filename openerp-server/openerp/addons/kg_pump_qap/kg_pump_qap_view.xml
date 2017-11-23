@@ -48,7 +48,7 @@
 						</group>
 						<notebook>
 							<page string="Dimentional Details">
-								<field name="line_ids" colspan="4" nolabel="1">
+								<field name="line_ids" colspan="4" nolabel="1" readonly="1">
 									<tree string="Dimentional Details" editable="top" create="false" delete="false">
 									   <field name="dimentional_details" />
 									   <field name="min_weight"/>

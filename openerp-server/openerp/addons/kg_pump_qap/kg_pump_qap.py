@@ -85,8 +85,8 @@ class kg_pump_qap(osv.osv):
 		
 		'di_date': fields.date('Date'),
 		'di_shift_id': fields.many2one('kg.shift.master','Shift'),
-		'di_operator': fields.char('Operator'),
-		'di_verified_by': fields.char('Verified By'),
+		'di_operator': fields.many2one('hr.employee','Operator'),
+		'di_verified_by': fields.many2one('hr.employee','Verified By'),
 		'di_result': fields.selection([('accept','Accept'),('reject','Reject')],'Result'),
 		'di_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'di_remarks': fields.text('Remarks'),
