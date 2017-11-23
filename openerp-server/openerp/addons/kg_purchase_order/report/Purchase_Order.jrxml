@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.1000000000000099"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="48"/>
+	<property name="ireport.zoom" value="1.7715610000000164"/>
+	<property name="ireport.x" value="242"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -412,7 +412,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["P.B.No. 7006, Avinashilingam Home Science College P.O.,"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="364" y="33" width="51" height="13"/>
+				<reportElement x="364" y="33" width="42" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" DATE  :"]]></textFieldExpression>
 			</textField>
@@ -484,14 +484,14 @@ where po.id = $P{po_id}]]>
 				<reportElement x="0" y="0" width="801" height="1"/>
 			</line>
 			<textField>
-				<reportElement x="416" y="33" width="66" height="13"/>
+				<reportElement x="406" y="33" width="86" height="13"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{po_date}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="416" y="21" width="77" height="13"/>
+				<reportElement x="406" y="20" width="87" height="13"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
@@ -538,7 +538,7 @@ where po.id = $P{po_id}]]>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="363" y="20" width="52" height="13"/>
+				<reportElement x="364" y="20" width="42" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" PO No :"]]></textFieldExpression>
 			</textField>
@@ -568,21 +568,21 @@ where po.id = $P{po_id}]]>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="364" y="46" width="52" height="11"/>
+				<reportElement x="364" y="46" width="42" height="11"/>
 				<textElement>
 					<font size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" Rev.No :  "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="363" y="57" width="114" height="11"/>
+				<reportElement x="363" y="57" width="129" height="11"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" QUOTATION REF.:"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="416" y="47" width="73" height="10"/>
+				<reportElement x="406" y="47" width="86" height="10"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
