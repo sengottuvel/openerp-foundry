@@ -413,7 +413,9 @@ where po.id = $P{po_id}]]>
 			</textField>
 			<textField>
 				<reportElement x="364" y="33" width="42" height="13"/>
-				<textElement/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
 				<textFieldExpression><![CDATA[" DATE  :"]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -486,14 +488,14 @@ where po.id = $P{po_id}]]>
 			<textField>
 				<reportElement x="406" y="33" width="86" height="13"/>
 				<textElement>
-					<font isBold="true"/>
+					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{po_date}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="406" y="20" width="87" height="13"/>
 				<textElement>
-					<font isBold="true"/>
+					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{po_no}]]></textFieldExpression>
 			</textField>
@@ -539,7 +541,9 @@ where po.id = $P{po_id}]]>
 			</image>
 			<textField>
 				<reportElement x="364" y="20" width="42" height="13"/>
-				<textElement/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
 				<textFieldExpression><![CDATA[" PO No :"]]></textFieldExpression>
 			</textField>
 			<textField>
