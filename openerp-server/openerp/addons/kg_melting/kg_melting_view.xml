@@ -66,20 +66,20 @@
 					</group>
 					<group string="Power Consumption">
 						<group>
-							<label for="initial_reading" string="Initial Reading"/>
+							<label for="initial_reading" string="Initial Reading(Units)"/>
 							<div>
 								<div class="address_format">
 									<field name="initial_reading" on_change="onchange_reading(initial_reading,final_reading)" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft','confirmed'])]}"/>
-									<field name="initial_reading_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft','confirmed'])]}"/>
+									
 								</div>
 							</div>														
 						</group>
 						<group>
-							<label for="final_reading" string="Final Reading"/>
+							<label for="final_reading" string="Final Reading(Units)"/>
 							<div>
 								<div class="address_format">
 									<field name="final_reading" on_change="onchange_reading(initial_reading,final_reading)" style="width: 43%%" attrs="{'readonly': [('state','not in',['draft','confirmed'])]}"/>
-									<field name="final_reading_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft','confirmed'])]}"/>
+									
 								</div>
 							</div>
 						</group>											
@@ -88,7 +88,7 @@
 							<label for="total_units" string="Total Units"/>
 							<div>
 								<div class="address_format">
-									<field name="total_units" style="width: 40%%" />Units																
+									<field name="total_units" style="width: 40%%" />															
 								</div>
 							</div>
 						</group>	

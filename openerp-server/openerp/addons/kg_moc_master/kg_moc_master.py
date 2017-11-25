@@ -337,14 +337,19 @@ class ch_chemical_chart(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
+		cr.execute(""" select chemical_id from ch_chemical_chart where chemical_id  = '%s' and header_id = '%s' """ %(entry.chemical_id.id,entry.header_id.id))
+		data = cr.dictfetchall()			
+		if len(data) > 1:		
+			raise osv.except_osv(_('Warning'), _('Duplicate Chemical Name (%s) are not allowed !!')%(entry.chemical_id.name))
 		if entry.min > entry.max:
-			return False
-		return True
-		
+			raise osv.except_osv(_('Warning'), _('Min Value should not be greater than Max Value for (%s) !!')%(entry.chemical_id.name))
+		if entry.min <= 0.00 or entry.max <= 0.00:
+			raise osv.except_osv(_('Warning'), _('Min Value or Max Value should be greater zero for (%s) !!')%(entry.chemical_id.name))
+		return True	
+	
 	_constraints = [		
 			  
-		(_check_values, 'Please Check the Min & Max values ,Min value should be less than Max value.!!',['Chemical Chart']),	
-		(_check_same_values, 'Please Check the same Chemical Name not allowed..!!',['Chemical Name']),	
+		(_check_values, ' ',['Chemical Name']),	
 		
 	   ]
 	
@@ -367,10 +372,17 @@ class ch_mechanical_chart(osv.osv):
 	}
 	
 	def _check_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
+		entry = self.browse(cr,uid,ids[0])		
+		if entry.mechanical_id:				
+			cr.execute(""" select mechanical_id from ch_mechanical_chart where mechanical_id  = '%s' and header_id =%s """ %(entry.mechanical_id.id,entry.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				raise osv.except_osv(_('Warning'), _('Mechanical Name (%s) must be unique !!')%(entry.mechanical_id.name))
 		if entry.range_flag == False:			
 			if entry.min > entry.max:
-				return False
+				raise osv.except_osv(_('Warning'), _('Min Value should not be greater than Max Value for (%s) !!')%(entry.mechanical_id.name))
+			if entry.min <= 0.00 or entry.max <= 0.00:
+				raise osv.except_osv(_('Warning'), _('Min Value or Max Value should be greater zero for (%s) !!')%(entry.mechanical_id.name))
 		return True
 		
 	def onchange_uom_name(self, cr, uid, ids, mechanical_id, context=None):
@@ -400,7 +412,7 @@ class ch_mechanical_chart(osv.osv):
 		
 	_constraints = [		
 			  
-		(_check_values, 'Please Check the Min & Max values ,Min value should be less than Max value.!!',['Mechanical Chart']),		
+		(_check_values, ' ',['Mechanical Chart']),		
 	   ]
 	
 ch_mechanical_chart()
@@ -430,37 +442,28 @@ class ch_fettling_process(osv.osv):
 			name = stage_rec.name		
 		return {'value': {'name': name}}
 	
-	def _seq_validate(self, cr, uid,ids, context=None):
+	def _seq_stage_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		res = True
 		if rec.seq_no:
 			seq_no = rec.seq_no					
 			cr.execute(""" select seq_no from ch_fettling_process where seq_no  = '%s' and header_id =%s """ %(seq_no,rec.header_id.id))			
 			data = cr.dictfetchall()						
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
-			
-	def _stage_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
+				raise osv.except_osv(_('Warning'), _('Sequence No (%s) must be unique !!')%(rec.stage_id.name))
 		if rec.stage_id:
 			stage_id = rec.stage_id			
 			cr.execute(""" select stage_id from ch_fettling_process where stage_id  = '%s' and header_id =%s """ %(stage_id.id,rec.header_id.id))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res		
+				raise osv.except_osv(_('Warning'), _('Stage (%s) must be unique !!')%(rec.stage_id.name))
+		if rec.seq_no <= 0:
+				raise osv.except_osv(_('Warning'), _('System not allow to save negative and zero values for (%s)!!')%(rec.stage_id.name))
+		return True
 	
 		
 	_constraints = [		
 			  
-		(_seq_validate, 'Please Check Sequence No and should be unique!!!',['Sequence No.']),		
-		(_stage_validate, 'Please Check Stage Name and should be unique!!!',['Stage Name']),		
+		(_seq_stage_validate, ' ',['Sequence No.']),		
 	   ]
 	
 ch_fettling_process()

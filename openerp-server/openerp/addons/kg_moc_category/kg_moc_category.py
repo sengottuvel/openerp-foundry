@@ -58,7 +58,9 @@ class kg_moc_category(osv.osv):
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
+		
+		'sc_rejection_rate': fields.float('SC Rejection Rate/KG', required=True),	
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -108,17 +110,19 @@ class kg_moc_category(osv.osv):
 		
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		res = True
+		if rec.type_moc_cate == 'ms':
+			if rec.sc_rejection_rate <= 0.00:
+				raise osv.except_osv(_('Warning'), _('System not allow to save negative and zero values for (%s)!!')%(rec.name))
+		else:
+			pass
 		if rec.name:
 			moc_cate_name = rec.name
 			name=moc_cate_name.upper()			
 			cr.execute(""" select upper(name) from kg_moc_category where upper(name)  = '%s' """ %(name))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
+				raise osv.except_osv(_('Warning'), _('MOC Category for (%s) Name must be unique !!')%(rec.name))		
+		return True
 			
 	def _code_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])

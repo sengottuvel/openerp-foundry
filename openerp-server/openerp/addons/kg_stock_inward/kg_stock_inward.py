@@ -288,7 +288,7 @@ class ch_stock_inward_details(osv.osv):
 				pass		
 		if rec.available_qty < total_qty:
 			raise osv.except_osv(_('Excess Qty !!'),
-				_('Manual Rejection process Excess Qty Not Allowed !!'))		
+				_('Rejection Qty should not be greater than stock Qty !!'))		
 		else:
 			pass
 		total_avai_qty = rec.available_qty - total_qty

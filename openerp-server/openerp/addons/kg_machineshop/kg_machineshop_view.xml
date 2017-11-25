@@ -8,7 +8,7 @@
 			<field name="name">MS Foundry Inward Form</field>
 			<field name="model">kg.machineshop</field>
 			<field name="arch" type="xml">
-				<form string="MS Foundry Inward" version="7.0" create="false">
+				<form string="MS Foundry Inward" version="7.0" create="false" delete="false">
 					<header>
 						<button name="ms_accept" type="object" string="Update" class="oe_highlight"
 						attrs="{'invisible': [('state','in',['accept'])]}"/>
@@ -20,7 +20,7 @@
 							<field name="inward_accept_qty" required="1" attrs="{'readonly': [('state','in',['accept'])]}"/>
 							<field name="inward_qty" readonly="1" />
 							<field name="accept_date" readonly="1" />
-							<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept'])]}"/>
+							<field name="inward_accept_user_id" invisible="1" string="QC by" attrs="{'readonly': [('state','in',['accept'])]}"/>
 							<field name="state" invisible="1"/>
 							<field name="stage_id" widget="selection" invisible="1"/>
 							<field name="stage_name" invisible="1"/>
@@ -38,6 +38,7 @@
 							<field name="order_priority" string="Category" readonly="1"/>
 							<field name="pattern_id" readonly="1"/>
 							<field name="moc_id" readonly="1"/>
+							<field name="position_id" readonly="1"/>
 							<field name="fettling_qty" string="Fettling Completed Qty" readonly="1"/>
 							<field name="total_weight" readonly="1"/>
 						</group>											
@@ -87,7 +88,7 @@
 			<field name="arch" type="xml">
 				<tree colors="red:state == 'pending';red:state == 'waiting'
 						;red:state == 'raw_pending';black:state == 'accept'" 
-								toolbar="True" string="MS Foundry Inward Entry Tree" create="false">									
+								toolbar="True" string="MS Foundry Inward Entry Tree" create="false" delete="false">									
 					<field name="name" invisible="1"/>
 					<field name="order_no"/>
 					<field name="order_delivery_date"/>
@@ -106,7 +107,7 @@
 					<field name="total_weight" sum="Total Weight"/>
 					<field name="stage_id" invisible="1"/>
 					<field name="oth_spec"/>
-					<field name="state"/>
+					<field name="state" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -157,7 +158,7 @@
 			<field name="res_model">kg.machineshop</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="domain">[('state','=','waiting')]</field>
+			<field name="domain">[('state','=','waiting'),('inward_qty','>',0)]</field>
 			<field name="search_view_id" ref="t_search_v_ms_inward"/>
 		</record>
 		
@@ -209,7 +210,7 @@
 			<field name="arch" type="xml">
 				<tree colors="red:state == 'pending';red:state == 'waiting'
 						;red:state == 'raw_pending';black:state == 'accept'" 
-								toolbar="True" string="MS Foundry Inward Entry Tree" create="false">									
+								toolbar="True" string="MS Foundry Inward Entry Tree" create="false" delete="false">									
 					<field name="name" invisible="1"/>
 					<field name="order_no"/>
 					<field name="order_delivery_date"/>
@@ -224,7 +225,7 @@
 					<field name="ms_plan_rem_qty" string="Pending Qty" sum="Total Pending Qty"/>				
 					<field name="stage_id" invisible="1"/>
 					<field name="oth_spec"/>
-					<field name="state"/>
+					<field name="state" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -336,7 +337,7 @@
 			<field name="arch" type="xml">
 				<tree colors="red:state == 'pending';red:state == 'waiting'
 						;red:state == 'raw_pending';black:state == 'accept'" 
-								toolbar="True" string="MS Foundry Inward Entry Tree" create="false">									
+								toolbar="True" string="MS Foundry Inward Entry Tree" create="false" delete="false">									
 					<field name="name" invisible="1"/>
 					<field name="order_no"/>
 					<field name="order_delivery_date"/>
@@ -356,7 +357,8 @@
 					<field name="total_weight" sum="Total Weight"/>
 					<field name="stage_id" invisible="1"/>
 					<field name="oth_spec"/>
-					<field name="state"/>
+					<field name="state" invisible="1"/>
+					<field name="ms_state" />
 				</tree>
 			</field>
 		</record>
@@ -441,7 +443,7 @@
 						</group>											
 						<group>
 							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-							<field name="inward_accept_user_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="inward_accept_user_id" invisible="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 							<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 						</group>					
 					</group>
@@ -513,7 +515,7 @@
 			<field name="model">kg.ms.batch.accept</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">	
-			<tree toolbar="True" string="Batch MS Accept">									
+			<tree toolbar="True" string="Batch MS Accept" >									
 					<field name="name"/>
 					<field name="entry_date"/>					
 					<field name="state"/>
@@ -699,7 +701,7 @@
 			<field name="arch" type="xml">	
 			<tree colors="blue:state == 'draft';red:state == 'confirmed'
 				 ;black:state == 'approved';gray:state == 'reject'" 
-				 toolbar="True" string="ID Commitment Process" create="false">										
+				 toolbar="True" string="ID Commitment Process" create="false" delete="false">										
 					<field name="order_id"/>
 					<field name="order_priority"/>
 					<field name="delivery_date"/>
@@ -854,7 +856,7 @@
 			<field name="model">kg.trimming.dia</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">	
-			<tree toolbar="True" string="Trimming Dia" create="false" colors="blue:state == 'draft';black:state == 'confirmed'" >									
+			<tree toolbar="True" string="Trimming Dia" create="false" delete="false" colors="blue:state == 'draft';black:state == 'confirmed'" >									
 					<field name="order_no"/>
 					<field name="pattern_id"/>					
 					<field name="pattern_name"/>

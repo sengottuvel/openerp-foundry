@@ -231,6 +231,17 @@ class kg_machine_shop(osv.osv):
 			if not rec.line_ids:
 				raise osv.except_osv(_('Warning'),
 					_('Raw materials should not be empty !!'))
+			if rec.type == 'ms':
+				if rec.flag_fabrication == False:					
+					if len(rec.line_ids) > 1:
+						raise osv.except_osv(_('Warning'),
+							_('More than one raw material should not allow to confirm !!'))
+					else:
+						pass
+				else:
+					pass
+			else:
+				pass
 			for item in rec.line_ids:
 				prod = self.pool.get('product.product').browse(cr, uid, item.product_id.id, context=context)	
 				print"item.uom.id",item.uom.id				

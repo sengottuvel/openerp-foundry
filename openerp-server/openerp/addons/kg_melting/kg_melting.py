@@ -147,10 +147,20 @@ class kg_melting(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])			
-		if entry.initial_reading < entry.final_reading :
-			return True
-		else:
-			return False
+		if entry.initial_reading > entry.final_reading :
+			raise osv.except_osv(_('Warning!'),
+						_('Initial Reading should not be less than Final Reading check the values !!'))
+		if entry.time > 12.00:
+			raise osv.except_osv(_('Warning!'),
+						_('Start Time Should not Exceed 12 Hours for Power Control Details !!'))
+		if entry.pouring_hrs > 12.00:
+			raise osv.except_osv(_('Warning!'),
+						_('Start Time Should not Exceed 12 Hours for Pouring Temp !!'))
+		if entry.pouring_finished > 12.00:
+			raise osv.except_osv(_('Warning!'),
+						_('Start Time Should not Exceed 12 Hours for Pouring Finished !!'))
+		
+		return True
 	
 	
 	### Added by Sangeetha ###
@@ -261,10 +271,10 @@ class kg_melting(osv.osv):
 								  ''',[entry.mech_value,entry.mech_value,entry.mech_value,entry.mpa_value,entry.mpa_value,entry.mpa_value,entry.moc_id.id,entry.mechanical_id.id])
 				values= cr.fetchone()			
 				if values:
-					return True
+					pass
 				else:
 					raise osv.except_osv(_('Mechanical Chart'),
-							_('Specified Mechanical Properties has not available in MOC Master and check the values !!'))
+							_('Specified Mechanical Properties getting mismatch with MOC master configuration !!'))
 			
 			
 			for line in line_ids:			

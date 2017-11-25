@@ -847,7 +847,7 @@ class kg_pouring_log(osv.osv):
 					if (production_rec.pour_qty + line_item.qty) != production_rec.total_mould_qty:
 						mould_mc_flag = 't'
 					
-					production_obj.write(cr,uid,production_rec.id,{'mould_mc_flag':mould_mc_flag,'pour_qty':tot_pour_qty,'pour_state':pour_status,'state':status,'pour_date':time.strftime('%Y-%m-%d %H:%M:%S'),})
+					production_obj.write(cr,uid,production_rec.id,{'pour_heat_id':entry.melting_id.id,'mould_mc_flag':mould_mc_flag,'pour_qty':tot_pour_qty,'pour_state':pour_status,'state':status,'pour_date':time.strftime('%Y-%m-%d %H:%M:%S'),})
 					
 			### Pour Log Number ###
 			pour_name = ''  

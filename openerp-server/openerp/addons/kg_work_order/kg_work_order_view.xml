@@ -11,16 +11,15 @@
 			<field name="arch" type="xml">
 				<form string="Work Order" version="7.0" create="false">
 					<header>
-						<button name="mkt_approve" type="object" string="WFMKT Approval" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"
-							/>
-						<button name="design_approve" type="object" string="WFD Approval" states="mkt_approved" class="oe_highlight" confirm="Are you sure to proceed ?"
-							/>
-						<button name="special_approve" type="object" string="Special Approval" class="oe_highlight" confirm="Are you sure to proceed ?"
-							attrs="{'invisible': ['|',('state','!=','design_approved'),('wo_spc_app_flag','=',False)]}" groups="kg_users_mgt.group_planning_admin"/>
+						<button name="mkt_approve" type="object" string="WFMKT Approval" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="design_check" type="object" string="WFD Check Approval" states="mkt_approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="design_approve" type="object" string="WFD Approval" states="design_check" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_confirm" type="object" string="Special Approval" class="oe_highlight" confirm="Are you sure to proceed ?"
+							attrs="{'invisible': ['|',('state','!=','design_approved'),('wo_spc_app_flag','=',False)]}"/>
 						<button name="entry_confirm" type="object" string="WFMD Approval" class="oe_highlight" confirm="Are you sure to proceed ?"
 							attrs="{'invisible': ['|',('state','!=','design_approved'),('wo_spc_app_flag','=',True)]}"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
-						<button name="wo_copy" type="object" string="WO Copy" class="oe_highlight"/>
+						<button name="wo_copy" type="object" string="WO Copy" class="oe_highlight" />
 					</header>
 					<group>
 						<group>
@@ -80,15 +79,22 @@
 							<group>
 								<group>
 									<field name="user_id"/>
-									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="mkt_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="design_check_user_id" attrs="{'invisible':[('state','in',['draft','mkt_approved'])]}"/>
+									<field name="design_user_id" attrs="{'invisible':[('state','in',['draft','mkt_approved','design_check'])]}"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft','mkt_approved','design_check','design_approved'])]}"/>									
 									<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
 									<field name="update_user_id"/>
 								</group>
 								<group>
 									<field name="crt_date"/>
-									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="mkt_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="design_check_date" attrs="{'invisible':[('state','in',['draft','mkt_approved'])]}"/>
+									<field name="design_date" attrs="{'invisible':[('state','in',['draft','mkt_approved','design_check'])]}"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft','mkt_approved','design_check','design_approved'])]}"/>
 									<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
 									<field name="update_date"/>
+									<field name="entry_mode"/>
 								</group>
 							</group>
 						</page>
@@ -693,7 +699,7 @@
 	<!-- Menu Action Start for Work Order -->
 		
 		<record id="tma_work_order" model="ir.actions.act_window">
-			<field name="name">Work Order</field>
+			<field name="name">WF Design Approval</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.work.order</field>
 			<field name="view_type">form</field>
@@ -701,9 +707,9 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_work_order"/>
 			<field name="search_view_id" ref="t_search_v_work_order"/>
-			<field name="domain">[('state','=','mkt_approved')]</field>	
+			<field name="domain">[('state','=','design_check')]</field>
+			
 		</record>
-		
 		
 		<record id="tma_work_order_app" model="ir.actions.act_window">
 			<field name="name">Approved Work Order</field>
@@ -723,7 +729,7 @@
 	<!-- Menu Action Start for CRM Work Order -->
 		
 		<record id="tma_crm_work_order" model="ir.actions.act_window">
-			<field name="name">Work Order</field>
+			<field name="name">Work Order MKT</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.work.order</field>
 			<field name="view_type">form</field>
@@ -731,7 +737,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_work_order"/>
 			<field name="search_view_id" ref="t_search_v_work_order"/>
-		<field name="domain">[('state','=','draft')]</field>
+			<field name="domain">[('state','=','draft')]</field>
 			
 		</record>
 		
@@ -745,6 +751,19 @@
 			<field name="view_id" ref="t_tree_v_work_order"/>
 			<field name="search_view_id" ref="t_search_v_work_order"/>
 			<field name="domain">[('state','=','design_approved')]</field>
+			
+		</record>
+		
+		<record id="tma_work_md_order_mgmt_d_check" model="ir.actions.act_window">
+			<field name="name">WF Design Check</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.work.order</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_work_order"/>
+			<field name="search_view_id" ref="t_search_v_work_order"/>
+			<field name="domain">[('state','=','mkt_approved')]</field>
 			
 		</record>
 		
@@ -764,6 +783,7 @@
 			<field name="domain">[('wo_spc_app_flag','=','t'),('state','=','design_approved')]</field>
 		
 		</record>
+		
 		
 	<!-- Menu Action End for Work Order -->
 	
@@ -939,6 +959,7 @@
 	<!-- Menu Item Start -->
 	
 		<!-- Work Order -->
+		<menuitem  action="tma_work_md_order_mgmt_d_check" name="WF Design Check" id="tam_work_order_d_check" parent="kg_stock_inward.tpm_planning_transactions" sequence="2"/>
 		<menuitem  action="tma_work_order" name="Work order Design" id="tam_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
 		<menuitem  action="tma_crm_work_order" name="Work order Marketing" id="tam_crm_work_order" parent="kg_menus.cpm_crm_enquiry_menu" sequence="3"/>
 		<menuitem  action="tma_wo_special_approval" id="tam_wo_special_approval" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>

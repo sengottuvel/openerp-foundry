@@ -571,7 +571,7 @@ class kg_fettling(osv.osv):
 			ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])
 			
 			
-			self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'fettling_id':entry_rec.id,'inward_accept_qty':0,'inward_reject_qty':0,'inward_qty':ms_shop_rec.inward_qty + inward_qty,'fettling_qty':ms_shop_rec.fettling_qty + inward_qty,'state':'waiting',})
+			self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'melting_id':entry_rec.melting_id.id,'fettling_id':entry_rec.id,'inward_accept_qty':ms_shop_rec.inward_qty + inward_qty,'inward_reject_qty':0,'inward_qty':ms_shop_rec.inward_qty + inward_qty,'fettling_qty':ms_shop_rec.fettling_qty + inward_qty,'state':'waiting',})
 
 			#~ ### Sequence Number Generation ###
 			#~ ms_name = ''	

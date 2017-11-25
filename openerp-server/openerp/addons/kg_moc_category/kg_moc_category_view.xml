@@ -18,7 +18,8 @@
 					</header>					
 					<group>
 						<group>						
-							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>									
+							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
+							<field name="sc_rejection_rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'invisible':[('type_moc_cate','=','fettling')]}"/>																	
 							<field name="modify" invisible = "1"/>
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 						</group>

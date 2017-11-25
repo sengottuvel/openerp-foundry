@@ -79,7 +79,7 @@ class kg_work_order(osv.osv):
 		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'active': fields.boolean('Active'),
-		'state': fields.selection([('draft','Draft'),('mkt_approved','MKT Approved'),('design_approved','Design Approved'),
+		'state': fields.selection([('draft','Draft'),('mkt_approved','MKT Approved'),('design_approved','Design Approved'),('design_check','Design Check'),
 				('confirmed','MD Approved'),('cancel','Cancelled')],'WO Status', readonly=True),
 		'line_ids': fields.one2many('ch.work.order.details', 'header_id', "Work Order Details"),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
@@ -132,14 +132,17 @@ class kg_work_order(osv.osv):
 		'crt_date': fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		
-		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
-		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'confirm_date': fields.datetime('WO Approved Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'WO Approved By', readonly=True),
 		
-		'mkt_date': fields.datetime('MKT Date', readonly=True),
-		'mkt_user_id': fields.many2one('res.users', 'MKT By', readonly=True),
+		'mkt_date': fields.datetime('MKT Approved Date', readonly=True),
+		'mkt_user_id': fields.many2one('res.users', 'MKT Approved By', readonly=True),
 		
-		'design_date': fields.datetime('Design Date', readonly=True),
-		'design_user_id': fields.many2one('res.users', 'Design By', readonly=True),
+		'design_check_date': fields.datetime('Design Checked Date', readonly=True),
+		'design_check_user_id': fields.many2one('res.users', 'Design Checked By', readonly=True),
+		
+		'design_date': fields.datetime('Design Approved Date', readonly=True),
+		'design_user_id': fields.many2one('res.users', 'Design Approved By', readonly=True),
 		
 		'spl_ap_date': fields.datetime('Special Approval Date', readonly=True),
 		'spl_ap_user_id': fields.many2one('res.users', 'Special Approval By', readonly=True),
@@ -936,6 +939,67 @@ class kg_work_order(osv.osv):
 		
 		return self.write(cr, uid, ids, {'rep_data':out,'wo_copy':report_name},context=context)
 	
+	def wo_validate(self,cr,uid,ids,context=None):			
+		entry = self.browse(cr,uid,ids[0])
+		if entry.name:
+			wo_name = entry.name				
+			name=wo_name.upper()			
+			cr.execute(""" select upper(name) from kg_work_order where upper(name)  = '%s' """ %(name))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				raise osv.except_osv(_('Warning!'),
+					_('Work Order No. must be Unique !!'))
+			else:
+				pass			
+		else:
+			raise osv.except_osv(_('Warning!'),
+					_('Work Order No. is must !!'))
+		for line in entry.line_ids:				
+			if line.order_no == False:
+				raise osv.except_osv(_('Warning!'),
+						_('Line Work Order No. is must !!'))				
+			if line.order_no:				
+				cr.execute(""" select wo_order.id as order_id from kg_work_order wo_order
+					left join ch_work_order_details ch_work on ch_work.header_id = wo_order.id 
+					where ch_work.order_no  = '%s' and ch_work.header_id not in ('%s')   """ %(line.order_no,line.header_id.id))
+				data = cr.dictfetchall()			
+				if len(data) >= 1:
+					raise osv.except_osv(_('Warning!'),
+						_('Line Work Order No. must be Unique !!'))
+				else:
+					pass
+			else:
+				pass		
+		
+		today = time.strftime('%Y-%m-%d')
+		todays_date = str(today)
+		today_date = datetime.strptime(todays_date, '%Y-%m-%d')		
+		delivery_date = str(entry.delivery_date)
+		delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
+		if entry.order_category == 'spare' and entry.order_priority == 'normal':					
+			ends_date = date.today()+timedelta(days=56)
+			end_date = ends_date.strftime('%Y-%m-%d')				
+			del_date = str(end_date)
+			ex_del_date = datetime.strptime(del_date, '%Y-%m-%d')				
+			if delivery_date < ex_del_date:
+				raise osv.except_osv(_('Warning!'),
+					_('Delivery Date should not be less than 56 days!!'))
+			else:
+				pass
+		elif entry.order_category == 'pump' and entry.order_priority == 'normal':				
+			ends_date = date.today()+timedelta(days=84)
+			end_date = ends_date.strftime('%Y-%m-%d')
+			del_date = str(end_date)
+			ex_del_date = datetime.strptime(del_date, '%Y-%m-%d')	
+			if delivery_date < ex_del_date:
+				raise osv.except_osv(_('Warning!'),
+					_('Delivery Date should not be less than 84 days!!'))
+			else:
+				pass				
+		elif delivery_date < today_date:
+			raise osv.except_osv(_('Warning!'),
+					_('Delivery Date should not be less than current date!!'))	
+	
 	def mkt_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':			
@@ -1013,16 +1077,29 @@ class kg_work_order(osv.osv):
 			self.write(cr,uid,ids,{'state':'mkt_approved','design_flag':True,'mkt_user_id': uid, 'mkt_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
+	def design_check(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		self.wo_validate(cr,uid,ids,context=None)
+		if entry.mkt_user_id.id == uid:
+			raise osv.except_osv(
+				_('Warning'),
+				_('Design Check cannot be done by MKT approved user'))
+		if entry.state == 'mkt_approved':
+			for line in entry.line_ids:
+				self.pool.get('ch.work.order.details').write(cr, uid, line.id,{'delivery_date': entry.delivery_date})
+			self.write(cr,uid,ids,{'state':'design_check','design_check_user_id': uid, 'design_check_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+		
 	def design_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		today = date.today()
 		today = str(today)
 		today = datetime.strptime(today, '%Y-%m-%d')
 		wo_spc_app_flag = False
-		if entry.mkt_user_id.id == uid:
+		if entry.design_check_user_id.id == uid:
 			raise osv.except_osv(
 				_('Warning'),
-				_('Design Approve cannot be done by MKT approved user'))
+				_('Design Approve cannot be done by Design Check user'))
 		if entry.state in ('draft','mkt_approved'):
 			if entry.name:
 				wo_name = entry.name
@@ -1147,7 +1224,7 @@ class kg_work_order(osv.osv):
 		assembly_foundry_obj = self.pool.get('ch.assembly.bom.details')
 		assembly_ms_obj = self.pool.get('ch.assembly.machineshop.details')
 		assembly_bot_obj = self.pool.get('ch.assembly.bot.details')
-		if entry.spl_ap_user_id.id == uid:
+		if entry.design_user_id.id == uid:
 			raise osv.except_osv(
 				_('Warning'),
 				_('MD Approval cannot be done by Special Approval user'))
