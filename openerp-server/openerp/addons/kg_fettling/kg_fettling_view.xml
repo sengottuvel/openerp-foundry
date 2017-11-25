@@ -15,15 +15,15 @@
 					</header>						
 					<group string="Fettling Details">
 						<group>
-							<field name="name"/>
+							<field name="name" invisible="1"/>
 							<field name="inward_accept_qty" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
 							<field name="state" invisible="1"/>
 							<field name="stage_id" widget="selection" readonly="1"/>
 							<field name="stage_name" invisible="1"/>
-							<field name="inward_reject_date" attrs="{'invisible': [('inward_reject_qty','=',0)],'required':[('inward_reject_qty','>',0)],'readonly': [('state','in',['accept','complete'])]}"/>
+							<field name="inward_reject_date" options="{'datepicker':{'minDate': null,'maxDate': 0,}}" attrs="{'invisible': [('inward_reject_qty','=',0)],'required':[('inward_reject_qty','>',0)],'readonly': [('state','in',['accept','complete'])]}"/>
 						</group>											
 						<group>
-							<field name="entry_date" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
+							<field name="entry_date" options="{'datepicker':{'minDate': -5,'maxDate': 0,}}" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
 							<field name="inward_reject_qty" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
 							<field name="inward_reject_remarks_id" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
 							<field name="inward_remarks" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
@@ -58,7 +58,7 @@
 							</group>
 							<group>
 								<group>
-									<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
+									<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept','complete'])]}" invisible="1"/>
 								</group>
 							<group></group>
 							</group>
@@ -293,7 +293,7 @@
 							
 						</group>											
 						<group>
-							<field name="knockout_date" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+							<field name="knockout_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
 							<field name="knockout_by" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>		
 							<field name="knockout_qty" string="Production Qty" readonly="1"/>
 							<field name="knockout_weight" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
@@ -474,7 +474,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="decoring_date" required="1" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+							<field name="decoring_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
 							<field name="decoring_by" required="1" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
 							<field name="decoring_qty" string="Production Qty" readonly="1"/>
 							<field name="decoring_weight" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
@@ -652,7 +652,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="shot_blast_date" required="1" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+							<field name="shot_blast_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
 							<field name="shot_blast_by" required="1" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
 							<field name="shot_blast_qty" string="Production Qty" readonly="1"/>
 							<field name="shot_blast_weight" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
@@ -832,7 +832,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="hammering_date" required="1" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+							<field name="hammering_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
 							<field name="hammering_by" required="1" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
 							<field name="hammering_qty" string="Production Qty" readonly="1"/>
 							<field name="hammering_weight" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
@@ -1013,7 +1013,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="wheel_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+							<field name="wheel_cutting_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
 							<field name="wheel_cutting_by" required="1" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
 							<field name="wheel_cutting_qty" string="Production Qty" readonly="1"/>
 							<field name="wheel_cutting_weight" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
@@ -1194,7 +1194,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="gas_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+							<field name="gas_cutting_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
 							<field name="gas_cutting_by" required="1" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
 							<field name="gas_cutting_qty" required="1" string="Production Qty" readonly="1"/>
 							<field name="gas_cutting_weight" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
@@ -1375,7 +1375,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="arc_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+							<field name="arc_cutting_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
 							<field name="arc_cutting_by" required="1" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
 							<field name="arc_cutting_qty" string="Production Qty" readonly="1"/>
 							<field name="arc_cutting_weight" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
@@ -1563,7 +1563,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="heat_date" required="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT1'])]}"/>
+							<field name="heat_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT1'])]}"/>
 							<field name="heat_fc_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT1'])]}"/>
 							<field name="heat_furnace_on_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT1'])]}"/>
 							<field name="heat_cooling_type" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT1'])]}"/>
@@ -1736,7 +1736,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="heat2_date" required="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT2'])]}"/>
+							<field name="heat2_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT2'])]}"/>
 							<field name="heat2_fc_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT2'])]}"/>
 							<field name="heat2_furnace_on_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT2'])]}"/>
 							<field name="heat2_cooling_type" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT2'])]}"/>
@@ -1909,7 +1909,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="heat3_date" required="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT3'])]}"/>
+							<field name="heat3_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT3'])]}"/>
 							<field name="heat3_fc_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT3'])]}"/>
 							<field name="heat3_furnace_on_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT3'])]}"/>
 							<field name="heat3_cooling_type" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT3'])]}"/>
@@ -2075,7 +2075,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="rough_grinding_date" required="1" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+							<field name="rough_grinding_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
 							<field name="rough_grinding_by" required="1" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
 							<field name="rough_grinding_qty" string="Production Qty" readonly="1"/>
 							<field name="rough_grinding_reject_qty" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
@@ -2258,7 +2258,7 @@
 							<field name="welding_state" invisible="1"/>
 						</group>											
 						<group>
-							<field name="welding_date" required="1" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+							<field name="welding_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
 							<field name="welding_by" required="1" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
 							<field name="welding_qty" string="Production Qty" readonly="1"/>
 							<field name="welding_weight" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
@@ -2440,7 +2440,7 @@
 							<field name="flag_reshot_blast_applicable" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
 						</group>											
 						<group>
-							<field name="finish_grinding_date" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+							<field name="finish_grinding_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
 							<field name="finish_grinding_by" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
 							<field name="finish_grinding_qty" string="Production Qty" readonly="1"/>
 							<field name="finish_grinding_weight" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
@@ -2621,7 +2621,7 @@
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="reshot_blasting_date" required="1" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+							<field name="reshot_blasting_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" required="1" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
 							<field name="reshot_blasting_by" required="1" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
 							<field name="reshot_blasting_qty" string="Production Qty" readonly="1"/>
 							<field name="reshot_blasting_weight" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
@@ -3049,7 +3049,7 @@
 							
 						</group>											
 						<group>
-							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="entry_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 							<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 						</group>					
 					</group>

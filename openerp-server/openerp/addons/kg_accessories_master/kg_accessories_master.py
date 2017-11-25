@@ -217,147 +217,143 @@ class kg_accessories_master(osv.osv):
 					
 			if rec.access_type == 'copy':				
 				cr.execute('''select 
-						access_line.product_id,
-						access_line.brand_id,
-						access_line.moc_id,
-						access_line.uom_id,
-						access_line.uom_conversation_factor,
-						access_line.length,
-						access_line.breadth,
-						access_line.qty,
-						access_line.remark
-						from ch_kg_accessories_master access_line 
-						left join kg_accessories_master header on header.id  = access_line.header_id
+						bom_line.pattern_id,
+						bom_line.position_id,
+						bom_line.qty
+						from ch_accessories_fou bom_line
+						left join kg_accessories_master header on header.id  = bom_line.header_id
 						where header.access_type = 'copy' and header.id = %s''',[rec.id])
-				source_position_ids = cr.fetchall()
-				source_position_len = len(source_position_ids)				
+				
+				source_bom_ids = cr.fetchall()				
+				source_bom_len = len(source_bom_ids)				
+				
 				cr.execute('''select 
-						access_line.product_id,
-						access_line.brand_id,
-						access_line.moc_id,
-						access_line.uom_id,
-						access_line.uom_conversation_factor,
-						access_line.length,
-						access_line.breadth,
-						access_line.qty,
-						access_line.remark
-						from ch_kg_accessories_master access_line 
-						where access_line.header_id  = %s''',[rec.access_id.id])
-				source_old_position_ids = cr.fetchall()
-				source_old_position_len = len(source_old_position_ids)					
+						bom_line.pattern_id,
+						bom_line.position_id,
+						bom_line.qty
+						from ch_accessories_fou bom_line 
+						where bom_line.header_id  = %s''',[rec.access_id.id])
+				
+				source_old_bom_ids = cr.fetchall()				
+				source_old_bom_len = len(source_old_bom_ids)
+								
 				cr.execute('''select 
-
-						access_line.product_id,
-						access_line.brand_id,
-						access_line.moc_id,
-						access_line.uom_id,
-						access_line.uom_conversation_factor,
-						access_line.length,
-						access_line.breadth,
-						access_line.qty,
-						access_line.remark
-						from ch_kg_accessories_master access_line 
-						left join kg_accessories_master header on header.id  = access_line.header_id
+						bom_line.pattern_id,
+						bom_line.position_id,
+						bom_line.qty
+						from ch_accessories_fou bom_line 
+						left join kg_accessories_master header on header.id  = bom_line.header_id
 						where header.access_type = 'copy' and header.id = %s
-
 						INTERSECT
-
 						select 
-						access_line.product_id,
-						access_line.brand_id,
-						access_line.moc_id,
-						access_line.uom_id,
-						access_line.uom_conversation_factor,
-						access_line.length,
-						access_line.breadth,
-						access_line.qty,
-						access_line.remark
-						from ch_kg_accessories_master access_line 
-						where access_line.header_id  = %s ''',[rec.id,rec.access_id.id])
-				repeat_ids = cr.fetchall()
-				new_position_len = len(repeat_ids)				
-				pos_dup = ''
-				if new_position_len  == source_position_len == source_old_position_len:
-					pos_dup = 'yes'
+						bom_line.pattern_id,
+						bom_line.position_id,
+						bom_line.qty
+						from ch_accessories_fou bom_line 
+						where bom_line.header_id  = %s ''',[rec.id,rec.access_id.id])
+						
+				repeat_ids = cr.fetchall()				
+				new_bom_len = len(repeat_ids)
 				
-				if pos_dup == 'yes':
+				### Check Duplicates Foundry Items end.... ###				
+				
+				### Check Duplicates Machine Shop Items  start ###
+				
+				cr.execute('''select 
+						machine_line.ms_id,
+						machine_line.position_id,
+						machine_line.qty
+						from ch_accessories_ms machine_line 
+						left join kg_accessories_master header on header.id  = machine_line.header_id
+						where header.access_type = 'copy' and header.id = %s''',[rec.id])
+				
+				ms_new_bom_ids = cr.fetchall()				
+				ms_new_bom_len = len(ms_new_bom_ids)
+				
+				cr.execute('''select 
+						machine_line.ms_id,
+						machine_line.position_id,
+						machine_line.qty
+						from ch_accessories_ms machine_line 
+						where machine_line.header_id  = %s''',[rec.access_id.id])
+				
+				ms_old_bom_ids = cr.fetchall()				
+				ms_old_bom_len = len(ms_old_bom_ids)
+								
+				cr.execute('''select 
+						machine_line.ms_id,
+						machine_line.position_id,
+						machine_line.qty
+						from ch_accessories_ms machine_line 
+						left join kg_accessories_master header on header.id  = machine_line.header_id
+						where header.access_type = 'copy' and header.id = %s
+						INTERSECT
+						select 
+						machine_line.ms_id,
+						machine_line.position_id,
+						machine_line.qty
+						from ch_accessories_ms machine_line 
+						where machine_line.header_id  = %s ''',[rec.id,rec.access_id.id])
+						
+				ms_repeat_ids = cr.fetchall()				
+				ms_join_bom_len = len(ms_repeat_ids)
+				
+				### Check Duplicates Machine Shop end.... ###			
+				
+				### Check Duplicates BOT Items  start ###				
+				
+				cr.execute('''select 
+						bot_line.ms_id,
+						bot_line.position_id,
+						bot_line.qty
+						from ch_kg_accessories_master bot_line 
+						left join kg_accessories_master header on header.id  = bot_line.header_id
+						where header.access_type = 'copy' and header.id = %s''',[rec.id])
+				
+				bot_new_bom_ids = cr.fetchall()				
+				bot_new_bom_len = len(bot_new_bom_ids)
+				
+				cr.execute('''select 
+						bot_line.ms_id,
+						bot_line.position_id,
+						bot_line.qty
+						from ch_kg_accessories_master bot_line 
+						where bot_line.header_id  = %s ''',[rec.access_id.id])
+				
+				bot_old_bom_ids = cr.fetchall()				
+				bot_old_bom_len = len(bot_old_bom_ids)
+								
+				cr.execute('''select 
+						bot_line.ms_id,
+						bot_line.position_id,
+						bot_line.qty
+						from ch_kg_accessories_master bot_line 
+						left join kg_accessories_master header on header.id  = bot_line.header_id
+						where header.access_type = 'copy' and header.id = %s
+						INTERSECT
+						select 
+						bot_line.ms_id,
+						bot_line.position_id,
+						bot_line.qty
+						from ch_kg_accessories_master bot_line 
+						where bot_line.header_id  = %s ''',[rec.id,rec.access_id.id])
+						
+				bot_repeat_ids = cr.fetchall()				
+				bot_join_bom_len = len(bot_repeat_ids)
+				
+				### Check Duplicates BOT end.... ###	
+				
+				bom_dup = ms_dup = bot_dup = ''		
+				if new_bom_len == source_bom_len == source_old_bom_len:			
+					bom_dup = 'yes'		
+				if ms_new_bom_len == ms_join_bom_len == ms_old_bom_len:			
+					ms_dup = 'yes'		
+				if bot_new_bom_len == bot_join_bom_len == bot_old_bom_len:
+					bot_dup = 'yes'				
+				
+				if bom_dup == 'yes' and ms_dup == 'yes' and bot_dup == 'yes':			
 					raise osv.except_osv(_('Warning!'),
-									_('Same Raw Material Details are already exist !!'))
-			####################
-			if rec.access_type == 'copy':
-				
-				obj = self.search(cr,uid,[('access_id','=',rec.access_id.id)])
-				if obj:
-					for item in obj:
-						if rec.id != item:
-							obj_rec = self.browse(cr,uid,item)						
-							
-							cr.execute('''select 
-									access_line.product_id,
-									access_line.brand_id,
-									access_line.moc_id,
-									access_line.uom_id,
-									access_line.uom_conversation_factor,
-									access_line.length,
-									access_line.breadth,
-									access_line.qty,
-									access_line.remark
-									from ch_kg_accessories_master access_line 
-									left join kg_accessories_master header on header.id  = access_line.header_id
-									where header.access_type = 'copy' and header.id = %s''',[rec.id])
-							source_position_ids = cr.fetchall()
-							source_position_len = len(source_position_ids)						
-							cr.execute('''select 
-									access_line.product_id,
-									access_line.brand_id,
-									access_line.moc_id,
-									access_line.uom_id,
-									access_line.uom_conversation_factor,
-									access_line.length,
-									access_line.breadth,
-									access_line.qty,
-									access_line.remark
-									from ch_kg_accessories_master access_line 
-									where access_line.header_id  = %s''',[obj_rec.id])
-							source_old_position_ids = cr.fetchall()
-							source_old_position_len = len(source_old_position_ids)						
-							cr.execute('''select 
-
-									access_line.product_id,
-									access_line.brand_id,
-									access_line.moc_id,
-									access_line.uom_id,
-									access_line.uom_conversation_factor,
-									access_line.length,
-									access_line.breadth,
-									access_line.qty,
-									access_line.remark
-									from ch_kg_accessories_master access_line 
-									left join kg_accessories_master header on header.id  = access_line.header_id
-									where header.access_type = 'copy' and header.id = %s
-
-									INTERSECT
-
-									select 
-									access_line.product_id,
-									access_line.brand_id,
-									access_line.moc_id,
-									access_line.uom_id,
-									access_line.uom_conversation_factor,
-									access_line.length,
-									access_line.breadth,
-									access_line.qty,
-									access_line.remark
-									from ch_kg_accessories_master access_line 
-									where access_line.header_id  = %s ''',[rec.id,obj_rec.id])
-							repeat_ids = cr.fetchall()
-							new_position_len = len(repeat_ids)							
-							pos_dup = ''
-							if new_position_len == source_position_len == source_old_position_len:
-								pos_dup = 'yes'						
-							if pos_dup == 'yes':
-								raise osv.except_osv(_('Warning!'),
-												_('Same Raw Material Details are already exist !!'))
+									_('Same Accessories Details are already exist !!'))	
 			
 			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
@@ -463,18 +459,14 @@ class ch_accessories_fou(osv.osv):
 	
 	def _check_line_duplicates(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute('''select id from ch_accessories_fou where pattern_id = %s and id != %s and header_id = %s ''',[entry.pattern_id.id,entry.id,entry.header_id.id])
+		cr.execute('''select id from ch_accessories_fou where position_id = %s and pattern_id = %s and id != %s and header_id = %s ''',[entry.position_id.id,entry.pattern_id.id,entry.id,entry.header_id.id])
 		duplicate_id = cr.fetchone()
 		if duplicate_id:
 			if duplicate_id[0] != None:
-				return False
-		return True 
-		
-	def _check_line_qty(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])		
+				raise osv.except_osv(_('Warning'), _('Duplicate of Check Pattern No (%s) is not allowed')%(entry.pattern_id.pattern_name))
 		if entry.qty <= 0:			
-			return False
-		return True
+			raise osv.except_osv(_('Warning'), _('Qty should be greater than zero for (%s) ')%(entry.pattern_id.pattern_name))
+		return True 	
 	
 	def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
 		value = {'pattern_name': '','csd_no':''}
@@ -485,8 +477,7 @@ class ch_accessories_fou(osv.osv):
 		
 	_constraints = [
 		
-		(_check_line_qty, 'Foundry Items Qty Zero and negative not accept', ['Qty']),	   
-		
+		(_check_line_duplicates, ' ', ['Qty']),	   		
 	]
 
 	
@@ -511,6 +502,12 @@ class ch_accessories_ms(osv.osv):
 	
 	}
 	
+	_defaults = {	
+	
+		'qty': 1,
+	  
+	}  
+	
 	def onchange_machineshop_name(self, cr, uid, ids, ms_id, context=None):
 		value = {'name': '','csd_no':''}
 		if ms_id:
@@ -518,16 +515,20 @@ class ch_accessories_ms(osv.osv):
 			value = {'name': pro_rec.name,'csd_no':pro_rec.csd_code}
 		return {'value': value}
 	
-	def _check_line_qty(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])		
+	def _check_line_duplicates(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute('''select id from ch_accessories_ms where position_id = %s and ms_id = %s and id != %s and header_id = %s ''',[entry.position_id.id,entry.ms_id.id,entry.id,entry.header_id.id])
+		duplicate_id = cr.fetchone()
+		if duplicate_id:
+			if duplicate_id[0] != None:
+				raise osv.except_osv(_('Warning'), _('Duplicate of Check Item Name (%s) is not allowed')%(entry.ms_id.name))
 		if entry.qty <= 0:			
-			return False
-		return True
+			raise osv.except_osv(_('Warning'), _('Qty should be greater than zero for (%s) ')%(entry.ms_id.name))
+		return True 	
 	
 	_constraints = [
 		
-		(_check_line_qty, 'Machine Shop items Qty Zero and negative not accept', ['Qty']),	   
-		
+		(_check_line_duplicates, ' ', ['Qty']),	 		
 	]   
 
 ch_accessories_ms()
@@ -550,7 +551,11 @@ class ch_kg_accessories_master(osv.osv):
 		
 		}
 	
+	_defaults = {	
 	
+		'qty': 1,
+	  
+	} 
 				
 	def onchange_product_uom(self, cr, uid, ids, product_id, uom_id,  context=None):		
 		prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)		
@@ -591,51 +596,21 @@ class ch_kg_accessories_master(osv.osv):
 		
 	
 	
-	def _check_values(self, cr, uid, ids, context=None):
+	def _check_line_duplicates(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute(""" select product_id from ch_kg_accessories_master where product_id  = '%s' and header_id = '%s' and length ='%s' """ %(entry.product_id.id,entry.header_id.id,entry.length))
-		data = cr.dictfetchall()			
-		if len(data) > 1:		
-			return False
-		return True	
-		
-	def _check_one_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
-		prod_rec = self.pool.get('product.product').browse(cr,uid,entry.product_id.id)
-		if entry.uom_conversation_factor =='one_dimension':
-			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
-				if entry.qty == 0:				
-					return False
-				return True	
-			else:
-				if entry.qty == 0 or entry.length == 0:				
-					return False				
-				return True				
-		return True
-		
-	def _check_two_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
-		if entry.uom_conversation_factor =='two_dimension':
-			if entry.length == 0 or entry.qty == 0 or entry.breadth == 0:				
-				return False
-			return True
-		return True
-		
-	def _check_uom_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
-		prod = self.pool.get('product.product').browse(cr, uid, entry.product_id.id)						
-		if entry.uom_id.id != prod.uom_id.id:
-			if entry.uom_id.id  != prod.uom_po_id.id:
-				return False			
-		return True	
+		cr.execute('''select id from ch_kg_accessories_master where position_id = %s and ms_id = %s and id != %s and header_id = %s ''',[entry.position_id.id,entry.ms_id.id,entry.id,entry.header_id.id])
+		duplicate_id = cr.fetchone()
+		if duplicate_id:
+			if duplicate_id[0] != None:
+				raise osv.except_osv(_('Warning'), _('Duplicate of Check Item Name (%s) is not allowed')%(entry.ms_id.name))
+		if entry.qty <= 0:			
+			raise osv.except_osv(_('Warning'), _('Qty should be greater than zero for (%s) ')%(entry.ms_id.name))
+		return True 	
 		
 	_constraints = [		
 			  
-		#~ (_check_one_values, 'Check the zero values not allowed..!!',['Qty or Length']),	
-		#~ (_check_two_values, 'Check the zero values not allowed..!!',['Breadth or Length or Qty']),
-		#~ (_check_values, 'Please Check the same Raw Material not allowed..!!',['Raw Material']),	
-		#~ (_check_uom_values, 'UOM Mismatching Error, You choosed wrong UOM !!!',['UOM']),	
-		
+		(_check_line_duplicates, ' ',['Qty or Length']),	
+				
 	   ]
 			
 ch_kg_accessories_master()

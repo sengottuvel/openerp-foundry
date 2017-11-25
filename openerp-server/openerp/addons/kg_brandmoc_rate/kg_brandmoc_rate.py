@@ -62,11 +62,11 @@ class kg_brandmoc_rate(osv.osv):
 		
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		'latest_price': fields.related('product_id','latest_price', type='float', string='Latest Price(Rs)', store=True,readonly=True),
-		'category_type': fields.selection([('purchase_item','Purchase Item'),('design_item','Design Item')],'Category'),
+		'category_type': fields.selection([('purchase_item','Purchase Item'),('design_item','Design Item'),('mkt_item','MKT Item')],'Category'),
 		
 		
-		'brand_type': fields.selection([('new_brand','New Brand'),('copy_brand','Copy Brand')],'Type', required=True),	
-		'source_brand': fields.many2one('kg.brandmoc.rate', 'Source Brand',domain="[('state','!=','expire')]"),
+		'brand_type': fields.selection([('new_brand','New'),('copy_brand','Copy')],'Type', required=True),	
+		'source_brand': fields.many2one('kg.brandmoc.rate', 'Source',domain="[('category_type','!=','expire'),('category_type','=',category_type)]"),
 		'copy_flag':fields.boolean('Copy Flag'),
 		
 		### Entry Info ###
@@ -248,7 +248,7 @@ class kg_brandmoc_rate(osv.osv):
 						#~ self.pool.get('kg.brand.master').write(cr,uid,brand_rec.id,{'product_ids':[(6, 0, [rec.product_id.id])]})				
 						pass
 			if rec.remark:
-				self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+				self.write(cr, uid, ids, {'state': 'draft','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 			else:
 				raise osv.except_osv(_('Rejection remark is must !!'),
 					_('Enter the remarks in rejection remark field !!'))

@@ -109,7 +109,7 @@ class kg_pumpmodel_master(osv.osv):
 		'stage_type': fields.selection([('single','Single'),('multi','Multi'),('double','Double')],'Stage Type'),
 		'rotation_type': fields.selection([('clock_wise','Clock Wise From Drive End'),('anti_clock_wise','Anti Clock Wise From Drive End')],'Rotation'),
 		'packing_type': fields.selection([('ptfe','PTFE'),('gp','GP'),('mechanical_seal','Mechanical Seal'),('dynamic_seal','Dynamic seal')],'Packing'),
-		'wear_ring_type': fields.selection([('yes','Yes'),('no','NO')],'Wear Ring'),
+		'wear_ring_type': fields.selection([('yes','YES'),('no','NO')],'Wear Ring'),
 		'lubrication_type': fields.selection([('grease','Grease'),('oil','Oil')],'Lubrication'),
 		'feet_location': fields.selection([('base','Base'),('center_line','Center Line')],'Feet Location'),
 		'suction_orientation': fields.selection([('axial','Axial'),('side','Side')],'Suction Orientation'),
@@ -240,6 +240,10 @@ class kg_pumpmodel_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		if len(rec.line_ids) == 0  or len(rec.line_ids_a) == 0 or len(rec.line_ids_b) == 0 or len(rec.line_ids_c) == 0 or len(rec.line_ids_d) == 0 or len(rec.line_ids_e) == 0:
+			raise osv.except_osv(
+						_('Warning !!!'),
+						_('Please Check Line empty values not allowed!!'))
 		if rec.state == 'draft':		
 			line = rec.line_ids	
 			if rec.line_ids_b:			

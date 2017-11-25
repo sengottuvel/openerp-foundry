@@ -147,7 +147,13 @@ class kg_vo_master(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		if len(rec.line_ids) == 0  or len(rec.line_ids_a) == 0 or len(rec.line_ids_b) == 0 or len(rec.line_ids_c) == 0 or len(rec.line_ids_d) == 0 or len(rec.line_ids_e) == 0 or len(rec.line_ids_e) == 0:
+			raise osv.except_osv(
+						_('Warning !!!'),
+						_('Please Check Line empty values not allowed!!'))
+		if rec.state == 'draft':
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	def entry_draft(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
@@ -207,28 +213,22 @@ class ch_power_series(osv.osv):
 	}
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
+		if entry.min < 0.00 or entry.max <= 0.00:
+			raise osv.except_osv(_('Warning'), _('Max Value (%s) of Star (%s) should be greater than zero')%(entry.max,entry.star))
 		if entry.min > entry.max:
-			return False
-		return True
-		
-	def _minmax_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.min:				
+			raise osv.except_osv(_('Warning'), _('Min Value (%s) should not be greater than Max Value (%s) of Star (%s)')%(entry.min,entry.max,entry.star))
+		if entry.min:				
 			cr.execute(""" select min from ch_power_series where star = '%s' and header_id =%s 
 				and %s BETWEEN min AND max and %s <= max
-			""" %(rec.star,rec.header_id.id,rec.min,rec.min))
+			""" %(entry.star,entry.header_id.id,entry.min,entry.min))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
-		
+				raise osv.except_osv(_('Warning'), _('Duplicate of Star (%s) with Min Value (%s) and Max Value (%s) is not allowed')%(entry.min,entry.max,entry.star))
+		return True
+
 	_constraints = [		
 			  
-		(_check_values, 'Please Check the Min & Max values ,Min value should be less than Max value.!!',['Power Series']),
-		(_minmax_validate, 'Please Check min and Max value should be unique!!!',['Power Series']),		
+		(_check_values, ' ',['Power Series']),
 		
 	   ]
 	
@@ -257,19 +257,31 @@ class ch_bed_assembly(osv.osv):
 	def _bed_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
-		if rec.limitation:					
+		if rec.limitation:	
+			if rec.limitation == 'upto_3000':
+				limitation = 'Upto 2999'
+			elif rec.limitation == 'above_3000':
+				limitation = 'Above 3000'
+			else:
+				limitation = ''
+			if rec.packing == 'g_p':
+				packing = 'G.P'
+			elif rec.packing == 'm_s':
+				packing = 'M.S'
+			elif rec.packing == 'f_s':
+				packing = 'F.S'
+			else:
+				packing = ''
 			cr.execute(""" select limitation from ch_bed_assembly where limitation  = '%s' and packing  = '%s' and header_id =%s """ %(rec.limitation,rec.packing,rec.header_id.id))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
+				raise osv.except_osv(_('Warning'), _('Duplicate of Limitation (%s) and Packing (%s) is not allowed')%(limitation,packing))				
 		return res
 		
 	_constraints = [
 	
 		
-		(_bed_validate, 'Please Check Limitation and Packing should be unique!!!',['Bed Tab']),	
+		(_bed_validate, ' ',['Bed Tab']),	
 		
 		]
 	
@@ -294,20 +306,16 @@ class ch_motor_assembly(osv.osv):
 	
 	def _motor_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		res = True
 		if rec.value:					
 			cr.execute(""" select value from ch_motor_assembly where value  = '%s' and header_id =%s """ %(rec.value,rec.header_id.id))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
+				raise osv.except_osv(_('Warning'), _('Duplicate of Motor Frame Size (%s) is not allowed')%(rec.value))		
+		return True
 		
 	_constraints = [
-	
-		
-		(_motor_validate, 'Please Check Motor Frame Size should be unique!!!',['Motor Tab']),	
+
+		(_motor_validate, ' ',['Motor Tab']),	
 		
 		]
 	
@@ -333,20 +341,25 @@ class ch_columnpipe_assembly(osv.osv):
 	
 	def _columnpipe_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.pipe_type:					
+		if rec.pipe_type:
+			if rec.pipe_type == 'grease':
+				pipe_type = 'Bronze/Grease'				
+			elif rec.pipe_type == 'cft_self':
+				pipe_type = 'CFT'				
+			elif rec.pipe_type == 'cut_less_rubber':
+				pipe_type = 'Cut less Rubber'	
+			else:
+				pipe_type = ''			
 			cr.execute(""" select pipe_type from ch_columnpipe_assembly where pipe_type = '%s' and star = '%s' and header_id =%s """ %(rec.pipe_type,rec.star,rec.header_id.id))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
+				raise osv.except_osv(_('Warning'), _('Duplicate of Check Type (%s) Star (in No) is not allowed')%(pipe_type))				
+		return True
 		
 	_constraints = [
 	
 		
-		(_columnpipe_validate, 'Please Check Type and Star (in No) should be unique!!!',['Column Pipe Tab']),	
+		(_columnpipe_validate, ' ',['Column Pipe Tab']),	
 		
 		]
 	
@@ -376,18 +389,15 @@ class ch_deliverypipe_assembly(osv.osv):
 			cr.execute(""" select size from ch_deliverypipe_assembly where size = '%s' and star = '%s' and header_id =%s """ %(rec.size,rec.star,rec.header_id.id))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
+				raise osv.except_osv(_('Warning'), _('Duplicate of Check Size (%s) Star (in No) is not allowed')%(rec.size))		
 		return res
 		
 	_constraints = [
 	
 		
-		(_deliverypipe_validate, 'Please Check Size and Star (in No) should be unique!!!',['DeliveryPipe Tab']),	
+		(_deliverypipe_validate, ' ',['DeliveryPipe Tab']),	
 		
 		]
-	
 	
 	
 	
@@ -414,18 +424,14 @@ class ch_casing_assembly(osv.osv):
 			cr.execute(""" select product_id from ch_casing_assembly where product_id = '%s' and header_id =%s """ %(rec.product_id.id,rec.header_id.id))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
+				raise osv.except_osv(_('Warning'), _('Duplicate of Check Product model (%s) is not allowed')%(rec.product_id.name))		
 		return res
 		
 	_constraints = [
-	
 		
 		(_casing_validate, 'Please Check Product model should be unique!!!',['Casing Tab']),	
 		
 		]
-	
 	
 	
 ch_casing_assembly()
@@ -447,20 +453,26 @@ class ch_lubricant(osv.osv):
 	
 	def _lubricant_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.type:					
+		if rec.type:
+			if rec.type == 'grease':
+				lu_type = 'Grease'	
+			elif rec.type == 'cft_ext':
+				lu_type = 'CFT-EXT'	
+			elif rec.type == 'cft_self':
+				lu_type = 'CFT-SELF'	
+			elif rec.type == 'cut_less_rubber':
+				lu_type = 'Cut less Rubber'	
+			else:
+				lu_type = ''
 			cr.execute(""" select type from ch_lubricant where type = '%s' and star = '%s' and header_id =%s """ %(rec.type,rec.star,rec.header_id.id))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
+				raise osv.except_osv(_('Warning'), _('Duplicate of Check Type (%s) is not allowed')%(lu_type))		
+		return True
 		
 	_constraints = [
 	
-		
-		(_lubricant_validate, 'Please Check Type and Star (in No) should be unique!!!',['Lubricant Tab']),	
+		(_lubricant_validate, ' ',['Lubricant Tab']),	
 		
 		]
 	

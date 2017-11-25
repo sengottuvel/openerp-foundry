@@ -148,7 +148,26 @@ class kg_product(osv.osv):
 													 'uom_id': rec.uom_po_id.id,
 													 'uom_conversation_factor':rec.uom_conversation_factor,
 													 'entry_mode': 'auto',
-													})			  
+													})	
+													
+			## Brand MOC Rate master creation process starts
+			brand_moc_obj = self.pool.get('kg.brandmoc.rate')
+			old_brand_moc_ids = brand_moc_obj.search(cr,uid,[('product_id','=',rec.id),('state','in',('draft','confirmed','approved'))])
+		
+			if rec.price_type == 'po_uom':
+				uom = rec.uom_po_id.id
+			elif rec.price_type == 'per_kg':
+				uom_id = self.pool.get('product.uom').search(cr,uid,[('name','=','Kgs')])
+				uom = uom_id[0]				
+			if not old_brand_moc_ids:
+				brand_moc_obj.create(cr,uid,{
+										'product_id': rec.id,
+										'name': rec.name,
+										'brand_type': 'new_brand',
+										'uom_id': uom,
+										'category_type': rec.rate_type,
+								 })
+			 ## Brand MOC Rate master creation process ends		  
 			self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True

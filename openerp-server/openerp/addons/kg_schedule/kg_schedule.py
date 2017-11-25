@@ -2375,7 +2375,8 @@ class kg_schedule(osv.osv):
 							'ms_line_id':flag_fabrication_item['order_ms_id'],
 							'ms_id':flag_fabrication_item['ms_id'],
 							'moc_id':flag_fabrication_item['moc_id'],
-							'schedule_qty':flag_fabrication_item['qty'],							
+							'schedule_qty':flag_fabrication_item['qty'],
+							'qty':flag_fabrication_item['qty'],									
 							'entry_mode':'auto',
 							'state': 'pending',
 							
@@ -2772,7 +2773,8 @@ class kg_schedule(osv.osv):
 							'acc_ms_line_id':flag_fabrication_item['order_ms_id'],
 							'ms_id':flag_fabrication_item['ms_id'],
 							'moc_id':flag_fabrication_item['moc_id'],
-							'schedule_qty':flag_fabrication_item['qty'],							
+							'schedule_qty':flag_fabrication_item['qty'],
+							'qty':flag_fabrication_item['qty'],									
 							'entry_mode':'auto',
 							'state': 'pending',
 							

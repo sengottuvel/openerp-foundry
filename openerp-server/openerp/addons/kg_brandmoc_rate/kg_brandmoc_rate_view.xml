@@ -8,7 +8,7 @@
 			<field name="name">Brand Moc Rate Form</field>
 			<field name="model">kg.brandmoc.rate</field>
 			<field name="arch" type="xml">
-				<form string="Brand Moc Rate" version="7.0">					
+				<form string="Brand Moc Rate" version="7.0" create="false" delete="false">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -25,17 +25,16 @@
 					</group>
 					<group>
 						<group>
-							<field name="source_brand" attrs="{'invisible':[('brand_type','=','new_brand')],'readonly': [('copy_flag','=',True)], 'required': [('brand_type','=','copy_brand')]}"/>
+							<field name="source_brand" attrs="{'invisible':[('brand_type','=','new_brand')],'readonly': [('state','=','approved')], 'required': [('brand_type','=','copy_brand')]}"/>
 						</group>
 						<group>
-							<button name="copy_brand" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('brand_type','=','new_brand'),('copy_flag','=',True)]}"/>
+							<button name="copy_brand" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('brand_type','=','new_brand'),('state','=','approved')]}"/>
 						</group>
 					</group>		
 					
 					<group>
 						<group>						
-							<field name="product_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" on_change="onchange_product(product_id)"/>
-							<field name="uom_id" on_change="onchange_product_uom(product_id,uom_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="product_id" readonly="1" on_change="onchange_product(product_id)"/>							
 							<field name="latest_price"/>
 							<field name="name" invisible="1"/>
 							<field name="category_type" invisible="1"/>
@@ -44,7 +43,8 @@
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 						</group>
 						<group>
-							<field name="eff_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>														
+							<field name="uom_id" readonly="1" on_change="onchange_product_uom(product_id,uom_id)" />
+							<field name="eff_date" invisible="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>														
 							<field name="state" style="width: 30%%" class="att_state_change"/>								
 						</group>
 					</group>
@@ -108,7 +108,7 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Brand Moc Rate Tree">				
+								toolbar="True" string="Brand Moc Rate Tree" create="false" delete="false">				
 					<field name="product_id"/>
 					<field name="eff_date"/>
 					<field name="category_type" invisible="1"/>
@@ -167,6 +167,16 @@
 			<field name="search_view_id" ref="m_search_v_brandmocrate"/>
 		</record>
 			
+		 <record id="mma_brandmocrate_mkt_master" model="ir.actions.act_window">
+			<field name="name">Brand/Moc/Rate</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.brandmoc.rate</field>
+			<field name="view_type">form</field>
+			<field name="context">{'default_category_type': 'mkt_item'}</field>
+			<field name="domain">[('category_type','=','mkt_item'),('state','!=','expire')]</field>
+			<field name="view_id" ref="m_tree_v_brandmocrate"/>
+			<field name="search_view_id" ref="m_search_v_brandmocrate"/>
+		</record>
 		<!-- Menu Action End-->
 		
 		 <!-- Audit Log Xml Data Start-->

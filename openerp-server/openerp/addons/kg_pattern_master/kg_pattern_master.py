@@ -268,7 +268,7 @@ class kg_pattern_master(osv.osv):
 									'nonferous_weight':rec.source_pattern.nonferous_weight,
 									'tolerance':rec.source_pattern.tolerance,
 									'notes':rec.source_pattern.notes,
-									
+									'list_moc_flag': True,
 									'moc_id':rec.source_pattern.moc_id.id,											
 									'moc_const_type':[(6, 0, [x.id for x in rec.source_pattern.moc_const_type])], })		
 		return True

@@ -281,7 +281,7 @@
 				<xpath expr = "//page[@string='Entry Info']" position="before" >
 					
 					<page string="VO Mapping">	
-						<field name="line_ids" nolabel="1" >
+						<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
 							<tree string="VO Mapping Entry Tree" editable="top" >															
 								<field name="rpm"/>				   
 								<field name="vo_id"/>
@@ -290,7 +290,7 @@
 						</field>	
 					</page>	
 					<page string="Coupling Configuration">	
-							<field name="line_ids_c" nolabel="1" >								
+							<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">								
 							<tree string="Coupling Configuration Tree" >
 								<field name="primemover_id" on_change="onchange_primee(primemover_id)" />										
 								<field name="power_kw" />
@@ -329,7 +329,7 @@
 					</page>	
 						
 					<page string="Accessories Configuration">	
-							<field name="line_ids_d" nolabel="1" >
+							<field name="line_ids_d" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
 								<tree string="Accessories Configuration Tree" editable="top" >									
 									<field name="primemover_id" on_change="onchange_primee(primemover_id)" />										
 									<field name="power_kw" />
@@ -348,7 +348,7 @@
 						
 						
 					<page string="CSD Drawing Attachments">	
-						<field name="line_ids_e" nolabel="1" >
+						<field name="line_ids_e" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
 							<tree string="CSD Drawing Attachments" >
 								<field name="moc_const_id"/>									
 								<field name="remarks"/>

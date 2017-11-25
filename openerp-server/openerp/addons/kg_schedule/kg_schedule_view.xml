@@ -261,7 +261,7 @@
 			<field name="name">Fabrication Entry Form</field>
 			<field name="model">kg.fabrication.process</field>
 			<field name="arch" type="xml">
-				<form string="Schedule" version="7.0">
+				<form string="Schedule" version="7.0" create="false" delete="false">
 					<header>
 						<button name="entry_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('state','in',['complete','accept'])]}"/>					
 						
@@ -320,7 +320,7 @@
 			<field name="name">Fabrication Entry Form</field>
 			<field name="model">kg.fabrication.process</field>
 			<field name="arch" type="xml">
-				<form string="Schedule" version="7.0">
+				<form string="Schedule" version="7.0" create="false" delete="false">
 					<header>						
 						<button name="entry_inward" type="object" string="Inward" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('state','in',['pending','accept'])]}"/>
 						
@@ -383,7 +383,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree colors="red:state == 'pending';blue:state == 'partial';black:state == 'complete';black:state == 'accept'" 
-								toolbar="True" string="Fabrication Entry Tree" create="false">					
+								toolbar="True" string="Fabrication Entry Tree" create="false" delete="false">					
 					<field name="order_line_id"/>
 					<field name="order_priority"/>
 					<field name="order_category" />
@@ -394,7 +394,7 @@
 					<field name="order_delivery_date" />
 					<field name="schedule_qty" />
 					<field name="completed_qty" />
-					<field name="state"/>
+					<field name="state" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -410,7 +410,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree colors="red:state == 'pending';blue:state == 'partial';black:state == 'complete';black:state == 'accept'" 
-								toolbar="True" string="Fabrication Entry Tree" create="false">					
+								toolbar="True" string="Fabrication Entry Tree" create="false" delete="false">					
 					<field name="order_line_id"/>
 					<field name="order_priority"/>
 					<field name="order_category" />
@@ -421,7 +421,7 @@
 					<field name="order_delivery_date" />
 					<field name="schedule_qty" />
 					<field name="completed_qty" />
-					<field name="state"/>
+					<field name="state" invisible="1"/>
 				</tree>
 			</field>
 		</record>

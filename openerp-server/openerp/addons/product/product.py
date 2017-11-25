@@ -957,6 +957,7 @@ class product_product(osv.osv):
 		'tolerance_applicable': fields.boolean('Tolerance Applicable?'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		'is_accessories': fields.boolean('Is Accessories?'),
+		'rate_type': fields.selection([('purchase_item','Purchase Item'),('design_item','Design Item'),('mkt_item','MKT Item')],'Category'),
 		
 		#Entry Info
 		
