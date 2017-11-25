@@ -1100,7 +1100,7 @@ class kg_work_order(osv.osv):
 			raise osv.except_osv(
 				_('Warning'),
 				_('Design Approve cannot be done by Design Check user'))
-		if entry.state in ('draft','mkt_approved'):
+		if entry.state == 'design_check':
 			if entry.name:
 				wo_name = entry.name
 				name=wo_name.upper()			

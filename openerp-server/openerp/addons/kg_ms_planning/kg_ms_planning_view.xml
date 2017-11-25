@@ -81,7 +81,7 @@
 						</page>
 						<page string="Select Planning Items" >
 							<field name="ms_line_ids" attrs="{'readonly': [('state','in',['confirmed'])]}">
-								<tree string = "Order Items" create="false">
+								<tree string = "Order Items" create="false" editable="bottom">
 									<field name="order_no"/>
 									<field name="order_delivery_date"/>
 									<field name="order_priority" string="Category"/>

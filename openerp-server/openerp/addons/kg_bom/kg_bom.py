@@ -243,7 +243,7 @@ class kg_bom(osv.osv):
 				cr.execute('''select 
 
 						bom_line.pattern_id,
-						bom_line.pos_no,
+						bom_line.position_id,
 						bom_line.qty
 
 						from ch_bom_line bom_line 
@@ -261,7 +261,7 @@ class kg_bom(osv.osv):
 				cr.execute('''select 
 
 						bom_line.pattern_id,
-						bom_line.pos_no,
+						bom_line.position_id,
 						bom_line.qty
 
 						from ch_bom_line bom_line 
@@ -275,7 +275,7 @@ class kg_bom(osv.osv):
 				cr.execute('''select 
 
 						bom_line.pattern_id,
-						bom_line.pos_no,
+						bom_line.position_id,
 						bom_line.qty
 
 						from ch_bom_line bom_line 
@@ -289,7 +289,7 @@ class kg_bom(osv.osv):
 						select 
 
 						bom_line.pattern_id,
-						bom_line.pos_no,
+						bom_line.position_id,
 						bom_line.qty
 
 						from ch_bom_line bom_line 
@@ -308,7 +308,7 @@ class kg_bom(osv.osv):
 				cr.execute('''select 
 
 						machine_line.ms_id,
-						machine_line.pos_no,
+						machine_line.position_id,
 						machine_line.qty
 
 						from ch_machineshop_details machine_line 
@@ -324,7 +324,7 @@ class kg_bom(osv.osv):
 				cr.execute('''select 
 
 						machine_line.ms_id,
-						machine_line.pos_no,
+						machine_line.position_id,
 						machine_line.qty
 
 						from ch_machineshop_details machine_line 
@@ -338,7 +338,7 @@ class kg_bom(osv.osv):
 				cr.execute('''select 
 
 						machine_line.ms_id,
-						machine_line.pos_no,
+						machine_line.position_id,
 						machine_line.qty
 
 						from ch_machineshop_details machine_line 
@@ -352,7 +352,7 @@ class kg_bom(osv.osv):
 						select 
 
 						machine_line.ms_id,
-						machine_line.pos_no,
+						machine_line.position_id,
 						machine_line.qty
 
 						from ch_machineshop_details machine_line 
@@ -373,7 +373,7 @@ class kg_bom(osv.osv):
 				cr.execute('''select 
 
 						bot_line.bot_id,
-						bot_line.pos_no,
+						bot_line.position_id,
 						bot_line.qty
 
 						from ch_bot_details bot_line 
@@ -389,7 +389,7 @@ class kg_bom(osv.osv):
 				cr.execute('''select 
 
 						bot_line.bot_id,
-						bot_line.pos_no,
+						bot_line.position_id,
 						bot_line.qty
 
 						from ch_bot_details bot_line 
@@ -403,7 +403,7 @@ class kg_bom(osv.osv):
 				cr.execute('''select 
 
 						bot_line.bot_id,
-						bot_line.pos_no,
+						bot_line.position_id,
 						bot_line.qty
 
 						from ch_bot_details bot_line 
@@ -417,7 +417,7 @@ class kg_bom(osv.osv):
 						select 
 
 						bot_line.bot_id,
-						bot_line.pos_no,
+						bot_line.position_id,
 						bot_line.qty
 
 						from ch_bot_details bot_line 
@@ -449,7 +449,7 @@ class kg_bom(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		print"rec.pump_model_id",rec.pump_model_id
 		if rec.pump_model_id:							   
-			self.write(cr, uid, ids, {'state': 'draft','category_type': 'pump_bom'})
+			self.write(cr, uid, ids, {'category_type': 'pump_bom'})
 		else:
 			raise osv.except_osv(_('Pump Model is must !!'),
 				_('Enter the pump model field !!'))
@@ -582,34 +582,16 @@ class ch_bom_line(osv.osv):
 	  
 	}
 	
-	def _name_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.name:
-			division_name = rec.name
-			name=division_name.upper()		  
-			cr.execute(""" select upper(name) from kg_stage_master where upper(name)  = '%s' """ %(name))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True			  
-		return res
-	
 	def _check_line_duplicates(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute('''select id from ch_bom_line where pattern_id = %s and id != %s and header_id = %s ''',[entry.pattern_id.id,entry.id,entry.header_id.id])
+		cr.execute('''select id from ch_bom_line where position_id = %s and pattern_id = %s and id != %s and header_id = %s ''',[entry.position_id.id,entry.pattern_id.id,entry.id,entry.header_id.id])
 		duplicate_id = cr.fetchone()
 		if duplicate_id:
 			if duplicate_id[0] != None:
-				return False
-		return True 
-		
-	def _check_line_qty(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])		
+				raise osv.except_osv(_('Warning'), _('Pattern Name (%s) must be unique !!')%(entry.pattern_id.pattern_name))	
 		if entry.qty <= 0:			
-			return False
-		return True
+			raise osv.except_osv(_('Warning'), _('Foundry items Qty should be greater than zero for (%s) ')%(entry.pattern_id.pattern_name))	
+		return True 
 
 	
 	def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
@@ -640,10 +622,9 @@ class ch_bom_line(osv.osv):
 		
 	_constraints = [
 		
-		(_check_line_qty, 'Foundry Items Qty Zero and negative not accept', ['Qty']),	   
+		(_check_line_duplicates, ' ', ['Pattern Name and Qty']),	   
 		
 	]
-
 	
 ch_bom_line()
 
@@ -667,6 +648,12 @@ class ch_machineshop_details(osv.osv):
 	
 	}   
 	
+	_defaults = {	
+	
+		'qty': 1,
+	  
+	} 
+	
 	def onchange_machineshop_name(self, cr, uid, ids, ms_id, context=None):
 		
 		value = {'name': '','csd_no':''}
@@ -676,11 +663,16 @@ class ch_machineshop_details(osv.osv):
 			
 		return {'value': value}
 	
-	def _check_line_qty(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])		
+	def _check_line_duplicates(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute('''select id from ch_machineshop_details where position_id = %s and ms_id = %s and id != %s and header_id = %s ''',[entry.position_id.id,entry.ms_id.id,entry.id,entry.header_id.id])
+		duplicate_id = cr.fetchone()
+		if duplicate_id:
+			if duplicate_id[0] != None:
+				raise osv.except_osv(_('Warning'), _('MS Name (%s) must be unique !!')%(entry.ms_id.name))	
 		if entry.qty <= 0:			
-			return False
-		return True
+			raise osv.except_osv(_('Warning'), _('MS items Qty should be greater than zero for (%s) ')%(entry.ms_id.name))	
+		return True 	
 		
 	def create(self, cr, uid, vals, context=None):	  
 		ms_obj = self.pool.get('kg.machine.shop')
@@ -701,9 +693,9 @@ class ch_machineshop_details(osv.osv):
 		return super(ch_machineshop_details, self).write(cr, uid, ids, vals, context)
 	_constraints = [
 		
-		(_check_line_qty, 'Machine Shop items Qty Zero and negative not accept', ['Qty']),	   
+		(_check_line_duplicates, '', ['MS Name and Qty']),	   
 		
-	]   
+	]     
 
 ch_machineshop_details()
 
@@ -723,6 +715,11 @@ class ch_bot_details(osv.osv):
 		'remarks':fields.text('Remarks'),   
 	
 	}
+	_defaults = {	
+	
+		'qty': 1,
+	  
+	} 
 	
 	def onchange_bot_name(self, cr, uid, ids, bot_id, context=None):	   
 		value = {'name': ''}
@@ -747,16 +744,22 @@ class ch_bot_details(osv.osv):
 			vals.update({'name':product_code })
 		return super(ch_bot_details, self).write(cr, uid, ids, vals, context) 
 		
-	def _check_line_qty(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])		
+	def _check_line_duplicates(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute('''select id from ch_bot_details where position_id = %s and bot_id = %s and id != %s and header_id = %s ''',[entry.position_id.id,entry.bot_id.id,entry.id,entry.header_id.id])
+		duplicate_id = cr.fetchone()
+		if duplicate_id:
+			if duplicate_id[0] != None:
+				raise osv.except_osv(_('Warning'), _('BOT Name (%s) must be unique !!')%(entry.bot_id.name))	
 		if entry.qty <= 0:			
-			return False
+			raise osv.except_osv(_('Warning'), _('BOT items Qty should be greater than zero for (%s) ')%(entry.bot_id.name))	
 		return True 
+		
 	_constraints = [
 		
-		(_check_line_qty, 'BOT Items Qty Zero and negative not accept', ['Qty']),	   
+		(_check_line_duplicates, ' ', ['BOT Name and Qty']),	   
 		
-	]
+	]	
 	
 	
 ch_bot_details()
