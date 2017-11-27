@@ -1027,7 +1027,7 @@ end ) as comp_zip,
 
 partner.name as customer,
 to_char(off.offer_date, 'dd/mm/yyyy') as offer_date,
-case when wo.state = 'confirmed' then to_char(wo.delivery_date,'dd/mm/yyyy') else
+case when wo.id then to_char(wo.delivery_date,'dd/mm/yyyy') else
 to_char(off.del_date,'dd/mm/yyyy') end as del_date,
 (CASE WHEN off.l_d_clause = '5_1' THEN '0.5 - 1.0% of total order value'
 WHEN off.l_d_clause = '1_10' THEN '1 - 10% of total order value'
