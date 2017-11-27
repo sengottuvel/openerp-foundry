@@ -74,9 +74,9 @@ class kg_melting(osv.osv):
 		'kw': fields.float('KW',required=True),	
 		'output_volt': fields.float('Output Volt',required=True),	
 		'final_reading': fields.float('Final Reading',required=True),
-		'final_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Final Reading Type', required=True),	
+		'final_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Final Reading Type'),	
 		'initial_reading': fields.float('Initial Reading',required=True),
-		'initial_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Initial Reading Type', required=True),	
+		'initial_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Initial Reading Type'),	
 		
 		'total_units': fields.float('Total Units',readonly=True),		
 		'amount': fields.float('Amount',readonly=True , help="total_value = total_reading * rate_rec.value"),		
