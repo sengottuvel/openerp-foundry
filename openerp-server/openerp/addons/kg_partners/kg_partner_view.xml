@@ -397,7 +397,7 @@
 		<field name="view_mode">tree,form</field>
 		<field name="view_id" ref="kg_partner_tree"/>
 		<field name="context">{'default_group_flag': True,'default_dealer': False,'default_customer': False,'default_supplier': False,'default_contractor': False}</field>
-		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>
+		<field name="domain">[('group_flag','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>
@@ -425,7 +425,9 @@
 	<menuitem action="kg_action_dealer_form" id="cam_crm_dealer_master" name="Dealer" parent="kg_menus.cpm_crm_master_menu" sequence="2"/>
 	
 	<!-- Group Master -->
+<!--
 	<menuitem action="kg_action_group_form" id="cam_crm_group_master" name="Group" parent="kg_menus.cpm_crm_master_menu" sequence="3"/>
+-->
 	
 	<!-- Country -->
 <!--
