@@ -32,8 +32,10 @@
 								<field name="ref_mode" readonly="1"/>
 								<field name="customer_po_no"/>
 								<field name="cust_po_date"/>
+								<field name="cpo_del"/>
 								<field name="dealer_po_no"/>
 								<field name="deal_po_date"/>
+								<field name="sam_del"/>
 								<field name="division_id" readonly="1"/>
 								<field name="road_permit"/>
 								<field name="inspection"/>
@@ -407,6 +409,7 @@
 								<tree string="Term History" editable="top">
 									<field name="term_id" required="1" on_change="onchange_term(term_id)"/>
 									<field name="term" required="1"/>
+									<field name="remark"/>
 								</tree>
 							</field>
 						</group>

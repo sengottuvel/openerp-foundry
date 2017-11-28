@@ -178,8 +178,10 @@ class kg_crm_offer(osv.osv):
 		'term_copy': fields.char('Terms Copy'),
 		'customer_po_no': fields.char('Customer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)],'approved_md':[('readonly',False)]}),
 		'cust_po_date': fields.date('Customer PO Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)],'approved_md':[('readonly',False)]}),
+		'cpo_del': fields.char('Delivery as per C.P.O',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'dealer_po_no': fields.char('Dealer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'deal_po_date': fields.date('Dealer PO Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'sam_del': fields.char('Delivery consider by SAM',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'revision': fields.integer('Revision'),
 		'wo_flag': fields.boolean('WO Flag'),
 		'load_term': fields.boolean('Terms Applicable',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
@@ -3959,6 +3961,7 @@ class ch_term_offer(osv.osv):
 		## Module Requirement Fields
 		
 		'term_id': fields.many2one('kg.offer.term','Name',domain="[('state','not in',('reject','cancel'))]"),
+		'remark': fields.char('Remarks'),
 		'term': fields.text('Terms'),
 		
 	}

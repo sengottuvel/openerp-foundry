@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cd_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000008"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="20"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset1">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
@@ -1004,28 +1004,16 @@ group by access.name,pump.cust_in_ex]]>
 (case when wo.name is not null then wo.name else '-' end) as wo_no,
 comp.name as company,
 
-(CASE WHEN comppart.street is null
-THEN ''
-ELSE comppart.street
-end ) as comp_street,
-(CASE WHEN comppart.street2 is null
-THEN ''
-ELSE comppart.street2
-end ) as comp_street2,
-(CASE WHEN compcity.name is null
-THEN ''
-ELSE compcity.name
-end ) as comp_city,
-(CASE WHEN compstate.name is null
-THEN ''
-ELSE compstate.name
-end ) as comp_state,
-(CASE WHEN comppart.zip is null
-THEN ''
-ELSE comppart.zip
-end ) as comp_zip,
+(CASE WHEN comppart.street is null THEN '' ELSE comppart.street end) as comp_street,
+(CASE WHEN comppart.street2 is null THEN '' ELSE comppart.street2 end) as comp_street2,
+(CASE WHEN compcity.name is null THEN '' ELSE compcity.name end) as comp_city,
+(CASE WHEN compstate.name is null THEN '' ELSE compstate.name end) as comp_state,
+(CASE WHEN comppart.zip is null THEN '' ELSE comppart.zip end) as comp_zip,
 
 partner.name as customer,
+(CASE WHEN dealpart.name is null THEN '' ELSE dealpart.name end) as dealer,
+(CASE WHEN off.cpo_del is null THEN '' ELSE off.cpo_del end) as cpo_del,
+(CASE WHEN off.sam_del is null THEN '' ELSE off.sam_del end) as sam_del,
 to_char(off.offer_date, 'dd/mm/yyyy') as offer_date,
 case when wo.id is not null then to_char(wo.delivery_date,'dd/mm/yyyy') else
 to_char(off.del_date,'dd/mm/yyyy') end as del_date,
@@ -1033,11 +1021,18 @@ to_char(off.del_date,'dd/mm/yyyy') end as del_date,
 WHEN off.l_d_clause = '1_10' THEN '1 - 10% of total order value'
 WHEN off.l_d_clause is null THEN ''
 ELSE off.l_d_clause
-end) as penality
+end) as penality,
+(CASE WHEN off.dom_freight = 'paid' THEN 'Paid'
+WHEN off.dom_freight = 'topay' THEN 'To Pay'
+WHEN off.dom_freight = 'paid_reimburse' THEN 'Paid & reimbursement'
+WHEN off.dom_freight is null THEN ''
+ELSE ' - '
+end) as dom_freight
 
 from kg_crm_offer off
 
 left join res_partner partner on(partner.id=off.customer_id)
+left join res_partner dealpart on(dealpart.id=off.dealer_id)
 left join res_company comp on(comp.id=off.company_id)
 left join res_partner comppart on(comppart.id=comp.partner_id)
 left join res_city compcity on(compcity.id=comppart.city_id)
@@ -1055,9 +1050,13 @@ where off.id = $P{offer_id}]]>
 	<field name="comp_state" class="java.lang.String"/>
 	<field name="comp_zip" class="java.lang.String"/>
 	<field name="customer" class="java.lang.String"/>
+	<field name="dealer" class="java.lang.String"/>
+	<field name="cpo_del" class="java.lang.String"/>
+	<field name="sam_del" class="java.lang.String"/>
 	<field name="offer_date" class="java.lang.String"/>
 	<field name="del_date" class="java.lang.String"/>
 	<field name="penality" class="java.lang.String"/>
+	<field name="dom_freight" class="java.lang.String"/>
 	<group name="Pump_detail">
 		<groupExpression><![CDATA[$P{offer_id}]]></groupExpression>
 		<groupHeader>
@@ -2241,7 +2240,7 @@ where off.id = $P{offer_id}]]>
 					<textElement textAlignment="Center">
 						<font isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Original of CPO is enclosed"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Soft Copy / Original of CPO is enclosed"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="491" y="17" width="232" height="17"/>
@@ -2796,7 +2795,7 @@ where off.id = $P{offer_id}]]>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="88" splitType="Stretch">
+		<band height="104" splitType="Stretch">
 			<textField>
 				<reportElement x="168" y="0" width="448" height="24"/>
 				<box topPadding="4"/>
@@ -2849,7 +2848,7 @@ where off.id = $P{offer_id}]]>
 				<textFieldExpression><![CDATA["CUSTOMER : "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="-12" y="72" width="278" height="16"/>
+				<reportElement x="-12" y="88" width="278" height="16"/>
 				<box topPadding="2" leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -2859,10 +2858,10 @@ where off.id = $P{offer_id}]]>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Delivery as per C.P.O - 16 Weeks"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Delivery as per C.P.O - "+$F{cpo_del}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="266" y="72" width="284" height="16"/>
+				<reportElement x="266" y="88" width="284" height="16"/>
 				<box topPadding="2" leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -2870,10 +2869,10 @@ where off.id = $P{offer_id}]]>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Delivery consider by SAM - 16 Weeks"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Delivery consider by SAM - "+$F{sam_del}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="550" y="72" width="66" height="16"/>
+				<reportElement x="550" y="88" width="66" height="16"/>
 				<box topPadding="2" leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -2916,7 +2915,7 @@ where off.id = $P{offer_id}]]>
 				<textFieldExpression><![CDATA["Date: "]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="403" y="56" width="269" height="16"/>
+				<reportElement x="403" y="56" width="113" height="16"/>
 				<box topPadding="2" leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -2945,7 +2944,7 @@ where off.id = $P{offer_id}]]>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
 			</image>
 			<textField isBlankWhenNull="true">
-				<reportElement x="616" y="72" width="197" height="16"/>
+				<reportElement x="616" y="88" width="197" height="16"/>
 				<box topPadding="4" leftPadding="2" rightPadding="0">
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -2977,6 +2976,59 @@ where off.id = $P{offer_id}]]>
 				</box>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{wo_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="-12" y="72" width="82" height="16"/>
+				<box topPadding="2" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DEALER       : "]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="70" y="72" width="300" height="16"/>
+				<box topPadding="2">
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{dealer}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="516" y="56" width="45" height="16"/>
+				<box topPadding="2" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA["Freight:"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="561" y="56" width="111" height="16"/>
+				<box topPadding="2" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{dom_freight}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="370" y="72" width="443" height="16"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -3040,7 +3092,7 @@ where off.id = $P{offer_id}]]>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA["Freight Paid"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Freight"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="370" y="0" width="60" height="16" isPrintWhenDetailOverflows="true"/>
