@@ -746,7 +746,7 @@ class ch_bot_details(osv.osv):
 		
 	def _check_line_duplicates(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute('''select id from ch_bot_details where position_id = %s and bot_id = %s and id != %s and header_id = %s ''',[entry.position_id.id,entry.bot_id.id,entry.id,entry.header_id.id])
+		cr.execute('''select id from ch_bot_details where bot_id = %s and id != %s and header_id = %s ''',[entry.bot_id.id,entry.id,entry.header_id.id])
 		duplicate_id = cr.fetchone()
 		if duplicate_id:
 			if duplicate_id[0] != None:
