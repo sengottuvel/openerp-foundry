@@ -2489,11 +2489,6 @@ class ch_pump_offer(osv.osv):
 				r_freight_tot = 0
 				r_freight_ex_tot = 0
 			print"r_freight_tot",r_freight_tot
-			if line.r_insurance_in_ex == 'inclusive':
-				r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
-			else:
-				r_insurance_tot = 0
-			print"r_insurance_tot",r_insurance_tot
 			if line.r_p_f_in_ex == 'inclusive':
 				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_ex_tot = 0
@@ -2503,6 +2498,13 @@ class ch_pump_offer(osv.osv):
 			else:
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
+			if line.r_insurance_in_ex == 'inclusive':
+				#~ r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
+				r_insurance_tot = round(((tot_price + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
+			else:
+				r_insurance_tot = 0
+			print"r_insurance_tot",r_insurance_tot
+			
 			print"r_p_f_tot",r_p_f_tot
 			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00)
 			print"r_spl_discount_tot",r_spl_discount_tot
@@ -3029,11 +3031,6 @@ class ch_spare_offer(osv.osv):
 				r_freight_tot = 0
 				r_freight_ex_tot = 0
 			print"r_freight_tot",r_freight_tot
-			if line.r_insurance_in_ex == 'inclusive':
-				r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
-			else:
-				r_insurance_tot = 0
-			print"r_insurance_tot",r_insurance_tot
 			if line.r_p_f_in_ex == 'inclusive':
 				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_ex_tot = 0
@@ -3043,6 +3040,13 @@ class ch_spare_offer(osv.osv):
 			else:
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
+			if line.r_insurance_in_ex == 'inclusive':
+				#~ r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
+				r_insurance_tot = round(((tot_price + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
+			else:
+				r_insurance_tot = 0
+			print"r_insurance_tot",r_insurance_tot
+			
 			print"r_p_f_tot",r_p_f_tot
 			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00)
 			print"r_spl_discount_tot",r_spl_discount_tot
@@ -3459,11 +3463,6 @@ class ch_accessories_offer(osv.osv):
 				r_freight_tot = 0
 				r_freight_ex_tot = 0
 			print"r_freight_tot",r_freight_tot
-			if line.r_insurance_in_ex == 'inclusive':
-				r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
-			else:
-				r_insurance_tot = 0
-			print"r_insurance_tot",r_insurance_tot
 			if line.r_p_f_in_ex == 'inclusive':
 				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_ex_tot = 0
@@ -3473,6 +3472,13 @@ class ch_accessories_offer(osv.osv):
 			else:
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
+			if line.r_insurance_in_ex == 'inclusive':
+				#~ r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
+				r_insurance_tot = round(((tot_price + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
+			else:
+				r_insurance_tot = 0
+			print"r_insurance_tot",r_insurance_tot
+			
 			print"r_p_f_tot",r_p_f_tot
 			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00)
 			print"r_spl_discount_tot",r_spl_discount_tot
