@@ -2500,7 +2500,10 @@ class ch_pump_offer(osv.osv):
 				r_p_f_ex_tot = 0
 			if line.r_insurance_in_ex == 'inclusive':
 				#~ r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
-				r_insurance_tot = round(((tot_price + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
+				if line.cpo_quote_cust == 'quoted':
+					r_insurance_tot = round(((tot_price + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
+				elif line.cpo_quote_cust == 'cust_po':
+					r_insurance_tot = round(((line.r_cpo_amount + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
 			else:
 				r_insurance_tot = 0
 			print"r_insurance_tot",r_insurance_tot
@@ -3042,7 +3045,10 @@ class ch_spare_offer(osv.osv):
 				r_p_f_ex_tot = 0
 			if line.r_insurance_in_ex == 'inclusive':
 				#~ r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
-				r_insurance_tot = round(((tot_price + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
+				if line.cpo_quote_cust == 'quoted':
+					r_insurance_tot = round(((tot_price + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
+				elif line.cpo_quote_cust == 'cust_po':
+					r_insurance_tot = round(((line.r_cpo_amount + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
 			else:
 				r_insurance_tot = 0
 			print"r_insurance_tot",r_insurance_tot
@@ -3474,7 +3480,10 @@ class ch_accessories_offer(osv.osv):
 				r_p_f_ex_tot = 0
 			if line.r_insurance_in_ex == 'inclusive':
 				#~ r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
-				r_insurance_tot = round(((tot_price + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
+				if line.cpo_quote_cust == 'quoted':
+					r_insurance_tot = round(((tot_price + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
+				elif line.cpo_quote_cust == 'cust_po':
+					r_insurance_tot = round(((line.r_cpo_amount + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
 			else:
 				r_insurance_tot = 0
 			print"r_insurance_tot",r_insurance_tot
