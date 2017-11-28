@@ -1970,6 +1970,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'motor_kw': fields.float('Motor KW'),
 		'speed_in_pump': fields.float('Speed in RPM-Pump'),
 		'speed_in_motor': fields.float('Speed in RPM-Motor'),
+		'motor_speed': fields.char('Motor speed'),
 		'full_load_rpm': fields.float('Speed in RPM - Engine'),
 		'engine_kw': fields.float('Engine KW'),
 		'belt_loss_in_kw': fields.float('Belt Loss in Kw - 3% of BKW'),

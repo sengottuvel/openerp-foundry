@@ -234,6 +234,7 @@
 									<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','in',['motor_direct','fc_gb'])]}"/>
 			-->
 									<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb','vfd'])]}"/>
+									<field name="motor_speed" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb','vfd'])]}"/>
 									<field name="engine_rpm" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 									<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','vfd'])]}"/>
 									<field name="critical_speed"/>
