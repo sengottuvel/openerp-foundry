@@ -1552,7 +1552,7 @@ class kg_crm_offer(osv.osv):
 		coalesce(pump_eoc,0) as pump_eoc,coalesce(pump_motor_kw,0) as pump_motor_kw,
 		
 		coalesce(pump_rpm_pump,'-') as pump_rpm_pump, -- Testing
-		coalesce(pump_rpm_motor,'-') as pump_rpm_motor, -- Testing
+		--coalesce(pump_rpm_motor,'-') as pump_rpm_motor, -- Testing
 		
 		--- coalesce(pump_speed,'-') as pump_speed,
 		
