@@ -240,10 +240,10 @@ class kg_pumpmodel_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if len(rec.line_ids) == 0  and len(rec.line_ids_a) == 0 and len(rec.line_ids_b) == 0 and len(rec.line_ids_c) == 0 and len(rec.line_ids_d) == 0 and len(rec.line_ids_e) == 0:
-			raise osv.except_osv(
-						_('Warning !!!'),
-						_('Please Check Line empty values not allowed!!'))
+		#~ if len(rec.line_ids) == 0  and len(rec.line_ids_a) == 0 and len(rec.line_ids_b) == 0 and len(rec.line_ids_c) == 0 and len(rec.line_ids_d) == 0 and len(rec.line_ids_e) == 0:
+			#~ raise osv.except_osv(
+						#~ _('Warning !!!'),
+						#~ _('Please Check Line empty values not allowed!!'))
 		if rec.state == 'draft':		
 			line = rec.line_ids	
 			if rec.line_ids_b:			
