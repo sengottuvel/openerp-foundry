@@ -1552,7 +1552,7 @@ class kg_crm_offer(osv.osv):
 		coalesce(pump_eoc,0) as pump_eoc,coalesce(pump_motor_kw,0) as pump_motor_kw,
 		
 		coalesce(pump_rpm_pump,'-') as pump_rpm_pump, -- Testing
-		
+		--coalesce(pump_rpm_motor,'-') as pump_rpm_motor, -- Testing
 		
 		--- coalesce(pump_speed,'-') as pump_speed,
 		
@@ -2005,7 +2005,7 @@ class kg_crm_offer(osv.osv):
 									sql_query_data = cr.dictfetchall()
 									if sql_query_data:
 										for loop in sql_query_data:
-											if loop[var[1]] != '-':
+											if loop[var[1]] != ' ':
 												replace_str = str(loop[var[1]])
 												values = string.replace(replace_str, '$', '/')
 												if var[1] == 'pump_pmodtype':
