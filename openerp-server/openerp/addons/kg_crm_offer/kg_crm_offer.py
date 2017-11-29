@@ -1611,7 +1611,7 @@ class kg_crm_offer(osv.osv):
 		
 		/* case when (pump_full_load_rpm is not null and pump_full_load_rpm != '') then pump_full_load_rpm::text else '-' end as pump_rpm_pump, -- Testing 
 		*/
-		case when (motor_speed is not null and motor_speed != '') then motor_speed::text else '-' end as pump_rpm_motor, -- Testing
+		
 		case when (pump_speed_in_rpm is not null and pump_speed_in_rpm != '') then pump_speed_in_rpm::text else '-' end as pump_rpm_pump, -- Testing
 		
 		/*case when ((pump_full_load_rpm is not null and pump_full_load_rpm != '') and 
