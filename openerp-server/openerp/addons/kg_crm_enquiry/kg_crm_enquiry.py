@@ -4777,33 +4777,36 @@ class ch_kg_crm_spare_bom(osv.osv):
 	
 	def default_get(self, cr, uid, fields, context=None):
 		if len(context) > 4:
-			if not context['moc_const_id']:
-				raise osv.except_osv(_('Warning!'),_('Select MOC Construction to proceed further !!'))
-			if not context['pump_id']:
-				raise osv.except_osv(_('Warning!'),_('Select Pump Model to proceed further !!'))
-			pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr,uid,context['pump_id'])
-			bom_ids = self.pool.get('kg.bom').search(cr,uid,[('pump_model_id','=',context['pump_id']),('category_type','=','part_list_bom'),('state','=','approved')])
-			if bom_ids:
-				bom_rec = self.pool.get('kg.bom').browse(cr,uid,bom_ids[0])
-				moc_ids = self.pool.get('kg.moc.construction').search(cr,uid,[('id','=',context['moc_const_id']),('state','=','approved')])
-				if moc_ids:
-					moc_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_ids[0])
-				if bom_rec.line_ids_e:
-					moc_map_sql = """ select moc_id from ch_bom_mocwise where header_id = %s and code = %s """%(bom_rec.id,moc_rec.id)
-					cr.execute(moc_map_sql)
-					moc_map_data = cr.dictfetchall()
-					if moc_map_data:
-						context['moc_id'] = moc_map_data[0]['moc_id']
-					else:
-						raise osv.except_osv(_('Warning!'),_('Bom (%s) MOC (%s) Kindly configure MOC Construction Mapping in Part List BOM !!'%(bom_rec.name,moc_rec.code)))
-					#~ for item in bom_rec.line_ids_e:
-						#~ if item.code.code == moc_rec.code:
-							#~ context['moc_id'] = item.moc_id.id
-							#~ break;
-				else:
-					raise osv.except_osv(_('Warning!'),_('Bom (%s) Kindly configure MOC Construction Mapping in Part List BOM !!'%(bom_rec.name)))
+			if not context.get('pump_id'):
+				pass
 			else:
-				raise osv.except_osv(_('Warning!'),_('Spare (%s) Kindly configure or Approve in Part List BOM !!'%(pump_rec.name)))
+				if not context['moc_const_id']:
+					raise osv.except_osv(_('Warning!'),_('Select MOC Construction to proceed further !!'))
+				if not context['pump_id']:
+					raise osv.except_osv(_('Warning!'),_('Select Pump Model to proceed further !!'))
+				pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr,uid,context['pump_id'])
+				bom_ids = self.pool.get('kg.bom').search(cr,uid,[('pump_model_id','=',context['pump_id']),('category_type','=','part_list_bom'),('state','=','approved')])
+				if bom_ids:
+					bom_rec = self.pool.get('kg.bom').browse(cr,uid,bom_ids[0])
+					moc_ids = self.pool.get('kg.moc.construction').search(cr,uid,[('id','=',context['moc_const_id']),('state','=','approved')])
+					if moc_ids:
+						moc_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_ids[0])
+					if bom_rec.line_ids_e:
+						moc_map_sql = """ select moc_id from ch_bom_mocwise where header_id = %s and code = %s """%(bom_rec.id,moc_rec.id)
+						cr.execute(moc_map_sql)
+						moc_map_data = cr.dictfetchall()
+						if moc_map_data:
+							context['moc_id'] = moc_map_data[0]['moc_id']
+						else:
+							raise osv.except_osv(_('Warning!'),_('Bom (%s) MOC (%s) Kindly configure MOC Construction Mapping in Part List BOM !!'%(bom_rec.name,moc_rec.code)))
+						#~ for item in bom_rec.line_ids_e:
+							#~ if item.code.code == moc_rec.code:
+								#~ context['moc_id'] = item.moc_id.id
+								#~ break;
+					else:
+						raise osv.except_osv(_('Warning!'),_('Bom (%s) Kindly configure MOC Construction Mapping in Part List BOM !!'%(bom_rec.name)))
+				else:
+					raise osv.except_osv(_('Warning!'),_('Spare (%s) Kindly configure or Approve in Part List BOM !!'%(pump_rec.name)))
 		return context
 	
 	def write(self, cr, uid, ids, vals, context=None):
