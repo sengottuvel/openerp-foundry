@@ -1552,7 +1552,7 @@ class kg_crm_offer(osv.osv):
 		coalesce(pump_eoc,0) as pump_eoc,coalesce(pump_motor_kw,0) as pump_motor_kw,
 		
 		coalesce(pump_rpm_pump,'-') as pump_rpm_pump, -- Testing
-		--coalesce(pump_rpm_motor,'-') as pump_rpm_motor, -- Testing
+		coalesce(pump_rpm_motor,'-') as pump_rpm_motor, -- Testing
 		
 		--- coalesce(pump_speed,'-') as pump_speed,
 		
@@ -1611,7 +1611,7 @@ class kg_crm_offer(osv.osv):
 		
 		/* case when (pump_full_load_rpm is not null and pump_full_load_rpm != '') then pump_full_load_rpm::text else '-' end as pump_rpm_pump, -- Testing 
 		*/
-		
+		case when (pump_speed_in_motor is not null and pump_speed_in_motor != '') then pump_speed_in_motor::text else '-' end as pump_rpm_motor, -- Testing
 		case when (pump_speed_in_rpm is not null and pump_speed_in_rpm != '') then pump_speed_in_rpm::text else '-' end as pump_rpm_pump, -- Testing
 		
 		/*case when ((pump_full_load_rpm is not null and pump_full_load_rpm != '') and 
@@ -1716,7 +1716,7 @@ class kg_crm_offer(osv.osv):
 		motor_kw as pump_motor_kw,
 		case when full_load_rpm>0 then full_load_rpm::text else ''::text end as pump_full_load_rpm,
 		case when speed_in_rpm>0 then speed_in_rpm::text else ''::text end as pump_speed_in_rpm,
-		case when speed_in_motor>0 then speed_in_motor::text else ''::text end as pump_speed_in_motor,
+		case when motor_speed is not null then motor_speed::text else ''::text end as pump_speed_in_motor,
 		npsh_r_m as pump_npsh,
 		impeller_type as pump_impeller_type,
 		
@@ -2005,7 +2005,7 @@ class kg_crm_offer(osv.osv):
 									sql_query_data = cr.dictfetchall()
 									if sql_query_data:
 										for loop in sql_query_data:
-											if loop[var[1]] != ' ':
+											if loop[var[1]] != '-':
 												replace_str = str(loop[var[1]])
 												values = string.replace(replace_str, '$', '/')
 												if var[1] == 'pump_pmodtype':
