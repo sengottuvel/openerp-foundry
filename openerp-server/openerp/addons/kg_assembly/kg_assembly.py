@@ -208,7 +208,7 @@ class kg_assembly_inward(osv.osv):
 					if foundry_line_item.line_ids:
 						for foun_item in foundry_line_item.line_ids:
 							if not foun_item.melting_id:
-								raise osv.except_osv(_('Warning !'), _('Heat No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
+								raise osv.except_osv(_('Warning !'), _('Heat No. is required for Pattern %s and Heat no %s !!')%(foundry_line_item.pattern_id,name,foun_item.melting_id.name))
 							
 							cr.execute(''' select pour.id from 	kg_pouring_log pour
 											left join ch_pouring_details pour_line on (pour.id = pour_line.header_id)
