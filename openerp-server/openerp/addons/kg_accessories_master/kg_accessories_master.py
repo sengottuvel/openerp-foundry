@@ -363,13 +363,13 @@ class kg_accessories_master(osv.osv):
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'confirmed':	
-			if not rec.line_ids:
+		rec = self.browse(cr,uid,ids[0])				
+		if rec.state == 'confirmed':
+			if len(rec.line_ids) == 0  and len(rec.line_ids_a) == 0 and len(rec.line_ids_b) == 0:			
 				raise osv.except_osv(_('Warning !!'),
-					_('You can not save this with out Raw material Details !!'))
-					
+					_('Either foundry,MS or BOT item should be mapped to confirm !!'))					
 			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):

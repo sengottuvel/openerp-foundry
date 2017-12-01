@@ -1415,8 +1415,8 @@ class kg_item_wise_dept_issue(osv.osv):
 		
 		'product_id':fields.many2one('product.product','Product Name',required=True),
 		'uom_id':fields.many2one('product.uom','UOM',readonly=True),
-		'grn_qty':fields.integer('GRN Quantity',required=True),
-		'issue_qty':fields.integer('Issue Quantity'),
+		'grn_qty':fields.float('GRN Quantity',required=True),
+		'issue_qty':fields.float('Issue Quantity'),
 		'price_unit':fields.float('Price Unit'),
 		'expiry_date':fields.date('Expiry Date'),
 		'batch_no':fields.char('Batch No',size=120),
