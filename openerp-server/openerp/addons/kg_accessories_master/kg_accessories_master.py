@@ -211,10 +211,9 @@ class kg_accessories_master(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'draft':
-			if not rec.line_ids:
+			if len(rec.line_ids) == 0  and len(rec.line_ids_a) == 0 and len(rec.line_ids_b) == 0:			
 				raise osv.except_osv(_('Warning !!'),
-					_('You can not save this with out Raw material Details !!'))
-					
+					_('Either foundry,MS or BOT item should be mapped to confirm !!'))					
 			if rec.access_type == 'copy':				
 				cr.execute('''select 
 						bom_line.pattern_id,
