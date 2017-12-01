@@ -216,7 +216,7 @@ class kg_assembly_inward(osv.osv):
 											 
 							foundry_work_order_check = cr.fetchone()							
 							if foundry_work_order_check is None:								
-								raise osv.except_osv(_('Warning !'), _('Heat No. Not mapped in particular work order for Pattern %s !!')%(foundry_line_item.pattern_id.name))							
+								raise osv.except_osv(_('Warning !'), _('Heat No. Not mapped in particular work order for Pattern %s and Heat No. %s !!')%(foundry_line_item.pattern_id.name,foun_item.melting_id.name))							
 												
 						cr.execute(''' select qty from ch_assembly_foundry_heat_details where header_id=%s ''',[foundry_line_item.id])
 						foundry_heat_qty = cr.fetchone()
