@@ -216,7 +216,7 @@ class kg_assembly_inward(osv.osv):
 							
 							cr.execute(''' select pour.id from 	kg_pouring_log pour
 											left join ch_pouring_details pour_line on (pour.id = pour_line.header_id)
-											 where pour_line.order_line_id =  %s and pour_line.pattern_id = %s ''',[entry_rec.order_line_id.id,foun_item.melting_id.id,foundry_line_item.pattern_id.id])
+											 where pour_line.order_line_id =  %s and pour_line.pattern_id = %s ''',[entry_rec.order_line_id.id,foundry_line_item.pattern_id.id])
 											 
 							foundry_work_order_check = cr.fetchone()							
 							if foundry_work_order_check is None:								
