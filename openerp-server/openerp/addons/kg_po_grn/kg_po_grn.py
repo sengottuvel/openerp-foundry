@@ -99,7 +99,8 @@ class kg_po_grn(osv.osv):
 				if line.po_grn_id.grn_type == 'from_po':
 					per_to_amt = (line.po_grn_qty * line.po_line_id.price_unit) * line.po_line_id.kg_discount_per / 100.00
 					tot_discount = ((line.po_line_id.kg_discount / qty) * line.po_grn_qty )+ per_to_amt
-					val1 += line.po_line_id.price_subtotal
+					#~ val1 += line.po_line_id.price_subtotal
+					val1 += line.price_subtotal
 					val += self._amount_line_tax(cr, uid, line, context=context)
 					val3 += tot_discount
 				else:
