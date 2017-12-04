@@ -623,7 +623,7 @@ class kg_scheduler(osv.osv):
 						amount_untaxed += line.po_grn_qty * line.price_unit
 					#~ print"totaltotal",total
 					#~ print"amount_untaxed",amount_untaxed
-				grn_obj.write(cr,uid,{'amount_total':total,'amount_untaxed':amount_untaxed})
+				grn_obj.write(cr,uid,grn_rec.id,{'amount_total':total,'amount_untaxed':amount_untaxed})
 		return True
 	
 kg_scheduler()
