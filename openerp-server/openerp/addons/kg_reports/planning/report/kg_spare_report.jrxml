@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="842" pageHeight="605" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="0.8857805000000005"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="353"/>
+	<property name="ireport.y" value="17"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -426,7 +426,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 		<groupHeader>
 			<band height="431">
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="32" width="801" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="32" width="801" height="21" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -447,7 +447,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="53" width="140" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="53" width="140" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -460,7 +460,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Work Order No. : ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="421" y="53" width="224" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="53" width="224" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -473,7 +473,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Order Date :]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="74" width="140" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="74" width="140" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -499,7 +499,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{division_name}+" / "+$F{region}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="421" y="74" width="224" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="74" width="224" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -525,7 +525,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{due_date}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="157" width="803" height="28" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="157" width="803" height="28" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -568,7 +568,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 				</image>
 				<staticText>
-					<reportElement mode="Transparent" x="421" y="115" width="224" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="115" width="224" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -594,7 +594,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{model}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="115" width="140" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="115" width="140" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -633,7 +633,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{drawing_approval}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="136" width="140" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="136" width="140" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -646,7 +646,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Pump Model : ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="421" y="95" width="224" height="20" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="95" width="224" height="20" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -672,7 +672,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{inspection}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="185" width="421" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="185" width="421" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -698,7 +698,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{flange_standard}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="201" width="421" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="201" width="421" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -724,7 +724,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{temperature_in_c}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="217" width="421" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="217" width="421" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -737,7 +737,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Capacity in m3/Hr]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="249" width="421" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="249" width="421" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -763,7 +763,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Remarks:]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="264" width="421" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="264" width="421" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -776,7 +776,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Speed - RPM (P/M)]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="233" width="421" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="233" width="421" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -789,7 +789,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Motor Make & Frame Size]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="280" width="421" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="280" width="421" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -906,7 +906,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{lubrication_type}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="316" width="421" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="316" width="421" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -945,7 +945,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{impeller_dia_min}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="332" width="421" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="332" width="421" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -971,7 +971,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{hydrostatic_test_pressure}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="348" width="421" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="348" width="421" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -984,7 +984,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Hydro Test Pressure in Bar]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="95" width="140" height="20" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="95" width="140" height="20" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -997,7 +997,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Category  :]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="421" y="136" width="224" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="136" width="224" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1187,9 +1187,9 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 	<group name="Spare Header Group" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
-			<band height="27">
+			<band height="36">
 				<componentElement>
-					<reportElement mode="Transparent" x="0" y="0" width="802" height="27"/>
+					<reportElement mode="Transparent" x="0" y="0" width="802" height="36"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset3">
 							<datasetParameter name="header_id">
@@ -1197,9 +1197,9 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 							</datasetParameter>
 							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 						</datasetRun>
-						<jr:listContents height="27" width="802">
+						<jr:listContents height="36" width="802">
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="87" y="0" width="46" height="27" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="87" y="0" width="46" height="36" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1207,7 +1207,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{position_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="507" y="0" width="112" height="27"/>
+								<reportElement stretchType="RelativeToTallestObject" x="507" y="0" width="112" height="36"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1215,7 +1215,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{pattern_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="133" y="0" width="140" height="27" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="133" y="0" width="140" height="36" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1223,7 +1223,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{pattern_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="273" y="0" width="44" height="27" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="273" y="0" width="44" height="36" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1231,7 +1231,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="393" y="0" width="114" height="27" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="393" y="0" width="114" height="36" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1239,7 +1239,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="662" y="0" width="65" height="27"/>
+								<reportElement stretchType="RelativeToTallestObject" x="662" y="0" width="65" height="36"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1247,7 +1247,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="727" y="0" width="75" height="27" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="727" y="0" width="75" height="36" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1255,7 +1255,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{material_code}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="317" y="0" width="77" height="27" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="317" y="0" width="77" height="36" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1263,7 +1263,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{mtl_form}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="1" y="0" width="33" height="27" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="1" y="0" width="33" height="36" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1271,7 +1271,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{ref_seq_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="34" y="0" width="53" height="27" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="34" y="0" width="53" height="36" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1279,7 +1279,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{csd_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="619" y="0" width="44" height="27"/>
+								<reportElement stretchType="RelativeToTallestObject" x="619" y="0" width="44" height="36"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
