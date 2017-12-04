@@ -608,22 +608,4 @@ class kg_scheduler(osv.osv):
 	
 	### Below function deletes the past 7 days records daily ends ###
 	
-	def entry_update(self,cr,uid,ids,context=None):
-		grn_obj = self.pool.get('kg.po.grn')
-		grn_ids = grn_obj.search(cr,uid,[('grn_date','>=','2017-12-01')])
-		if grn_ids:
-			for item in grn_ids:
-				total = 0
-				amount_untaxed = 0
-				grn_rec = grn_obj.browse(cr,uid,item)
-				#~ print"grn_recgrn_rec",grn_rec.id
-				if grn_rec.line_ids:
-					total = sum(line.price_subtotal for line in grn_rec.line_ids)
-					for line in grn_rec.line_ids:
-						amount_untaxed += line.po_grn_qty * line.price_unit
-					#~ print"totaltotal",total
-					#~ print"amount_untaxed",amount_untaxed
-				grn_obj.write(cr,uid,grn_rec.id,{'amount_total':total,'amount_untaxed':amount_untaxed})
-		return True
-	
 kg_scheduler()

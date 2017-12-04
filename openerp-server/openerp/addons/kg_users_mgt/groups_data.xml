@@ -489,7 +489,6 @@
 			ref('kg_menus.cpm_crm_master_menu'),
 			ref('kg_partners.cam_crm_customer_master'),
 			ref('kg_partners.cam_crm_dealer_master'),   
-			ref('kg_partners.cam_crm_group_master'),		
 			ref('kg_menus.cam_crm_chemical_master'),
 			ref('kg_industry_master.cam_crm_industry_master'),
 			ref('kg_fluid_master.mam_fluid_master_menu'),

@@ -25,7 +25,6 @@
 					<button name="auto_scheduler_in_house_date" string="IN House Date" type="object" class="oe_highlight"/>
 					<button name="auto_scheduler_sc_wo_date" string="SUB Completed Date" type="object" class="oe_highlight"/>
 					<button name="auto_scheduler_rm_date" string="RM Date" type="object" class="oe_highlight"/>
-					<button name="entry_update" string="PO GRN" type="object" class="oe_highlight"/>
 				</group>
 				</form>
 			</field>
