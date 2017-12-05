@@ -1010,7 +1010,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA["Spare Work Order"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="1" y="53" width="139" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="53" width="140" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1020,7 +1020,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement verticalAlignment="Middle">
 						<font size="10" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[Work Order No. : ]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Work Order No. :"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="53" width="224" height="21"/>
@@ -1033,7 +1033,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement verticalAlignment="Middle">
 						<font size="10" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA[Order Date :]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Order Date :"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
