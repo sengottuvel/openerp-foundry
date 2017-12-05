@@ -1352,6 +1352,46 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
 		</record>
 		
+		<record id="t_crm_ch_primecost_view_access" model="ir.model.access">
+			<field name="model_id" ref="kg_primecost_view.model_ch_primecost_view_access"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch primecost view access</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_primecost_access_fou" model="ir.model.access">
+			<field name="model_id" ref="kg_primecost_view.model_ch_primecost_access_fou"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch primecost access fou</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_primecost_access_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_primecost_view.model_ch_primecost_access_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch primecost access ms</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_ch_primecost_access_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_primecost_view.model_ch_primecost_access_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch primecost access bot</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	

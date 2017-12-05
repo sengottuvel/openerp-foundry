@@ -11,12 +11,12 @@
 				<form string="Primecost View" version="7.0" delete="false">
 					<header>
 						<button name="entry_update" type="object" string="Update" states="draft" class="oe_highlight" invisible="1"/>
-						<button name="prime_cost_update" type="object" string="Update" class="oe_highlight"/>
-<!--					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+						<button name="prime_cost_update" type="object" states="draft" string="Update" class="oe_highlight"/>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
-								<field name="name"/>
+								<field name="name" invisible="1"/>
 								<field name="pump_id" attrs="{'readonly': [('load_bom','=',True)]}" required="1"/>
 								<field name="pump_model_type" required="1"/>
 								<field name="rpm" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
@@ -37,9 +37,9 @@
 								<field name="del_pipe_size" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
 								<field name="bush_bearing" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
 								<field name="motor_kw" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
-								<field name="total_cost" readonly="1"/>
+								<field name="total_cost" readonly="1" invisible="1"/>
 								<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" style="width: 30%%" class="att_state_change" invisible="1"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>
 							</group>					
 						</group>
 						<notebook>
@@ -51,10 +51,11 @@
 										<field name="pattern_id" readonly="1"/>
 										<field name="pattern_name" readonly="1"/>
 										<field name="material_code"/>
-										<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}"/>
-										<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
+										<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+										<field name="qty" attrs="{'required':[('is_applicable','=',True)],'readonly':[('purpose_categ','!=','spare')]}"/>
 										<field name="prime_cost" readonly="1"/>
 										<field name="active" invisible="1"/>
+										<field name="purpose_categ" invisible="1"/>
 									</tree>
 								</field>
 							</page>
@@ -66,11 +67,12 @@
 										<field name="ms_id" readonly="1"/>
 										<field name="ms_name" readonly="1"/>
 										<field name="material_code"/>
-										<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}"/>
+										<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
 										<field name="length" readonly="1"/>
-										<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
+										<field name="qty" attrs="{'required':[('is_applicable','=',True)],'readonly':[('purpose_categ','!=','spare')]}"/>
 										<field name="prime_cost" readonly="1"/>
 										<field name="active" invisible="1"/>
+										<field name="purpose_categ" invisible="1"/>
 									</tree>
 									<form string="MS Details Entry Tree" create="false" delete="false">					
 										<group colspan="4">
@@ -82,11 +84,12 @@
 												<field name="material_code"/>
 											</group>
 											<group>
-												<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}"/>
+												<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
 												<field name="length" readonly="1"/>
-												<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
+												<field name="qty" attrs="{'required':[('is_applicable','=',True)]}"/>
 												<field name="prime_cost" readonly="1"/>
 												<field name="active" invisible="1"/>
+												<field name="purpose_categ" invisible="1"/>
 											</group>
 										</group>
 										<notebook>
@@ -120,12 +123,13 @@
 										<field name="bot_id" readonly="1"/>
 										<field name="bot_name" readonly="1"/>
 										<field name="material_code"/>
-										<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}"/>
-										<field name="brand_id" attrs="{'required': [('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
-										<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
+										<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+										<field name="brand_id" attrs="{'required':[('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
+										<field name="qty" attrs="{'required': [('is_applicable','=',True)],'readonly':[('purpose_categ','!=','spare')]}"/>
 										<field name="prime_cost" readonly="1"/>
 										<field name="active" invisible="1"/>
 										<field name="flag_is_bearing" invisible="1"/>
+										<field name="purpose_categ" invisible="1"/>
 									</tree>
 								</field>
 							</page>
@@ -258,6 +262,109 @@
 							</form>
 							</field>
 							</page>
+							<page string="Accessories">
+								<field name="line_ids_c" context="{'moc_const_id':moc_const_id,'is_selectable_all':True}">
+									<tree string="Accessories Entry Tree">
+										<field name="access_categ_id" required="1"/>
+										<field name="access_id" required="1"/>
+										<field name="accessories_type"/>
+										<field name="off_name"/>
+										<field name="moc_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="prime_cost"/>
+										<field name="oth_spec"/>
+									</tree>
+									<form string="Accessories Entry Form">
+										<group colspan="4">
+											<group>
+												<field name="access_categ_id" on_change="onchange_access_id(access_categ_id,access_id)" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
+												<field name="access_id" required="1" attrs="{'readonly':['|',('load_access','=',True),('access_categ_id','=',False)]}"/>
+												<field name="accessories_type" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
+												<field name="moc_const_id" required="1" attrs="{'readonly':[('load_access','=',True)]}" invisible="1"/>
+												<field name="flag_standard"/>
+												<field name="moc_id" invisible="1"/>
+											</group>
+											<group>
+												<field name="qty" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
+												<field name="off_name"/>
+												<field name="oth_spec"/>
+												<field name="prime_cost" invisible="1"/>
+											</group>
+											<group>
+											<group>
+												<field name="load_access" on_change="onchange_load_access(load_access,flag_standard,access_id,moc_const_id,qty,is_selectable_all)"/>
+											</group>
+											<group>
+												<field name="is_selectable_all" on_change="onchange_load_access(load_access,flag_standard,access_id,moc_const_id,qty,is_selectable_all)" attrs="{'invisible':[('load_access','!=',True)]}"/>
+											</group>
+											</group>
+										</group>
+										<notebook>
+											<page string = "Foundry Items">
+												<field name="line_ids" nolabel="1">
+													<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
+														<field name="is_applicable"/>
+														<field name="position_id" readonly="1"/>
+														<field name="pattern_id" readonly="1"/>
+														<field name="pattern_name" readonly="1"/>
+														<field name="material_code"/>
+														<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+														<field name="csd_no" readonly="1"/>
+														<field name="qty" required="1"/>
+														<field name="prime_cost" readonly="1"/>
+														<field name="remarks" />
+														<field name="load_bom" invisible="1"/>
+														<field name="moc_name" invisible="1"/>
+														<field name="moc_changed_flag" invisible="1"/>
+														<field name="flag_standard" invisible="1"/>
+													</tree>
+												</field>								
+											</page>
+											<page string = "MS Items">
+												<field name="line_ids_a" nolabel="1">
+													<tree string="MS Item" editable="top" create="false" delete="false">
+														<field name="is_applicable"/>
+														<field name="position_id" readonly="1"/>
+														<field name="ms_id" readonly="1"/>
+														<field name="name" readonly="1"/>
+														<field name="material_code"/>
+														<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+														<field name="csd_no" readonly="1"/>
+														<field name="qty" required="1"/>
+														<field name="prime_cost" readonly="1"/>
+														<field name="remarks"/>
+														<field name="load_bom" invisible="1"/>
+														<field name="moc_name" invisible="1"/>
+														<field name="moc_changed_flag" invisible="1"/>
+														<field name="flag_standard" invisible="1"/>
+													</tree>
+												</field>								
+											</page>
+											<page string = "BOT Items">
+												<field name="line_ids_b" nolabel="1">
+													<tree string="BOT Item" editable="top" create="false" delete="false">
+														<field name="is_applicable"/>
+														<field name="position_id" readonly="1"/>
+														<field name="ms_id" readonly="1"/>
+														<field name="name" readonly="1"/>
+														<field name="material_code"/>
+														<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+														<field name="csd_no" readonly="1"/>
+														<field name="qty" required="1"/>
+														<field name="prime_cost" readonly="1"/>
+														<field name="remarks"/>
+														<field name="load_bom" invisible="1"/>
+														<field name="moc_name" invisible="1"/>
+														<field name="moc_changed_flag" invisible="1"/>
+														<field name="flag_standard" invisible="1"/>
+													</tree>
+												</field>								
+											</page>
+										</notebook>
+									</form>
+								</field>								
+							</page>
+							
 							<page string="Entry Info">
 								<group>
 									<group>
@@ -278,7 +385,7 @@
 									</group>
 								</group>
 							</page>
-							<page string="Notification Info">								
+							<page string="Notification Info" invisible="1">								
 								<group>
 									<group>
 										<field name="flag_sms"/>										
@@ -305,12 +412,12 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';black:state == 'confirmed';" 
 								toolbar="True" string="Primecost View" delete="false">					
-					<field name="name"/>
+					<field name="name" invisible="1"/>
 					<field name="entry_date"/>
 					<field name="pump_id"/>
 					<field name="pump_cost"/>
 					<field name="total_cost"/>
-					<field name="state" invisible="1"/>
+					<field name="state"/>
 				</tree>
 			</field>
 		</record>
@@ -324,21 +431,18 @@
             <field name="model">kg.primecost.view</field>
             <field name="arch" type="xml">
                 <search string="Primecost View Entry Search">
-					<field name="name" string="No"  filter_domain="[('name','ilike',self)]" />
-					<field name="pump_id" string="Pump Model"  filter_domain="[('pump_id','ilike',self)]" />
-					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
-					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<field name="pump_id" string="Pump Model" filter_domain="[('pump_id','ilike',self)]" />
+					<field name="entry_date" string="Entry Date" filter_domain="[('entry_date','ilike',self)]" />
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_id'}"/>
-                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
 					</group>
                 </search>
 			</field>
 		</record>
 		
 	<!-- Search View End -->		
-        
+	
 	<!-- Menu Action Start-->
 		
 		<record id="tma_primecost_view" model="ir.actions.act_window">
@@ -349,20 +453,12 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_primecost_view"/>
 			<field name="search_view_id" ref="t_search_v_primecost_view"/>
-			<field name="context">{"search_default_draft":1}</field>
+			<field name="context">{}</field>
 		</record>
-		
+	
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start -->
-		
-        <record id="audit_primecost_view" model="audittrail.rule">
-            <field name="name">Audit Log Primecost Views</field>
-            <field name="object_id" eval="ref('kg_primecost_view.model_kg_primecost_view')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-		
-		<!-- Prime Cost View --> 
+		<!-- Menu item --> 
 		
 		<menuitem action="tma_primecost_view" name="Prime Cost View" id="tam_primecost_view" parent="kg_menus.cpm_crm_enquiry_menu" sequence="9"/>
 				
