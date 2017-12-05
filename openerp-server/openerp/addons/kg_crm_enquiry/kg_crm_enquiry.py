@@ -975,6 +975,7 @@ class kg_crm_enquiry(osv.osv):
 						values = self.pool.get('ch.kg.crm.pumpmodel').copy_data(cr, uid, order_item.id, default=None, context=None)
 						template_id = self.pool.get('ch.kg.crm.pumpmodel').create(cr,uid,values)
 						self.pool.get('ch.kg.crm.pumpmodel').write(cr,uid,template_id,{'template_name':order_item.template_name,'template_id':order_item.id,'template_type':order_item.template_type,'template_id':order_item.template_id.id,'template_copy_flag':True,'template_flag':True,'qty':1})
+						cr.execute(''' delete from ch_kg_crm_pumpmodel where id = %s '''%(order_item.id))
 					## Save as template process ends
 			
 			## Additional Components Primecost calculation starts
