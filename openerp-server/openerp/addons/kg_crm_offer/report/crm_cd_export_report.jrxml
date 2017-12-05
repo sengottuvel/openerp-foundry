@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cd_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.2100000000000009"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="82"/>
+	<property name="ireport.y" value="34"/>
 	<subDataset name="dataset1">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
@@ -189,10 +189,21 @@ sum((COALESCE((COALESCE(pump.prime_cost,0)),0))),2) as ratio,
 
 round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
 round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
-(select case when r_p_f_in_ex = 'inclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
-from ch_accessories_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'inclusive' group by r_p_f_in_ex) as avg_pf_dis,
-(select case when r_freight_in_ex = 'inclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
-from ch_accessories_offer where header_id = $P{offer_id} and r_freight_in_ex = 'inclusive' group by r_freight_in_ex) as avg_freight_dis,
+
+(select case when acc_off.r_p_f_in_ex = 'inclusive' then round (avg(COALESCE(acc_off.r_p_f,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer acc_off
+left join kg_accessories_master acc_mas on(acc_mas.id=acc_off.access_id)
+where acc_off.header_id = $P{offer_id} and acc_off.r_p_f_in_ex = 'inclusive' and
+acc_mas.is_pump_acc_flag = True
+group by acc_off.r_p_f_in_ex) as avg_pf_dis,
+
+(select case when acc_off.r_freight_in_ex = 'inclusive' then round (avg(COALESCE(acc_off.r_freight,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer acc_off
+left join kg_accessories_master acc_mas on(acc_mas.id=acc_off.access_id)
+where acc_off.header_id = $P{offer_id} and acc_off.r_freight_in_ex = 'inclusive' and
+acc_mas.is_pump_acc_flag = True
+group by acc_off.r_freight_in_ex) as avg_freight_dis,
+
 round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
 
 from ch_accessories_offer pump
@@ -557,10 +568,20 @@ sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer)  -
 
 sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam,
 
-(select case when r_p_f_in_ex = 'exclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
-from ch_accessories_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'exclusive' group by r_p_f_in_ex) as avg_pf_ex_dis,
-(select case when r_freight_in_ex = 'exclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
-from ch_accessories_offer where header_id = $P{offer_id} and r_freight_in_ex = 'exclusive' group by r_freight_in_ex) as avg_freight_ex_dis
+(select case when acc_off.r_p_f_in_ex = 'exclusive' then round (avg(COALESCE(acc_off.r_p_f,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer acc_off
+left join kg_accessories_master acc_mas on(acc_mas.id=acc_off.access_id)
+where acc_off.header_id = $P{offer_id} and acc_off.r_p_f_in_ex = 'inclusive' and
+acc_mas.is_pump_acc_flag = True
+group by acc_off.r_p_f_in_ex) as avg_pf_ex_dis,
+
+
+(select case when acc_off.r_freight_in_ex = 'exclusive' then round (avg(COALESCE(acc_off.r_freight,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer acc_off
+left join kg_accessories_master acc_mas on(acc_mas.id=acc_off.access_id)
+where acc_off.header_id = $P{offer_id} and acc_off.r_freight_in_ex = 'inclusive' and
+acc_mas.is_pump_acc_flag = True
+group by acc_off.r_freight_in_ex) as avg_freight_ex_dis
 
 from ch_accessories_offer pump
 
@@ -809,10 +830,20 @@ sum((COALESCE((COALESCE(pump.prime_cost,0)),0))),2) as ratio,
 
 round (avg(COALESCE(pump.r_customer_discount,0))::DECIMAL,2)::TEXT as avg_cust_dis,
 round (avg(COALESCE(pump.r_special_discount,0))::DECIMAL,2)::TEXT as avg_spl_dis,
-(select case when r_p_f_in_ex = 'inclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
-from ch_accessories_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'inclusive' group by r_p_f_in_ex) as avg_pf_dis,
-(select case when r_freight_in_ex = 'inclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
-from ch_accessories_offer where header_id = $P{offer_id} and r_freight_in_ex = 'inclusive' group by r_freight_in_ex) as avg_freight_dis,
+
+(select case when acc_off.r_p_f_in_ex = 'inclusive' then round (avg(COALESCE(acc_off.r_p_f,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer acc_off
+left join kg_accessories_master acc_mas on(acc_mas.id=acc_off.access_id)
+where acc_off.header_id = $P{offer_id} and acc_off.r_p_f_in_ex = 'inclusive' and
+(acc_mas.is_pump_acc_flag != True or acc_mas.is_pump_acc_flag is null)
+group by acc_off.r_p_f_in_ex) as avg_pf_dis,
+
+(select case when acc_off.r_freight_in_ex = 'inclusive' then round (avg(COALESCE(acc_off.r_freight,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer acc_off
+left join kg_accessories_master acc_mas on(acc_mas.id=acc_off.access_id)
+where acc_off.header_id = $P{offer_id} and acc_off.r_freight_in_ex = 'inclusive' and
+(acc_mas.is_pump_acc_flag != True or acc_mas.is_pump_acc_flag is null) group by r_freight_in_ex) as avg_freight_dis,
+
 round (avg(COALESCE(pump.r_dealer_discount,0))::DECIMAL,2)::TEXT as avg_deal_dis
 
 from ch_accessories_offer pump
@@ -880,11 +911,17 @@ sum((COALESCE((COALESCE(pump.r_freight_ex_tot,0)),0)))::integer)  -
 
 sum((COALESCE((COALESCE(pump.r_dealer_discount_tot,0)),0)))::integer) as nett_sam,
 
-(select case when r_p_f_in_ex = 'exclusive' then round (avg(COALESCE(r_p_f,0))::DECIMAL,2) else 0 end
-from ch_accessories_offer where header_id = $P{offer_id} and r_p_f_in_ex = 'exclusive' group by r_p_f_in_ex) as avg_pf_ex_dis,
-(select case when r_freight_in_ex = 'exclusive' then round (avg(COALESCE(r_freight,0))::DECIMAL,2) else 0 end
-from ch_accessories_offer where header_id = $P{offer_id} and r_freight_in_ex = 'exclusive' group by r_freight_in_ex) as avg_freight_ex_dis
+(select case when acc_off.r_p_f_in_ex = 'exclusive' then round (avg(COALESCE(acc_off.r_p_f,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer acc_off
+left join kg_accessories_master acc_mas on(acc_mas.id=acc_off.access_id)
+where acc_off.header_id = $P{offer_id} and acc_off.r_p_f_in_ex = 'inclusive' and acc_mas.is_pump_acc_flag = True
+group by acc_off.r_p_f_in_ex) as avg_pf_ex_dis,
 
+(select case when acc_off.r_freight_in_ex = 'exclusive' then round (avg(COALESCE(acc_off.r_freight,0))::DECIMAL,2) else 0 end
+from ch_accessories_offer acc_off
+left join kg_accessories_master acc_mas on(acc_mas.id=acc_off.access_id)
+where acc_off.header_id = $P{offer_id} and acc_off.r_freight_in_ex = 'inclusive' and
+acc_mas.is_pump_acc_flag = True group by r_freight_in_ex) as avg_freight_ex_dis
 
 from ch_accessories_offer pump
 

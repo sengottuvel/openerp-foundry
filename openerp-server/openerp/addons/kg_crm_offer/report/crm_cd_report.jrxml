@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cd_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000008"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="31"/>
+	<property name="ireport.y" value="30"/>
 	<subDataset name="dataset1">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
@@ -217,7 +217,11 @@ trim(TO_CHAR((COALESCE(((
 select avg(ref) as ref from (
 select
 case when pp.r_p_f_in_ex = 'inclusive' then r_p_f else 0.00 end as ref
- from ch_accessories_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_dis,
+ from ch_accessories_offer pp
+left join kg_accessories_master access_pp on(access_pp.id=pp.access_id)
+where pp.header_id = $P{offer_id} and access_pp.is_pump_acc_flag = True
+
+) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_dis,
 
 round (avg(COALESCE(pump.r_freight,0))::DECIMAL,2)::TEXT as avg_freight_dis,
 round (avg(COALESCE(pump.r_insurance,0))::DECIMAL,2)::TEXT as avg_ins_dis,
@@ -613,7 +617,9 @@ trim(TO_CHAR((COALESCE(((
 select avg(ref) as ref from (
 select
 case when pp.r_p_f_in_ex = 'exclusive' then r_p_f else 0.00 end as ref
- from ch_accessories_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_ex_dis,
+ from ch_accessories_offer pp
+left join kg_accessories_master access_pp on(access_pp.id=pp.access_id)
+where pp.header_id = $P{offer_id} and access_pp.is_pump_acc_flag = True) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_ex_dis,
 
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
@@ -955,7 +961,9 @@ trim(TO_CHAR((COALESCE(((
 select avg(ref) as ref from (
 select
 case when pp.r_p_f_in_ex = 'exclusive' then r_p_f else 0.00 end as ref
- from ch_accessories_offer pp where pp.header_id = $P{offer_id} ) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_ex_dis,
+ from ch_accessories_offer pp
+left join kg_accessories_master access_pp on(access_pp.id=pp.access_id)
+where pp.header_id = $P{offer_id} and (access_pp.is_pump_acc_flag != True or access_pp.is_pump_acc_flag is null)) as sam where ref > 0)::numeric) ,0.00) ), '999G999G99G999G99G99G990D99')) as avg_pf_ex_dis,
 
 -- PF val
 sum((COALESCE((COALESCE(pump.r_p_f_ex_tot,0)),0)))::integer pf_val,
