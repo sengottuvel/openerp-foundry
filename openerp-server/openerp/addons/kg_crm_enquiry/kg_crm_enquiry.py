@@ -968,7 +968,7 @@ class kg_crm_enquiry(osv.osv):
 																						  })
 					## Accesssories Part
 					if order_item.acces == 'yes':
-						self.access_creation(cr,uid,offer_id,order_item,'fou')
+						self.access_creation(cr,uid,offer_id,order_item,'enquiry')
 					
 					## Save as template process starts
 					if order_item.save_as_template == True:
@@ -1079,73 +1079,88 @@ class kg_crm_enquiry(osv.osv):
 		return True
 	
   	def access_creation(self,cr,uid,offer_id,order_item,item_type,context=None):
-		if order_item.line_ids_access_a:
+		if item_type == 'enquiry':
+			if order_item.line_ids_access_a:
+				moc_changed_flag = False
+				pump_id = order_item.pump_id.id
+				prime_cost = 0
+				for foundry_item in order_item.line_ids_access_a:
+					prime_cost = 0
+					if foundry_item.line_ids:
+						for acc_fou_item in foundry_item.line_ids:
+							if acc_fou_item.is_applicable == True:
+								acc_fou_prime_cost = self._prime_cost_calculation(cr,uid,'foundry',acc_fou_item.pattern_id.id,
+								0,0,0,order_item.moc_const_id.id,acc_fou_item.moc_id.id,0)
+								self.pool.get('ch.crm.access.fou').write(cr,uid,acc_fou_item.id,{'prime_cost':acc_fou_prime_cost * acc_fou_item.qty })
+								prime_cost += acc_fou_prime_cost * acc_fou_item.qty							
+								moc_changed_flag = acc_fou_item.moc_changed_flag
+					if foundry_item.line_ids_a:
+						for acc_ms_item in foundry_item.line_ids_a:
+							if acc_ms_item.is_applicable == True:							
+								acc_ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
+								acc_ms_item.ms_id.id,1,0,order_item.moc_const_id.id,acc_ms_item.moc_id.id,0)
+								self.pool.get('ch.crm.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost * acc_ms_item.qty})
+								prime_cost += acc_ms_prime_cost * acc_ms_item.qty							
+								moc_changed_flag = acc_ms_item.moc_changed_flag
+					if foundry_item.line_ids_b:
+						for acc_bot_item in foundry_item.line_ids_b:
+							if acc_bot_item.is_applicable == True:							
+								acc_bot_prime_cost = self._prime_cost_calculation(cr,uid,'bot',0,
+								0,0,acc_bot_item.ms_id.id,order_item.moc_const_id.id,acc_bot_item.moc_id.id,0)
+								self.pool.get('ch.crm.access.bot').write(cr,uid,acc_bot_item.id,{'prime_cost':acc_bot_prime_cost * acc_bot_item.qty})
+								prime_cost += acc_bot_prime_cost * acc_bot_item.qty							
+								moc_changed_flag = acc_bot_item.moc_changed_flag
+					self.pool.get('ch.kg.crm.accessories').write(cr,uid,foundry_item.id,{'prime_cost':prime_cost})
+					hsn_no = ''
+					gst = ''
+					if foundry_item.header_id.header_id.segment == 'dom':
+						hsn_no = foundry_item.access_id.hsn_no.id
+						gst = foundry_item.access_id.hsn_no.igst_id.id
+					access_id = self.pool.get('ch.accessories.offer').create(cr,uid,{
+																'header_id': offer_id,
+																'access_id': foundry_item.access_id.id,
+																'off_name': foundry_item.off_name,
+																'pump_id': order_item.pump_id.id,
+																'moc_id': foundry_item.moc_id.id,
+																'qty': foundry_item.qty,
+																'prime_cost': prime_cost,
+																'per_access_prime_cost': prime_cost / foundry_item.qty,
+																'enquiry_line_access_id': foundry_item.id,
+																'enquiry_line_id': order_item.id,
+																'hsn_no': hsn_no,
+																'gst': gst,
+																})
+		elif item_type == 'primecost_view':
 			moc_changed_flag = False
 			pump_id = order_item.pump_id.id
-			
 			prime_cost = 0
-			for foundry_item in order_item.line_ids_access_a:
+			for foundry_item in order_item.line_ids_c:
 				prime_cost = 0
 				if foundry_item.line_ids:
 					for acc_fou_item in foundry_item.line_ids:
 						if acc_fou_item.is_applicable == True:
-							print "ffffffffffffffffoufoufouffoufffffffffaccess"
 							acc_fou_prime_cost = self._prime_cost_calculation(cr,uid,'foundry',acc_fou_item.pattern_id.id,
 							0,0,0,order_item.moc_const_id.id,acc_fou_item.moc_id.id,0)
-							print "foundry_item.pattern_id",acc_fou_item.pattern_id.pattern_name
-							self.pool.get('ch.crm.access.fou').write(cr,uid,acc_fou_item.id,{'prime_cost':acc_fou_prime_cost * acc_fou_item.qty })
-							print"acc_fou_prime_cost--------------",acc_fou_prime_cost
-							print"foundry_item.qty--------------",acc_fou_item.qty
-							prime_cost += acc_fou_prime_cost * acc_fou_item.qty
-							print "acc_fou_prime_cost",acc_fou_prime_cost
-							print "fou_prime_cost_access",prime_cost
+							self.pool.get('ch.primecost.access.fou').write(cr,uid,acc_fou_item.id,{'prime_cost':acc_fou_prime_cost * acc_fou_item.qty })
+							prime_cost += acc_fou_prime_cost * acc_fou_item.qty							
 							moc_changed_flag = acc_fou_item.moc_changed_flag
 				if foundry_item.line_ids_a:
 					for acc_ms_item in foundry_item.line_ids_a:
-						if acc_ms_item.is_applicable == True:
-							print "fffffffffffffffmsmsmsmsmsfffffffffaccess"
+						if acc_ms_item.is_applicable == True:							
 							acc_ms_prime_cost = self._prime_cost_calculation(cr,uid,'ms',0,
 							acc_ms_item.ms_id.id,1,0,order_item.moc_const_id.id,acc_ms_item.moc_id.id,0)
-							self.pool.get('ch.crm.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost * acc_ms_item.qty})
-							print"acc_ms_prime_cost--------------",acc_ms_prime_cost
-							print"acc_ms_item.qty--------------",acc_ms_item.qty
-							prime_cost += acc_ms_prime_cost * acc_ms_item.qty
-							print "acc_ms_prime_cost",acc_ms_prime_cost
-							print "ms_prime_cost_access",prime_cost
+							self.pool.get('ch.primecost.access.ms').write(cr,uid,acc_ms_item.id,{'prime_cost':acc_ms_prime_cost * acc_ms_item.qty})
+							prime_cost += acc_ms_prime_cost * acc_ms_item.qty							
 							moc_changed_flag = acc_ms_item.moc_changed_flag
 				if foundry_item.line_ids_b:
 					for acc_bot_item in foundry_item.line_ids_b:
-						if acc_bot_item.is_applicable == True:
-							print "fffffffffffffffbotbotobotbotfffffffffaccess"
+						if acc_bot_item.is_applicable == True:							
 							acc_bot_prime_cost = self._prime_cost_calculation(cr,uid,'bot',0,
 							0,0,acc_bot_item.ms_id.id,order_item.moc_const_id.id,acc_bot_item.moc_id.id,0)
-							self.pool.get('ch.crm.access.bot').write(cr,uid,acc_bot_item.id,{'prime_cost':acc_bot_prime_cost * acc_bot_item.qty})
-							print"acc_bot_prime_cost--------------",acc_bot_prime_cost
-							print"acc_bot_item.qty--------------",acc_bot_item.qty
-							prime_cost += acc_bot_prime_cost * acc_bot_item.qty
-							print "acc_bot_prime_cost",acc_bot_prime_cost
-							print "bot_prime_cost_access",prime_cost
+							self.pool.get('ch.primecost.access.bot').write(cr,uid,acc_bot_item.id,{'prime_cost':acc_bot_prime_cost * acc_bot_item.qty})
+							prime_cost += acc_bot_prime_cost * acc_bot_item.qty							
 							moc_changed_flag = acc_bot_item.moc_changed_flag
-				self.pool.get('ch.kg.crm.accessories').write(cr,uid,foundry_item.id,{'prime_cost':prime_cost})
-				hsn_no = ''
-				gst = ''
-				if foundry_item.header_id.header_id.segment == 'dom':
-					hsn_no = foundry_item.access_id.hsn_no.id
-					gst = foundry_item.access_id.hsn_no.igst_id.id
-				access_id = self.pool.get('ch.accessories.offer').create(cr,uid,{
-															'header_id': offer_id,
-															'access_id': foundry_item.access_id.id,
-															'off_name': foundry_item.off_name,
-															'pump_id': order_item.pump_id.id,
-															'moc_id': foundry_item.moc_id.id,
-															'qty': foundry_item.qty,
-															'prime_cost': prime_cost,
-															'per_access_prime_cost': prime_cost / foundry_item.qty,
-															'enquiry_line_access_id': foundry_item.id,
-															'enquiry_line_id': order_item.id,
-															'hsn_no': hsn_no,
-															'gst': gst,
-															})
+				self.pool.get('ch.primecost.view.access').write(cr,uid,foundry_item.id,{'prime_cost':prime_cost})
 		return True
 	
   	def spare_bom_creation(self,cr,uid,offer_id,orde_item,spare_bom_prime_cost,context=None):

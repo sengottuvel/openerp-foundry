@@ -1377,24 +1377,27 @@ class kg_primecost_view(osv.osv):
 			
 			## Accessories primecost starts
 			if entry.line_ids_c:
-				for access in entry.line_ids_c:
-					prime_cost = 0
-					access_rec = self.pool.get('kg.accessories.master').browse(cr,uid,access.access_id.id)
-					if access_rec.line_ids_b:
-						for acc_fou_item in access_rec.line_ids_b:
-							acc_fou_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'foundry',acc_fou_item.pattern_id.id,
-							0,0,0,0,access.moc_id.id,0)
-							prime_cost += acc_fou_prime_cost * acc_fou_item.qty
-					if access_rec.line_ids_a:
-						for acc_ms_item in access_rec.line_ids_a:
-							acc_ms_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'ms',0,
-							acc_ms_item.ms_id.id,1,0,0,access.moc_id.id,0)
-							prime_cost += acc_ms_prime_cost
-					if access_rec.line_ids:
-						for acc_bot_item in access_rec.line_ids:
-							acc_bot_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'bot',0,
-							0,0,acc_bot_item.ms_id.id,0,access.moc_id.id,0)
-							prime_cost += acc_bot_prime_cost * acc_bot_item.qty
+				crm_obj.access_creation(cr,uid,0,entry,'primecost_view')
+			
+			#~ if entry.line_ids_c:
+				#~ for access in entry.line_ids_c:
+					#~ prime_cost = 0
+					#~ access_rec = self.pool.get('kg.accessories.master').browse(cr,uid,access.access_id.id)
+					#~ if access_rec.line_ids_b:
+						#~ for acc_fou_item in access_rec.line_ids_b:
+							#~ acc_fou_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'foundry',acc_fou_item.pattern_id.id,
+							#~ 0,0,0,0,access.moc_id.id,0)
+							#~ prime_cost += acc_fou_prime_cost * acc_fou_item.qty
+					#~ if access_rec.line_ids_a:
+						#~ for acc_ms_item in access_rec.line_ids_a:
+							#~ acc_ms_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'ms',0,
+							#~ acc_ms_item.ms_id.id,1,0,0,access.moc_id.id,0)
+							#~ prime_cost += acc_ms_prime_cost
+					#~ if access_rec.line_ids:
+						#~ for acc_bot_item in access_rec.line_ids:
+							#~ acc_bot_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'bot',0,
+							#~ 0,0,acc_bot_item.ms_id.id,0,access.moc_id.id,0)
+							#~ prime_cost += acc_bot_prime_cost * acc_bot_item.qty
 			## Accessories primecost ends
 			
 			self.write(cr, uid, ids, {'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
