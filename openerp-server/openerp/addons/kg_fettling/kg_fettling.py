@@ -3468,6 +3468,10 @@ class kg_fettling(osv.osv):
 				raise osv.except_osv(_('Warning!'),
 							_('Completed and Rejected qty should be equal to Production Qty !!'))
 							
+			if entry.finish_grinding_weight <= 0:
+				raise osv.except_osv(_('Warning!'),
+					_('System not allow to save negative or zero values for weight !!'))
+							
 			if reject_qty > 0:
 				if entry.finish_grinding_reject_qty == 0:
 					raise osv.except_osv(_('Warning!'),
