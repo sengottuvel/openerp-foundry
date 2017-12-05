@@ -198,31 +198,30 @@
 					<group>
 						<group>
 							<field name="order_no" required="1"/>
+							<field name="equipment_no"/>
+							<field name="description"/>
 							<field name="pump_model_id" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="order_ref_no" invisible="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="moc_construction_id" on_change="onchange_moccons_name(moc_construction_id)" required="1"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
-							<field name="qap_plan_id"/>
-							<field name="rpm"   attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="qap_plan_id" required="1"/>
+							<field name="rpm" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>							
 							<field name="bed_length"  invisible="1"/>
-							<field name="motor_power"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
-							<field name="delivery_pipe_size"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
-							<field name="bush_bearing"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="motor_power" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
+							<field name="delivery_pipe_size" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
+							<field name="bush_bearing" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>							
 							<field name="flange_standard"  readonly="0"/>
 							<field name="bp" invisible="1"/>
-							<field name="m_power" attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="m_power" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>							
 							<field name="drawing_approval" attrs="{'readonly': [('flag_load_bom','!=',False)],'invisible': [('order_category','=','access')]}"/>
 							<field name="inspection" attrs="{'readonly': [('flag_load_bom','!=',False)],'invisible': [('order_category','=','access')]}"/>
 							<field name="size_suctionx"/>
 							<field name="consistency"/>
+							<field name="npsh_avl"/>
+							<field name="npsh_r_m"/>
 							<field name="unit_price"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="flag_standard"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="state" invisible="1"/>
 							<field name="flag_cancel" invisible="1"/>
-							<!--<field name="cancel_remark" attrs="{'invisible': [('flag_cancel','=',False)], 'readonly': [('state','in',['cancel'])]}"/>
-							<group attrs="{'invisible': [('flag_cancel','=',False)]}">
-								<button name="entry_cancel" type="object" string="Cancel"  class="oe_highlight"  states="confirmed"/>
-							</group>
-							-->
 						</group>
 						<group>
 							
@@ -230,14 +229,14 @@
 							<field name="pump_model_type" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="moc_construction_name"/>
 							<field name="qty"  required="1" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
-							<field name="setting_height"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="setting_height" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>							
 							<field name="suction_spool"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
-							<field name="shaft_sealing" />
-							<field name="lubrication"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="shaft_sealing" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
+							<field name="lubrication" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>							
 							<field name="shaft_ext" invisible="1"/>
 							<field name="trimming_dia"/>
 							<field name="cc_drill"/>
-							<field name="delivery_date" readonly="1" on_change="onchange_delivery_date(delivery_date)"/>
+							<field name="delivery_date" readonly="1"/>
 							<field name="mar_prime_cost" readonly="1" invisible="0"/>
 							<field name="wo_prime_cost" readonly="1"/>
 							<field name="flag_offer" invisible="1"/>
