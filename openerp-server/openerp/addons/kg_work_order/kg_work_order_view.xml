@@ -197,9 +197,7 @@
 				<form string="Work Order Details Entry Form" version="7.0" delete="false">
 					<group>
 						<group>
-							<field name="order_no" required="1"/>
-							<field name="equipment_no"/>
-							<field name="description"/>
+							<field name="order_no" required="1"/>						
 							<field name="pump_model_id" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="order_ref_no" invisible="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="moc_construction_id" on_change="onchange_moccons_name(moc_construction_id)" required="1"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
