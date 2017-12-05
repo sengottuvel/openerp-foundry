@@ -491,7 +491,7 @@ class kg_partner(osv.osv):
 		(_check_ifsc,'IFSC should contain 11 letters. Else system not allow to save.',['IFSC']),
 		(_check_acc_no,'A/C No. should contain 6-18 digit numerics. Else system not allow to save.',['A/C No.']),
 		(_check_mobile_no,'Mobile No. should contain 10-12 digit numerics. Else system not allow to save.',['Mobile']),
-		(_name_validate, 'Name must be unique !!', ['Name']),		
+		#~ (_name_validate, 'Name must be unique !!', ['Name']),		
 		#~ (_unique_tin, 'TIN must be unique !!', ['TIN']),
 		(_spl_name, 'Special Character Not Allowed!', ['']),
 		]
