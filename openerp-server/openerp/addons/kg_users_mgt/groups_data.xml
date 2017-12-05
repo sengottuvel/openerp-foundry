@@ -13,6 +13,7 @@
 			ref('kg_pumpmodel_master.mpm_masters'),
 			ref('kg_pumpmodel_master.mpm_planning_master'),			  
 			ref('kg_pumpmodel_master.mam_pumpmodel_master'),
+			ref('kg_menus.menu_mgmt_masters_ppc_trans'),
 		  
 			ref('kg_stage_master.mam_stage_master'),
 			ref('kg_moc_master.mam_moc_master'),
@@ -204,6 +205,7 @@
 		<field name="category_id" ref="base.module_category_manufacturing"/>
 		<field eval="[(6,0,[
 			ref('kg_pumpmodel_master.mpm_masters'),
+			ref('kg_menus.menu_mgmt_masters_ppc_trans'),
 			ref('kg_pumpmodel_master.mpm_planning_master'),			  
 			ref('kg_pumpmodel_master.mam_pumpmodel_master'),
 			ref('kg_product.mam_uom_master'),
