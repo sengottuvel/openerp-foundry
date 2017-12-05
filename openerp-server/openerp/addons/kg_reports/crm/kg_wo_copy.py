@@ -111,14 +111,14 @@ class kg_wo_copy(osv.osv):
 			pass
 		return True
 	
-	def unlink(self,cr,uid,ids,context=None):
-		unlink_ids = []		
-		for rec in self.browse(cr,uid,ids):	
-			if rec.state != 'draft':			
-				raise osv.except_osv(_('Warning!'),_('You can not delete this entry !!'))
-			else:
-				unlink_ids.append(rec.id)
-		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	#~ def unlink(self,cr,uid,ids,context=None):
+		#~ unlink_ids = []		
+		#~ for rec in self.browse(cr,uid,ids):	
+			#~ if rec.state != 'draft':			
+				#~ raise osv.except_osv(_('Warning!'),_('You can not delete this entry !!'))
+			#~ else:
+				#~ unlink_ids.append(rec.id)
+		#~ return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 	
 	def create(self, cr, uid, vals, context=None):
 		return super(kg_wo_copy, self).create(cr, uid, vals, context=context)

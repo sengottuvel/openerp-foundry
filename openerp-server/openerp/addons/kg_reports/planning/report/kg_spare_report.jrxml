@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="842" pageHeight="605" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="0.8857805000000005"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="17"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -425,19 +425,6 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
 			<band height="431">
-				<staticText>
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="32" width="801" height="21" isRemoveLineWhenBlank="true"/>
-					<box>
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Spare Work Order]]></text>
-				</staticText>
 				<textField>
 					<reportElement mode="Transparent" x="0" y="1" width="802" height="31"/>
 					<box topPadding="13"/>
@@ -446,32 +433,6 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
 				</textField>
-				<staticText>
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="53" width="140" height="21" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Work Order No. : ]]></text>
-				</staticText>
-				<staticText>
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="53" width="224" height="21" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Order Date :]]></text>
-				</staticText>
 				<staticText>
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="74" width="140" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
@@ -1034,6 +995,45 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{order_priority}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="32" width="803" height="21"/>
+					<box leftPadding="3" bottomPadding="0">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Spare Work Order"]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="1" y="53" width="139" height="21"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[Work Order No. : ]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="53" width="224" height="21"/>
+					<box leftPadding="3" rightPadding="0">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[Order Date :]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
