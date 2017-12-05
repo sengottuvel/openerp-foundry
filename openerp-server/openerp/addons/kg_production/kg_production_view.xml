@@ -646,8 +646,7 @@
 					<field name="schedule_date"/>
 					<field name="schedule_id"/>
 					<field name="order_no"/>
-					<field name="pump_model_id"/>
-					<field name="order_no"/>
+					<field name="pump_model_id"/>					
 					<field name="order_delivery_date" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
@@ -657,7 +656,7 @@
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
 					<field name="each_weight" sum="Total Each Weight"/>
 					<field name="core_total_weight" sum="Total Weight"/>
-					<field name="core_rem_qty" string="Remaining Qty"/>
+					<field name="core_rem_qty" sum="core_rem_qty" string="Remaining Qty"/>
 					<field name="sch_remarks"/>
 					<field name="core_remarks"/>
 					<field name="core_state"/>
@@ -715,7 +714,7 @@
 			<field name="res_model">kg.production</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="domain">[('core_state','in',('pending','partial')),('pattern_id.corless_pattern','=','f'),('pattern_id.pattern_state','=','active')]</field>
+			<field name="domain">[('core_state','in',('pending','partial')),('pattern_id.corless_pattern','=',False),('pattern_id.pattern_state','=','active')]</field>
 			<field name="search_view_id" ref="t_search_v_core_log"/>
 		</record>
 		

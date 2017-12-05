@@ -375,42 +375,28 @@ class kg_production(osv.osv):
 		
 		if entry_rec.core_state in ('pending','partial'):
 			
-			today = datetime.today()
-			core_date = entry_rec.core_date
-			core_date = str(core_date)
-			core_date = datetime.strptime(core_date, '%Y-%m-%d')
-			if core_date > today:
-				raise osv.except_osv(_('Warning!'),
-								_('System not allow to save with future date. !!'))
 			if entry_rec.core_by == 'comp_employee':
-				if entry_rec.core_helper <= 0 or entry_rec.core_helper <= 0 or entry_rec.core_qty <=0:
+				if entry_rec.core_helper <= 0:
 					raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative or zero values !!'))
-								
+								_('Helper Count should be greater than zero !!'))
 			if entry_rec.core_qty <=0:
 				raise osv.except_osv(_('Warning!'),
-							_('System not allow to save negative or zero values !!'))
-			
+							_('Qty should be greater than zero !!'))
+			if entry_rec.core_qty > entry_rec.qty:
+				raise osv.except_osv(_('Warning!'),
+							_('Qty should not be greater than Schedule Qty !!'))
 			sch_qty = entry_rec.qty
 			total_core_qty = entry_rec.total_core_qty + entry_rec.core_qty
 			if total_core_qty < sch_qty:
 				core_state = 'partial'
 			if total_core_qty >= sch_qty:
 				core_state = 'done'
-			#~ if total_core_qty > sch_qty:
-				#~ raise osv.except_osv(_('Warning!'),
-							#~ _('Core Qty should be greater than Schedule Qty !!'))
+			
 			if core_state == 'partial':
 				core_entry_qty = 0
 			else:
 				core_entry_qty = entry_rec.core_qty
 				
-			### PAN No ###
-			#~ upper_pan_no = ''
-			#~ pan_no = entry_rec.core_pan_no
-			#~ if pan_no:
-				#~ upper_pan_no = (pan_no.upper())
-			
 			## Remaining Qty ###
 			remain_qty = entry_rec.qty - total_core_qty
 			
@@ -419,14 +405,12 @@ class kg_production(osv.osv):
 			else:
 				remain_qty = remain_qty
 				
-				
 			self.write(cr, uid, ids,{
 			'core_state': core_state,
 			'total_core_qty':total_core_qty,
 			'core_qty':core_entry_qty,
 			'core_rem_qty':remain_qty,
 			'core_user_id':uid,
-			#~ 'core_pan_no':upper_pan_no
 			})
 		else:
 			pass
