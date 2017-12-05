@@ -38,7 +38,7 @@ class kg_purchase_indent(osv.osv):
 		#~ 'division':fields.many2one('kg.division.master','Division',readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		#~ 'expected_date':fields.date('Expected Date',required=True,readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'indent_type': fields.selection([('fromdi','From Dept'),('direct','Direct')],'Indent Type',required=True,readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
-		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division',readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
+		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Location',readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'due_date': fields.date('Due Date', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		
 		# Entry Info
@@ -100,7 +100,7 @@ class kg_purchase_indent(osv.osv):
 			if t['state'] in ('draft'):
 				unlink_ids.append(t['id'])
 			else:
-				raise osv.except_osv(_('Invalid action !'), _('System not allow to delete a UN-DRAFT state Purchase Indent!!'))
+				raise osv.except_osv(_('Warning !'), _('System not allow to delete a UN-DRAFT state Purchase Indent!!'))
 		pi_indent_lines_to_del = self.pool.get('purchase.requisition.line').search(cr, uid, [('requisition_id','in',unlink_ids)])
 		self.pool.get('purchase.requisition.line').unlink(cr, uid, pi_indent_lines_to_del)
 		osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
@@ -109,11 +109,12 @@ class kg_purchase_indent(osv.osv):
 	def tender_in_progress(self, cr, uid, ids, context=None):
 		obj = self.browse(cr,uid,ids[0])
 		if obj.state == 'draft':
-			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','purchase.order.requisition')])
-			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj.date_start))
-			seq_name = cr.fetchone();
-			self.write(cr,uid,ids,{'name':seq_name[0]})
+			if not obj.name or obj.name == False:
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','purchase.order.requisition')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj.date_start))
+				seq_name = cr.fetchone();
+				self.write(cr,uid,ids,{'name':seq_name[0]})
 			self.write(cr,uid,ids,{'state':'in_progress','confirmed_by':uid,'confirmed_date':time.strftime("%Y-%m-%d")})
 		
 		return True
@@ -126,16 +127,11 @@ class kg_purchase_indent(osv.osv):
 			for t in self.browse(cr,uid,ids):
 				indent_line_obj = self.pool.get('kg.depindent.line')
 				if not t.line_ids:
-					raise osv.except_osv(_('Empty Purchase Indent'),
-						_('You can not confirm an empty Purchase Indent'))
+					raise osv.except_osv(_('Warning!'),_('You can not approve an empty Purchase Indent !'))
 				for line in t.line_ids:
 					pi_line_obj.write(cr,uid,line.id, {'line_state' : 'process'})
 					if line.product_qty==0:
-						raise osv.except_osv(_('Error'),
-							_('Purchase Indent quantity can not be zero'))
-					else:
-						print "Line have enough Qty"
-						
+						raise osv.except_osv(_('Warning!'),_('Indent quantity should be greter than zero !'))
 				self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 				cr.execute(""" select depindent_line_id from kg_depindent_pi_line where pi_id = %s """ %(str(ids[0])))
 				data = cr.dictfetchall()
@@ -146,18 +142,15 @@ class kg_purchase_indent(osv.osv):
 					product_record = product_obj.browse(cr, uid, product_id)
 					product = pi_lines[i].product_id.name
 					pi_used_qty = pi_lines[i].product_qty
-						
 					if pi_lines[i].line_ids:
 						total = sum(wo.qty for wo in pi_lines[i].line_ids)
 						if total <= pi_used_qty:
 							pass
 						else:
-							raise osv.except_osv(_('Warning!'),
-								_('Please Check WO Qty'))
+							raise osv.except_osv(_('Warning!'),_('Please Check WO Qty'))
 					if pi_lines[i].depindent_line_id and pi_lines[i].group_flag == False:
 						depindent_line_id=pi_lines[i].depindent_line_id
 						orig_depindent_qty = pi_lines[i].dep_indent_qty
-						
 						po_uom_qty = pi_lines[i].po_uom_qty
 						pending_stock_depindent_qty = pi_lines[i].dep_indent_qty -  pi_lines[i].po_uom_qty
 						pending_po_depindent_qty = pi_lines[i].po_uom_qty - pi_lines[i].po_uom_qty
@@ -220,8 +213,7 @@ class kg_purchase_indent(osv.osv):
 							pass
 						if pi_lines[i].group_flag == True:
 							self.update_product_group(cr,uid,ids,line=pi_lines[i])
-						else:
-							print "All are correct Values"
+						
 		return True
 		
 	def write(self, cr, uid, ids, vals, context=None):		
@@ -234,9 +226,7 @@ class kg_purchase_indent(osv.osv):
 			purchase_order_obj = self.pool.get('purchase.order')
 			pi_line_obj = self.pool.get('purchase.requisition.line')
 			if not piindent.remark:
-				raise osv.except_osv(_('Remarks Needed !!'),
-					_('Enter Remark in Remarks Tab....'))
-					
+				raise osv.except_osv(_('Remarks Needed !!'),_('Enter Remark in Remarks Tab....'))
 			if piindent.indent_type == 'di':
 				if piindent.state == 'approved':					
 					for line in piindent.line_ids:
@@ -259,48 +249,39 @@ class kg_purchase_indent(osv.osv):
 						line.depindent_line_id.write({'line_state' : 'noprocess'})			
 			else:
 				pass
-			return self.write(cr, uid, ids, {'state': 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
-		
+			return self.write(cr,uid,ids,{'state':'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
+	
 	def tender_reject(self, cr, uid, ids, context=None):
 		piindent = self.browse(cr, uid, ids[0], context=context)
 		if piindent.state == 'in_progress':
 			purchase_order_obj = self.pool.get('purchase.order')
 			pi_line_obj = self.pool.get('purchase.requisition.line')
 			if not piindent.remark:
-				raise osv.except_osv(_('Remarks Needed !!'),
-					_('Enter Remark in Remarks Tab....'))
-				
+				raise osv.except_osv(_('Warning !'),_('Enter Remark in Reject Remarks !!'))
 			if piindent.indent_type == 'di':
 				for line in piindent.line_ids:
-					line.depindent_line_id.write({'line_state' : 'noprocess'})			
+					line.depindent_line_id.write({'line_state': 'noprocess'})			
 			else:
 				pass
-		return self.write(cr, uid, ids, {'state': 'reject','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
+		return self.write(cr,uid,ids,{'state':'draft','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
 	
 	def _check_line(self, cr, uid, ids, context=None):
-		tot = 0.0
 		for pi in self.browse(cr,uid,ids):
 			if pi.entry_mode == 'manual':
 				if not pi.kg_depindent_lines:
 					if not pi.line_ids:
-						raise osv.except_osv(_('Warning!'),
-							_('You can not save this Purchase Indent with out Item Details!'))
+						raise osv.except_osv(_('Warning!'),_('You can not save this Purchase Indent with out Item Details!'))
 					for line in pi.line_ids:
-						tot += line.product_qty
-					if tot <= 0.0:
-						raise osv.except_osv(_('Warning!'),
-							_('You can not save this Purchase Indent with Zero Qty!'))
+						if line.product_qty <= 0:
+							raise osv.except_osv(_('Warning!'),_('%s Qty should be greater than Zero !'%(line.product_id.name)))
 				elif pi.kg_depindent_lines and pi.state != 'draft':
 					if not pi.line_ids:
-						raise osv.except_osv(_('Warning!'),
-							_('You can not save this Purchase Indent with out Item Details!'))
+						raise osv.except_osv(_('Warning!'),_('You can not save this Purchase Indent with out Item Details!'))
 					for line in pi.line_ids:
-						tot += line.product_qty
-					if tot <= 0.0:			
-						raise osv.except_osv(_('Warning!'),
-							_('You can not save this Purchase Indent with Zero Qty!'))
+						if line.product_qty <= 0:
+							raise osv.except_osv(_('Warning!'),_('%s Qty should be greater than Zero !'%(line.product_id.name)))
 			return True
-			
+	
 	_constraints = [
 		
 		(_check_line,'You can not save this Purchase Indent with out Line and Zero Qty !',['']),
@@ -345,6 +326,9 @@ class kg_purchase_indent_line(osv.osv):
 	
 	}
 	
+	def default_get(self, cr, uid, fields, context=None):
+		return context
+	
 	def onchange_product_id(self, cr, uid, ids, product_id, product_uom_id, context=None):
 		value = {'product_uom_id': '','stock_qty':'','brand_id':'','moc_id_temp':'','moc_id':''}
 		uom = brand = moc_id_temp = moc_id = ''
@@ -364,7 +348,7 @@ class kg_purchase_indent_line(osv.osv):
 			stock_qty = 0.00
 		value = {'product_uom_id': uom,'stock_qty': stock_qty,'brand_id':brand,'moc_id_temp':moc_id_temp,'moc_id':moc_id}	
 		return {'value': value}
-			
+	
 	def onchange_qty(self, cr, uid, ids, product_qty, pending_qty, context=None):
 		value = {'pending_qty': ''}
 		if product_qty:
@@ -386,7 +370,7 @@ class kg_purchase_indent_line(osv.osv):
 				del_sql = """ delete from kg_depindent_pi_line where pi_id=%s and depindent_line_id=%s """ %(pi_id,dep_line_id)
 				cr.execute(del_sql)				
 				return super(kg_purchase_indent_line, self).unlink(cr, uid, ids, context=context)
-				
+	
 	def line_cancel(self, cr, uid, ids, context=None):
 		line = self.browse(cr, uid, ids[0])
 		if not line.cancel_remark:

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
-		
+	
 	<record model="ir.ui.view" id="kg_purchase_indent_form_inherit">
 		<field name="name">kg.purchase.indent.form.inherit</field>
 		<field name="model">purchase.requisition</field>
@@ -37,7 +37,7 @@
 			</field>
 			
 			<field name="date_start" position="replace">
-				<field name="date_start" required="1"/>
+				<field name="date_start" required="1" options="{'datepicker':{'minDate': -10,'maxDate': 0,}}"/>
 				<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 				<field name="division"/>
 				<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
@@ -50,11 +50,11 @@
 			<field name="date_end" position="replace">
 			<field name="dep_name" invisible="1"/>
 			</field>
-
+			
 			<field name="exclusive" position="replace">
 			<field name="exclusive" invisible="1"/>
 			</field>
-
+			
 			<field name="warehouse_id" position="replace">
 			<field name="warehouse_id" invisible="1"/>
 			</field>
@@ -62,8 +62,8 @@
 			<field name="user_id" invisible="1"/>
 			<field name="kg_store" invisible="1"/>
 			<field name="pi_flag" invisible="1"/>
-			<field name="indent_type" on_change="onchange_indent_type(indent_type,pi_flag,line_ids)"/>
-			<field name="remark" attrs="{'invisible':[('state','not in',('approved','in_progress'))]}"/>
+			<field name="indent_type" on_change="onchange_indent_type(indent_type,pi_flag,line_ids)" attrs="{'readonly':[('indent_type','=','fromdi')]}"/>
+			<field name="remark" attrs="{'invisible':[('remark','=',False),('state','not in',('draft','in_progress','approved'))]}"/>
 			<field name="note"/>
 			<field name="entry_mode" on_change="onchange_entry_mode(entry_mode,pi_flag)" invisible="1"/>
 			</field>
@@ -98,7 +98,7 @@
 						<group>
 						<field name="created_by"/>
 						<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
-						<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','cancel','done'])]}"/>
+						<field name="rej_user_id" attrs="{'invisible':['|',('remark','=',False),('state','!=','draft')]}"/>
 						<field name="approved_by" attrs="{'invisible':[('state','in',['draft', 'in_progress','reject'])]}"/>
 						<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','done','reject'])]}"/>
 						<field name="update_user_id"/>
@@ -106,15 +106,16 @@
 						<group>
 						<field name="creation_date"/>
 						<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-						<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','cancel','done'])]}"/>
+						<field name="reject_date" attrs="{'invisible':['|',('remark','=',False),('state','!=','draft')]}"/>
 						<field name="approved_date" attrs="{'invisible':[('state','in',['draft', 'in_progress','reject'])]}"/>
 						<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','done','reject'])]}"/>
 						<field name="update_date"/>
+						<field name="entry_mode"/>
 						</group>
 					</group>
 				</page>
 			</xpath>
-					
+			
 			<xpath expr="//tree[@string='Dep Indent']" position="attributes">
 				<attribute name="create">0</attribute>
 					<attribute name="create">0</attribute>
@@ -131,24 +132,21 @@
 		<field name="arch" type="xml">
 		<field name="user_id" position="replace" >
 			<field name="user_id" invisible="1"/>
+			<field name="indent_type" invisible="1"/>
+			<field name="division" invisible="1"/>
 		</field>
-<!--
-		<field name="user_id" position="after" >
-			<field name="expected_date"/>
-		</field>
--->
 		</field>
 	</record>
-			
+	
 	<!-- Confirmed Purchase Indent -->
-		
+	
 	<record id="kg_pi_line_tree_view1" model="ir.ui.view">
 		<field name="name">PI Line Tree View</field>
 		<field name="model">purchase.requisition.line</field>
 		<field name="type">tree</field>
 		<field name="arch" type="xml">
 			<tree string="PI Tree View" create="false" delete="false">					
-				<field name="requisition_id" string="Purchase Indent No"/>
+				<field name="requisition_id" string="Purchase Indent No."/>
 				<field name="line_date"/>
 				<field name="product_id"/>
 				<field name="product_uom_id" invisible="1"/>
@@ -160,8 +158,8 @@
 			</tree>
 		</field>
 	</record>
-		
-	 <record id="kg_pi_line_form_view1" model="ir.ui.view">
+	
+	<record id="kg_pi_line_form_view1" model="ir.ui.view">
 		<field name="name">PI Line Form</field>
 		<field name="model">purchase.requisition.line</field>
 		<field name="arch" type="xml">
@@ -171,29 +169,28 @@
 				</header>
 				<group>
 					<group>                            
-						<field name="requisition_id" string="Purchase Indent No" readonly="True"/>
-						<field name="product_id"  readonly="True"/> 
+						<field name="requisition_id" string="Purchase Indent No." readonly="True"/>
+						<field name="product_id" readonly="True"/> 
 						<field name="product_qty" readonly="True"/> 
-						<field name="line_state"  readonly="True"/>                                               
+						<field name="line_state" readonly="True"/>                                               
 					</group>
 					<group>                            
-						<field name="line_date"  readonly="True"/>
-						<field name="product_uom_id"  readonly="True"/>
-						<field name="cancel_remark" />                      
+						<field name="line_date" readonly="True"/>
+						<field name="product_uom_id" readonly="True"/>
+						<field name="cancel_remark"/>                      
 					</group>
 				</group>
-			   
 			</form>
 		</field>
 	</record>
-        
+	
 	<record id="pil_search_view" model="ir.ui.view">
 		<field name="name">Indent Line</field>
 		<field name="model">purchase.requisition.line</field>
 		<field name="arch" type="xml">
 			<search string="Indent">
 				<field name="name" string="Product" filter_domain="[('product_id','ilike',self)]"/>
-				<field name="requisition_id" string="Indent No" filter_domain="[('requisition_id','ilike',self)]"/>
+				<field name="requisition_id" string="Indent No." filter_domain="[('requisition_id','ilike',self)]"/>
 			<separator/> 
 			<group expand="0" string="Group By...">
 				<filter string="Indent No" icon="terp-personal" domain="[]" context="{'group_by':'requisition_id'}"/>
@@ -203,7 +200,7 @@
 			</search>
 		</field>
 	</record>
-		
+	
 	<record id="kg_piline_confirmed_action" model="ir.actions.act_window">
 		<field name="name">Purchase Indent Item Details</field>
 		<field name="type">ir.actions.act_window</field>
@@ -214,7 +211,7 @@
 		<field name="context">{'search_default_group_product_id':1}</field>
 		<field name="search_view_id" ref="pil_search_view"/>
 	</record>
-
+	
 	<record id="pi_line_new_tree1" model="ir.actions.act_window.view">
 		<field eval="1" name="sequence"/>
 		<field name="view_mode">tree</field>
@@ -222,9 +219,11 @@
 		<field name="act_window_id" ref="kg_piline_confirmed_action"/>
 	</record>
 	
+	<!-- Menu items -->
+	
 	<!-- Purchase Indent -->
 	<menuitem action="purchase_requisition.action_purchase_requisition" id="iam_pruchase_indent" name="Purchase Indent" parent="kg_menus.ipm_purchase_indent_menu" sequence="1"/>
-
+	
 	<!-- Purchase Indent Line-->
 	<menuitem action="kg_piline_confirmed_action" id="iam_pruchase_indent_line" name="Item Details" parent="kg_menus.ipm_purchase_indent_menu" sequence="2"/>
 	

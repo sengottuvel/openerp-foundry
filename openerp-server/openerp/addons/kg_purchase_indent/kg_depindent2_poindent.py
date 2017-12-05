@@ -12,7 +12,7 @@ class kg_depindent2_poindent(osv.osv):
 	
 	_name = "purchase.requisition"
 	_inherit = "purchase.requisition"
-
+	
 	_columns = {
 	
 	'kg_depindent_lines':fields.many2many('kg.depindent.line','kg_depindent_pi_line' , 'pi_id', 'depindent_line_id', 'DepIndent Lines',
@@ -20,9 +20,8 @@ class kg_depindent2_poindent(osv.osv):
 			readonly=True, states={'draft': [('readonly', False)]}),
 			
 		}
-
+	
 	def update_pil(self,cr,uid,ids,product_id,context=False):
-		print "callled update_pil from KG"
 		obj =  self.browse(cr,uid,ids[0])
 		if obj.state in ('draft','in_progress'):
 			"""
@@ -109,9 +108,9 @@ class kg_depindent2_poindent(osv.osv):
 					'requisition_id': obj.id,
 					'indent_type': obj.indent_type,
 					'due_date': obj.due_date,
+					'line_date': time.strftime("%Y-%m-%d %H:%M:%S"),
 					
 					}
-					print "vals :", vals
 					if pending_qty == 0:
 						depindent_line_obj.write(cr,uid,depindent_id,{'line_state' : 'process'})
 					if ids:
@@ -129,7 +128,7 @@ class kg_depindent2_poindent(osv.osv):
 							"""
 			self.write(cr,uid,ids,res)			
 		return True		
-		
+	
 	def update_product_group(self,cr,uid,ids,line,context=None):		
 		pi_rec = self.browse(cr, uid, ids[0])
 		line_obj = self.pool.get('purchase.requisition.line')

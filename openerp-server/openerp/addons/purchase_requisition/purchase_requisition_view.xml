@@ -30,21 +30,17 @@
         <field name="arch" type="xml">
             <form string="Purchase Requisition" version="7.0">
             <header>
-                <!--<button name="tender_in_progress" states="draft" string="Confirm" type="object" class="oe_highlight"/>-->
+               <!--<button name="tender_in_progress" states="draft" string="Confirm" type="object" class="oe_highlight"/>-->
                <!-- <button name="tender_reset" states="done,cancel" string="Reset to Draft" type="object" />-->
                 <button name="tender_done" states="in_progress" string="Purchase Done" type="object" class="oe_highlight"/>
                 <button name="tender_cancel" states="draft,in_progress" string="Cancel Requisition" type="object" />
-<!--
-                <field name="state" widget="statusbar" statusbar_visible="draft,done" statusbar_colors='{"in_progress":"blue"}'/>
--->
+<!--            <field name="state" widget="statusbar" statusbar_visible="draft,done" statusbar_colors='{"in_progress":"blue"}'/> -->
             </header>
                 <div class="oe_edit_only">
-                  
                     <label for="origin" class="oe_inline" invisible="1"/>
                 </div>
                 <h1>
                     <field name="name" class="oe_inline" />
-                    
                 </h1>
                 <group>
                     <group>
@@ -61,7 +57,7 @@
                 </group>
                 <notebook>
                     <page string="Indent Item Details" autofocus="True" attrs="{'invisible': [('pi_flag', '=', False)]}">
-                        <field name="line_ids" colspan="4" nolabel="1" context="{'indent_type':indent_type}">
+                        <field name="line_ids" colspan="4" nolabel="1" context="{'indent_type':indent_type,'line_state':'noprocess','draft_flag':False,'line_date':date_start,'due_date':due_date}">
                             <tree string="Products">
                                 <field name="product_id" on_change="onchange_product_id(product_id,product_uom_id)"/>
                                 <field name="product_qty"/>
@@ -97,10 +93,12 @@
                         <field name="description"/>
                     </page>
                 </notebook>
+<!--
             <div class="oe_chatter">
               <field name="message_follower_ids" widget="mail_followers"/>
               <field name="message_ids" widget="mail_thread"/>
             </div> 
+-->
             </form>
         </field>
     </record>
@@ -130,20 +128,19 @@
             <field name="model">purchase.requisition</field>
             <field name="arch" type="xml">
                 <search string="Search Purchase Requisition">
-                    <field name="name" string="Purchase Requisition"/>
+                    <field name="name" string="Indent No."/>
                     <field name="exclusive" />
-                    <filter icon="terp-document-new" name="draft" string="New" domain="[('state','=','draft')]" help="New Purchase Requisition"/>
-                    <filter icon="terp-camera_test" string="Sent to Suppliers" domain="[('state','=','in_progress')]" help="Purchase Requisition in negociation"/>
-                    <filter icon="terp-dialog-close" string="Purchase Done" domain="[('state','=','done')]" help="Current Purchase Requisition"/>
+                    <filter icon="terp-document-new" name="draft" string="Draft" domain="[('state','=','draft')]" help="New Purchase Indent"/>
+                    <filter icon="terp-camera_test" string="WFA" domain="[('state','=','in_progress')]"/>
+                    <filter icon="terp-camera_test" string="Approved" domain="[('state','=','approved')]"/>
                     <separator/>
-                    <filter icon="terp-personal-" string="Unassigned"  domain="[('user_id','=', False)]" help="Unassigned  Requisition"/>
-
                     <group expand="0" string="Group By...">
-                        <!--<filter string="Responsible" icon="terp-personal" domain="[]" context="{'group_by':'user_id'}"/>-->
-                        <filter string="Source" icon="terp-gtk-jump-to-rtl" domain="[]" context="{'group_by':'origin'}"/>
+                        <!--<filter string="Responsible" icon="terp-personal" domain="[]" context="{'group_by':'user_id'}"/>
+                        <filter string="Source" icon="terp-gtk-jump-to-rtl" domain="[]" context="{'group_by':'origin'}"/>-->
                         <filter string="Status" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'state'}"/>
-                        <filter string="Start Date" icon="terp-go-month" domain="[]" context="{'group_by':'date_start'}"/>
-                        <filter string="End Date" icon="terp-go-month" domain="[]" context="{'group_by':'date_end'}"/>
+                        <filter string="Indent Type" icon="terp-go-month" domain="[]" context="{'group_by':'indent_type'}"/>
+                        <filter string="Indent Date" icon="terp-go-month" domain="[]" context="{'group_by':'date_start'}"/>
+                        <filter string="Location" icon="terp-go-month" domain="[]" context="{'group_by':'division'}"/>
                     </group>
                 </search>
             </field>
@@ -174,7 +171,7 @@
 			<form string="Purchase Indent Line Entry Form">
 				<group>
 					<group>
-						<field name="product_id" required="1" on_change="onchange_product_id(product_id,product_uom_id)" attrs="{'readonly': [('indent_type', '=', 'fromdi')]}"/>
+						<field name="product_id" required="1" on_change="onchange_product_id(product_id,product_uom_id)" attrs="{'readonly':[('indent_type','=','fromdi')]}"/>
 						<field name="product_qty" required="1" on_change="onchange_qty(product_qty,pending_qty)"/>
 						<field name="product_uom_id" string="UOM" readonly="1"/>
 						<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>

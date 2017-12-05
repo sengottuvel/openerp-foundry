@@ -1,24 +1,4 @@
-# -*- encoding: utf-8 -*-
-##############################################################################
-#
-#	OpenERP, Open Source Management Solution
-#	Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>). All Rights Reserved
-#	$Id$
-#
-#	This program is free software: you can redistribute it and/or modify
-#	it under the terms of the GNU Affero General Public License as published by
-#	the Free Software Foundation, either version 3 of the License, or
-#	(at your option) any later version.
-#
-#	This program is distributed in the hope that it will be useful,
-#	but WITHOUT ANY WARRANTY; without even the implied warranty of
-#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#	GNU Affero General Public License for more details.
-#
-#	You should have received a copy of the GNU Affero General Public License
-#	along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import time
@@ -29,11 +9,14 @@ from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
 class purchase_requisition(osv.osv):
+	
 	_name = "purchase.requisition"
 	_description="Purchase Requisition"
 	_inherit = ['mail.thread', 'ir.needaction_mixin']
+	
 	_columns = {
-		'name': fields.char('Indent.NO', size=32),
+		
+		'name': fields.char('Indent No.', size=32),
 		'origin': fields.char('Source Document', size=32),
 		'date_start': fields.datetime('Requisition Date'),
 		'date_end': fields.datetime('Requisition Deadline'),
@@ -46,7 +29,9 @@ class purchase_requisition(osv.osv):
 		'warehouse_id': fields.many2one('stock.warehouse', 'Warehouse'),		
 		'state': fields.selection([('draft','Draft'),('in_progress','WFA'),('cancel','Cancelled'),('done','Purchase Done')],
 			'Status', track_visibility='onchange', required=True)
+		
 	}
+	
 	_defaults = {
 		
 		'date_start': lambda *args: time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -57,9 +42,8 @@ class purchase_requisition(osv.osv):
 		'name': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'purchase.order.requisition'),
 		
 	}
-
+	
 	def copy(self, cr, uid, id, default=None, context=None):
-		print "copy from OpenERP,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 		if not default:
 			default = {}
 		default.update({
@@ -70,26 +54,23 @@ class purchase_requisition(osv.osv):
 		return super(purchase_requisition, self).copy(cr, uid, id, default, context)
 	
 	def tender_cancel(self, cr, uid, ids, context=None):
-		print "tender_cancel from OpenERP,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 		purchase_order_obj = self.pool.get('purchase.order')
 		for purchase in self.browse(cr, uid, ids, context=context):
 			for purchase_id in purchase.purchase_ids:
 				if str(purchase_id.state) in('draft'):
 					purchase_order_obj.action_cancel(cr,uid,[purchase_id.id])
 		return self.write(cr, uid, ids, {'state': 'cancel'})
-
+	
 	def tender_in_progress(self, cr, uid, ids, context=None):
-		print "tender_in_progress from OpenERP,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 		return self.write(cr, uid, ids, {'state':'in_progress'} ,context=context)
-
+	
 	def tender_reset(self, cr, uid, ids, context=None):
 		return self.write(cr, uid, ids, {'state': 'draft'})
-
+	
 	def tender_done(self, cr, uid, ids, context=None):
 		return self.write(cr, uid, ids, {'state':'done', 'date_end':time.strftime('%Y-%m-%d %H:%M:%S')}, context=context)
-
+	
 	def _planned_date(self, requisition, delay=0.0):
-		print "_planned_date from OpenERP,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 		company = requisition.company_id
 		date_planned = False
 		if requisition.date_start:
@@ -99,9 +80,8 @@ class purchase_requisition(osv.osv):
 		if delay:
 			date_planned -= relativedelta(days=delay)
 		return date_planned and date_planned.strftime('%Y-%m-%d %H:%M:%S') or False
-
+	
 	def _seller_details(self, cr, uid, requisition_line, supplier, context=None):
-		print "_seller_details from OpenERP,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 		product_uom = self.pool.get('product.uom')
 		pricelist = self.pool.get('product.pricelist')
 		supplier_info = self.pool.get("product.supplierinfo")
@@ -121,9 +101,8 @@ class purchase_requisition(osv.osv):
 			qty = max(qty,seller_qty)
 		date_planned = self._planned_date(requisition_line.requisition_id, seller_delay)
 		return seller_price, qty, default_uom_po_id, date_planned
-
+	
 	def make_purchase_order(self, cr, uid, ids, partner_id, context=None):
-		print "make_purchase_order from OpenERP,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 		"""
 		Create New RFQ for Supplier
 		"""
@@ -171,13 +150,12 @@ class purchase_requisition(osv.osv):
 				
 		return res
 
-
 class purchase_requisition_line(osv.osv):
-
+	
 	_name = "purchase.requisition.line"
 	_description="Purchase Requisition Line"
 	_rec_name = 'product_id'
-
+	
 	_columns = {
 		
 		'product_id': fields.many2one('product.product', 'Product',domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
@@ -185,7 +163,7 @@ class purchase_requisition_line(osv.osv):
 		'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
 		'requisition_id' : fields.many2one('purchase.requisition','Purchase Requisition', ondelete='cascade'),
 		'company_id': fields.related('requisition_id','company_id',type='many2one',relation='res.company',string='Company', store=True, readonly=True),
-		'brand_id': fields.many2one('kg.brand.master', 'Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
+		'brand_id': fields.many2one('kg.brand.master','Brand',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
 		'stock_qty': fields.float('Stock Qty'),
 		'line_ids': fields.one2many('ch.purchase.indent.wo','header_id','Ch Line Id'),
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode'),
@@ -198,7 +176,7 @@ class purchase_requisition_line(osv.osv):
 		'due_date': fields.date('Due Date'),
 		
 	}
-
+	
 	def onchange_product_id(self, cr, uid, ids, product_id, product_uom_id, context=None):
 		""" Changes UoM and name if product_id changes.
 		@param name: Name of the field
@@ -217,12 +195,12 @@ class purchase_requisition_line(osv.osv):
 			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
 			value = {'moc_id': rate_rec.moc_id.id}
 		return {'value': value}
-		
-		
+	
 	_defaults = {
 		'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'purchase.requisition.line', context=c),
 		'line_date': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S'),
 	}
+	
 purchase_requisition_line()
 
 class ch_purchase_indent_wo(osv.osv):
@@ -231,7 +209,7 @@ class ch_purchase_indent_wo(osv.osv):
 	_description = "Ch Purchase Indent WO"
 	
 	_columns = {
-
+	
 	'header_id': fields.many2one('purchase.requisition.line', 'Purchase Indent Line', required=True, ondelete='cascade'),
 	'wo_id': fields.char('WO'),
 	'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
@@ -249,25 +227,26 @@ class ch_purchase_indent_wo(osv.osv):
 	
 	def _check_qty(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
-			
 		if rec.qty <= 0.00:
 			return False					
 		return True
-		
-	_constraints = [
 	
+	_constraints = [
+		
 		(_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
-			
+	
 ch_purchase_indent_wo()	
 
 class purchase_order(osv.osv):
+	
 	_inherit = "purchase.order"
+	
 	_columns = {
 		'requisition_id' : fields.many2one('purchase.requisition','Purchase Requisition')
 	}
-
+	
 	def wkf_confirm_order(self, cr, uid, ids, context=None):
 		res = super(purchase_order, self).wkf_confirm_order(cr, uid, ids, context=context)
 		proc_obj = self.pool.get('procurement.order')
@@ -286,11 +265,15 @@ class purchase_order(osv.osv):
 purchase_order()
 
 class product_product(osv.osv):
+	
 	_inherit = 'product.product'
-
+	
 	_columns = {
+	
 		'purchase_requisition': fields.boolean('Purchase Requisition', help="Check this box to generates purchase requisition instead of generating requests for quotation from procurement.")
+		
 	}
+	
 	_defaults = {
 		'purchase_requisition': False
 	}
@@ -298,11 +281,13 @@ class product_product(osv.osv):
 product_product()
 
 class procurement_order(osv.osv):
-
+	
 	_inherit = 'procurement.order'
+	
 	_columns = {
 		'requisition_id' : fields.many2one('purchase.requisition','Latest Requisition')
 	}
+	
 	def make_po(self, cr, uid, ids, context=None):
 		res = {}
 		requisition_obj = self.pool.get('purchase.requisition')
