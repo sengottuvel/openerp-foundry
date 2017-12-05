@@ -459,19 +459,6 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{due_date}]]></textFieldExpression>
 				</textField>
-				<staticText>
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="157" width="803" height="28" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Technical Specification]]></text>
-				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="140" y="53" width="281" height="21"/>
 					<box leftPadding="3">
@@ -1034,6 +1021,19 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Due Date :"]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="157" width="803" height="28"/>
+					<box leftPadding="3" bottomPadding="0">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Technical Specification"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
