@@ -2461,7 +2461,7 @@ class kg_schedule(osv.osv):
 										)
 										as sub_query
 										where pump_model_id = %s and order_line_id = %s
-										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id,position_id,moc_id """%(entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
+										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id,position_id,moc_id """%(entry.id,acc_ms_pm_item['pump_model_id'],order_line_rec.id))
 								acc_ms_product_details = cr.dictfetchall();
 								
 								for acc_ms_indent_item in acc_ms_product_details:
@@ -2643,7 +2643,7 @@ class kg_schedule(osv.osv):
 										)
 										as sub_query
 										where pump_model_id = %s and order_line_id = %s
-										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id,position_id,moc_id """%(entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
+										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id,position_id,moc_id """%(entry.id,acc_ms_pm_item['pump_model_id'],order_line_rec.id))
 								acc_ms_product_details = cr.dictfetchall();
 								
 								for acc_ms_indent_item in acc_ms_product_details:
