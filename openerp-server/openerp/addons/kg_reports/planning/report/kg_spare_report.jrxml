@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="842" pageHeight="605" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="0.8857805000000005"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="192"/>
+	<property name="ireport.y" value="288"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -1010,30 +1010,17 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{shaft_sealing}+" / "+$F{mech_seal_make}+" / "+$F{seal_type}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="364" width="156" height="32"/>
-					<box topPadding="16" leftPadding="3">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="364" width="382" height="32"/>
+					<box topPadding="6" leftPadding="6">
 						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
 						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="10" isBold="true"/>
+						<font size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Remarks:"]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="156" y="364" width="645" height="32"/>
-					<box topPadding="16" leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.0"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="10" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
+					<textFieldExpression><![CDATA["rerererer"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
