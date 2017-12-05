@@ -67,41 +67,30 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		else:
 			pro_type=''
 		
-		print "date............"	, type(form['date'])
 		location_rec = self.pool.get('stock.location').browse(self.cr,self.uid,location)
-		print "location_rec.........................", location_rec, location_rec.location_type
 		
 		if location_rec.location_type == 'main':
 			lo_type = 'in'
 		else:
 			lo_type = 'out'
+		start_date = ''
+		self.cr.execute( '''select date_start from account_fiscalyear order by  date_start desc''')
+		start_data=self.cr.dictfetchall()
+		if start_data:
+			start_date = start_data[0]['date_start']
 		
-		#~ self.cr.execute('''		
-			   #~ SELECT 
-					#~ sm.product_id as in_pro_id,
-					#~ sum(product_qty) as in_qty
-			   #~ 
-			   #~ FROM stock_move sm
-			   #~ 
-			   #~ left JOIN product_template pt ON (pt.id=sm.product_id)
-			   #~ left JOIN product_category pc ON (pc.id=pt.categ_id)
-			   #~ 
-			   #~ where sm.product_qty != 0 and sm.state=%s and sm.move_type =%s and sm.date::date <=%s '''+ where_sql + major + product + pro_type +'''
-			   #~ group by sm.product_id''',('done',lo_type,form['date']))
-		#~ 
-		#~ data=self.cr.dictfetchall()
 		self.cr.execute('''
 			   select sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
-				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s and b.location_id = %s) as stock_uom_close,
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date >= %s and b.date <= %s and b.location_id = %s) as stock_uom_close,
 				(case when a.uom_conversation_factor = 'two_dimension' then
 				(sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
-				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s and b.location_id = %s)) / prod.po_uom_in_kgs
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date >= %s and b.date <= %s and b.location_id = %s)) / prod.po_uom_in_kgs
 				else
 				(sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
-				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date <= %s and b.location_id = %s)) / prod.po_uom_coeff
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date >= %s and b.date <= %s and b.location_id = %s)) / prod.po_uom_coeff
 				end) as po_uom_close,
 				a.product_id as product_id,
 				prod.name_template as product,
@@ -127,11 +116,10 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				left JOIN product_template pt ON (pt.id=a.product_id)
 				left join product_category pc on(pc.id=pt.categ_id)
 				
-			   where a.move_type = 'in' and a.date <= %s and a.state=%s and a.location_dest_id = %s'''+ major + product + pro_type +'''
-			   group by 3,4,5,6,7,8,9,10,11,12,13,14,15 order by prod.name_template ''',(form['date'],location,form['date'],location,form['date'],location,form['date'],'done',location))
+			   where a.move_type = 'in' and a.date >= %s and a.date <= %s and a.state=%s and a.location_dest_id = %s'''+ major + product + pro_type +'''
+			   group by 3,4,5,6,7,8,9,10,11,12,13,14,15 order by prod.name_template ''',(start_date,form['date'],location,start_date,form['date'],location,start_date,form['date'],location,start_date,form['date'],'done',location))
 		
 		data=self.cr.dictfetchall()
-		print "in_data ::::::::::::::=====>>>>", data
 		data_new = []
 		gr_total=0.0
 		s_no = 0
@@ -162,40 +150,30 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 								order by po.date_order desc limit 1''',(item['product_id'],item['brand_id'],item['moc_id'],form['date']))
 					
 					lot_data = self.cr.dictfetchall()
-					print"lot_datalot_datalot_data--------------",lot_data
 					if lot_data:
 						closing_value = lot_data[0]['price']
 						item['po_price'] = lot_data[0]['price']
-						print"item['uom_conversation_factor']",item['uom_conversation_factor']
 						if item['uom_conversation_factor'] == 'two_dimension':
-							print"aaaaaaaaaaaaaa"
 							if lot_data[0]['price_type'] == 'po_uom':
-								print"popopopopopopopo"
 								if lot_data[0]['product_uom'] == item['product_uom']:
 									item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['length'] or 1 * lot_data[0]['breadth'] or 1 * lot_data[0]['product_qty'] or 1 * item['po_uom_in_kgs'] or 1))
 								else:
 									item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
 							elif lot_data[0]['price_type'] == 'per_kg':
-								print"per_kgper_kgper_kgper_kgper_kg"
 								item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
 						elif item['uom_conversation_factor'] == 'one_dimension':
-							print"bbbbbbbbbbbbbbbbbbbbb"
 							if lot_data[0]['price_type'] == 'po_uom':
-								print"popopopopopopopo"
 								if lot_data[0]['product_uom'] == item['product_uom']:
 									item['closing_value'] = item['stock_uom_close'] * ((lot_data[0]['price'] * lot_data[0]['product_qty'])/(lot_data[0]['product_qty'] * item['po_uom_coeff']))
 								else:
 									item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
 							elif lot_data[0]['price_type'] == 'per_kg':
-								print"per_kgper_kgper_kgper_kgper_kg"
 								item['closing_value'] = item['stock_uom_close'] * lot_data[0]['price']
 						else:
 							item['closing_value'] = 0
 					else:
 						item['po_price'] = 0
 						item['closing_value'] = 0
-					print"item['po_price']item['po_price']item['po_price']",item['po_price']
-					print"item['closing_value']item['closing_value']item['closing_value']",item['closing_value']
 					gr_total += item['closing_value']
 					item['grand_total'] = int(gr_total)
 					
@@ -203,7 +181,6 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		
 				else:
 					pass
-		print "*******************************************************************************",data_new
 		return data_new
 	
 	def _get_filter(self, data):

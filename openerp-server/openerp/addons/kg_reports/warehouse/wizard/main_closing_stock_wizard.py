@@ -27,7 +27,7 @@ class main_closing_stock_wizard(osv.osv_memory):
 		
 		'filter': 'filter_date', 
 		'date': lambda * a: time.strftime('%Y-%m-%d'),
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.depindent.detail.wizard', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'main.closing.stock.wizard', context=c),
 		
 	}
 	
