@@ -1,31 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>        
-    
-    
-    <!-- Form View Start -->
-	
-	
-	<!-- BOM Amendment -->
-	
-	<!-- Form View Start -->
-    
+     <!-- Form View Start -->
+		    
 		<record id="m_form_v_bom_amendment" model="ir.ui.view">
 			<field name="name">BOM Amendment Form</field>
 			<field name="model">kg.bom.amendment</field>
 			<field name="arch" type="xml">
 				<form string="BOM Amendment" version="7.0">
-				
 					<header>						
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>						
 						<button name="entry_confirm" type="object" string="Confirm" attrs="{'invisible': ['|',('load_bom','!=',True),('state','in',('confirmed','approved'))]}"/>
 					</header>				
 					<group>
 						<group>	
-							<field name="amend_no" />	
+							<field name="name" />	
 							<field name="bom_id" attrs="{'readonly': [('load_bom','=',True)]}"/>																								
 							<field name="uom"/>																
 							<field name="revision" invisible="1"/>																
+							<field name="category_type" invisible="1"/>																
 							<field name="notes"/>																
 						</group>
 						<group>
@@ -41,23 +34,23 @@
 					<page string="Foundry Items">
 					<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}">
 						<tree string="BOM Details Entry Tree" editable="top" >					
-							
-							<field name="pos_no" />	
+							<field name="position_id" />	
 							<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
 							<field name="pattern_name" readonly="1"/>				   
+							<field name="csd_no"/>
 							<field name="qty"/>
 							<field name="remarks" widget="char"/>
 							<field name="state" invisible="1"/>
-				
 						</tree>
 					</field>
 					</page>
 					<page string="Machine Shop">
 							<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
 								<tree string="Machine Shop Details Entry Tree" editable="top" >			
-									<field name="pos_no" />	
+									<field name="position_id" />	
 									<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
 									<field name="name" readonly="1"/>
+									<field name="csd_no"/>
 									<field name="qty"/>
 									<field name="remarks" widget="char"/>
 								</tree>
@@ -66,34 +59,33 @@
 						<page string="BOT">
 							<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
 								<tree string="BOT Details Entry Tree" editable="top" >	
-									<field name="pos_no" />		
-									<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
-									<field name="code" readonly="1" />											
+									<field name="position_id" />		
+									<field name="bot_id" on_change="onchange_bot_name(bot_id)"/>
+									<field name="name" readonly="1" />											
 									<field name="qty"/>
 									<field name="remarks" widget="char"/>
 								</tree>
 							</field>
-						</page>						
-						<page string="Consumable" invisible="1">
-							<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
-								<tree string="Consumable Details Entry Tree" editable="top" >					
-									
-									<field name="product_temp_id" on_change="onchange_consu_code(product_temp_id)"/>
-									<field name="code" readonly="1"/>											
-									<field name="qty"/>
+						</page>	
+						
+						<page string="Base Plate" attrs="{'invisible':[('category_type','in',['part_list_bom'])]}">
+							<field name="line_ids_d" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}">
+								<tree string="Base Plate Details Entry Tree" editable="top" >										
+									<field name="limitation"/>
+									<field name="partlist_id"/>
 									<field name="remarks"  widget="char"/>
 								</tree>
 							</field>
-						</page>
-						<page string="Core" invisible="1">					
-							
-						</page>
+						</page>					
+						
 						<page string="Entry Info">
+							<group>
 								<group>
 									<field name="company_id"/>
-									<field name="active"/>	
 								</group>
 								<group>
+									<field name="active"/>	
+								</group>
 								<group>
 									<field name="user_id"/>
 									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
@@ -105,6 +97,7 @@
 									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>		
 									<field name="ap_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>								
 									<field name="update_date"/>
+									<field name="entry_mode"/>
 								</group>
 							</group>
 						</page>
@@ -115,7 +108,6 @@
 		
 		<!-- Form View End -->
 		
-		
 		<!-- Tree View Start -->
     
 		<record id="m_tree_v_bom_amendment" model="ir.ui.view">
@@ -123,7 +115,7 @@
 			<field name="model">kg.bom.amendment</field>
 			<field name="arch" type="xml">
 				<tree string="BOM Amendment" >
-					<field name="amend_no" />					
+					<field name="name" />					
 					<field name="bom_id"/>
 					<field name="pump_model_id" />							
 					<field name="entry_date" />					
@@ -145,49 +137,37 @@
 			<field name="view_id" ref="m_tree_v_bom_amendment"/>
 		</record>
 		
-		
 		 <!-- Audit Log Xml Data Start-->
 		
         <record id="bom_amend_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM Amendment</field>
+            <field name="name">BOM Amendment</field>
             <field name="object_id" eval="ref('kg_bom_amendment.model_kg_bom_amendment')"/>       
             <field name="state">subscribed</field>              
         </record>   
 		
         <record id="bom_amend_foundry_model" model="audittrail.rule">
-            <field name="name">Audit Log Amend Foundry Items</field>
+            <field name="name">Amend Foundry Items</field>
             <field name="object_id" eval="ref('kg_bom_amendment.model_ch_bom_line_amendment')"/>       
             <field name="state">subscribed</field>              
         </record> 
 		
         <record id="bom_amend_machine_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM Amend Machine Shop</field>
+            <field name="name">BOM Amend Machine Shop</field>
             <field name="object_id" eval="ref('kg_bom_amendment.model_ch_machineshop_details_amendment')"/>       
             <field name="state">subscribed</field>              
         </record>    
 		
         <record id="bom_amend_bot_model" model="audittrail.rule">
-            <field name="name">Audit Log Amend BOM BOT</field>
+            <field name="name">Amend BOM BOT</field>
             <field name="object_id" eval="ref('kg_bom_amendment.model_ch_bot_details_amendment')"/>       
             <field name="state">subscribed</field>              
         </record>     
-		
-        <record id="bom_amend_consu_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM Amend Consumable</field>
-            <field name="object_id" eval="ref('kg_bom_amendment.model_ch_consu_details_amendment')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
+      
     <!-- Audit Log Xml Data End-->
 		
-		<!-- Menu Action End-->
+		<!-- Menu Item --> 
 		
-		<!-- Menu Name Start here --> 
-		
-				<menuitem action="mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="kg_pumpmodel_master.mpm_planning_master" sequence="6"/> 
-		
-		<!-- Menu Name End here --> 	
-	
-	
+			<menuitem action="mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="kg_pumpmodel_master.mpm_planning_master" sequence="6"/> 
+
     </data>
 </openerp>
