@@ -1010,7 +1010,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{shaft_sealing}+" / "+$F{mech_seal_make}+" / "+$F{seal_type}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="364" width="382" height="32"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="364" width="382" height="32" isPrintWhenDetailOverflows="true"/>
 					<box topPadding="6" leftPadding="6">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1020,7 +1020,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement verticalAlignment="Middle">
 						<font size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA["rerererer"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["rerererer"+$F{remarks}]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
