@@ -2410,7 +2410,7 @@ class kg_schedule(osv.osv):
 					for acc_ms_pm_item in acc_ms_pumpmodel_details:
 						
 						### Getting Pump Model Qty ###
-						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, ms_pm_item['order_line_id'])
+						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, acc_ms_pm_item['order_line_id'])
 						acc_line_rec = self.pool.get('ch.wo.accessories').browse(cr, uid, acc_ms_pm_item['acc_line_id'])
 						acc_qty = int(acc_line_rec.qty)						
 						for indent_header in range(acc_qty): 
@@ -2592,7 +2592,7 @@ class kg_schedule(osv.osv):
 					for acc_ms_pm_item in acc_ms_pumpmodel_details:
 						
 						### Getting Pump Model Qty ###
-						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, ms_pm_item['order_line_id'])
+						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, acc_ms_pm_item['order_line_id'])
 						acc_line_rec = self.pool.get('ch.wo.accessories').browse(cr, uid, acc_ms_pm_item['acc_line_id'])
 						acc_qty = int(acc_line_rec.qty)						
 						for indent_header in range(acc_qty): 

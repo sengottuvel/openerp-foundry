@@ -150,13 +150,13 @@ class kg_melting(osv.osv):
 		if entry.initial_reading > entry.final_reading :
 			raise osv.except_osv(_('Warning!'),
 						_('Initial Reading should not be less than Final Reading check the values !!'))
-		if entry.time > 12.00:
+		if entry.time > 13.00:
 			raise osv.except_osv(_('Warning!'),
 						_('Start Time Should not Exceed 12 Hours for Power Control Details !!'))
-		if entry.pouring_hrs > 12.00:
+		if entry.pouring_hrs > 13.00:
 			raise osv.except_osv(_('Warning!'),
 						_('Start Time Should not Exceed 12 Hours for Pouring Temp !!'))
-		if entry.pouring_finished > 12.00:
+		if entry.pouring_finished > 13.00:
 			raise osv.except_osv(_('Warning!'),
 						_('Start Time Should not Exceed 12 Hours for Pouring Finished !!'))
 		
