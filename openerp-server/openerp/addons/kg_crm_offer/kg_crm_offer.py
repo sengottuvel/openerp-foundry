@@ -47,7 +47,7 @@ PURPOSE_SELECTION = [
 	('pump','Pump'),('spare','Spare'),('access','Accessories'),('prj','Project'),('pump_spare','Pump With Spare'),('in_development','New Development')
 ]
 STATE_SELECTION = [
-	('draft','Draft'),('moved_to_offer','Confirmed'),('wfa_md','WFA MD'),('approved_md','Approved MD'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
+	('draft','Draft'),('confirmed','Design Check'),('design_checked','Design Verify'),('design_verified','Design Approve'),('moved_to_offer','WO creation'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
 ]
 MARKET_SELECTION = [
 	('cp','CP'),('ip','IP')
@@ -177,8 +177,8 @@ class kg_crm_offer(osv.osv):
 		'freight': fields.selection([('topay','Topay'),('paid','Paid')],'Freight',readonly=False,states={'wo_created':[('readonly',True)]}),
 		'offer_copy': fields.char('Offer Copy'),
 		'term_copy': fields.char('Terms Copy'),
-		'customer_po_no': fields.char('Customer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)],'approved_md':[('readonly',False)]}),
-		'cust_po_date': fields.date('Customer PO Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)],'approved_md':[('readonly',False)]}),
+		'customer_po_no': fields.char('Customer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'cust_po_date': fields.date('Customer PO Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'cpo_del': fields.char('Delivery as per C.P.O',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'dealer_po_no': fields.char('Dealer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'deal_po_date': fields.date('Dealer PO Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
@@ -324,8 +324,18 @@ class kg_crm_offer(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'crt_date': fields.datetime('Created Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
-		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
-		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'confirm_date': fields.datetime('MKT Approved Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'MKT Approved By', readonly=True),
+		'design_date': fields.datetime('Design checked Date', readonly=True),
+		'design_user_id': fields.many2one('res.users', 'Design Checked By', readonly=True),
+		'design_verifiy_date': fields.datetime('Design Verified Date', readonly=True),
+		'design_verifiy_user_id': fields.many2one('res.users', 'Design Verified By', readonly=True),
+		'mkt_date': fields.datetime('Design Approved Date', readonly=True),
+		'mkt_user_id': fields.many2one('res.users', 'Design Approved By', readonly=True),
+		'wo_date': fields.datetime('WO Approved Date', readonly=True),
+		'wo_user_id': fields.many2one('res.users', 'WO Approved By', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
+		'reject_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
@@ -653,91 +663,94 @@ class kg_crm_offer(osv.osv):
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state == 'draft':
-			#~ if entry.is_zero_offer == True:
-				#~ pass
-			#~ else:
-				#~ if entry.dummy_flag != True:
-					#~ raise osv.except_osv(_('Warning'),_('Kindly update values for Ratio,Discount'))
-			#~ for line in entry.line_pump_ids:
-			#~ if not entry.name:
-				#~ off_no = ''	
-				#~ seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.offer')])
-				#~ rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-				#~ cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],rec.code,entry.offer_date))
-				#~ off_no = cr.fetchone();
-				#~ off_no = off_no[0]
-			#~ else:
+		if entry.state == 'draft':			
 			off_no = entry.name
-			#~ self.wo_creation(cr,uid,entry)
-			
 			self.write(cr, uid, ids, {
-										'name':off_no,
-										'state': 'moved_to_offer',
+										'name': off_no,
+										'state': 'confirmed',
 										'confirm_user_id': uid, 
-										'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
+										'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 									})
 		return True
 	
-	def entry_wfa_md(self,cr,uid,ids,context=None):
+	def entry_design_check(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state == 'moved_to_offer':
-			self.write(cr, uid, ids, {'state': 'wfa_md'})
+		if entry.state == 'confirmed':
+			if obj.confirmed_by.id == uid:
+				raise osv.except_osv(_('Warning'),_('WFD Check cannot be done by MKT Approved user'))
+			self.write(cr, uid, ids, {'state': 'design_checked',
+									  'design_user_id': uid, 
+									  'design_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+										})
 		return True
 	
-	def entry_approved_md(self,cr,uid,ids,context=None):
+	def entry_design_verify(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state == 'wfa_md':
+		if entry.state == 'design_checked':
+			if obj.design_user_id.id == uid:
+				raise osv.except_osv(_('Warning'),_('WFD Verify cannot be done by Design Checked user'))
+			self.write(cr, uid, ids, {'state': 'design_verified',
+									  'design_verifiy_user_id': uid, 
+									  'design_verifiy_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+										})
+		return True
+	
+	def entry_design_approve(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'design_verified':
+			if obj.design_verifiy_user_id.id == uid:
+				raise osv.except_osv(_('Warning'),_('WFD Approve cannot be done by Design Verified user'))
 			user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
 			if user_obj:
 				user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
 				if user_rec.special_approval == True:
-					self.write(cr, uid, ids, {'state': 'approved_md','md_approved_date':time.strftime('%Y-%m-%d')})
+					self.write(cr, uid, ids, {'state': 'moved_to_offer','mkt_user_id': uid,'mkt_date': time.strftime('%Y-%m-%d')})
 				else:
 					raise osv.except_osv(_('Warning'),_('It should be approved by special approver'))
 		return True
 	
-	def entry_reject_md(self,cr,uid,ids,context=None):
+	def entry_reject(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state == 'wfa_md':
+		if not entry.reject_remarks:
+			raise osv.except_osv(_('Warning !'),_('Enter rejection remarks in Reject Remarks field !!'))
+		if entry.state == 'confirmed':
 			self.write(cr, uid, ids, {'state': 'draft'})
+		elif entry.state == 'design_checked':
+			self.write(cr, uid, ids, {'state': 'confirmed'})
+		elif entry.state == 'design_verified':
+			self.write(cr, uid, ids, {'state': 'design_checked'})
+		self.write(cr, uid, ids, {'reject_user_id': uid,'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
 	def entry_revision(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state in ('moved_to_offer','wo_created'):
 			revision = 0
-			print"entry.is_zero_offer",entry.is_zero_offer
 			if entry.is_zero_offer != True:
-				wo_obj = self.pool.get('kg.work.order')
-				#~ wo_id = wo_obj.search(cr,uid,[('offer_id','=',entry.id),('state','not in',('draft','cancel'))])
+				wo_obj = self.pool.get('kg.work.order')			
 				wo_id = wo_obj.search(cr,uid,[('offer_no','=',entry.name),('state','not in',('draft','cancel'))])
 				if wo_id:
 					raise osv.except_osv(_('Warning!'),_('You can not delete this entry because WO confirmed!'))
 			
 			if entry.wo_flag == False:
 				revision = entry.revision + 1
-				print"revisionrevisionrevisionaaaaaaaa",revision
 				vals = {
 						'state' : 'draft',
 						'revision' : revision,
 						'revision_remarks' : '',
 						}
 				offer_id = self.copy(cr,uid,entry.id,vals,context) 
-				print"offer_idoffer_idoffer_id",offer_id
 				self.write(cr, uid, ids, {
 										  'state': 'revised',
 										})
 			if entry.wo_flag == True and entry.is_zero_offer == True:
 				revision = entry.revision + 1
-				print"revisionrevisionrevisionbbbbbbbbbbb",revision
 				vals = {
 						'state' : 'draft',
 						'revision' : revision,
 						'revision_remarks' : '',
 						}
 				offer_id = self.copy(cr,uid,entry.id,vals,context) 
-				print"offer_idoffer_idoffer_id",offer_id
 				
 				self.write(cr, uid, ids, {
 										  'state': 'revised',
@@ -746,7 +759,7 @@ class kg_crm_offer(osv.osv):
 	
 	def wo_creation(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state in ('moved_to_offer','approved_md') and entry.revision == 0 and entry.purpose not in ('in_development'):
+		if entry.state in ('moved_to_offer') and entry.revision == 0 and entry.purpose not in ('in_development'):
 			if not entry.customer_po_no:
 				raise osv.except_osv(_('Warning!'),_('Update Customer PO No.'))
 			if entry.ref_mode == 'dealer':
@@ -869,7 +882,7 @@ class kg_crm_offer(osv.osv):
 				self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created'})
 				self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})
 		
-		if entry.state in ('moved_to_offer','approved_md') and entry.revision > 0:
+		if entry.state in ('moved_to_offer') and entry.revision > 0:
 			wo_obj = self.pool.get('kg.work.order')
 			wo_ids = wo_obj.search(cr,uid,[('offer_no','=',entry.name),('state','!=','cancel')])
 			if wo_ids:

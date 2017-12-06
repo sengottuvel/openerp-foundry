@@ -10,17 +10,18 @@
 			<field name="arch" type="xml">
 				<form string="CRM Offer" version="7.0" create="false" delete="false">
 					<header>
-						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
-<!--					<button name="entry_wfa_md" type="object" string="WFA MD" states="moved_to_offer" class="oe_highlight"/>
-						<button name="entry_approved_md" type="object" string="Approve MD" states="wfa_md" class="oe_highlight"/>-->
-						<button name="entry_reject_md" type="object" string="Reject" states="wfa_md" class="oe_highlight"/>
-						<button name="wo_creation" type="object" string="WO Creation" attrs="{'invisible':['|',('state','!=','moved_to_offer'),('purpose','=','in_development')]}" class="oe_highlight"/>
+						<button name="entry_confirm" type="object" string="WFMT Approve" states="draft" class="oe_highlight"/>
+						<button name="entry_design_check" type="object" string="WFD Check" states="confirmed" class="oe_highlight"/>
+						<button name="entry_design_verify" type="object" string="WFD Verify" states="design_checked" class="oe_highlight"/>
+						<button name="entry_design_approve" type="object" string="WFD Approve" states="design_verified" class="oe_highlight"/>
+						<button name="entry_reject" type="object" string="Reject" states="confirmed,design_checked,design_verified" class="oe_highlight"/>
+						<button name="wo_creation" type="object" string="Create WO" attrs="{'invisible':['|',('state','!=','moved_to_offer'),('purpose','=','in_development')]}" class="oe_highlight"/>
 						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible':['|',('state','!=','wo_created'),('is_zero_offer','!=',True)]}" class="oe_highlight"/>
 						<button name="offer_copy" type="object"  string="Offer Copy" class="oe_highlight"/>
 						<button name="spare_regular_copy" type="object"  string="Spare Regular Copy" class="oe_highlight"/>
 						<button name="spare_budgetary_copy" type="object"  string="Spare Budgetary Copy" class="oe_highlight"/>
-						<button name="term_copy" type="object" states="moved_to_offer,approved_md,wo_created" string="Terms Copy" class="oe_highlight"/>
-						<button name="send_by_email" type="object" states="approved_md,wo_created" string="Send by Email" class="oe_highlight" invisible="1"/>
+						<button name="term_copy" type="object" states="moved_to_offer,wo_created" string="Terms Copy" class="oe_highlight"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
@@ -1339,14 +1340,14 @@
 			<field name="model">kg.crm.offer</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree colors="blue:state == 'draft';black:state == 'moved_to_offer';gray:state == 'call'" 
+				<tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'moved_to_offer';gray:state == 'call'" 
 								toolbar="True" string="Enquiry Entry Tree"  create="false" delete="false">					
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>				
 					<field name="name"/>
 					<field name="revision"/>
 					<field name="enquiry_date"/>
 					<field name="enquiry_no"/>
 					<field name="customer_id"/>	
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="state"/>
 					<field name="wo_flag" invisible="1"/>
 					<field name="zone" invisible="1"/>
@@ -1499,21 +1500,6 @@
 		</record>
 		
 	<!-- Menu Action End-->
-	
-	<!-- Menu Spl Apl Action Start-->
-		
-		<record id="tma_crm_offer_spl_apl" model="ir.actions.act_window">
-			<field name="name">Offer</field>
-			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.crm.offer</field>
-			<field name="view_type">form</field>
-			<field name="context">{}</field>
-			<field name="view_id" ref="t_tree_v_crm_offer"/>
-			<field name="search_view_id" ref="t_search_v_crm_offer"/>
-			<field name="domain">[('state','=','wfa_md')]</field>
-		</record>
-		
-	<!-- Menu Spl Apl Action End-->
 	
 		<record forcecreate="1" id="seq_crm_offer" model="ir.sequence.type">	
 			<field name="name">CRM Offer</field>
