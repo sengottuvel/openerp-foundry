@@ -158,6 +158,7 @@ class kg_crm_offer(osv.osv):
 		'note': fields.char('Notes'),
 		'offer_date': fields.date('Offer Date',required=True),
 		'remarks': fields.text('Remarks'),
+		'reject_remarks': fields.text('Reject Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'state': fields.selection(STATE_SELECTION,'Status', readonly=True),
 		

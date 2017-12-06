@@ -44,6 +44,7 @@
 								<field name="note"/>
 								<field name="is_zero_offer" attrs="{'readonly':[('state','=','wo_created')]}"/>
 								<field name="purpose" readonly="1"/>
+								<field name="reject_remarks"/>
 <!--							<field name="revision_remarks" attrs="{'invisible':[('state','not in',('moved_to_offer','wo_created','revised'))],'readonly':[('state','=','revised')]}"/>-->
 								<field name="revision_remarks" attrs="{'invisible':[('revision','=',0)],'readonly':[('state','=','revised')],'required':[('revision','!=',0)]}"/>
 								<field name="wo_flag" invisible="1"/>
@@ -454,13 +455,23 @@
 									</group>
 									<group>
 										<field name="user_id"/>
+										<field name="reject_user_id" attrs="{'invisible':[('reject_remarks','=',False)]}"/>
 										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="design_user_id" attrs="{'invisible':[('state','not in',['design_checked','design_verified','moved_to_offer','wo_created','wo_released'])]}"/>
+										<field name="design_verifiy_user_id" attrs="{'invisible':[('state','not in',['design_verified','moved_to_offer','wo_created','wo_released'])]}"/>
+										<field name="mkt_user_id" attrs="{'invisible':[('state','not in',['moved_to_offer','wo_created','wo_released'])]}"/>
+										<field name="wo_user_id" attrs="{'invisible':[('state','not in',['wo_created'])]}"/>
 										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
 										<field name="update_user_id"/>
 									</group>
 									<group>
 										<field name="crt_date"/>
+										<field name="reject_date" attrs="{'invisible':[('reject_remarks','=',False)]}"/>
 										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="design_date" attrs="{'invisible':[('state','not in',['design_checked','design_verified','moved_to_offer','wo_created','wo_released'])]}"/>
+										<field name="design_verifiy_date" attrs="{'invisible':[('state','not in',['design_verified','moved_to_offer','wo_created','wo_released'])]}"/>
+										<field name="mkt_date" attrs="{'invisible':[('state','not in',['moved_to_offer','wo_created','wo_released'])]}"/>
+										<field name="wo_date" attrs="{'invisible':[('state','not in',['wo_created'])]}"/>
 										<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
 										<field name="update_date"/>
 									</group>
