@@ -1947,6 +1947,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
 		'alias_name': fields.char('Alias Name'),
+		'item_code': fields.char('Item Code'),
 		'sump_depth': fields.char('Sump Depth'),
 		'spare_pump_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
 		'size_suctionx': fields.char('Size-SuctionX Delivery(mm)'),

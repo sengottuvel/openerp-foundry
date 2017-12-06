@@ -190,6 +190,7 @@
 								<group>
 									<field name="pump_id" on_change="onchange_pumpmodel(pump_id,division_id,suction_pressure_kg,discharge_pressure_kg,purpose_categ)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 									<field name="alias_name"/>
+									<field name="item_code"/>
 									<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 									<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 									<field name="qap_plan_id"/>
