@@ -677,8 +677,8 @@ class kg_crm_offer(osv.osv):
 	def entry_design_check(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'confirmed':
-			if entry.confirm_user_id.id == uid:
-				raise osv.except_osv(_('Warning'),_('WFD Check cannot be done by MKT Approved user'))
+			#~ if entry.confirm_user_id.id == uid:
+				#~ raise osv.except_osv(_('Warning'),_('WFD Check cannot be done by MKT Approved user'))
 			self.write(cr, uid, ids, {'state': 'design_checked',
 									  'design_user_id': uid, 
 									  'design_date': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -688,8 +688,8 @@ class kg_crm_offer(osv.osv):
 	def entry_design_verify(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'design_checked':
-			if entry.design_user_id.id == uid:
-				raise osv.except_osv(_('Warning'),_('WFD Verify cannot be done by Design Checked user'))
+			#~ if entry.design_user_id.id == uid:
+				#~ raise osv.except_osv(_('Warning'),_('WFD Verify cannot be done by Design Checked user'))
 			self.write(cr, uid, ids, {'state': 'design_verified',
 									  'design_verifiy_user_id': uid, 
 									  'design_verifiy_date': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -699,8 +699,8 @@ class kg_crm_offer(osv.osv):
 	def entry_design_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'design_verified':
-			if entry.design_verifiy_user_id.id == uid:
-				raise osv.except_osv(_('Warning'),_('WFD Approve cannot be done by Design Verified user'))
+			#~ if entry.design_verifiy_user_id.id == uid:
+				#~ raise osv.except_osv(_('Warning'),_('WFD Approve cannot be done by Design Verified user'))
 			user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
 			if user_obj:
 				user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])

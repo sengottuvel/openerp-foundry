@@ -129,7 +129,7 @@ class kg_purchase_indent(osv.osv):
 				if not t.line_ids:
 					raise osv.except_osv(_('Warning!'),_('You can not approve an empty Purchase Indent !'))
 				for line in t.line_ids:
-					pi_line_obj.write(cr,uid,line.id, {'line_state' : 'process'})
+					pi_line_obj.write(cr,uid,line.id,{'line_state':'process','line_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 					if line.product_qty==0:
 						raise osv.except_osv(_('Warning!'),_('Indent quantity should be greter than zero !'))
 				self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
