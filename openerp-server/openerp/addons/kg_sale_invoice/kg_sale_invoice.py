@@ -603,9 +603,12 @@ class kg_sale_invoice(osv.osv):
 		rec_code = str(rec.name)		
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
+	
+		if rec.state != 'invoice':
 			
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Proforma_Invoice='+rec_code
-
+			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&proforma_invoice='+rec_code
+		else:
+			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&customer_invoice='+rec_code
 
 		return {
 					  'name'	 : 'Go to website',
