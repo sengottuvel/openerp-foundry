@@ -16,8 +16,8 @@
 					<group>
 						<group>
 							<field name="name" readonly="1"/>
-							<field name="melting_id" on_change="onchange_melting_id(melting_id)" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-							<field name="shift_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="melting_id" required="1" on_change="onchange_melting_id(melting_id)" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="shift_id" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="pour_close_team" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 						</group>											
