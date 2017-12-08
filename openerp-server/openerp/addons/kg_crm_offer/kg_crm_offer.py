@@ -677,7 +677,7 @@ class kg_crm_offer(osv.osv):
 	def entry_design_check(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'confirmed':
-			if entry.confirmed_by.id == uid:
+			if entry.confirm_user_id.id == uid:
 				raise osv.except_osv(_('Warning'),_('WFD Check cannot be done by MKT Approved user'))
 			self.write(cr, uid, ids, {'state': 'design_checked',
 									  'design_user_id': uid, 

@@ -204,7 +204,6 @@
 					<field name="date"/>
 					<field name="so_type"/>
 					<field name="partner_id"/>
-                   
                     <field name="amount_tax"/>
                     <field name="amount_total"/>
 					<field name="state"/>
