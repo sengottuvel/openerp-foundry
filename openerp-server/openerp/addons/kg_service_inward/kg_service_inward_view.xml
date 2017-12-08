@@ -11,6 +11,7 @@
 				<form string="Service Inward" version="7.0" create="false">
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="pending" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
@@ -94,7 +95,8 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'pending';black:state == 'confirmed';" 
-								toolbar="True" string="Service Inward" >					
+								toolbar="True" string="Service Inward" >	
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="name"/>
 					<field name="entry_date"/>
 					<field name="customer_id"/>
@@ -102,7 +104,6 @@
 					<field name="item_name"/>
 					<field name="purpose_categ"/>
 					<field name="move_to"/>
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="state"/>
 				</tree>
 			</field>

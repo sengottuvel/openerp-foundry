@@ -15,6 +15,9 @@
 			<h2><field name="minor_name"/></h2>
 		</field>
 		-->
+		<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" position="after">
+			<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
+		</button>
 		
 		<field name="categ_id" position="after">
 			<field name="hsn_no"/>
@@ -167,7 +170,9 @@
 		<field name="model">product.product</field>
 		<field name="inherit_id" ref="product.product_product_tree_view"/>
 		<field name="arch" type="xml">
-			
+			<field name="name" position="before"> 
+				<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
+			</field>
 			<field name="categ_id" position="after"> 
 			<field name="product_type"/> 
 			</field>					

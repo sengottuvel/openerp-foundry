@@ -943,11 +943,11 @@ class kg_part_qap(osv.osv):
 		
 		if rec.hs_flag == True:
 			
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Dynamic_Balancing='+rec_code
+			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&dynamic_balancing='+rec_code
 		
 		else:
 			
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Pre_Hydro_Static_Test='+rec_code
+			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&pre_hydro_static_test='+rec_code
 			
 		return {
 					  'name'	 : 'Go to website',

@@ -2103,8 +2103,6 @@ class kg_work_order(osv.osv):
 		
 		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&work_order='+rec_work_order
 
-
-		
 		return {
 					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',

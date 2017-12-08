@@ -11,6 +11,7 @@
 				<form string="Service Enquiry" version="7.0">
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 <!--					<button name="entry_update" type="object" string="Update" states="open" class="oe_highlight"/>
 						<button name="entry_close" type="object" string="Closed" states="in_progress" class="oe_highlight"/>-->
 					</header>
@@ -92,10 +93,10 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';black:state == 'open';red:state == 'in_progress'" 
 								toolbar="True" string="Enquiry Entry Tree" >
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="name"/>
 					<field name="complaint_date"/>
 					<field name="customer_id"/>
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>	
 					<field name="state"/>
 				</tree>
 			</field>

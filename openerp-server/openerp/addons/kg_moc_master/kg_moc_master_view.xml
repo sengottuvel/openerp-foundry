@@ -125,12 +125,12 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="MOC Master Tree">				
+								toolbar="True" string="MOC Master Tree">			
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>	
 					<field name="code"/>
 					<field name="name"/>
 					<field name="rate"/>
 					<field name="pro_cost"/>
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>				
 					<field name="state"/>
 				</tree>
 			</field>

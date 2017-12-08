@@ -170,9 +170,7 @@ class kg_pattern_master(osv.osv):
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
 		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&pattern='+rec_code
-
 		
-		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
 		return {
 					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',

@@ -677,7 +677,7 @@ class kg_crm_offer(osv.osv):
 	def entry_design_check(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'confirmed':
-			if obj.confirmed_by.id == uid:
+			if entry.confirmed_by.id == uid:
 				raise osv.except_osv(_('Warning'),_('WFD Check cannot be done by MKT Approved user'))
 			self.write(cr, uid, ids, {'state': 'design_checked',
 									  'design_user_id': uid, 
@@ -688,7 +688,7 @@ class kg_crm_offer(osv.osv):
 	def entry_design_verify(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'design_checked':
-			if obj.design_user_id.id == uid:
+			if entry.design_user_id.id == uid:
 				raise osv.except_osv(_('Warning'),_('WFD Verify cannot be done by Design Checked user'))
 			self.write(cr, uid, ids, {'state': 'design_verified',
 									  'design_verifiy_user_id': uid, 
@@ -699,7 +699,7 @@ class kg_crm_offer(osv.osv):
 	def entry_design_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'design_verified':
-			if obj.design_verifiy_user_id.id == uid:
+			if entry.design_verifiy_user_id.id == uid:
 				raise osv.except_osv(_('Warning'),_('WFD Approve cannot be done by Design Verified user'))
 			user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
 			if user_obj:
@@ -2398,8 +2398,7 @@ class kg_crm_offer(osv.osv):
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 			
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Offer='+rec_code
-
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&offer='+rec_code
 
 		return {
 					  'name'	 : 'Go to website',

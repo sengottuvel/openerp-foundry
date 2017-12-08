@@ -182,8 +182,7 @@ class kg_packing_type(osv.osv):
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 			
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Packing_Type='+rec_code
-
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&packing_type='+rec_code
 
 		return {
 					  'name'	 : 'Go to website',

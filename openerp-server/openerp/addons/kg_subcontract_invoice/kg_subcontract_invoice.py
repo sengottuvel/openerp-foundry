@@ -597,8 +597,7 @@ class kg_subcontract_invoice(osv.osv):
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 			
-		url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&subcontract_invoice='+rec_code
-
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&subcontract_invoice='+rec_code
 
 		return {
 					  'name'	 : 'Go to website',

@@ -312,10 +312,10 @@ class kg_pump_qap(osv.osv):
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
 		if rec.test_state == 'hs':
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Hydro_Static_Test_(After_Assembly)='+rec_code
-		else:
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Dynamic_Balancing='+rec_code
+			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&hydro_static_test_after_assembly='+rec_code
 
+		else:
+			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&dimensional_inspection='+rec_code
 
 		return {
 					  'name'	 : 'Go to website',

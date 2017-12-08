@@ -13,6 +13,7 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirm" class="oe_highlight"/>
 						<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 <!--					<button name="entry_close" type="object" string="Closed" states="plan" class="oe_highlight"/>-->
 					</header>
 						<group>
@@ -158,13 +159,13 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';black:state == 'plan';gray:state == 'reject';red:state == 'confirm'" 
 								toolbar="True" string="Site Visit Plan Tree">
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>	
 					<field name="name"/>
 					<field name="region"/>
 					<field name="from_date"/>
 					<field name="to_date"/>	
 					<field name="allowance_amt"/>	
 					<field name="purpose_of_visit"/>
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>	
 					<field name="state"/>
 				</tree>
 			</field>
@@ -235,6 +236,7 @@
 				<form string="Ch Site Visit Plan Details" version="7.0" create="false" delete="false">
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="pending" class="oe_highlight"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 					<group string="Plan Details">
 						<group>
@@ -397,6 +399,7 @@
 			<field name="arch" type="xml">
 				<tree toolbar="True" colors="blue:state == 'pending';black:state == 'close'" 
 						string="Ch Site Visit Plan Tree" create="false" delete="false">
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="complaint_no"/>
 					<field name="header_id"/>
 					<field name="plan_date"/>
@@ -404,7 +407,6 @@
 					<field name="s_no"/>
 					<field name="wo_no"/>
 					<field name="pump_id"/>
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="state"/>
 				</tree>
 			</field>

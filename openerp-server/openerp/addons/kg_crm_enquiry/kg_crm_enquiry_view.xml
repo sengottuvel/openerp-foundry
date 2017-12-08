@@ -13,7 +13,6 @@
 						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight" invisible="1"/>
 						<button name="prime_cost_update" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
 						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
-						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible': [('state','not in',('moved_to_offer'))]}" class="oe_highlight"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 						<!--<field name="state" widget="statusbar" 

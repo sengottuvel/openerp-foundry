@@ -17,6 +17,7 @@
 			<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('partner_state','in',('approve','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 <!--		<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('partner_state','not in',('approve'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','not in',('approve'))]}"/> 
+			<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 		</header>
 		</xpath>
         
@@ -291,8 +292,9 @@
 		<field name="model">res.partner</field>
 		<field name="inherit_id" ref="base.view_partner_tree"/>
 		<field name="arch" type="xml">
-			<field name="name" position="after"> 
-			<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>	
+			<field name="name" position="before">
+				<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>			
+			</field>	
 			<field name="contact_person"/> 
 			<field name="mobile"/> 
 			</field>					

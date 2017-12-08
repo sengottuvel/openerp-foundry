@@ -440,8 +440,7 @@ class kg_site_visit_plan(osv.osv):
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 			
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Site_Visit_Plan='+rec_code
-
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&site_visit_plan='+rec_code
 
 		return {
 					  'name'	 : 'Go to website',
@@ -1053,8 +1052,7 @@ class ch_site_visit_plan(osv.osv):
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 			
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Plan_Status_Update='+rec_code
-
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&plan_status_update='+rec_code
 
 		return {
 					  'name'	 : 'Go to website',
