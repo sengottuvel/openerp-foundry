@@ -28,7 +28,7 @@
 							<field name="order_line_id" string="WO No." readonly="1"/>
 							<field name="pump_model_id" readonly="1"/>
 							<field name="moc_construction_id" readonly="1"/>
-							<field name="flag_not_applicable" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}" />
+							<field name="flag_not_applicable" invisible="1" />
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="entry_mode" invisible="1"/>
 							<field name="flag_data_bank" invisible="1"/>

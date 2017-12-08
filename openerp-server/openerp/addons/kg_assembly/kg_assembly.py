@@ -80,27 +80,27 @@ class kg_assembly_inward(osv.osv):
 		'pump_serial_no': fields.char('Pump Serial No.'),
 		'time_taken': fields.float('Time Taken'),
 		
-		'bed_assembly_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
+		'bed_assembly_state': fields.selection([('pending','Pending'),('completed','Completed'),('not_required','Not Required')],'State', readonly=True),
 		'bed_assembly_date': fields.date('Date'),
 		'bed_assembly_shift_id': fields.many2one('kg.shift.master','Shift'),
 		'bed_assembly_done_by': fields.many2one('hr.employee','Done By'),
 		
-		'rotate_assembly_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
+		'rotate_assembly_state': fields.selection([('pending','Pending'),('completed','Completed'),('not_required','Not Required')],'State', readonly=True),
 		'rotate_assembly_date': fields.date('Date'),
 		'rotate_assembly_shift_id': fields.many2one('kg.shift.master','Shift'),
 		'rotate_assembly_done_by': fields.many2one('hr.employee','Done By'),
 		
-		'runout_test_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
+		'runout_test_state': fields.selection([('pending','Pending'),('completed','Completed'),('not_required','Not Required')],'State', readonly=True),
 		'runout_test_date': fields.date('Date'),
 		'runout_test_shift_id': fields.many2one('kg.shift.master','Shift'),
 		'runout_test_done_by': fields.many2one('hr.employee','Done By'),
 		
-		'mech_assembly_state': fields.selection([('pending','Pending'),('completed','Completed'),('nill','NILL')],'State', readonly=True),
+		'mech_assembly_state': fields.selection([('pending','Pending'),('completed','Completed'),('nill','NILL'),('not_required','Not Required')],'State', readonly=True),
 		'mech_assembly_date': fields.date('Date'),
 		'mech_assembly_shift_id': fields.many2one('kg.shift.master','Shift'),
 		'mech_assembly_done_by': fields.many2one('hr.employee','Done By'),
 		
-		'full_assembly_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
+		'full_assembly_state': fields.selection([('pending','Pending'),('completed','Completed'),('not_required','Not Required')],'State', readonly=True),
 		'full_assembly_date': fields.date('Date'),
 		'full_assembly_shift_id': fields.many2one('kg.shift.master','Shift'),
 		'full_assembly_done_by': fields.many2one('hr.employee','Done By'),

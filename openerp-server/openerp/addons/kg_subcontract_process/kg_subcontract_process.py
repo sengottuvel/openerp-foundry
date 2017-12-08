@@ -238,7 +238,11 @@ class kg_subcontract_wo(osv.osv):
 		cr.execute(del_sql)		
 		
 		if entry.sc_line_ids:		
-			for item in entry.sc_line_ids:	
+			for item in entry.sc_line_ids:
+				if item.ms_id.flag_trimming_dia == True:
+					raise osv.except_osv(_('Warning!'),
+						_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
+					
 				if item.ms_id.state != 'accept':
 					raise osv.except_osv(_('Warning!'),
 						_('Still %s item has not yet inwarded, Kindly check and update !!')%(item.item_code))
@@ -340,7 +344,10 @@ class kg_subcontract_wo(osv.osv):
 					if line.entry_type == 'manual':											
 						if line.pattern_id.id == False and line.ms_shop_id.id == False:
 							raise osv.except_osv(_('Pattern or MS item must required'),
-							_('Kindly verify Pattern Number and MS Item Name!!'))						
+							_('Kindly verify Pattern Number and MS Item Name!!'))
+						if line.qty <= 0:
+							raise osv.except_osv(_('Warning!'),
+										_('Qty should be greater than Zero!!'))						
 						
 					if line.entry_type == 'direct':
 						print"line.sc_id.sc_wo_qty",line.sc_id.sc_wo_qty
@@ -645,8 +652,8 @@ class ch_subcontract_wo_line(osv.osv):
 		'ms_shop_id': fields.many2one('kg.machine.shop','MS Item Code', domain="[('type','=','ms')]"),
 		'pattern_code': fields.char('MS Item Code'),
 		'pattern_name': fields.char('MS Item Name'),
-		'item_code': fields.char('Item Code'),
-		'item_name': fields.char('Pattern Name'),
+		'item_code': fields.char('Item Code', readonly=True),
+		'item_name': fields.char('Item Name', readonly=True),
 		'entry_type': fields.selection([('direct','Direct'),('manual','Manual')], 'Entry Type', readonly=True),
 		
 		'schedule_id': fields.related('sc_id','schedule_id', type='many2one', relation='kg.schedule', string='Schedule No.', store=True, readonly=True),
@@ -723,7 +730,7 @@ class ch_subcontract_wo_line(osv.osv):
 			print"sssssssssss",ms_shop_id
 			ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_shop_id)
 			
-			value = {'pattern_code': ms_rec.code,'pattern_name':ms_rec.name}
+			value = {'item_code': ms_rec.code,'item_name':ms_rec.name}
 		return {'value': value}
 	
 	
@@ -889,7 +896,7 @@ class kg_subcontract_dc(osv.osv):
 		'flag_dc': False,
 		'division_id':_get_default_division,		
 		'state': 'draft',
-		'transfer_type': 'internal',
+		'transfer_type': 'sub_contractor',
 		'entry_mode': 'direct'
 		
 	}
@@ -923,7 +930,19 @@ class kg_subcontract_dc(osv.osv):
 					'pending_qty':sc_qty - item.sc_wo_qty,
 					'sc_dc_qty':sc_qty - item.sc_wo_qty,
 					'actual_qty':sc_qty,
+					'pump_model_id':item.pump_model_id.id,
 					'entry_mode':'direct',
+					
+					
+					'order_id':item.order_id.id,
+					'order_line_id':item.order_line_id.id,
+					'moc_id':item.moc_id.id,
+					'position_id':item.position_id.id,					
+					'pattern_id':item.pattern_id.id,					
+					'pattern_code':item.pattern_code,
+					'pattern_name':item.pattern_name,
+					'item_code':item.item_code,
+					'item_name':item.item_name,	
 					
 					
 				}
@@ -1615,6 +1634,8 @@ class kg_subcontract_inspection(osv.osv):
 		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),	
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		
+		
 				
 		
 	}
@@ -3109,7 +3130,10 @@ class kg_subcontract_inspection(osv.osv):
 				entry_name = cr.fetchone();
 				entry_name = entry_name[0]
 			else:
-				entry_name = rec.name				
+				entry_name = entry.name
+			
+			
+						
 			
 			######################### Creation MS SC Rejection List For raising Credit Note ####################################
 			
@@ -3140,7 +3164,6 @@ class kg_subcontract_inspection(osv.osv):
 
 			self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 								
-							
 		return True
 		
 	def unlink(self,cr,uid,ids,context=None):
@@ -3243,8 +3266,9 @@ class ch_subcontract_inspection_line(osv.osv):
 		'operation_id': fields.many2many('ch.kg.position.number', 'm2m_inspection_operation_details', 'in_operation_id', 'in_sub_id','Operation', domain="[('header_id','=',position_id)]"),
 		'com_operation_id': fields.many2many('ch.kg.position.number', 'm2m_inspection_com_operation_details', 'in_com_operation_id', 'in_com_sub_id','Completed Operation', domain="[('header_id','=',position_id)]"),
 		'actual_qty': fields.integer('Actual Qty',readonly=True),
-		'qty': fields.integer('Received Qty'),	
+		'qty': fields.integer('Accepted Qty'),	
 		'reject_qty': fields.integer('Rejection Qty'),
+		'rework_qty': fields.integer('Rework Qty'),
 		'inward_qty': fields.integer('Inward Qty'),	
 		'sc_wo_qty': fields.integer('SC WO Qty'),
 		'pending_qty': fields.integer('Pending Qty'),		
@@ -3255,6 +3279,8 @@ class ch_subcontract_inspection_line(osv.osv):
 				
 		'remarks': fields.text('Remarks'),
 		'state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done')],'Status', readonly=True),
+		
+		'rejection_remarks':fields.text('Rejection Remarks'),
 		
 		
 	}

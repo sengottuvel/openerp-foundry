@@ -1645,50 +1645,7 @@ class kg_work_order(osv.osv):
 							
 							draw_indent_line_obj.create(cr,uid,bot_indent_line_vals)
 
-					for foundry_item in item.line_ids:
-						
 					
-						### Trimming dia creation ###
-						if foundry_item.pattern_id.need_dynamic_balancing == True and foundry_item.flag_applicable == True:
-							trim_dia_obj = self.pool.get('kg.trimming.dia')
-							enq_line_obj = self.pool.get('ch.kg.crm.pumpmodel')
-							enq_line_rec = enq_line_obj.browse(cr,uid,item.enquiry_line_id)
-							print ":",enq_line_rec.id
-							if enq_line_rec.id > 0:
-								capacity_in = enq_line_rec.capacity_in
-								head_in = enq_line_rec.head_in
-								bkw_water = enq_line_rec.bkw_water
-								speed_in_rpm = enq_line_rec.speed_in_rpm
-								efficiency_in = enq_line_rec.efficiency_in
-								motor_kw = enq_line_rec.motor_kw
-								old_ref = enq_line_rec.wo_no
-							else:
-								capacity_in = 0
-								head_in = 0
-								bkw_water = 0
-								speed_in_rpm = 0
-								efficiency_in = 0
-								motor_kw = 0
-								old_ref = ''
-
-							dia_vals = { 
-								'order_line_id': item.id,
-								'order_bomline_id': foundry_item.id,
-								'order_category': item.order_category,		
-								'pump_model_type': item.pump_model_type,
-								'pump_model_id': item.pump_model_id.id,
-								'pattern_id': foundry_item.pattern_id.id,
-								'capacity_in': capacity_in,
-								'head_in': head_in,
-								'bkw_water': bkw_water,
-								'speed_in_rpm': speed_in_rpm,
-								'efficiency_in': efficiency_in,
-								'motor_kw': motor_kw,
-								'trimming_dia': item.trimming_dia,
-								'old_ref': old_ref,
-							}
-							trim_dia_obj.create(cr,uid,dia_vals)
-							self.pool.get('ch.order.bom.details').write(cr,uid,foundry_item.id,{'flag_trimming_dia':True})
 						
 					qc_created = 'no'
 					print "item",item

@@ -6,7 +6,6 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import re
 import math
-dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_rate_revision(osv.osv):
 
@@ -51,15 +50,13 @@ class kg_rate_revision(osv.osv):
 			
 		'name': fields.char('Revision No', size=128, readonly=True, select=True),
 		'entry_date': fields.date('Date',required=True),
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		
-		'active': fields.boolean('Active'),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
+		'active': fields.boolean('Active'),		
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),		
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),			
 		
-		'line_ids':fields.one2many('ch.rate.revision.details', 'header_id', "Rate Revision Details"),
 		'line_product_id': fields.related('line_ids','product_id', type='many2one', relation='product.product', string='Product'),
 		
 		'product_id': fields.many2many('kg.brandmoc.rate', 'm2m_brand_rate_revision_details', 'revision_id', 'brand_product_id','Product Name', domain="[('state','=','approved')]"),	
@@ -67,6 +64,7 @@ class kg_rate_revision(osv.osv):
 		'revision_mode': fields.selection([('all','All'),('individual','Individual')],'Revision Mode',required=True),
 		'value_type': fields.selection([('fixed_amt','Fixed Amount'),('per','Percentage')],'Value Type'),
 		'rate':fields.float('Value'),
+		'flag_load_item': fields.boolean('Load Item'),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -77,6 +75,10 @@ class kg_rate_revision(osv.osv):
 		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),	
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
+		
+		### Child class Declaration 
+		
+		'line_ids':fields.one2many('ch.rate.revision.details', 'header_id', "Rate Revision Details"),
 				
 	}
 	
@@ -84,6 +86,7 @@ class kg_rate_revision(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.rate.revision', context=c),
 		'active': True,
+		'flag_load_item': False,
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
@@ -138,6 +141,7 @@ class kg_rate_revision(osv.osv):
 						   'product_id':brand_rec.product_id.id,
 						   'brand_id':brand_moc_lines.brand_id.id,
 						   'revision_mode':revision_mode,
+						   'flag_read':True,
 						   'design_rate':brand_moc_lines.rate,
 						   'new_design_rate':design_rate_value})	
 			
@@ -170,12 +174,16 @@ class kg_rate_revision(osv.osv):
 						   'brand_line_ids':brand_moc_lines.id,
 						   'product_id':brand_rec.product_id.id,
 						   'brand_id':brand_moc_lines.brand_id.id,
+						   'new_brand_id':brand_moc_lines.brand_id.id,
+						   'new_moc_id':brand_moc_lines.moc_id.id,
 						   'revision_mode':revision_mode,
+						   'flag_read':True,
 						   'design_rate':brand_moc_lines.rate,
-						   'new_design_rate':design_rate_value})								
+						   'new_design_rate':design_rate_value})	
+						   
+		self.write(cr, uid, ids, {'flag_load_item': True})							
 			
 		return True
-
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])	
@@ -211,7 +219,28 @@ class kg_rate_revision(osv.osv):
 						 raise osv.except_osv(
 						_('Purchase Order Waiting for approval!!!'),
 						_('System not allow to Approve. Need to confirm purchase order contains product name %s and Po No. %s'%(line.product_id.name,purchase_rec.name)))					
+				
 				self.pool.get('ch.brandmoc.rate.details').write(cr,uid,line.brand_line_ids.id,{'rate':line.new_design_rate})
+				if line.flag_read == False:
+					if line.brand_id:										
+						sql_check = """ select brd_id,prod_id from prod_brnd where brd_id=%s and prod_id=%s""" %(line.brand_id.id,line.product_id.id)
+						cr.execute(sql_check)
+						data = cr.dictfetchall()						
+						if data:
+							pass
+						else:				
+							sql = """ insert into prod_brnd (brd_id,prod_id) VALUES(%s,%s) """ %(line.brand_id.id,line.product_id.id)
+							cr.execute(sql)
+					else:
+						pass		
+					brand_ids = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',line.product_id.id)])					
+					line = self.pool.get('ch.brandmoc.rate.details').create(cr,uid,{
+						   'header_id':brand_ids[0],
+						   'moc_id':line.moc_id.id,						  
+						   'name':line.moc_id.name,						   
+						   'brand_id':line.brand_id.id,						 
+						   'rate':line.design_rate})			
+					
 			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
@@ -228,21 +257,17 @@ class kg_rate_revision(osv.osv):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
 			if rec.state not in ('draft'):				
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
+				raise osv.except_osv(_('Delete access denied !'), _('Unable to delete. Draft entry only you can delete !!'))
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_rate_revision, self).write(cr, uid, ids, vals, context)	
-	
+		return super(kg_rate_revision, self).write(cr, uid, ids, vals, context)		
 	
 	
 kg_rate_revision()
-
-
 
 
 class ch_rate_revision_details(osv.osv):
@@ -250,8 +275,7 @@ class ch_rate_revision_details(osv.osv):
 	_name = "ch.rate.revision.details"
 	_description = "Brand MOC Rate Revision Details"
 	
-	_columns = {
-		
+	_columns = {		
 		
 		'header_id':fields.many2one('kg.rate.revision', 'Rate Revision Entry', required=True, ondelete='cascade'),	
 		'product_id': fields.many2one('product.product','Product Name'),
@@ -260,10 +284,18 @@ class ch_rate_revision_details(osv.osv):
 		'moc_id':fields.many2one('kg.moc.master','MOC'),	
 		'design_rate':fields.float('Current Design Rate(Rs)'),
 		'revision_mode': fields.selection([('all','All'),('individual','Individual')],'Revision Mode'),
-		'new_design_rate':fields.float('New Design Rate(Rs)'),		
-		'remarks':fields.text('Remarks'),		
-	}
+		'new_design_rate':fields.float('New Design Rate(Rs)'),
+		'new_brand_id': fields.many2one('kg.brand.master','New Brand'),			
+		'new_moc_id':fields.many2one('kg.moc.master','New MOC'),		
+		'remarks':fields.text('Remarks'),	
+		'flag_read': fields.boolean('Read Flag'),	
+	}	
 	
+	
+	_defaults = {	
 		
+		'flag_read': False,		
+		
+	}	
 	   
 ch_rate_revision_details()

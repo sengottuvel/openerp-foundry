@@ -18,17 +18,18 @@
 					<group>
 						<group>						
 							<field name="name"/>						
-							<field name="revision_mode" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>	
-							<field name="product_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>
-							<field name="rate" attrs="{'invisible':[('revision_mode','=','individual')], 'required': [('revision_mode','=','all')], 'readonly': [('state','in',['approved','reject'])]}"/>	
+							<field name="revision_mode" attrs="{'readonly': [('flag_load_item','!=',False)]}"/>	
+							<field name="product_id" widget="many2many_tags" attrs="{'readonly': [('flag_load_item','!=',False)]}"/>
+							<field name="rate" attrs="{'invisible':[('revision_mode','=','individual')], 'required': [('revision_mode','=','all')], 'readonly': [('flag_load_item','!=',False)]}"/>	
 							<field name="modify" invisible = "1"/>
+							<field name="flag_load_item" invisible = "1"/>
 							<field name="line_product_id" invisible = "1"/>
-							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>				
+							<field name="notes" attrs="{'readonly': [('flag_load_item','!=',False)]}"/>				
 						</group>
 						<group>	
-							<field name="entry_date" attrs="{'readonly': [('state','in',['approved','confirmed','reject'])]}"/>							
-							<field name="category_type" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>							
-							<field name="value_type" attrs="{'invisible':[('revision_mode','=','individual')], 'required': [('revision_mode','=','all')], 'readonly': [('state','in',['approved','reject'])]}"/>							
+							<field name="entry_date" options="{'datepicker':{'minDate': 0,'maxDate': 0,}}" attrs="{'readonly': [('flag_load_item','!=',False)]}"/>							
+							<field name="category_type" attrs="{'readonly': [('flag_load_item','!=',False)]}"/>							
+							<field name="value_type" attrs="{'invisible':[('revision_mode','=','individual')], 'required': [('revision_mode','=','all')], 'readonly': [('flag_load_item','!=',False)]}"/>							
 							<field name="state" style="width: 30%%" class="att_state_change"/>								
 						</group>
 					</group>
@@ -43,22 +44,43 @@
 					<notebook>
 						<page string="Rate Revision Details">	
 							<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject'])]}">
-								<tree string="Rate Revision Details Entry Tree" editable="top" create="false">	
-									<field name="product_id" readonly="1"/>										
-									<field name="brand_id" readonly="1"/>																		
-									<field name="moc_id" readonly="1" />	
-									<field name="design_rate" readonly="1" />										
+								<tree string="Rate Revision Details Entry Tree" editable="top">	
+									<field name="product_id" required="1" attrs="{'readonly': [('flag_read','!=',False)]}"/>										
+									<field name="brand_id" required="1" attrs="{'readonly': [('flag_read','!=',False)]}"/>																		
+									<field name="moc_id" required="1" attrs="{'readonly': [('flag_read','!=',False)]}" />	
+									<field name="design_rate" required="1" attrs="{'readonly': [('flag_read','!=',False)]}" />										
 									<field name="new_design_rate" required="1" attrs="{'readonly': [('revision_mode','=','all')]}" />																																
 									<field name="revision_mode" invisible="1"/>																																
+									<field name="flag_read" invisible="1"/>																																
 								</tree>
+								<form>
+									<group>
+										<group>
+											<field name="product_id" readonly="1"/>										
+											<field name="brand_id" readonly="1"/>																		
+											<field name="moc_id" readonly="1" />	
+											<field name="design_rate" readonly="1" />										
+										</group>
+										<group>
+											<field name="new_brand_id" required="1"/>																		
+											<field name="new_moc_id" required="1" />	
+											<field name="new_design_rate" required="1" />
+										</group>
+									
+									</group>
+								
+								</form>
+								
 							</field>																								
 						</page>
 						<page string="Entry Info">
+							<group>
 								<group>
 									<field name="company_id"/>
-									<field name="active"/>
 								</group>
 								<group>
+									<field name="active"/>
+								</group>
 								<group>
 									<field name="user_id"/>
 									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
@@ -160,21 +182,25 @@
 		
 		 <!-- Audit Log Xml Data Start -->
 		
-<!--
+
         <record id="rate_revision_model" model="audittrail.rule">
             <field name="name">Audit Log Rate Revision</field>
             <field name="object_id" eval="ref('kg_rate_revision.model_kg_rate_revision')"/>       
             <field name="state">subscribed</field>              
         </record>
--->
+        
+        <record id="rate_revision_line_model" model="audittrail.rule">
+            <field name="name">Audit Log Rate Revision</field>
+            <field name="object_id" eval="ref('kg_rate_revision.model_ch_rate_revision_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+
         
         <!-- Audit Log Xml Data End-->
 		
-		<!-- Menu Name Start here --> 
+		<!-- Menu item --> 
 		
 			<menuitem action="mma_rate_revision_master" name="Rate Revision" id="mam_rate_revision_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="36"/>
-
-		<!-- Menu Name End here --> 
 
 	</data>
 </openerp>
