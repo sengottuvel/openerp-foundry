@@ -136,7 +136,7 @@
 							
 							<page string = "Spare BOM" attrs="{'invisible':[('purpose_categ','!=','spare')]}">
 								<field name="line_ids_spare_bom" context="{'moc_const_id':moc_const_id}">
-								<tree string="BOM Tree" delete="false">
+								<tree string="BOM Tree">
 									<field name="bom_id" required="1"/>
 									<field name="qty" required="1"/>
 									<field name="prime_cost" readonly="1"/>

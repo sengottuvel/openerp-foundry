@@ -25,32 +25,35 @@ class kg_primecost_view(osv.osv):
 				'pump_cost': 0.0,
 				'total_cost': 0.0,
 			}
-			
-			for line in order.line_ids:
-				if line.is_applicable == True:
+			if order.line_ids:
+				for line in order.line_ids:
+					if line.is_applicable == True:
+						pump_cost += line.prime_cost
+			if order.line_ids_a:
+				for line in order.line_ids_a:
+					if line.is_applicable == True:
+						pump_cost += line.prime_cost
+			if order.line_ids_b:
+				for line in order.line_ids_b:
+					if line.is_applicable == True:
+						pump_cost += line.prime_cost
+			if order.line_ids_c:
+				for line in order.line_ids_c:
+					if line.line_ids:
+						for a in line.line_ids:
+							pump_cost += a.prime_cost
+					if line.line_ids_a:
+						for a in line.line_ids_a:
+							pump_cost += a.prime_cost
+					if line.line_ids_b:
+						for a in line.line_ids_b:
+							pump_cost += a.prime_cost
+			if order.line_ids_spare_bom:
+				for line in order.line_ids_spare_bom:
 					pump_cost += line.prime_cost
-			for line in order.line_ids_a:
-				if line.is_applicable == True:
-					pump_cost += line.prime_cost
-			for line in order.line_ids_b:
-				if line.is_applicable == True:
-					pump_cost += line.prime_cost
-			for line in order.line_ids_c:
-				if line.line_ids:
-					for a in line.line_ids:
-						pump_cost += a.prime_cost
-				if line.line_ids_a:
-					for a in line.line_ids_a:
-						pump_cost += a.prime_cost
-				if line.line_ids_b:
-					for a in line.line_ids_b:
-						pump_cost += a.prime_cost
-			for line in order.line_ids_spare_bom:
-				pump_cost += line.prime_cost
 			
 			pump_cost = pump_cost / order.qty
 			total_cost = pump_cost * order.qty
-			
 			res[order.id]['pump_cost'] = pump_cost
 			res[order.id]['total_cost'] = total_cost
 		
