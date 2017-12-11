@@ -220,7 +220,7 @@ class kg_crm_offer(osv.osv):
 		'excise_duty': fields.selection([('inclusive','Inclusive'),('extra','Extra'),('exemted','Exemted - Export'),('pac','PAC'),('sez','SEZ'),('ct1','CT1'),('ct3','CT3')],'EXCISE DUTY',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'road_permit': fields.selection([('yes','Yes'),('no','No')],'Road Permit',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'inspection': fields.selection([('yes','Yes(customers)'),('no','No(works)'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'l_d_clause': fields.char('L. D. CLAUSE / Penalty',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		#~ 'l_d_clause': fields.selection([('5_1','0.5 - 1.0% of total order value'),('1_10','1 to 10% of total order value'),('nill','Nill')],'L. D. CLAUSE / Penalty',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'pump_per_flag': fields.boolean('Pump',readonly=True, states={'draft':[('readonly',False)]}),
@@ -967,6 +967,8 @@ class kg_crm_offer(osv.osv):
 			 shaft_sealing = 'd_s'
 		elif item.shaft_sealing == 'f_s':
 			 shaft_sealing = 'f_s'
+		else:
+			shaft_sealing = shaft_sealing
 		if item.lubrication_type == 'grease':
 			 lubrication_type = 'grease'
 		if item.bush_bearing_lubrication == 'grease':
