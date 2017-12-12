@@ -1,6 +1,6 @@
 import xmlrpclib
 username = 'admin' #the user
-pwd = 'admin'      #the password of the user
+pwd = 'admin@123'      #the password of the user
 dbname = 'sam_phaseI'    #the database
 # Server Connectivity
 

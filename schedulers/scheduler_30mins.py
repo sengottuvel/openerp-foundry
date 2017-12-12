@@ -1,7 +1,7 @@
 import xmlrpclib
 
 username = 'admin' 
-pwd = 'admin'      
+pwd = 'admin@123'      
 dbname = 'sam_phaseI'    
 
 # Server Connectivity
