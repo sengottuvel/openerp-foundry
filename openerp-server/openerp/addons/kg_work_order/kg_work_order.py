@@ -1143,9 +1143,7 @@ class kg_work_order(osv.osv):
 				
 				line_delivery_date = str(item.delivery_date)
 				line_delivery_date = datetime.strptime(line_delivery_date, '%Y-%m-%d')
-				if line_delivery_date < today:
-					raise osv.except_osv(_('Warning!'),
-							_('Delivery Date should not be less than current date for Pump Model %s !!')%(item.pump_model_id.name))
+				
 							
 				
 				#~ if item.order_category != 'access':
