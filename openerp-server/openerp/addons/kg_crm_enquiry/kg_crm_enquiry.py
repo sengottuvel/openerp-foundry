@@ -1920,13 +1920,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'specific_gravity': fields.float('Specific Gravity'),
 		'viscosity': fields.integer('Viscosity in CST'),
 		'npsh_avl': fields.integer('NPSH-AVL'),
-		'capacity_in_liquid': fields.integer('Capacity in M3/hr(Liquid)'),
+		'capacity_in_liquid': fields.float('Capacity in M3/hr(Liquid)'),
 		'head_in_liquid': fields.float('Total Head in Mlc(Liquid)'),
 		'consistency': fields.float('Consistency In %'),
 		
 		# Duty Parameters
 		
-		'capacity_in': fields.integer('Capacity in M3/hr(Water)',),
+		'capacity_in': fields.float('Capacity in M3/hr(Water)',),
 		'head_in': fields.float('Total Head in Mlc(Water)'),
 		'viscosity_crt_factor': fields.char('Viscosity correction factors'),
 		'suction_pressure': fields.selection([('normal','Normal'),('centre_line','Centre Line')],'Suction pressure'),
