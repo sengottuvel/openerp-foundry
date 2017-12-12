@@ -701,13 +701,14 @@ class kg_crm_offer(osv.osv):
 		if entry.state == 'design_verified':
 			#~ if entry.design_verifiy_user_id.id == uid:
 				#~ raise osv.except_osv(_('Warning'),_('WFD Approve cannot be done by Design Verified user'))
-			user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
-			if user_obj:
-				user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
-				if user_rec.special_approval == True:
-					self.write(cr, uid, ids, {'state': 'moved_to_offer','mkt_user_id': uid,'mkt_date': time.strftime('%Y-%m-%d')})
-				else:
-					raise osv.except_osv(_('Warning'),_('It should be approved by special approver'))
+			#~ user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
+			#~ if user_obj:
+				#~ user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
+				#~ if user_rec.special_approval == True:
+					#~ self.write(cr, uid, ids, {'state': 'moved_to_offer','mkt_user_id': uid,'mkt_date': time.strftime('%Y-%m-%d')})
+				#~ else:
+					#~ raise osv.except_osv(_('Warning'),_('It should be approved by special approver'))
+			self.write(cr, uid, ids, {'state': 'moved_to_offer','mkt_user_id': uid,'mkt_date': time.strftime('%Y-%m-%d')})
 		return True
 	
 	def entry_reject(self,cr,uid,ids,context=None):
