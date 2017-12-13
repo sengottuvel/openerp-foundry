@@ -2461,7 +2461,7 @@ class kg_qc_verification(osv.osv):
 						
 						if ms_shop_rec.schedule_qty < entry.order_bomline_id.qty:
 							if ms_shop_rec.ms_plan_rem_qty == 0:
-								ms_state = 'raw_pending'
+								ms_state = 'waiting'
 							else:
 								ms_state = ms_shop_rec.state
 							self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':ms_state,'ms_sch_qty':ms_shop_rec.ms_sch_qty + entry.qty,'schedule_qty':ms_shop_rec.schedule_qty + entry.qty,'fettling_qty':ms_shop_rec.fettling_qty + entry.qty,'inward_accept_qty':ms_shop_rec.inward_accept_qty + entry.qty,'ms_plan_rem_qty':ms_shop_rec.inward_accept_qty + entry.qty})

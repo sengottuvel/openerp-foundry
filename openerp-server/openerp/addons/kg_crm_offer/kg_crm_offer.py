@@ -2077,7 +2077,7 @@ class kg_crm_offer(osv.osv):
 		left join ch_kg_crm_pumpmodel enquiry on(enquiry.id = spare.enquiry_line_id)
 		left join res_partner partner on(partner.id=offer.customer_id)
 		left join res_company company on(company.id=offer.company_id) 
-		where offer.id=%s and offer.state != 'draft' and spare.enquiry_line_id is not null
+		where offer.id=%s and spare.enquiry_line_id is not null
 		) as sample		
 		"""%(ids[0])
 		cr.execute(pump_sql)
@@ -2210,7 +2210,7 @@ class kg_crm_offer(osv.osv):
 		left join ch_kg_crm_pumpmodel enquiry on(enquiry.id = spare.enquiry_line_id)
 		left join res_partner partner on(partner.id=offer.customer_id)
 		left join res_company company on(company.id=offer.company_id) 
-		where offer.id=%s and offer.state != 'draft' and spare.enquiry_line_id is not null
+		where offer.id=%s and spare.enquiry_line_id is not null
 		) as sample		
 		"""%(ids[0])
 		cr.execute(pump_sql)
