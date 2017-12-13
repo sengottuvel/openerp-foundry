@@ -23,7 +23,7 @@
 								<field name="db_actual_unbal_weight" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
 								<field name="db_shift_id" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
 								<field name="name" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
-								<field name="db_verified_by" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
+								<field name="db_verified_by" domain ="[('status','=','approved')]" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
 								<field name="db_reject_remarks_id" attrs="{'readonly': [('db_state','=','completed')],'invisible':[('db_result','!=','reject')],'required':[('db_result','=','reject')]}"/>
 								<field name="db_remarks" attrs="{'readonly': [('db_state','=','completed')]}"/>
 							</group>											
@@ -31,7 +31,7 @@
 								<field name="qap_plan_id"/>
 								<field name="db_max_weight" attrs="{'readonly': ['|',('flag_db_customer_specific','!=',True),('db_state','=','completed')]}"/>
 								<field name="db_machinery_id" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
-								<field name="db_operator" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
+								<field name="db_operator" domain ="[('status','=','approved')]" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
 								<field name="db_result" required="1" attrs="{'readonly': [('db_state','=','completed')]}"/>
 								<field name="flag_db_customer_specific" attrs="{'readonly': [('db_state','=','completed')]}"/>
 								<field name="db_state" invisible="1" attrs="{'readonly': [('db_state','=','completed')]}"/>
@@ -185,6 +185,7 @@
 					<header>
 						<button name="hs_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
 						attrs="{'invisible': [('hs_state','=','completed')]}"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 						<group string="Pre Hydro Static Test">
 							<group>
@@ -272,6 +273,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Pre Hydro Static Test" create="false" delete="false">					
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="order_no"/>
 					<field name="order_category"/>
 					<field name="item_code"/>

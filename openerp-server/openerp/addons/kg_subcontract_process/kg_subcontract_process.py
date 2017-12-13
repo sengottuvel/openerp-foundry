@@ -48,6 +48,7 @@ class kg_subcontract_process(osv.osv):
 		
 		
 		'active': fields.boolean('Active'),
+		'rework_flag': fields.boolean('Rework Flag'),
 		'contractor_id': fields.many2one('res.partner','Contractor Name',domain="[('contractor','=','t'),('partner_state','=','approve')]"),
 		
 		'ms_plan_id': fields.many2one('kg.ms.daily.planning','Planning Id'),
@@ -71,22 +72,29 @@ class kg_subcontract_process(osv.osv):
 		
 		'ms_id': fields.related('ms_plan_line_id','ms_id', type='many2one', relation='kg.machineshop', string='MS Id', store=True, readonly=True),
 		'production_id': fields.related('ms_id','production_id', type='many2one', relation='kg.production', string='Production No.', store=True, readonly=True),
-		'position_id': fields.related('ms_plan_line_id','position_id', type='many2one', relation='kg.position.number', string='Position No.', store=True, readonly=True),
-		'order_id': fields.related('ms_plan_line_id','order_id', type='many2one', relation='kg.work.order', string='Work Order', store=True, readonly=True),
-		'order_line_id': fields.related('ms_plan_line_id','order_line_id', type='many2one', relation='ch.work.order.details', string='Order Line', store=True, readonly=True),
-		'order_no': fields.related('ms_plan_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
+		
+		
 		'oth_spec': fields.related('ms_plan_line_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),
 		'order_delivery_date': fields.related('ms_plan_line_id','order_delivery_date', type='date', string='Delivery Date', store=True, readonly=True),
-
+		
+		'order_id': fields.many2one('kg.work.order','Work Order'),	
+		'order_line_id': fields.many2one('ch.work.order.details','Order Line'),	
+		'moc_id': fields.many2one('kg.moc.master','MOC'),	
+		'position_id': fields.many2one('kg.position.number','Position No.'),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number'),
+		'ms_shop_id': fields.many2one('kg.machine.shop','Pattern Number'),
+		'item_code': fields.char('Item Code'),		
+		'item_name': fields.char('Item Name'),		
+		'order_no': fields.char('WO No.'),		
+		
 		'order_category': fields.related('ms_plan_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'order_priority': fields.related('ms_plan_line_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		'pump_model_id': fields.related('ms_plan_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
-		'pattern_id': fields.related('ms_plan_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		
 		'pattern_code': fields.related('ms_plan_line_id','pattern_code', type='char', string='Pattern Code', store=True, readonly=True),
 		'pattern_name': fields.related('ms_plan_line_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
-		'item_code': fields.related('ms_plan_line_id','item_code', type='char', string='Item Code', store=True, readonly=True),
-		'item_name': fields.related('ms_plan_line_id','item_name', type='char', string='Item Name', store=True, readonly=True),
-		'moc_id': fields.related('ms_plan_line_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		
+		
 		'ms_type': fields.related('ms_plan_line_id','ms_type', type='selection', selection=[('foundry_item','Foundry Item'),('ms_item','MS Item')], string='Item Type', store=True, readonly=True),
 		'ms_op_id': fields.many2one('kg.ms.operations','MS Operation Id'),	
 		
@@ -123,6 +131,7 @@ class kg_subcontract_process(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
+		'rework_flag': False,
 		'division_id':_get_default_division,
 		'wo_state': 'pending',
 		'dc_state': 'pending',
@@ -239,13 +248,14 @@ class kg_subcontract_wo(osv.osv):
 		
 		if entry.sc_line_ids:		
 			for item in entry.sc_line_ids:
-				if item.ms_id.flag_trimming_dia == True:
-					raise osv.except_osv(_('Warning!'),
-						_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
+				if item.ms_id:
+					if item.ms_id.flag_trimming_dia == True:
+						raise osv.except_osv(_('Warning!'),
+							_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
 					
-				if item.ms_id.state != 'accept':
-					raise osv.except_osv(_('Warning!'),
-						_('Still %s item has not yet inwarded, Kindly check and update !!')%(item.item_code))
+					if item.ms_id.state != 'accept':
+						raise osv.except_osv(_('Warning!'),
+							_('Still %s item has not yet inwarded, Kindly check and update !!')%(item.item_code))
 				if item.ms_op_id:
 					vals = {								
 						'header_id': entry.id,
@@ -647,7 +657,7 @@ class ch_subcontract_wo_line(osv.osv):
 		'oth_spec': fields.related('sc_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC', required=True),
 		'position_id': fields.many2one('kg.position.number','Position No.', required=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number'),
 		'ms_shop_id': fields.many2one('kg.machine.shop','MS Item Code', domain="[('type','=','ms')]"),
 		'pattern_code': fields.char('MS Item Code'),
@@ -1248,7 +1258,7 @@ class ch_subcontract_dc_line(osv.osv):
 		'order_id': fields.many2one('kg.work.order','Work Order', readonly=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC', required=True),
 		'position_id': fields.many2one('kg.position.number','Position No.', required=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number'),
 		'ms_shop_id': fields.many2one('kg.machine.shop','MS Item Name', domain="[('type','=','ms')]"),
 		'pattern_code': fields.char('Pattern Code'),
@@ -1560,7 +1570,7 @@ class ch_subcontract_inward_line(osv.osv):
 		'order_id': fields.many2one('kg.work.order','Work Order', readonly=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC', required=True),
 		'position_id': fields.many2one('kg.position.number','Position No.', required=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number'),
 		'ms_shop_id': fields.many2one('kg.machine.shop','MS Item Name', domain="[('type','=','ms')]"),
 		'pattern_code': fields.char('Pattern Code'),
@@ -1623,7 +1633,7 @@ class kg_subcontract_inspection(osv.osv):
 		'line_ids': fields.one2many('ch.subcontract.inspection.line','header_id','Subcontract Inspection Line'),   
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		
-		'order_id': fields.many2many('ch.work.order.details', 'm2m_work_order_inspection_details', 'inspection_id', 'order_id','WO No' ,domain="[('state','=','confirmed')]"),
+		'order_id': fields.many2many('ch.work.order.details', 'm2m_work_order_inspection_details', 'inspection_id', 'order_id','WO No' ,domain="[('state','=','confirmed')]",required=True),
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -1751,7 +1761,7 @@ class kg_subcontract_inspection(osv.osv):
 					print"item .reject....",item.reject_qty
 					print"item ..qty...",item.qty
 					
-					if item.sc_wo_qty < (item.reject_qty + item.qty):
+					if item.sc_inward_line_id.pending_qty < (item.reject_qty + item.qty + item.rework_qty):
 						raise osv.except_osv(_('Warning!'),
 						_('Excess Qty not allowed, Kindly verify !!'))					
 					
@@ -3083,18 +3093,57 @@ class kg_subcontract_inspection(osv.osv):
 												if op_name == '120':
 													self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'pending'})	
 					
-					
-					if item.reject_qty > 0:
+					if item.order_line_id.order_no != 'STK WO':
+						if item.reject_qty > 0:							
+							print"ms_type",item.ms_type
+							if item.ms_type == 'foundry_item':
+								ms_type = 'foundry'
+							elif item.ms_type == 'ms_item':
+								ms_type = 'ms'
+							print"ms_typems_type",ms_type							
+							
+							self.pool.get('kg.qc.verification').reject_process(cr,uid,0,item.reject_qty,ms_type,'',item,False,0)
+							
+					if item.rework_qty > 0:
+							
+							sc_obj = self.pool.get('kg.subcontract.process')				
+							sc_name = ''	
+							sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+							sc_name = cr.fetchone();
+							
+							print"item.sc_id.ms_plan_id.id",item.sc_id.ms_plan_id
+							if item.sc_id.ms_plan_id is None:
+								ms_plan_id = False
+								ms_plan_line_id = False
+							else:
+								ms_plan_id = item.sc_id.ms_plan_id.id
+								ms_plan_line_id = item.sc_id.ms_plan_line_id.id
+							
+							sc_vals = {
+								'name': sc_name[0],
+								'ms_plan_id': ms_plan_id,
+								'ms_plan_line_id': ms_plan_line_id,
+								'order_id': item.order_line_id.header_id.id,
+								'order_line_id': item.order_line_id.id,
+								'total_qty': item.rework_qty,
+								'pending_qty': item.rework_qty,
+								'actual_qty': item.rework_qty,
+								'rework_flag': True,
+								
+								
+								'moc_id': item.moc_id.id,
+								'position_id': item.position_id.id,
+								'pattern_id': item.pattern_id.id,						
+								'item_code': item.item_code,
+								'item_name': item.item_name,
+								'order_no': item.order_line_id.order_no,								
+								
+							}
+							
+							sc_id = sc_obj.create(cr, uid,sc_vals)				
 						
-						print"ms_type",item.ms_type
-						if item.ms_type == 'foundry_item':
-							ms_type = 'foundry'
-						elif item.ms_type == 'ms_item':
-							ms_type = 'ms'
-						print"ms_typems_type",ms_type
-						
-						
-						self.pool.get('kg.qc.verification').reject_process(cr,uid,0,item.reject_qty,ms_type,'',item,False,0)
 								
 												
 			direct_sc_inward_qty = 0		
@@ -3103,24 +3152,30 @@ class kg_subcontract_inspection(osv.osv):
 					raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative values !!'))
 								
-				if (line_item.qty + line_item.reject_qty)  == 0:
+				if (line_item.qty + line_item.reject_qty + line_item.rework_qty)  == 0:
 					raise osv.except_osv(_('Warning!'),
 								_('System not allow to save Zero values !!'))	
 				
 								
-				if (line_item.qty + line_item.reject_qty) > line_item.sc_inward_line_id.qty:
+				if (line_item.qty + line_item.reject_qty + line_item.rework_qty) > line_item.sc_inward_line_id.qty:
 					raise osv.except_osv(_('Warning!'),
 								_('Check the Qty !!! '))	
-								
-				if line_item.entry_type == 'direct':
-					direct_sc_inward_qty = line_item.sc_id.sc_inward_qty + line_item.qty									
-						
-				
-				self.pool.get('ch.subcontract.inward.line').write(cr,uid,line_item.sc_inward_line_id.id,{'pending_qty':line_item.sc_inward_line_id.pending_qty - line_item.qty})							
-				
-				
-				sc_obj.write(cr, uid, line_item.sc_id.id, 
+				print"line_item.sc_id",line_item.sc_id
+				if line_item.sc_id:				
+					if line_item.entry_type == 'direct':
+						direct_sc_inward_qty = line_item.sc_id.sc_inward_qty + line_item.qty + line_item.reject_qty + line_item.rework_qty
+					else:
+						direct_sc_inward_qty = line_item.sc_id.sc_inward_qty + line_item.qty + line_item.reject_qty + line_item.rework_qty							
+					
+					sc_obj.write(cr, uid, line_item.sc_id.id, 
 					{'sc_inward_qty':direct_sc_inward_qty})	
+				else:
+					pass
+				
+				self.pool.get('ch.subcontract.inward.line').write(cr,uid,line_item.sc_inward_line_id.id,{'pending_qty':line_item.sc_inward_line_id.pending_qty - (line_item.qty + line_item.reject_qty + line_item.rework_qty)})							
+				
+				
+					
 			
 			### Sequence Number Generation  ###		
 			if entry.name == '' or entry.name == False:
@@ -3233,7 +3288,7 @@ class ch_subcontract_inspection_line(osv.osv):
 		'order_id': fields.many2one('kg.work.order','Work Order', readonly=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC', required=True),
 		'position_id': fields.many2one('kg.position.number','Position No.', required=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
 		
 		'schedule_id': fields.related('sc_id','schedule_id', type='many2one', relation='kg.schedule', string='Schedule No.', store=True, readonly=True),
 		'schedule_date': fields.related('schedule_id','entry_date', type='date', string='Schedule Date', store=True, readonly=True),

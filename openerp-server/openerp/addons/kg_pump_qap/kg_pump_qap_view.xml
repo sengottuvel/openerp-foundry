@@ -14,19 +14,18 @@
 					<header>
 						<button name="di_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
 						attrs="{'invisible': [('di_state','=','completed')]}"/>
-						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 						<group string="Dimensional Inspection">
 							<group>
 								<field name="di_date" attrs="{'required':[('flag_di_not_applicable','!=',True)],'readonly': [('di_state','=','completed')]}"/>
 								<field name="di_shift_id" attrs="{'required':[('flag_di_not_applicable','!=',True)],'readonly': [('di_state','=','completed')]}"/>
-								<field name="di_verified_by" attrs="{'required':[('flag_di_not_applicable','!=',True)],'readonly': [('di_state','=','completed')]}"/>
+								<field name="di_verified_by" domain="[('status','=','approved')]" attrs="{'required':[('flag_di_not_applicable','!=',True)],'readonly': [('di_state','=','completed')]}"/>
 								<field name="di_reject_remarks_id" attrs="{'readonly': [('di_state','=','completed')],'invisible':[('di_result','!=','reject')],'required':[('di_result','=','reject')]}"/>
 								<field name="di_remarks" attrs="{'readonly': [('di_state','=','completed')]}"/>
 							</group>											
 							<group>
 								<field name="qap_plan_id" />
-								<field name="di_operator" attrs="{'required':[('flag_di_not_applicable','!=',True)],'readonly': [('di_state','=','completed')]}"/>
+								<field name="di_operator" domain="[('status','=','approved')]" attrs="{'required':[('flag_di_not_applicable','!=',True)],'readonly': [('di_state','=','completed')]}"/>
 								<field name="di_result" attrs="{'required':[('flag_di_not_applicable','!=',True)],'readonly': [('di_state','=','completed')]}"/>
 								<field name="flag_di_customer_specific" attrs="{'readonly': [('di_state','=','completed')]}"/>
 								<field name="overall_dim"  attrs="{'required':[('flag_di_not_applicable','!=',True)],'readonly': [('di_state','=','completed')]}"/>
@@ -43,7 +42,7 @@
 							<group>
 								<field name="order_category"/>
 								<field name="pump_serial_no" attrs="{'required': [('order_category','=','pump')]}"/>
-								<field name="spare_assembly_id"/>
+								<field name="spare_assembly_id" attrs="{'readonly': [('di_state','=','completed')]}"/>
 							</group>					
 						</group>
 						<notebook>
@@ -106,7 +105,6 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Dimensional Inspection" create="false" delete="false">					
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="order_no"/>
 					<field name="order_category"/>
 					<field name="pump_model_id"/>
@@ -186,6 +184,7 @@
 					<header>
 						<button name="hs_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
 							attrs="{'invisible': [('hs_state','=','completed')]}"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 						<group string="Hydro Static Test (After Assembly)">
 							<group>
@@ -272,6 +271,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Hydro Static Test (After Assembly)" create="false" delete="false">					
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="order_no"/>
 					<field name="order_category"/>
 					<field name="pump_model_id"/>
@@ -533,7 +533,7 @@
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('painting_state','=','completed')]}"/>
 								<field name="shift_id" required="1" attrs="{'readonly': [('painting_state','=','completed')]}"/>
-								<field name="verified_by" required="1" attrs="{'readonly': [('painting_state','=','completed')]}"/>
+								<field name="verified_by" domain="[('status','=','approved')]" required="1" attrs="{'readonly': [('painting_state','=','completed')]}"/>
 								<field name="surface_preparation" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('painting_state','=','completed')]}"/>
 								<field name="primer_ratio" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('painting_state','=','completed')]}"/>
 								<field name="intermediater_ratio" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('painting_state','=','completed')]}"/>
@@ -546,7 +546,7 @@
 								<field name="qap_plan_id"/>
 								<field name="operator" required="1" attrs="{'readonly': [('painting_state','=','completed')]}"/>
 								<field name="contractor_id" attrs="{'required':[('operator','=','contractor')],'invisible':[('operator','!=','contractor')],'readonly': [('painting_state','=','completed')]}"/>
-								<field name="employee_id" attrs="{'required':[('operator','=','comp_employee')],'invisible':[('operator','!=','comp_employee')],'readonly': [('painting_state','=','completed')]}"/>
+								<field name="employee_id" domain="[('status','=','approved')]" attrs="{'required':[('operator','=','comp_employee')],'invisible':[('operator','!=','comp_employee')],'readonly': [('painting_state','=','completed')]}"/>
 								<field name="paint_color" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('painting_state','=','completed')]}"/>
 								<field name="primer" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('painting_state','=','completed')]}"/>
 								<field name="inter_mediater" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('painting_state','=','completed')]}"/>

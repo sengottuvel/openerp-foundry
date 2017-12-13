@@ -107,9 +107,9 @@ class kg_pump_qap(osv.osv):
 		'hs_actual_unbal_weight': fields.float('Actual Un Balanced Weight in (gms)'),
 		'hs_machinery_id': fields.many2one('kg.machinery.master','Machinery'),
 		'hs_shift_id': fields.many2one('kg.shift.master','Shift'),
-		'hs_operator': fields.char('Operator'),
-		'hs_verified_by': fields.char('Verified By'),
-		'hs_result': fields.selection([('accept','Accept'),('reject','Reject')],'Result'),
+		'hs_operator': fields.many2one('hr.employee','Operator'),		
+		'hs_verified_by': fields.many2one('hr.employee','Verified By'),
+		'hs_result': fields.selection([('accept','Accept'),('reject','Reject'),('leak','Leak')],'Result'),
 		'hs_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'hs_leak_remarks': fields.char('Leak Remarks'),
 		'hs_action': fields.char('Action to be taken'),
@@ -211,27 +211,30 @@ class kg_pump_qap(osv.osv):
 		### Sequence Number Generation  ###
 		tag_no = ''
 		description = ''
-		if rec.hs_state == 'pending':
-			if rec.order_line_id.inspection != 'no':
-				if rec.order_line_id.enquiry_line_id:
-					enquiry_line_rec = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,rec.order_line_id.enquiry_line_id)
-					tag_no = enquiry_line_rec.equipment_no
-					description = enquiry_line_rec.description
-				### Sending to Inspection ###
-				inspection_vals = {
-					'qap_plan_id' : rec.qap_plan_id.id,
-					'pump_qap_id': rec.id,
-					'order_id': rec.order_id.id,
-					'order_line_id': rec.order_line_id.id,
-					'assembly_id': rec.assembly_id.id,
-					'equipment_no': tag_no,
-					'description': description,
-				}
-				inspection_id = self.pool.get('kg.inspection').create(cr, uid, inspection_vals)
-				self.write(cr, uid, ids, {'flag_sent_for_inspection':True,'hs_state':'completed','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		if rec.hs_result != 'leak':
+			if rec.hs_state == 'pending':
+				if rec.order_line_id.inspection != 'no':
+					if rec.order_line_id.enquiry_line_id:
+						enquiry_line_rec = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,rec.order_line_id.enquiry_line_id)
+						tag_no = enquiry_line_rec.equipment_no
+						description = enquiry_line_rec.description
+					### Sending to Inspection ###
+					inspection_vals = {
+						'qap_plan_id' : rec.qap_plan_id.id,
+						'pump_qap_id': rec.id,
+						'order_id': rec.order_id.id,
+						'order_line_id': rec.order_line_id.id,
+						'assembly_id': rec.assembly_id.id,
+						'equipment_no': tag_no,
+						'description': description,
+					}
+					inspection_id = self.pool.get('kg.inspection').create(cr, uid, inspection_vals)
+					self.write(cr, uid, ids, {'flag_sent_for_inspection':True,'hs_state':'completed','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+				else:
+		
+					self.write(cr, uid, ids, {'test_state':'pt','pt_state':'pending','hs_state':'completed','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 			else:
-	
-				self.write(cr, uid, ids, {'test_state':'pt','pt_state':'pending','hs_state':'completed','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+				pass
 		else:
 			pass	
 		return True
@@ -312,10 +315,13 @@ class kg_pump_qap(osv.osv):
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
 		if rec.test_state == 'hs':
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&hydro_static_test_after_assembly='+rec_code
+			
+			url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&hydro_static_test_(After_Assembly)='+rec_code
 
 		else:
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&dimensional_inspection='+rec_code
+			
+			url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&dimensional_inspection='+rec_code
+
 
 		return {
 					  'name'	 : 'Go to website',

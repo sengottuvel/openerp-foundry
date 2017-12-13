@@ -172,11 +172,12 @@
 					colors="blue:state == 'draft';red:state == 'mkt_approved';violet:state == 'design_approved';gray:state == 'cancel';black:state == 'confirmed'" toolbar="1">	
 									
 					<field name="order_no"/>
-					<field name="order_date"/>
-					
+					<field name="order_date"/>					
 					<field name="order_category"/>
 					<field name="pump_model_id"/>
 					<field name="qty" sum="Total Qty"/>
+					<field name="total_weight" sum="Total Weight"/>
+					<field name="rate_kg"/>
 					<field name="unit_price" sum="Total Price"/>
 					<field name="delivery_date"/>
 					
@@ -443,6 +444,8 @@
 													<field name="moc_id" required="1" attrs="{'readonly':[('flag_standard','!=',True)]}"/>
 													<field name="csd_no"/>
 													<field name="qty" required="1" readonly="1"/>
+													<field name="weight" readonly="1"/>
+													<field name="total_weight" readonly="1"/>
 													<field name="prime_cost" readonly="1" invisible="0"/>
 													<field name="wo_prime_cost" readonly="1"/>
 													<field name="entry_mode" invisible="1"/>

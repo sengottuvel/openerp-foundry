@@ -2149,6 +2149,34 @@ class ch_work_order_details(osv.osv):
 	_description = "Work Order Details"
 	_rec_name = 'order_no'
 	
+	
+	def _get_foundry_total_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		bom_weight = acc_bom_weight = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):	
+			for bom_line in entry.line_ids:				
+				bom_weight += bom_line.total_weight				
+			for acc_line in entry.line_ids_d:
+				for acc_fou_line in acc_line.line_ids:
+					acc_bom_weight += acc_fou_line.total_weight				
+			total_weight = bom_weight + acc_bom_weight 			
+		result[entry.id]= total_weight
+		return result
+	
+	def _get_foundry_rate_kg(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		bom_weight = acc_bom_weight = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):	
+			for bom_line in entry.line_ids:
+				bom_weight += bom_line.total_weight				
+			for acc_line in entry.line_ids_d:
+				for acc_fou_line in acc_line.line_ids:
+					acc_bom_weight += acc_fou_line.total_weight						
+			total_weight = bom_weight + acc_bom_weight 
+			total_weight_kg = total_weight / entry.unit_price			
+		result[entry.id]= total_weight_kg
+		return result
+	
 	_columns = {
 	
 		### Order Details ####
@@ -2231,6 +2259,9 @@ class ch_work_order_details(osv.osv):
 		'suction_spool': fields.integer('Suction Spool'),
 		'flag_select_all': fields.boolean('Select All'),
 		'pumpseries_id': fields.many2one('kg.pumpseries.master', 'Pump Series',domain="[('state','=','approved')]"),
+		
+		'total_weight': fields.function(_get_foundry_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float', readonly=True),
+		'rate_kg': fields.function(_get_foundry_rate_kg, string='Rate/KG', method=True, store=True, type='float', readonly=True),
 		
 	}
 	
@@ -4270,12 +4301,23 @@ class ch_wo_accessories(osv.osv):
 							if pat_line_obj:
 								pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
 								moc_id = pat_line_rec.moc_id.id
+								wgt = 0.00	
+								if moc_id != False:
+									moc_obj = self.pool.get('kg.moc.master')
+									moc_rec = moc_obj.browse(cr, uid, moc_id)
+									if moc_rec.weight_type == 'ci':
+										wgt =  item.pattern_id.ci_weight
+									if moc_rec.weight_type == 'ss':
+										wgt = item.pattern_id.pcs_weight
+									if moc_rec.weight_type == 'non_ferrous':
+										wgt = item.pattern_id.nonferous_weight
 					fou_vals.append({
 									'position_id': item.position_id.id,
 									'pattern_id': item.pattern_id.id,
 									'pattern_name': item.pattern_name,
 									'moc_id': moc_id,
 									'qty': item.qty * qty,
+									'weight': wgt or 0.00,
 									'load_bom': True,
 									'is_applicable': True,
 									'entry_mode': 'auto',
@@ -4347,6 +4389,14 @@ class ch_wo_accessories_foundry(osv.osv):
 	_name = "ch.wo.accessories.foundry"
 	_description = "WO Accessories Foundry Details"
 	
+	def _get_total_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		total_weight = 0.00		
+		for entry in self.browse(cr, uid, ids, context=context):			
+			total_weight = entry.qty * entry.weight
+		result[entry.id]= total_weight
+		return result
+	
 	_columns = {
 	
 		### Foundry Item Details ####
@@ -4355,6 +4405,8 @@ class ch_wo_accessories_foundry(osv.osv):
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'pump_id':fields.many2one('kg.pumpmodel.master', 'Pump',domain="[('state','=','approved')]"),
 		'qty':fields.integer('Quantity'),
+		'weight': fields.float('Weight(kgs)'),
+		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float', readonly=True),
 		'oth_spec':fields.char('Other Specification'),
 		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
 		'csd_no': fields.char('CSD No.', size=128),

@@ -116,8 +116,8 @@ class kg_part_qap(osv.osv):
 		'hs_actual_unbal_weight': fields.float('Actual Un Balanced Weight in (gms)' ),
 		'hs_machinery_id': fields.many2one('kg.machinery.master','Machinery'),
 		'hs_shift_id': fields.many2one('kg.shift.master','Shift'),
-		'hs_operator': fields.char('Operator'),
-		'hs_verified_by': fields.char('Verified By'),
+		'hs_operator': fields.many2one('hr.employee','Operator'),
+		'hs_verified_by': fields.many2one('hr.employee','Verified By'),
 		'hs_result': fields.selection([('accept','Accept'),('reject','Reject'),('leak','Leak')],'Result'),
 		'hs_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'hs_leak_remarks': fields.char('Leak Remarks'),
@@ -894,21 +894,23 @@ class kg_part_qap(osv.osv):
 		if rec.hs_pressure <= 0.00:
 			raise osv.except_osv(_('Warning !!'),
 				_('Test Pressure should be greater than zero. !!'))
-		
-		if rec.hs_state == 'pending':
-			if rec.hs_result == 'reject':
-				### Rejection Process Function Calling ###
-				self.reject_process(cr,uid,ids,1)
-				### Updation in previous sequence Dynamic Balancing ###
-				self.write(cr, uid, ids, {'db_state':'completed','db_result':'reject'})
-				### Changing Assembly state to reprocess ###
-				assembly_obj.write(cr,uid,rec.assembly_id.id,{'state':'re_process'})
-				ass_foundry_obj.write(cr,uid,rec.assembly_foundry_id.id,{'state':'re_process'})
-			if rec.hs_result == 'leak':
-				self.write(cr, uid, ids, {'hs_state':'pending'})
-			if rec.hs_result == 'accept':
-				self.write(cr, uid, ids, {'hs_state':'completed'})
-			self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		if rec.hs_result != 'leak':
+			if rec.hs_state == 'pending':
+				if rec.hs_result == 'reject':
+					### Rejection Process Function Calling ###
+					self.reject_process(cr,uid,ids,1)
+					### Updation in previous sequence Dynamic Balancing ###
+					self.write(cr, uid, ids, {'db_state':'completed','db_result':'reject'})
+					### Changing Assembly state to reprocess ###
+					assembly_obj.write(cr,uid,rec.assembly_id.id,{'state':'re_process'})
+					ass_foundry_obj.write(cr,uid,rec.assembly_foundry_id.id,{'state':'re_process'})
+				if rec.hs_result == 'leak':
+					self.write(cr, uid, ids, {'hs_state':'pending'})
+				if rec.hs_result == 'accept':
+					self.write(cr, uid, ids, {'hs_state':'completed'})
+				self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				pass
 		else:
 			pass
 				
@@ -937,18 +939,18 @@ class kg_part_qap(osv.osv):
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
 		rec_user = str(res_rec.login)
 		rec_pwd = str(res_rec.password)
-		rec_code = str(rec.name)		
+		rec_code = str(rec.item_name)		
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
-		if rec.hs_flag == True:
+		if rec.hs_flag is False:
 			
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&dynamic_balancing='+rec_code
-		
-		else:
+			url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&dynamic_balancing='+rec_code
 			
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&pre_hydro_static_test='+rec_code
+		if rec.hs_flag is True:
 			
+			url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&pre_hydro_static_test='+rec_code
+
 		return {
 					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',
