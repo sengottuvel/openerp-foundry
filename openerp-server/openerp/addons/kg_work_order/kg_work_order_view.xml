@@ -284,6 +284,7 @@
 								   
 								   <field name="flag_pattern_check"/>
 								   <field name="moc_id" on_change="onchange_pattern_details(pattern_id,moc_id)" attrs="{'readonly':[('flag_standard','!=',True)],'required': [('flag_applicable','!=',False)]}"/>
+								   <field name="csd_no" readonly="1"/>
 								   <field name="add_spec" widget="char"/>
 								   <field name="flag_standard" invisible="1"/>
 								   <field name="entry_mode" invisible="1"/>
@@ -317,6 +318,7 @@
 											<field name="unit_price"/>
 											<field name="wo_prime_cost" readonly="1"/>
 											<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required': [('flag_applicable','!=',False)]}"/>
+											<field name="csd_no" readonly="1"/>
 											<field name="flag_standard" invisible="1"/>
 											<field name="bom_type" invisible="1"/>
 										</group>
@@ -360,6 +362,7 @@
 									<field name="length"/>
 									
 									<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required': [('flag_applicable','!=',False)]}"/>
+									<field name="csd_no" readonly="1"/>
 									<field name="remarks" widget="char" string="Other Specification"/>
 									<field name="flag_standard" invisible="1"/>
 									<field name="entry_mode" invisible="1"/>
@@ -385,6 +388,7 @@
 									<field name="wo_prime_cost" readonly="1"/>
 									<field name="flag_is_bearing" invisible="1"/>
 									<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required': [('flag_applicable','!=',False)]}"/>
+									<field name="csd_no" readonly="1"/>
 									<field name="brand_id" attrs="{'required': [('flag_is_bearing','!=',False)]}"/>
 									<field name="remarks" widget="char" string="Other Specification"/>
 									<field name="flag_standard" invisible="1"/>
@@ -443,7 +447,7 @@
 													<field name="off_name"/>
 													<field name="material_code"/>
 													<field name="moc_id" required="1" attrs="{'readonly':[('flag_standard','!=',True)]}"/>
-													<field name="csd_no"/>
+													<field name="csd_no" readonly="1"/>
 													<field name="qty" required="1" readonly="1"/>
 													<field name="weight" readonly="1"/>
 													<field name="total_weight" readonly="1"/>
@@ -468,7 +472,7 @@
 													<field name="off_name"/>
 													<field name="material_code"/>
 													<field name="moc_id" required="1" attrs="{'readonly':[('flag_standard','!=',True)]}"/>
-													<field name="csd_no"/>
+													<field name="csd_no" readonly="1"/>
 													<field name="qty" required="1" on_change="onchange_qty(qty)" readonly="1"/>
 													<field name="indent_qty" invisible="1"/>
 													<field name="prime_cost" readonly="1" invisible="0"/>
@@ -492,7 +496,7 @@
 													<field name="off_name"/>
 													<field name="material_code"/>
 													<field name="moc_id" required="1" attrs="{'readonly':[('flag_standard','!=',True)]}"/>
-													<field name="csd_no" required="1"/>
+													<field name="csd_no" readonly="1"/>
 													<field name="qty" required="1" readonly="1"/>
 													<field name="prime_cost" readonly="1" invisible="0"/>
 													<field name="wo_prime_cost" readonly="1"/>
@@ -544,7 +548,7 @@
 													<field name="material_code"/>
 													<field name="flag_pattern_check"/>
 													<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
-													<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="csd_no" readonly="1"/>
 													<field name="qty" required="1" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}" />
 													<field name="prime_cost" readonly="1"/>
 													<field name="remarks" />
@@ -569,7 +573,7 @@
 													<field name="material_code"/>
 													<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 													<field name="length"/>
-													<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+													<field name="csd_no" readonly="1"/>
 													<field name="qty" required="1" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}"/>
 													<field name="prime_cost" readonly="1"/>
 													<field name="remarks" />
@@ -587,7 +591,7 @@
 															<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 															<field name="off_name"/>
 															<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
-															<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+															<field name="csd_no" readonly="1"/>
 															<field name="prime_cost" readonly="1"/>
 															<field name="load_bom" invisible="1"/>
 															<field name="moc_name" invisible="1"/>
@@ -642,6 +646,7 @@
 													<field name="off_name"/>
 													<field name="material_code"/>
 													<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+													<field name="csd_no" readonly="1"/>
 													<field name="brand_id" attrs="{'required': [('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
 													<field name="qty" required="1" attrs="{'readonly':[('entry_mode','=','auto'),('order_category','=','pump')]}"/>
 													<field name="prime_cost" readonly="1"/>
