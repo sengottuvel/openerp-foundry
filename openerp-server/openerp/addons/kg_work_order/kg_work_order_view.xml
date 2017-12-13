@@ -239,6 +239,7 @@
 							<field name="flag_offer" invisible="1"/>
 							<field name="schedule_status" invisible="1"/>
 							<field name="order_summary" readonly="1"/>
+							<field name="spl_remarks"/>
 							<field name="note" string="Remarks"/>
 						</group>
 					</group>

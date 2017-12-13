@@ -2266,6 +2266,8 @@ class ch_work_order_details(osv.osv):
 		'total_weight': fields.function(_get_foundry_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float', readonly=True),
 		'rate_kg': fields.function(_get_foundry_rate_kg, string='Rate/KG', method=True, store=True, type='float', readonly=True),
 		
+		'spl_remarks': fields.char('Special Remarks'),
+		
 	}
 	
 	
