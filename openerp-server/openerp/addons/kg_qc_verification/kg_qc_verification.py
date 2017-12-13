@@ -2045,18 +2045,18 @@ class kg_qc_verification(osv.osv):
 							}
 							production_id = production_obj.create(cr, uid, production_vals)
 							
-							ms_shop_id = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',ref_id.order_line_id.id),('pattern_id','=',ref_id.pattern_id.id),('schedule_line_id','=',ref_id.schedule_line_id.id)])
-							if ms_shop_id != []:
-								ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])
-								
-								if ms_shop_rec.schedule_qty < ref_id.order_bomline_id.qty:
-									if ms_shop_rec.ms_plan_rem_qty == 0:
-										ms_state = 'pending'
-									else:
-										ms_state = ms_shop_rec.state
-									self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':ms_state,'ms_sch_qty':ms_shop_rec.ms_sch_qty + rem_qty,'schedule_qty':ms_shop_rec.schedule_qty + rem_qty,'ms_plan_rem_qty':ms_shop_rec.ms_plan_rem_qty + rem_qty})
-							else:
-								raise osv.except_osv(_('Warning !'), _('Old records not updated in Machineshop Process !!'))			
+							#~ ms_shop_id = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',ref_id.order_line_id.id),('pattern_id','=',ref_id.pattern_id.id),('schedule_line_id','=',ref_id.schedule_line_id.id)])
+							#~ if ms_shop_id != []:
+								#~ ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])
+								#~ 
+								#~ if ms_shop_rec.schedule_qty < ref_id.order_bomline_id.qty:
+									#~ if ms_shop_rec.ms_plan_rem_qty == 0:
+										#~ ms_state = 'pending'
+									#~ else:
+										#~ ms_state = ms_shop_rec.state
+									#~ self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':ms_state,'ms_sch_qty':ms_shop_rec.ms_sch_qty + rem_qty,'schedule_qty':ms_shop_rec.schedule_qty + rem_qty,'ms_plan_rem_qty':ms_shop_rec.ms_plan_rem_qty + rem_qty})
+							#~ else:
+								#~ raise osv.except_osv(_('Warning !'), _('Old records not updated in Machineshop Process !!'))			
 				else:
 					
 					if reject_type == 'fettling':
@@ -2457,14 +2457,9 @@ class kg_qc_verification(osv.osv):
 					if entry.stock_type == 'pattern':
 						
 						ms_shop_id = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',entry.order_line_id.id),('pattern_id','=',entry.pattern_id.id),('schedule_line_id','=',entry.schedule_line_id.id)])
-						ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])
-						
-						if ms_shop_rec.schedule_qty < entry.order_bomline_id.qty:
-							if ms_shop_rec.ms_plan_rem_qty == 0:
-								ms_state = 'waiting'
-							else:
-								ms_state = ms_shop_rec.state
-							self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':ms_state,'ms_sch_qty':ms_shop_rec.ms_sch_qty + entry.qty,'schedule_qty':ms_shop_rec.schedule_qty + entry.qty,'fettling_qty':ms_shop_rec.fettling_qty + entry.qty,'inward_accept_qty':ms_shop_rec.inward_accept_qty + entry.qty,'ms_plan_rem_qty':ms_shop_rec.inward_accept_qty + entry.qty})
+						ms_shop_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_shop_id[0])					
+							
+						self.pool.get('kg.machineshop').write(cr, uid, ms_shop_id[0], {'state':'waiting','inward_accept_qty':ms_shop_rec.inward_accept_qty + entry.qty,'inward_qty':ms_shop_rec.inward_qty + entry.qty,'fettling_qty':ms_shop_rec.fettling_qty + entry.qty})
 						
 						#~ ms_obj = self.pool.get('kg.machineshop')
 						#~ 

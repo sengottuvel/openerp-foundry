@@ -1412,11 +1412,11 @@ class kg_schedule(osv.osv):
 						'pattern_code':schedule_item.pattern_id.name,
 						'pattern_name':schedule_item.pattern_id.pattern_name,
 						'moc_id':schedule_item.moc_id.id,
-						'schedule_qty':schedule_item.qty,						
+						'schedule_qty':schedule_item.order_qty,						
 						'fettling_qty':0,
 						'inward_accept_qty':0,
 						'state':'pending',
-						'ms_sch_qty': schedule_item.qty,
+						'ms_sch_qty': schedule_item.order_qty,
 						'ms_type': 'foundry_item',
 						'item_code': schedule_item.pattern_id.name,
 						'item_name': schedule_item.pattern_id.pattern_name,
@@ -1425,7 +1425,7 @@ class kg_schedule(osv.osv):
 						'flag_trimming_dia': schedule_item.order_bomline_id.flag_trimming_dia,
 						'bom_type': schedule_item.order_bomline_id.bom_type,
 						'spare_id': spare_id,
-						'ms_plan_rem_qty':schedule_item.qty,
+						'ms_plan_rem_qty':schedule_item.order_qty,
 					
 					}						
 						

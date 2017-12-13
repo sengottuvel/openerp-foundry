@@ -969,7 +969,7 @@ class kg_crm_offer(osv.osv):
 		elif item.shaft_sealing == 'f_s':
 			 shaft_sealing = 'f_s'
 		else:
-			shaft_sealing = shaft_sealing
+			shaft_sealing = item.shaft_sealing
 		if item.lubrication_type == 'grease':
 			 lubrication_type = 'grease'
 		if item.bush_bearing_lubrication == 'grease':
