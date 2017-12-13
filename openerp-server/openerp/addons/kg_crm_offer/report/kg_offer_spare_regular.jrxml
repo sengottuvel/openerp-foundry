@@ -83,7 +83,7 @@ left join ch_kg_crm_pumpmodel enquiry on(enquiry.id = spare.enquiry_line_id)
 left join res_partner partner on(partner.id=offer.customer_id)
 left join res_company company on(company.id=offer.company_id)
 
-where offer.id=$P{offer_id} and offer.state != 'draft' and spare.enquiry_line_id is not Null
+where offer.id=$P{offer_id} and spare.enquiry_line_id is not Null
 ) as sample]]>
 	</queryString>
 	<field name="offer_ref_id" class="java.lang.Integer"/>

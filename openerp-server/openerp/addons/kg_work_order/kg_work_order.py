@@ -2361,7 +2361,7 @@ class ch_work_order_details(osv.osv):
 					#### Loading Foundry Items
 					
 					order_bom_obj = self.pool.get('ch.order.bom.details')
-					cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,bom.position_id,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
+					cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.csd_no,bom.pattern_name,bom.qty, bom.pos_no,bom.position_id,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
 							from ch_bom_line as bom
 							LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
 							where bom.header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom') 
@@ -2428,6 +2428,11 @@ class ch_work_order_details(osv.osv):
 							#~ aplicable = False
 							#~ flag_select_all_val = False
 							
+						if bom_details['csd_no'] is None:
+							csd_no = ''
+						else:
+							csd_no = bom_details['csd_no']
+							
 							
 						bom_vals.append({
 															
@@ -2439,7 +2444,8 @@ class ch_work_order_details(osv.osv):
 							'weight': wgt or 0.00,								  
 							'pos_no': bom_details['pos_no'],
 							'position_id': bom_details['position_id'],				  
-							'qty' : bom_qty,				   
+							'qty' : bom_qty,	
+							'csd_no': csd_no,			   
 							'schedule_qty' : bom_qty,				  
 							'production_qty' : 0,				   
 							'flag_applicable' : applicable,
@@ -2453,7 +2459,7 @@ class ch_work_order_details(osv.osv):
 					#### Loading Machine Shop details
 					
 					bom_ms_obj = self.pool.get('ch.machineshop.details')
-					cr.execute(''' select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+					cr.execute(''' select id,pos_no,csd_no,position_id,ms_id,name,qty,header_id as bom_id
 							from ch_machineshop_details
 							where header_id = (select id from kg_bom where pump_model_id = %s and active='t' and category_type = 'pump_bom') 
 							order by header_id ''',[pump_model_id])
@@ -2515,6 +2521,11 @@ class ch_work_order_details(osv.osv):
 						if ch_ms_vals == []:
 							raise osv.except_osv(_('Warning!'),
 									_('Raw material are not mapped for MS Item %s !!')%(bom_ms_details['name']))
+									
+						if bom_ms_details['csd_no'] is None:
+							csd_no = ''
+						else:
+							csd_no = bom_ms_details['csd_no']
 							
 						machine_shop_vals.append({
 							
@@ -2525,6 +2536,7 @@ class ch_work_order_details(osv.osv):
 							'name': bom_ms_details['name'],
 							'off_name': bom_ms_details['name'],
 							'qty': bom_ms_qty,
+							'csd_no': csd_no,
 							'indent_qty':bom_ms_qty,
 							'flag_applicable' : applicable,
 							'flag_standard':flag_standard,
@@ -2538,7 +2550,7 @@ class ch_work_order_details(osv.osv):
 					#### Loading BOT Details
 					
 					bom_bot_obj = self.pool.get('ch.bot.details')
-					cr.execute(''' select id,position_id,bot_id,qty,header_id as bom_id
+					cr.execute(''' select id,position_id,csd_no,bot_id,qty,header_id as bom_id
 							from ch_bot_details
 							where header_id = (select id from kg_bom where pump_model_id = %s and  active='t' and category_type = 'pump_bom') 
 							order by header_id ''',[pump_model_id])
@@ -2579,6 +2591,11 @@ class ch_work_order_details(osv.osv):
 						if not bot_rec.line_ids:
 							raise osv.except_osv(_('Warning!'),
 									_('Raw material are not mapped for BOT Item %s !!')%(bot_rec.name))
+									
+						if bom_bot_details['csd_no'] is None:
+							csd_no = ''
+						else:
+							csd_no = bom_bot_details['csd_no']
 							
 						bot_vals.append({
 							
@@ -2630,6 +2647,7 @@ class ch_work_order_details(osv.osv):
 								bom.pattern_name,
 								bom.qty, 
 								bom.pos_no,
+								bom.csd_no,
 								bom.position_id,
 								pattern.pcs_weight, 
 								pattern.ci_weight,
@@ -2663,6 +2681,7 @@ class ch_work_order_details(osv.osv):
 								bom.pattern_name,
 								bom.qty, 
 								bom.pos_no,
+								bom.csd_no,
 								bom.position_id,
 								pattern.pcs_weight, 
 								pattern.ci_weight,
@@ -2698,6 +2717,7 @@ class ch_work_order_details(osv.osv):
 								bom.pattern_name,
 								bom.qty, 
 								bom.pos_no,
+								bom.csd_no,
 								bom.position_id,
 								pattern.pcs_weight, 
 								pattern.ci_weight,
@@ -2739,6 +2759,7 @@ class ch_work_order_details(osv.osv):
 								bom.pattern_name,
 								bom.qty, 
 								bom.pos_no,
+								bom.csd_no,
 								bom.position_id,
 								pattern.pcs_weight, 
 								pattern.ci_weight,
@@ -2780,6 +2801,7 @@ class ch_work_order_details(osv.osv):
 								bom.pattern_name,
 								bom.qty, 
 								bom.pos_no,
+								bom.csd_no,
 								bom.position_id,
 								pattern.pcs_weight, 
 								pattern.ci_weight,
@@ -2818,6 +2840,7 @@ class ch_work_order_details(osv.osv):
 								bom.pattern_name,
 								bom.qty, 
 								bom.pos_no,
+								bom.csd_no,
 								bom.position_id,
 								pattern.pcs_weight, 
 								pattern.ci_weight,
@@ -2893,6 +2916,11 @@ class ch_work_order_details(osv.osv):
 										flag_select_all_val = False
 										applicable = False	
 										
+									if vertical_foundry['csd_no'] is None:
+										csd_no = ''
+									else:
+										csd_no = vertical_foundry['csd_no']
+										
 									bom_vals.append({
 																		
 										'bom_id': vertical_foundry['header_id'],
@@ -2900,7 +2928,8 @@ class ch_work_order_details(osv.osv):
 										'pattern_id': vertical_foundry['pattern_id'],
 										'pattern_name': vertical_foundry['pattern_name'],						
 										'off_name': vertical_foundry['pattern_name'],						
-										'weight': wgt or 0.00,								  
+										'weight': wgt or 0.00,	
+										'csd_no': csd_no,								  
 										'pos_no': vertical_foundry['pos_no'],
 										'position_id': vertical_foundry['position_id'],			  
 										'qty' : bom_qty,				   
@@ -2924,7 +2953,7 @@ class ch_work_order_details(osv.osv):
 							cr.execute(''' 
 										
 										(-- Bed Assembly ----
-										select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+										select id,pos_no,csd_no,position_id,ms_id,name,qty,header_id as bom_id
 										from ch_machineshop_details
 										where header_id = 
 										(
@@ -2945,7 +2974,7 @@ class ch_work_order_details(osv.osv):
 
 
 										(--- Motor Assembly ---
-										select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+										select id,pos_no,csd_no,position_id,ms_id,name,qty,header_id as bom_id
 										from ch_machineshop_details
 										where header_id =  
 										(
@@ -2966,7 +2995,7 @@ class ch_work_order_details(osv.osv):
 
 										(-- Column Pipe ------
 
-										select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+										select id,pos_no,csd_no,position_id,ms_id,name,qty,header_id as bom_id
 										from ch_machineshop_details
 										where header_id = 
 										(
@@ -2994,7 +3023,7 @@ class ch_work_order_details(osv.osv):
 
 										(-- Delivery Pipe ------
 
-										select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+										select id,pos_no,csd_no,position_id,ms_id,name,qty,header_id as bom_id
 										from ch_machineshop_details
 										where header_id =  
 										(
@@ -3021,7 +3050,7 @@ class ch_work_order_details(osv.osv):
 
 										(-- Lubrication ------
 
-										select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+										select id,pos_no,csd_no,position_id,ms_id,name,qty,header_id as bom_id
 										from ch_machineshop_details
 										where header_id = 
 										(
@@ -3046,7 +3075,7 @@ class ch_work_order_details(osv.osv):
 										
 										(-- Base Plate --
 										
-										select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+										select id,pos_no,csd_no,position_id,ms_id,name,qty,header_id as bom_id
 										from ch_machineshop_details
 										where header_id = 
 										(
@@ -3472,9 +3501,15 @@ class ch_work_order_details(osv.osv):
 												}])
 								
 								
+								if vertical_ms_details['csd_no'] is None:
+									csd_no = ''
+								else:
+									csd_no = vertical_ms_details['csd_no']
+								
 								machine_shop_vals.append({
 									
 									'pos_no':pos_no,
+									'csd_no': csd_no,	
 									'position_id':vertical_ms_details['position_id'],						
 									'ms_line_id': vertical_ms_details['id'],
 									'bom_id': vertical_ms_details['bom_id'],
