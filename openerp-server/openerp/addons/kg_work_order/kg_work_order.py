@@ -1285,6 +1285,7 @@ class kg_work_order(osv.osv):
 									'position_id': spare_foundry_item.position_id.id,				  
 									'qty' : spare_foundry_item.qty,				   
 									'schedule_qty' : spare_foundry_item.qty,				  
+									'csd_no' : spare_foundry_item.csd_no,				  
 									'production_qty' : 0,				   
 									'flag_applicable' : True,
 									'order_category': order_line_item.order_category,
@@ -1325,6 +1326,7 @@ class kg_work_order(osv.osv):
 									'spare_id': spare_item.id, 
 									'material_code': spare_ms_item.material_code,
 									'sequence_no': spare_ms_item.sequence_no,
+									'csd_no' : spare_ms_item.csd_no,
 											  
 									}
 									
@@ -1377,6 +1379,7 @@ class kg_work_order(osv.osv):
 									'spare_id': spare_item.id,
 									'material_code': spare_bot_item.material_code,
 									'sequence_no': spare_bot_item.sequence_no,
+									'csd_no' : spare_bot_item.csd_no,
 											  
 									}
 									
@@ -3536,7 +3539,7 @@ class ch_work_order_details(osv.osv):
 							cr.execute(''' 
 										
 										(-- Bed Assembly ----
-										select id,bot_id,position_id,qty,header_id as bom_id
+										select id,bot_id,csd_no,position_id,qty,header_id as bom_id
 										from ch_bot_details
 										where header_id =
 										(
@@ -3554,7 +3557,7 @@ class ch_work_order_details(osv.osv):
 
 
 										(--- Motor Assembly ---
-										select id,bot_id,position_id,qty,header_id as bom_id
+										select id,bot_id,csd_no,position_id,qty,header_id as bom_id
 										from ch_bot_details
 										where header_id =
 										(
@@ -3573,7 +3576,7 @@ class ch_work_order_details(osv.osv):
 
 										(-- Column Pipe ------
 
-										select id,bot_id,position_id,qty,header_id as bom_id
+										select id,bot_id,csd_no,position_id,qty,header_id as bom_id
 										from ch_bot_details
 										where header_id =
 										(
@@ -3597,7 +3600,7 @@ class ch_work_order_details(osv.osv):
 
 										(-- Delivery Pipe ------
 
-										select id,bot_id,position_id,qty,header_id as bom_id
+										select id,bot_id,csd_no,position_id,qty,header_id as bom_id
 										from ch_bot_details
 										where header_id =  
 										(
@@ -3622,7 +3625,7 @@ class ch_work_order_details(osv.osv):
 
 										(-- Lubrication ------
 
-										select id,bot_id,position_id,qty,header_id as bom_id
+										select id,bot_id,csd_no,position_id,qty,header_id as bom_id
 										from ch_bot_details
 										where header_id =
 										(
@@ -3646,7 +3649,7 @@ class ch_work_order_details(osv.osv):
 										
 										(-- Base Plate --
 										
-										select id,bot_id,position_id,qty,header_id as bom_id
+										select id,bot_id,csd_no,position_id,qty,header_id as bom_id
 										from ch_bot_details
 										where header_id =
 										(
@@ -3696,12 +3699,18 @@ class ch_work_order_details(osv.osv):
 									flag_select_all_val = False
 									applicable = False	
 								
+								if vertical_bot_details['csd_no'] is None:
+									csd_no = ''
+								else:
+									csd_no = vertical_bot_details['csd_no']
+								
 								bot_vals.append({
 									
 									'bot_line_id': vertical_bot_details['id'],
 									'bom_id': vertical_bot_details['bom_id'],							
 									'bot_id': vertical_bot_details['bot_id'],
 									'item_name': bot_rec.name,
+									'csd_no': csd_no,
 									'off_name': bot_rec.name,
 									'position_id': vertical_bot_details['position_id'] or False,	
 									'qty': vertical_bot_qty,
@@ -3879,6 +3888,7 @@ class ch_order_bom_details(osv.osv):
 		'position_id': fields.many2one('kg.position.number', string='Position No',domain="[('state','=','approved')]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'qty': fields.integer('Qty'),
+		'csd_no': fields.char('CSD No.'),
 		'unit_price': fields.float('Unit Price'),
 		'schedule_qty': fields.integer('Schedule Pending Qty'),
 		'production_qty': fields.integer('Produced Qty'),
@@ -4016,6 +4026,7 @@ class ch_order_machineshop_details(osv.osv):
 		'indent_qty': fields.integer('Indent Creation Qty'),
 		### Offer Details ###
 		'spare_offer_line_id': fields.integer('Spare Offer'),
+		'csd_no': fields.char('CSD No.'),
 		### Prime Cost ###
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
@@ -4184,6 +4195,7 @@ class ch_order_bot_details(osv.osv):
 		'brand_id': fields.many2one('kg.brand.master','Brand',domain="[('state','=','approved')]"),	
 		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
 		
+		'csd_no': fields.char('CSD No.'),
 		### Offer Details ###
 		'spare_offer_line_id': fields.integer('Spare Offer'),
 		### Prime Cost ###
@@ -4351,6 +4363,7 @@ class ch_wo_accessories(osv.osv):
 									'pattern_id': item.pattern_id.id,
 									'pattern_name': item.pattern_name,
 									'moc_id': moc_id,
+									'csd_no': item.csd_no,
 									'qty': item.qty * qty,
 									'weight': wgt or 0.00,
 									'load_bom': True,
@@ -4378,6 +4391,7 @@ class ch_wo_accessories(osv.osv):
 									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
 									'qty': item.qty * qty,
+									'csd_no': item.csd_no,
 									'indent_qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
@@ -4444,7 +4458,7 @@ class ch_wo_accessories_foundry(osv.osv):
 		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float', readonly=True),
 		'oth_spec':fields.char('Other Specification'),
 		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
-		'csd_no': fields.char('CSD No.', size=128),
+		'csd_no': fields.char('CSD No.'),
 		'pattern_name': fields.char('Pattern Name'),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('state','=','approved')]"),
 		'remarks': fields.char('Remarks'),
@@ -4678,6 +4692,7 @@ class ch_wo_spare_bom(osv.osv):
 									'off_name': item.pattern_id.pattern_name,
 									'moc_id': moc_id,
 									'moc_name': moc_name,
+									'csd_no': item.csd_no,
 									'moc_changed_flag': moc_changed_flag,
 									'qty': item.qty * qty,
 									'load_bom': True,
@@ -4733,6 +4748,7 @@ class ch_wo_spare_bom(osv.osv):
 										'off_name': item.name,
 										'position_id': item.position_id.id,							
 										'ms_id': item.ms_id.id,
+										'csd_no': item.csd_no,
 										'moc_id': moc_id,
 										'moc_name': moc_name,
 										'moc_changed_flag': moc_changed_flag,
@@ -4776,6 +4792,7 @@ class ch_wo_spare_bom(osv.osv):
 										'ms_id': item.bot_id.id,
 										'moc_id': moc_id,
 										'moc_name': moc_name,
+										'csd_no': item.csd_no,
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty * qty,
 										'load_bom': True,
@@ -4825,6 +4842,7 @@ class ch_wo_spare_foundry(osv.osv):
 		'flag_pattern_check': fields.boolean('Is Pattern Check'),
 		'sequence_no': fields.integer('Sequence No.'),
 		'flag_standard': fields.boolean('Non Standard'),
+		'csd_no': fields.char('CSD No.'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
 	}
@@ -4917,6 +4935,7 @@ class ch_wo_spare_ms(osv.osv):
 		'sequence_no': fields.integer('Sequence No.'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
+		'csd_no': fields.char('CSD No.'),
 		'flag_standard': fields.boolean('Non Standard'),
 		## Child Tables Declaration
 		'line_ids': fields.one2many('ch.wo.spare.ms.raw', 'header_id', "MS Raw material"),
@@ -5111,6 +5130,7 @@ class ch_wo_spare_bot(osv.osv):
 		'off_name': fields.char('Offer Name'),
 		'sequence_no': fields.integer('Sequence No.'),
 		'flag_standard': fields.boolean('Non Standard'),
+		'csd_no': fields.char('CSD No.'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
 	}
