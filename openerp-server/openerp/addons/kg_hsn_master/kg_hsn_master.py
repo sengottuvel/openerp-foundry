@@ -49,8 +49,8 @@ class kg_hsn_master(osv.osv):
 	
 	
 			
-		'name': fields.char('HSN Code', size=8, required=True, select=True),
-		'temp': fields.char('Temp', size=8),
+		'name': fields.char('HSN Code', size=15, required=True, select=True),
+		'temp': fields.char('Temp', size=15),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
