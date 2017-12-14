@@ -599,7 +599,7 @@
 														</group>
 														<group>
 															<field name="sequence_no"/>
-															<field name="position_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+															<field name="position_id" required="1"/>
 															<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 															<field name="material_code"/>
 															<field name="length"/>
