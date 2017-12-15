@@ -564,6 +564,14 @@ class kg_packing(osv.osv):
 	_order = "entry_date desc"
 	
 	
+	def getFilename(self):
+		self.manual_filename = 'filename_ConfidentialReports.xls'
+		self.photos_filename = 'filename_ConfidentialReports.xls'
+		self.ps1_filename = 'filename_ConfidentialReports.xls'
+		self.ps2_filename = 'filename_ConfidentialReports.xls'
+		self.ps3_filename = 'filename_ConfidentialReports.xls'
+	
+	
 	_columns = {
 	
 		## Version 0.1
@@ -623,7 +631,9 @@ class kg_packing(osv.osv):
 		'remarks':fields.text('Remarks'),
 		'flag_customer_specific': fields.boolean('Customer Specific'),
 		'manual_book_attach': fields.binary('Manual Book'),
+		'manual_filename': fields.char('file name', readonly = True,store = False,compute ='getFilename'),
 		'photos_attach': fields.binary('Photos'),
+		'photos_filename': fields.char('file name', readonly = True,store = False,compute ='getFilename'),
 		'packing_state': fields.selection([('pending','Pending'),('completed','Completed')],'State'),
 		'outer_length': fields.float('Outer length'),
 		'outer_breadth': fields.float('Outer Breadth'),
@@ -633,8 +643,11 @@ class kg_packing(osv.osv):
 		'inner_height': fields.float('Inner Height'),
 		'closing_cft': fields.float('Closing CFT'),
 		'ps_attach1': fields.binary('Attachment 1'),
+		'ps1_filename': fields.char('file name', readonly = True,store = False,compute ='getFilename'),
 		'ps_attach2': fields.binary('Attachment 2'),
+		'ps2_filename': fields.char('file name', readonly = True,store = False,compute ='getFilename'),
 		'ps_attach3': fields.binary('Attachment 3'),
+		'ps3_filename': fields.char('file name', readonly = True,store = False,compute ='getFilename'),
 	}
 	
 		

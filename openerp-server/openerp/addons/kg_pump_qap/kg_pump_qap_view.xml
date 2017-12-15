@@ -741,19 +741,24 @@
 						</group>
 						<group string="Attachments">
 							<group>
-								<field name="manual_book_attach" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+								<field name="manual_filename" readonly="1" invisible="1"/>
+								<field name="manual_book_attach" filename="manual_filename" attrs="{'readonly': [('packing_state','=','completed')]}"/>								
 							</group>											
 							<group>
-								<field name="photos_attach" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+								<field name="photos_filename" readonly="1" invisible="1"/>
+								<field name="photos_attach" filename="photos_filename" attrs="{'readonly': [('packing_state','=','completed')]}"/>								
 							</group>					
 						</group>
 						<group string="Packing Slip">
 							<group>
-								<field name="ps_attach1" attrs="{'readonly': [('packing_state','=','completed')]}"/>
-								<field name="ps_attach3" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+								<field name="ps1_filename" readonly="1" invisible="1"/>
+								<field name="ps_attach1" filename="ps1_filename" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+								<field name="ps3_filename" readonly="1" invisible="1"/>
+								<field name="ps_attach3" filename="ps3_filename" attrs="{'readonly': [('packing_state','=','completed')]}"/>
 							</group>											
 							<group>
-								<field name="ps_attach2" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+								<field name="ps2_filename" readonly="1" invisible="1"/>
+								<field name="ps_attach2" filename="ps2_filename" attrs="{'readonly': [('packing_state','=','completed')]}"/>
 							</group>					
 						</group>
 						<group string="WO Details">
