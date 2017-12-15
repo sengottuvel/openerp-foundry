@@ -2176,7 +2176,10 @@ class ch_work_order_details(osv.osv):
 				for acc_fou_line in acc_line.line_ids:
 					acc_bom_weight += acc_fou_line.total_weight						
 			total_weight = bom_weight + acc_bom_weight 
-			total_weight_kg = total_weight / entry.unit_price			
+			if entry.unit_price > 0:
+				total_weight_kg = total_weight / entry.unit_price		
+			else:
+				total_weight_kg = 0.00	
 		result[entry.id]= total_weight_kg
 		return result
 	
