@@ -1,5 +1,3 @@
-## KG Quotation ##
-
 from datetime import *
 import time
 from openerp import tools
@@ -8,23 +6,19 @@ from openerp.tools.translate import _
 import decimal_precision as dp
 from itertools import groupby
 from datetime import datetime, timedelta,date
-from dateutil.relativedelta import relativedelta
 import smtplib
 import socket
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEImage import MIMEImage
 from collections import OrderedDict
-import logging
 from tools import number_to_text_convert_india
-logger = logging.getLogger('server')
-today = datetime.now()
-
 import urllib
 import urllib2
-import logging
 import base64
 import re
+import logging
+logger = logging.getLogger('server')
 
 class kg_rfq_vendor_selection(osv.osv):
 	
@@ -37,13 +31,14 @@ class kg_rfq_vendor_selection(osv.osv):
 		## Basic Info
 		
 		'name': fields.char('RFQ No', size=32),
-		'state': fields.selection([('draft', 'Draft'),('confirm', 'WFA'),('approved', 'RFQ Generated'),('rfq_approved', 'RFQ Approved'),('comparison_confirmed', 'Compared'),('comparison_approved', 'Quotation Comparision Approved'),('reject','Rejected'),('cancel','Cancelled')], 'State', readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirm','WFA'),('approved','RFQ Generated'),('rfq_approved','RFQ Approved'),('comparison_confirmed','Compared'),('comparison_approved','Quotation Comparision Approved'),('reject','Rejected'),('cancel','Cancelled')],'State',readonly=True),
 		'cancel_remark': fields.text('Cancel Remark'),
 		'reject_remark': fields.text('Reject Remark'),
 		
 		## Module Requirement Info
 		
-		'rfq_name': fields.char('Alias Name', size=64, ),
+		'rfq_name': fields.char('Alias Name', size=64),
+		'rfq_type': fields.selection([('direct','Direct'),('from_pi','From PI')],'RFQ Type',required=True),
 		'quotation_date': fields.date('RFQ Date'),
 		'quote_submission_date': fields.date('Due Date'),
 		'user_id': fields.many2one('res.users', 'Requested By'),
@@ -77,7 +72,7 @@ class kg_rfq_vendor_selection(osv.osv):
 	_defaults = {
 		
 		'name': '/',
-		'visible_quote':False,
+		'visible_quote': False,
 		'state': 'draft',
 		'quotation_date': lambda *a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
@@ -88,57 +83,45 @@ class kg_rfq_vendor_selection(osv.osv):
 		'line_flag': False,
 		
 	}
-
-	def _line_entry_check(self,cr,uid,ids,context = None):
+	
+	def _line_validations(self,cr,uid,ids,context = None):
 		entry = self.browse(cr,uid,ids[0])
-		if not entry.requisition_line_ids:
-			return False
-		return True
-
-	def _quotedate_validation(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
-		if rec.state != 'comparison_approved':
-			today = date.today()
-			today = datetime.strptime(str(today), '%Y-%m-%d')
-			quote_submission_date = str(rec.quote_submission_date)
-			quote_submission_date = datetime.strptime(quote_submission_date, '%Y-%m-%d')
-			if quote_submission_date < today:
-				return False
+		quote_ven_obj = self.pool.get('kg.rfq.vendor.list')
+		if entry.rfq_type == 'from_pi':
+			if not entry.requisition_line_ids:
+				raise osv.except_osv(_('Warning !'),_('You cannot Confirm the record without Indent details !!'))
+		if entry.vendor_ids:
+			vendor_line_ids = quote_ven_obj.search(cr, uid, [('header_id','=',entry.id)])
+			if len(vendor_line_ids) > 5:
+				raise osv.except_osv(_('Warning !'),_('Select only five Vendors for comparision !!'))
+			for line in entry.vendor_ids:
+				dup_ids = self.pool.get('kg.rfq.vendor.list').search(cr,uid,[('partner_id','=',line.partner_id.id),('header_id','=',entry.id)])
+				if dup_ids:
+					if len(dup_ids) > 1:
+						raise osv.except_osv(_('Warning !'),_('Vendor (%s) duplicate not accepted !!'%(line.partner_id.name)))
 		return True
 	
-	def _past_date_check(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.state != 'comparison_approved':
-			today = date.today()
-			today = datetime.strptime(str(today), '%Y-%m-%d')
-			quotation_date = str(rec.quotation_date)
-			quotation_date = datetime.strptime(quotation_date, '%Y-%m-%d')
-			if quotation_date < today:
-				return False
-		return True	
-		
 	_constraints = [
-		(_line_entry_check, 'You cannot Confirm the record without line entry!', ['id']),
-		#~ (_quotedate_validation, 'Last Submission date should be equal or greater than current date !!',['Due Date']),
-		#~ (_past_date_check, 'System not allow to save with past date. !!',['RFQ Date']),
+		(_line_validations, 'You cannot Confirm the record without line entry !', ['']),
 	]
-		
-	def confirm_rfq(self, cr, uid, ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'draft':
-			self.write(cr,uid,rec.id,{'state': 'confirm','confirm_date':time.strftime('%m/%d/%Y %H:%M:%S'),'confirm_user_id':uid})
-		return True
 	
-	def reject_rfq(self, cr, uid, ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'confirm':
-			self.write(cr,uid,rec.id,{'state': 'reject','ap_rej_date':time.strftime('%m/%d/%Y %H:%M:%S'),'ap_rej_user_id':uid})
-		return True
-	
-	def cancel_rfq(self, cr, uid, ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'rfq_approved':
-			self.write(cr,uid,rec.id,{'state': 'cancel','cancel_date':time.strftime('%m/%d/%Y %H:%M:%S'),'cancel_user_id':uid})
+	def line_validations(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if not entry.line_id:
+			raise osv.except_osv(_('Warning !'),_('You cannot Confirm the record without Quotation details !!'))
+		if not entry.vendor_ids:
+			raise osv.except_osv(_('Warning !'),_('You cannot Confirm the record without Vendor details !!'))
+		for line in entry.line_id:
+			print"line.product_uom_id.id",line.product_uom_id.name
+			print"line.uom_po_id.id",line.product_id.uom_po_id.id
+			print"line.uom_id.id",line.product_id.uom_id.id
+			if line.product_uom_id.id == line.product_id.uom_po_id.id or line.product_uom_id.id == line.product_id.uom_id.id:
+				pass
+			else:
+				raise osv.except_osv(_('UOM Mismatching Error !'),
+					_('You choosed wrong UOM and you can choose either %s or %s for %s !!') % (line.product_id.uom_id.name,line.product_id.uom_po_id.name,line.product_id.name))			
+			if line.quotation_qty <= 0:
+				raise osv.except_osv(_('Warning !'),_('Product (%s) RFQ Qty should be greater than Zero !!'%(line.product_id.name)))
 		return True
 	
 	def proceed(self, cr, uid, ids, context=None):
@@ -149,129 +132,140 @@ class kg_rfq_vendor_selection(osv.osv):
 			vendor_obj = self.pool.get('kg.rfq.vendor.list')
 			for quote in self.browse(cr, uid, ids, context=context):
 				tmp_ids = []
-				del_sql = """ delete from kg_rfq_vendor_selection_line where header_id=%s """ %(ids[0])
+				del_sql = """ delete from kg_rfq_vendor_selection_line where header_id = %s """ %(ids[0])
 				cr.execute(del_sql)
-				ven_sql = """ delete from kg_rfq_vendor_list where header_id=%s """ %(ids[0])
+				ven_sql = """ delete from kg_rfq_vendor_list where header_id = %s """ %(ids[0])
 				cr.execute(ven_sql)
 				cr.execute("""select requisition_id from kg_rfq_pi_lines where quote_id = %s"""%(quote.id))
 				data = cr.dictfetchall()
 				for pi_lines in data:
 					line_ids = pi_lines['requisition_id']
 					tree = pi_line_obj.browse(cr, uid, line_ids, context)
-					
 					for item in tree.product_id.pro_seller_ids:
 						vendor_line_ids = self.pool.get('kg.rfq.vendor.list').search(cr,uid,[('header_id','=',rec.id),('partner_id','=',item.name.id)])
-						print"vendor_line_ids",vendor_line_ids
-						tot_add = (item.name.street or '')+ ' ' + (item.name.street2 or '') + '\n'+(item.name.city_id.name or '')+ ',' +(item.name.state_id.name or '') + '-' +(item.name.zip or '') + '\nPh:' + (item.name.phone or '')+ '\n' +(item.name.mobile or '')		
+						tot_add = (item.name.street or '')+ ' ' + (item.name.street2 or '') + '\n'+(item.name.city_id.name or '')+ ',' +(item.name.state_id.name or '') + '-' +(item.name.zip or '') + '\nPh:' + (item.name.phone or '')+ '\n' +(item.name.mobile or '')
 						if vendor_line_ids:
 							pass
-						else:						
-							vendor_ids = vendor_obj.create(cr,uid,{'partner_id':item.name.id,'header_id':rec.id,'partner_address':tot_add})
-					
+						else:
+							vendor_ids = vendor_obj.create(cr,uid,{'partner_id':item.name.id,'header_id':rec.id,'partner_address':tot_add,'entry_mode':'auto'})
 					pi_line_obj.write(cr, uid, pi_lines['requisition_id'], {'src_type':'fromquote'})
 					name = 'name'
-					cr.execute(''' insert into kg_rfq_vendor_selection_line (create_date,create_uid,name,state,purchase_requisition_id,header_id,quotation_qty,product_uom_id,purchase_requisition_line_id,product_id,brand_id,moc_id_temp,moc_id,requested_qty,product_name,due_date)
-					values(now(),%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',[uid,name, 'draft',tree.requisition_id.id,quote.id,tree.product_qty,tree.product_uom_id.id,tree.id,tree.product_id.id,tree.brand_id.id,tree.moc_id_temp.id,tree.moc_id.id,tree.product_qty,tree.product_id.name_template,rec.quote_submission_date])
+					cr.execute(''' insert into kg_rfq_vendor_selection_line (create_date,create_uid,name,state,purchase_requisition_id,header_id,quotation_qty,product_uom_id,purchase_requisition_line_id,product_id,brand_id,moc_id_temp,moc_id,requested_qty,product_name,due_date,rfq_type)
+					values(now(),%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',[uid,name, 'draft',tree.requisition_id.id,quote.id,tree.product_qty,tree.product_uom_id.id,tree.id,tree.product_id.id,tree.brand_id.id,tree.moc_id_temp.id,tree.moc_id.id,tree.product_qty,tree.product_id.name,rec.quote_submission_date,rec.rfq_type])	
 			self.write(cr,uid,ids,{'line_flag':True})
 		return True
-
+	
+	def confirm_rfq(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'draft':
+			
+			self.line_validations(cr,uid,ids)
+			
+			self.write(cr,uid,rec.id,{'state':'confirm',
+									  'line_flag':False,
+									  'confirm_date':time.strftime('%m/%d/%Y %H:%M:%S'),
+									  'confirm_user_id':uid
+									  })
+		return True
+	
 	def approve_rfq(self, cr, uid, ids, context=None):
 		vendor = []
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirm':
+			
+			self.line_validations(cr,uid,ids)
+			
 			rfq_pi_obj = self.pool.get('kg.rfq.vendor.selection.line')
 			quote_pi_obj = self.pool.get('kg.quote.pi.line')
 			quote_ven_obj = self.pool.get('kg.rfq.vendor.list')
 			quote_header_obj = self.pool.get('kg.quotation.requisition.header')
 			quote_line_obj = self.pool.get('kg.quotation.requisition.line')
-			for custom in self.browse(cr, uid, ids, context=context):
-				if not custom.line_id:
-					raise osv.except_osv(_('Invalid action !'), _('Please Add Purchase Indent Lines To Generate RFQ'))
-				if not custom.vendor_ids:
-					raise osv.except_osv(_('Invalid action !'), _('Please Add Vendor list '))
-				#~ if custom.name == '/':
-					#~ name = self.pool.get('ir.sequence').get(cr, uid, 'kg.rfq.vendor.selection')
-				#~ else:
-					#~ name = custom.name
-				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.rfq.vendor.selection')])
-				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,custom.quotation_date))
-				seq_name = cr.fetchone();
-				duplicate_ids = quote_header_obj.search(cr, uid, [('rfq_no_id','=',custom.id)])
-				
-				if duplicate_ids == []:
-					header_vals = {
-						'quotation_date': custom.quotation_date,
-						'user_id': custom.user_id.id,
-						'state': 'draft',
-						'rfq_no_id': custom.id,
-					}
-					quote_header_id = quote_header_obj.create(cr, uid, header_vals)
-					if quote_header_id:
-						ven_list = []
-						vendor_line_ids = quote_ven_obj.search(cr, uid, [('header_id','=',custom.id)])
-						if len(vendor_line_ids)>5:
-							raise osv.except_osv(_(''), _('Please Select Only Five Vendors for Comparision!!!'))
-						for lines in vendor_line_ids:
-							ven_rec = quote_ven_obj.browse(cr, uid, lines, context)
-							ven_list.append(ven_rec.partner_id.id)
-						tmp_list = list(set(ven_list))
-						if len(tmp_list) != len(vendor_line_ids):
-							raise osv.except_osv(_(''), _('Vendor shoud be unique!!!'))
-						for line in vendor_line_ids:
-							vendor_rec = quote_ven_obj.browse(cr, uid, line, context)
-							quote_ven_obj.write(cr, uid, [vendor_rec.id], {'state':'approved'})
-							#~ name_ref = self.pool.get('ir.sequence').get(cr, uid, 'kg.quotation.requisition.line')
-							name_ref = seq_name[0]
-							print"name_ref",name_ref
-							
+			
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.rfq.vendor.selection')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,rec.quotation_date))
+			seq_name = cr.fetchone();
+			duplicate_ids = quote_header_obj.search(cr, uid, [('rfq_no_id','=',rec.id)])
+			
+			if duplicate_ids == []:
+				header_vals = {
+					'quotation_date': rec.quotation_date,
+					'user_id': rec.user_id.id,
+					'state': 'draft',
+					'rfq_no_id': rec.id,
+				}
+				quote_header_id = quote_header_obj.create(cr, uid, header_vals)
+				if quote_header_id:
+					ven_list = []
+					vendor_line_ids = quote_ven_obj.search(cr, uid, [('header_id','=',rec.id)])
+					for lines in vendor_line_ids:
+						ven_rec = quote_ven_obj.browse(cr, uid, lines, context)
+						quote_ven_obj.write(cr, uid, [ven_rec.id], {'state':'approved'})
+						name_ref = seq_name[0]
+						line_vals = {
+							'header_id': quote_header_id,
+							'user_id': rec.user_id.id,
+							'partner_id': ven_rec.partner_id.id,
+							'user_ref_id': ven_rec.partner_id.user_ref_id.id,
+							'partner_address': ven_rec.partner_address,
+							'name': name_ref,
+							'rfq_ven_id': rec.id,
+							'state': 'draft',
+							'rfq_date': rec.quotation_date,
+							'due_date': rec.quote_submission_date,
+						}
+						
+						quote_line_id = quote_line_obj.create(cr, uid, line_vals)
+						
+						for line in rec.line_id:
+							rfq_pi_obj.write(cr, uid, line.id, {'state':'approved'})
 							line_vals = {
-								'header_id': quote_header_id,
-								'user_id': custom.user_id.id,
-								'partner_id': vendor_rec.partner_id.id,
-								'user_ref_id': vendor_rec.partner_id.user_ref_id.id,
-								'partner_address': vendor_rec.partner_address,
-								'name': name_ref,
-								'rfq_ven_id': custom.id,
+								'name': 'name',
+								'rfq_no_id': rec.id ,
+								'header_id': quote_line_id,
+								'user_id': rec.user_id.id,
+								'product_id': line.product_id.id,
+								'product_name': line.product_name,
+								'brand_id': line.brand_id.id,
+								'moc_id_temp': line.moc_id_temp.id,
+								'moc_id': line.moc_id.id,
+								'product_uom_id': line.product_uom_id.id,
+								'requested_qty': line.requested_qty,
+								'quotation_qty': line.quotation_qty,
 								'state': 'draft',
-								'rfq_date': custom.quotation_date,
-								'due_date': custom.quote_submission_date,
-								
+								'rfq_date': rec.quotation_date,
+								'partner_id':ven_rec.partner_id.id,
+								'partner_address': ven_rec.partner_address,
+								'partner_name': ven_rec.partner_name,	
+								'vendors_price': 1,
+								'ven_del_date': rec.quote_submission_date,
 							}
-							quote_line_id = quote_line_obj.create(cr, uid, line_vals)
-							rfq_pi_id = rfq_pi_obj.search(cr, uid, [('header_id','=',custom.id)])
-							for prod in rfq_pi_id:
-								rfq_pi_rec = rfq_pi_obj.browse(cr, uid, prod, context)
-								rfq_pi_obj.write(cr, uid, [rfq_pi_rec.id], {'state':'approved'})
-								merge_vals = {
-									'name': 'name',
-									'rfq_no_id': custom.id ,
-									'header_id': quote_line_id,
-									'user_id': custom.user_id.id,
-									'product_id': rfq_pi_rec.product_id.id,
-									'product_name': rfq_pi_rec.product_name,
-									'brand_id': rfq_pi_rec.brand_id.id,
-									'moc_id_temp': rfq_pi_rec.moc_id_temp.id,
-									'moc_id': rfq_pi_rec.moc_id.id,
-									'product_uom_id': rfq_pi_rec.product_uom_id.id,
-									'requested_qty': rfq_pi_rec.requested_qty,
-									'quotation_qty': rfq_pi_rec.quotation_qty,
-									'state': 'draft',
-									'rfq_date': custom.quotation_date,
-									'partner_id':vendor_rec.partner_id.id,
-									'partner_address': vendor_rec.partner_address,
-									'partner_name': vendor_rec.partner_name,	
-									'vendors_price': 1,
-									'ven_del_date': custom.quote_submission_date,
-																	
-								}
-								quote_pi_id = quote_pi_obj.create(cr, uid, merge_vals)							
-				self.write(cr, uid, ids, {'state':'rfq_approved', 
-										  'name':seq_name[0],
-										  'ap_rej_date':time.strftime('%m/%d/%Y %H:%M:%S'),
-										  'ap_rej_user_id':uid,
-										})
+							quote_pi_id = quote_pi_obj.create(cr, uid, line_vals)
+						ven_list.append(ven_rec.partner_id.id)
+					tmp_list = list(set(ven_list))
+					if len(tmp_list) != len(vendor_line_ids):
+						raise osv.except_osv(_('Warning !'),_('Vendor shoud be unique !!'))
+			
+			self.write(cr, uid, ids, {'state': 'rfq_approved', 
+									  'name': seq_name[0],
+									  'ap_rej_date': time.strftime('%m/%d/%Y %H:%M:%S'),
+									  'ap_rej_user_id': uid,
+									})
 		
+		return True
+	
+	def reject_rfq(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'confirm':
+			if not rec.reject_remark:
+				raise osv.except_osv(_('Warning !'),_('Enter Reject Remark !!'))
+			self.write(cr,uid,rec.id,{'state':'draft','ap_rej_date':time.strftime('%m/%d/%Y %H:%M:%S'),'ap_rej_user_id':uid})
+		return True
+	
+	def cancel_rfq(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'rfq_approved':
+			self.write(cr,uid,rec.id,{'state':'cancel','cancel_date':time.strftime('%m/%d/%Y %H:%M:%S'),'cancel_user_id':uid})
 		return True
 	
 	def write(self, cr, uid, ids, vals, context=None):		
@@ -289,14 +283,14 @@ class kg_rfq_vendor_list(osv.osv):
 		
 		## Basic Info
 		
-		'header_id': fields.many2one('kg.rfq.vendor.selection' , 'Header Id', required=True, ondelete='cascade'),
-		'state': fields.selection([('draft','Draft'),('approved','Approved')], 'Status'),
-		
+		'header_id': fields.many2one('kg.rfq.vendor.selection','Header Id',required=True,ondelete='cascade'),
+		'state': fields.selection([('draft','Draft'),('approved','Approved')],'Status'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode',readonly=True),
 		## Module Requirement Info
 		
-		'partner_id': fields.many2one('res.partner', 'Vendor', domain="[('supplier','=',1)]", required=True),
+		'partner_id': fields.many2one('res.partner','Vendor',domain="[('supplier','=',1)]",required=True),
 		'partner_address': fields.char('Vendor Address',size=200, ),
-		'partner_name': fields.related('partner_id','name',type='char', string="Vendor Name", size=200, store=True),
+		'partner_name': fields.related('partner_id','name',type='char',string="Vendor Name",size=200,store=True),
 		
 		## Entry Info
 		
@@ -308,8 +302,12 @@ class kg_rfq_vendor_list(osv.osv):
 		
 		'active':True,
 		'state':'draft',
+		'entry_mode':'manual',
 		
 	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		return context
 	
 	def onchange_partner_id(self, cr, uid, ids, partner_id):
 		partner = self.pool.get('res.partner')
@@ -332,22 +330,23 @@ class kg_rfq_vendor_selection_line(osv.osv):
 		## Basic Info
 		
 		'name': fields.char('Name',size=128),
-		'state': fields.selection([('draft','Draft'),('approved','Approved')], 'Status',readonly=True),
+		'state': fields.selection([('draft','Draft'),('approved','Approved')],'Status',readonly=True),
+		'rfq_type': fields.selection([('direct','Direct'),('from_pi','From PI')],'RFQ Type'),
 		'remarks': fields.text('Remarks'),
 		
 		## Module Requirement Info
 		
 		'product_id': fields.many2one('product.product', 'Product'),
 		'product_name': fields.related('product_id', 'name', type='char', string='Product Name', store=True, size=300),
-		'product_uom_id': fields.related('product_id','uom_id', type='many2one', relation='product.uom', string='Product UOM', store=True),
+		'product_uom_id': fields.related('product_id','uom_id',type='many2one',relation='product.uom',string='Product UOM', store=True),
 		'requested_qty': fields.float('Purchase Indent Approved Qty', digits=(16,3)),
 		'quotation_qty': fields.float('RFQ Qty', digits=(16,3), ),
 		'header_id': fields.many2one('kg.rfq.vendor.selection', 'Header', ondelete="cascade", ),
 		'purchase_requisition_id': fields.many2one('purchase.requisition', 'Material Requisition No.', ),
 		'purchase_requisition_line_id': fields.many2one('purchase.requisition.line', 'Material Requisition No.'),
-		'vendor_ids': fields.one2many('kg.rfq.vendor.list', 'header_id', 'Vendors' ),
+		'vendor_ids': fields.one2many('kg.rfq.vendor.list','header_id','Vendors'),
 		'due_date': fields.date('Due Date'),
-		'brand_id': fields.many2one('kg.brand.master','Brand'),
+		'brand_id': fields.many2one('kg.brand.master','Brand',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 		'revised_flag': fields.boolean('Revised Button Flag'),
@@ -362,14 +361,37 @@ class kg_rfq_vendor_selection_line(osv.osv):
 		
 	}
 	
+	def default_get(self, cr, uid, fields, context=None):
+		print"contextcontextcontextcontext",context
+		return context
+	
 	def create(self, cr, uid, vals, context=None):
 		return super(kg_rfq_vendor_selection_line, self).create(cr, uid, vals, context=context)
+	
+	def onchange_uom_id(self, cr, uid, ids, product_id, product_uom_id, context=None):
+		value = {'product_uom_id': ''}
+		if product_id and product_uom_id:
+			pro_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
+			if product_uom_id == pro_rec.uom_id.id or product_uom_id == pro_rec.uom_po_id.id:
+				pass
+			else:
+				raise osv.except_osv(_('UOM Mismatching Error !'),
+					_('You choosed wrong UOM and you can choose either %s or %s for %s !!') % (pro_rec.uom_id.name,pro_rec.uom_po_id.name,pro_rec.name))
+			value = {'product_uom_id':product_uom_id}
+		return {'value': value}
 	
 	def onchange_moc(self, cr, uid, ids, moc_id_temp):
 		value = {'moc_id':''}
 		if moc_id_temp:
 			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
 			value = {'moc_id': rate_rec.moc_id.id}
+		return {'value': value}
+	
+	def onchange_product_name(self, cr, uid, ids, product_id):
+		value = {'product_name':'','brand_id':'','moc_id_temp':'','product_uom_id':''}
+		if product_id:
+			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+			value = {'product_name': prod_rec.name,'brand_id':'','moc_id_temp':'','product_uom_id':''}
 		return {'value': value}
 	
 kg_rfq_vendor_selection_line()
@@ -382,20 +404,22 @@ class kg_quotation_requisition_header(osv.osv):
 		
 		## Basic Info
 		
-		'name': fields.char('Quotation Reference', size=32, readonly=True),
+		'name': fields.char('Quotation Reference',size=32,readonly=True),
+		'revision_remarks': fields.text('Reveision Remarks'),
+		'reject_remarks': fields.text('Reject Remarks'),
 		'quotation_date': fields.date('RFQ Date', readonly=True),
 		'state': fields.selection([('draft', 'Draft'),('approved', 'Approved'),('reject', 'Rejected'),('revised', 'Revised')], 'State',readonly=True),
 		
 		## Module Requirement Info
 		
 		'revision': fields.integer('Revision'),
-		'user_id': fields.many2one('res.users', 'Requested By',readonly=True),
-		'rfq_no_id': fields.many2one('kg.rfq.vendor.selection', 'No.', required=True,),		
+		'user_id': fields.many2one('res.users','Requested By',readonly=True),
+		'rfq_no_id': fields.many2one('kg.rfq.vendor.selection','No.',required=True,),		
 		'revised_flag': fields.boolean('Revised Button Flag'),
 		
 		## Child Tables Declaration
 		
-		'line_ids': fields.one2many('kg.quotation.requisition.line', 'header_id', 'RFQ Lines', readonly=False, states={'approved':[('readonly',True)],'reject':[('readonly',True)]}),
+		'line_ids': fields.one2many('kg.quotation.requisition.line','header_id','RFQ Lines',readonly=False,states={'approved':[('readonly',True)],'reject':[('readonly',True)]}),
 		
 		## Entry Info
 		
@@ -415,46 +439,64 @@ class kg_quotation_requisition_header(osv.osv):
 	
 	_order = 'id desc'
 	
+	def line_validations(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		for lines in rec.line_ids:
+			if not lines.freight_type:
+				raise osv.except_osv(_('Warning !'),
+					_('(%s) Freight should be select for this Vendor (%s) !!'%(lines.name,lines.partner_id.name)))
+			if not lines.other_charges:
+				raise osv.except_osv(_('Warning !'),
+					_('(%s) Other Charges should be select for this Vendor (%s) !!'%(lines.name,lines.partner_id.name)))
+			if not lines.tax_type:
+				raise osv.except_osv(_('Warning !'),
+					_('(%s) Tax should be select for this Vendor (%s) !!'%(lines.name,lines.partner_id.name)))
+			if lines.pi_line_ids:
+				for quotes in lines.pi_line_ids:
+					if quotes.vendors_price <= 0:
+						raise osv.except_osv(_('Warning !'),
+							_('(%s) Unit Price should be greater than Zero for this Vendor (%s) !!'%(quotes.product_id.name,lines.partner_id.name)))
+		return True
+	
 	def create_revision1(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		print "rec.id",rec.id
-		self.write(cr, uid, ids[0], {'state': 'revised'})
-		var = rec.revision+1
-		vals = {
-				'state': 'draft',
-				'revision': var,
-				}
-		new_rec = self.copy(cr, uid, ids[0], vals, context)
+		if rec.state == 'approved':
+			if not rec.revision_remarks:
+				raise osv.except_osv(_('Warning !'),_('Enter Revision Remarks !!'))
+			self.write(cr, uid, ids[0], {'state': 'revised'})
+			var = rec.revision + 1
+			vals = {
+					'state': 'draft',
+					'revision': var,
+					}
+			new_rec = self.copy(cr, uid, ids[0], vals, context)
 		return True
 	
 	def app_quotation(self, cr, uid, ids, context=None):
-		rfq_ven_obj = self.pool.get('kg.rfq.vendor.selection')
-		rfq_ven_lin_obj = self.pool.get('kg.rfq.vendor.selection.line')
-		line_obj = self.pool.get('kg.quotation.requisition.line')
-		quo_lin_obj = self.pool.get('kg.quote.pi.line')
-		today = date.today()
-		today = datetime.strptime(str(today), '%Y-%m-%d')
-		for custom in self.browse(cr, uid, ids, context):
-			for lines in custom.line_ids:
-				for quotes in lines.pi_line_ids:
-					if quotes.ven_del_date:
-						ven_del_date = datetime.strptime(str(quotes.ven_del_date), '%Y-%m-%d')
-						if ven_del_date < today:
-							raise osv.except_osv(_('Warning!'),
-								_('%s System not allow to save with future date for this %s!'%(quotes.product_id.name,lines.partner_id.name)))
-					if quotes.vendors_price<=0:
-						raise osv.except_osv(_('Warning!'),
-							_('%s Please enter Unit Price for this %s!'%(quotes.product_id.name,lines.partner_id.name)))
-					quo_lin_obj.write(cr,uid,quotes.id,{'state':'approved'})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'draft':
+			
+			self.line_validations(cr,uid,ids)
+			
+			rfq_ven_obj = self.pool.get('kg.rfq.vendor.selection')
+			rfq_ven_lin_obj = self.pool.get('kg.rfq.vendor.selection.line')
+			line_obj = self.pool.get('kg.quotation.requisition.line')
+			quo_lin_obj = self.pool.get('kg.quote.pi.line')
+			for lines in rec.line_ids:
+				if lines.pi_line_ids:
+					for quotes in lines.pi_line_ids:
+						quo_lin_obj.write(cr,uid,quotes.id,{'state':'approved'})
 				line_obj.write(cr,uid,lines.id,{'state':'approved'})
-			rfq_ven_rec = rfq_ven_obj.browse(cr, uid, custom.rfq_no_id.id)
-			rfq_ven_obj.write(cr, uid, [custom.rfq_no_id.id], {'state':'rfq_approved'})
+			rfq_ven_rec = rfq_ven_obj.browse(cr, uid, rec.rfq_no_id.id)
+			rfq_ven_obj.write(cr, uid, [rec.rfq_no_id.id], {'state':'rfq_approved'})
 			self.write(cr, uid, ids, {'state':'approved'})
 		
 		return True
 	
 	def rej_quotation(self, cr, uid, ids, context=None):
 		for custom in self.browse(cr, uid, ids, context):
+			if not custom.reject_remarks:
+				raise osv.except_osv(_('Warning !'),_('Enter Reject Remarks !!'))
 			self.write(cr, uid, ids, {'state':'reject'})
 		return True	
 	
@@ -464,18 +506,17 @@ class kg_quotation_requisition_header(osv.osv):
 		if entry.state != 'draft':
 			if not entry.line_ids:
 				return False
-			else:
-				for loop in entry.line_ids:
-					if loop.cmp_flag == True:
-						for items in loop.pi_line_ids:
-							if items.vendors_price<=0:
-								raise osv.except_osv(_('Warning!'),
-									_('Please enter Unit Price for this %s!'%(items.product_id.name)))
-					
+			for loop in entry.line_ids:
+				if loop.cmp_flag == True:
+					if not loop.pi_line_ids:
+						raise osv.except_osv(_('Warning !'),_('In Supplier details Product detail is must for this RFQ No. (%s) product (%s) !!'%(loop.name,items.product_id.name)))
+					for items in loop.pi_line_ids:
+						if items.vendors_price <= 0:
+							raise osv.except_osv(_('Warning !'),_('Unit Price should be greater than Zero for this (%s) !!'%(items.product_id.name)))
 		return True
 	
 	_constraints = [
-			(_lines_check, 'Please enter Unit Price', ['']),
+			(_lines_check, 'Supplier Detail is must !!', ['']),
 		]
 	
 kg_quotation_requisition_header()
@@ -540,8 +581,7 @@ class kg_quotation_requisition_line(osv.osv):
 			if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", entry.email) != None:
 				return True
 			else:
-				raise osv.except_osv(_('Invalid Email!'),
-					_('Please enter a valid email address for this %s!'%(entry.partner_id.name)))
+				raise osv.except_osv(_('Warning !'),_('Please enter a valid email address for this (%s) !!'%(entry.partner_id.name)))
 		else:
 			return True
 		return True
@@ -554,7 +594,7 @@ class kg_quotation_requisition_line(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		quote_lines_ids = self.pool.get('kg.quote.pi.line').search(cr, uid, [('header_id','=',rec.id)], context=context)
 		self.write(cr, uid, ids[0], {'state': 'revised'})
-		var = rec.revision+1
+		var = rec.revision + 1
 		vals = {
 				'state': 'draft',
 				'revision': var,
@@ -568,9 +608,10 @@ class kg_quotation_requisition_line(osv.osv):
 		line_obj = self.pool.get('kg.quotation.requisition.line')
 		quo_lin_obj = self.pool.get('kg.quote.pi.line')
 		total = 0
-		for custom in self.browse(cr, uid, ids, context):			
-			for quotes in custom.pi_line_ids:
-				quo_lin_obj.write(cr,uid,quotes.id,{'state':'approved'})
+		for custom in self.browse(cr, uid, ids, context):
+			if custom.pi_line_ids:
+				for quotes in custom.pi_line_ids:
+					quo_lin_obj.write(cr,uid,quotes.id,{'state':'approved'})
 			self.write(cr, uid, ids, {'state':'approved'})		
 			self_rec = self.search(cr,uid,[('rfq_ven_id','=',custom.rfq_ven_id.id)])
 			app_rec = self.search(cr,uid,[('rfq_ven_id','=',custom.rfq_ven_id.id),('state','=','approved')])
@@ -583,7 +624,7 @@ class kg_quotation_requisition_line(osv.osv):
 				pass
 			
 			self.write(cr, uid, ids, {'state':'approved','line_state':'submit'})			
-			
+		
 		return True	
 		
 kg_quotation_requisition_line()
@@ -639,37 +680,24 @@ class kg_quote_pi_line(osv.osv):
 		
 	}
 	
-	def _past_date_check(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		today = date.today()
-		today = str(today)
-		today = datetime.strptime(today, '%Y-%m-%d')
-		ven_del_date = str(rec.ven_del_date)
-		ven_del_date = datetime.strptime(ven_del_date, '%Y-%m-%d')
-		if ven_del_date < today:
-			return False
-		return True
-	
 	def _check_price(self,cr,uid,ids,context = None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.vendors_price <= 0.00:
-			raise osv.except_osv(_('Warning!'),
-				_('System not allow to save with Unit Price as Zero for this %s '%(rec.product_id.name)))
+			raise osv.except_osv(_('Warning !'),_('System not allow to save with Unit Price as Zero for this (%s) !!'%(rec.product_id.name)))
 		else:
 			return True
 			
 	_constraints = [        
-              
-        (_past_date_check, 'System not allow to save with past date!',['Vendor Delivery Date']),
+		
         (_check_price, 'System not allow to save with Unit Price as Zero !',['Unit Price']),
         
        ]
-       	
+	
 	def onchange_price(self, cr, uid, ids, quotation_qty,vendors_price,vendors_value):
 		val = {'vendors_value':''}
 		qty = quotation_qty
 		price = vendors_price
-		tot = qty*price
+		tot = qty * price
 		val = {'vendors_value':tot}
 		return {'val': val}	
 	
@@ -1174,7 +1202,6 @@ class kg_quotation_entry_header(osv.osv):
 			ven_sel_obj = self.pool.get('kg.rfq.vendor.selection').search(cr,uid,[('id','=',rec.rfq_no_id.id)])
 			ven_sel_rec = self.pool.get('kg.rfq.vendor.selection').browse(cr,uid,ven_sel_obj[0])
 			self.pool.get('kg.rfq.vendor.selection').write(cr,uid,ven_sel_rec.id,{'state': 'comparison_confirmed'})
-		
 		return True
 	
 	def approve_quote(self, cr, uid, ids, context=None):
@@ -1193,7 +1220,6 @@ class kg_quotation_entry_header(osv.osv):
 			if q_ids:
 				q_rec = quote_header.browse(cr, uid, q_ids[0])
 				quote_header.write(cr, uid, q_rec.id,{'revised_flag':True})
-		
 		return True
 	
 	def po_record_create(self, cr, uid, ids, vendor_id, vendor_count, context=None):
@@ -1252,16 +1278,20 @@ class kg_quotation_entry_header(osv.osv):
 				po_id = po_obj.create(cr, uid, po_vals)	
 				print"po_iddddd",po_id
 				if po_id:
-					cr.execute('''select product_id as product_id,uom as product_uom_id,vendor_%s_price_input as price_unit,vendor_%s_id as partner_id,quotation_qty as group_qty,
+					cr.execute('''select product_id as product_id,brand_id as brand_id,moc_id as moc_id,moc_id_temp as moc_id_temp,uom as product_uom_id,vendor_%s_price_input as price_unit,vendor_%s_id as partner_id,quotation_qty as group_qty,
 					case when rfq_no_line_id is not null then
 					(select purchase_requisition_line_id from kg_rfq_vendor_selection_line where id = rfq_no_line_id)
 					end as pi_line_id,
 					quotation_qty as received_qty,requested_qty as pi_qty,quotation_qty as pending_qty,quotation_qty as product_qty
 					from kg_quotation_entry_lines where vendor_%s_select = %s and header_id = %s''',(vendor_count,vendor_count,vendor_count,True,quo.id,))
-					resultant = cr.dictfetchall()	
+					resultant = cr.dictfetchall()
 					print "eeeeeeeeeeeeeeeee",resultant
 					
 					for items in resultant:
+						if items['pi_line_id']:
+							pi_line_id = items['pi_line_id']
+						else:
+							pi_line_id = False
 						po_line_vals = {
 							'product_id': items['product_id'],
 							'brand_id': items['brand_id'],
@@ -1276,7 +1306,7 @@ class kg_quotation_entry_header(osv.osv):
 							'state': 'draft',
 							'group_qty': items['group_qty'],
 							'line_bill': False,
-							'pi_line_id': items['pi_line_id'],
+							'pi_line_id': pi_line_id,
 							'received_qty': items['received_qty'],
 							'group_flag': False,
 							'pi_qty': items['pi_qty'],
@@ -1286,8 +1316,9 @@ class kg_quotation_entry_header(osv.osv):
 							'line_flag': False,
 							'product_qty': items['product_qty'],
 						}
-						po_line_id = po_lin_obj.create(cr, uid, po_line_vals)						
-						cr.execute('insert into kg_poindent_po_line(po_order_id,piline_id) values(%s,%s)', (po_id,items['pi_line_id']))	
+						po_line_id = po_lin_obj.create(cr, uid, po_line_vals)
+						if quo.rfq_no_id.rfq_type == 'from_pi':
+							cr.execute('insert into kg_poindent_po_line(po_order_id,piline_id) values(%s,%s)', (po_id,pi_line_id))	
 		return True
 	
 	def po_generate(self, cr, uid, ids, context=None):
@@ -1341,9 +1372,10 @@ class kg_quotation_entry_header(osv.osv):
 	
 	def reject_quote(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.remarks == False:
-			raise osv.except_osv(_('Warning'),_('Please enter Approve/Reject Remarks'))
-		self.write(cr, uid, ids, {'state':'cancel'})
+		if rec.state == 'confirmed':
+			if not rec.remarks:
+				raise osv.except_osv(_('Warning !'),_('Enter Approve/Reject Remarks !!'))
+			self.write(cr, uid, ids, {'state':'draft'})
 		return True
 		
 kg_quotation_entry_header()

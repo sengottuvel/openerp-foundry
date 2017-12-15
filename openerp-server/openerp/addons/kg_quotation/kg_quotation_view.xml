@@ -7,23 +7,30 @@
 			<field name="type">form</field>
 			<field name="arch" type="xml">
 				<form string="RFQ-Vendor Selection" version="7.0" delete="false">
+					<header>
+						<button name="confirm_rfq" string="Confirm" type="object" attrs="{'invisible':[('state','!=','draft'),'|',('line_flag','!=',True),'|',('rfq_type','!=','direct')]}" icon="gtk-execute"/>
+						<button name="reject_rfq" string="Reject" type="object" states="confirm" icon="gtk-execute"/>
+						<button name="approve_rfq" string="Generate RFQ" type="object" states="confirm" icon="gtk-execute"/>
+						<button name="cancel_rfq" string="Cancel" type="object" states="rfq_approved" icon="gtk-execute"/>
+					</header>
 					<group>
 						<group>
-							<field name="name" readonly="1"	/>
-							<field name="quote_submission_date" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
-							<field name="cancel_remark" attrs="{'invisible':[('state','not in',('rfq_approved','cancel'))],'readonly': [('state','!=','rfq_approved')]}"/>
-							<field name="reject_remark" attrs="{'invisible':[('state','not in',('reject','confirm'))],'readonly': [('state','!=','reject')]}"/>
+							<field name="name" readonly="1"/>
+							<field name="rfq_type" attrs="{'readonly':[('rfq_type','!=',False)]}"/>
+							<field name="quote_submission_date" required="1" attrs="{'readonly':[('state','!=','draft')]}" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
+							<field name="cancel_remark" attrs="{'invisible':[('state','not in',('rfq_approved','cancel'))],'readonly':[('state','!=','rfq_approved')]}"/>
+							<field name="reject_remark" attrs="{'invisible':[('state','not in',('reject','confirm'))],'readonly':[('state','!=','confirm')]}"/>
 						</group>
 						<group>
-							<field name="rfq_name" attrs="{'readonly': [('state', '!=', 'draft')]}" />
+							<field name="rfq_name" attrs="{'readonly':[('state','!=','draft')]}" invisible="1"/>
 							<field name="quotation_date" readonly="1"/>							
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="line_flag" invisible="1"/>
 						</group>
 					</group>
 					<notebook colspan="4">
-						<page string="Select Items">
-							<field name="requisition_line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state', '!=', 'draft')]}">
+						<page string="Select Items" attrs="{'invisible':[('rfq_type','!=','from_pi')]}">
+							<field name="requisition_line_ids" colspan="4" nolabel="1" attrs="{'readonly':['|',('state','!=','draft'),('line_flag','=',True)]}">
 								<form string="Purchase Indent Lines" >
 									<field name="requisition_id" string="PI No"/>
 									<field name="line_date" string="Date"/>
@@ -41,46 +48,49 @@
 								</tree>
 							</field>
 						<newline/>
-						<button name="proceed" string="Proceed" type="object" states='draft'/>
+						<button name="proceed" string="Proceed" type="object" attrs="{'invisible':['|',('state','!=','draft'),('line_flag','=',True)]}"/>
 						</page>
 						<page string="Quotation Details">
-							<field name="line_id" colspan="4" nolabel="1" attrs="{'readonly': [('state', '!=', 'draft')]}">
-								<tree string="Quotation Lines" create="false" editable="bottom">
+							<field name="line_id" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}" context="{'name':'/','state':'draft','revised_flag':False,'rfq_type':rfq_type,'due_date':quote_submission_date}">
+								<tree string="Quotation Lines" editable="bottom">
 									<field name="purchase_requisition_id" invisible="1"/>
-									<field name="product_id" readonly="1"/>
-									<field name="product_uom_id" string="UOM" readonly="1"/>
+									<field name="product_id" attrs="{'readonly':[('rfq_type','=','from_pi')]}" on_change="onchange_product_name(product_id)" required="1"/>
+									<field name="product_uom_id" string="UOM" readonly="1" on_change="onchange_uom_id(product_id,product_uom_id)"/>
 									<field name="requested_qty" string="Indent Qty" readonly="1"/>
-									<field name="quotation_qty" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+									<field name="quotation_qty" attrs="{'readonly':[('rfq_type','=','from_pi'),('state','!=','draft')]}" required="1"/>
 									<field name="state" invisible="1" readonly="1"/>
-									<field name="due_date" required="1"/>
-									<field name="brand_id" required="1"/>
-									<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" required="1"/>
+									<field name="due_date" attrs="{'readonly':[('rfq_type','=','from_pi'),('state','!=','draft')]}" required="1" options="{'datepicker':{'minDate': 0,'maxDate': null}}"/>
+									<field name="brand_id" attrs="{'readonly':[('rfq_type','=','from_pi'),('state','!=','draft')]}" required="1"/>
+									<field name="moc_id_temp" attrs="{'readonly':[('rfq_type','=','from_pi'),('state','!=','draft')]}" on_change="onchange_moc(moc_id_temp)" required="1"/>
 									<field name="remarks"/>
 									<field name="moc_id" invisible="1"/>
+									<field name="rfq_type" invisible="1"/>
 								</tree>
 								<form string="Quotation Lines" create="false">
 									<field name="purchase_requisition_id" invisible="1"/>
 									<field name="product_id" readonly="1"/>
 									<field name="product_uom_id" string="UOM" readonly="1"/>
 									<field name="requested_qty" string="Indent Qty" readonly="1"/>
-									<field name="quotation_qty" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+									<field name="quotation_qty" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
 									<field name="state" invisible="1" readonly="1"/>
 									<field name="due_date" required="1"/>
 									<field name="remarks"/>
 									<field name="brand_id"/>
-								</form>								
+								</form>
 							</field>
 						</page>
 						<page string="Select Vendor">
-							<field name="vendor_ids" colspan="4" nolabel="1" mode="tree" attrs="{'readonly': [('state', '!=', 'draft')]}">
+							<field name="vendor_ids" colspan="4" nolabel="1" mode="tree" attrs="{'readonly':[('state','!=','draft')]}" context="{'entry_mode':'manual','state':'draft','active':True}">
 								<tree string="Vendors" editable="bottom">
-									<field name="partner_id"  on_change="onchange_partner_id(partner_id)" context="{'search_default_supplier':1,'default_supplier':1,'default_customer':0}" 
-									attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-									<field name="partner_address" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+									<field name="partner_id"  on_change="onchange_partner_id(partner_id)" context="{'search_default_supplier':1,'default_supplier':1,'default_customer':0,}" 
+									attrs="{'readonly':['|',('state','!=','draft'),('entry_mode','=','auto')]}"/>
+									<field name="partner_address" attrs="{'readonly':[('state','!=','draft')]}"/>
 									<field name="state" invisible="1" readonly="1"/>
+									<field name="entry_mode" invisible="1"/>
+									<field name="active" invisible="1"/>
 								</tree>
 							</field>
-						</page>		
+						</page>
 						<page string="Entry Info">
 							<group>
 								<group>
@@ -105,20 +115,21 @@
 								</group>
 							</group>
 						</page>
-						
 					</notebook>
 					<group colspan="4" col="4">
 			    	    <group col="2" colspan="2">
+<!--
 							<button name="confirm_rfq" string="Confirm" type="object" attrs="{'invisible':['|',('state','!=','draft'),('line_flag','!=',True)]}" icon="gtk-execute"/>
 							<button name="reject_rfq" string="Reject" type="object" states="confirm" icon="gtk-execute"/>
 							<button name="approve_rfq" string="Generate RFQ" type="object" states="confirm" icon="gtk-execute"/>
 							<button name="cancel_rfq" string="Cancel" type="object" states="rfq_approved" icon="gtk-execute"/>
+-->
 						</group>
 			    	</group> 
 				</form>
 			</field>
 		</record>
-
+		
 		<record model="ir.ui.view" id="kg_rfq_vendor_selection_tree">
 			<field name="name">RFQ-Vendor Selection</field>
 			<field name="model">kg.rfq.vendor.selection</field>
@@ -127,12 +138,12 @@
 				<tree colors="blue:state in ('draft');black:state in ('approved','rfq_approved');red:state in ('confirm','comparison_confirmed','comparison_approved');" string="Quotations" delete="false">
 					<field name="name"/>
 					<field name="rfq_name"/>
-					<field name="quotation_date"/>					
-					<field name="state"/>					
+					<field name="quotation_date"/>
+					<field name="state"/>
 				</tree>
 			</field>
 		</record>
-				
+		
 		<record model="ir.actions.act_window" id="kg_rfq_vendor_selection_action">
 			<field name="name">RFQ-Vendor Selection</field>
 			<field name="res_model">kg.rfq.vendor.selection</field>
@@ -141,14 +152,14 @@
 			<field name="context">{"search_default_state":'draft'}</field>
 			<field name="domain"></field>
 		</record>
-
+		
 		<!-- Sequence Number Setting Starts Here -->
-	
-		<record forcecreate="1" id="seq_type_rfq_vendor_selection" model="ir.sequence.type">	
+		
+		<record forcecreate="1" id="seq_type_rfq_vendor_selection" model="ir.sequence.type">
 			<field name="name">Kg RFQ Vendor Selection</field>
 			<field name="code">kg.rfq.vendor.selection</field>
 		</record>
-
+		
 		<record forcecreate="1" id="seq_req_vendor_selection" model="ir.sequence">
 		  <field name="name">Kg RFQ Vendor Selection</field>
 		  <field name="code">kg.rfq.vendor.selection</field>
@@ -163,9 +174,16 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Request for Quotation" create="false" delete="false" version="7.0" >
+					<header>
+						<button name="rej_quotation" type="object" states="draft" string="Reject" icon="gtk-execute"/>
+						<button name="app_quotation" type="object" states="draft" string="Approve"  icon="gtk-execute"/>
+						<button name="create_revision1" string="Create Revision" type="object" attrs="{'invisible':['|',('state','!=','approved'),('revised_flag','=',True)]}"/>
+					</header>
 					<group>
 						<group>
 							<field name="rfq_no_id" readonly="1"/>
+							<field name="revision_remarks" attrs="{'invisible':['|',('state','not in',('approved','revised')),('revised_flag','=',True)]}"/>
+							<field name="reject_remarks" attrs="{'invisible':[('state','not in',('draft','reject'))],'readonly':[('state','=','reject')]}"/>
 							<field name="revised_flag" invisible="1"/>
 						</group>
 						<group>
@@ -177,7 +195,7 @@
 					<notebook>
 						<page string="Supplier Details" >
 							<field name="line_ids" colspan="4" nolabel="1">
-								<tree string="Department Indent Line"> 
+								<tree string="Department Indent Line" delete="false" create="false"> 
 									<field name="name"/>
 									<field name="rfq_date"/>
 									<field name="partner_id"/>
@@ -192,20 +210,21 @@
 								<field name="active"/>
 							</group>
 							<group>
-								<field name="user_id"/>									
+								<field name="user_id"/>
 							</group>
 						</page>
 					</notebook>
 					<group colspan="4" col="4">
 					<group colspan="2" col="2">
+<!--
 					<button name="app_quotation" type="object" states="draft" string="Approve"  icon="gtk-execute"/>
 					<button name="rej_quotation" type="object" states="draft" string="Reject" icon="gtk-execute"/>
 					<button name="create_revision1" string="Create Revision" type="object" attrs="{'invisible': ['|',('state','!=','approved'),('revised_flag','=',True)]}"/>
+-->
 					</group>
 					<group colspan="2" col="2">
 					</group>
-					</group>								
-					
+					</group>
 				</form>
 			</field>
         </record>
@@ -222,7 +241,7 @@
                 </search>
             </field>
         </record>
-
+		
         <record id="kg_quotation_requisition_header_tree" model="ir.ui.view">
             <field name="name">kg.quotation.requisition.header.tree</field>
             <field name="model">kg.quotation.requisition.header</field>
@@ -255,9 +274,16 @@
 			<field name="type">form</field>
 			<field name="arch" type="xml">
 				<form string="Quotation Entry and Comparison" version="7.0">
+					<header>
+						<button name="send_for_approval" type="object" attrs="{'invisible':['|','|',('rfq_no_id','=',False),('state','!=','draft'),('quote_list_flag','=',False)]}" string="Confirm" icon="gtk-execute"/>
+						<button name="reject_quote" type="object" states='confirmed' string="Reject" icon="gtk-execute"/>
+						<button name="approve_quote" type="object" states='confirmed' string="Approve" icon="gtk-execute"/>
+						<button name="approve_po_quote" type="object" states='confirmed' string="Approve &amp; Generate PO" icon="gtk-execute"/>
+						<button name="po_generate" type="object" states='approved' string="Generate PO" icon="gtk-execute"/>
+					</header>
 					<group>
 						<group>
-						<field name="rfq_no_id" on_change="onchange_partner_id(rfq_no_id)" attrs="{'readonly': [('state', '!=', 'draft')]}" />
+						<field name="rfq_no_id" on_change="onchange_partner_id(rfq_no_id)" attrs="{'readonly':[('rfq_no_id','!=',False)]}" />
 						<field name="rfq_name" readonly="1"/>
 						<field name="quote_list_flag" invisible="1"/>
 						</group>
@@ -293,11 +319,11 @@
           			<newline/>
 					<group colspan="14" col="14" attrs="{'invisible':[('rfq_no_id','=',False)]}">
 						<label string="Vendors:" colspan="2"/>
-							<field name="vendor_1_name" readonly="1" nolabel="1" colspan="2" />
-							<field name="vendor_2_name" readonly="1" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)]}"/>
-							<field name="vendor_3_name" readonly="1" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)]}"/>
-							<field name="vendor_4_name" readonly="1" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)]}"/>
-							<field name="vendor_5_name" readonly="1" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)]}"/>						
+							<field name="vendor_1_name" readonly="1" nolabel="1" colspan="2" class="att_state_blue"/>
+							<field name="vendor_2_name" readonly="1" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)]}" class="att_state_blue"/>
+							<field name="vendor_3_name" readonly="1" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)]}" class="att_state_blue"/>
+							<field name="vendor_4_name" readonly="1" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)]}" class="att_state_blue"/>
+							<field name="vendor_5_name" readonly="1" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)]}" class="att_state_blue"/>
 						<newline/>
 						<label string="" colspan="2"/>
 							<button name="select_vendor_1" string="Select All" type="object" icon="gtk-execute" colspan="2" />
@@ -342,7 +368,7 @@
 										<field name="vendor_1_quantity" readonly="1"/>
 										<field name="vendor_1_price_input" readonly="1"/>
 										<field name="vendor_1_value" readonly="1"/>
-										<field name="vendor_1_select" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+										<field name="vendor_1_select" attrs="{'readonly':[('state','!=','draft')]}"/>
 										<field name="state" invisible="1"/>
 									</page>
 								</notebook>
@@ -368,7 +394,7 @@
 										<field name="vendor_2_quantity" readonly="1"/>
 										<field name="vendor_2_price_input" readonly="1"/>
 										<field name="vendor_2_value" readonly="1"/>
-										<field name="vendor_2_select" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+										<field name="vendor_2_select" attrs="{'readonly':[('state','!=','draft')]}"/>
 										<field name="state" invisible="1"/>
 									</page>
 								</notebook>
@@ -394,12 +420,12 @@
 										<field name="vendor_3_quantity" readonly="1"/>
 										<field name="vendor_3_price_input" readonly="1"/>
 										<field name="vendor_3_value" readonly="1"/>
-										<field name="vendor_3_select" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+										<field name="vendor_3_select" attrs="{'readonly':[('state','!=','draft')]}"/>
 										<field name="state" invisible="1"/>
 									</page>
 								</notebook>
 									<group colspan="1" col="3">
-									</group> 
+									</group>
 							</form>
 						</field>
 						<field name="line_ids_vendor4" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)]}">
@@ -420,7 +446,7 @@
 										<field name="vendor_4_quantity" readonly="1"/>
 										<field name="vendor_4_price_input" readonly="1"/>
 										<field name="vendor_4_value" readonly="1"/>
-										<field name="vendor_4_select" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+										<field name="vendor_4_select" attrs="{'readonly':[('state','!=','draft')]}"/>
 										<field name="state" invisible="1"/>
 									</page>
 								</notebook>
@@ -446,7 +472,7 @@
 										<field name="vendor_5_quantity" readonly="1"/>
 										<field name="vendor_5_price_input" readonly="1"/>
 										<field name="vendor_5_value" readonly="1"/>
-										<field name="vendor_5_select" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+										<field name="vendor_5_select" attrs="{'readonly':[('state','!=','draft')]}"/>
 										<field name="state" invisible="1"/>
 									</page>
 								</notebook>
@@ -458,7 +484,7 @@
 						<div>
 							<separator colspan="4" string="Terms and Condition"/>
 						</div>
-						<newline/>									
+						<newline/>
 							<label string="Freight Type" colspan="2"/>
 								<field name="vendor_1_freight" nolabel="1" colspan="2" />
 								<field name="vendor_2_freight" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)]}"/>
@@ -479,40 +505,38 @@
 								<field name="vendor_3_others" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)]}"/>
 								<field name="vendor_4_others" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)]}"/>
 								<field name="vendor_5_others" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)]}"/>
-						<newline/>																
+						<newline/>
 						<div>
 							<separator colspan="4" string="Details"/>
 						</div>
 						<newline/>
 							<label string="Vendor Reference No." colspan="2"/>
-								<field name="vendor_reference_no_vendor_1" nolabel="1" colspan="2" attrs="{'readonly': [('vendor_1_flag', '=', True), ('state', '!=', 'draft')]}"/>
-								<field name="vendor_reference_no_vendor_2" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)],'required':[('vendor_2_flag','=',True)]}"/>
-								<field name="vendor_reference_no_vendor_3" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)],'required':[('vendor_3_flag','=',True)]}"/>
-								<field name="vendor_reference_no_vendor_4" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)],'required':[('vendor_4_flag','=',True)]}"/>
-								<field name="vendor_reference_no_vendor_5" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)],'required':[('vendor_5_flag','=',True)]}"/>
+								<field name="vendor_reference_no_vendor_1" nolabel="1" colspan="2" attrs="{'readonly':[('vendor_1_flag','=',True),('state','!=','draft')]}"/>
+								<field name="vendor_reference_no_vendor_2" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)]}"/>
+								<field name="vendor_reference_no_vendor_3" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)]}"/>
+								<field name="vendor_reference_no_vendor_4" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)]}"/>
+								<field name="vendor_reference_no_vendor_5" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)]}"/>
 						<newline/>
 							<label string="Vendor Reference Date" colspan="2"/>
-								<field name="vendor_reference_date_vendor_1" nolabel="1" colspan="2" attrs=							"{'readonly': [('vendor_1_flag', '=', True), ('state', '!=', 'draft')],
-								'required':[('quote_list_flag','=',True)]}"/>
-								<field name="vendor_reference_date_vendor_2" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)],'required':[('vendor_2_flag','=',True)]}"/>
-								<field name="vendor_reference_date_vendor_3" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)],'required':[('vendor_3_flag','=',True)]}"/>
-								<field name="vendor_reference_date_vendor_4" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)],'required':[('vendor_4_flag','=',True)]}"/>
-								<field name="vendor_reference_date_vendor_5" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)],'required':[('vendor_5_flag','=',True)]}"/>
+								<field name="vendor_reference_date_vendor_1" nolabel="1" colspan="2" attrs="{'readonly':[('vendor_1_flag','=',True),('state','!=','draft')]}"/>
+								<field name="vendor_reference_date_vendor_2" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)]}"/>
+								<field name="vendor_reference_date_vendor_3" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)]}"/>
+								<field name="vendor_reference_date_vendor_4" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)]}"/>
+								<field name="vendor_reference_date_vendor_5" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)]}"/>
 						<newline/>
 							<label string="Quotation Validity in Days" colspan="2"/>
-								<field name="quotation_validity_vendor_1" nolabel="1" colspan="2" attrs=							"{'readonly': [('vendor_1_flag', '=', True), ('state', '!=', 'draft')],
-								'required':[('quote_list_flag','=',True)]}"/>
-								<field name="quotation_validity_vendor_2" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)],'required':[('vendor_2_flag','=',True)]}"/>
-								<field name="quotation_validity_vendor_3" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)],'required':[('vendor_3_flag','=',True)]}"/>
-								<field name="quotation_validity_vendor_4" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)],'required':[('vendor_4_flag','=',True)]}"/>
-								<field name="quotation_validity_vendor_5" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)],'required':[('vendor_5_flag','=',True)]}"/>
+								<field name="quotation_validity_vendor_1" nolabel="1" colspan="2" attrs="{'readonly':[('vendor_1_flag','=',True),('state','!=','draft')]}"/>
+								<field name="quotation_validity_vendor_2" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)]}"/>
+								<field name="quotation_validity_vendor_3" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)]}"/>
+								<field name="quotation_validity_vendor_4" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)]}"/>
+								<field name="quotation_validity_vendor_5" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)]}"/>
 						<newline/>
 							<label string="Enquiry Type" colspan="2"/>
-								<field name="enquiry_type_vendor_1" nolabel="1" colspan="2" attrs="{'readonly': [('vendor_1_flag', '=', True), ('state', '!=', 'draft')],'required':[('quote_list_flag','=',True)]}"/>
-								<field name="enquiry_type_vendor_2" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)],'required':[('vendor_2_flag','=',True)]}"/>
-								<field name="enquiry_type_vendor_3" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)],'required':[('vendor_3_flag','=',True)]}"/>
-								<field name="enquiry_type_vendor_4" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)],'required':[('vendor_4_flag','=',True)]}"/>
-								<field name="enquiry_type_vendor_5" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)],'required':[('vendor_5_flag','=',True)]}"/>
+								<field name="enquiry_type_vendor_1" nolabel="1" colspan="2" attrs="{'readonly':[('vendor_1_flag','=',True),('state','!=','draft')]}"/>
+								<field name="enquiry_type_vendor_2" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_2_flag','=',False)]}"/>
+								<field name="enquiry_type_vendor_3" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_3_flag','=',False)]}"/>
+								<field name="enquiry_type_vendor_4" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_4_flag','=',False)]}"/>
+								<field name="enquiry_type_vendor_5" nolabel="1" colspan="2" attrs="{'invisible':[('vendor_5_flag','=',False)]}"/>
 						
 						<newline/>
 						</group>
@@ -520,21 +544,25 @@
 						<field name="comparison_remarks" colspan="4" attrs="{'readonly':[('state','!=','draft')],'invisible':[('rfq_no_id','=',False)]}"/>
 						
 						<newline/>
-						<label string="Approve or Reject Remarks" colspan="2" attrs="{'invisible': [('state','=','draft')]}"/>
-						<field name="remarks" colspan="4" attrs="{'invisible': [('state','=','draft')],'readonly': [('state',' in',('approved','cancel'))]}"/>
+						<label string="Approve or Reject Remarks" colspan="2" attrs="{'invisible':[('state','=','draft')]}"/>
+						<field name="remarks" colspan="4" attrs="{'invisible':[('state','not in',('draft','confirmed'))],'readonly':[('state','in',('approved','cancel'))]}"/>
 					<group colspan="14" col="14">
 						<group colspan="4" col="4">
+<!--
 						<button name="send_for_approval" type="object" attrs="{'invisible':['|','|',('rfq_no_id','=',False),('state','!=','draft'),('quote_list_flag','=',False)]}" string="Confirm"  icon="gtk-execute"/>
 						<button name="approve_quote" type="object" states='confirmed' string="Approve"  icon="gtk-execute"/>
 						<button name="approve_po_quote" type="object" states='confirmed' string="Approve &amp; Generate PO"  icon="gtk-execute"/>
 						<button name="po_generate" type="object" states='approved' string="Generate PO"  icon="gtk-execute"/>
+-->
 						</group>
 						<group colspan="4" col="4">
+<!--
 						<button name="reject_quote" type="object" states='confirmed' string="Reject" icon="gtk-execute"/>
+-->
 						</group>
 						<group colspan="6" col="6">
-						</group>						
-					</group>		
+						</group>
+					</group>
 				<notebook>
 					<page string="Entry Info">
 						<group>
@@ -545,13 +573,13 @@
 								<field name="active" string="Active"/>
 							</group>
 							<group>
-								<field name="confirm_user_id" string="Confirmed By" attrs="{'invisible': [('state','=','draft')]}"/>
-								<field name="app_user_id" string="Approved By" attrs="{'invisible': [('state','not in',('approved','cancel'))]}"/>
+								<field name="confirm_user_id" string="Confirmed By" attrs="{'invisible':[('state','=','draft')]}"/>
+								<field name="app_user_id" string="Approved By" attrs="{'invisible':[('state','not in',('approved','cancel'))]}"/>
 								<field name="update_user_id" string="Last Updated By"/>
 							</group>
 							<group>
-								<field name="confirm_date" string="Confirmed Date" attrs="{'invisible': [('state','=','draft')]}"/>
-								<field name="approve_date" string="Approved Date" attrs="{'invisible': [('state','not in',('approved','cancel'))]}"/>
+								<field name="confirm_date" string="Confirmed Date" attrs="{'invisible':[('state','=','draft')]}"/>
+								<field name="approve_date" string="Approved Date" attrs="{'invisible':[('state','not in',('approved','cancel'))]}"/>
 								<field name="update_date" string="Last Updated Date"/>
 							</group>
 						</group>
@@ -560,7 +588,7 @@
 				</form>
           	</field>
 		</record>
-
+		
 		<record model="ir.ui.view" id="kg_quotation_entry_header_tree">
 			<field name="name">kg.quotation.entry.header.tree</field>
 			<field name="model">kg.quotation.entry.header</field>
@@ -569,12 +597,12 @@
 				<tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'approved';gray:state == 'cancel'"  string="Quotations">
 					<field name="rfq_no_id"/>
 					<field name="rfq_date" readonly="0"/>
-					<field name="comparision_date" required="0"/>				
-					<field name="state"/>					
+					<field name="comparision_date" required="0"/>
+					<field name="state"/>
 				</tree>
 			</field>
 		</record>
-				
+		
 		<record model="ir.actions.act_window" id="kg_quotation_entry_header_action">
 			<field name="name">Quote Comparison</field>
 			<field name="res_model">kg.quotation.entry.header</field>
@@ -582,7 +610,7 @@
 			<field name="view_mode">tree,form</field>
 			<field name="context">{"search_default_state":'draft'}</field>
 			<field name="domain"></field>
-		</record>    
+		</record>
 		
 		<record model="ir.ui.view" id="kg_quotation_requisition_line_form">
 			<field name="name">RFQ Quotation Lines</field>
@@ -597,10 +625,10 @@
 						<group>
 							<field name="name" readonly = "1"/>
 							<field name="partner_id" readonly = "1"/>
-							<field name="mail_flag" attrs="{'readonly': [('state','=','approved')]}"/>
-							<field name="cmp_flag" attrs="{'readonly': [('state','=','approved')]}" />
-							<field name="freight_type" attrs="{'required': [('cmp_flag','=',True)],'readonly': [('state','=','approved')]}"/>
-							<field name="other_charges" attrs="{'required': [('cmp_flag','=',True)],'readonly': [('state','=','approved')]}"/>
+							<field name="mail_flag" attrs="{'readonly':[('state','=','approved')]}"/>
+							<field name="cmp_flag" attrs="{'readonly':[('state','=','approved')]}" />
+							<field name="freight_type" attrs="{'required': [('cmp_flag','=',True)],'readonly':[('state','=','approved')]}"/>
+							<field name="other_charges" attrs="{'required': [('cmp_flag','=',True)],'readonly':[('state','=','approved')]}"/>
 							<field name="note"/>
 							<field name="active" invisible="1"/>
 						</group>
@@ -609,37 +637,37 @@
 							<field name="rfq_date" readonly = "1"/>
 							<field name="user_ref_id" invisible="1" readonly = "1"/>
 							<field name="partner_address" readonly = "1" />
-							<field name="email" attrs="{'readonly': [('state','=','approved')]}"/>
-							<field name="tax_type" attrs="{'required': [('cmp_flag','=',True)],'readonly': [('state','=','approved')]}"/>
+							<field name="email" attrs="{'readonly':[('state','=','approved')]}"/>
+							<field name="tax_type" attrs="{'required':[('cmp_flag','=',True)],'readonly': [('state','=','approved')]}"/>
 							<field name="state" style="width: 30%%" class="att_state_change" invisible="1"/>
 						</group>
 					</group>
 					<newline/>
 					<field name="pi_line_ids" colspan="4" nolabel="1">
 						<tree string="Purchase Indent Lines" create="false" editable="bottom">
-							<field name="product_id" />
-							<field name="brand_id" />
-							<field name="moc_id_temp" />
-							<field name="product_uom_id" string="UOM" />
+							<field name="product_id"/>
+							<field name="brand_id"/>
+							<field name="moc_id_temp"/>
+							<field name="product_uom_id" string="UOM"/>
 							<field name="requested_qty" invisible="1"/>
-							<field name="quotation_qty" />
-							<field name="del_date" />
-							<field name="ven_del_date" />
-							<field name="vendors_price" on_change="onchange_price(quotation_qty,vendors_price,vendors_value)" attrs="{'readonly': [('state', '!=', 'draft')]}"  />
-							<field name="state" invisible="1" />
+							<field name="quotation_qty"/>
+							<field name="del_date"/>
+							<field name="ven_del_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
+							<field name="vendors_price" on_change="onchange_price(quotation_qty,vendors_price,vendors_value)" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+							<field name="state" invisible="1"/>
 							<field name="vendors_value" string ="Total" sum="total" readonly="1"/>
 						</tree>
 						<form string="Purchase Indent Lines">
 							<group>
 								<group>
-									<field name="product_name" />
-									<field name="requested_qty" />
-									<field name="state" invisible="1" />
+									<field name="product_name"/>
+									<field name="requested_qty"/>
+									<field name="state" invisible="1"/>
 								</group>
 								<group>
-									<field name="product_uom_id" />
-									<field name="vendors_price" />
-									<field name="quotation_qty" />
+									<field name="product_uom_id"/>
+									<field name="vendors_price"/>
+									<field name="quotation_qty"/>
 								</group>
 							</group>
 						</form>
@@ -648,7 +676,7 @@
 				</form>
 			</field>
 		</record>
-
+		
 		<record model="ir.ui.view" id="kg_quotation_requisition_line_tree">
 			<field name="name">RFQ Quotation Lines</field>
 			<field name="model">kg.quotation.requisition.line</field>
@@ -665,11 +693,11 @@
 					<field name="mail_flag" invisible="1"/>
 					<field name="cmp_flag" invisible="1"/>	
 					<field name="user_ref_id" invisible="1" />
-					<field name="state" invisible="1"/>				
+					<field name="state" invisible="1"/>
 				</tree>
 			</field>
 		</record>
-				
+		
 		<record model="ir.actions.act_window" id="kg_quotation_requisition_line_action">
 			<field name="name">RFQ Quotation Lines</field>
 			<field name="res_model">kg.quotation.requisition.line</field>
