@@ -32,15 +32,15 @@ class kg_sale_invoice(osv.osv):
 			cur = order.customer_id.property_product_pricelist_purchase.currency_id
 			
 			for line in order.line_ids:
-				pump_net_amount += line.net_amount
+				pump_net_amount += line.r_net_amount
 				print"pump_net_amount",pump_net_amount	
 				
 			for line in order.line_ids_a:
-				spare_net_amount += line.net_amount
+				spare_net_amount += line.r_net_amount
 				print"spare_net_amount",spare_net_amount	
 				
 			for line in order.line_ids_b:
-				access_net_amount += line.net_amount
+				access_net_amount += line.r_net_amount
 				print"access_net_amount",access_net_amount	
 			for line in order.line_ids_c:
 				add_net_amount += line.expense_amt
@@ -75,19 +75,13 @@ class kg_sale_invoice(osv.osv):
 	'customer_id': fields.many2one('res.partner','Customer Name',domain=[('customer','=',True)]),
 	'accounts_state': fields.selection([('pending','Pending'),('received','Received')],'Accounts State', readonly=True),
 	'balance_receivable': fields.float('Balance Receivable'),			
-	'line_ids':fields.one2many('ch.pumpspare.invoice', 'header_id', "Pump Invoice"),
-	'line_ids_a': fields.one2many('ch.spare.invoice', 'header_id', "Spare Invoice"),
-	'line_ids_b': fields.one2many('ch.accessories.invoice', 'header_id', "Accessories Invoice"),
-	'line_ids_c': fields.one2many('ch.invoice.additional.charge', 'header_id', "Invoice Additional Charge"),
-	'line_ids_d': fields.one2many('ch.customer.advance.invoice.line', 'header_id', "Invoice Advance Details"),
+	
 	
 	
 	'customer_po_no': fields.char('Customer PO No.',readonly=True),
 	'cust_po_date': fields.date('Customer PO Date',readonly=True),
 	
-	
-	'work_order_ids': fields.many2many('kg.work.order', 'invoice_work_order_ids', 'invoice_id','work_order_id', 'WO No.', delete=False,
-			 domain="[('partner_id','=',customer_id),'&',('invoice_flag','=',False),'&', ('state','!=','draft'),'&', ('entry_mode','=','auto')]"),
+	'work_order_id': fields.many2one('kg.work.order','WO No.', domain="[('partner_id','=',customer_id),'&',('invoice_flag','=',False),'&', ('state','!=','draft'),'&', ('entry_mode','=','auto')]"),
 	
 	
 	'round_off_amt': fields.float('Round off(+/-)' ),
@@ -102,6 +96,26 @@ class kg_sale_invoice(osv.osv):
 	'advance_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Adjected Advance Amount(-)',multi="sums",store=True ,readonly=True),
 	
 	'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+	
+	'invoice_issue_date': fields.datetime('Invoice Issue Date'),
+	'invoice_removal_date': fields.datetime('Invoice Removal Date'),
+	'vehicle_no': fields.char('Vehicle No.',size=128),
+	'place_of_supply': fields.char('Place Of Supply'),
+	
+	'bill_address':fields.text('Billing Address'),
+	
+	'delivery_address':fields.text('Delivery Address'),
+	
+	### Child Tables Declarations
+	
+	'line_ids':fields.one2many('ch.pumpspare.invoice', 'header_id', "Pump Invoice"),
+	'line_ids_a': fields.one2many('ch.spare.invoice', 'header_id', "Spare Invoice"),
+	'line_ids_b': fields.one2many('ch.accessories.invoice', 'header_id', "Accessories Invoice"),
+	'line_ids_c': fields.one2many('ch.invoice.additional.charge', 'header_id', "Invoice Additional Charge"),
+	'line_ids_d': fields.one2many('ch.customer.advance.invoice.line', 'header_id', "Invoice Advance Details"),
+	'line_ids_e': fields.one2many('ch.customer.invoice.copy.rpt', 'header_id', "Invoice Copy Details"),
+	'line_ids_f': fields.one2many('ch.annexure.invoice.copy.rpt', 'header_id', "Invoice Annexure Details"),
+	
 	}
 
 	_defaults = {
@@ -110,7 +124,9 @@ class kg_sale_invoice(osv.osv):
 		'proforma_invoice_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'invoice_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'state' : 'draft',
-		'accounts_state': 'pending',	
+		'accounts_state': 'pending',
+		'invoice_issue_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),		
+		'invoice_removal_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),		
 		
 	}
 	
@@ -119,7 +135,7 @@ class kg_sale_invoice(osv.osv):
 		contact_person = ''		
 		billing_address = ''		
 		del_address = ''		
-		values = {'contact_person':'','billing_address':'','del_address':''}
+		values = {'contact_person':'','billing_address':'','del_address':'','place_of_supply':''}
 		if cust_rec.id:
 			for bill in cust_rec.billing_ids:	
 				bill_ids = self.pool.get('kg.billing.address').search(cr, uid, [('bill_id','=',cust_rec.id),('default','=',True)])	
@@ -132,36 +148,165 @@ class kg_sale_invoice(osv.osv):
 					del_rec = self.pool.get('kg.delivery.address').browse(cr, uid,del_ids[0])			
 					del_address = del_rec.id				
 			if cust_rec.contact_person :
-				contact_person = cust_rec.contact_person		
-			values = {'contact_person':contact_person,'billing_address':billing_address,'del_address':del_address}		
+				contact_person = cust_rec.contact_person
+			place_of_supply_add = (cust_rec.city_id.name or '') +'-'+(cust_rec.zip or '' )
+			values = {'contact_person':contact_person,'billing_address':billing_address,'del_address':del_address,'place_of_supply':place_of_supply_add}		
+		return {'value' : values}
+		
+	def onchange_billing_details(self,cr,uid,ids,billing_address,context=None):
+		bill_rec = self.pool.get('kg.billing.address').browse(cr,uid,billing_address)				
+		values = {'bill_address':''}
+		if bill_rec.id:
+				
+			bill_add = (bill_rec.name or '') +'\n' +(bill_rec.landmark or '' )+'\n'+(bill_rec.street or '' )+'\n'+(bill_rec.city_id.name or '' )+'\n'+(bill_rec.state_id.name or '' )+'\n'+(bill_rec.country_id.name or '' )+'\n'+(bill_rec.zip or '' )+'\n'+(str(bill_rec.contact_no) or '' )	
+			values = {'bill_address':bill_add}		
+		return {'value' : values}
+		
+	def onchange_del_details(self,cr,uid,ids,del_address,context=None):
+		del_rec = self.pool.get('kg.delivery.address').browse(cr,uid,del_address)				
+		values = {'delivery_address':''}
+		if del_rec.id:			
+			del_add = (del_rec.name or '') +'\n' +(del_rec.landmark or '' )+'\n'+(del_rec.street or '' )+'\n'+(del_rec.city_id.name or '' )+'\n'+(del_rec.state_id.name or '' )+'\n'+(del_rec.country_id.name or '' )+'\n'+(del_rec.zip or '' )+'\n'+(str(del_rec.contact_no) or '' )	
+			values = {'delivery_address':del_add}		
 		return {'value' : values}
 	
 	def load_wo_details(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		cr.execute(""" delete from ch_pumpspare_invoice where header_id  = %s """ %(ids[0]))
 		cr.execute(""" delete from ch_spare_invoice where header_id  = %s """ %(ids[0]))		
-		cr.execute(""" delete from ch_accessories_invoice where header_id  = %s """ %(ids[0]))		
-		for item in [x.id for x in rec.work_order_ids]:
-			print"item",item
-			work_obj = self.pool.get('kg.work.order')
-			work_rec = self.pool.get('kg.work.order').browse(cr,uid,item)			
-			for line in work_rec.line_ids:
-				print"line",line.id
-				if line.order_category == 'pump':	
+		cr.execute(""" delete from ch_accessories_invoice where header_id  = %s """ %(ids[0]))			
+		
+		print"item",rec.work_order_id.id
+		work_obj = self.pool.get('kg.work.order')
+		work_rec = self.pool.get('kg.work.order').browse(cr,uid,rec.work_order_id.id)			
+		for line in work_rec.line_ids:				
+			if line.order_category == 'pump':						
+				offer_rec = self.pool.get('ch.pump.offer').browse(cr,uid,line.pump_offer_line_id)
+				offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
+				
+				if offer_rec.hsn_no.id is False:
+					raise osv.except_osv(_('Warning!'),
+						_('HSN Code not mapping in Pump Model!!'))
+				else:
 					
-					offer_rec = self.pool.get('ch.pump.offer').browse(cr,uid,line.pump_offer_line_id)
+					list_id = []
+					if rec.customer_id.state_id.code == 'TN':							
+						if offer_rec.hsn_no.sgst_id.id:
+							if offer_rec.hsn_no.sgst_id.id is False:
+								raise osv.except_osv(_('Warning!'),
+									_('Kindly map in HSN master SGST Tax!!'))
+							else:									
+								list_id.append(offer_rec.hsn_no.sgst_id.id)
+						if offer_rec.hsn_no.cgst_id.id:
+							if offer_rec.hsn_no.cgst_id.id is False:
+								raise osv.except_osv(_('Warning!'),
+									_('Kindly map in HSN master CGST Tax!!'))
+							else:
+								list_id.append(offer_rec.hsn_no.cgst_id.id)								
+					else:
+						if offer_rec.hsn_no.igst_id.id:
+							if offer_rec.hsn_no.igst_id.id is False:
+								raise osv.except_osv(_('Warning!'),
+									_('Kindly map in HSN master IGST Tax!!'))
+							else:
+								list_id.append(offer_rec.hsn_no.igst_id.id)				
+				if offer_rec.invoice_pending_qty > 0:				
+					invoice_line = self.pool.get('ch.pumpspare.invoice').create(cr,uid,{
+					   'header_id':rec.id,
+					   'work_order_id':work_rec.id,
+					   'order_line_id':line.id,
+					   'pump_offer_id':offer_rec.id,
+					   'pump_model_id':line.pump_model_id.id,
+					   'order_category':line.order_category,
+					   'qty':offer_rec.invoice_pending_qty,
+					   'offer_qty':offer_rec.qty,
+					   'pending_qty':offer_rec.invoice_pending_qty,					  
+					   'prime_cost':offer_rec.prime_cost,
+					   'per_pump_prime_cost':offer_rec.per_pump_prime_cost,
+					   'sam_ratio':offer_rec.sam_ratio,
+					   'dealer_discount':offer_rec.dealer_discount,
+					   'customer_discount':offer_rec.customer_discount,
+					   'special_discount':offer_rec.special_discount,					   
+					   'p_f':offer_rec.p_f,
+					   'freight':offer_rec.freight,
+					   'insurance':offer_rec.insurance,
+					   'net_offer_amt':offer_rec.r_net_amt_tot,
+					   'net_amount':offer_rec.net_amount,
+					   'r_net_amount':offer_rec.r_net_amount,
+					   'tax_id':[(6, 0, [x for x in list_id])],
+					   'hsn_no':offer_rec.hsn_no.id,
+					   })
+				   
+			for access_line in line.line_ids_d:		
+				offer_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,access_line.access_offer_line_id)
+				offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
+				print"offer_rec.prime_costoffer_rec.prime_cost",offer_rec.prime_cost
+				
+				if offer_rec.hsn_no.id is False:
+					raise osv.except_osv(_('Warning!'),
+						_('HSN Code not mapping in Pump Model!!'))
+				else:
+					
+					list_id = []
+					if rec.customer_id.state_id.code == 'TN':							
+						if offer_rec.hsn_no.sgst_id.id:
+							if offer_rec.hsn_no.sgst_id.id is False:
+								raise osv.except_osv(_('Warning!'),
+									_('Kindly map in HSN master SGST Tax!!'))
+							else:									
+								list_id.append(offer_rec.hsn_no.sgst_id.id)
+						if offer_rec.hsn_no.cgst_id.id:
+							if offer_rec.hsn_no.cgst_id.id is False:
+								raise osv.except_osv(_('Warning!'),
+									_('Kindly map in HSN master CGST Tax!!'))
+							else:
+								list_id.append(offer_rec.hsn_no.cgst_id.id)								
+					else:
+						if offer_rec.hsn_no.igst_id.id:
+							if offer_rec.hsn_no.igst_id.id is False:
+								raise osv.except_osv(_('Warning!'),
+									_('Kindly map in HSN master IGST Tax!!'))
+							else:
+								list_id.append(offer_rec.hsn_no.igst_id.id)
+				if offer_rec.invoice_pending_qty > 0:						
+					acc_line = self.pool.get('ch.accessories.invoice').create(cr,uid,{
+					   'header_id':rec.id,
+					   'acc_offer_id':offer_rec.id,
+					   'work_order_id':work_rec.id,
+					   'order_line_id':line.id,
+					   'pump_id':line.pump_model_id.id,
+					   'order_category':line.order_category,
+					   'access_id':access_line.access_id.id,							   
+					   'moc_id':access_line.moc_id.id,							   
+					  
+					   'qty':offer_rec.invoice_pending_qty,
+					   'offer_qty':offer_rec.qty,
+					   'pending_qty':offer_rec.invoice_pending_qty,			
+					   'prime_cost':offer_rec.prime_cost,						   
+					   'per_access_prime_cost':offer_rec.per_access_prime_cost,						   
+					   'sam_ratio':offer_rec.sam_ratio,
+					   'dealer_discount':offer_rec.dealer_discount,
+					   'customer_discount':offer_rec.customer_discount,
+					   'special_discount':offer_rec.special_discount,
+					  
+					   'p_f':offer_rec.p_f,
+					   'freight':offer_rec.freight,
+					   'insurance':offer_rec.insurance,
+					   'net_acc_amt':offer_rec.r_net_amt_tot,
+					   'net_amount':offer_rec.r_net_amt_tot,
+					   'r_net_amount':offer_rec.r_net_amount,
+					   'tax_id':[(6, 0, [x for x in list_id])],
+					   'hsn_no':offer_rec.hsn_no.id,
+					   'off_name':offer_rec.off_name,	
+					   })					   
+				
+				self.write(cr, uid, ids, {'customer_po_no':offer_hea_rec.customer_po_no,
+									'cust_po_date': offer_hea_rec.cust_po_date,})
+			
+			if line.order_category == 'spare':					
+				for bom_line in line.line_ids:								
+					offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,bom_line.spare_offer_line_id)	
 					offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
-					print"customer_po_no",offer_hea_rec.customer_po_no
-					print"cust_po_date",offer_hea_rec.cust_po_date
-					
-					
-					print"offer_rec",offer_rec.prime_cost
-					print"per_pump_prime_cost",offer_rec.per_pump_prime_cost
-					print"sam_ratio",offer_rec.sam_ratio
-					print"hsn_nohsn_no",offer_rec.id
-					print"hsn_nohsn_no",offer_rec.hsn_no.id
-					
-					print"customerrrr",rec.customer_id.state_id.code
 					if offer_rec.hsn_no.id is False:
 						raise osv.except_osv(_('Warning!'),
 							_('HSN Code not mapping in Pump Model!!'))
@@ -188,72 +333,10 @@ class kg_sale_invoice(osv.osv):
 										_('Kindly map in HSN master IGST Tax!!'))
 								else:
 									list_id.append(offer_rec.hsn_no.igst_id.id)
-						print"list_idlist_id",list_id
-					
-					
-										
-					invoice_line = self.pool.get('ch.pumpspare.invoice').create(cr,uid,{
-					   'header_id':rec.id,
-					   'work_order_id':work_rec.id,
-					   'order_line_id':line.id,
-					   'pump_model_id':line.pump_model_id.id,
-					   'order_category':line.order_category,
-					   'qty':line.qty,
-					   'pending_qty':line.qty,
-					   'unit_price':line.unit_price,
-					   'prime_cost':offer_rec.prime_cost,
-					   'per_pump_prime_cost':offer_rec.per_pump_prime_cost,
-					   'sam_ratio':offer_rec.sam_ratio,
-					   'dealer_discount':offer_rec.dealer_discount,
-					   'customer_discount':offer_rec.customer_discount,
-					   'special_discount':offer_rec.special_discount,
-					   'tax':offer_rec.tax,
-					   'p_f':offer_rec.p_f,
-					   'freight':offer_rec.freight,
-					   'insurance':offer_rec.insurance,
-					   'total_price':offer_rec.total_price,
-					   'tax_id':[(6, 0, [x for x in list_id])],
-					   'hsn_no':offer_rec.hsn_no.id,
-					   })
-				
-					
-					self.write(cr, uid, ids, {'customer_po_no':offer_hea_rec.customer_po_no,
-										'cust_po_date': offer_hea_rec.cust_po_date,})
-				
-				if line.order_category == 'spare':					
-					for bom_line in line.line_ids:					
-						print"bom_line.spare_of222222222222222222222222222222222@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2fer_line_id",bom_line.spare_offer_line_id
-						offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,bom_line.spare_offer_line_id)	
-						offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
-						if offer_rec.hsn_no.id is False:
-							raise osv.except_osv(_('Warning!'),
-								_('HSN Code not mapping in Pump Model!!'))
-						else:
-							
-							list_id = []
-							if rec.customer_id.state_id.code == 'TN':							
-								if offer_rec.hsn_no.sgst_id.id:
-									if offer_rec.hsn_no.sgst_id.id is False:
-										raise osv.except_osv(_('Warning!'),
-											_('Kindly map in HSN master SGST Tax!!'))
-									else:									
-										list_id.append(offer_rec.hsn_no.sgst_id.id)
-								if offer_rec.hsn_no.cgst_id.id:
-									if offer_rec.hsn_no.cgst_id.id is False:
-										raise osv.except_osv(_('Warning!'),
-											_('Kindly map in HSN master CGST Tax!!'))
-									else:
-										list_id.append(offer_rec.hsn_no.cgst_id.id)								
-							else:
-								if offer_rec.hsn_no.igst_id.id:
-									if offer_rec.hsn_no.igst_id.id is False:
-										raise osv.except_osv(_('Warning!'),
-											_('Kindly map in HSN master IGST Tax!!'))
-									else:
-										list_id.append(offer_rec.hsn_no.igst_id.id)
-															
+					if offer_rec.invoice_pending_qty > 0:									
 						invoice_line = self.pool.get('ch.spare.invoice').create(cr,uid,{
 						   'header_id':rec.id,
+						   'spare_offer_id':offer_rec.id,
 						   'work_order_id':work_rec.id,
 						   'order_line_id':line.id,
 						   'pump_id':line.pump_model_id.id,
@@ -262,57 +345,60 @@ class kg_sale_invoice(osv.osv):
 						   'item_name':bom_line.pattern_id.name,
 						   'item_code':bom_line.pattern_id.pattern_name,
 						   'moc_id':bom_line.moc_id.id,
-						   'qty':bom_line.qty,
-						   'pending_qty':line.qty,
-						   'unit_price':bom_line.unit_price,
+						   'qty':offer_rec.invoice_pending_qty,
+						   'offer_qty':offer_rec.qty,
+						   'pending_qty':offer_rec.invoice_pending_qty,								  
+						   'per_prime_cost':offer_rec.prime_cost,						   
 						   'prime_cost':offer_rec.prime_cost,						   
 						   'sam_ratio':offer_rec.sam_ratio,
 						   'dealer_discount':offer_rec.dealer_discount,
 						   'customer_discount':offer_rec.customer_discount,
-						   'special_discount':offer_rec.special_discount,
-						   'tax':offer_rec.tax,
+						   'special_discount':offer_rec.special_discount,						   
 						   'p_f':offer_rec.p_f,
 						   'freight':offer_rec.freight,
 						   'insurance':offer_rec.insurance,
-						   'total_price':offer_rec.total_price,	
+						   'net_spare_amt':offer_rec.r_net_amt_tot,
+						   'r_net_amount':offer_rec.r_net_amount,
+						   'net_amount':offer_rec.r_net_amt_tot,
 						   'tax_id':[(6, 0, [x for x in list_id])],
 						   'hsn_no':offer_rec.hsn_no.id,
 						   'off_name':offer_rec.off_name,				  
 						   })						
+					
+				for machine_shop_line in line.line_ids_a:
+					print"machine_shop_line.spare_offer_line_id",machine_shop_line.spare_offer_line_id	
+					offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,machine_shop_line.spare_offer_line_id)
+					offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
+					if offer_rec.hsn_no.id is False:
+						raise osv.except_osv(_('Warning!'),
+							_('HSN Code not mapping in Pump Model!!'))
+					else:
 						
-					for machine_shop_line in line.line_ids_a:
-						print"machine_shop_line.spare_offer_line_id",machine_shop_line.spare_offer_line_id	
-						offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,machine_shop_line.spare_offer_line_id)
-						offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
-						if offer_rec.hsn_no.id is False:
-							raise osv.except_osv(_('Warning!'),
-								_('HSN Code not mapping in Pump Model!!'))
+						list_id = []
+						if rec.customer_id.state_id.code == 'TN':							
+							if offer_rec.hsn_no.sgst_id.id:
+								if offer_rec.hsn_no.sgst_id.id is False:
+									raise osv.except_osv(_('Warning!'),
+										_('Kindly map in HSN master SGST Tax!!'))
+								else:									
+									list_id.append(offer_rec.hsn_no.sgst_id.id)
+							if offer_rec.hsn_no.cgst_id.id:
+								if offer_rec.hsn_no.cgst_id.id is False:
+									raise osv.except_osv(_('Warning!'),
+										_('Kindly map in HSN master CGST Tax!!'))
+								else:
+									list_id.append(offer_rec.hsn_no.cgst_id.id)								
 						else:
-							
-							list_id = []
-							if rec.customer_id.state_id.code == 'TN':							
-								if offer_rec.hsn_no.sgst_id.id:
-									if offer_rec.hsn_no.sgst_id.id is False:
-										raise osv.except_osv(_('Warning!'),
-											_('Kindly map in HSN master SGST Tax!!'))
-									else:									
-										list_id.append(offer_rec.hsn_no.sgst_id.id)
-								if offer_rec.hsn_no.cgst_id.id:
-									if offer_rec.hsn_no.cgst_id.id is False:
-										raise osv.except_osv(_('Warning!'),
-											_('Kindly map in HSN master CGST Tax!!'))
-									else:
-										list_id.append(offer_rec.hsn_no.cgst_id.id)								
-							else:
-								if offer_rec.hsn_no.igst_id.id:
-									if offer_rec.hsn_no.igst_id.id is False:
-										raise osv.except_osv(_('Warning!'),
-											_('Kindly map in HSN master IGST Tax!!'))
-									else:
-										list_id.append(offer_rec.hsn_no.igst_id.id)
-														
+							if offer_rec.hsn_no.igst_id.id:
+								if offer_rec.hsn_no.igst_id.id is False:
+									raise osv.except_osv(_('Warning!'),
+										_('Kindly map in HSN master IGST Tax!!'))
+								else:
+									list_id.append(offer_rec.hsn_no.igst_id.id)
+					if offer_rec.invoice_pending_qty > 0:								
 						machine_shop_line = self.pool.get('ch.spare.invoice').create(cr,uid,{
 						   'header_id':rec.id,
+						   'spare_offer_id':offer_rec.id,
 						   'work_order_id':work_rec.id,
 						   'order_line_id':line.id,
 						   'pump_id':line.pump_model_id.id,
@@ -321,28 +407,103 @@ class kg_sale_invoice(osv.osv):
 						   'moc_id':machine_shop_line.moc_id.id,
 						   'item_name':machine_shop_line.ms_id.name,
 						   'item_code':machine_shop_line.ms_id.code,
-						   'unit_price':0.00,
-						   'qty':machine_shop_line.qty,
-						   'pending_qty':line.qty,
+						   
+						   'qty':offer_rec.invoice_pending_qty,
+						   'offer_qty':offer_rec.qty,
+						   'pending_qty':offer_rec.invoice_pending_qty,	
+						   'per_prime_cost':offer_rec.prime_cost,			
 						   'prime_cost':offer_rec.prime_cost,						   
 						   'sam_ratio':offer_rec.sam_ratio,
 						   'dealer_discount':offer_rec.dealer_discount,
 						   'customer_discount':offer_rec.customer_discount,
 						   'special_discount':offer_rec.special_discount,
-						   'tax':offer_rec.tax,
+						  
 						   'p_f':offer_rec.p_f,
 						   'freight':offer_rec.freight,
 						   'insurance':offer_rec.insurance,
-						   'total_price':offer_rec.total_price,
+						   'net_spare_amt':offer_rec.r_net_amt_tot,
+						   'r_net_amount':offer_rec.r_net_amount,
+						   'net_amount':offer_rec.r_net_amt_tot,
 						   'tax_id':[(6, 0, [x for x in list_id])],
 						   'hsn_no':offer_rec.hsn_no.id,
 						   'off_name':offer_rec.off_name,	
 						   })
+					   
+				for bot_line in line.line_ids_b:
+					print"bot_line.spare_offer_line_id",bot_line.spare_offer_line_id	
+					offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,bot_line.spare_offer_line_id)
+					offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
+					
+					if offer_rec.hsn_no.id is False:
+						raise osv.except_osv(_('Warning!'),
+							_('HSN Code not mapping in Pump Model!!'))
+					else:
+						
+						list_id = []
+						if rec.customer_id.state_id.code == 'TN':							
+							if offer_rec.hsn_no.sgst_id.id:
+								if offer_rec.hsn_no.sgst_id.id is False:
+									raise osv.except_osv(_('Warning!'),
+										_('Kindly map in HSN master SGST Tax!!'))
+								else:									
+									list_id.append(offer_rec.hsn_no.sgst_id.id)
+							if offer_rec.hsn_no.cgst_id.id:
+								if offer_rec.hsn_no.cgst_id.id is False:
+									raise osv.except_osv(_('Warning!'),
+										_('Kindly map in HSN master CGST Tax!!'))
+								else:
+									list_id.append(offer_rec.hsn_no.cgst_id.id)								
+						else:
+							if offer_rec.hsn_no.igst_id.id:
+								if offer_rec.hsn_no.igst_id.id is False:
+									raise osv.except_osv(_('Warning!'),
+										_('Kindly map in HSN master IGST Tax!!'))
+								else:
+									list_id.append(offer_rec.hsn_no.igst_id.id)
+					
+					if offer_rec.invoice_pending_qty > 0:									
+						bot_line = self.pool.get('ch.spare.invoice').create(cr,uid,{
+						   'header_id':rec.id,
+						   'spare_offer_id':offer_rec.id,
+						   'work_order_id':work_rec.id,
+						   'order_line_id':line.id,
+						   'pump_id':line.pump_model_id.id,
+						   'order_category':line.order_category,
+						   'bot_id':bot_line.bot_id.id,
+						   'item_name':bot_line.bot_id.name,
+						   'item_code':bot_line.bot_id.code,								  
+						   'moc_id':bot_line.moc_id.id,
+						  
+						   'qty':offer_rec.invoice_pending_qty,
+						   'offer_qty':offer_rec.qty,
+						   'pending_qty':offer_rec.invoice_pending_qty,
+						   'per_prime_cost':offer_rec.prime_cost,				
+						   'prime_cost':offer_rec.prime_cost,						   
+						   'sam_ratio':offer_rec.sam_ratio,
+						   'dealer_discount':offer_rec.dealer_discount,
+						   'customer_discount':offer_rec.customer_discount,
+						   'special_discount':offer_rec.special_discount,
 						   
-					for bot_line in line.line_ids_b:
-						print"bot_line.spare_offer_line_id",bot_line.spare_offer_line_id	
-						offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,bot_line.spare_offer_line_id)
+						   'p_f':offer_rec.p_f,
+						   'freight':offer_rec.freight,
+						   'insurance':offer_rec.insurance,
+						   'net_spare_amt':offer_rec.r_net_amt_tot,
+						   'net_amount':offer_rec.r_net_amt_tot,
+						   'r_net_amount':offer_rec.r_net_amount,
+						   'tax_id':[(6, 0, [x for x in list_id])],
+						   'hsn_no':offer_rec.hsn_no.id,
+						   'off_name':offer_rec.off_name,	
+							})
+						
+				self.write(cr, uid, ids, {'customer_po_no':offer_hea_rec.customer_po_no,
+									'cust_po_date': offer_hea_rec.cust_po_date,})
+							   
+			if line.order_category == 'access':											
+					
+					for access_line in line.line_ids_d:		
+						offer_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,access_line.access_offer_line_id)
 						offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
+						print"offer_rec.prime_costoffer_rec.prime_cost",offer_rec.prime_cost
 						
 						if offer_rec.hsn_no.id is False:
 							raise osv.except_osv(_('Warning!'),
@@ -370,103 +531,43 @@ class kg_sale_invoice(osv.osv):
 											_('Kindly map in HSN master IGST Tax!!'))
 									else:
 										list_id.append(offer_rec.hsn_no.igst_id.id)
-															
-						bot_line = self.pool.get('ch.spare.invoice').create(cr,uid,{
-						   'header_id':rec.id,
-						   'work_order_id':work_rec.id,
-						   'order_line_id':line.id,
-						   'pump_id':line.pump_model_id.id,
-						   'order_category':line.order_category,
-						   'bot_id':bot_line.bot_id.id,
-						   'item_name':bot_line.bot_id.name,
-						   'item_code':bot_line.bot_id.code,								  
-						   'moc_id':bot_line.moc_id.id,
-						   'unit_price':0.00,
-						   'qty':bot_line.qty,
-						   'pending_qty':line.qty,
-						   'prime_cost':offer_rec.prime_cost,						   
-						   'sam_ratio':offer_rec.sam_ratio,
-						   'dealer_discount':offer_rec.dealer_discount,
-						   'customer_discount':offer_rec.customer_discount,
-						   'special_discount':offer_rec.special_discount,
-						   'tax':offer_rec.tax,
-						   'p_f':offer_rec.p_f,
-						   'freight':offer_rec.freight,
-						   'insurance':offer_rec.insurance,
-						   'total_price':offer_rec.total_price,
-						   'tax_id':[(6, 0, [x for x in list_id])],
-						   'hsn_no':offer_rec.hsn_no.id,
-						   'off_name':offer_rec.off_name,	
-						   	})
-						   	
-					self.write(cr, uid, ids, {'customer_po_no':offer_hea_rec.customer_po_no,
-										'cust_po_date': offer_hea_rec.cust_po_date,})
-								   
-				if line.order_category == 'access':											
-						
-						for access_line in line.line_ids_d:		
-							offer_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,access_line.access_offer_line_id)
-							offer_hea_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_rec.header_id.id)
-							print"offer_rec.prime_costoffer_rec.prime_cost",offer_rec.prime_cost
-							
-							if offer_rec.hsn_no.id is False:
-								raise osv.except_osv(_('Warning!'),
-									_('HSN Code not mapping in Pump Model!!'))
-							else:
-								
-								list_id = []
-								if rec.customer_id.state_id.code == 'TN':							
-									if offer_rec.hsn_no.sgst_id.id:
-										if offer_rec.hsn_no.sgst_id.id is False:
-											raise osv.except_osv(_('Warning!'),
-												_('Kindly map in HSN master SGST Tax!!'))
-										else:									
-											list_id.append(offer_rec.hsn_no.sgst_id.id)
-									if offer_rec.hsn_no.cgst_id.id:
-										if offer_rec.hsn_no.cgst_id.id is False:
-											raise osv.except_osv(_('Warning!'),
-												_('Kindly map in HSN master CGST Tax!!'))
-										else:
-											list_id.append(offer_rec.hsn_no.cgst_id.id)								
-								else:
-									if offer_rec.hsn_no.igst_id.id:
-										if offer_rec.hsn_no.igst_id.id is False:
-											raise osv.except_osv(_('Warning!'),
-												_('Kindly map in HSN master IGST Tax!!'))
-										else:
-											list_id.append(offer_rec.hsn_no.igst_id.id)
-													
-							machine_shop_line = self.pool.get('ch.accessories.invoice').create(cr,uid,{
+										
+						if offer_rec.invoice_pending_qty > 0:						
+							acc_line = self.pool.get('ch.accessories.invoice').create(cr,uid,{
 							   'header_id':rec.id,
+							   'acc_offer_id':offer_rec.id,
 							   'work_order_id':work_rec.id,
 							   'order_line_id':line.id,
 							   'pump_id':line.pump_model_id.id,
 							   'order_category':line.order_category,
 							   'access_id':access_line.access_id.id,							   
 							   'moc_id':access_line.moc_id.id,							   
-							   'unit_price':line.unit_price,
-							   'qty':access_line.qty,
-							   'pending_qty':line.qty,
+							  
+							   'qty':offer_rec.invoice_pending_qty,
+							   'offer_qty':offer_rec.qty,
+							   'pending_qty':offer_rec.invoice_pending_qty,			
 							   'prime_cost':offer_rec.prime_cost,						   
 							   'per_access_prime_cost':offer_rec.per_access_prime_cost,						   
 							   'sam_ratio':offer_rec.sam_ratio,
 							   'dealer_discount':offer_rec.dealer_discount,
 							   'customer_discount':offer_rec.customer_discount,
 							   'special_discount':offer_rec.special_discount,
-							   'tax':offer_rec.tax,
+							  
 							   'p_f':offer_rec.p_f,
 							   'freight':offer_rec.freight,
 							   'insurance':offer_rec.insurance,
-							   'total_price':offer_rec.total_price,
+							   'net_acc_amt':offer_rec.r_net_amt_tot,
+							   'net_amount':offer_rec.r_net_amt_tot,
+							   'r_net_amount':offer_rec.r_net_amount,
 							   'tax_id':[(6, 0, [x for x in list_id])],
 							   'hsn_no':offer_rec.hsn_no.id,
 							   'off_name':offer_rec.off_name,	
 							   })					   
-															   
-						self.write(cr, uid, ids, {'customer_po_no':offer_hea_rec.customer_po_no,'cust_po_date': offer_hea_rec.cust_po_date,})	   
-					
-				else:
-					pass
+														   
+					self.write(cr, uid, ids, {'customer_po_no':offer_hea_rec.customer_po_no,'cust_po_date': offer_hea_rec.cust_po_date,})	   
+				
+			else:
+				pass
 					
 	def update_actual_values(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])		
@@ -508,12 +609,48 @@ class kg_sale_invoice(osv.osv):
 	def invoice_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		
-		if rec.state == 'draft':
-			for item in [x.id for x in rec.work_order_ids]:
-				print"item",item
-				work_obj = self.pool.get('kg.work.order')
-				work_rec = self.pool.get('kg.work.order').browse(cr,uid,item)
-				print"line_idsline_ids",work_rec.line_ids
+		work_obj = self.pool.get('kg.work.order')
+		work_rec = self.pool.get('kg.work.order').browse(cr,uid,rec.work_order_id.id)
+		crm_offer_id = self.pool.get('kg.crm.offer').search(cr, uid, [('name','=',work_rec.offer_no)])	
+		
+		if rec.state == 'draft':					
+			print"crm_offer_id",crm_offer_id[0]
+			for offer_invoice in rec.line_ids:
+				if offer_invoice.qty > offer_invoice.pump_offer_id.invoice_pending_qty:
+					raise osv.except_osv(_('Warning!'),_('Excess qty not allowd'))
+				else:					
+					self.pool.get('ch.pump.offer').write(cr,uid,offer_invoice.pump_offer_id.id,{'invoice_pending_qty':offer_invoice.pump_offer_id.invoice_pending_qty - offer_invoice.qty})				
+			for spare_invoice in rec.line_ids_a:
+				if spare_invoice.qty > spare_invoice.spare_offer_id.invoice_pending_qty:
+					raise osv.except_osv(_('Warning!'),_('Excess qty not allowd'))
+				else:					
+					self.pool.get('ch.spare.offer').write(cr,uid,spare_invoice.spare_offer_id.id,{'invoice_pending_qty':spare_invoice.spare_offer_id.invoice_pending_qty - spare_invoice.qty})				
+			for acc_invoice in rec.line_ids_b:
+				if acc_invoice.qty > acc_invoice.acc_offer_id.invoice_pending_qty:
+					raise osv.except_osv(_('Warning!'),_('Excess qty not allowd'))
+				else:					
+					self.pool.get('ch.accessories.offer').write(cr,uid,acc_invoice.acc_offer_id.id,{'invoice_pending_qty':acc_invoice.acc_offer_id.invoice_pending_qty - acc_invoice.qty})				
+			
+			cr.execute(''' 
+				select sum(pending_qty) as qty from (
+				select invoice_pending_qty as pending_qty
+				from ch_pump_offer
+				where header_id = %s 
+				union all
+				select invoice_pending_qty as pending_qty
+				from ch_spare_offer
+				where header_id = %s 
+				union all
+				select invoice_pending_qty as pending_qty
+				from ch_accessories_offer
+				where header_id = %s ) as test ''',[crm_offer_id[0],crm_offer_id[0],crm_offer_id[0]])
+				
+			pending_qty_details = cr.dictfetchall()	
+			
+			print"pending_qty_details",pending_qty_details[0]['qty']
+			
+			if pending_qty_details[0]['qty'] == 0:
+			
 				work_obj.write(cr, uid, work_rec.id, {'invoice_flag': True})
 			
 			if rec.name == False:					
@@ -535,17 +672,16 @@ class kg_sale_invoice(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
 			cus_adv_obj = self.pool.get('kg.customer.advance')			
-			cus_adv_inv_obj = self.pool.get('ch.customer.advance.invoice.line')			
-			for item in [x.id for x in rec.work_order_ids]:			
-				work_rec = self.pool.get('kg.work.order').browse(cr,uid,item)				
-				for line in rec.line_ids_d:	
-					print"line.order_id",line.order_id
-					adv_ids = self.pool.get('kg.customer.advance').search(cr, uid, [('order_id','=',line.order_id.id)])
-					print"adv_ids",adv_ids							
-					adv_rec = self.pool.get('kg.customer.advance').browse(cr, uid,adv_ids[0])				
-					adjusted_amt = adv_rec.adjusted_amt + line.current_adv_amt 
-					balance_amt = line.current_adv_amt - adjusted_amt
-					cus_adv_obj.write(cr, uid, line.cus_advance_id.id, {'adjusted_amt': adjusted_amt,'balance_amt':balance_amt})	
+			cus_adv_inv_obj = self.pool.get('ch.customer.advance.invoice.line')				
+			work_rec = self.pool.get('kg.work.order').browse(cr,uid,rec.work_order_id.id)				
+			for line in rec.line_ids_d:	
+				print"line.order_id",line.order_id
+				adv_ids = self.pool.get('kg.customer.advance').search(cr, uid, [('order_id','=',line.order_id.id)])
+				print"adv_ids",adv_ids							
+				adv_rec = self.pool.get('kg.customer.advance').browse(cr, uid,adv_ids[0])				
+				adjusted_amt = adv_rec.adjusted_amt + line.current_adv_amt 
+				balance_amt = line.current_adv_amt - adjusted_amt
+				cus_adv_obj.write(cr, uid, line.cus_advance_id.id, {'adjusted_amt': adjusted_amt,'balance_amt':balance_amt})	
 			self.write(cr, uid, ids, {'state': 'approved'})
 		return True
 		
@@ -565,22 +701,130 @@ class kg_sale_invoice(osv.osv):
 		cus_adv_obj = self.pool.get('kg.customer.advance')		
 		cus_inadv_obj = self.pool.get('ch.customer.advance.invoice.line')	
 		del_sql = """delete from ch_customer_advance_invoice_line where header_id=%s"""%(ids[0])
+		cr.execute(del_sql)					
+		work_rec = self.pool.get('kg.work.order').browse(cr,uid,invoice_rec.work_order_id.id)			
+		adv_search = self.pool.get('kg.customer.advance').search(cr, uid, [('order_id','=',work_rec.id)])
+		cr.execute(""" select * from kg_customer_advance where order_id = %s and balance_amt > 0 and state='done'""" %(work_rec.id))
+		adv_data = cr.dictfetchall()			
+		for adv in adv_data:
+			cus_inadv_obj.create(cr,uid,{
+				'order_id' : adv['order_id'],
+				'cus_advance_id' : adv['id'],
+				'cus_advance_date' : adv['advance_date'],
+				'tot_advance_amt' : adv['advance_amt'],
+				'balance_amt' : adv['balance_amt'],
+				'current_adv_amt' : 0.0,
+				'header_id' : invoice_rec.id,
+				})
+				
+		return True
+		
+		
+	def load_invoice_copy(self, cr, uid, ids,context=None):
+		invoice_rec = self.browse(cr,uid,ids[0])		
+		cus_invcopy_obj = self.pool.get('ch.customer.invoice.copy.rpt')	
+		del_sql = """delete from ch_customer_invoice_copy_rpt where header_id=%s"""%(ids[0])
 		cr.execute(del_sql)
-		for item in [x.id for x in invoice_rec.work_order_ids]:			
-			work_rec = self.pool.get('kg.work.order').browse(cr,uid,item)			
-			adv_search = self.pool.get('kg.customer.advance').search(cr, uid, [('order_id','=',work_rec.id)])
-			cr.execute(""" select * from kg_customer_advance where order_id = %s and balance_amt > 0 and state='confirmed'""" %(work_rec.id))
-			adv_data = cr.dictfetchall()			
-			for adv in adv_data:
-				cus_inadv_obj.create(cr,uid,{
-					'order_id' : adv['order_id'],
-					'cus_advance_id' : adv['id'],
-					'cus_advance_date' : adv['advance_date'],
-					'tot_advance_amt' : adv['advance_amt'],
-					'balance_amt' : adv['balance_amt'],
-					'current_adv_amt' : 0.0,
-					'header_id' : invoice_rec.id,
-					})
+		for item in invoice_rec.line_ids:		
+			
+			cus_invcopy_obj.create(cr,uid,{
+				'header_id' : invoice_rec.id,
+				'description' : item.pump_model_id.name,
+				'hsn_id' : item.hsn_no.id,
+				'qty' : item.qty,
+				'unit_price' : item.net_offer_amt/item.offer_qty,
+				'deductions' : 0.0,
+				'additions' : 0.0,
+				'taxable_value' : item.net_offer_amt/item.offer_qty,
+				'total_taxable_value' : item.net_offer_amt/item.offer_qty,
+				})
+				
+		for item in invoice_rec.line_ids_a:		
+			
+			cus_invcopy_obj.create(cr,uid,{
+				'header_id' : invoice_rec.id,
+				'description' : item.pump_id.name,
+				'hsn_id' : item.hsn_no.id,
+				'qty' : item.qty,
+				'unit_price' : item.net_spare_amt/item.offer_qty,
+				'deductions' : 0.0,
+				'additions' : 0.0,
+				'taxable_value' : item.net_spare_amt/item.offer_qty,
+				'total_taxable_value' : item.net_spare_amt/item.offer_qty,
+				})
+		for item in invoice_rec.line_ids_b:		
+			
+			cus_invcopy_obj.create(cr,uid,{
+				'header_id' : invoice_rec.id,
+				'description' : item.pump_id.name,
+				'hsn_id' : item.hsn_no.id,
+				'qty' : item.qty,
+				'unit_price' : item.net_acc_amt/item.offer_qty,
+				'deductions' : 0.0,
+				'additions' : 0.0,
+				'taxable_value' : item.net_acc_amt/item.offer_qty,
+				'total_taxable_value' : item.net_acc_amt/item.offer_qty,
+				})
+				
+		return True
+		
+	def load_annexure_copy(self, cr, uid, ids,context=None):
+		invoice_rec = self.browse(cr,uid,ids[0])		
+		cus_invanne_obj = self.pool.get('ch.annexure.invoice.copy.rpt')	
+		product_uom_id = self.pool.get('product.uom').search(cr, uid, [('name','=','Nos')])		
+		del_sql = """delete from ch_annexure_invoice_copy_rpt where header_id=%s"""%(ids[0])
+		cr.execute(del_sql)
+		for item in invoice_rec.line_ids:		
+			
+			cus_invanne_obj.create(cr,uid,{
+				'header_id' : invoice_rec.id,				
+				'hsn_id' : item.hsn_no.id,
+				'hsn_code' : item.hsn_no.name,
+				'item_code' : item.pump_model_id.name,
+				'tag_no' : item.pump_offer_id.enquiry_line_id.equipment_no,
+				'description' : item.pump_offer_id.enquiry_line_id.description,
+				'pump_model_id' : item.pump_model_id.id,
+				'pump_serial_no' : item.pump_offer_id.enquiry_line_id.s_no,
+				'qty' : item.qty,
+				'uom_id' : product_uom_id[0],
+				'each_price' : item.net_offer_amt/item.offer_qty,
+				'total_value' : (item.net_offer_amt/item.offer_qty) * item.qty,
+				
+				})
+				
+		for item in invoice_rec.line_ids_a:		
+			
+			cus_invanne_obj.create(cr,uid,{
+				'header_id' : invoice_rec.id,				
+				'hsn_id' : item.hsn_no.id,
+				'hsn_code' : item.hsn_no.name,
+				'item_code' : item.pump_id.name,
+				'tag_no' : item.spare_offer_id.enquiry_line_id.equipment_no,
+				'description' : item.spare_offer_id.enquiry_line_id.description,
+				'pump_model_id' : item.pump_id.id,
+				'pump_serial_no' : item.spare_offer_id.enquiry_line_id.s_no,
+				'qty' : item.qty,
+				'uom_id' : product_uom_id[0],
+				'each_price' : item.net_spare_amt/item.offer_qty,
+				'total_value' : (item.net_spare_amt/item.offer_qty) * item.qty,
+				})
+		for item in invoice_rec.line_ids_b:		
+			
+			cus_invanne_obj.create(cr,uid,{
+				'header_id' : invoice_rec.id,				
+				'hsn_id' : item.hsn_no.id,
+				'hsn_code' : item.hsn_no.name,
+				'item_code' : item.pump_id.name,
+				'tag_no' : item.acc_offer_id.enquiry_line_id.equipment_no,
+				'description' : item.acc_offer_id.enquiry_line_id.description,
+				'pump_model_id' : item.pump_id.id,
+				'pump_serial_no' : item.acc_offer_id.enquiry_line_id.s_no,
+				'qty' : item.qty,
+				'uom_id' : product_uom_id[0],
+				'each_price' : item.net_acc_amt/item.offer_qty,
+				'total_value' : (item.net_acc_amt/item.offer_qty) * item.qty,
+				})
+				
 				
 		return True
 	
@@ -604,11 +848,13 @@ class kg_sale_invoice(osv.osv):
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 	
-		if rec.state != 'invoice':
+		if rec.state == 'invoice':
 			
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&proforma_invoice='+rec_code
+			url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&customer_invoice='+rec_code
+		
 		else:
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&customer_invoice='+rec_code
+
+			url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&proforma_invoice='+rec_code
 
 		return {
 					  'name'	 : 'Go to website',
@@ -631,75 +877,33 @@ class ch_pumpspare_invoice(osv.osv):
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
-		sam_ratio_tot = dealer_discount_tot = val = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
-		i_tot = k_tot = m_tot = p_tot = r_tot = 0
+		prime_cost = net_amount = val = tax_tot = r_net_amount = 0		
 		for line in self.browse(cr, uid, ids, context=context):
-			print"linelineline",line
+			
 			res[line.id] = {
 				
-				'sam_ratio_tot': 0.0,
-				'dealer_discount_tot': 0.0,
-				'customer_discount_tot' : 0.0,
-				'spl_discount_tot' : 0.0,
+				'prime_cost': 0.0,
+				'net_amount': 0.0,
 				'tax_tot': 0.0,
-				'p_f_tot': 0.0,
-				'freight_tot': 0.0,
-				'insurance_tot': 0.0,
-				'pump_price': 0.0,
-				'tot_price': 0.0,
+				'r_net_amount' : 0.0,
+				
 				
 			}
-			print"line.prime_cost",line.prime_cost
-			print"line.sam_ratio",line.sam_ratio
-			sam_ratio_tot = line.prime_cost * line.sam_ratio
-			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
-			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
-			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
-			i_tot = sam_ratio_tot + dealer_discount_tot
-			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
-			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
-			k_tot = i_tot + customer_discount_tot
-			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
-			print"spl_discount_totspl_discount_tot",spl_discount_tot
-			m_tot = k_tot + spl_discount_tot
-			print"line.unit_price",line.unit_price
+			
 			for c in self.pool.get('account.tax').compute_all(cr, uid, line.tax_id,
-				line.prime_cost, line.qty,1,1)['taxes']:
-				print"ccccccc",c
-				
-				val += c.get('amount', 0.0)
-				print"valvalval",val
+				line.net_offer_amt/line.offer_qty, line.qty,1,1)['taxes']:				
+				val += c.get('amount', 0.0)				
 				tax_tot = val	
 			
+			net_amount = (line.net_offer_amt/line.offer_qty) * line.qty
+			net_grand_amount = net_amount + tax_tot			
+			prime_cost = line.per_pump_prime_cost * line.qty
 			
-			
-			print"tax_tottax_tot",tax_tot
-			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
-			print"p_f_totp_f_tot",p_f_tot
-			p_tot = m_tot + tax_tot + p_f_tot
-			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
-			print"freight_totfreight_tot",freight_tot
-			r_tot = p_tot + freight_tot
-			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
-			print"insurance_totinsurance_tot",insurance_tot
-			pump_price_tot = r_tot + insurance_tot
-			print"pump_price_totpump_price_tot",pump_price_tot
-			tot_price = pump_price_tot
-			print"tot_pricetot_price",tot_price
-			net_amount = tot_price * line.qty
-			print"net_amountnet_amount",net_amount
-			
-			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
-			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
-			res[line.id]['customer_discount_tot'] = customer_discount_tot
-			res[line.id]['spl_discount_tot'] = spl_discount_tot
+			res[line.id]['prime_cost'] = prime_cost
+			res[line.id]['net_amount'] = net_amount
 			res[line.id]['tax_tot'] = tax_tot
-			res[line.id]['p_f_tot'] = p_f_tot
-			res[line.id]['freight_tot'] = freight_tot
-			res[line.id]['insurance_tot'] = insurance_tot
-			res[line.id]['pump_price_tot'] = pump_price_tot
-			res[line.id]['tot_price'] = tot_price
-			res[line.id]['net_amount'] = net_amount + tax_tot
+			res[line.id]['r_net_amount'] = net_grand_amount
+			
 			
 		return res
 	
@@ -707,53 +911,44 @@ class ch_pumpspare_invoice(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.sale.invoice', 'Invoice Detail', required=1, ondelete='cascade'),
-		'work_order_id':fields.many2one('kg.work.order', 'Offer'),	
+		'pump_offer_id':fields.many2one('ch.pump.offer', 'Offer'),	
+		'work_order_id':fields.many2one('kg.work.order', 'Work Order'),	
 		'order_line_id': fields.many2one('ch.work.order.details','Order Line'),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),		
 		'order_category': fields.selection([('pump','Pump'),('spare','Spare')],'Purpose', required=True),
 		'qty': fields.integer('Qty', required=True),
+		'offer_qty': fields.integer('Offer Qty'),
 		'pending_qty': fields.integer('Pending Qty'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Approve/Reject Remarks'),
-		'cancel_remark': fields.text('Cancel Remarks'),
-		
-		'line_ids': fields.one2many('ch.pumpspare.bom.details', 'header_id', "BOM Details"),
-		'line_ids_a': fields.one2many('ch.pumpspare.machineshop.details', 'header_id', "Machine Shop Details"),
-		'line_ids_b': fields.one2many('ch.pumpspare.bot.details', 'header_id', "BOT Details"),	
+		'cancel_remark': fields.text('Cancel Remarks'),	
 		
 		'hsn_no': fields.many2one('kg.hsn.master','HSN No.'),
 		'tax_id': fields.many2many('account.tax', 'pump_invoice_taxes', 'pump_invoice_id', 'tax_id', 'GST Taxes'),
 		
-		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),		
-		'unit_price': fields.float('Unit Price',required=True),	
 		
-		### Used for value
+		### Used for value		
 		
-		'prime_cost': fields.float('Prime Cost'),
 		'per_pump_prime_cost': fields.float('Per Pump Prime Cost'),
 		'sam_ratio': fields.float('Sam Ratio(%)'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
 		'customer_discount': fields.float('Customer Discount(%)'),
-		'special_discount': fields.float('Special Discount(%)'),
-		'tax': fields.float('Tax(%)'),
+		'special_discount': fields.float('Special Discount(%)'),		
 		'p_f': fields.float('P&F(%)'),
 		'freight': fields.float('Freight(%)'),
 		'insurance': fields.float('Insurance(%)'),
-		'total_price': fields.float('Total Price'),
+		'net_offer_amt': fields.float('Net Offer Amount'),
 		
 		### Function used value update
-		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Unit Price',multi="sums",store=True),	
-		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
-		'dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
-		'customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
-		'spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),	
+		
+		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),		
+		
 		'tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),	
-		'p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
-		'freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
-		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
-		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
-		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
+		
+		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
+		
+		'r_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Grand Total',multi="sums",store=True),	
 		
 		
 		
@@ -778,71 +973,34 @@ class ch_spare_invoice(osv.osv):
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
-		sam_ratio_tot = dealer_discount_tot = val = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
-		i_tot = k_tot = m_tot = p_tot = r_tot = 0
+		prime_cost = net_amount = val = tax_tot = r_net_amount = 0		
 		for line in self.browse(cr, uid, ids, context=context):
-			print"linelineline",line
+			
 			res[line.id] = {
 				
-				'sam_ratio_tot': 0.0,
-				'dealer_discount_tot': 0.0,
-				'customer_discount_tot' : 0.0,
-				'spl_discount_tot' : 0.0,
+				'prime_cost': 0.0,
+				'net_amount': 0.0,
 				'tax_tot': 0.0,
-				'p_f_tot': 0.0,
-				'freight_tot': 0.0,
-				'insurance_tot': 0.0,
-				'pump_price': 0.0,
-				'tot_price': 0.0,
+				'r_net_amount' : 0.0,
+				
 				
 			}
-			print"line.prime_cost",line.prime_cost
-			print"line.sam_ratio",line.sam_ratio
-			sam_ratio_tot = line.prime_cost * line.sam_ratio
-			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
-			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
-			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
-			i_tot = sam_ratio_tot + dealer_discount_tot
-			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
-			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
-			k_tot = i_tot + customer_discount_tot
-			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
-			print"spl_discount_totspl_discount_tot",spl_discount_tot
-			m_tot = k_tot + spl_discount_tot
 			
 			for c in self.pool.get('account.tax').compute_all(cr, uid, line.tax_id,
-				line.prime_cost, line.qty,1,1)['taxes']:
-				val += c.get('amount', 0.0)
-				print"valvalval",val
+				line.net_offer_amt/line.offer_qty, line.qty,1,1)['taxes']:				
+				val += c.get('amount', 0.0)				
 				tax_tot = val	
 			
-			print"tax_tottax_tot",tax_tot
-			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
-			print"p_f_totp_f_tot",p_f_tot
-			p_tot = m_tot + tax_tot + p_f_tot
-			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
-			print"freight_totfreight_tot",freight_tot
-			r_tot = p_tot + freight_tot
-			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
-			print"insurance_totinsurance_tot",insurance_tot
-			pump_price_tot = r_tot + insurance_tot
-			print"pump_price_totpump_price_tot",pump_price_tot
-			tot_price = pump_price_tot 
-			print"tot_pricetot_price",tot_price
-			net_amount = tot_price * 1
-			print"net_amountnet_amount",net_amount
+			net_amount = (line.net_offer_amt/line.offer_qty) * line.qty
+			net_grand_amount = net_amount + tax_tot			
+			per_prime_cost = line.per_prime_cost / line.offer_qty
+			prime_cost = per_prime_cost / line.qty
 			
-			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
-			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
-			res[line.id]['customer_discount_tot'] = customer_discount_tot
-			res[line.id]['spl_discount_tot'] = spl_discount_tot
+			res[line.id]['prime_cost'] = prime_cost
+			res[line.id]['net_amount'] = net_amount
 			res[line.id]['tax_tot'] = tax_tot
-			res[line.id]['p_f_tot'] = p_f_tot
-			res[line.id]['freight_tot'] = freight_tot
-			res[line.id]['insurance_tot'] = insurance_tot
-			res[line.id]['pump_price_tot'] = pump_price_tot
-			res[line.id]['tot_price'] = tot_price
-			res[line.id]['net_amount'] = net_amount + tax_tot
+			res[line.id]['r_net_amount'] = net_grand_amount
+			
 			
 		return res
 	
@@ -850,9 +1008,11 @@ class ch_spare_invoice(osv.osv):
 	
 		### Pump Details ####
 		'header_id':fields.many2one('kg.sale.invoice', 'Offer', ondelete='cascade'),
+		'spare_offer_id':fields.many2one('ch.spare.offer', 'Offer'),	
 		'work_order_id':fields.many2one('kg.work.order', 'Offer'),	
 		'order_line_id': fields.many2one('ch.work.order.details','Order Line'),		
 		'qty':fields.integer('Quantity'),
+		'offer_qty': fields.integer('Offer Qty'),
 		'pending_qty': fields.integer('Pending Qty'),
 		'item_code': fields.char('Item Code'),
 		'item_name': fields.char('Item Name'),
@@ -866,31 +1026,26 @@ class ch_spare_invoice(osv.osv):
 		'hsn_no': fields.many2one('kg.hsn.master','HSN No.'),
 		'tax_id': fields.many2many('account.tax', 'spare_invoice_taxes', 'spare_invoice_id', 'tax_id', 'GST Taxes'),
 		
-		'unit_price': fields.float('Unit Price',required=True),	
+		### Used for value		
 		
-		'prime_cost': fields.float('Prime Cost'),
 		'sam_ratio': fields.float('Sam Ratio(%)'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
 		'customer_discount': fields.float('Customer Discount(%)'), 
-		'special_discount': fields.float('Special Discount(%)'),
-		'tax': fields.float('Tax(%)'),
+		'special_discount': fields.float('Special Discount(%)'),		
 		'p_f': fields.float('P&F(%)'),
 		'freight': fields.float('Freight(%)'),
 		'insurance': fields.float('Insurance(%)'),
-		'total_price': fields.float('Total Price'),	
+		'net_spare_amt': fields.float('Total Price'),	
+		'per_prime_cost': fields.float('Refer Prime cost'),	
 		
 		### Function used value update
-		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Unit Price',multi="sums",store=True),	
-		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
-		'dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
-		'customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
-		'spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),	
+		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),		
+		
 		'tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),	
-		'p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
-		'freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
-		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
-		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
-		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),		
+		
+		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
+		
+		'r_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Grand Total',multi="sums",store=True),		
 		
 		
 	}
@@ -908,69 +1063,33 @@ class ch_accessories_invoice(osv.osv):
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
-		sam_ratio_tot = val = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
-		i_tot = k_tot = m_tot = p_tot = r_tot = 0
+		prime_cost = net_amount = val = tax_tot = r_net_amount = 0		
 		for line in self.browse(cr, uid, ids, context=context):
-			print"linelineline",line
+			
 			res[line.id] = {
 				
-				'sam_ratio_tot': 0.0,
-				'dealer_discount_tot': 0.0,
-				'customer_discount_tot' : 0.0,
-				'spl_discount_tot' : 0.0,
+				'prime_cost': 0.0,
+				'net_amount': 0.0,
 				'tax_tot': 0.0,
-				'p_f_tot': 0.0,
-				'freight_tot': 0.0,
-				'insurance_tot': 0.0,
-				'pump_price': 0.0,
-				'tot_price': 0.0,
+				'r_net_amount' : 0.0,
+				
 				
 			}
-			print"line.prime_cost",line.prime_cost
-			print"line.sam_ratio",line.sam_ratio
-			sam_ratio_tot = line.prime_cost * line.sam_ratio
-			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
-			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
-			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
-			i_tot = sam_ratio_tot + dealer_discount_tot
-			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
-			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
-			k_tot = i_tot + customer_discount_tot
-			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
-			print"spl_discount_totspl_discount_tot",spl_discount_tot
-			m_tot = k_tot + spl_discount_tot
-			for c in self.pool.get('account.tax').compute_all(cr, uid, line.tax_id,
-				line.prime_cost, line.qty,1,1)['taxes']:
-				val += c.get('amount', 0.0)
-				print"valvalval",val
-				tax_tot = val	
-			print"tax_tottax_tot",tax_tot
-			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
-			print"p_f_totp_f_tot",p_f_tot
-			p_tot = m_tot + tax_tot + p_f_tot
-			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
-			print"freight_totfreight_tot",freight_tot
-			r_tot = p_tot + freight_tot
-			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
-			print"insurance_totinsurance_tot",insurance_tot
-			pump_price_tot = r_tot + insurance_tot
-			print"pump_price_totpump_price_tot",pump_price_tot
-			tot_price = pump_price_tot 
-			print"tot_pricetot_price",tot_price
-			net_amount = tot_price * line.qty
-			print"net_amountnet_amount",net_amount
 			
-			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
-			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
-			res[line.id]['customer_discount_tot'] = customer_discount_tot
-			res[line.id]['spl_discount_tot'] = spl_discount_tot
+			for c in self.pool.get('account.tax').compute_all(cr, uid, line.tax_id,
+				line.net_acc_amt/line.offer_qty, line.qty,1,1)['taxes']:				
+				val += c.get('amount', 0.0)				
+				tax_tot = val	
+			
+			net_amount = (line.net_acc_amt/line.offer_qty) * line.qty
+			net_grand_amount = net_amount + tax_tot			
+			prime_cost = line.per_access_prime_cost * line.qty
+			
+			res[line.id]['prime_cost'] = prime_cost
+			res[line.id]['net_amount'] = net_amount
 			res[line.id]['tax_tot'] = tax_tot
-			res[line.id]['p_f_tot'] = p_f_tot
-			res[line.id]['freight_tot'] = freight_tot
-			res[line.id]['insurance_tot'] = insurance_tot
-			res[line.id]['pump_price_tot'] = pump_price_tot
-			res[line.id]['tot_price'] = tot_price
-			res[line.id]['net_amount'] = net_amount + tax_tot
+			res[line.id]['r_net_amount'] = net_grand_amount
+			
 			
 		return res
 	
@@ -978,43 +1097,41 @@ class ch_accessories_invoice(osv.osv):
 	
 		### Spare Details ####
 		'header_id':fields.many2one('kg.sale.invoice', 'Invoice', ondelete='cascade'),
+		'acc_offer_id':fields.many2one('ch.accessories.offer', 'Offer'),	
 		'work_order_id':fields.many2one('kg.work.order', 'Offer'),
 		'order_line_id': fields.many2one('ch.work.order.details','Order Line'),
 		'access_id':fields.many2one('kg.accessories.master', 'Item Name'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
 		'moc_id':fields.many2one('kg.moc.master', 'MOC'),
 		'qty':fields.integer('Quantity'),
+		'offer_qty': fields.integer('Offer Qty'),
 		'pending_qty': fields.integer('Pending Qty'),
 		
 		'off_name': fields.char('Offer Name'),
 		'hsn_no': fields.many2one('kg.hsn.master','HSN No.'),
 		'tax_id': fields.many2many('account.tax', 'acc_invoice_taxes', 'acc_invoice_id', 'tax_id', 'GST Taxes'),
 		
-		'prime_cost': fields.float('Prime Cost'),
+		### Used for value		
 		'per_access_prime_cost': fields.float('Per Access Prime Cost'),
 		'sam_ratio': fields.float('Sam Ratio(%)'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
 		'customer_discount': fields.float('Customer Discount(%)'),
-		'special_discount': fields.float('Special Discount(%)'),
-		'tax': fields.float('Tax(%)'),
+		'special_discount': fields.float('Special Discount(%)'),		
 		'p_f': fields.float('P&F(%)'),
 		'freight': fields.float('Freight(%)'),
 		'insurance': fields.float('Insurance(%)'),
 		'pump_price': fields.float('Pump Price'),
 		'total_price': fields.float('Total Price'),
-		'unit_price': fields.float('Unit Price',required=True),
+		'net_acc_amt': fields.float('Total Acc Price'),	
 		
-		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Unit Price',multi="sums",store=True),	
-		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
-		'dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
-		'customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
-		'spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),	
+		### Function used value update
+		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),		
+		
 		'tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),	
-		'p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
-		'freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
-		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
-		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
-		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),		
+		
+		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),
+		
+		'r_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Grand Total',multi="sums",store=True),
 			
 		
 		
@@ -1132,6 +1249,210 @@ class ch_customer_advance_invoice_line(osv.osv):
 			return True
 			
 ch_customer_advance_invoice_line()
+
+
+
+class ch_customer_invoice_copy_rpt(osv.osv):
+
+	_name = "ch.customer.invoice.copy.rpt"
+	_description = "Customer Invoice Copy Report"
+	
+	
+	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+		res = {}
+		cur_obj=self.pool.get('res.currency')
+		cgst_per = sgst_per = igst_per = ''		
+		cgst_amt = sgst_amt = igst_amt = 0		
+		for line in self.browse(cr, uid, ids, context=context):			
+			res[line.id] = {
+				
+				'cgst_amt' : 0.0,
+				'cgst_amt' : 0.0,
+				'cgst_amt' : 0.0,
+				'total_taxable_value' : 0.0,				
+				
+			}			
+			sgst_tax_tot = cgst_tax_tot = igst_tax_tot = total_taxable_value = 0
+			sgst_tax_per = cgst_tax_per = igst_tax_per = ''			
+			if line.header_id.customer_id.state_id.code == 'TN':							
+				if line.hsn_id.sgst_id.id:
+					if line.hsn_id.sgst_id.id is False:
+						raise osv.except_osv(_('Warning!'),
+							_('Kindly map in HSN master SGST Tax!!'))
+					else:	
+						value = line.taxable_value * line.qty
+						tax_per = line.hsn_id.sgst_id.amount * 100
+						total_tax = (value * tax_per ) / 100									
+						sgst_tax_tot = total_tax
+						sgst_tax_per = line.hsn_id.sgst_id.name
+							
+				if line.hsn_id.cgst_id.id:
+					if line.hsn_id.cgst_id.id is False:
+						raise osv.except_osv(_('Warning!'),
+							_('Kindly map in HSN master CGST Tax!!'))
+					else:
+						value = line.taxable_value * line.qty
+						tax_per = line.hsn_id.cgst_id.amount * 100
+						total_tax = (value * tax_per ) / 100		
+						cgst_tax_tot = total_tax
+						cgst_tax_per = line.hsn_id.cgst_id.name							
+			else:
+				if line.hsn_id.igst_id.id:
+					if line.hsn_id.igst_id.id is False:
+						raise osv.except_osv(_('Warning!'),
+							_('Kindly map in HSN master IGST Tax!!'))
+					else:
+						value = line.taxable_value * line.qty
+						tax_per = line.hsn_id.igst_id.amount * 100
+						total_tax = (value * tax_per ) / 100		
+						igst_tax_tot = total_tax
+						igst_tax_per = line.hsn_id.igst_id.name				
+			
+			res[line.id]['cgst_amt'] = sgst_tax_tot
+			res[line.id]['sgst_amt'] = cgst_tax_tot
+			res[line.id]['igst_amt'] = igst_tax_tot
+			res[line.id]['total_taxable_value'] = line.taxable_value * line.qty
+			cr.execute('''update ch_customer_invoice_copy_rpt set cgst_per = %s,sgst_per = %s,igst_per = %s where id = %s ''',(cgst_tax_per,sgst_tax_per,igst_tax_per,line.id))
+			
+			
+		return res
+	
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.sale.invoice', 'Invoice advance', ondelete='cascade'),
+		
+		'description' : fields.char('Description'),	
+		'hsn_id' : fields.many2one('kg.hsn.master', 'HSN No'),
+		'qty':fields.integer('Quantity'),
+		'unit_price': fields.float('Unit Price'),	
+		'deductions': fields.float('Deductions'),	
+		'additions': fields.float('Additions'),	
+		'taxable_value': fields.float('Taxable Value(Per Unit)'),		
+		
+		'cgst_per' : fields.char('CGST(%)'),	
+		'sgst_per' : fields.char('SGST(%)'),	
+		'igst_per' : fields.char('IGST(%)'),
+		
+		
+		'total_taxable_value': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Taxable Value',multi="sums",store=True),
+		'cgst_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='CGST Amt',multi="sums",store=True),
+		'sgst_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='SGST Amt',multi="sums",store=True),
+		'igst_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='IGST Amt',multi="sums",store=True),
+		
+		
+		
+	}	
+	
+	def onchange_taxable_value(self, cr, uid, ids, deductions,additions,unit_price,qty, context=None):
+		value = {'taxable_value': ''}	
+		total_value = unit_price		
+		sub_final_total = (total_value + additions) - deductions				
+		value = {'taxable_value': sub_final_total }
+		return {'value': value}
+	
+			
+ch_customer_invoice_copy_rpt()
+
+
+class ch_annexure_invoice_copy_rpt(osv.osv):
+
+	_name = "ch.annexure.invoice.copy.rpt"
+	_description = "Customer Annexure Copy Report"
+	
+	
+	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+		res = {}
+		cur_obj=self.pool.get('res.currency')			
+		cgst_amt = sgst_amt = igst_amt = total_value = 0		
+		for line in self.browse(cr, uid, ids, context=context):			
+			res[line.id] = {
+				
+				'cgst_amt' : 0.0,
+				'cgst_amt' : 0.0,
+				'cgst_amt' : 0.0,
+				'total_value' : 0.0,				
+				
+			}			
+			sgst_tax_tot = cgst_tax_tot = igst_tax_tot = total_taxable_value = 0
+			sgst_tax_per = cgst_tax_per = igst_tax_per = ''			
+			if line.header_id.customer_id.state_id.code == 'TN':							
+				if line.hsn_id.sgst_id.id:
+					if line.hsn_id.sgst_id.id is False:
+						raise osv.except_osv(_('Warning!'),
+							_('Kindly map in HSN master SGST Tax!!'))
+					else:	
+						value = line.each_price * line.qty
+						tax_per = line.hsn_id.sgst_id.amount * 100
+						total_tax = (value * tax_per ) / 100									
+						sgst_tax_tot = total_tax
+						sgst_tax_per = line.hsn_id.sgst_id.name
+							
+				if line.hsn_id.cgst_id.id:
+					if line.hsn_id.cgst_id.id is False:
+						raise osv.except_osv(_('Warning!'),
+							_('Kindly map in HSN master CGST Tax!!'))
+					else:
+						value = line.each_price * line.qty
+						tax_per = line.hsn_id.cgst_id.amount * 100
+						total_tax = (value * tax_per ) / 100		
+						cgst_tax_tot = total_tax
+						cgst_tax_per = line.hsn_id.cgst_id.name							
+			else:
+				if line.hsn_id.igst_id.id:
+					if line.hsn_id.igst_id.id is False:
+						raise osv.except_osv(_('Warning!'),
+							_('Kindly map in HSN master IGST Tax!!'))
+					else:
+						value = line.each_price * line.qty
+						tax_per = line.hsn_id.igst_id.amount * 100
+						total_tax = (value * tax_per ) / 100		
+						igst_tax_tot = total_tax
+						igst_tax_per = line.hsn_id.igst_id.name				
+			
+			res[line.id]['cgst_amt'] = sgst_tax_tot
+			res[line.id]['sgst_amt'] = cgst_tax_tot
+			res[line.id]['igst_amt'] = igst_tax_tot
+			res[line.id]['total_value'] = line.each_price * line.qty
+			
+			
+			
+		return res
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.sale.invoice', 'Invoice advance', ondelete='cascade'),
+		
+		'hsn_id' : fields.many2one('kg.hsn.master', 'HSN No'),
+		'hsn_code' : fields.char('HSN Code'),
+		'item_code' : fields.char('Item Code'),
+		'tag_no' : fields.char('Tag No.'),
+		'description' : fields.char('Description'),			
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
+		'pump_serial_no' : fields.char('Pump SL. No.'),
+		'qty':fields.integer('Quantity'),
+		'uom_id': fields.many2one('product.uom','UOM'),
+		'each_price': fields.float('Each Price'),			
+		
+		
+		'total_value': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Value',multi="sums",store=True),
+		'cgst_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='CGST Amt',multi="sums",store=True),
+		'sgst_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='SGST Amt',multi="sums",store=True),
+		'igst_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='IGST Amt',multi="sums",store=True),	
+		
+		
+	}	
+	
+	
+	def onchange_hsn_code(self, cr, uid, ids, hsn_id, context=None):
+		value = {'hsn_code': ''}
+		if hsn_id:
+			hsn_rec = self.pool.get('kg.hsn.master').browse(cr, uid, hsn_id, context=context)
+			value = {'hsn_code': hsn_rec.name}
+		return {'value': value}
+	
+			
+ch_annexure_invoice_copy_rpt()
 
 
 

@@ -14,6 +14,7 @@
 						<button name="invoice_approve" type="object" string="Approve" states="confirmed" class="oe_highlight"/>
 						<button name="invoice_process" type="object" string="Create Invoice" states="approved" class="oe_highlight"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
+						
 					</header>
 						<group>
 							<group>
@@ -26,66 +27,79 @@
                                 options='{"always_reload": True}'
                                 domain="[('customer', '=', True)]" required="1"
                                 attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" />							
-								<field name="contact_person"/>
-								<field name="work_order_ids" widget="many2many_tags" required="1"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>									
-										
-								<button name="load_wo_details" type="object" string="Load Order Details" class="oe_highlight"  attrs="{'invisible': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>	
+								<field name="contact_person"/>								
+								<field name="vehicle_no" required="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>								
+								<field name="work_order_id"  required="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>									
+								
 							</group>											
 							<group>		
 								<field name="cust_po_date"/>
 								<field name="proforma_invoice_date" required="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>						
+								<field name="invoice_issue_date" required="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>						
+								<field name="invoice_removal_date" required="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>						
 								<field name="invoice_date" attrs="{'invisible': [('state','in',['draft','confirmed','approved'])]}" required="1"/>						
-								<field name="billing_address"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" required="1"/>
-								<field name="del_address"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>	
+								<field name="place_of_supply" required="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>										
 								<field name="state" style="width: 30%%" class="att_state_change"/>	
 							</group>	
 						</group>
-							
+						
+						<group colspan="3" >
+							<group string="Delivery Address">
+								<field name="del_address"  on_change="onchange_del_details(del_address)"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" required="1"/>	
+								<field name="delivery_address" readonly="1"/>
+							</group>
+							<group string="Billing Address">
+								<field name="billing_address"  on_change="onchange_billing_details(billing_address)" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" required="1"/>
+								<field name="bill_address" readonly="1"/>
+							</group>
+						</group>
+						
+						<button name="load_wo_details" type="object" string="Load Order Details" class="oe_highlight"  attrs="{'invisible': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>	
 						<group string="Pump Details">
-							<field name="line_ids" colspan="4" nolabel="1">
-								<tree string="Pump History" create="false" delete="false">
-									<field name="pump_model_id" required="1"/>
-									<field name="order_category" required="1"/>	
-									<field name="qty" sum="qty"/>
-									<field name="prime_cost" sum="prime_cost"/>																
-									<field name="sam_ratio" sum="sam_ratio"/>																
-									<field name="dealer_discount" sum="dealer_discount"/>
-									<field name="customer_discount" sum="customer_discount"/>
-									<field name="special_discount" sum="special_discount"/>
-									<field name="hsn_no" />
-									<field name="tax_id" widget="many2many_tags"/>
-									<field name="p_f" sum="p_f"/>
-									<field name="freight" sum="freight"/>
-									<field name="insurance" sum="insurance"/>									
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}">
+								<tree string="Pump History" create="false" editable="top">
+									<field name="pump_model_id" readonly="1"/>
+									<field name="order_category" readonly="1"/>	
+									<field name="qty" sum="qty" required="1"/>
+									<field name="prime_cost" sum="prime_cost" readonly="1"/>																
+									<field name="sam_ratio" sum="sam_ratio" readonly="1"/>																
+									<field name="dealer_discount" sum="dealer_discount" readonly="1"/>
+									<field name="customer_discount" sum="customer_discount" readonly="1"/>
+									<field name="special_discount" sum="special_discount" readonly="1"/>
+									<field name="hsn_no" readonly="1"/>
+									<field name="tax_id" widget="many2many_tags" readonly="1"/>
+									<field name="p_f" sum="p_f" readonly="1"/>
+									<field name="freight" sum="freight" readonly="1"/>
+									<field name="insurance" sum="insurance" readonly="1"/>	
 																	
-									<field name="tot_price" sum="tot_price"/>									
+									<field name="net_amount" sum="tot_price"/>									
 									<field name="tax_tot" sum="tax_tot"/>									
-									<field name="net_amount" sum="net_amount"/>									
+									<field name="r_net_amount" sum="net_amount"/>									
 								</tree>
 							</field>
 
 						</group>
 						<group string="Spare Details">
-							<field name="line_ids_a" colspan="4" nolabel="1">
-								<tree string="Spare History" create="false" delete="false">									
-									<field name="pump_id" required="1"/>
-									<field name="item_code" required="1"/>
-									<field name="item_name" required="1"/>
-									<field name="moc_id"/>
-									<field name="qty" sum="qty"/>									
-									<field name="prime_cost" sum="prime_cost"/>									
-									<field name="sam_ratio" sum="sam_ratio"/>									
-									<field name="dealer_discount" sum="dealer_discount"/>
-									<field name="customer_discount" sum="customer_discount"/>
-									<field name="special_discount" sum="special_discount"/>
-									<field name="hsn_no" />
-									<field name="tax_id" widget="many2many_tags"/>
-									<field name="p_f" sum="p_f"/>
-									<field name="freight" sum="freight"/>
-									<field name="insurance" sum="insurance"/>
-									<field name="tot_price" sum="tot_price"/>									
+							<field name="line_ids_a" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}">
+								<tree string="Spare History" create="false" editable="top">									
+									<field name="pump_id" readonly="1"/>
+									<field name="item_code" readonly="1"/>
+									<field name="item_name" readonly="1"/>
+									<field name="moc_id" readonly="1"/>
+									<field name="qty" sum="qty" required="1"/>									
+									<field name="prime_cost" sum="prime_cost" readonly="1"/>									
+									<field name="sam_ratio" sum="sam_ratio" readonly="1"/>									
+									<field name="dealer_discount" sum="dealer_discount" readonly="1"/>
+									<field name="customer_discount" sum="customer_discount" readonly="1"/>
+									<field name="special_discount" sum="special_discount" readonly="1"/>
+									<field name="hsn_no" readonly="1"/>
+									<field name="tax_id" widget="many2many_tags" readonly="1"/>
+									<field name="p_f" sum="p_f" readonly="1"/>
+									<field name="freight" sum="freight" readonly="1"/>
+									<field name="insurance" sum="insurance" readonly="1"/>
+									<field name="net_amount" sum="tot_price" />									
 									<field name="tax_tot" sum="tax_tot"/>									
-									<field name="net_amount" sum="net_amount"/>	
+									<field name="r_net_amount" sum="net_amount"/>	
 								
 									
 								</tree>
@@ -93,25 +107,25 @@
 
 						</group>
 						<group string="Accessories Details">
-							<field name="line_ids_b" colspan="4" nolabel="1">
-								<tree string="Accessories History" create="false" delete="false">
-									<field name="access_id" required="1" readonly="1"/>
-									<field name="pump_id" required="1" readonly="1"/>
-									<field name="moc_id" required="1" readonly="1"/>
-									<field name="qty" sum="qty"/>							
+							<field name="line_ids_b" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}">
+								<tree string="Accessories History" create="false" editable="top">
+									<field name="access_id" readonly="1"/>
+									<field name="pump_id" readonly="1"/>
+									<field name="moc_id" readonly="1"/>
+									<field name="qty" sum="qty" required="1"/>							
 									<field name="prime_cost" sum="prime_cost" readonly="1"/>
-									<field name="sam_ratio" sum="sam_ratio"/>
-									<field name="dealer_discount" sum="dealer_discount"/>
-									<field name="customer_discount" sum="customer_discount"/>
-									<field name="special_discount" sum="special_discount"/>
-									<field name="hsn_no" />
-									<field name="tax_id" widget="many2many_tags"/>
-									<field name="p_f" sum="p_f"/>
-									<field name="freight" sum="freight"/>
-									<field name="insurance" sum="insurance"/>
-									<field name="tot_price" sum="tot_price"/>									
+									<field name="sam_ratio" sum="sam_ratio" readonly="1"/>
+									<field name="dealer_discount" sum="dealer_discount" readonly="1"/>
+									<field name="customer_discount" sum="customer_discount" readonly="1"/>
+									<field name="special_discount" sum="special_discount" readonly="1"/>
+									<field name="hsn_no" readonly="1"/>
+									<field name="tax_id" widget="many2many_tags" readonly="1"/>
+									<field name="p_f" sum="p_f" readonly="1"/>
+									<field name="freight" sum="freight" readonly="1"/>
+									<field name="insurance" sum="insurance" readonly="1"/>
+									<field name="net_amount" sum="tot_price"/>									
 									<field name="tax_tot" sum="tax_tot"/>									
-									<field name="net_amount" sum="net_amount"/>	
+									<field name="r_net_amount" sum="net_amount"/>	
 																	
 								</tree>
 							</field>
@@ -125,6 +139,47 @@
 									<field name="amount" required="1" />
 									<field name="tax_id" widget="many2many_tags"/>
 									<field name="expense_amt" readonly="1"/>																	
+								</tree>
+							</field>
+						</group>
+						
+						<button name="load_invoice_copy" string="Load Data" type="object"  attrs="{'invisible': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>
+						<group string="Invoice Copy Details">
+							<field name="line_ids_e" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" >
+								<tree string="Invoice Copy" editable="top">
+									<field name="description" required="1"/>
+									<field name="hsn_id" required="1"/>
+									<field name="qty" required="1" on_change="onchange_taxable_value(deductions,additions,unit_price,qty)"/>
+									<field name="unit_price" required="1" on_change="onchange_taxable_value(deductions,additions,unit_price,qty)"/>
+									<field name="deductions" required="1" on_change="onchange_taxable_value(deductions,additions,unit_price,qty)"/>
+									<field name="additions" required="1" on_change="onchange_taxable_value(deductions,additions,unit_price,qty)"/>
+									<field name="taxable_value" readonly="1" />
+									<field name="total_taxable_value" required="1"/>
+									<field name="cgst_amt"/>
+									<field name="sgst_amt" />
+									<field name="igst_amt"/>															
+								</tree>
+							</field>
+						</group>
+						
+						<button name="load_annexure_copy" string="Load Data" type="object"  attrs="{'invisible': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>
+						<group string="Annexure Copy Details">
+							<field name="line_ids_f" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" >
+								<tree string="Annexure Copy" editable="top">
+									<field name="hsn_id" required="1" on_change="onchange_hsn_code(hsn_id)"/>
+									<field name="hsn_code" readonly="1"/>
+									<field name="item_code" required="1"/>
+									<field name="tag_no" required="1"/>
+									<field name="description" required="1"/>
+									<field name="pump_model_id" required="1"/>
+									<field name="pump_serial_no" required="1"/>
+									<field name="qty" required="1"/>
+									<field name="uom_id" required="1"/>
+									<field name="each_price" required="1"/>
+									<field name="total_value" required="1"/>
+									<field name="cgst_amt" required="1"/>
+									<field name="sgst_amt" required="1"/>
+									<field name="igst_amt" required="1"/>																										
 								</tree>
 							</field>
 						</group>
@@ -182,8 +237,7 @@
 						</group>
 						<group>
 							<field name="customer_discount"/>
-							<field name="special_discount"/>
-							<field name="tax"/>
+							<field name="special_discount"/>							
 							<field name="p_f"/>
 							<field name="freight"/>
 							<field name="insurance"/>
@@ -208,7 +262,7 @@
 							<field name="item_name" required="1" readonly="1"/>
 							<field name="moc_id" required="1" readonly="1"/>
 							<field name="qty" readonly="1"/>
-							<field name="unit_price" readonly="1"/>
+							
 						
 							<field name="pattern_id" readonly="1" invisible="1"/>
 							<field name="ms_id" readonly="1" invisible="1"/>
@@ -217,8 +271,7 @@
 						<group>
 							<field name="dealer_discount"/>
 							<field name="customer_discount"/>
-							<field name="special_discount"/>
-							<field name="tax"/>
+							<field name="special_discount"/>							
 							<field name="p_f"/>
 							<field name="freight"/>
 							<field name="insurance"/>
@@ -246,8 +299,7 @@
 						<field name="customer_discount"/>
 						</group>
 						<group>
-						<field name="special_discount"/>
-						<field name="tax"/>
+						<field name="special_discount"/>						
 						<field name="p_f"/>
 						<field name="freight"/>
 						<field name="insurance"/>

@@ -6,419 +6,90 @@
 	<subDataset name="dataset1">
 		<parameter name="invoice_id" class="java.lang.Integer"/>
 		<queryString>
-			<![CDATA[select invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
-
-billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
-
-delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
-off_name,prime_cost,hsn_name,qty,tax_per,tax_per_val,cgst_rate,sgst_rate,igst_rate,
-
-trim(TO_CHAR((coalesce(tax_tot,0.00)), '999G999G99G999G99G99G990D99')) as tax_tot,
-trim(TO_CHAR((coalesce(net_amount,0.00)), '999G999G99G999G99G99G990D99')) as net_amount,
-trim(TO_CHAR((coalesce(cgst_tax_val,0.00)), '999G999G99G999G99G99G990D99')) as cgst_tax_val,
-trim(TO_CHAR((coalesce(sgst_tax_val,0.00)), '999G999G99G999G99G99G990D99')) as sgst_tax_val,
-trim(TO_CHAR((coalesce(igst_tax_val,0.00)), '999G999G99G999G99G99G990D99')) as igst_tax_val
-
-from (
-
-select invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
-
-billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
-
-delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
-off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,
-
-case when cgst_tax is not null then
-((qty*prime_cost)*tax_per_val)/100 else 0.00 end as cgst_tax_val,
-case when sgst_tax is not null then
-((qty*prime_cost)*tax_per_val)/100 else 0.00 end as sgst_tax_val,
-case when igst_tax is not null then
-((qty*prime_cost)*tax_per_val)/100 else 0.00 end as igst_tax_val,
-
-case when cgst_tax is not null then
-'9%' end as cgst_rate,
-case when sgst_tax is not null then
-'9%' end as sgst_rate,
-case when igst_tax is not null then
-'18%' end as igst_rate
-
-
-from (
-
-select invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
-
-billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
-
-delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
-off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,
-
-max(cgst_tax) as cgst_tax,
-max(sgst_tax) as sgst_tax,
-max(igst_tax) as igst_tax
-
-
-
-
-from (
-
-
-select invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
-
-billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
-
-delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
-off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,
-
-case when description ilike '%CGST%' then description end as cgst_tax,
-case when description ilike '%SGST%' then description end as sgst_tax,
-case when description ilike '%IGST%' then description end as igst_tax
-
-
-from (
-
-
-select
-
-sale.invoice_no as invoice_no,
-to_char(sale.invoice_date,'dd-mm-yyyy') as invoice_date,
-sale.customer_po_no as customer_po_no,
-to_char(sale.cust_po_date,'dd-mm-yyyy') as cust_po_date,
-billing.name as billing_name,
-billing.street as billing_street,
-billing.street1 as billing_street1,
-billing.landmark as billing_landmark,
-bill_city.name as billing_city,
-bill_state.name as billing_state,
-bill_country.name as billing_country,
-billing.contact_no as billing_contact_no,
-billing.zip as billing_zip,
-
-
-delivery.name as delivery_name,
-delivery.street as delivery_street,
-delivery.street1 as delivery_street1,
-delivery.landmark as delivery_landmark,
-del_city.name as delivery_city,
-del_state.name as delivery_state,
-del_country.name as delivery_country,
-delivery.contact_no as delivery_contact_no,
-delivery.zip as delivery_zip,
-partner.gs_tin_no as gs_tin_no,
-pump_line.prime_cost as prime_cost,
-pump_type.name as off_name,
+			<![CDATA[select
+sale.id as invoice_id,
+case when sale.invoice_no is not null then
+sale.invoice_no else '' end as invoice_no,
+invoice_copy.description as off_name,
 hsn.name as hsn_name,
-pump_line.qty as qty,
-pump_line.tax_tot as tax_tot,
-pump_line.net_amount as net_amount,
-
-(pump_acc_tax.amount * 100) as tax_per,
-pump_acc_tax.description as description,
-(pump_acc_tax.amount * 100) as tax_per_val
+invoice_copy.qty as qty,
+trim(TO_CHAR((coalesce(round(invoice_copy.unit_price),0.00)), '999G999G99G999G99G99G990D99')) as prime_cost,
+trim(TO_CHAR((coalesce(round(invoice_copy.deductions),0.00)), '999G999G99G999G99G99G990D99')) as deductions,
+trim(TO_CHAR((coalesce(round(invoice_copy.additions),0.00)), '999G999G99G999G99G99G990D99')) as additions,
+trim(TO_CHAR((coalesce(round(invoice_copy.taxable_value),0.00)), '999G999G99G999G99G99G990D99')) as tax_tot,
+trim(TO_CHAR((coalesce(round(invoice_copy.total_taxable_value),0.00)), '999G999G99G999G99G99G990D99')) as net_amount,
+trim(TO_CHAR((coalesce(round(invoice_copy.cgst_amt),0.00)), '999G999G99G999G99G99G990D99')) as cgst_tax_val,
+trim(TO_CHAR((coalesce(round(invoice_copy.sgst_amt),0.00)), '999G999G99G999G99G99G990D99')) as sgst_tax_val,
+trim(TO_CHAR((coalesce(round(invoice_copy.igst_amt),0.00)), '999G999G99G999G99G99G990D99')) as igst_tax_val,
+invoice_copy.cgst_per as cgst_rate,
+invoice_copy.sgst_per as sgst_rate,
+invoice_copy.igst_per as igst_rate
 
 from
 
 kg_sale_invoice sale
-left join ch_pumpspare_invoice pump_line on (pump_line.header_id = sale.id)
-left join kg_pumpmodel_master pump_type on (pump_type.id = pump_line.pump_model_id)
-left join kg_hsn_master hsn on (hsn.id = pump_line.hsn_no)
+left join ch_customer_invoice_copy_rpt invoice_copy on (invoice_copy.header_id = sale.id)
+left join kg_hsn_master hsn on (hsn.id = invoice_copy.hsn_id)
 left join res_partner partner on (partner.id = sale.customer_id)
-left join kg_delivery_address delivery on (delivery.src_id = partner.id)
-left join res_city del_city on(del_city.id=delivery.city_id)
-left join res_country_state del_state on(del_state.id=delivery.state_id)
-left join res_country del_country on(del_country.id=delivery.country_id)
-left join kg_billing_address billing on (billing.bill_id = partner.id)
-left join res_city bill_city on(bill_city.id=billing.city_id)
-left join res_country_state bill_state on(bill_state.id=billing.state_id)
-left join res_country bill_country on(bill_country.id=billing.country_id)
-left join pump_invoice_taxes pump_tax on(pump_tax.pump_invoice_id=pump_line.id)
-left join account_tax pump_acc_tax on(pump_acc_tax.id=pump_tax.tax_id)
 left join res_country_state state on(state.id=partner.state_id)
 left join res_company company on (company.id = sale.company_id)
 
-where pump_line.header_id=$P{invoice_id}
-
-union
-
-select
-sale.invoice_no as invoice_no,
-to_char(sale.invoice_date,'dd-mm-yyyy') as invoice_date,
-sale.customer_po_no as customer_po_no,
-to_char(sale.cust_po_date,'dd-mm-yyyy') as cust_po_date,
-billing.name as billing_name,
-billing.street as billing_street,
-billing.street1 as billing_street1,
-billing.landmark as billing_landmark,
-bill_city.name as billing_city,
-bill_state.name as billing_state,
-bill_country.name as billing_country,
-billing.contact_no as billing_contact_no,
-billing.zip as billing_zip,
-
-
-delivery.name as delivery_name,
-delivery.street as delivery_street,
-delivery.street1 as delivery_street1,
-delivery.landmark as delivery_landmark,
-del_city.name as delivery_city,
-del_state.name as delivery_state,
-del_country.name as delivery_country,
-delivery.contact_no as delivery_contact_no,
-delivery.zip as delivery_zip,
-partner.gs_tin_no as gs_tin_no,
-spare_line.prime_cost as prime_cost,
-spare_line.off_name as off_name,
-hsn.name as hsn_name,
-spare_line.qty as qty,
-spare_line.tax_tot as tax_tot,
-spare_line.net_amount as net_amount,
-
-(spare_acc_tax.amount * 100) as tax_per,
-spare_acc_tax.description as description,
-(spare_acc_tax.amount * 100) as tax_per_val
-
-
-from
-
-kg_sale_invoice sale
-
-left join ch_spare_invoice spare_line on (spare_line.header_id = sale.id)
-left join kg_hsn_master hsn on (hsn.id = spare_line.hsn_no)
-left join res_partner partner on (partner.id = sale.customer_id)
-left join kg_delivery_address delivery on (delivery.src_id = partner.id)
-left join res_city del_city on(del_city.id=delivery.city_id)
-left join res_country_state del_state on(del_state.id=delivery.state_id)
-left join res_country del_country on(del_country.id=delivery.country_id)
-left join kg_billing_address billing on (billing.bill_id = partner.id)
-left join res_city bill_city on(bill_city.id=billing.city_id)
-left join res_country_state bill_state on(bill_state.id=billing.state_id)
-left join res_country bill_country on(bill_country.id=billing.country_id)
-
-left join spare_invoice_taxes spare_tax on(spare_tax.spare_invoice_id=spare_line.id)
-
-
-left join account_tax spare_acc_tax on(spare_acc_tax.id=spare_tax.tax_id)
-
-left join res_country_state state on(state.id=partner.state_id)
-left join res_company company on (company.id = sale.company_id)
-
-where spare_line.header_id=$P{invoice_id}
-union
-
-select
-
-sale.invoice_no as invoice_no,
-to_char(sale.invoice_date,'dd-mm-yyyy') as invoice_date,
-sale.customer_po_no as customer_po_no,
-to_char(sale.cust_po_date,'dd-mm-yyyy') as cust_po_date,
-billing.name as billing_name,
-billing.street as billing_street,
-billing.street1 as billing_street1,
-billing.landmark as billing_landmark,
-bill_city.name as billing_city,
-bill_state.name as billing_state,
-bill_country.name as billing_country,
-billing.contact_no as billing_contact_no,
-billing.zip as billing_zip,
-
-
-delivery.name as delivery_name,
-delivery.street as delivery_street,
-delivery.street1 as delivery_street1,
-delivery.landmark as delivery_landmark,
-del_city.name as delivery_city,
-del_state.name as delivery_state,
-del_country.name as delivery_country,
-delivery.contact_no as delivery_contact_no,
-delivery.zip as delivery_zip,
-partner.gs_tin_no as gs_tin_no,
-acc_line.prime_cost as prime_cost,
-acc_line.off_name as off_name,
-hsn.name as hsn_name,
-acc_line.qty as qty,
-acc_line.tax_tot as tax_tot,
-acc_line.net_amount as net_amount,
-
-
-(acc_acc_tax.amount * 100) as tax_per,
-acc_acc_tax.description as description,
-(acc_acc_tax.amount * 100) as tax_per_val
-
-from
-
-kg_sale_invoice sale
-
-left join ch_accessories_invoice acc_line on (acc_line.header_id = sale.id)
-left join kg_hsn_master hsn on (hsn.id = acc_line.hsn_no)
-left join res_partner partner on (partner.id = sale.customer_id)
-left join kg_delivery_address delivery on (delivery.src_id = partner.id)
-left join res_city del_city on(del_city.id=delivery.city_id)
-left join res_country_state del_state on(del_state.id=delivery.state_id)
-left join res_country del_country on(del_country.id=delivery.country_id)
-left join kg_billing_address billing on (billing.bill_id = partner.id)
-left join res_city bill_city on(bill_city.id=billing.city_id)
-left join res_country_state bill_state on(bill_state.id=billing.state_id)
-left join res_country bill_country on(bill_country.id=billing.country_id)
-
-left join acc_invoice_taxes acc_tax on(acc_tax.acc_invoice_id=acc_line.id)
-
-left join account_tax acc_acc_tax on(acc_acc_tax.id=acc_tax.tax_id)
-left join res_country_state state on(state.id=partner.state_id)
-left join res_company company on (company.id = sale.company_id)
-
-where acc_line.header_id=$P{invoice_id}
-
-) as sam
-
-) as sample
-group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
-
-) as fin
-
-) as final]]>
+where invoice_copy.header_id=$P{invoice_id}]]>
 		</queryString>
+		<field name="invoice_id" class="java.lang.Integer"/>
 		<field name="invoice_no" class="java.lang.String"/>
-		<field name="invoice_date" class="java.lang.String"/>
-		<field name="customer_po_no" class="java.lang.String"/>
-		<field name="cust_po_date" class="java.lang.String"/>
-		<field name="billing_name" class="java.lang.String"/>
-		<field name="billing_street" class="java.lang.String"/>
-		<field name="billing_street1" class="java.lang.String"/>
-		<field name="billing_landmark" class="java.lang.String"/>
-		<field name="billing_city" class="java.lang.String"/>
-		<field name="billing_state" class="java.lang.String"/>
-		<field name="billing_country" class="java.lang.String"/>
-		<field name="billing_contact_no" class="java.lang.String"/>
-		<field name="billing_zip" class="java.lang.String"/>
-		<field name="delivery_name" class="java.lang.String"/>
-		<field name="delivery_street" class="java.lang.String"/>
-		<field name="delivery_street1" class="java.lang.String"/>
-		<field name="delivery_landmark" class="java.lang.String"/>
-		<field name="delivery_city" class="java.lang.String"/>
-		<field name="delivery_state" class="java.lang.String"/>
-		<field name="delivery_country" class="java.lang.String"/>
-		<field name="delivery_contact_no" class="java.lang.String"/>
-		<field name="delivery_zip" class="java.lang.String"/>
-		<field name="gs_tin_no" class="java.lang.String"/>
 		<field name="off_name" class="java.lang.String"/>
-		<field name="prime_cost" class="java.lang.Double"/>
 		<field name="hsn_name" class="java.lang.String"/>
 		<field name="qty" class="java.lang.Integer"/>
-		<field name="tax_per" class="java.math.BigDecimal"/>
-		<field name="tax_per_val" class="java.math.BigDecimal"/>
-		<field name="cgst_rate" class="java.lang.String"/>
-		<field name="sgst_rate" class="java.lang.String"/>
-		<field name="igst_rate" class="java.lang.String"/>
+		<field name="prime_cost" class="java.lang.String"/>
+		<field name="deductions" class="java.lang.String"/>
+		<field name="additions" class="java.lang.String"/>
 		<field name="tax_tot" class="java.lang.String"/>
 		<field name="net_amount" class="java.lang.String"/>
 		<field name="cgst_tax_val" class="java.lang.String"/>
 		<field name="sgst_tax_val" class="java.lang.String"/>
 		<field name="igst_tax_val" class="java.lang.String"/>
+		<field name="cgst_rate" class="java.lang.String"/>
+		<field name="sgst_rate" class="java.lang.String"/>
+		<field name="igst_rate" class="java.lang.String"/>
 	</subDataset>
 	<parameter name="invoice_id" class="java.lang.Integer"/>
 	<queryString>
-		<![CDATA[select invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
-
-billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
-
-delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
-off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,
+		<![CDATA[select  invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,bill_address,delivery_address,
 
 
-trim(TO_CHAR((coalesce(total_net_amount,0.00)), '999G999G99G999G99G99G990D99')) as total_net_amount,
-trim(TO_CHAR((coalesce(net_amount,0.00)), '999G999G99G999G99G99G990D99')) as net_after_tax,
-trim(TO_CHAR((coalesce(cgst_tax_gnd,0.00)), '999G999G99G999G99G99G990D99')) as cgst_tax_gnd,
-trim(TO_CHAR((coalesce(sgst_tax_gnd,0.00)), '999G999G99G999G99G99G990D99')) as sgst_tax_gnd,
-trim(TO_CHAR((coalesce(igst_tax_gnd,0.00)), '999G999G99G999G99G99G990D99')) as igst_tax_gnd,
-trim(TO_CHAR((coalesce(tax_gnd,0.00)), '999G999G99G999G99G99G990D99')) as tax_gnd,
-trim(TO_CHAR((coalesce((net_amount - tax_gnd ),0.00)), '999G999G99G999G99G99G990D99')) as tot_before_tax,
+gs_tin_no,prime_cost,off_name,hsn_name,total_tax,qty,
+
+to_char(invoice_issue_date, 'DD-MM-YYYY HH12:MI:SS AM') AS invoice_issue_date,
+to_char(invoice_removal_date, 'DD-MM-YYYY HH12:MI:SS AM') AS invoice_removal_date,
+
+vehicle_no,
+place_of_supply,
 
 
 
-case when total_net_amount > 0 then
-(select f_amount_to_words((total_net_amount)::numeric,1)) else '' end as word_total_inv,
-case when cgst_tax_gnd > 0 then
-(select f_amount_to_words((cgst_tax_gnd)::numeric,1)) else '' end as word_cgst_amt,
-case when sgst_tax_gnd > 0 then
-(select f_amount_to_words((sgst_tax_gnd)::numeric,1)) else '' end as word_sgst_amt,
-case when igst_tax_gnd > 0 then
-(select f_amount_to_words((igst_tax_gnd)::numeric,1)) else '' end as word_igst_amt
+trim(TO_CHAR((coalesce(total_tax,0.00)), '999G999G99G999G99G99G990D99')) as tax_gnd,
 
+trim(TO_CHAR((coalesce(cgst_total_tax,0.00)), '999G999G99G999G99G99G990D99')) as cgst_tax_gnd,
+trim(TO_CHAR((coalesce(sgst_total_tax,0.00)), '999G999G99G999G99G99G990D99')) as sgst_tax_gnd,
+trim(TO_CHAR((coalesce(igst_total_tax,0.00)), '999G999G99G999G99G99G990D99')) as igst_tax_gnd,
+trim(TO_CHAR((coalesce(total_before_net_amount,0.00)), '999G999G99G999G99G99G990D99')) as tot_before_tax,
+trim(TO_CHAR((coalesce(total_before_net_amount+total_tax,0.00)), '999G999G99G999G99G99G990D99')) as total_net_amount,
+trim(TO_CHAR((coalesce(total_before_net_amount+total_tax,0.00)), '999G999G99G999G99G99G990D99')) as net_after_tax,
 
+case when total_before_net_amount+total_tax > 0 then
+(select f_amount_to_words((total_before_net_amount+total_tax)::numeric,1)) else '' end as word_total_inv,
 
-from (
+case when cgst_total_tax > 0 then
+(select f_amount_to_words((cgst_total_tax)::numeric,1)) else '' end as word_cgst_amt,
+case when sgst_total_tax > 0 then
+(select f_amount_to_words((sgst_total_tax)::numeric,1)) else '' end as word_sgst_amt,
+case when igst_total_tax > 0 then
+(select f_amount_to_words((igst_total_tax)::numeric,1)) else '' end as word_igst_amt
 
-select invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
+from
 
-billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
-
-delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
-off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,total_net_amount,
-
-coalesce((sum(cgst_tax_val) OVER ()),0.00) as cgst_tax_gnd,
-coalesce((sum(sgst_tax_val) OVER ()),0.00) as sgst_tax_gnd,
-coalesce((sum(igst_tax_val) OVER ()),0.00) as igst_tax_gnd,
-coalesce((sum(tax_tot) OVER ()),0.00) as tax_gnd
-
-
-
-
-
-from (
-
-select invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
-
-billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
-
-delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
-off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,total_net_amount,
-
-case when cgst_tax is not null then
-((qty*prime_cost)*tax_per_val)/100 else 0.00 end as cgst_tax_val,
-case when sgst_tax is not null then
-((qty*prime_cost)*tax_per_val)/100 else 0.00 end as sgst_tax_val,
-case when igst_tax is not null then
-((qty*prime_cost)*tax_per_val)/100 else 0.00 end as igst_tax_val,
-
-case when cgst_tax is not null then
-'9%' end as cgst_rate,
-case when sgst_tax is not null then
-'9%' end as sgst_rate,
-case when igst_tax is not null then
-'18%' end as igst_rate
-
-
-from (
-
-select invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
-
-billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
-
-delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
-off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,total_net_amount,
-
-max(cgst_tax) as cgst_tax,
-max(sgst_tax) as sgst_tax,
-max(igst_tax) as igst_tax
-
-
-
-
-from (
-
-
-select invoice_id,invoice_no,invoice_date,customer_po_no,cust_po_date,billing_name,billing_street,billing_street1,billing_landmark,billing_city,
-
-billing_state,billing_country,billing_contact_no,billing_zip,delivery_name,delivery_street,delivery_street1,delivery_landmark,
-
-delivery_city,delivery_state,delivery_country,delivery_contact_no,delivery_zip,gs_tin_no,
-off_name,prime_cost,hsn_name,qty,tax_tot,net_amount,tax_per,tax_per_val,total_net_amount,
-
-case when description ilike '%CGST%' then description end as cgst_tax,
-case when description ilike '%SGST%' then description end as sgst_tax,
-case when description ilike '%IGST%' then description end as igst_tax
-
-
-from (
+(
 
 
 select
@@ -431,265 +102,71 @@ case when sale.customer_po_no is not null then
 sale.customer_po_no else '' end as customer_po_no,
 case when sale.cust_po_date is not null then
 to_char(sale.cust_po_date,'dd-mm-yyyy') else '' end as cust_po_date,
+sale.bill_address as bill_address,
+sale.delivery_address as delivery_address,
+sale.invoice_issue_date as invoice_issue_date,
 
-case when billing.name is not null then
-billing.name else '' end as billing_name,
-case when billing.street is not null then
-billing.street else '' end as billing_street,
-case when billing.street1 is not null then
-billing.street1 else '' end as billing_street1,
-case when billing.landmark is not null then
-billing.landmark else '' end as billing_landmark,
-case when bill_city.name is not null then
-bill_city.name else '' end as billing_city,
-case when bill_state.name is not null then
-bill_state.name else '' end as billing_state,
-case when bill_country.name is not null then
-bill_country.name else '' end as billing_country,
-case when billing.contact_no is not null then
-billing.contact_no else '' end as billing_contact_no,
-case when billing.zip is not null then
-billing.zip else '' end as billing_zip,
 
-case when delivery.name is not null then
-delivery.name else '' end as delivery_name,
-case when delivery.street is not null then
-delivery.street else '' end as delivery_street,
-case when delivery.street1 is not null then
-delivery.street1 else '' end as delivery_street1,
-case when delivery.landmark is not null then
-delivery.landmark else '' end as delivery_landmark,
-case when del_city.name is not null then
-del_city.name else '' end as delivery_city,
-case when del_state.name is not null then
-del_state.name else '' end as delivery_state,
-case when del_country.name is not null then
-del_country.name else '' end as delivery_country,
-case when delivery.contact_no is not null then
-delivery.contact_no else '' end as delivery_contact_no,
-case when delivery.zip is not null then
-delivery.zip else '' end as delivery_zip,
+
+sale.invoice_removal_date as invoice_removal_date,
+sale.vehicle_no as vehicle_no,
+sale.place_of_supply as place_of_supply,
+
+
 case when partner.gs_tin_no is not null then
 partner.gs_tin_no else '' end as gs_tin_no,
-pump_line.prime_cost as prime_cost,
-case when pump_type.name is not null then
-pump_type.name else '' end as off_name,
+invoice_copy.taxable_value as prime_cost,
+case when invoice_copy.description is not null then
+invoice_copy.description else '' end as off_name,
 hsn.name as hsn_name,
-pump_line.qty as qty,
-pump_line.tax_tot as tax_tot,
-pump_line.net_amount as net_amount,
-sale.net_amt as total_net_amount,
+invoice_copy.qty as qty,
 
-(pump_acc_tax.amount * 100) as tax_per,
-pump_acc_tax.description as description,
-(pump_acc_tax.amount * 100) as tax_per_val
+(select sum(cgst_amt + sgst_amt + igst_amt) from ch_customer_invoice_copy_rpt where header_id = sale.id)  as total_tax,
 
-from
+(select sum(cgst_amt) from ch_customer_invoice_copy_rpt where header_id = sale.id)  as cgst_total_tax,
 
-kg_sale_invoice sale
-left join ch_pumpspare_invoice pump_line on (pump_line.header_id = sale.id)
-left join kg_pumpmodel_master pump_type on (pump_type.id = pump_line.pump_model_id)
-left join kg_hsn_master hsn on (hsn.id = pump_line.hsn_no)
-left join res_partner partner on (partner.id = sale.customer_id)
-left join kg_delivery_address delivery on (delivery.src_id = partner.id)
-left join res_city del_city on(del_city.id=delivery.city_id)
-left join res_country_state del_state on(del_state.id=delivery.state_id)
-left join res_country del_country on(del_country.id=delivery.country_id)
-left join kg_billing_address billing on (billing.bill_id = partner.id)
-left join res_city bill_city on(bill_city.id=billing.city_id)
-left join res_country_state bill_state on(bill_state.id=billing.state_id)
-left join res_country bill_country on(bill_country.id=billing.country_id)
-left join pump_invoice_taxes pump_tax on(pump_tax.pump_invoice_id=pump_line.id)
-left join account_tax pump_acc_tax on(pump_acc_tax.id=pump_tax.tax_id)
-left join res_country_state state on(state.id=partner.state_id)
-left join res_company company on (company.id = sale.company_id)
+(select sum(sgst_amt) from ch_customer_invoice_copy_rpt where header_id = sale.id)  as sgst_total_tax,
 
-where sale.state = 'invoice' and pump_line.header_id=$P{invoice_id}
+(select sum(igst_amt) from ch_customer_invoice_copy_rpt where header_id = sale.id)  as igst_total_tax,
 
-union
-
-select
-sale.id as invoice_id,
-sale.invoice_no as invoice_no,
-to_char(sale.invoice_date,'dd-mm-yyyy') as invoice_date,
-sale.customer_po_no as customer_po_no,
-to_char(sale.cust_po_date,'dd-mm-yyyy') as cust_po_date,
-billing.name as billing_name,
-billing.street as billing_street,
-billing.street1 as billing_street1,
-billing.landmark as billing_landmark,
-bill_city.name as billing_city,
-bill_state.name as billing_state,
-bill_country.name as billing_country,
-billing.contact_no as billing_contact_no,
-billing.zip as billing_zip,
-
-
-delivery.name as delivery_name,
-delivery.street as delivery_street,
-delivery.street1 as delivery_street1,
-delivery.landmark as delivery_landmark,
-del_city.name as delivery_city,
-del_state.name as delivery_state,
-del_country.name as delivery_country,
-delivery.contact_no as delivery_contact_no,
-delivery.zip as delivery_zip,
-partner.gs_tin_no as gs_tin_no,
-spare_line.prime_cost as prime_cost,
-spare_line.off_name as off_name,
-hsn.name as hsn_name,
-spare_line.qty as qty,
-spare_line.tax_tot as tax_tot,
-spare_line.net_amount as net_amount,
-sale.net_amt as total_net_amount,
-
-(spare_acc_tax.amount * 100) as tax_per,
-spare_acc_tax.description as description,
-(spare_acc_tax.amount * 100) as tax_per_val
+(select sum(total_taxable_value) from ch_customer_invoice_copy_rpt where header_id = sale.id)  as total_before_net_amount
 
 
 from
 
 kg_sale_invoice sale
-
-left join ch_spare_invoice spare_line on (spare_line.header_id = sale.id)
-left join kg_hsn_master hsn on (hsn.id = spare_line.hsn_no)
+left join ch_customer_invoice_copy_rpt invoice_copy on (invoice_copy.header_id = sale.id)
+left join kg_hsn_master hsn on (hsn.id = invoice_copy.hsn_id)
 left join res_partner partner on (partner.id = sale.customer_id)
-left join kg_delivery_address delivery on (delivery.src_id = partner.id)
-left join res_city del_city on(del_city.id=delivery.city_id)
-left join res_country_state del_state on(del_state.id=delivery.state_id)
-left join res_country del_country on(del_country.id=delivery.country_id)
-left join kg_billing_address billing on (billing.bill_id = partner.id)
-left join res_city bill_city on(bill_city.id=billing.city_id)
-left join res_country_state bill_state on(bill_state.id=billing.state_id)
-left join res_country bill_country on(bill_country.id=billing.country_id)
-
-left join spare_invoice_taxes spare_tax on(spare_tax.spare_invoice_id=spare_line.id)
-
-
-left join account_tax spare_acc_tax on(spare_acc_tax.id=spare_tax.tax_id)
-
 left join res_country_state state on(state.id=partner.state_id)
 left join res_company company on (company.id = sale.company_id)
 
-where sale.state = 'invoice' and spare_line.header_id=$P{invoice_id}
-
-union
-
-select
-sale.id as invoice_id,
-sale.invoice_no as invoice_no,
-to_char(sale.invoice_date,'dd-mm-yyyy') as invoice_date,
-sale.customer_po_no as customer_po_no,
-to_char(sale.cust_po_date,'dd-mm-yyyy') as cust_po_date,
-billing.name as billing_name,
-billing.street as billing_street,
-billing.street1 as billing_street1,
-billing.landmark as billing_landmark,
-bill_city.name as billing_city,
-bill_state.name as billing_state,
-bill_country.name as billing_country,
-billing.contact_no as billing_contact_no,
-billing.zip as billing_zip,
-
-
-delivery.name as delivery_name,
-delivery.street as delivery_street,
-delivery.street1 as delivery_street1,
-delivery.landmark as delivery_landmark,
-del_city.name as delivery_city,
-del_state.name as delivery_state,
-del_country.name as delivery_country,
-delivery.contact_no as delivery_contact_no,
-delivery.zip as delivery_zip,
-partner.gs_tin_no as gs_tin_no,
-acc_line.prime_cost as prime_cost,
-acc_line.off_name as off_name,
-hsn.name as hsn_name,
-acc_line.qty as qty,
-acc_line.tax_tot as tax_tot,
-acc_line.net_amount as net_amount,
-sale.net_amt as total_net_amount,
-
-
-(acc_acc_tax.amount * 100) as tax_per,
-acc_acc_tax.description as description,
-(acc_acc_tax.amount * 100) as tax_per_val
-
-from
-
-kg_sale_invoice sale
-
-left join ch_accessories_invoice acc_line on (acc_line.header_id = sale.id)
-left join kg_hsn_master hsn on (hsn.id = acc_line.hsn_no)
-left join res_partner partner on (partner.id = sale.customer_id)
-left join kg_delivery_address delivery on (delivery.src_id = partner.id)
-left join res_city del_city on(del_city.id=delivery.city_id)
-left join res_country_state del_state on(del_state.id=delivery.state_id)
-left join res_country del_country on(del_country.id=delivery.country_id)
-left join kg_billing_address billing on (billing.bill_id = partner.id)
-left join res_city bill_city on(bill_city.id=billing.city_id)
-left join res_country_state bill_state on(bill_state.id=billing.state_id)
-left join res_country bill_country on(bill_country.id=billing.country_id)
-
-left join acc_invoice_taxes acc_tax on(acc_tax.acc_invoice_id=acc_line.id)
-
-left join account_tax acc_acc_tax on(acc_acc_tax.id=acc_tax.tax_id)
-left join res_country_state state on(state.id=partner.state_id)
-left join res_company company on (company.id = sale.company_id)
-
-where sale.state = 'invoice' and acc_line.header_id=$P{invoice_id}
-
-) as sam
-
-) as sample
-group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33
-
-) as fin
-
-) as final
-
-) as w_fin limit 1]]>
+where invoice_copy.header_id=$P{invoice_id} limit 1 ) as final]]>
 	</queryString>
 	<field name="invoice_id" class="java.lang.Integer"/>
 	<field name="invoice_no" class="java.lang.String"/>
 	<field name="invoice_date" class="java.lang.String"/>
 	<field name="customer_po_no" class="java.lang.String"/>
 	<field name="cust_po_date" class="java.lang.String"/>
-	<field name="billing_name" class="java.lang.String"/>
-	<field name="billing_street" class="java.lang.String"/>
-	<field name="billing_street1" class="java.lang.String"/>
-	<field name="billing_landmark" class="java.lang.String"/>
-	<field name="billing_city" class="java.lang.String"/>
-	<field name="billing_state" class="java.lang.String"/>
-	<field name="billing_country" class="java.lang.String"/>
-	<field name="billing_contact_no" class="java.lang.String"/>
-	<field name="billing_zip" class="java.lang.String"/>
-	<field name="delivery_name" class="java.lang.String"/>
-	<field name="delivery_street" class="java.lang.String"/>
-	<field name="delivery_street1" class="java.lang.String"/>
-	<field name="delivery_landmark" class="java.lang.String"/>
-	<field name="delivery_city" class="java.lang.String"/>
-	<field name="delivery_state" class="java.lang.String"/>
-	<field name="delivery_country" class="java.lang.String"/>
-	<field name="delivery_contact_no" class="java.lang.String"/>
-	<field name="delivery_zip" class="java.lang.String"/>
+	<field name="bill_address" class="java.lang.String"/>
+	<field name="delivery_address" class="java.lang.String"/>
 	<field name="gs_tin_no" class="java.lang.String"/>
-	<field name="off_name" class="java.lang.String"/>
 	<field name="prime_cost" class="java.lang.Double"/>
+	<field name="off_name" class="java.lang.String"/>
 	<field name="hsn_name" class="java.lang.String"/>
+	<field name="total_tax" class="java.math.BigDecimal"/>
 	<field name="qty" class="java.lang.Integer"/>
-	<field name="tax_tot" class="java.math.BigDecimal"/>
-	<field name="net_amount" class="java.math.BigDecimal"/>
-	<field name="tax_per" class="java.math.BigDecimal"/>
-	<field name="tax_per_val" class="java.math.BigDecimal"/>
-	<field name="total_net_amount" class="java.lang.String"/>
-	<field name="net_after_tax" class="java.lang.String"/>
+	<field name="invoice_issue_date" class="java.lang.String"/>
+	<field name="invoice_removal_date" class="java.lang.String"/>
+	<field name="vehicle_no" class="java.lang.String"/>
+	<field name="place_of_supply" class="java.lang.String"/>
+	<field name="tax_gnd" class="java.lang.String"/>
 	<field name="cgst_tax_gnd" class="java.lang.String"/>
 	<field name="sgst_tax_gnd" class="java.lang.String"/>
 	<field name="igst_tax_gnd" class="java.lang.String"/>
-	<field name="tax_gnd" class="java.lang.String"/>
 	<field name="tot_before_tax" class="java.lang.String"/>
+	<field name="total_net_amount" class="java.lang.String"/>
+	<field name="net_after_tax" class="java.lang.String"/>
 	<field name="word_total_inv" class="java.lang.String"/>
 	<field name="word_cgst_amt" class="java.lang.String"/>
 	<field name="word_sgst_amt" class="java.lang.String"/>
@@ -825,11 +302,7 @@ group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27
 					<textElement>
 						<font size="10" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{billing_name}+$F{billing_street}+$F{billing_street1}+$F{billing_landmark}+
-$F{billing_city}+$F{billing_state}+$F{billing_country}+
-$F{billing_zip}+"."+
-
-"Contact No."+$F{billing_contact_no}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{bill_address}]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="0" y="217" width="84" height="19"/>
@@ -998,12 +471,7 @@ $F{billing_zip}+"."+
 					<textElement>
 						<font size="10" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{delivery_name}+","+$F{delivery_street}+$F{delivery_street1}+
-$F{delivery_landmark}+$F{delivery_city}+$F{delivery_state}+
-$F{delivery_country}+$F{delivery_zip}+"."+
-
-
-"Contact No."+$F{delivery_contact_no}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{delivery_address}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" x="611" y="83" width="183" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1798,7 +1266,7 @@ $F{delivery_country}+$F{delivery_zip}+"."+
 					<textElement>
 						<font size="10" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["PLACE OF SUPPLY :"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["PLACE OF SUPPLY :"+$F{place_of_supply}]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="0" y="50" width="774" height="25"/>
@@ -1811,7 +1279,7 @@ $F{delivery_country}+$F{delivery_zip}+"."+
 					<textElement>
 						<font size="10" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["DATE & TIME OF ISSUE OF INVOICE"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["DATE & TIME OF ISSUE OF INVOICE : " +$F{invoice_issue_date}]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="0" y="75" width="573" height="25"/>
@@ -1824,7 +1292,7 @@ $F{delivery_country}+$F{delivery_zip}+"."+
 					<textElement>
 						<font size="10" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["DATE & TIME OF REMOVAL OF GOODS"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["DATE & TIME OF REMOVAL OF GOODS : "+$F{invoice_removal_date}]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="0" y="100" width="774" height="61"/>
@@ -1992,7 +1460,7 @@ $F{delivery_country}+$F{delivery_zip}+"."+
 					<textElement>
 						<font size="10" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["VEHICLE NUMBER"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["VEHICLE NUMBER:"+$F{vehicle_no}]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="774" y="75" width="230" height="25"/>

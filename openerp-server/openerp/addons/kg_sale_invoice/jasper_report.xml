@@ -13,6 +13,16 @@
         header="False"
         />
         
+        <report string="Annexure Invoice Copy"
+        model="kg.sale.invoice"
+        auto="True"
+        name="onscreen_anne_customer_invoice_report"
+        rml="kg_sale_invoice/reports/anne_customer_invoice_copy.jrxml"
+        id="anne_cus_invoice_jasper_report_menu" 
+        menu="True"
+        header="False"
+        />
+        
          <report string="Proforma Invoice Copy"
         model="kg.sale.invoice"
         auto="True"
