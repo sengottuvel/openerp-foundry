@@ -8,28 +8,17 @@
         <field name="name">kg.product.form.inherit</field>
         <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_normal_form_view"/>
-        <field name="arch" type="xml">		
-		<!-- not working and name changed in in base module
-		<field name="categ_id" string="Major Name" position="after">
-			<label for="minor_name" class="oe_edit_only"/>
-			<h2><field name="minor_name"/></h2>
-		</field>
-		-->
+        <field name="arch" type="xml">
 		<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" position="after">
 			<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
-		</button>
-		
+		</button>		
 		<field name="categ_id" position="after">
-			<field name="hsn_no"/>
+			<field name="hsn_no" required="1"/>
 			<field name="is_accessories" invisible="1"/>
 			<field name="capital" invisible="1"/>
 			<field name="abc" invisible="1"/>
 		</field>
-		<!--<field name="product_code" position="after">
-			<label for = "moc_id"></label>
-				<field name="moc_id" required="0"/>
-		</field>
-		-->
+				
 		<field name="tolerance_applicable" position="after">
 		<field name="is_depreciation" attrs="{'invisible':[('product_type','not in',['capital'])]}"/>
 		</field>
@@ -68,8 +57,9 @@
 		
 		<field name="uom_po_id" position="after">
 		<field name="po_copy_uom" required = "1" attrs="{'readonly':[('state','=','approved')]}"/>
-		<field name="po_uom_coeff" placeholder="UOM * PO Coeff = 1 POM" attrs="{'readonly':[('state','=','approved')]}"/>
-		<field name="po_uom_in_kgs" attrs="{'required':[('price_type','=','per_kg')]}"/>
+		<field name="po_uom_coeff" attrs="{'readonly':[('state','=','approved')]}"/>
+		<field name="po_uom_in_kgs" attrs="{'required':['|','|',('price_type','=','per_kg'),('uom_code','=','Kg'),('uom_conversation_factor','=','two_dimension')]}"/>
+		<field name="uom_code" invisible="1"/>
 		</field>
 		
 		<field name="list_price" position="replace">
@@ -85,7 +75,7 @@
 			<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','reject','approved'])]}"/>
 			<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>		
 		</field>
-        <field name="crt_date" position="after">
+        <field name="creation_date" position="after">
 			<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
 			<field name="approve_date" attrs="{'invisible':[('state','in',['draft', 'confirm','reject'])]}"/>
 			<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirm','reject','approved'])]}"/>
@@ -97,7 +87,7 @@
 			<field name="cancel_remark" invisible="1"/>
 		</field>
 		<xpath expr = "//page[@string='Entry Info']" position="before">
-				<page string="Coupling Details" attrs="{'invisible':[('product_type','not in',('coupling'))]}">
+				<page string="Coupling Details" invisible="1">
 					<group>
 						<group>
 							<field name="coupling_type" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
@@ -172,25 +162,14 @@
 		<field name="arch" type="xml">
 			<field name="name" position="before"> 
 				<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
-			</field>
+			</field>					
 			<field name="categ_id" position="after"> 
-			<field name="product_type"/> 
+				<field name="product_type"/> 
 			</field>					
 			
 		</field>
-	</record>
+	</record>	
 	
-	<!-- Product Master Template form view  
-	
-	<record model="ir.ui.view" id="kg_product_template_form_inherit">
-        <field name="name">kg.product.template.form.inherit</field>
-        <field name="model">product.template</field>
-        <field name="inherit_id" ref="product.product_template_form_view"/>
-        <field name="arch" type="xml">
-		
-		</field>
-	</record>
--->
 	<record id="kg_action_product_form" model="ir.actions.act_window">
 		<field name="name">Product Master Design</field>
 		<field name="type">ir.actions.act_window</field>
@@ -198,9 +177,7 @@
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form</field>
 		<field name="context">{'default_product_type': 'ms','default_rate_type': 'design_item',}</field>
-		<field name="domain">[('product_type','in',('raw','ms','bot','coupling','mechanical_seal')),]</field>
-		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
-		-->
+		<field name="domain">[('product_type','in',('raw','ms','bot','coupling','mechanical_seal')),]</field>		
 	</record>
 	
 	<record id="mma_fou_product_master" model="ir.actions.act_window">
@@ -221,8 +198,7 @@
 		<field name="view_mode">tree,form</field>
 		<field name="context">{'default_product_type': 'primemover','default_rate_type': 'mkt_item',}</field>
 		<field name="domain">[('product_type','=','primemover'),]</field>
-		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
-		-->
+		
 	</record>
 	
 	<record id="mma_product_mechanical_master" model="ir.actions.act_window">
@@ -233,11 +209,8 @@
 		<field name="view_mode">tree,form</field>
 		<field name="context">{'default_product_type': 'mechanical_seal','default_rate_type': 'mkt_item',}</field>
 		<field name="domain">[('product_type','=','mechanical_seal'),]</field>
-		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
-		-->
-	</record>
-	
-	<!-- Product Category Form view inherited start -->
+		
+	</record>	
 	
 	<record model="ir.ui.view" id="kg_product_category_form_inherit">
         <field name="name">kg.product.category.form.inherit</field>

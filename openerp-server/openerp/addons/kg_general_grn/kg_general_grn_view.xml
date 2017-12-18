@@ -23,20 +23,21 @@
 					<group>
 						<field name="name"/>
 						<field name="dc_no"/>
-						<field name="supplier_id" required="1"/>
+						<field name="supplier_id" required="1" attrs="{'readonly': [('supplier_id','!=',False)]}"/>
 						<field name="sup_invoice_no" attrs="{'invisible': [('grn_dc','!=','dc_invoice')],'required': [('grn_dc','=','dc_invoice')]}"/>
-						<field name="bill" string="Bill Type"/>
+						<field name="bill"/>
                         <field name="payment_type" attrs="{'required': [('bill','=','applicable')]}"/>
-                        <field name="grn_dc" readonly="1"/>
+                        <field name="grn_dc" readonly="1" invisible="1"/>
                         <field name="location_dest_code" required="1" invisible="1" readonly="1"/>
                         <field name="location_dest_id" required="1" invisible="1"/>
                         <field name="dep_name" invisible="1"/>
                         <field name="invoice_flag" invisible="1"/>
                         <field name="division" invisible="1"/>
+                        <field name="product_id" invisible="1"/>
                     </group>
                     <group>
-						<field name="grn_date" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
-						<field name="dc_date" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
+						<field name="grn_date" options="{'datepicker':{'minDate': -10,'maxDate': 0,}}"/>
+						<field name="dc_date" options="{'datepicker':{'minDate': -10,'maxDate': 0,}}"/>
 						<field name="sup_invoice_date"  attrs="{'invisible': [('grn_dc','!=','dc_invoice')],'required': [('grn_dc','=','dc_invoice')]}"/>
 						<field name="inward_type"/>
 						<field name="vehicle_details"/>
@@ -54,7 +55,7 @@
 				</group>
                 <notebook>
 					<page string="Products">
-						<field name="grn_line" colspan="4" nolabel="1" context="{'inward_type':inward_type,'state':'draft','price_type':'po_uom','location_dest_id':location_dest_id}">
+						<field name="grn_line" colspan="4" nolabel="1" context="{'supplier_id':supplier_id,'inward_type':inward_type,'state':'draft','price_type':'po_uom','location_dest_id':location_dest_id,'length':1,'breadth':1}">
 							<tree string="General GRN Line">
 								<field name="product_id"/>
 								<field name="brand_id"/>
@@ -65,45 +66,36 @@
 								<field name="price_subtotal"/>
 								<field name="inward_type"/>
 								<field name="state" invisible="1"/>
+								<field name="supplier_id" invisible="1"/>
 							</tree>
 						<form string="General GRN Line" >
 							<group>
 								<group>
-									<field name="product_id" on_change="onchange_product_id(product_id)"/>
+									<field name="product_id" on_change="onchange_product_id(product_id,uom_id,supplier_id)"/>
 									<field name="brand_id" required="1"/>
 									<field name="moc_id" invisible="1"/>
 									<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" required="1"/>
 									<field name="uom_conversation_factor"/>
-									<field name="uom_id" on_change="onchange_uom_id(product_id,uom_id)" attrs="{'invisible':[('product_id','=',False)],'required':[('product_id','!=',False)],'readonly':[('uom_id','!=',False)]}"/>
-									<field name="price_type" required="1"/>
+									<field name="uom_id" on_change="onchange_uom_id(product_id,uom_id)" attrs="{'invisible':[('product_id','=',False)],'required':[('product_id','!=',False)]}"/>
 									<field name="location_dest_id" required="1" invisible="1"/>
+									<field name="uom_category" invisible="1"/>
 								</group> 
 								<group>
-									<div>
-										<label for="grn_qty" string="Accepted Qty" attrs="{'required': [('state','in',('draft','confirmed'))],'invisible': [('state','not in',('draft','done'))],'readonly': [('state','=','confirmed')]}"/>
-										<label for="grn_qty" string="Received Qty" attrs="{'required': [('state','=',('draft','confirmed'))],'invisible': [('state','!=','confirmed')],'readonly': [('state','=','draft')]}" />
-									</div>
-									<field name="grn_qty" on_change="onchange_weight(grn_qty,length,breadth,uom_conversation_factor,product_id,uom_id)" nolabel="1"/>
-									<div>
-										<label for="recvd_qty"  string="Received Qty"  attrs="{'required': [('state','in',('draft','confirmed'))],'invisible': [('state','not in',('draft','done'))]}"/>
-										<label for="recvd_qty" string="Accepted Qty" attrs="{'required': [('state','=',('draft','confirmed'))],'invisible': [('state','!=','confirmed')]}"/>
-									</div>
-									<field name="recvd_qty" nolabel="1" readonly="1"/>
-						<!--		<field name="grn_qty" string="Accepted Qty" on_change="onchange_qty(grn_qty,recvd_qty,reject_qty)"/>
-									<field name="recvd_qty" readonly="1"/>-->
-									<field name="reject_qty" readonly="1"/>
-									<field name="length" on_change="onchange_weight(grn_qty,length,breadth,uom_conversation_factor,product_id,uom_id)" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
-									<field name="breadth" on_change="onchange_weight(grn_qty,length,breadth,uom_conversation_factor,product_id,uom_id)" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
+									<field name="grn_qty" on_change="onchange_weight(grn_qty,length,breadth,uom_conversation_factor,product_id,uom_id)"/>
+									<field name="length" on_change="onchange_weight(grn_qty,length,breadth,uom_conversation_factor,product_id,uom_id)" attrs="{'invisible':['|',('uom_category','!=','length'),('uom_conversation_factor','!=','two_dimension')],'required':[('uom_category','=','length'),('uom_conversation_factor','=','two_dimension')]}"/>
+									<field name="breadth" on_change="onchange_weight(grn_qty,length,breadth,uom_conversation_factor,product_id,uom_id)" attrs="{'invisible':['|',('uom_category','!=','length'),('uom_conversation_factor','!=','two_dimension')],'required':[('uom_category','=','length'),('uom_conversation_factor','=','two_dimension')]}"/>
 									<field name="weight" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')]}"/>
-									<field name="price_unit"/>
 									<field name="inward_type" required="1"/>
 									<field name="state" invisible="1"/>
+									<field name="supplier_id" invisible="1"/>
 								</group>
 								<group string="Discounts">
-									<field name="kg_discount_per"/>
-									<field name="kg_discount"/>
+									<field name="price_type" required="1"/>
+									<field name="kg_discount_per" attrs="{'readonly': [('kg_discount','!=',0)]}"/>
+									<field name="kg_discount" attrs="{'readonly': [('kg_discount_per','!=',0)]}"/>
 								</group>
 								<group string="Taxes">
+									<field name="price_unit"/>
 									<field name="grn_tax_ids" widget="many2many_tags"/>
 								</group>					
 								<notebook colspan="4">
@@ -111,7 +103,7 @@
 										<field name="exp_batch_id" nolabel="1">
 											<tree editable="bottom">
 												<field name="product_qty" required="1"/>
-												<field name="exp_date"/>               
+												<field name="exp_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>               
 												<field name="batch_no" string="S/N" required="1"/>
 											</tree>
 										</field>
@@ -120,13 +112,14 @@
 										<field name="cancel_remark" nolabel="1" attrs="{'readonly': [('state','=','draft')]}"/>
 									</page>
 								</notebook>
-								<button name="grn_line_cancel" string="Cancel" type="object" states="draft,confirmed,done" 
-									class="oe_highlight"/>
+<!--
+								<button name="grn_line_cancel" string="Cancel" type="object" states="draft,confirmed,done" class="oe_highlight"/>
+-->
 							</group>
 						</form>
 					</field>
 					</page>
-					<page string="Additonal Charges" invisible="1">
+					<page string="Additonal Charges">
 						<field colspan="4" mode="tree" name="expense_line_id" nolabel="1" widget="one2many_list">
 							<tree string="Expense Lines" editable="bottom">
 								<field name="description" required="1"/>
@@ -143,7 +136,7 @@
 								<field name="active"/>
 							</group>
 							<group>
-								<field name="user_id" on_change="onchange_user_id(user_id,location_dest_code)"/>
+								<field name="user_id" on_change="onchange_user_id(location_dest_code)"/>
 								<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
 								<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
 								<field name="approved_by" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
@@ -205,10 +198,12 @@
 					<field name="name"/>
 					<field name="grn_date"/>
 					<field name="supplier_id"/>
-                    <field name="inward_type"/>
+                    <field name="bill"/>
 					<field name="dc_date"/>
 					<field name="dc_no"/>
                     <field name="state"/>
+                    <field name="product_id" invisible="1"/>
+                    <field name="inward_type" invisible="1"/>
                 </tree>
             </field>
         </record>
@@ -236,9 +231,9 @@
 						<field name="dc_no"/>
 						<field name="supplier_id" required="1"/>
 						<field name="sup_invoice_no" attrs="{'invisible': [('grn_dc','!=','dc_invoice')],'required': [('grn_dc','=','dc_invoice')]}"/>
-						<field name="bill" string="Bill Type"/>
+						<field name="bill"/>
                         <field name="payment_type" attrs="{'required': [('bill','=','applicable')]}"/>
-                        <field name="grn_dc" readonly="1"/>
+                        <field name="grn_dc" readonly="1" invisible="1"/>
                         <field name="dep_name" invisible="1"/>
                         <field name="invoice_flag" invisible="1"/>
                     </group>
@@ -257,7 +252,7 @@
 						<field name="can_remark" attrs="{'invisible':[('state','not in',('done','cancel'))], 'readonly': [('state','in',['cancel','inv','reject'])]}"/>
 						<field name="reject_remark" attrs="{'invisible':[('state','not in',['confirmed'])], 'readonly': [('state','in',['cancel','inv','reject'])]}"/>	
 					</group>
-					<group>												
+					<group>
 					</group>
 				</group>
                 <notebook>
@@ -284,9 +279,7 @@
 									<field name="price_type" required="1"/>
 								</group> 
 								<group>
-									<field name="recvd_qty" string="Accepted Qty" readonly="1"/>
-									<field name="grn_qty" string="Received Qty" on_change="onchange_qty(grn_qty,recvd_qty,reject_qty)"/>
-									<field name="reject_qty" readonly="1"/>
+									<field name="grn_qty" string="Received Qty"/>
 									<field name="weight"/>
 									<field name="price_unit"/>
 									<field name="inward_type" required="1"/>
@@ -336,7 +329,7 @@
 								<field name="active"/>
 							</group>
 							<group>
-								<field name="user_id" on_change="onchange_user_id(user_id,location_dest_code)"/>
+								<field name="user_id" on_change="onchange_user_id(location_dest_code)"/>
 								<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
 								<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
 								<field name="approved_by" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
@@ -398,10 +391,10 @@
 					<field name="name"/>
 					<field name="grn_date"/>
 					 <field name="supplier_id"/>
-                    <field name="inward_type"/>
 					<field name="dc_date"/>
 					<field name="dc_no"/>
                     <field name="state"/>
+                    <field name="inward_type" invisible="1"/>
                 </tree> 
             </field>
         </record>
@@ -414,6 +407,7 @@
             <field name="arch" type="xml">
                 <search string="General GRN Search">
 					<field name="name" string="GRN No" filter_domain="[('name','ilike',self)]" />
+					<field name="product_id" string="Product" filter_domain="[('product_id','ilike',self)]" />
 					<field name="supplier_id" string="Supplier" filter_domain="[('supplier_id','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="WFA" domain="[('state','=','confirmed')]"/>
@@ -458,11 +452,7 @@
             <field name="act_window_id" ref="action_kg_general_grn"/>
         </record>
         
-		<act_window name="Create Invoice" res_model="kg.generalgrn.invoice.wizard"
-					src_model="kg.general.grn" key2="client_action_multi"
-					multi="True" view_mode="form"
-					view_type="form" target="new"
-					id="action_general_grn_invoice"/> 
+	
 		
 		<!--
         =========================

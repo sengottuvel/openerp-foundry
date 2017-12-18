@@ -9,6 +9,10 @@
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
+		
+		<button name="purchase_confirm" states="draft" string="Confirm Order" position="after">
+			<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
+		</button>
 		<field name="partner_id" context="{'search_default_supplier':1,'default_supplier':1,'default_customer':0}" domain="[('supplier','=',True)]" position="replace">
 			<field name="name" readonly="1"/>
 			<field name="division" required="1" attrs="{'readonly': [('name','!=',False)]}"/>
@@ -70,7 +74,6 @@
 			<button name="confirm_po" states="draft" string="Confirm" type="object" confirm="Are you sure to proceed ?"/>
 			<button name="verify_po" states="confirmed" string="Verify" type="object" confirm="Are you sure to proceed ?"/>
 			<button name="entry_approve" states="verified" string="Approve" type="object" confirm="Are you sure to proceed ?"/>
-			<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 		</button>
 		<field name="origin" position="replace">
 			<field name="bill_type" invisible="1"/>
@@ -295,6 +298,7 @@
 				<field name="product_uom" position="after">
 				<field name="cancel_flag" invisible="1"/>
 				<field name="po_copy_uom" required="1"/>
+				<field name="warranty"/>
 				<field name="delivery_date"/>
 				<field name="po_type" invisible="1"/>
 				<field name="test_cert_flag"/>

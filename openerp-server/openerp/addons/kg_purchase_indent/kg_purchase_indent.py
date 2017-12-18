@@ -213,7 +213,7 @@ class kg_purchase_indent(osv.osv):
 							pass
 						if pi_lines[i].group_flag == True:
 							self.update_product_group(cr,uid,ids,line=pi_lines[i])
-						
+					
 		return True
 		
 	def write(self, cr, uid, ids, vals, context=None):		

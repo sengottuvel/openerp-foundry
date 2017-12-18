@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+		<!-- Partner Form view start -->
 		
         <record model="ir.ui.view" id="kg_partner_form_view">
         <field name="name">kg_partner_form_view</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
-        <field name="arch" type="xml">	
-        
+        <field name="arch" type="xml">	        
         <xpath expr="//group" position="before">
 		<header>
-			<!--<button name="entry_confirm" class="oe_highlight" type="object" string="Confirm" attrs = "{'invisible':['|',('partner_state','=','approve'),('partner_state','=','confirm')]}"/>-->
 			<button name="confirm_partner" class="oe_highlight" type="object" string="Confirm" attrs = "{'invisible':[('partner_state','not in',('draft'))]}"/>
 			<button name="reject_partner" class="oe_highlight" type="object" string="Reject" attrs = "{'invisible':[('partner_state','not in',('confirm'))]}" confirm="Are you sure to proceed ?"/>
 			<button name="approve_partner" class="oe_highlight" type="object" string="Approve" attrs = "{'invisible':[('partner_state','not in',('confirm'))]}" confirm="Are you sure to proceed ?"/>
 			<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('partner_state','in',('approve','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
-<!--		<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('partner_state','not in',('approve'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','not in',('approve'))]}"/> 
 			<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 		</header>
-		</xpath>
-        
+		</xpath>        
         <field name="name" position="after">
         <field name="con_category_id" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('contractor','!=',True)],'required':[('contractor','=',True)]}"/>
+		</field>
+		<field name="country_id" position="replace">
+		<field name="country_id" readonly="1"/>
+		</field>
+		<field name="state_id" position="replace">
+		<field name="state_id" readonly="1"/>
 		</field>
 		<field name="city" position="after">
 		<field name="city_id" on_change="onchange_city(city_id)" style="width: 40%%" placeholder="City"  attrs="{'readonly':[('partner_state','=','approve')]}"/>
@@ -30,13 +33,13 @@
 		<field name="is_company" position="replace">
 		<field name="is_company" invisible="1"/>
 		
-<!--	<field name="tin_no" attrs = "{'required':[('group_flag','!=',True),('tin_flag','=',False)],'readonly':[('partner_state','=','approve')]}" placeholder="TIN Number"/>-->
-		<field name="tin_no" attrs = "{'readonly':[('partner_state','=','approve')]}" placeholder="TIN Number" class = "aplhanum_expect"/>
+		<field name="tin_no" class="aplhanum_expect" required="1" attrs = "{'readonly':[('partner_state','=','approve')]}" string="GSTIN No."/>
 		</field>
 		
 		<field name="mobile" position="before">
 		<field name="sms_applicable" required="1" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		</field>
+		
 		<field name="country_id" position="after">
 		<field name="region" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('customer','!=',True),('dealer','!=',True)]}"/>
 		</field>
@@ -44,7 +47,7 @@
 		<field name="email_applicable" required="1" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		</field>
 		<field name="zip" position="replace">
-		<field name="zip" on_change="onchange_zip(zip)" placeholder="ZIP" attrs="{'readonly':[('partner_state','=','approve')]}" class = "aplhanum_expect"/>
+		<field name="zip" on_change="onchange_zip(zip)" placeholder="ZIP" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		<field name="language" invisible="1"/>
 		<field name="contact" invisible="1"/>
 		</field>
@@ -53,22 +56,22 @@
 		<field name="company_type" required="1"	attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		<field name="supply_type" attrs = "{'invisible':['|',('customer','=',True),('dealer','=',True)],'readonly':[('partner_state','=','approve')]}"/>
 		<field name="tds" attrs = "{'required':[('company_type','=','individual'),('customer','!=',True)],'invisible':[('customer','=',True)],'readonly':[('partner_state','=','approve')]}"/>
-		<field name="tan_no" class = "aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-		<field name="cst_no" class = "aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-		<field name="vat_no" class = "aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-		<field name="cheque_in_favour" class = "aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
+		<field name="tan_no" class="aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
+		<field name="cst_no" class="aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
+		<field name="vat_no" class="aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
+		<field name="cheque_in_favour" class="aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		<field name="max_deal_discount" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('dealer','!=',True)]}"/>
 		<field name="max_cust_discount" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('customer','!=',True)]}"/>
 		<field name="max_spl_discount" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('customer','!=',True)]}"/>
-		<field name="economic_category" attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)],'readonly':[('partner_state','=','approve')]}"/>
+		<field name="economic_category" invisible="1"/>
 		<field name="dealer_id"  attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)],'readonly':[('partner_state','=','approve')]}"/>
 		</field>
 		<field name="ean13" position="replace">
 		<field name="grade" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-		<field name="pan_no" class = "aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-		<field name="adhar_id" class = "aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-		<field name="gst_no" class = "aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
-		<field name="gs_tin_no" class = "aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')],'invisible': [('supplier','!=',True),('customer','!=',True)]}"/>
+		<field name="pan_no" class="aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}" string="Pan No."/>
+		<field name="adhar_id" class="aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}" string="Aadhar NO."/>
+		<field name="gst_no" invisible="1" attrs="{'readonly':[('partner_state','=','approve')]}"/>
+		<field name="gs_tin_no" invisible="1" attrs="{'readonly':[('partner_state','=','approve')],'invisible': [('supplier','!=',True),('customer','!=',True)]}"/>
 		<field name="transport_id" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		<field name="sector" attrs="{'invisible': [('supplier','=',True)],'readonly': [('partner_state','=','approve')]}"/>
 		<field name="industry_id" attrs="{'readonly':[('partner_state','=','approve')]}"/>
@@ -77,7 +80,7 @@
 		
 		<field name="ref" position="replace">
 		<field name="payment_id"/>
-		<div >
+		<div>
 			<label for="advance_limit"  string="Advance"  attrs="{'invisible': [('customer','=',True)]}"/>
 			<label for="advance_limit" string="Credit" attrs="{'invisible': [('supplier','=',True)]}"/>
 		</div>
@@ -94,17 +97,17 @@
 				</group>
 			</group>
 		</xpath>
-				
+		
 		<field name="mobile" position="after">
 		<field name="mobile_2" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		</field>
-
+		
 		<field name="color" position="replace">
 		<field name="delivery_id" attrs = "{'invisible':[('dealer','=',True)]}"/>
 		</field>
-
+		
 		<field name="function" position="replace">
-		<field name="contact_person" class = "aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
+		<field name="contact_person" class="aplhanum_expect" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		</field>
 		<field name="title" position="replace">
 		<field name="group_flag" invisible="1"/>
@@ -113,62 +116,51 @@
 		</field>
 		<field name="city" position="replace">
 		<field name="city" invisible="1"/>
-		<field name="landmark" class = "aplhanum_expect" placeholder="Landmark" attrs="{'readonly':[('partner_state','=','approve')]}"/>
+		<field name="landmark" placeholder="Landmark" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		</field>
 		<field name="category_id" position="replace">
 		<field name="category_id" invisible="1"/>
 		<field name="con_designation" invisible="1"/>
 		<field name="con_whatsapp" invisible="1"/>
-<!--
-		<field name="acc_number" invisible="1"/>
-		<field name="bank_name" invisible="1"/>
-		<field name="bank_bic" invisible="1"/>
--->
-<!--
-		<field name="partner_state" invisible="1"/> 
--->
 		<field name="dealer" invisible="1"/> 
 		<field name="modify" invisible="1"/> 
 		</field>
 		
-	
-		
 		<xpath expr = "//page[@string='Additional Contacts']" position="after">
-				<page string="Delivery Address" attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)]}">
-				
-				<field colspan="4" mode="tree" name="delivery_ids" nolabel="1" widget="one2many_list" attrs="{'readonly':[('partner_state','=','approve')]}">
-					<tree string="Delivery Address"> 
-						<field name="landmark" />
-						<field name="street" string="Street1"/>
-						<field name="street1" string="Street2"/>
-						<field name="city_id"/>
-						<field name="contact_no"/>
-						<field name="default"/>
-					</tree>
-					<form string="Delivery Address"	>
+			<page string="Delivery Address" attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)]}">
+			<field colspan="4" mode="tree" name="delivery_ids" nolabel="1" widget="one2many_list" attrs="{'readonly':[('partner_state','=','approve')]}">
+				<tree string="Delivery Address"> 
+					<field name="landmark"/>
+					<field name="street" string="Street1"/>
+					<field name="street1" string="Street2"/>
+					<field name="city_id"/>
+					<field name="contact_no"/>
+					<field name="default"/>
+				</tree>
+				<form string="Delivery Address"	>
+					<group>
 						<group>
-							<group>
-								<field name="name" class = "aplhanum_expect"/>
-								<field name="landmark" placeholder="Landmark" class = "aplhanum_expect"/>
-								<field name="street" string="Street1" class = "aplhanum_expect"/>
-								<field name="street1" string="Street2" class = "aplhanum_expect"/>
-								<field name="city_id"/>
-							</group>
-							<group>
-								<field name="contact_no" class="numberonly"/>
-								<field name="zip" class = "aplhanum_expect"/>
-								<field name="state_id"/>
-								<field name="country_id"/>
-								<field name="default"/>
-							</group>
+							<field name="name" required="1"/>
+							<field name="landmark" placeholder="Landmark"/>
+							<field name="street" string="Street1" required="1"/>
+							<field name="street1" string="Street2"/>
+							<field name="city_id" required="1" on_change="onchange_city(city_id)"/>
 						</group>
-					</form>
-				</field>
-				</page>
-				</xpath>
-				
+						<group>
+							<field name="contact_no" class="numberonly" required="1"/>
+							<field name="zip" class="numberonly"/>
+							<field name="state_id" readonly="1"/>
+							<field name="country_id" readonly="1"/>
+							<field name="default"/>
+						</group>
+					</group>
+				</form>
+			</field>
+			</page>
+		</xpath>
+		
 		<xpath expr = "//page[@string='Delivery Address']" position="after">
-					<page string="Billing Address">
+			<page string="Billing Address">
 				
 				<field colspan="4" mode="tree" name="billing_ids" nolabel="1" widget="one2many_list" attrs="{'readonly':[('partner_state','=','approve')]}">
 					<tree string="Billing Address"> 
@@ -181,16 +173,16 @@
 					<form string="Billing Address"	>
 						<group>
 							<group>
-								<field name="name" required="1" class = "aplhanum_expect"/>
-								<field name="landmark" placeholder="Landmark" required="1" class = "aplhanum_expect"/>
-								<field name="street" string="Street" required="1" class = "aplhanum_expect"/>
-								<field name="city_id" required="1"/>
+								<field name="name" required="1"/>
+								<field name="landmark" placeholder="Landmark" required="1"/>
+								<field name="street" string="Street" required="1"/>
+								<field name="city_id" required="1" on_change="onchange_city(city_id)"/>
 							</group>
 							<group>
-								<field name="contact_no" required="1"/>
-								<field name="zip" required="1" class = "aplhanum_expect"/>
-								<field name="state_id" required="1"/>
-								<field name="country_id" required="1"/>
+								<field name="contact_no" class="numberonly" required="1"/>
+								<field name="zip" class="numberonly" required="1"/>
+								<field name="state_id" readonly="1"/>
+								<field name="country_id" readonly="1"/>
 								<field name="default"/>
 							</group>
 						</group>
@@ -202,29 +194,26 @@
 		<!-- Bank Tab Menu -->
 		
 		<xpath expr = "//page[@string='Billing Address']" position="after">
-				<page string="Bank Details">
+				<page string="Bank Details" invisible="1">
 					<group>
 				<field name="bank_ids" nolabel="1" context="{'default_partner_id': active_id, 'form_view_ref': 'base.view_partner_bank_form'}" attrs="{'readonly':[('partner_state','=','approve')]}">
 				<form string="Bank" version="7.0">
-				<sheet>
 				<group>
-					
-						<field name="acc_number" colspan="4"/>
+					<field name="acc_number" colspan="4" class="numberonly"/>
 					<group string="Bank Account Owner">
-						<field name="owner_name" class = "aplhanum_expect"/>
-						<field name="street" class = "aplhanum_expect"/>
-						<field name="city"/>
-						<field name="state_id" string="State"/>
-						<field name="country_id"/>
+						<field name="owner_name" class="aplhanum_expect"/>
+						<field name="street" class="aplhanum_expect"/>
+						<field name="city_id" on_change="onchange_city(city_id)"/>
+						<field name="state_id" readonly="1" string="State"/>
+						<field name="country_id" readonly="1"/>
 						<field name="zip"/>
 					</group>
 					<group string="Information About The Bank">
-						<field name="bank" class = "aplhanum_expect"/>
-						<field name="bank_name" class = "aplhanum_expect"/>
-						<field name="bank_bic" class = "aplhanum_expect"/>
+						<field name="bank"/>
+						<field name="bank_name" class="aplhanum_expect"/>
+						<field name="bank_bic" class="numberonly"/>
 					</group>
 				</group>	
-				</sheet>
 			</form>
 			</field>
 			</group>
@@ -232,14 +221,12 @@
 		</xpath>
 		<xpath expr = "//page[@string='Bank Details']" position="after">
 				<page string="Consultant Fee" attrs="{'invisible':[('dealer','!=',True)]}">
-				
 				<field colspan="4" mode="tree" name="consult_ids" nolabel="1" widget="one2many_list" attrs="{'readonly':[('partner_state','=','approve')]}">
 					<tree string="Consult Fee" editable="bottom"> 
 						<field name="effective_date" attrs="{'readonly':[('read_flag','=',True)]}"/>
 						<field name="value" attrs="{'readonly':[('read_flag','=',True)]}"/>
 						<field name="state" readonly="1"/>
 						<field name="read_flag" readonly="1" invisible="1"/>
-						
 					</tree>
 					<form string="Billing Address" >
 						<group>
@@ -284,8 +271,17 @@
 				</group>	
 			</page>	
 		</xpath>
+		<xpath expr = "//page[@string='Accounting']" position="replace">
+			<page string="Accounting" invisible="1">
+				<group>
+					
+				</group>	
+			</page>	
+		</xpath>
 		</field>
 	</record>
+	
+	<!-- Partner form view end -->
 	
 	<record model="ir.ui.view" id="kg_partner_tree">
 		<field name="name">res.partner.form</field>
@@ -294,9 +290,8 @@
 		<field name="arch" type="xml">
 			<field name="name" position="before">
 				<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>			
-<!--
-			</field>	
--->
+			</field> 
+			<field name="name" position="after"> 
 			<field name="contact_person"/> 
 			<field name="mobile"/> 
 			</field>					
@@ -305,45 +300,40 @@
 			</field>					
 			<field name="email" position="after"> 
 			<field name="supply_type"/> 
-<!--
-			<field name="partner_state" invisible="1"/>
--->
 			<field name="dealer" invisible="1"/>
 			</field>					
 		</field>
 	</record>
 	
-	
 	<!-- contractor tree view -->
 	
 	<record id="kg_contractor_tree_1" model="ir.ui.view">
-			<field name="name">Contractor Tree</field>
-			<field name="model">res.partner</field>
-			<field eval="8" name="priority"/>
-			<field name="arch" type="xml">	
-			<tree toolbar="True" string="Contractor" colors="blue:partner_state == 'draft';red:partner_state == 'confirm'
-						;black:partner_state == 'approved';gray:partner_state == 'reject';gray:partner_state == 'cancel'" >									
-					<field name="name"/>
-					<field name="contact_person"/>
-					<field name="mobile"/>
-					<field name="email"/>
-					<field name="con_category_id"/>
-					<field name="partner_state"/>				
-				</tree>
-			</field>
-		</record>
-		
+		<field name="name">Contractor Tree</field>
+		<field name="model">res.partner</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">	
+		<tree toolbar="True" string="Contractor" colors="blue:partner_state == 'draft';red:partner_state == 'confirm'
+					;black:partner_state == 'approved';gray:partner_state == 'reject';gray:partner_state == 'cancel'" >									
+				<field name="name"/>
+				<field name="contact_person"/>
+				<field name="mobile"/>
+				<field name="email"/>
+				<field name="con_category_id"/>
+				<field name="partner_state"/>				
+			</tree>
+		</field>
+	</record>
 	
 	<!-- End Tree view -->
 	
 	<!-- Audit Log Xml Data Start-->
-		
+	
       <!--  <record id="partnermaster_model" model="audittrail.rule">
             <field name="name">Audit Log Partner Master</field>
             <field name="object_id" eval="ref('base.model_res_partner')"/>       
             <field name="state">subscribed</field>              
         </record>-->
-        
+	
 	<!-- Audit Log Xml Data End-->
 	
 	<record id="kg_action_customer_form" model="ir.actions.act_window">
@@ -354,12 +344,8 @@
 		<field name="view_mode">tree,form</field>
 		<field name="view_id" ref="kg_partner_tree"/>
 		<field name="context">{'default_customer': True,'default_supplier': False,'default_contractor': False,'default_dealer': False,'default_group_flag': False}</field>
-		<field name="domain">[('customer','=',True),('contact','=',False)]</field>
-		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
-		<field name="search_view_id" ref="partner_group_view"/>-->
+		<field name="domain">[('customer','=',True),('contact','=',False)]</field>		
 	</record>		
-	
-	
 	
 	<record id="kg_action_dealer_form" model="ir.actions.act_window">
 		<field name="name">Dealer</field>
@@ -369,12 +355,8 @@
 		<field name="view_mode">tree,form</field>
 		<field name="view_id" ref="kg_partner_tree"/>
 		<field name="context">{'default_dealer': True,'default_customer': False,'default_supplier': False,'default_contractor': False,'default_group_flag': False}</field>
-		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>
-		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
-		<field name="search_view_id" ref="partner_group_view"/>-->
-	</record>
-	
-		
+		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>	
+	</record>		
 	
 	<record id="kg_action_contractor_form_1" model="ir.actions.act_window">
 		<field name="name">Contractor</field>
@@ -384,14 +366,8 @@
 		<field name="view_mode">tree,form</field>
 		<field name="view_id" ref="kg_contractor_tree_1"/>
 		<field name="context">{'default_contractor': True,'default_dealer': False,'default_customer': False,'default_supplier': False,'default_group_flag': False,'default_tin_flag': True}</field>
-		<field name="domain">[('contractor','=',True),('contact','=',False)]</field>
-		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
-		<field name="search_view_id" ref="partner_group_view"/>-->
+		<field name="domain">[('contractor','=',True),('contact','=',False)]</field>		
 	</record>
-	
-		
-	
-	
 	
 	<record id="kg_action_group_form" model="ir.actions.act_window">
 		<field name="name">Groups</field>
@@ -401,12 +377,10 @@
 		<field name="view_mode">tree,form</field>
 		<field name="view_id" ref="kg_partner_tree"/>
 		<field name="context">{'default_group_flag': True,'default_dealer': False,'default_customer': False,'default_supplier': False,'default_contractor': False}</field>
-		<field name="domain">[('group_flag','=',True),('contact','=',False)]</field>
-		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
-		<field name="search_view_id" ref="partner_group_view"/>-->
+		<field name="domain">[('group_flag','=',True),('contact','=',False)]</field>		
 	</record>
-
-	<!--- Purchase Menu -->
+	
+	<!-- Menu items -->
 	
     <!--  Supplier Master  --> 
 	<menuitem action="base.action_partner_supplier_form" name="Supplier" id="mam_supplier_master" parent="kg_menus.ppm_master_menu" sequence="1"/>
@@ -424,7 +398,7 @@
 	
 	<!-- Customer Master -->
 	<menuitem action="kg_action_customer_form" id="cam_crm_customer_master" name="Customer" parent="kg_menus.cpm_crm_master_menu" sequence="1"/>
-
+	
 	<!-- Dealer Master -->
 	<menuitem action="kg_action_dealer_form" id="cam_crm_dealer_master" name="Dealer" parent="kg_menus.cpm_crm_master_menu" sequence="2"/>
 	
@@ -433,20 +407,5 @@
 	<menuitem action="kg_action_group_form" id="cam_crm_group_master" name="Group" parent="kg_menus.cpm_crm_master_menu" sequence="3"/>
 -->
 	
-	<!-- Country -->
-<!--
-	<menuitem id="cam_crm_country_master" parent="kg_menus.cpm_crm_master_menu" name="Country" action="base.action_country" sequence="4"/>
--->
-	
-	<!-- State -->
-<!--
-	<menuitem id="cam_crm_state_master" parent="kg_menus.cpm_crm_master_menu" name="State" action="base.action_country_state" sequence="5"/>
--->
-	
-	<!-- City Master  --> 
-<!--
-	<menuitem action="base.action_city" parent="kg_menus.cpm_crm_master_menu" name="City" id="cam_crm_city_master"  sequence="6"/>
--->
-					
     </data>
 </openerp>

@@ -174,6 +174,7 @@ class stock_location(osv.osv):
 		return res
 		
 	_columns = {
+		
 		'name': fields.char('Name', size=64, required=True, translate=True),
 		'code': fields.char('Code', size=64),
 		'active': fields.boolean('Active', help="By unchecking the active field, you may hide a location without deleting it."),
@@ -253,7 +254,7 @@ class stock_location(osv.osv):
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		'custom': fields.boolean('Custom'),
-		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode',readonly=True),
 		'is_parent': fields.boolean('Is Parent'),
 		
 		# Entry Info
@@ -293,7 +294,6 @@ class stock_location(osv.osv):
 	
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		res = True
 		if rec.name:
 			location_name = rec.name
 			location_type = rec.location_type
@@ -301,24 +301,12 @@ class stock_location(osv.osv):
 			cr.execute(""" select upper(name) from stock_location where upper(name) = '%s' and location_type = '%s' """ %(name,location_type))
 			data = cr.dictfetchall()
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
-		
-	def _Validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
-		if name_special_char:
-			raise osv.except_osv(_('Warning !!'),
-				_('Special Characters are not allowed in Name !!'))
-			return False		
-		return True	
-		
+				raise osv.except_osv(_('Warning'), _('Location Name must be unique !!'))
+		return True
+	
 	_constraints = [
 		
 		(_name_validate, 'Location Name must be unique !!', ['Location Name']),
-		(_Validation, 'Special Characters are not allowed in Name !!', ['']),
 		
 	]
 	
@@ -368,12 +356,25 @@ class stock_location(osv.osv):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
 			if rec.state != 'draft':			
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
+				raise osv.except_osv(_('Delete access denied !'), _('Unable to delete. Draft entry only you can delete !!'))
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-				
+	
+	def _name_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.name:
+			cr.execute(""" select upper(name) from stock_location where upper(name)  = '%s' """ %(rec.name.upper()))
+			data = cr.dictfetchall()
+			if len(data) > 1:
+				raise osv.except_osv(_('Warning'), _('Name must be unique !!'))		
+		return True
+	
+	_constraints = [	
+		(_name_validate, ' ', ['name']),		
+		
+	]
+	
 	def chained_location_get(self, cr, uid, location, partner=None, product=None, context=None):
 		""" Finds chained location
 		@param location: Location id

@@ -45,16 +45,15 @@
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" string="Products">
                     <field name="default_code" invisible="1"/>
                     <field name="product_code" invisible="1"/>
-                   <button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
                     <field name="name"/>
                     <field name="categ_id"/>
                     <field name="type" invisible="1"/>
                     <field name="variants" groups="product.group_product_variant" invisible="1"/>
                     <field name="uom_id" string="Store UOM" groups="product.group_uom"/>
                     <field name="uom_po_id" string="PO UOM"/>
-                    <field name="qty_available"/>
+                    <field name="qty_available" invisible="1"/>
                     <field name="sales_price" invisible="1"/>
-                    <field name="latest_price" readonly="1"/>   
+                    <field name="latest_price" readonly="1" invisible="1"/>   
                     <field name="state"/>                
                     <field name="virtual_available" invisible="1"/>
                     <field name="lst_price" invisible="1"/>
@@ -79,7 +78,6 @@
 					<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 <!--				<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 					<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-					<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 				</header>
 					<group>
 						<group>
@@ -89,7 +87,6 @@
 						<group>
 							<field name="product_code" placeholder="Code" attrs="{'readonly':[('state','in',('approved','reject'))]}" required="0" invisible="1"/>
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
-							<field name="creation_date" invisible ="1"/>
 							<field name="expiry" invisible ="1"/>
 							<field name="qa_status" invisible ="1"/>
 							<field name="reorder_status" invisible ="1"/>
@@ -119,7 +116,7 @@
 									<field name="qty_available" attrs="{'readonly':[('state','in',('approved','reject'))]}" invisible="1"/>                                        
 								</group>
 								<group>
-									<field name="latest_price" readonly="1"/>
+									<field name="latest_price" readonly="1" invisible="1"/>
 									<field name="design_rate" attrs="{'readonly':[('state','in',('approved','reject'))],'invisible':[('product_type','in',('consu','capital','service'))]}" groups="kg_users.group_planning_admin"/>
 									<field name="equivalent_stand" attrs="{'readonly':[('state','in',('approved','reject'))]}" groups="kg_users.group_planning_admin"/>
 									<field name="minimum_qty" attrs="{'readonly':[('state','in',('approved','reject'))],'required':[('flag_minqty_rule','=',True)]}"/>
@@ -186,7 +183,7 @@
 									<field name="update_user_id"/>	
 								</group>
 								<group>
-									<field name="crt_date"/>
+									<field name="creation_date"/>
 									<field name="update_date"/>						
 								</group>
 							</group>
@@ -609,6 +606,7 @@
                     <group>
                         <group>
                             <field name="name" attrs="{'readonly':[('dummy_state','=','approved')]}"/>
+                            <field name="uom_category" attrs="{'readonly':[('dummy_state','=','approved')]}"/>
                             <field name="category_id" invisible="1"/>
                             <field name="modify" invisible="1"/>
                             <field name="rounding" invisible="1"/>
@@ -883,7 +881,9 @@
                 <form string="Product Variant" version="7.0">
                     <group col="4">
                         <field name="product_tmpl_id"/>
+<!--
                         <field name="active"/>
+-->
                         <field name="variants"/>
                         <field name="default_code"/>
                         <field name="price_margin"/>

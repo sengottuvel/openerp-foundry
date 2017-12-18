@@ -14,7 +14,6 @@ import logging
 import netsvc
 import base64
 logger = logging.getLogger('server')
-today = datetime.now()
 
 UOM_CONVERSATION = [
 	('one_dimension','One Dimension'),('two_dimension','Two Dimension')
@@ -41,18 +40,16 @@ class kg_purchase_amendment(osv.osv):
 				qty = line.product_qty_amend
 		else:
 			qty = line.product_qty_amend
-			
+		
 		new_amt_to_per = line.kg_discount_amend / qty
 		amt_to_per = (line.kg_discount_amend / (qty * line.price_unit_amend or 1.0 )) * 100
 		kg_discount_per = line.kg_discount_per_amend
 		tot_discount_per = amt_to_per + kg_discount_per
-
+		
 		for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id_amend,
 			line.price_unit_amend * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id_amend,
 				line.amendment_id.partner_id_amend)['taxes']:
-			 
 			val += c.get('amount', 0.0)
-			
 		return val
 	
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
@@ -81,7 +78,6 @@ class kg_purchase_amendment(osv.osv):
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount
 			res[order.id]['total_amount_amend'] = (val1 + val3) - val
-			print"res[order.id]['total_amount_amend']",res[order.id]['total_amount_amend']
 			res[order.id]['other_charge'] = other_charges_amt or 0
 			res[order.id]['amount_tax_amend'] = val
 			res[order.id]['amount_untaxed_amend'] = val1 - val 
@@ -89,13 +85,11 @@ class kg_purchase_amendment(osv.osv):
 			res[order.id]['grand_total_amend'] = val1
 			res[order.id]['round_off_amend'] = order.round_off
 			res[order.id]['amount_total_amend'] = val1 + order.round_off or 0.00
-			
 		return res
-		
+	
 	def _get_order(self, cr, uid, ids, context=None):
 		result = {}
 		for line in self.pool.get('kg.purchase.amendment.line').browse(cr, uid, ids, context=context):
-			print "line :::::::::::::::::::::::ids:::",ids, line
 			result[line.amendment_id.id] = True
 		return result.keys()
 	
@@ -108,12 +102,12 @@ class kg_purchase_amendment(osv.osv):
 		'state':fields.selection([('draft','Draft'),('amend','Processing'),('confirm','Confirmed'),('approved','Approved'),('reject','Rejected'),('cancel','Cancel')], 'Status'),
 		'note': fields.text('Remarks'),
 		'remark': fields.text('Remarks', states={'confirm':[('readonly', True)]}),
-		'cancel_note': fields.text('Cancel Remarks'),
+		'cancel_note': fields.text('Reject Remarks'),
 		
 		## Module Requirement Info
 		
 		'po_id':fields.many2one('purchase.order','PO.NO', required=True,
-			domain="[('state','=','approved'),'&',('order_line.line_state','!=','cancel'),'&',('order_line.line_bill','=', False),'&',('order_line.pending_qty','>',0)]",
+			domain="[('state','=','approved'),'&',('order_line.line_state','!=','cancel'),'&',('order_line.line_bill','=',False),'&',('order_line.pending_qty','>',0),'&',('amend_flag','=',False)]",
 			readonly=True,states={'amend':[('readonly',False)]}),
 		'po_date':fields.date('PO Date', readonly=True),
 		'partner_id':fields.many2one('res.partner', 'Supplier', readonly=True),
@@ -274,11 +268,9 @@ class kg_purchase_amendment(osv.osv):
 		if rec.state not in ('draft','amend'):
 			if rec.bill_type_amend == 'advance':
 				if rec.advance_amt_amend <= 0.00:
-					raise osv.except_osv(_('Warning !'),
-						_('System sholud not be accecpt with out Advance !'))
+					raise osv.except_osv(_('Warning !'),_('System sholud not be accecpt with out Advance !!'))
 				elif rec.advance_amt_amend > 100:
-					raise osv.except_osv(_('Warning !'),
-						_('System sholud not be greater than 100 !'))
+					raise osv.except_osv(_('Warning !'),_('System sholud not be greater than 100 !!'))
 				else:
 					pass
 		return True
@@ -298,32 +290,32 @@ class kg_purchase_amendment(osv.osv):
 			value = {'pricelist_id': price_id}
 			return {'value':value}	
 		else:
-			print "No Change"
-			
-	def unlink(self, cr, uid, ids, context=None):
-		if context is None:
-			context = {}
-		amend = self.read(cr, uid, ids, ['state'], context=context)
-		unlink_ids = []
-		for t in amend:
-			if t['state'] in ('amend','draft'):
-				unlink_ids.append(t['id'])
-			else:
-				raise osv.except_osv(_('Invalid action !'), _('System not allow to delete a UN-DRAFT state Purchase Amendment!!'))
-		amend_lines_to_del = self.pool.get('kg.purchase.amendment.line').search(cr, uid, [('amendment_id','in',unlink_ids)])
-		self.pool.get('kg.purchase.amendment.line').unlink(cr, uid, amend_lines_to_del)
-		osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		return True
+			pass
+	
+	def onchange_partner_id(self, cr, uid, ids, partner_id_amend,add_text_amend):
+		partner = self.pool.get('res.partner')
+		if not partner_id_amend:
+			return {'value': {
+				'add_text_amend': False,
+				}}
+		supplier_address = partner.address_get(cr, uid, [partner_id_amend], ['default'])
+		supplier = partner.browse(cr, uid, partner_id_amend)
+		tot_add = (supplier.street or '')+ ' ' + (supplier.street2 or '') + '\n'+(supplier.city_id.name or '')+ ',' +(supplier.state_id.name or '') + '-' +(supplier.zip or '') + '\nPh:' + (supplier.phone or '')+ '\n' +(supplier.mobile or '')		
+		return {'value': {
+			'add_text_amend' : tot_add or False
+			}}
 	
 	def _prepare_amend_line(self, cr, uid, po_order, order_line, amend_id, context=None):
 		return {
-		
+			
 			'order_id':po_order.id,
 			'po_type': po_order.po_type,
 			'product_id': order_line.product_id.id,
 			'product_id_amend': order_line.product_id.id,
 			'product_uom': order_line.product_uom.id,
 			'product_uom_amend': order_line.product_uom.id,
+			'po_copy_uom': order_line.po_copy_uom.id,
+			'po_copy_uom_amend': order_line.po_copy_uom.id,
 			'brand_id':order_line.brand_id.id,
 			'brand_id_amend':order_line.brand_id.id,
 			'moc_id':order_line.moc_id.id,
@@ -363,11 +355,13 @@ class kg_purchase_amendment(osv.osv):
 			'price_subtotal': order_line.price_subtotal,
 			
 			'note' : order_line.name or '',
+			'entry_mode' : 'auto',
 			'note_amend' : order_line.name or '',			
 			'amendment_id': amend_id,
 			'po_line_id': order_line.id,
-			'line_bill':order_line.line_bill,
+			'line_bill': order_line.line_bill,
 			'pi_line_id': order_line.pi_line_id.id,
+			'kg_poindent_lines': [(6, 0, [x.id for x in po_order.kg_poindent_lines])],
 			
 		}
 	
@@ -375,7 +369,6 @@ class kg_purchase_amendment(osv.osv):
 		
 		po_id = False
 		obj = self.browse(cr,uid,ids[0])
-		print "Amend Obj ::::::::::",obj
 		if obj.state == 'amend':
 			po_obj=self.pool.get('purchase.order')
 			amend_obj=self.pool.get('kg.purchase.amendment')
@@ -387,7 +380,7 @@ class kg_purchase_amendment(osv.osv):
 				raise osv.except_osv(_('Amendment has been created for this PO!'),
 					_('Please approve that for proceed another Amendment!!')) 
 			
-			sql = """delete from kg_purchase_amendment where state='amend' and id !=%s"""%(str(ids[0]))
+			sql = """delete from kg_purchase_amendment where state='amend' and id != %s """%(str(ids[0]))
 			cr.execute(sql)
 			if po_order.picking_ids:
 				grn = True
@@ -397,9 +390,9 @@ class kg_purchase_amendment(osv.osv):
 				amend_no = po_order.name + '-01'
 			else:
 				amend_no = po_order.name + '-' + '%02d' % int(str(len(total_amends)))
-			
+			po_obj.write(cr,uid,obj.po_id.id,{'amend_flag':True})
 			if obj.partner_id.id is False:
-			
+				
 				vals = {
 						'amend_flag': True,
 						'name' : amend_no, 
@@ -470,17 +463,16 @@ class kg_purchase_amendment(osv.osv):
 						'round_off_amend':po_order.round_off,
 						'amount_total':po_order.amount_total,
 						'amount_total_amend':po_order.amount_total,
+						'state':'draft',
 						
 						}
-				print "vals ..........",vals
 				self.pool.get('kg.purchase.amendment').write(cr,uid,ids,vals)
-					
+				
 				amend_id = obj.id
 				todo_lines = []
 				amend_line_obj = self.pool.get('kg.purchase.amendment.line')
 				wf_service = netsvc.LocalService("workflow")
-				order_lines=po_order.order_line
-				self.write(cr,uid,ids[0],{'state':'draft',})
+				order_lines = po_order.order_line
 				for order_line in order_lines:
 					if order_line.line_state != 'cancel' and order_line.line_bill == False:
 						amend_line = amend_line_obj.create(cr, uid, self._prepare_amend_line(cr, uid, po_order, order_line, amend_id,
@@ -493,15 +485,35 @@ class kg_purchase_amendment(osv.osv):
 							cr.execute(""" INSERT INTO amendment_order_tax (amend_line_id,tax_id) VALUES(%s,%s) """ %(amend_line,val[i]))
 						todo_lines.append(amend_line_obj)
 					else:
-						print "NO Qty or Cancel"
-					
+						pass
 				wf_service.trg_validate(uid, 'kg.purchase.amendment', amend_id, 'button_confirm', cr)
 				return [amend_id]
 				cr.close()
 			else:
-				raise osv.except_osv(_('Amendment Created Already!'),
-					_('System not allow to create Amendment again !!')) 
+				raise osv.except_osv(_('Amendment Created Already !'),_('System not allow to create Amendment again !!')) 
 		
+	def line_validations(self, cr, uid, ids,context=None):
+		amend_obj = self.browse(cr,uid,ids[0])
+		for amend_line in amend_obj.amendment_line:
+			
+			# PO Qty is less than GRN Qty raise the warning starts
+			
+			if amend_line.product_qty_amend < amend_line.product_qty:
+				grn_sql = """ select sum(line.po_grn_qty) as received_qty 
+								from po_grn_line line
+								join kg_po_grn grn on(grn.id=line.po_grn_id)
+								where line.po_id = %s and line.product_id = %s and line.po_line_id = %s and grn.state in ('done','inv') """%(amend_obj.po_id.id,amend_line.product_id.id,amend_line.po_line_id.id)
+				cr.execute(grn_sql)		
+				grn_data = cr.dictfetchall()
+				if grn_data:
+					if amend_line.product_qty_amend < grn_data[0]['received_qty']:
+						raise osv.except_osv(_('Warning !'),
+							_('You can not decrease PO Qty for product (%s), because GRN qty is (%s) !!')%(amend_line.product_id.name,grn_data[0]['received_qty']))
+			
+			# PO Qty is less than GRN Qty raise the warning ends
+			
+		return True
+	
 	def confirm_amend(self, cr, uid, ids,context=None):
 		amend_obj = self.browse(cr,uid,ids[0])
 		if amend_obj.state == 'draft':
@@ -512,12 +524,14 @@ class kg_purchase_amendment(osv.osv):
 			pi_line_obj = self.pool.get('purchase.requisition.line')
 			stock_move_obj = self.pool.get('stock.move')
 			advance_obj = self.pool.get('kg.supplier.advance')
+			
+			self.line_validations(cr,uid,ids)
+			
 			# Created advance process check
 			if amend_obj.bill_type == 'advance':
 				adv_ids = advance_obj.search(cr,uid,[('po_id','=',amend_obj.po_id.id)])
 				if adv_ids:
-					raise osv.except_osv(_('Warning!'),
-						_('You cannot change Payment Mode. Because advance created for this PO'))
+					raise osv.except_osv(_('Warning !'),_('You cannot change Payment Mode. Because advance created for this PO !!'))
 			approval = ''
 			for amend_line in amend_obj.amendment_line:
 				## Spl approval Process start
@@ -587,8 +601,7 @@ class kg_purchase_amendment(osv.osv):
 						pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
 						if pi_line_record.pending_qty <= 0:
 							if not amend_line.kg_poindent_lines:
-								raise osv.except_osv(_('If you want to increase PO Qty'),
-									_('Select PI for this Product'))
+								raise osv.except_osv(_('If you want to increase PO Qty'),_('Select PI for this Product'))
 							else:
 								for ele in amend_line.kg_poindent_lines:
 									if ele.product_id.id == amend_line.product_id.id:
@@ -596,11 +609,9 @@ class kg_purchase_amendment(osv.osv):
 											pi_line_obj.write(cr,uid,pi_line_record.id,{'pending_qty': 0}) 
 											amend_line_obj.write(cr,uid,amend_line.id,{'pi_line_id':ele.id})
 											line_pending = ele.pending_qty - (amend_line.product_qty_amend - amend_line.product_qty)
-											print"line_pending",line_pending
 											pi_line_obj.write(cr,uid,ele.id,{'pending_qty': line_pending}) 
 										else:
-											raise osv.except_osv(_('Warning!'),
-												_('Amendment Qty is greater than indent qty'))
+											raise osv.except_osv(_('Warning !'),_('Amendment Qty is greater than indent qty !!'))
 						else:
 							pass
 					else:
@@ -611,8 +622,7 @@ class kg_purchase_amendment(osv.osv):
 								if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
 									pass
 								else:
-									raise osv.except_osv(_('You can not decrease PO Qty'),
-										_('Because GRN is already created'))
+									raise osv.except_osv(_('You can not decrease PO Qty'),_('Because GRN is already created'))
 							else:
 								pass
 					if amend_line.product_qty != amend_line.product_qty_amend:
@@ -633,8 +643,7 @@ class kg_purchase_amendment(osv.osv):
 							if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
 								pass
 							else:
-								raise osv.except_osv(_('You can not decrease PO Qty'),
-									_('Because GRN is already created'))
+								raise osv.except_osv(_('You can not decrease PO Qty'),_('Because GRN is already created'))
 						else:
 							pass
 					if amend_line.product_id:
@@ -674,7 +683,6 @@ class kg_purchase_amendment(osv.osv):
 			if approval == 'yes' and amend_obj.sent_mail_flag == False:
 				self.spl_po_apl_mail(cr,uid,ids,amend_obj,context)
 				self.write(cr,uid,ids,{'sent_mail_flag':True})
-		
 		return True
 	
 	def spl_po_apl_mail(self,cr,uid,ids,obj,context=None):
@@ -708,24 +716,17 @@ class kg_purchase_amendment(osv.osv):
 				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
 			else:
 				pass
-				
 		return True
-		
+	
 	def reject_amend(self, cr, uid, ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state in ('confirm','amend'):
 			if not rec.cancel_note:
-				raise osv.except_osv(_('Warning!'),
-					_('Please give reason for this cancellation'))
+				raise osv.except_osv(_('Warning !'),_('Give reason in reject remarks for this rejection !!'))
 			else:	
-				self.write(cr,uid,ids[0],{'state':'reject'})
-		
+				self.write(cr,uid,ids[0],{'state':'draft'})
 		return True
 	
-	def write(self, cr, uid, ids, vals, context=None):		
-		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_purchase_amendment, self).write(cr, uid, ids, vals, context)
-		
 	def approve_amend(self,cr,uid,ids,context={}):
 		
 		amend_obj = self.browse(cr,uid,ids[0])
@@ -742,15 +743,16 @@ class kg_purchase_amendment(osv.osv):
 			stock_move_obj = self.pool.get('stock.move')
 			stock_lot_obj = self.pool.get('stock.production.lot')
 			advance_obj = self.pool.get('kg.supplier.advance')
-			po_id = False 
+			po_id = False
+			
+			self.line_validations(cr,uid,ids)
 			
 			# Created advance process check
 			if amend_obj.bill_type == 'advance':
 				adv_ids = advance_obj.search(cr,uid,[('po_id','=',amend_obj.po_id.id)])
 				if adv_ids:
-					raise osv.except_osv(_('Warning!'),
-						_('You cannot change Payment Mode. Because advance created for this PO'))
-						
+					raise osv.except_osv(_('Warning !'),_('You cannot change Payment Mode. Because advance created for this PO'))
+			
 			#~ if amend_obj.bill_type_amend == 'advance':
 				#~ pre_obj = self.pool.get('kg.supplier.advance').search(cr,uid,[('po_id','=',amend_obj.po_id.id),('state','!=','cancel')])
 				#~ if not pre_obj:
@@ -765,8 +767,7 @@ class kg_purchase_amendment(osv.osv):
 				#~ pass
 				
 			if amend_obj.amendment_line ==[]:
-				raise osv.except_osv(_('Empty Purchase Amendment!'),
-					_('System not allow to confirm a PO Amendment without Amendment Line !!'))
+				raise osv.except_osv(_('Warning !'),_('System not allow to confirm a PO Amendment without Amendment Line !!'))
 			#if amend_obj.po_id.bill_flag == True:
 				#raise osv.except_osv(
 				#_('System not allow for Amendment!'),
@@ -774,7 +775,7 @@ class kg_purchase_amendment(osv.osv):
 			else:			
 				po_id = amend_obj.po_id.id
 				po_record = po_obj.browse(cr,uid,po_id)
-				po_obj.write(cr,uid,po_id,{'amend_flag': True})
+				po_obj.write(cr,uid,po_id,{'amend_flag': False})
 				if amend_obj.partner_id.id != amend_obj.partner_id_amend.id:
 					po_obj.write(cr,uid,po_id,{'partner_id': amend_obj.partner_id_amend.id,'add_test':amend_obj.add_text_amend})
 				if amend_obj.po_date != amend_obj.po_date_amend:
@@ -897,8 +898,7 @@ class kg_purchase_amendment(osv.osv):
 						pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
 						if pi_line_record.pending_qty <= 0:
 							if not amend_line.kg_poindent_lines:
-								raise osv.except_osv(_('If you want to increase PO Qty'),
-									_('Select PI for this Product')) 
+								raise osv.except_osv(_('If you want to increase PO Qty'),_('Select PI for this Product')) 
 						else:
 							pi_product_qty = pi_line_record.product_qty
 							pi_pending_qty = pi_line_record.pending_qty
@@ -921,8 +921,7 @@ class kg_purchase_amendment(osv.osv):
 								pi_pending_qty += re_qty
 								pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : pi_pending_qty})
 							else:
-								raise osv.except_osv(_('You can not decrease PO Qty'),
-									_('Because GRN is already created'))
+								raise osv.except_osv(_('You can not decrease PO Qty'),_('Because GRN is already created'))
 						else:
 							pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
 							pi_pending_qty = pi_line_record.pending_qty
@@ -949,17 +948,15 @@ class kg_purchase_amendment(osv.osv):
 																 })
 					if amend_line.product_qty != amend_line.product_qty_amend:
 						grn_sql = """ select sum(po_qty) - sum(po_grn_qty) as bal_po_grn_qty from po_grn_line where po_id = %s and product_id = %s """%(amend_obj.po_id.id,amend_line.product_id.id)
-						cr.execute(grn_sql)		
+						cr.execute(grn_sql)
 						grn_data = cr.dictfetchall()
 						if grn_data:
 							if grn_data[0]['bal_po_grn_qty'] == 0:
-								raise osv.except_osv(_('Please Check GRN!'),
-									_('GRN Already Created For This PO!!'))
+								raise osv.except_osv(_('Warning !'),_('GRN Already Created For This PO !!'))
 						if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
 							raise osv.except_osv(_('All Qty has received for this PO !'),
 								_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
 						disc_value = (amend_line.product_qty_amend * amend_line.price_unit_amend) * amend_line.kg_discount_per_amend / 100
-						print "kg_discount_per_value :::::::::::::::", disc_value
 						po_line_obj.write(cr,uid,po_line_id,{
 								'product_qty': amend_line.product_qty_amend,
 								'pending_qty': amend_line.pending_qty_amend,
@@ -968,10 +965,8 @@ class kg_purchase_amendment(osv.osv):
 					
 					if amend_line.price_unit != amend_line.price_unit_amend:
 						pinv_obj = self.pool.get('kg.purchase.invoice').search(cr,uid,[('po_so_name','=',amend_obj.po_id.name),('state','=','approved')])
-						print"pinv_objpinv_obj",pinv_obj
 						if pinv_obj:
-							raise osv.except_osv(_('Please Check Invoice!'),
-								_('Invoice Already Created For This PO!!'))
+							raise osv.except_osv(_('Warning !'),_('Invoice Already Created For This PO!!'))
 						po_line_obj.write(cr,uid,po_line_id,{
 							'price_unit': amend_line.price_unit_amend})
 					if amend_line.brand_id.id != amend_line.brand_id_amend.id:
@@ -980,8 +975,7 @@ class kg_purchase_amendment(osv.osv):
 						grn_data = cr.dictfetchall()
 						if grn_data:
 							if grn_data[0]['po_grn_qty'] == 0:
-								raise osv.except_osv(_('Please Check GRN!'),
-									_('GRN Already Created For This PO!!'))
+								raise osv.except_osv(_('Warning !'),_('GRN Already Created For This PO !!'))
 						po_line_obj.write(cr,uid,po_line_id,{
 							'brand_id': amend_line.brand_id_amend.id})	
 					if amend_line.price_type_amend == 'per_kg':
@@ -998,9 +992,7 @@ class kg_purchase_amendment(osv.osv):
 					else:
 						qty = amend_line.product_qty_amend
 					self.pool.get('kg.purchase.amendment.line').write(cr,uid,amend_line.id,{'quantity_amend':qty})	
-					
 				else:
-					
 					if amend_line.product_qty != amend_line.product_qty_amend:
 						#~ grn_sql = """ select sum(po_qty) - sum(po_grn_qty) as bal_po_grn_qty from po_grn_line where po_id = %s and product_id = %s """%(amend_obj.po_id.id,amend_line.product_id.id)
 						grn_sql = """ select sum(line.po_qty) - sum(line.po_grn_qty) as bal_po_grn_qty 
@@ -1011,8 +1003,7 @@ class kg_purchase_amendment(osv.osv):
 						grn_data = cr.dictfetchall()
 						if grn_data:
 							if grn_data[0]['bal_po_grn_qty'] == 0:
-								raise osv.except_osv(_('Please Check GRN!'),
-									_('GRN Already Created For This PO!!'))
+								raise osv.except_osv(_('Warning !'),_('GRN Already Created For This PO !!'))
 						if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
 							raise osv.except_osv(_('All Qty has received for this PO !'),
 								_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
@@ -1026,32 +1017,24 @@ class kg_purchase_amendment(osv.osv):
 					if amend_line.price_unit != amend_line.price_unit_amend:
 						pinv_obj = self.pool.get('kg.purchase.invoice').search(cr,uid,[('po_so_name','=',amend_obj.po_id.name),('state','=','approved')])
 						if pinv_obj:
-							raise osv.except_osv(_('Please Check Invoice!'),
-								_('Invoice Already Created For This PO!!'))
-						
-						po_line_obj.write(cr,uid,po_line_id,{
-							'price_unit': amend_line.price_unit_amend})
+							raise osv.except_osv(_('Warning !'),_('Invoice Already Created For This PO !!'))
+						po_line_obj.write(cr,uid,po_line_id,{'price_unit': amend_line.price_unit_amend})
 					if amend_line.brand_id.id != amend_line.brand_id_amend.id:
 						grn_sql = """ select sum(po_qty) - sum(po_grn_qty) as bal_po_grn_qty from po_grn_line where po_id = %s and product_id = %s """%(amend_obj.po_id.id,amend_line.product_id.id)
 						cr.execute(grn_sql)		
 						grn_data = cr.dictfetchall()
 						if grn_data:
 							if grn_data[0]['bal_po_grn_qty'] == 0:
-								raise osv.except_osv(_('Please Check GRN!'),
-									_('GRN Already Created For This PO!!'))
-						po_line_obj.write(cr,uid,po_line_id,{
-							'brand_id': amend_line.brand_id_amend.id})
+								raise osv.except_osv(_('Warning !'),_('GRN Already Created For This PO !!'))
+						po_line_obj.write(cr,uid,po_line_id,{'brand_id': amend_line.brand_id_amend.id})
 					if amend_line.moc_id.id != amend_line.moc_id_amend.id:
-						po_line_obj.write(cr,uid,po_line_id,{
-							'moc_id': amend_line.moc_id_amend.id})
+						po_line_obj.write(cr,uid,po_line_id,{'moc_id': amend_line.moc_id_amend.id})
 					if amend_line.moc_id_temp.id != amend_line.moc_id_temp_amend.id:
-						po_line_obj.write(cr,uid,po_line_id,{
-							'moc_id_temp': amend_line.moc_id_temp_amend.id})
+						po_line_obj.write(cr,uid,po_line_id,{'moc_id_temp': amend_line.moc_id_temp_amend.id})
 					if amend_line.product_id.id != amend_line.product_id_amend.id:
 						po_grn_obj = self.pool.get('po.grn.line').search(cr,uid,[('po_id','=',amend_obj.po_id.id)])
 						if po_grn_obj:
-							raise osv.except_osv(_('Please Check GRN!'),
-								_('GRN Already Created For This PO!!'))
+							raise osv.except_osv(_('Warning !'),_('GRN Already Created For This PO !!'))
 						po_line_obj.write(cr,uid,po_line_id,{'product_id': amend_line.product_id_amend.id})
 				
 				# PO Line updation
@@ -1087,6 +1070,8 @@ class kg_purchase_amendment(osv.osv):
 					po_line_obj.write(cr,uid,po_line_id,{'quantity': amend_line.quantity_amend})
 				if amend_line.price_type != amend_line.price_type_amend:
 					po_line_obj.write(cr,uid,po_line_id,{'price_type': amend_line.price_type_amend})
+				if amend_line.po_copy_uom.id != amend_line.po_copy_uom_amend.id:
+					po_line_obj.write(cr,uid,po_line_id,{'po_copy_uom': amend_line.po_copy_uom_amend.id})
 				
 				#~ order_line_rec = amend_line.po_line_id
 				#~ product_tax_amt = self._amount_line_tax(cr, uid, order_line_rec, context=context)	
@@ -1095,8 +1080,7 @@ class kg_purchase_amendment(osv.osv):
 				if amend_line.product_id.id != amend_line.product_id_amend.id:
 					po_grn_obj = self.pool.get('po.grn.line').search(cr,uid,[('po_id','=',amend_obj.po_id.id)])
 					if po_grn_obj:
-						raise osv.except_osv(_('Please Check GRN!'),
-							_('GRN Already Created For This PO!!'))
+						raise osv.except_osv(_('Warning !'),_('GRN Already Created For This PO !!'))
 					po_line_obj.write(cr,uid,po_line_id,{'product_id': amend_line.product_id_amend.id})
 				cr.execute(""" select tax_id from amendment_order_tax where amend_line_id = %s """ %(amend_line.id))
 				data = cr.dictfetchall()
@@ -1105,15 +1089,13 @@ class kg_purchase_amendment(osv.osv):
 				for i in range(len(val)):
 					cr.execute(""" INSERT INTO purchase_order_taxe (ord_id,tax_id) VALUES(%s,%s) """ %(po_line_id,val[i]))
 				else:
-					print "NO PO Line Changs"
+					pass
 				amend_line.write({'line_state': 'done'})
-				
 				
 			cr.execute(""" select count(id) from kg_purchase_amendment where state = 'approved' and po_id = %s """ %(amend_obj.po_id.id))
 			revision_data = cr.dictfetchall()
 			if revision_data:
 				po_obj.write(cr,uid,amend_obj.po_id.id,{'revision': revision_data[0]['count']+1})
-			print "Tax Calculation Methods are Going to Call"
 			#po_line_obj._amount_line(cr,uid,[po_id],prop=None,arg=None,context=None)
 			po_obj._amount_line_tax(cr,uid,pol_record,context=None)
 			po_obj._amount_all(cr,uid,[po_id],field_name=None,arg=False,context=None)
@@ -1158,13 +1140,11 @@ class kg_purchase_amendment(osv.osv):
 									invoice_obj.update_actual_values(cr, uid, ids,context=None)
 					else:
 						pass
-		
 		return True
 		cr.close()
 	
 	def advance_creation(self,cr,uid,amend_obj,context=None):
 		advance_amt = (amend_obj.po_id.amount_total / 100.00) * amend_obj.advance_amt_amend
-		print"advance_amt",advance_amt
 		sup_adv_id = self.pool.get('kg.supplier.advance').create(cr,uid,{'supplier_id': amend_obj.partner_id_amend.id,
 															'order_category': 'purchase',
 															'po_id': amend_obj.po_id.id,
@@ -1187,23 +1167,7 @@ class kg_purchase_amendment(osv.osv):
 																})
 		
 		return True
-			
-	def onchange_partner_id(self, cr, uid, ids, partner_id_amend,add_text_amend):
-		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: onchange_partner_id called...')
-		partner = self.pool.get('res.partner')
-		if not partner_id_amend:
-			return {'value': {
-				'add_text_amend': False,
-				
-				}}
-		supplier_address = partner.address_get(cr, uid, [partner_id_amend], ['default'])
-		supplier = partner.browse(cr, uid, partner_id_amend)
-		tot_add = (supplier.street or '')+ ' ' + (supplier.street2 or '') + '\n'+(supplier.city_id.name or '')+ ',' +(supplier.state_id.name or '') + '-' +(supplier.zip or '') + '\nPh:' + (supplier.phone or '')+ '\n' +(supplier.mobile or '')		
-		return {'value': {
-			'add_text_amend' : tot_add or False
-			}}
-		
-		
+	
 	def send_to_dms(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
@@ -1212,16 +1176,38 @@ class kg_purchase_amendment(osv.osv):
 		rec_code = str(rec.name)		
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
-			
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&po_amendment='+rec_code
-
+		
+		url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&po_amendment='+rec_code
+		
 		return {
 					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',
 					  'type'	 : 'ir.actions.act_url',
 					  'target'   : 'current',
-					  'url'	  : url
+					  'url'	  	 : url
 			   }
+	
+	def button_dummy(self, cr, uid, ids, context=None):
+		return True
+	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_purchase_amendment, self).write(cr, uid, ids, vals, context)
+	
+	def unlink(self, cr, uid, ids, context=None):
+		if context is None:
+			context = {}
+		amend = self.read(cr, uid, ids, ['state'], context=context)
+		unlink_ids = []
+		for t in amend:
+			if t['state'] in ('amend','draft'):
+				unlink_ids.append(t['id'])
+			else:
+				raise osv.except_osv(_('Invalid action !'), _('System not allow to delete a UN-DRAFT state Purchase Amendment!!'))
+		amend_lines_to_del = self.pool.get('kg.purchase.amendment.line').search(cr, uid, [('amendment_id','in',unlink_ids)])
+		self.pool.get('kg.purchase.amendment.line').unlink(cr, uid, amend_lines_to_del)
+		osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+		return True
 	
 kg_purchase_amendment()
 
@@ -1291,6 +1277,7 @@ class kg_purchase_amendment_line(osv.osv):
 		'received_qty':fields.float('Received Qty'),
 		'cancel_qty':fields.float('Cancel Qty'),
 		'product_uom': fields.many2one('product.uom', 'UOM',readonly=True),
+		'po_copy_uom': fields.many2one('product.uom','PO Copy UOM',readonly=True),
 		'note': fields.text('Remarks'),
 		'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
 		'kg_discount_per_value': fields.float('Discount(%)Value', digits_compute= dp.get_precision('Discount')),
@@ -1317,6 +1304,7 @@ class kg_purchase_amendment_line(osv.osv):
 		# Amendment Fields:
 		
 		'product_id_amend': fields.many2one('product.product','Amend Product'),
+		'po_copy_uom_amend': fields.many2one('product.uom','Amend PO Copy UOM'),
 		'kg_discount_amend': fields.float('Amend Discount Amount', digits_compute= dp.get_precision('Discount')),
 		'price_unit_amend': fields.float('Amend Unit Price', digits_compute= dp.get_precision('Product Price')),
 		'product_qty_amend': fields.float('Amend Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
@@ -1341,11 +1329,12 @@ class kg_purchase_amendment_line(osv.osv):
 		'uom_conversation_factor_amend': fields.related('product_id_amend','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True),
 		'approval_flag': fields.boolean('Spl Approval'),
 		'rate_revise': fields.selection([('yes','Yes'),('no','No')],'Rate Revise'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode'),
 		
 		## Child Tables Declaration
 		
-		'kg_poindent_lines':fields.many2many('purchase.requisition.line','kg_poindent_po_line' , 'po_order_id', 'piline_id','POIndent Lines',
-				domain="[('pending_qty','>','0'), '&',('line_state','=','process'), '&',('draft_flag','=', False),'&',('product_id','=',product_id)]"),
+		'kg_poindent_lines':fields.many2many('purchase.requisition.line','m2m_poamend_po_indent_line','poamend_id','piline_id','POIndent Lines',
+				domain="[('pending_qty','>','0'),'&',('line_state','=','process'),'&',('draft_flag','=', False),'&',('product_id','=',product_id)]"),
 		
 	}
 	
@@ -1362,33 +1351,30 @@ class kg_purchase_amendment_line(osv.osv):
 	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
-			
+	
 	def onchange_price_unit(self,cr,uid,price_unit,price_unit_amend,
 					kg_discount_per_amend,kg_discount_per_value_amend,product_qty_amend):
-						
 		if price_unit != price_unit_amend:
 			disc_value = (product_qty_amend * price_unit_amend) * kg_discount_per_amend / 100.00
 			return {'value': {'kg_discount_per_value_amend': disc_value}}
 		else:
-			print "NO changes"
-			
+			pass
+	
 	def onchange_discount_value_calc(self, cr, uid, ids, kg_discount_per_amend,product_qty_amend,price_unit_amend):
 		discount_value = (product_qty_amend * price_unit_amend) * kg_discount_per_amend / 100.00
-		
 		if discount_value:
 			return {'value': {'kg_discount_per_value_amend': discount_value,'discount_flag':True}}
 		else:
 			return {'value': {'kg_discount_per_value_amend': discount_value,'discount_flag':False}}
-		
+	
 	def onchange_disc_amt(self,cr,uid,ids,kg_discount_amend,product_qty_amend,price_unit_amend,kg_disc_amt_per_amend):
-		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_disc_amt called...')
 		if kg_discount_amend:
 			kg_discount_amend = kg_discount_amend + 0.00
 			amt_to_per = (kg_discount_amend / (product_qty_amend * price_unit_amend or 1.0 )) * 100.00
 			return {'value': {'kg_disc_amt_per_amend': amt_to_per,'discount_per_flag':True}}
 		else:
 			return {'value': {'kg_disc_amt_per_amend': 0.0,'discount_per_flag':False}}
-		
+	
 	def onchange_qty(self, cr, uid, ids,product_qty,product_qty_amend,pending_qty,pending_qty_amend,pi_line_id,pi_qty,uom_conversation_factor_amend,length_amend,breadth_amend,price_type_amend,product_id_amend):	
 		# Need to do block flow
 		value = {'pending_qty_amend': '','quantity_amend': 0}
@@ -1428,10 +1414,10 @@ class kg_purchase_amendment_line(osv.osv):
 					value = {'pending_qty_amend': amend_pen_qty}
 		if uom_conversation_factor_amend == 'two_dimension':
 			if length_amend <= 0:
-				raise osv.except_osv(_('Warning!'),_("You can not save this Length with Zero value!") )
+				raise osv.except_osv(_('Warning !'),_("You can not save this Length with Zero value !!"))
 			if breadth_amend <= 0:
-				raise osv.except_osv(_('Warning!'),_("You can not save this Breadth with Zero value!") )
-			
+				raise osv.except_osv(_('Warning !'),_("You can not save this Breadth with Zero value !!"))
+		
 		#~ value = {'pending_qty_amend': ''}
 		#~ if product_qty == pending_qty:
 			#~ value = {'pending_qty_amend': product_qty_amend }			
@@ -1463,7 +1449,7 @@ class kg_purchase_amendment_line(osv.osv):
 			quantity = product_qty_amend
 		value = {'quantity_amend': quantity}
 		return {'value': value}
-		
+	
 	def onchange_moc(self, cr, uid, ids, moc_id_temp_amend):
 		value = {'moc_id_amend':''}
 		if moc_id_temp_amend:
@@ -1474,49 +1460,43 @@ class kg_purchase_amendment_line(osv.osv):
 	def onchange_bnd_moc(self, cr, uid, ids, product_id_amend,brand_id_amend):
 		value = {'moc_id_temp_amend':''}
 		return {'value': value}
-		
+	
 	def onchange_brand_moc(self, cr, uid, ids, product_id_amend):
 		product_uom = ''
 		if product_id_amend:
 			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id_amend)
 			product_uom = prod_rec.uom_po_id.id
-		value = {'brand_id_amend':'','moc_id_amend':'','moc_id_temp_amend':'','product_uom_amend':product_uom,'price_type_amend':prod_rec.price_type}
+		value = {'brand_id_amend':'','moc_id_amend':'','moc_id_temp_amend':'','product_uom_amend':product_uom,'price_type_amend':prod_rec.price_type,'po_copy_uom_amend':prod_rec.po_copy_uom.id,'uom_conversation_factor_amend':prod_rec.uom_conversation_factor}
+		print"valuevaluevaluevaluevaluevalue",value
 		return {'value': value}
-		
+	
 	def pol_cancel(self, cr, uid, ids, context=None):
 		line_rec = self.browse(cr,uid,ids)
 		if line_rec[0].amendment_id.state == 'draft':			
 			if line_rec[0].note_amend == '' or line_rec[0].note_amend == False:
-				raise osv.except_osv(_('Remarks Required !! '),
-					_('Without remarks you can not cancel a PO Item...'))				
+				raise osv.except_osv(_('Remarks Required !'),_('Without remarks you can not cancel a PO Item...'))				
 			if line_rec[0].pending_qty == 0.0:
-				raise osv.except_osv(_('All Quanties are Received !! '),
-					_('You can cancel a PO line before receiving product'))					
+				raise osv.except_osv(_('All Quanties are Received !'),_('You can cancel a PO line before receiving product'))					
 			else:				
 				self.write(cr,uid,ids,{'line_state':'cancel', 
 										'cancel_flag': True,
 										'cancel_qty' : line_rec[0].pending_qty,
 										})
 		else:
-			raise osv.except_osv(_('Amendment Confirmed Already !! '),
-				_('System allow to cancel a line Item in draft state only !!!...'))
-						
+			raise osv.except_osv(_('Amendment Confirmed Already !'),
+				_('System allow to cancel a line Item in draft state only !!...'))
 		return True
-		
+	
 	def pol_draft(self,cr,uid,ids,context=None):
 		self.write(cr,uid,ids,{'line_state':'draft', 'cancel_flag': False})
 		return True
-		
-	"""	
-	def unlink(self,cr,uid,ids,context=None):
-		print "Amend =======>unlink called"
-		if context is None:
-			context = {}
-			Allows to delete sales order lines in draft,cancel states
-		for rec in self.browse(cr, uid, ids, context=context):
-			if rec.line_state in ['draft', 'confirm']:
-				raise osv.except_osv(_('Invalid Action!'), _('Cannot delete a sales order line which is in state \'%s\'.') %(rec.line_state,))
-		return super(kg_purchase_amendment_line, self).unlink(cr, uid, ids, context=context)	
-		"""
+	
+	#~ def unlink(self,cr,uid,ids,context=None):
+		#~ if context is None:
+			#~ context = {}
+		#~ for rec in self.browse(cr, uid, ids, context=context):
+			#~ if rec.line_state in ['draft', 'confirm']:
+				#~ raise osv.except_osv(_('Warning !'),_('Cannot delete a sales order line which is in state \'%s\'.') %(rec.line_state,))
+		#~ return super(kg_purchase_amendment_line, self).unlink(cr, uid, ids, context=context)	
 	
 kg_purchase_amendment_line()

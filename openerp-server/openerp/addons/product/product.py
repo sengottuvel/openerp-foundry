@@ -34,7 +34,6 @@ from openerp import tools
 from openerp.tools import float_compare, DEFAULT_SERVER_DATETIME_FORMAT
 import openerp.addons.decimal_precision as dp
 import logging
-import base64
 _logger = logging.getLogger(__name__)
 
 def ean_checksum(eancode):
@@ -196,6 +195,8 @@ class product_uom(osv.osv):
 									  ('reference','Reference Unit of Measure for this category'),
 									  ('smaller','Smaller than the reference Unit of Measure')],'Type'),
 		
+		'uom_category': fields.selection([('length','Length'),('other','Others')],'Type',required=True),
+							  
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'dummy_state': fields.selection([('draft','Draft'),('confirm','WFA'),('approved','Approved'),
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
@@ -722,6 +723,7 @@ class product_template(osv.osv):
 product_template()
 
 class product_product(osv.osv):
+	
 	def view_header_get(self, cr, uid, view_id, view_type, context=None):
 		if context is None:
 			context = {}
@@ -919,7 +921,7 @@ class product_product(osv.osv):
 		'minimum_qty':fields.integer('Minimum Stock Qty'),
 		'reorder_qty':fields.integer('Re-Order Qty'),
 		'stock_in_hand':fields.integer('Stock In Hand'),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'creation_date':fields.datetime('Created Date',readonly=True),
 		# image: all image fields are base64 encoded and PIL-supported
 		'image': fields.binary("Image",
 			help="This field holds the image used as image for the product, limited to 1024x1024px."),
@@ -1068,15 +1070,13 @@ class product_product(osv.osv):
 					unlink_product_tmpl_ids.append(tmpl_id)
 				unlink_ids.append(product.id)
 			else:
-				raise osv.except_osv(_('Warning!'),
-					_('You can not delete this entry !!'))
+				raise osv.except_osv(_('Delete access denied !'), _('Unable to delete. Draft entry only you can delete !!'))
 		res = super(product_product, self).unlink(cr, uid, unlink_ids, context=context)
-		# delete templates after calling super, as deleting template could lead to deleting
-		# products due to ondelete='cascade'
+		
 		self.pool.get('product.template').unlink(cr, uid, unlink_product_tmpl_ids, context=context)
 			
 		return res
-
+	
 	def onchange_uom(self, cursor, user, ids, uom_id, uom_po_id):		
 		if uom_id and uom_po_id:
 			if uom_id == uom_po_id:
@@ -1087,16 +1087,20 @@ class product_product(osv.osv):
 			uom=uom_obj.browse(cursor,user,[uom_id])[0]
 			uom_po=uom_obj.browse(cursor,user,[uom_po_id])[0]
 			if uom.category_id.id != uom_po.category_id.id:
-				return {'value': {'uom_po_id': '','po_uom_coeff':po_coeff}}
+				return {'value': {'uom_po_id':'','po_uom_coeff':po_coeff,'uom_code':uom.code}}
+			else:
+				return {'value': {'uom_po_id':uom_po_id,'po_uom_coeff':po_coeff,'uom_code':uom.code}}
 		return False
-		
-	def onchange_po_uom(self, cursor, user, ids, uom_id, uom_po_id):		
+	
+	def onchange_po_uom(self, cursor, user, ids, uom_id, uom_po_id):
+		uom_obj=self.pool.get('product.uom')
+		uom=uom_obj.browse(cursor,user,[uom_id])[0]	
 		if uom_id == uom_po_id:
-			return {'value': {'po_uom_coeff': 1}}
+			return {'value': {'po_uom_coeff': 1,'uom_code':uom.code,'po_copy_uom':uom_po_id}}
 		else:
-			return {'value': {'po_uom_coeff': 0}}
+			return {'value': {'po_uom_coeff': 0,'uom_code':uom.code,'po_copy_uom':uom_po_id}}
 		return {}
-
+	
 	def _check_ean_key(self, cr, uid, ids, context=None):
 		for product in self.read(cr, uid, ids, ['ean13'], context=context):
 			res = check_ean(product['ean13'])
@@ -1115,7 +1119,7 @@ class product_product(osv.osv):
 				return False
 			return True
 		return True	
-
+	
 	_constraints = [
 	
 	(_check_ean_key, 'You provided an invalid "EAN13 Barcode" reference. You may use the "Internal Reference" field instead.', ['ean13']),
@@ -1263,28 +1267,6 @@ class product_product(osv.osv):
 		if context and context.get('search_default_categ_id', False):
 			args.append((('categ_id', 'child_of', context['search_default_categ_id'])))
 		return super(product_product, self).search(cr, uid, args, offset=offset, limit=limit, order=order, context=context, count=False)
-	
-	def send_to_dms(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
-		rec_user = str(res_rec.login)
-		rec_pwd = str(res_rec.password)
-		rec_code = str(rec.name)		
-		encoded_user = base64.b64encode(rec_user)
-		encoded_pwd = base64.b64encode(rec_pwd)
-		
-		if rec.product_type == 'ms':
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&Product_Master-Design='+rec_code
-		
-
-
-		return {
-					  'name'	 : 'Go to website',
-					  'res_model': 'ir.actions.act_url',
-					  'type'	 : 'ir.actions.act_url',
-					  'target'   : 'current',
-					  'url'	  : url
-			   }
 
 product_product()
 

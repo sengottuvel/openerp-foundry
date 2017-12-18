@@ -17,7 +17,7 @@ class kg_partner(osv.osv):
 	
 	_name = "res.partner"
 	_inherit = "res.partner"
-	_description = "Partner Managment"
+	_description = "Partner Management"
 	
 	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
@@ -48,11 +48,11 @@ class kg_partner(osv.osv):
 	_columns = {
 	
 	'city_id' : fields.many2one('res.city', 'City'),
-	'tin_no' : fields.char('TIN'),
-	'vat_no' : fields.char('VAT'),
-	'pan_no' : fields.char('PAN'),
-	'tan_no' : fields.char('TAN'),
-	'cst_no' : fields.char('CST'),
+	'tin_no' : fields.char('TIN',size=15),
+	'vat_no' : fields.char('VAT',size=12),
+	'pan_no' : fields.char('PAN',size=12),
+	'tan_no' : fields.char('TAN',size=12),
+	'cst_no' : fields.char('CST',size=12),
 	'gst_no' : fields.char('GST'),
 	'gs_tin_no' : fields.char('GS TIN NO.',size=15),
 	'supply_type': fields.selection([('material','Material'),('service','Service'),('contractor','Contractor'),('labour','Labour'),('all','All')],'Supply Type'),
@@ -67,16 +67,10 @@ class kg_partner(osv.osv):
 	'transport_id': fields.many2one('kg.transport','Transport'),
 	'contact_person': fields.char('Contact Person', size=128),
 	'landmark': fields.char('Landmark', size=128),
-	#~ 'partner_state': fields.selection([('draft','Draft'),('confirm','WFA'),('approve','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status'),
 	'group_flag': fields.boolean('Is Group Company'),
 	'delivery_id': fields.many2one('kg.delivery.master','Delivery Type'),
-	#'child_ids': fields.one2many('res.partner', 'parent_id', 'Contacts', domain=[('active','=',True)]),
-	
 	'con_designation': fields.char('Designation'),
 	'con_whatsapp': fields.char('Whatsapp No'),
-	#~ 'acc_number': fields.char('Whatsapp No'),
-	#~ 'bank_name': fields.char('Whatsapp No'),
-	#~ 'bank_bic': fields.char('Whatsapp No'),
 	'delivery_ids':fields.one2many('kg.delivery.address', 'src_id', 'Delivery Address'),
 	'billing_ids':fields.one2many('kg.billing.address', 'bill_id', 'Billing Address'),
 	'consult_ids':fields.one2many('kg.consultant.fee', 'consult_id', 'Consultant Fees'),
@@ -89,7 +83,7 @@ class kg_partner(osv.osv):
 	'cancel_remark': fields.text('Cancel Remarks'),
 	'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 	'user_ref_id': fields.many2one('res.users','User Name'),
-	'adhar_id': fields.char('Adhar ID'),
+	'adhar_id': fields.char('Adhar ID',size=16),
 	'contractor': fields.boolean('Contractor'),
 	'tin_flag': fields.boolean('TIN Flag'),
 	'mobile_2': fields.char('Mobile2',size=12),
@@ -113,7 +107,7 @@ class kg_partner(osv.osv):
 	'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 	'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 	'updated_date': fields.datetime('Last Updated Date',readonly=True),
-	'updated_by': fields.many2one('res.users','Last Updated By',readonly=True),
+	'updated_by': fields.many2one('res.users','Last Updated By',readonly=True),	
 	
 	}
 	
@@ -131,35 +125,20 @@ class kg_partner(osv.osv):
 	
 	def onchange_city(self, cr, uid, ids, city_id, context=None):
 		if city_id:
-			state_id = self.pool.get('res.city').browse(cr, uid, city_id, context).state_id.id
-			return {'value':{'state_id':state_id}}
+			city_rec = self.pool.get('res.city').browse(cr, uid, city_id, context)		
+			return {'value':{'state_id':city_rec.state_id.id,'country_id':city_rec.country_id.id}}
+		else:
+			pass
 		return {}
 	
 	def onchange_zip(self,cr,uid,ids,zip,context=None):
-		if len(str(zip)) in (6,7,8):
+		if len(str(zip)) in range(6,8):
 			value = {'zip':zip}
 		else:
-			raise osv.except_osv(_('Check zip number !!'),
-				_('zip should contain 6-8 digit numerics. Else system not allow to save. !!'))
+			raise osv.except_osv(_('Invalid Zip code !!'),_(' Enter your correct 6-8 digits zip code !!'))
 		if zip.isdigit() == False:
-			raise osv.except_osv(_('Check zip number !!'),
-				_('Please enter numeric values !!'))
+			raise osv.except_osv(_('Check zip number !!'),_('Please enter numeric values !!'))
 		return {'value': value}
-	
-	#~ def onchange_tin_cst(self,cr,uid,ids,tin_no,cst_no,context=None):
-		#~ if tin_no:
-			#~ if len(str(tin_no)) == 11:
-				#~ value = {'tin_no':tin_no}
-			#~ else:
-				#~ raise osv.except_osv(_('Check TIN number !!'),
-					#~ _('Please enter 11 digit number !!'))
-		#~ if cst_no:
-			#~ if len(str(cst_no)) == 11:
-				#~ value = {'cst_no':cst_no}
-			#~ else:
-				#~ raise osv.except_osv(_('Check CST number !!'),
-					#~ _('Please enter 11 digit number !!'))
-		#~ return {'value': value}
 	
 	def confirm_partner(self, cr, uid, ids, context=None): 
 		rec = self.browse(cr, uid, ids[0])
@@ -179,7 +158,6 @@ class kg_partner(osv.osv):
 	def approve_partner(self, cr, uid, ids, context=None): 
 		rec = self.browse(cr, uid, ids[0])
 		if rec.partner_state == 'confirm':
-			
 			## Account master creation process start
 			
 			internal_type = note = account_receivable_id = account_payable_id =  ''
@@ -216,11 +194,6 @@ class kg_partner(osv.osv):
 						ac_type_rec = self.pool.get('account.account.type').browse(cr,uid,ac_type_ids[0])
 						ac_type = ac_type_rec.id
 					account_payable_id = ac_obj.account_creation(cr,uid,rec.name,ac_type,rec.id,entry_mode,internal_type,note,context=context)
-				#~ account_receivable_id = ac_obj.account_creation(cr,uid,rec.name,ac_type,rec.id,entry_mode,internal_type,note,context=context)
-				#~ creditor_ids = ac_obj.search(cr,uid,[('name','=','Sundry Creditors')])
-				#~ if creditor_ids:
-					#~ creditor_rec = ac_obj.browse(cr,uid,creditor_ids[0])
-					#~ account_payable_id = creditor_rec.id
 				
 				self.write(cr, uid, ids, {'property_account_receivable':account_receivable_id,'property_account_payable':account_payable_id})
 			
@@ -249,121 +222,71 @@ class kg_partner(osv.osv):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
 			if rec.partner_state != 'draft':			
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
+				raise osv.except_osv(_('Delete access denied!'),_('Unable to delete. Draft entry only you can delete !!'))
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)	
 	
-	def write(self, cr, uid, ids, vals, context=None):
-		print"valsssssS",vals
-		#if len(str(vals['zip'])) == 6:
-		#	pass
-		#else:
-		#	raise osv.except_osv(_('Check zip number !!'),
-		#		_('Please enter six digit number !!'))
+	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'updated_date': time.strftime('%Y-%m-%d %H:%M:%S'),'updated_by':uid})
 		return super(kg_partner, self).write(cr, uid, ids, vals, context)
 	
-	def _check_zip(self, cr, uid, ids, context=None):		
+	def _validations(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.zip:
-			if len(str(rec.zip)) in (6,7,8) and rec.zip.isdigit() == True:
-				return True
-		else:
-			return True
-		return False
-	
-	def _check_gs_tin(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
+			if len(str(rec.zip)) not in range(6,8) and rec.zip.isdigit() != True:
+				raise osv.except_osv(_('Invalid Zip code !!'),_('Enter your correct 6-8 digits zip code !!'))
 		if rec.gs_tin_no:
-			if len(str(rec.gs_tin_no)) == 15:
-				return True
-		else:
-			return True
-		return False
-	
-	def _check_cst(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
+			if len(str(rec.gs_tin_no)) != 15:
+				raise osv.except_osv(_('Warning !!'),_('GS TIN No. should contain 15 letters. Else system not allow to save. !!'))
 		if rec.cst_no:
-			if len(str(rec.cst_no)) == 11 and rec.cst_no.isdigit() == True:
-				return True
-		else:
-			return True
-		return False
-	
-	def _check_vat(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
+			if len(str(rec.cst_no)) != 11 and rec.cst_no.isdigit() != True:
+				raise osv.except_osv(_('Warning !!'),_('Enter your correct 11 digits GS TIN No. !!'))
 		if rec.vat_no:
-			if len(str(rec.vat_no)) == 15:
-				return True
-		else:
-			return True
-		return False
-	
-	def _check_phone(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
+			if len(str(rec.vat_no)) != 15:
+				raise osv.except_osv(_('Warning !!'),_('Enter your correct 15 letters VAT No. !!'))
 		if rec.phone:
-			if len(str(rec.phone)) in (8,9,10,11,12,13,14,15) and rec.phone.isdigit() == True:
-				return True
-		else:
-			return True
-		return False
-	
-	def _validate_email(self, cr, uid, ids, context=None):
-		rec = self.browse(cr,uid,ids[0]) 
-		if rec.email==False:
-			return True
-		else:
-			if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", rec.email) != None:
-				return True
-			else:
-				raise osv.except_osv('Invalid Email', 'Please enter a valid email address')   
-	
-	def _check_website(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
+			if len(str(rec.phone)) not in range(8,15) and rec.phone.isdigit() != True:
+				raise osv.except_osv(_('Warning !!'),_('Enter your correct 8-15 digit numerics. Phone No. !!'))
+		if rec.email != False:
+			if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", rec.email) == None:
+				raise osv.except_osv(_('Invalid Email !!'),_('Enter a valid email address !!'))
 		if rec.website != False:
 			#~ if re.match('www?.(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',rec.website):
-			if re.match('www.(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',rec.website):
-				return True
-			else:
-				return False
-		return True
-	
-	def _check_ifsc(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
+			if not re.match('www.(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',rec.website):
+				raise osv.except_osv(_('Invalid Email !!'),_('Enter a valid Website !!'))
 		if rec.bank_ids:
 			for item in rec.bank_ids:
 				if item.bank_bic:
-					if len(str(item.bank_bic)) == 11:
-						return True
-				else:
-					return True
-		else:
-			return True
-		return False
-	
-	def _check_acc_no(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
+					if len(str(item.bank_bic)) != 11:
+						raise osv.except_osv(_('Warning !!'),_('IFSC should contain 11 letters. !!'))
 		if rec.bank_ids:
 			for item in rec.bank_ids:
 				if item.acc_number:
-					if len(str(item.acc_number)) in (6,7,8,9,10,11,12,13,14,15,16,17,18) and item.acc_number.isdigit() == True:
-						return True
-				else:
-					return True
-		else:
-			return True
-		return False
-	
-	def _check_mobile_no(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
+					if len(str(item.acc_number)) not in range(6,18) and item.acc_number.isdigit() != True:
+						raise osv.except_osv(_('Warning !!'),_('Enter your correct 6-18 digit numerics. A/C No. !!'))
 		if rec.mobile:
-			if len(str(rec.mobile)) in (10,11,12) and rec.mobile.isdigit() == True:
-				return True
-		else:
-			return True
-		return False
+			if len(str(rec.mobile)) not in range(10,12) and rec.mobile.isdigit() != True:
+				raise osv.except_osv(_('Warning !!'),_('Enter your correct 10-12 digit numerics. Mobile No. !!'))
+		
+		if rec.max_deal_discount > 100 and rec.dealer == True:
+			raise osv.except_osv(_('Warning!'),_('Max dealer discount(%) should not be accept above 100!'))
+		if rec.max_cust_discount > 100 and rec.customer == True:
+			raise osv.except_osv(_('Warning!'),_('Max customer discount(%) should not be accept above 100!'))
+		if rec.max_spl_discount > 100 and rec.customer == True:
+			raise osv.except_osv(_('Warning!'),_('Max special discount(%) should not be accept above 100!'))
+		
+		if rec.delivery_ids:
+			ser_dups = self.pool.get('kg.delivery.address').search(cr,uid,[('src_id','=',rec.id),('default','=','t')])
+			if len(ser_dups) > 1:
+				raise osv.except_osv(_('Warning!'),_('More than one default Delivery address is not allowed !! '))
+				
+		if rec.billing_ids:
+			ser_dups = self.pool.get('kg.billing.address').search(cr,uid,[('bill_id','=',rec.id),('default','=','t')])
+			if len(ser_dups) > 1:
+				raise osv.except_osv(_('Warning!'),_('More than one default Billing address is not allowed !! '))
+	
+		return True
 	
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -390,73 +313,6 @@ class kg_partner(osv.osv):
 				res = True
 		return res
 	
-	def _unique_tin(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.tin_no:
-			tin_no = rec.tin_no
-			name = tin_no.upper()			
-			cr.execute(""" select tin_no from res_partner where tin_no = '%s' """ %(name))
-			data = cr.dictfetchall()	
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
-	
-	def _spl_name(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.name:
-			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
-			if name_special_char:
-				raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in Name!'))
-		if rec.adhar_id:
-			adhar_special_char = ''.join(c for c in rec.adhar_id if c in '!@#$%^~*{}?+/=')
-			if adhar_special_char:
-				raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in Adhar ID!'))
-		if rec.pan_no:	
-			pan_special_char = ''.join(c for c in rec.pan_no if c in '!@#$%^~*{}?+/=')
-			if pan_special_char:
-				raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in PAN!'))
-		if rec.gst_no:	
-			gst_special_char = ''.join(c for c in rec.gst_no if c in '!@#$%^~*{}?+/=')
-			if gst_special_char:
-				raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in GST!'))
-		if rec.gs_tin_no:	
-			gs_tin_no_special_char = ''.join(c for c in rec.gs_tin_no if c in '!@#$%^~*{}?+/=')
-			if gs_tin_no_special_char:
-				raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in GS TIN NO.!'))
-		if rec.tan_no:
-			tan_special_char = ''.join(c for c in rec.tan_no if c in '!@#$%^~*{}?+/=')
-			if tan_special_char:
-				raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in TAN!'))
-		if rec.cst_no:
-			cst_special_char = ''.join(c for c in rec.cst_no if c in '!@#$%^~*{}?+/=')
-			if cst_special_char:
-				raise osv.except_osv(_('Warning!'),_('Special Character Not in CST!'))
-		if rec.vat_no:
-			vat_special_char = ''.join(c for c in rec.vat_no if c in '!@#$%^~*{}?+/=')
-			if vat_special_char:
-				raise osv.except_osv(_('Warning!'),_('Special Character Not in VAT!'))
-		if rec.cheque_in_favour:
-			cheque_special_char = ''.join(c for c in rec.cheque_in_favour if c in '!@#$%^~*{}?+/=')
-			if cheque_special_char:
-				raise osv.except_osv(_('Warning!'),_('Special Character Not in Cheque in Favour Of!'))
-		if rec.max_deal_discount > 100 and rec.dealer == True:
-			raise osv.except_osv(_('Warning!'),_('Max dealer discount(%) should not be accept above 100!'))
-		if rec.max_cust_discount > 100 and rec.customer == True:
-			raise osv.except_osv(_('Warning!'),_('Max customer discount(%) should not be accept above 100!'))
-		if rec.max_spl_discount > 100 and rec.customer == True:
-			raise osv.except_osv(_('Warning!'),_('Max special discount(%) should not be accept above 100!'))
-		if rec.contact_person:
-			contact_special_char = ''.join(c for c in rec.contact_person if c in '!@#$%^~*{}?+/=')
-			if contact_special_char:
-				raise osv.except_osv(_('Warning!'),_('Special Character Not in Contact Person!'))
-			return True
-		else:
-			return True
-		return False
-	
 	def send_to_dms(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
@@ -467,10 +323,11 @@ class kg_partner(osv.osv):
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
 		if rec.customer == True:
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&customer='+rec_code
+			url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&customer='+rec_code
+
 		if rec.dealer == True:
-			url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&dealer='+rec_code
-		
+			url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&dealer='+rec_code
+
 		return {
 					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',
@@ -480,23 +337,14 @@ class kg_partner(osv.osv):
 			   }
 	
 	_constraints = [
-	
-		(_check_zip,'ZIP should contain 6-8 digit numerics. Else system not allow to save.',['ZIP']),
-		(_check_gs_tin,'GS TIN No. should contain 15 letters. Else system not allow to save.',['GS TIN']),
-		(_check_cst,'CST No. should contain 11 digit numerics. Else system not allow to save.',['CST']),
-		(_check_vat,'VAT No. should contain 15 letters. Else system not allow to save.',['VAT']),
-		(_validate_email,'Check Email !',['']),
-		(_check_website,'Check Website !',['Website']),
-		(_check_phone,'Phone No. should contain 8-15 digit numerics. Else system not allow to save.',['Phone']),
-		(_check_ifsc,'IFSC should contain 11 letters. Else system not allow to save.',['IFSC']),
-		(_check_acc_no,'A/C No. should contain 6-18 digit numerics. Else system not allow to save.',['A/C No.']),
-		(_check_mobile_no,'Mobile No. should contain 10-12 digit numerics. Else system not allow to save.',['Mobile']),
-		#~ (_name_validate, 'Name must be unique !!', ['Name']),		
-		#~ (_unique_tin, 'TIN must be unique !!', ['TIN']),
-		(_spl_name, 'Special Character Not Allowed!', ['']),
+		
+		(_validations,' ',[' ']),
+		#~ (_name_validate, ' ', [' ']),
+				
 		]
 	
 kg_partner()
+
 
 class kg_delivery_address(osv.osv):
 	
@@ -513,8 +361,8 @@ class kg_delivery_address(osv.osv):
 	'city_id': fields.many2one('res.city', 'City',select=True),
 	'state_id': fields.many2one('res.country.state', 'State'),
 	'country_id': fields.many2one('res.country', 'Country'),	
-	'contact_no': fields.char('Contact No', size=128),
-	'zip': fields.char('ZIP', size=128),
+	'contact_no': fields.char('Contact No', size=12),
+	'zip': fields.char('ZIP', size=8),
 	'date': fields.date('Creation Date'),
 	'default': fields.boolean('Default'),
 	
@@ -526,6 +374,14 @@ class kg_delivery_address(osv.osv):
 	
 	}
 	
+	def onchange_city(self, cr, uid, ids, city_id, context=None):
+		if city_id:
+			city_rec = self.pool.get('res.city').browse(cr, uid, city_id, context)		
+			return {'value':{'state_id':city_rec.state_id.id,'country_id':city_rec.country_id.id}}
+		else:
+			pass
+		return {}
+
 kg_delivery_address()
 
 class kg_billing_address(osv.osv):
@@ -556,6 +412,14 @@ class kg_billing_address(osv.osv):
 	
 	} 
 	
+	def onchange_city(self, cr, uid, ids, city_id, context=None):
+		if city_id:
+			city_rec = self.pool.get('res.city').browse(cr, uid, city_id, context)		
+			return {'value':{'state_id':city_rec.state_id.id,'country_id':city_rec.country_id.id}}
+		else:
+			pass
+		return {}
+		
 kg_billing_address()
 
 class kg_consultant_fee(osv.osv):
@@ -591,3 +455,26 @@ class kg_consultant_fee(osv.osv):
 		return new_id
 	
 kg_consultant_fee()
+
+class ch_bank_details(osv.osv):
+	
+	_name = "res.partner.bank"
+	_description = "Bank Details"
+	_inherit = 'res.partner.bank'
+	
+	_columns = {
+	
+	'city_id': fields.many2one('res.city', 'City'),
+	
+	}
+	
+	def onchange_city(self, cr, uid, ids, city_id, context=None):
+		if city_id:
+			city_rec = self.pool.get('res.city').browse(cr, uid, city_id, context)		
+			return {'value':{'state_id':city_rec.state_id.id,'country_id':city_rec.country_id.id}}
+		else:
+			pass
+		return {}
+	
+
+ch_bank_details()

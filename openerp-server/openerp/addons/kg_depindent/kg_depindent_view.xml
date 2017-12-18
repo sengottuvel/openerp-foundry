@@ -12,19 +12,18 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Department Indent" version="7.0">					
-			<header>
-                <button name="confirm_indent" states="draft" string="Confirm" type="object" class="oe_highlight"/>
-                <button name="approve_indent" states="confirm" string="Approve" type="object" class="oe_highlight"/>
-                <button name="reject_indent" states="confirm" string="Reject" type="object" class="oe_highlight"/>
-                <button name="cancel_indent" states="approved" string="Cancel" type="object" class="oe_highlight"/>
-                <button name="set_to_draft" states="cancel" string="Set To Draft" type="object" class="oe_highlight"/>
-                <!--<button name="print_indent" states="confirm,approved" string="Indent Slip" type="object" class="oe_highlight"/>-->
-			</header>
+				<header>
+					<button name="confirm_indent" states="draft" string="Confirm" type="object" class="oe_highlight"/>
+					<button name="approve_indent" states="confirm" string="Approve" type="object" class="oe_highlight"/>
+					<button name="reject_indent" states="confirm" string="Reject" type="object" class="oe_highlight"/>
+					<button name="cancel_indent" states="approved" string="Cancel" type="object" class="oe_highlight"/>
+					<button name="set_to_draft" states="cancel" string="Set To Draft" type="object" class="oe_highlight"/>
+				</header>
 				<group>
 					<group>
 						<field name="name"/>
 						<field name="dep_name" attrs="{'readonly':[('dep_name','!=',False)]}"/>
-						<field name="division"/>
+						<field name="division" invisible="1"/>
 						<field name="main_store" groups="kg_menus.group_kg_main_store_user"/>
 						<field name="remarks" attrs="{'invisible': [('state', 'not in', ('confirm','rejected'))]}"/>
 						<field name="src_location_id" invisible="1"/>
@@ -32,7 +31,7 @@
 						<field name ="order_line_id"/>
                     </group>
                     <group>
-						<field name="ind_date" required="1"/>
+						<field name="ind_date" required="1" options="{'datepicker':{'minDate': -10,'maxDate': 0,}}"/>
 						<field name="indent_type"/>
 						<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/> 
 						<field name="cancel_remark" attrs="{'invisible':[('state','not in',('approved','cancel'))]}"/>
@@ -42,25 +41,25 @@
 				</group>
 				<notebook>
 				<page string="Indent Details">
-					<field colspan="4" mode="tree" name="dep_indent_line" nolabel="1" widget="one2many_list" context="{'dep_id':dep_name,'line_state':'noprocess','name':'Dep.Indent.Line','line_date':ind_date,'flag_dynamic_length':False,'length':1}">
-						  <tree string="Department Indent Line" > 
-								<field name="product_id" on_change="onchange_product_id(product_id,uom,po_uom)"/>
-								<field name="brand_id"/>
-								<field name="fns_item_name"/>
-								<field name="position_id"/>
-								<field name="moc_id"/>
-								<field name="uom" on_change="onchange_product_uom(product_id, uom, po_uom,qty)"/>
-								<field name="length"/>
-								<field name="breadth"/>
-								<field name="qty" on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
-								<field name="cutting_qty"/>
-								<field name="pending_qty" invisible="1"/>
-								<field name="issue_pending_qty" invisible="1"/>
-								<field name="line_state" invisible="1"/>
-								<field name="pi_cancel" invisible="1"/>		
-								<field name="po_uom" invisible="1"/>	
-								<field name="po_qty" invisible="1"/>					
-							</tree>
+					<field colspan="4" mode="tree" name="dep_indent_line" nolabel="1" widget="one2many_list" context="{'dep_id':dep_name,'line_state':'noprocess','name':'Dep.Indent.Line','line_date':ind_date,'flag_dynamic_length':False,'length':1,'breadth':1}">
+						<tree string="Department Indent Line" > 
+							<field name="product_id" on_change="onchange_product_id(product_id,uom,po_uom)"/>
+							<field name="brand_id"/>
+							<field name="fns_item_name"/>
+							<field name="position_id"/>
+							<field name="moc_id"/>
+							<field name="uom" on_change="onchange_product_uom(product_id, uom, po_uom,qty)"/>
+							<field name="length"/>
+							<field name="breadth"/>
+							<field name="qty" on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
+							<field name="cutting_qty"/>
+							<field name="pending_qty" invisible="1"/>
+							<field name="issue_pending_qty" invisible="1"/>
+							<field name="line_state" invisible="1"/>
+							<field name="pi_cancel" invisible="1"/>		
+							<field name="po_uom" invisible="1"/>	
+							<field name="po_qty" invisible="1"/>					
+						</tree>
                     </field>
                 </page>
                 <page string="Entry Info">
@@ -86,6 +85,7 @@
 							<field name="approved_date" attrs="{'invisible':[('state','in',['draft','rejected','confirm'])]}"/>
 							<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirm','rejected','approved'])]}"/>
 							<field name="update_date"/>
+							<field name="entry_mode"/>
 						</group>
 					</group>
 				</page>
@@ -104,19 +104,20 @@
             <field name="model">kg.depindent</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-				<tree colors="blue:state == 'confirm';red:state == 'rejected';gray:state in ('draft','cancel');black:state == 'approved'" 
-								string="Department Indent" toolbar="1" >                
-                    <field name="name" string="Indent No"/>
+				<tree colors="blue:state == 'draft';red:state == 'confirm';gray:state in ('rejected','cancel');black:state == 'approved'" 
+						string="Department Indent" toolbar="1" >                
+                    <field name="name" string="Indent No."/>
 					<field name="ind_date"/>
                     <field name="dep_name"/>
                     <field name="order_line_id"/>
 					<field name="state"/>
 					<field name="division" invisible="1"/>								
 					<field name="indent_type" invisible="1"/>
+					<field name="entry_mode" invisible="1"/>
                 </tree> 
             </field>
 		</record>
-       
+		
 		<record id="depindent_group_view" model="ir.ui.view">
             <field name="name">Dep Indent</field>
             <field name="model">kg.depindent</field>
@@ -136,6 +137,7 @@
                         <filter string="WO No." icon="terp-personal" domain="[]" context="{'group_by':'order_line_id'}"/>
                         <filter string="Division" icon="terp-personal" domain="[]" context="{'group_by':'division'}"/>
                         <filter string="Indent Type" icon="terp-personal" domain="[]" context="{'group_by':'indent_type'}"/>
+                        <filter string="Entry Mode" icon="terp-personal" domain="[]" context="{'group_by':'entry_mode'}"/>
                         <filter string="Indent Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'ind_date'}"/>
                         <filter string="Status" name="group_state" icon="terp-gtk-select-all"  domain="[]" context="{'group_by':'state'}"/>
 					</group>
@@ -170,18 +172,23 @@
 							<field name="product_id" on_change="onchange_product_id(product_id,uom,po_uom)"/>
 							<field name="uom" on_change="onchange_product_uom(product_id, uom, po_uom,qty)"/>
 							<field name="po_uom" invisible="1"/>
+							<field name="uom_category" invisible="1"/>
 							<field name="qty" attrs="{'readonly': [('uom', '=', False)]}"
 								on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
 							<field name="cutting_qty" readonly="0"/>
+<!--
 							<field name="length" attrs="{'invisible':[('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')],'required':['|',('dep_code','=','DP2'),('uom_conversation_factor','=','two_dimension')]}"/>
 							<field name="breadth" attrs="{'invisible':[('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
+-->
+							<field name="length" attrs="{'invisible':[('uom_category','!=','length')],'required':[('uom_category','=','length')]}"/>
+							<field name="breadth" attrs="{'invisible':['|',('uom_category','!=','length'),('uom_conversation_factor','!=','two_dimension')],'required':[('uom_category','=','length'),('uom_conversation_factor','=','two_dimension')]}"/>
 							<field name="dep_code" invisible="1"/>
 							<field name="uom_conversation_factor" invisible="1"/>
 							<field name="po_qty" invisible="1"/>
 						</group>
 						<group>
-							<field name="brand_id"/>
-							<field name="pattern_id"/>
+							<field name="brand_id" on_change="onchange_brand(brand_id)"/>
+							<field name="pattern_id" invisible="1"/>
 							<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)"/>
 							<field name="pending_qty" invisible="1"/>
 							<field name="issue_pending_qty" invisible="1"/>
@@ -345,11 +352,30 @@
             <field name="view_id" ref="t_form_v_dynamic_indent_line"/>
             <field name="act_window_id" ref="tma_dynamic_indent_line"/>
         </record>
+        
+        
+        <!-- Audit log data -->
+        
+        <record id="indent_header" model="audittrail.rule">
+            <field name="name">Department Indent</field>
+            <field name="object_id" eval="ref('kg_depindent.model_kg_depindent')"/>       
+            <field name="state">subscribed</field>              
+        </record>
 		
-		<!-- Department Indent -->
+        <record id="kg_depindent_line" model="audittrail.rule">
+            <field name="name">Department Indent Items</field>
+            <field name="object_id" eval="ref('kg_depindent.model_kg_depindent_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Sequence Data -->
+        
+       
+		
+		<!-- Menu item-->
+		
 		<menuitem action="action_kg_depindent_form" id="iam_depindent" name="Department Indent" parent="kg_menus.ipm_dep_indent_menu" sequence="1"/>
 		
-		<!-- Department Indent Line-->
 		<menuitem action="action_kg_depindent_line_form" id="iam_depindent_line" name="Item Details" parent="kg_menus.ipm_dep_indent_menu" sequence="2"/>
 		
 		<menuitem action="tma_dynamic_indent_line" id="tam_dynamic_depindent_line" parent="kg_menus.ipm_dep_indent_menu" sequence="3"/>

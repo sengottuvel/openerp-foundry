@@ -23,7 +23,6 @@ class kg_indent2_po(osv.osv):
 		}
 	
 	def update_poline(self,cr,uid,ids,context=False):
-		logger.info('[KG OpenERP] Class: kg_indent2_po, Method: update_poline called...')
 		"""
 		Purchase order line should be created from purchase indent while click on update to PO Line button
 		"""
@@ -38,7 +37,6 @@ class kg_indent2_po(osv.osv):
 		obj =  self.browse(cr,uid,ids[0])
 		if obj.order_line:
 			order_line = map(lambda x:x.id,obj.order_line)
-			
 			for line in obj.order_line:
 				pi_line = line.pi_line_id
 				pi_line.write({'line_state' : 'process','draft_flag':False})			
@@ -54,7 +52,6 @@ class kg_indent2_po(osv.osv):
 			for key, group in groupby(poindent_line_browse, lambda x: x.product_id.id):
 				for key,group in groupby(group,lambda x: x.brand_id.id):
 					groups.append(map(lambda r:r,group))
-					print "key ====", key , "Group ======", group, 'Groupsssssss ====', groups
 			for key,group in enumerate(groups):
 				qty = sum(map(lambda x:float(x.pending_qty),group)) #TODO: qty
 				poindent_line_ids = map(lambda x:x.id,group)
@@ -87,8 +84,6 @@ class kg_indent2_po(osv.osv):
 								order by po.approved_date desc limit 1 """%(prod_browse.id,brand_id,group[0].moc_id.id)
 				cr.execute(recent_sql)		
 				recent_data = cr.dictfetchall()
-				print"max_datamax_datamax_data",max_data
-				print"recent_datarecent_data",recent_data
 				
 				if max_data:
 					max_val = max_data[0]['max']
@@ -113,13 +108,12 @@ class kg_indent2_po(osv.osv):
 								tax = [prod_browse.hsn_no.igst_id.id] 
 					elif not obj.partner_id.state_id.id:
 						tax = []
-				
 				vals = {
-				
 				'order_id': obj.id,
 				'product_id':prod_browse.id,
 				'brand_id':brand_id,
 				'product_uom':po_uom,
+				'po_copy_uom':group[0].product_id.po_copy_uom.id,
 				'product_qty':qty,
 				'pending_qty':qty,
 				'pi_qty':qty,
@@ -157,19 +151,15 @@ class kg_indent2_po(osv.osv):
 					line_id = self.pool.get('purchase.order.line').create(cr,uid,vals)
 					for wo in group[0].line_ids:
 						self.pool.get('ch.purchase.wo').create(cr,uid,{'header_id':line_id,'wo_id':wo.wo_id,'w_order_id':wo.w_order_id.id,'qty':wo.qty})
-			
 			if ids:
 				if obj.order_line:
 					order_line = map(lambda x:x.id,obj.order_line)
 					for line_id in order_line:
 						self.write(cr,uid,ids,{'order_line':[]})
 		self.write(cr,uid,ids,res)
-		
 		return True
 	
 	def update_product_pending_qty(self,cr,uid,ids,line,context=None):
-		
-		print "update_product_pending_qty called @@@@@@@@@@@@@@@@@@@@", line
 		po_rec = self.browse(cr, uid, ids[0])
 		line_obj = self.pool.get('purchase.order.line')
 		pi_line_obj = self.pool.get('purchase.requisition.line')
@@ -202,7 +192,6 @@ class kg_indent2_po(osv.osv):
 				pi_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
 				if remain_qty < 0:
 					break
-		
 		return True
 	
 kg_indent2_po()

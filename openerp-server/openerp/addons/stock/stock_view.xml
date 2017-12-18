@@ -7,11 +7,11 @@
             id="menu_stock_root"
             groups="group_stock_manager,group_stock_user"
             sequence="70"/>
-
-     <!--   <menuitem id="menu_stock_warehouse_mgmt" name="Receive/Deliver By Orders" parent="menu_stock_root" sequence="1"/>
-       <menuitem id="menu_stock_products_moves" name="Receive/Deliver Products" parent="menu_stock_root" sequence="2"/>-->
-       <!--<menuitem id="menu_stock_product" name="Products" parent="menu_stock_root" sequence="6"/>
-        <menuitem name="Products by Category" id="menu_product_by_category_stock_form" action="product.product_category_action"
+		
+    <!--<menuitem id="menu_stock_warehouse_mgmt" name="Receive/Deliver By Orders" parent="menu_stock_root" sequence="1"/>
+		<menuitem id="menu_stock_products_moves" name="Receive/Deliver Products" parent="menu_stock_root" sequence="2"/>-->
+	<!--<menuitem id="menu_stock_product" name="Products" parent="menu_stock_root" sequence="6"/>
+		<menuitem name="Products by Category" id="menu_product_by_category_stock_form" action="product.product_category_action"
             parent="stock.menu_stock_product" sequence="0"/>
         <menuitem action="product.product_normal_action" id="menu_stock_products_menu" parent="menu_stock_product" sequence="1"/>
         -->
@@ -71,7 +71,7 @@
                 </form>
             </field>
         </record>
-
+		
          <record id="view_inventory_filter" model="ir.ui.view">
             <field name="name">stock.inventory.filter</field>
             <field name="model">stock.inventory</field>
@@ -85,10 +85,9 @@
                         <filter string="Date" icon="terp-go-month" domain="[]" context="{'group_by':'date'}"/>
                     </group>
                 </search>
-
             </field>
         </record>
-
+		
         <record id="view_inventory_tree" model="ir.ui.view">
             <field name="name">stock.inventory.tree</field>
             <field name="model">stock.inventory</field>
@@ -192,7 +191,7 @@
                 </form>
             </field>
         </record>
-
+		
         <record id="action_inventory_form" model="ir.actions.act_window">
             <field name="name">Physical Inventories</field>
             <field name="type">ir.actions.act_window</field>
@@ -549,7 +548,7 @@
             <field name="name">Upstream traceability</field>
             <field eval="'ir.actions.act_window,'+str(action5)" name="value"/>
         </record>
-
+		
         <record id="view_location_form" model="ir.ui.view">
             <field name="name">stock.location.form</field>
             <field name="model">stock.location</field>
@@ -560,17 +559,15 @@
 					<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
 					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 					<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
-<!--				<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 					<button name="entry_draft" type="object" attrs="{'invisible':['|',('entry_mode','=','auto'),('state','!=','approved')]}" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 				  </header>	
 				  <group>
                     <group>
-						<field name="name" attrs="{'readonly': [('state','=', 'approved')]}"/>
+						<field name="name" class="aplhanum_expect" attrs="{'readonly': [('state','=', 'approved')]}"/>
 						<field name="usage" string="Usage Type" attrs="{'readonly': [('state','=', 'approved')]}"/>
 						<field name="is_parent" attrs="{'readonly': [('state','=', 'approved')]}"/>
 						<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 						<field name="scrap_location" attrs="{'readonly': [('state','=', 'approved')]}" invisible="1"/>
-						<field name="entry_mode" invisible="1"/>
 						<field name="modify" invisible="1"/>
 						<field name="custom" invisible="1"/>
                     </group>
@@ -649,7 +646,7 @@
                 </form>
             </field>
         </record>
-
+		
         <record id="view_location_search" model="ir.ui.view">
             <field name="name">stock.location.search</field>
             <field name="model">stock.location</field>
@@ -668,14 +665,12 @@
                 </search>
             </field>
         </record>
-
-
+		
         <record id="view_location_tree2" model="ir.ui.view">
             <field name="name">stock.location.tree</field>
             <field name="model">stock.location</field>
             <field name="priority" eval="2"/>
             <field name="arch" type="xml">
-<!--            <tree string="Stock Location" colors="blue:usage=='view';darkred:usage=='internal'">-->
 				 <tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" string="Stock Location">
                     <field name="complete_name" invisible="1"/>
@@ -689,7 +684,7 @@
                 </tree>
             </field>
         </record>
-
+		
         <record id="action_location_form" model="ir.actions.act_window">
             <field name="name">Stock Locations</field>
             <field name="res_model">stock.location</field>
@@ -699,9 +694,7 @@
             <field name="search_view_id" ref="view_location_search"/>
             <field name="context">{'default_custom': True}</field>
 			<field name="domain">[('custom','=',True)]</field>
-<!--
-            <field name="context">{'search_default_in_location':1}</field>
--->
+<!--        <field name="context">{'search_default_in_location':1}</field> -->
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to add a location.
@@ -721,9 +714,11 @@
               </p>
             </field>
         </record>
+        
+        <!-- Menu item -->
         <menuitem action="action_location_form" id="menu_action_location_form" groups="stock.group_locations"
             parent="menu_stock_configuration" sequence="5"/>
-
+		
         <record id="view_location_tree" model="ir.ui.view">
             <field name="name">stock.location.tree</field>
             <field name="model">stock.location</field>
@@ -734,6 +729,7 @@
                 </tree>
             </field>
         </record>
+        
         <record id="action_location_tree" model="ir.actions.act_window">
             <field name="name">Location Structure</field>
             <field name="res_model">stock.location</field>
@@ -756,7 +752,7 @@
         <!-- Audit Log Xml Data Start-->
 		
         <record id="inventorymaster_model" model="audittrail.rule">
-            <field name="name">Audit Log Inventorymaster</field>
+            <field name="name">Location Master</field>
             <field name="object_id" eval="ref('stock.model_stock_location')"/>       
             <field name="state">subscribed</field>              
         </record>

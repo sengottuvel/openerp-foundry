@@ -69,6 +69,7 @@ class kg_depindent2_poindent(osv.osv):
 					brand_id = group[0].brand_id.id			
 					uom = group[0].uom.id or False
 					po_uom = prod_browse.uom_po_id.id or False
+					po_copy_uom = prod_browse.product_id.po_copy_uom.id or False
 					depindent_id= group[0].id
 					po_qty = group[0].po_qty
 					#pending_qty = group[0].pending_qty
@@ -90,6 +91,7 @@ class kg_depindent2_poindent(osv.osv):
 					'product_id': prod_browse.id,
 					'brand_id': brand_id,
 					'product_uom_id': po_uom,
+					'po_copy_uom': po_uom,
 					'product_qty': qty,
 					'current_qty': cur_qty,
 					'pending_qty': qty,
