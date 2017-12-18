@@ -167,6 +167,9 @@ class kg_ms_daily_planning(osv.osv):
 		return True
 		
 	def ms_planning_mail(self,cr,uid,ids,obj,context=None):
+		
+		rec = self.browse(cr,uid,ids[0])
+		mail_queue = self.pool.get('kg.mail.queue')
 		cr.execute("""select ms_daily_planning_confirm('MS Daily Planning',"""+str(obj.id)+""")""")
 		data = cr.fetchall();
 		if data[0][0] is None:
@@ -176,27 +179,22 @@ class kg_ms_daily_planning(osv.osv):
 			cont = data[0][0].partition('UNWANTED.')		
 			email_from = maildet[1]	
 			if maildet[2]:	
-				email_to = [maildet[2]]
+				email_to = [maildet[2]][0]
 			else:
 				email_to = ['']			
 			if maildet[3]:
-				email_cc = [maildet[3]]	
+				email_cc = [maildet[3]][0]
 			else:
-				email_cc = ['']		
-			ir_mail_server = self.pool.get('ir.mail_server')
-			if maildet[4] != '':
-				msg = ir_mail_server.build_email(
-					email_from = email_from,
-					email_to = email_to,
-					subject = maildet[4],
-					body = cont[0],
-					email_cc = email_cc,
-					object_id = ids and ('%s-%s' % (ids, 'kg.mail.settings')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-			else:
-				pass
+				email_cc = ['']
+			mail_queue.create(cr,uid,{'source': 'MS Daily Planning',
+									  'mail_to': email_to,
+									  'mail_cc': email_cc,
+									  'subject': maildet[4],
+									  'body': cont[0],
+									  'body_1': cont[0],
+									  'user_id': uid,
+									  'transaction_id': rec.id,
+									})
 		
 		return True
 	
