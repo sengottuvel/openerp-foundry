@@ -8,7 +8,7 @@
 			<field name="name">Chemical Master Form</field>
 			<field name="model">kg.chemical.master</field>
 			<field name="arch" type="xml">
-				<form string="chemical Master" version="7.0">					
+				<form string="chemical" version="7.0">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -128,7 +128,7 @@
 		<!-- Menu Action End-->
 		
 		<record id="cma_chemical_master" model="ir.actions.act_window">
-			<field name="name">Chemical Master</field>
+			<field name="name">Chemical</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.chemical.master</field>
 			<field name="view_type">form</field>

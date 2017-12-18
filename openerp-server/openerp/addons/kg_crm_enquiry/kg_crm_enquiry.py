@@ -972,6 +972,19 @@ class kg_crm_enquiry(osv.osv):
 						values = self.pool.get('ch.kg.crm.pumpmodel').copy_data(cr, uid, order_item.id, default=None, context=None)
 						template_id = self.pool.get('ch.kg.crm.pumpmodel').create(cr,uid,values)
 						self.pool.get('ch.kg.crm.pumpmodel').write(cr,uid,template_id,{'template_name':order_item.template_name,'template_id':order_item.id,'template_type':order_item.template_type,'template_id':order_item.template_id.id,'template_copy_flag':True,'template_flag':True,'qty':1})
+						
+						pump_off_ids = self.pool.get('ch.pump.offer').search(cr,uid,[('enquiry_line_id','=',order_item.id)])
+						if pump_off_ids:
+							self.pool.get('ch.pump.offer').write(cr,uid,pump_off_ids[0],{'enquiry_line_id':template_id})
+						spare_off_ids = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',order_item.id)])
+						if spare_off_ids:
+							for item in spare_off_ids:
+								self.pool.get('ch.spare.offer').write(cr,uid,item,{'enquiry_line_id':template_id})
+						access_off_ids = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',order_item.id)])
+						if access_off_ids:
+							for item in access_off_ids:
+								self.pool.get('ch.accessories.offer').write(cr,uid,item,{'enquiry_line_id':template_id})
+						
 						cr.execute(''' delete from ch_kg_crm_pumpmodel where id = %s '''%(order_item.id))
 					## Save as template process ends
 			
