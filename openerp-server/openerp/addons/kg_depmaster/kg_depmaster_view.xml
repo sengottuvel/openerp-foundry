@@ -20,8 +20,8 @@
 				<field name="name" string="Code"/>
 				<field name="dep_name" string="Name"/>
 				<field name="item_request"/>
+				<field name="stock_location" string="Department Stock Location" invisible="0"/>
 				<field name="notes"/>
-				<field name="stock_location" string="Department Stock Location" invisible="1"/>
 				<field name="main_location" invisible="1"/>
 				<field name="used_location" invisible="1"/>
 				<field name="modify" invisible="1"/>

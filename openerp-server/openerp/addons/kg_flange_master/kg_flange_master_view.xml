@@ -8,7 +8,7 @@
 			<field name="name">Flange Master Form</field>
 			<field name="model">kg.flange.master</field>
 			<field name="arch" type="xml">
-				<form string="Flange Master" version="7.0">					
+				<form string="Flange" version="7.0">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -77,7 +77,7 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Flange Master Tree">		
+								toolbar="True" string="Flange">		
 					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>
 					<field name="code" invisible="1"/>
 					<field name="name"/>
@@ -114,7 +114,7 @@
 		<!-- Menu Action Start-->
 		
 		 <record id="mma_flange_master" model="ir.actions.act_window">
-			<field name="name">Flange Master</field>
+			<field name="name">Flange</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.flange.master</field>
 			<field name="view_type">form</field>

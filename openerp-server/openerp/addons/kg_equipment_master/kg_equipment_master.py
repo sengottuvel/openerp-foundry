@@ -121,7 +121,20 @@ class kg_equipment_master(osv.osv):
 				res = False
 			else:
 				res = True				
-		return res	
+		return res
+		
+	def _line_item_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.equ_type == 'gig':
+			if not rec.line_ids:
+				raise osv.except_osv(_('Warning'), _('Empty Line Items are not allowed for Type Gig !!'))
+		if rec.equ_type == 'cage':
+			if not rec.line_ids_a:
+				raise osv.except_osv(_('Warning'), _('Empty Line Items are not allowed for Type Cage !!'))
+		if rec.equ_type == 'dye':
+			if not rec.line_ids_b:
+				raise osv.except_osv(_('Warning'), _('Empty Line Items are not allowed for Type Dye !!'))
+		return True
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])			
@@ -177,6 +190,7 @@ class kg_equipment_master(osv.osv):
 		
 		(_name_validate, 'Equipment name must be unique !!', ['name']),		
 		(_code_validate, 'Equipment code must be unique !!', ['code']),		
+		(_line_item_validate, ' ', ['Line Items Validations']),		
 		
 	]
 	

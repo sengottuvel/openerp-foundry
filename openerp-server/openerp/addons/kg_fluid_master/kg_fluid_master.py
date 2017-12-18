@@ -175,7 +175,7 @@ class kg_fluid_master(osv.osv):
 		rec = self.browse(cr, uid, ids[0])
 			
 		if rec.specific_gravity <= 0:
-			raise osv.except_osv(_('Warning!'),_('Specific Gravity should be greater than zero!! '))	
+			raise osv.except_osv(_('Warning!'),_('Specific Gravity should be greater than zero!! '))
 		return True
 	
 	def _spl_name(self, cr, uid, ids, context=None):		
@@ -197,7 +197,7 @@ class kg_fluid_master(osv.osv):
 		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Fluid name must be unique!', ['']),		
-		(_check_total,'You can not save this Fluid specific gravity with Zero value !',['Specific gravity']),
+		(_check_total,' ',['Specific gravity']),
 		(_spl_name, 'Special Character Not Allowed!', ['']),
 		
 	]

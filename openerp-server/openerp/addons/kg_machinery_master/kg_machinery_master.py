@@ -220,12 +220,16 @@ class ch_efficiency(osv.osv):
 		cr.execute(""" select operation_id from ch_efficiency where operation_id  = '%s' and header_id = '%s' """ %(entry.operation_id.id,entry.header_id.id))
 		data = cr.dictfetchall()			
 		if len(data) > 1:		
-			return False
+			raise osv.except_osv(_('Warning'), _('Duplicate Efficiencies are not allowed !!'))
+		if entry.duration_hrs > 24.00:
+			raise osv.except_osv(_('Warning'), _('Duration Hours should not exceed 24 Hours !!'))
+		if entry.duration_hrs < 0.0:
+			raise osv.except_osv(_('Warning'), _('Duration Hours should not be less than zero !!'))
 		return True
 		
 	_constraints = [		
 			  
-		(_check_values, 'Please Check the same Efficiency not allowed..!!',['Operation Name']),	
+		(_check_values, ' ',['Validations']),	
 		
 	   ]
 	

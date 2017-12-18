@@ -40,12 +40,12 @@
 						<page string="Efficiency">	
 							<field name="line_ids" nolabel="1" >
 								<tree string="Efficiency Tree" editable="top" >																								
-									<field name="operation_id"/>										
-									<field name="stage_id"/>	
-									<field name="moc_id" />
-									<field name="duration_hrs" widget="float_time" />
-									<field name="uom_id" />
-									<field name="qty" />
+									<field name="operation_id" required="1"/>										
+									<field name="stage_id" required="1"/>	
+									<field name="moc_id" required="1"/>
+									<field name="duration_hrs" widget="float_time" required="1"/>
+									<field name="uom_id" required="1"/>
+									<field name="qty" required="1"/>
 									<field name="remarks" widget="char"/>																												
 								</tree>
 							</field>																								

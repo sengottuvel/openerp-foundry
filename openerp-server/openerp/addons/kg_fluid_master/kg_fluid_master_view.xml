@@ -8,7 +8,7 @@
 			<field name="name">Liquid Master Form</field>
 			<field name="model">kg.fluid.master</field>
 			<field name="arch" type="xml">
-				<form string="Liquid Master" version="7.0">					
+				<form string="Liquid" version="7.0">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -85,7 +85,7 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Liquid Master Tree">				
+								toolbar="True" string="Liquid">				
 					<field name="name"/>
 					<field name="specific_gravity"/>
 					<field name="state"/>
@@ -121,7 +121,7 @@
 		<!-- Menu Action Start-->
 		
 		 <record id="mma_fluid_master" model="ir.actions.act_window">
-			<field name="name">Liquid Master</field>
+			<field name="name">Liquid</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.fluid.master</field>
 			<field name="view_type">form</field>

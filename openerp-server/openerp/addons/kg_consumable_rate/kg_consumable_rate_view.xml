@@ -16,7 +16,6 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" groups="kg_users_mgt.group_set_to_draft"/>
 					</header>
-					<sheet >
 						<group>
 							<group>						
 								<field name="effective_from" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
@@ -61,7 +60,6 @@
 								</group>
 							</page>
 						</notebook>															
-					</sheet>
 				</form>
 			</field> 
 		</record>

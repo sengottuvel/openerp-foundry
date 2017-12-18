@@ -94,31 +94,20 @@ class kg_hsn_master(osv.osv):
 		
 	]	
 		
-	def _name_validate(self, cr, uid,ids, context=None):
+	def _name_code_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		res = True
 		if rec.name:
-			name = rec.name		
-			cr.execute(""" select name from kg_hsn_master where name  = '%s' """ %(name))
-			data = cr.dictfetchall()			
+			cr.execute(""" select upper(name) from kg_hsn_master where upper(name)  = '%s' """ %(rec.name.upper()))
+			data = cr.dictfetchall()
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
-	def _tax_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.name:
-			if rec.cgst_id.id == rec.sgst_id.id:
-				res = False
-			elif rec.sgst_id.id == rec.igst_id.id:
-				res = False
-			elif rec.cgst_id.id == rec.igst_id.id:
-				res = False
-			else:
-				res = True				
-		return res
+				raise osv.except_osv(_('Warning'), _('Name must be unique !!'))						
+		if rec.cgst_id.id == rec.sgst_id.id:
+			raise osv.except_osv(_('Warning'), _('Same Tax not allowed in HSN Master !!'))	
+		elif rec.sgst_id.id == rec.igst_id.id:
+			raise osv.except_osv(_('Warning'), _('Same Tax not allowed in HSN Master !!'))	
+		elif rec.cgst_id.id == rec.igst_id.id:
+			raise osv.except_osv(_('Warning'), _('Same Tax not allowed in HSN Master !!'))	
+		return True	
 			
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
@@ -167,9 +156,7 @@ class kg_hsn_master(osv.osv):
 	
 	_constraints = [
 		
-		(_name_validate, 'HSN name must be unique !!', ['name']),		
-		(_tax_validate, 'Same Tax not allowed in HSN Master !!', ['CGST,SGST,IGST']),		
-		
+		(_name_code_validate, 'HSN name must be unique !!', ['name']),				
 		
 	]
 	

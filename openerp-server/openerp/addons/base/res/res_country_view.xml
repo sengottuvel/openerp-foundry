@@ -35,7 +35,7 @@
                     <group>
                         <group>
                             <field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-                            <field name="currency_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+                            <field name="currency_id" invisible="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
                             <field name="modify" invisible="1"/>
                         </group>
                         <group>

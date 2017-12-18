@@ -178,6 +178,12 @@ class kg_moc_construction(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_moc_construction, self).write(cr, uid, ids, vals, context)
+	
+	def _line_item_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.line_ids:
+			raise osv.except_osv(_('Warning'), _('Empty Offer materials are not allowed !!'))	
+		return True
 		
 	
 	_constraints = [
@@ -185,6 +191,7 @@ class kg_moc_construction(osv.osv):
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'MOC Construction name must be unique !!', ['name']),		
 		(_code_validate, 'MOC Construction code must be unique !!', ['code']),		
+		(_line_item_validate, ' ', ['Line Validations']),		
 		
 	]
 	

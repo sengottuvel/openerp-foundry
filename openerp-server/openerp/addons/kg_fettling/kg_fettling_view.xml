@@ -226,7 +226,7 @@
 					<field name="inward_accept_qty" string="Fettling Accepted Qty" sum="Total Accepted Qty"/>
 					<field name="stage_id"/>
 					<field name="oth_spec"/>
-					<field name="state"/>
+					<field name="state" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -351,7 +351,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Knock Out Tree" create="false">					
-					<field name="knockout_name"/>
+					<field name="knockout_name" invisible="1"/>
 					<field name="knockout_date"/>
 					<field name="order_no"/>
 					<field name="order_delivery_date"/>

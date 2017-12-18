@@ -1936,12 +1936,6 @@
             <field name="view_id" ref="t_tree_v_pouring_completed"/>
             <field name="act_window_id" ref="tma_pouring_completed"/>
         </record>
-        <record model="ir.actions.act_window.view" id="tma_pouring_completed_form_view">
-            <field name="sequence" eval="2"/>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="t_form_v_pouring_completed"/>
-            <field name="act_window_id" ref="tma_pouring_completed"/>
-        </record>
 		
 	<!-- Menu Action End-->
 		
