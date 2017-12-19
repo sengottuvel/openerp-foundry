@@ -31,7 +31,7 @@
 							<field name="product_id" invisible="1"/>
 						</group>
 						<group> 
-							<field name="issue_date" options="{'datepicker':{'minDate': 5,'maxDate': 0,}}"/>
+							<field name="issue_date" options="{'datepicker':{'minDate': -10,'maxDate': 0,}}"/>
 							<field name="location_id" required="1" attrs="{'readonly':[('location_id','!=',False)]}" invisible="1"/>
 							<field name="location_code" required="1" readonly="1" invisible="1"/>
 							<field name="outward_type" invisible="1"/>
