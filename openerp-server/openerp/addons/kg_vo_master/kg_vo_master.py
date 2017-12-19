@@ -582,7 +582,7 @@ class ch_accessories_config(osv.osv):
 		'pump_speed': fields.integer('Pump Speed',required=True),
 		'pump_pulley_access_id': fields.many2one('kg.accessories.master','Pump Pulley',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','pump_pulley')]"),
 		'motor_pulley_access_id': fields.many2one('kg.accessories.master','Motor Pulley',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','motor_pulley')]"),
-		'slide_rail_access_id': fields.many2one('kg.accessories.master','Slide Rail',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','slide_rail')]"),
+		'slide_rail_access_id': fields.many2one('kg.accessories.master','Slide Rail/Base plate',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','slide_rail')]"),
 		'belt_access_id': fields.many2one('kg.accessories.master','Belt',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','belt')]"),
 		'belt_guard_access_id': fields.many2one('kg.accessories.master','Belt Guard',required=True,domain="[('state','not in',('reject','cancel')),('accessories_type','=','belt_guard')]"),
 		'remarks':fields.text('Remarks'),	
