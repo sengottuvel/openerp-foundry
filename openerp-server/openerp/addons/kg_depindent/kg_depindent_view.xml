@@ -173,9 +173,9 @@
 							<field name="uom" on_change="onchange_product_uom(product_id, uom, po_uom,qty)"/>
 							<field name="po_uom" invisible="1"/>
 							<field name="uom_category" invisible="1"/>
-							<field name="qty" attrs="{'readonly': [('uom', '=', False)]}"
+							<field name="qty" attrs="{'readonly':[('uom','=',False)]}"
 								on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
-							<field name="cutting_qty" readonly="0"/>
+							<field name="cutting_qty" readonly="0" attrs="{'invisible':[('uom_conversation_factor','=','two_dimension')]}"/>
 <!--
 							<field name="length" attrs="{'invisible':[('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')],'required':['|',('dep_code','=','DP2'),('uom_conversation_factor','=','two_dimension')]}"/>
 							<field name="breadth" attrs="{'invisible':[('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
@@ -187,9 +187,9 @@
 							<field name="po_qty" invisible="1"/>
 						</group>
 						<group>
-							<field name="brand_id" on_change="onchange_brand(brand_id)"/>
+							<field name="brand_id" on_change="onchange_brand(brand_id)" required="1"/>
 							<field name="pattern_id" invisible="1"/>
-							<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)"/>
+							<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" required="1"/>
 							<field name="pending_qty" invisible="1"/>
 							<field name="issue_pending_qty" invisible="1"/>
 							<field name="main_store_qty" invisible="1"/>
