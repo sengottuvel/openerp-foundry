@@ -5536,6 +5536,7 @@ class ch_kg_crm_accessories(osv.osv):
 									})
 				print"fou_valsfou_vals",fou_vals
 			if data_rec.line_ids_a:
+				moc_id = ''
 				for item in data_rec.line_ids_a:
 					ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
 					if ms_obj:
@@ -5570,6 +5571,7 @@ class ch_kg_crm_accessories(osv.osv):
 									})
 					print"ms_valsms_vals",ms_vals	
 			if data_rec.line_ids:
+				moc_id = ''
 				for item in data_rec.line_ids:
 					bot_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
 					if bot_obj:
