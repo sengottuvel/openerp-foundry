@@ -1272,7 +1272,7 @@ class kg_crm_enquiry(osv.osv):
 			if bom_item.header_id.header_id.segment == 'dom':
 				hsn = bom_item.pattern_id.hsn_no.id
 				if not bom_item.pattern_id.hsn_no.igst_id:
-					raise osv.except_osv(_('Warning!'), _('Configure Pump of (%s) IGST Tax in HSN master for Pattern %s and HSN %s !!' %(bom_item.header_id.pump_id.name,bom_item.pattern_id.pattern_name,bom_item.pattern_id.hsn_no.name)))
+					raise osv.except_osv(_('Warning!'),_('Configure Pump of (%s) IGST Tax in HSN master for Pattern (%s) and HSN (%s) !!' %(bom_item.header_id.pump_id.name,bom_item.pattern_id.pattern_name,bom_item.pattern_id.hsn_no.name)))
 				gst = bom_item.pattern_id.hsn_no.igst_id.id
 		elif item_type == 'ms':
 			item_code = bom_item.ms_id.code
@@ -1285,6 +1285,8 @@ class kg_crm_enquiry(osv.osv):
 			moc_changed_flag = bom_item.moc_changed_flag
 			if bom_item.header_id.header_id.segment == 'dom':
 				hsn = bom_item.ms_id.hsn_no.id
+				if not bom_item.pattern_id.hsn_no.igst_id:
+					raise osv.except_osv(_('Warning!'),_('Configure Pump of (%s) IGST Tax in HSN master for Item (%s) and HSN (%s) !!' %(bom_item.header_id.pump_id.name,item_name,bom_item.ms_id.hsn_no.name)))
 				gst = bom_item.ms_id.hsn_no.igst_id.id
 		elif item_type == 'bot':
 			item_code = bom_item.ms_id.code
@@ -1297,6 +1299,8 @@ class kg_crm_enquiry(osv.osv):
 			moc_changed_flag = bom_item.moc_changed_flag
 			if bom_item.header_id.header_id.segment == 'dom':
 				hsn = bom_item.ms_id.hsn_no.id
+				if not bom_item.pattern_id.hsn_no.igst_id:
+					raise osv.except_osv(_('Warning!'),_('Configure Pump of (%s) IGST Tax in HSN master for Item (%s) and HSN (%s) !!' %(bom_item.header_id.pump_id.name,item_name,bom_item.ms_id.hsn_no.name)))
 				gst = bom_item.ms_id.hsn_no.igst_id.id
 		
 		spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{'header_id': offer_id,
