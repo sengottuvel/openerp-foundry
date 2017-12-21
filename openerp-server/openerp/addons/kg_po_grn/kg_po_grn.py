@@ -1,20 +1,17 @@
 import math
-import re
 from openerp import tools
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 import time
 import openerp.addons.decimal_precision as dp
+from itertools import groupby
 import netsvc
 import datetime
-import calendar
 import urllib
 import urllib2
 import logging
 from datetime import date
 from datetime import datetime
-from datetime import timedelta
-from dateutil import relativedelta
 
 UOM_CONVERSATION = [
 
@@ -61,7 +58,7 @@ class kg_po_grn(osv.osv):
 			supplier_id = line.supplier_id
 		
 		for c in self.pool.get('account.tax').compute_all(cr, uid, tax_ids,
-			price, qty, line.product_id,supplier_id)['taxes']:			 
+			price, qty, line.product_id,supplier_id)['taxes']:
 			val += c.get('amount', 0.0)
 		return val
 	
@@ -145,7 +142,7 @@ class kg_po_grn(osv.osv):
 		'dc_no': fields.char('DC No.', required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'dc_date':fields.date('DC Date',required=True, readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'po_id':fields.many2one('purchase.order', 'PO NO',
-					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]"), 
+					domain="[('state','=','approved'),'&',('order_line.pending_qty','>','0'),'&',('grn_flag','=',False),'&',('partner_id','=',supplier_id),'&',('order_line.line_state','!=','cancel')]"), 
 		'po_ids':fields.many2many('purchase.order', 'multiple_po', 'grn_id', 'po_id', 'PO Nos',
 					domain="[('state','=','approved'),('order_line.pending_qty','>','0'),('grn_flag','=',False),('partner_id','=',supplier_id),('order_line.line_state','!=','cancel'),('division','=',division)]",
 					readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}), 
@@ -154,12 +151,12 @@ class kg_po_grn(osv.osv):
 		'order_date': fields.char('Date',readonly=True),
 		'pos_date': fields.char('PO Date',readonly=True),
 		'po_date':fields.date('PO Date',readonly=True),
-		'supplier_id':fields.many2one('res.partner','Supplier',domain=[('supplier','=',True)],required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'supplier_id':fields.many2one('res.partner','Supplier',domain=[('supplier','=',True),('partner_state','=','approve')],required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'billing_status': fields.selection([
 			('applicable', 'Applicable'),
 			('not_applicable', 'Not Applicable')], 'Billing Status',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		'department_id': fields.many2one('kg.depmaster','Department',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'inward_type': fields.many2one('kg.inwardmaster','Inward Type',domain="[('state','=','approved')]",readonly=True,states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'department_id': fields.many2one('kg.depmaster','Department',domain="[('state','=','approved')]",readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'type': fields.selection([('in', 'IN'), ('out', 'OUT'), ('internal', 'Internal')], 'Type'),
 		'po_so_remark':fields.text('PO/SO Remarks'),
 		'other_charge': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Other Charges(+)',
@@ -217,21 +214,21 @@ class kg_po_grn(osv.osv):
 		
 		## Child Tables Declaration
 		
-		'line_ids':fields.one2many('po.grn.line','po_grn_id','Line Entry',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'line_ids': fields.one2many('po.grn.line','po_grn_id','Line Entry',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'expense_line_id': fields.one2many('kg.po.grn.expense.track','expense_id','Expense Track',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		
 		# Entry Info
 		
-		'active':fields.boolean('Active'),
-		'company_id':fields.many2one('res.company','Company',readonly=True),
-		'created_by':fields.many2one('res.users','Created By',readonly=True),
-		'creation_date':fields.datetime('Created Date',required=True,readonly=True),
-		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
-		'confirmed_date':fields.datetime('Confirmed Date',readonly=True),
+		'active': fields.boolean('Active'),
+		'company_id': fields.many2one('res.company','Company',readonly=True),
+		'created_by': fields.many2one('res.users','Created By',readonly=True),
+		'creation_date': fields.datetime('Created Date',required=True,readonly=True),
+		'confirmed_by': fields.many2one('res.users','Confirmed By',readonly=True),
+		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
 		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
-		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
-		'approved_date':fields.datetime('Approved Date',readonly=True),
+		'approved_by': fields.many2one('res.users','Approved By',readonly=True),
+		'approved_date': fields.datetime('Approved Date',readonly=True),
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date' : fields.datetime('Last Updated Date',readonly=True),
@@ -264,7 +261,7 @@ class kg_po_grn(osv.osv):
 				value = {'location_dest_id':loc_rec.id}
 		return {'value': value}	
 	
-	def write(self, cr, uid, ids, vals, context=None):		
+	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_po_grn, self).write(cr, uid, ids, vals, context)
 	
@@ -310,7 +307,7 @@ class kg_po_grn(osv.osv):
 								'order_no':po_name,
 								'order_date':po_date,
 								'po_name':po_name,
-								'pos_name':po_date,								
+								'pos_name':po_date,
 								})
 					po_grn_id = grn_entry_obj.id
 					order_lines=po_record.order_line
@@ -510,7 +507,7 @@ class kg_po_grn(osv.osv):
 	def line_validations(self,cr,uid,ids,context=None):
 		grn_entry = self.browse(cr,uid,ids[0])
 		if grn_entry.dc_date and grn_entry.dc_date > grn_entry.grn_date:
-			raise osv.except_osv(_('Warning !'),_('DC Date Should Be Less Than GRN Date !'))			
+			raise osv.except_osv(_('Warning !'),_('DC Date Should Be Less Than GRN Date !'))
 		if not grn_entry.line_ids:
 			raise osv.except_osv(_('Item Line Empty!'),_('You cannot process GRN without Item Line.'))
 		for line in grn_entry.line_ids:
@@ -591,27 +588,33 @@ class kg_po_grn(osv.osv):
 				if line.po_grn_qty > line.gp_pending_qty:
 					raise osv.except_osv(_('Warning!'),_('GRN Qty should not be greater than GP Qty for %s !!' %(line.product_id.name)))
 					
-		if grn_entry.grn_type == 'from_po':	
+		if grn_entry.grn_type == 'from_po':
 			for i in range(len(grn_entry.line_ids)):
 				if grn_entry.line_ids[i].line_wo_id:
 					total = sum(wo.qty for wo in grn_entry.line_ids[i].line_wo_id)
 					if total <= grn_entry.line_ids[i].po_grn_qty:
 						pass
 					wo_sql = """ select count(wo_id) as wo_tot,wo_id as wo_name from ch_po_grn_wo where header_id = %s group by wo_id"""%(grn_entry.line_ids[i].id)
-					cr.execute(wo_sql)		
+					cr.execute(wo_sql)
 					wo_data = cr.dictfetchall()
 					for wo in wo_data:
 						if wo['wo_tot'] > 1:
 							raise osv.except_osv(_('Warning!'),_('%s This WO No. repeated'%(wo['wo_name'])))
 						else:
 							pass
-		
+			line_po_ids = []
+			po_ids = map(lambda x:x.id, grn_entry.po_ids)
+			line_ids = set(map(lambda x:x.po_line_id.order_id.id, grn_entry.line_ids))
+			for x in line_ids:
+				line_po_ids.append(x)
+			if sorted(po_ids) != sorted(line_po_ids):
+				raise osv.except_osv(_('Warning !'),_('Mapped PO and Lines are mismatched !!'))
 		return True
 	
 	# PO GRN Confirm #
 	
 	def entry_confirm(self, cr, uid, ids,context=None):
-		grn_entry = self.browse(cr, uid, ids[0])		
+		grn_entry = self.browse(cr, uid, ids[0])
 		if grn_entry.state == 'draft':
 			po_obj=self.pool.get('purchase.order')
 			so_obj=self.pool.get('kg.service.order')
@@ -627,16 +630,7 @@ class kg_po_grn(osv.osv):
 				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.creation_date))
 				seq_name = cr.fetchone();
 				self.write(cr,uid,ids[0],{'name':seq_name[0]})
-			if grn_entry.grn_type == 'from_po':
-				po_ids = []
-				line_po_ids = []
-				for item in grn_entry.po_ids:
-					po_ids.append(item.id)
-				for line in grn_entry.line_ids:
-					line_po_ids.append(line.po_line_id.order_id.id)
-				#~ if po_ids != line_po_ids:
-					#~ raise osv.except_osv(_('Warning !'),_('Mapped PO and Lines are mismatched !!'))
-			
+
 			for line in grn_entry.line_ids:
 				if line.billing_type == 'cost':
 					if grn_entry.grn_type == 'from_po':
@@ -653,7 +647,6 @@ class kg_po_grn(osv.osv):
 									  'confirmed_by': uid,
 									  'confirmed_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 									   })
-		
 		return True
 	
 	# PO GRN Approve #
@@ -675,20 +668,10 @@ class kg_po_grn(osv.osv):
 			gp_obj = self.pool.get('kg.gate.pass')
 			pi_obj = self.pool.get('kg.purchase.invoice')
 			pi_po_grn_obj = self.pool.get('kg.pogrn.purchase.invoice.line')
-			po_order = grn_entry.po_id			
+			po_order = grn_entry.po_id
 			line_tot = 0
 			line_id_list = []
-			grn_type = 'service'			
-			
-			if grn_entry.grn_type == 'from_po':
-				po_ids = []
-				line_po_ids = []
-				for item in grn_entry.po_ids:
-					po_ids.append(item.id)
-				for line in grn_entry.line_ids:
-					line_po_ids.append(line.po_line_id.order_id.id)
-				#~ if po_ids != line_po_ids:
-					#~ raise osv.except_osv(_('Warning !'),_('Mapped PO and Lines are mismatched !!'))
+			grn_type = 'service'
 			
 			for line in grn_entry.line_ids:
 				
@@ -728,7 +711,7 @@ class kg_po_grn(osv.osv):
 								})
 							
 				# This code is to update pending qty in Service Order
-				elif grn_entry.grn_type == 'from_so':						
+				elif grn_entry.grn_type == 'from_so':
 					if line.so_line_id:
 						so_line_pending_qty = line.so_pending_qty - line.po_grn_qty
 						if so_line_pending_qty < 0:
@@ -744,17 +727,17 @@ class kg_po_grn(osv.osv):
 								})
 						so_obj.write(cr,uid,line.so_line_id.service_id.id, {'grn_flag': False,'adv_flag':True})
 						
-					if line.si_line_id and line.so_line_id.service_id.gp_id:		
+					if line.si_line_id and line.so_line_id.service_id.gp_id:
 						sql1 = """ update kg_gate_pass_line set grn_pending_qty=(grn_pending_qty - %s) where si_line_id = %s and gate_id = %s"""%(line.po_grn_qty,
 															line.si_line_id.id,line.so_line_id.service_id.gp_id.id)
 						cr.execute(sql1)
 					elif not line.si_line_id and line.so_line_id:
 						sql1 = """ update kg_gate_pass_line set grn_pending_qty=(grn_pending_qty - %s) where product_id = %s and gate_id = %s"""%(line.po_grn_qty,
 															line.product_id.id,line.so_line_id.service_id.gp_id.id)
-						cr.execute(sql1)	
+						cr.execute(sql1)
 					else:
 						pass
-							
+					
 					so_ids = [x.id for x in grn_entry.so_ids]
 					
 					for i in so_ids:
@@ -785,7 +768,7 @@ class kg_po_grn(osv.osv):
 								'grn_pending_qty' : gp_line_pending_qty,
 								})
 				else:
-					pass				
+					pass
 				# This code will create PO GRN to Stock Move
 				
 				if grn_entry.grn_type == 'from_po':
@@ -866,7 +849,7 @@ class kg_po_grn(osv.osv):
 						'trans_date': grn_entry.grn_date,
 						})
 					
-					line.write({'state':'done'})					
+					line.write({'state':'done'})
 						
 				elif grn_entry.grn_type == 'from_gp':
 					if line.length == 0.00:
@@ -993,26 +976,8 @@ class kg_po_grn(osv.osv):
 			self.write(cr,uid,ids[0],{'state': 'done',
 									  'approved_by': uid,
 									  'approved_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-									  })							  
+									  })
 		
-		return True
-	
-	# GRN Reject #
-	
-	def entry_reject(self, cr, uid, ids, context=None):
-		grn = self.browse(cr, uid, ids[0])
-		if grn.state =='confirmed':
-			if not grn.reject_remark:
-				raise osv.except_osv(_('Warning !'),_('Enter Remarks for GRN Rejection !!'))
-			else:
-				self.write(cr, uid, ids[0], {'state': 'draft','rej_user_id': uid,'reject_date': time.strftime("%Y-%m-%d %H:%M:%S")})
-		return True
-	
-	# GRN Cancel #
-	
-	def entry_cancel(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
-		if rec.state == 'done':
 			po_id = self.pool.get('purchase.order')
 			so_id = self.pool.get('kg.service.order')
 			if not rec.can_remark:
@@ -1117,7 +1082,7 @@ class po_grn_line(osv.osv):
 		'po_grn_date':fields.date('PO GRN Date'),
 		'name':fields.char('Product'),
 		'product_id':fields.many2one('product.product','Product Name',required=True, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
-		'uom_id':fields.many2one('product.uom','PO UOM',required=True),
+		'uom_id':fields.many2one('product.uom','PO UOM',domain="[('dummy_state','=','approved')]",required=True),
 		'po_grn_qty':fields.float('Received Qty',required=True),
 		'recvd_qty':fields.float('Received Qty'),
 		'reject_qty':fields.float('Rejected Qty'),
@@ -1143,12 +1108,12 @@ class po_grn_line(osv.osv):
 		'si_line_id':fields.many2one('kg.service.indent.line','SI Line'),
 		'price_subtotal': fields.function(_amount_line, string='Line Total', digits_compute= dp.get_precision('Account'),store=True),
 		#'price_subtotal': fields.function(_amount_line, string='Line Total', digits_compute= dp.get_precision('Account')),
-		'brand_id':fields.many2one('kg.brand.master','Brand',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
+		'brand_id':fields.many2one('kg.brand.master','Brand',domain="[('product_ids','in',(product_id)),('state','=','approved')]"),
 		'so_flag':fields.boolean('SO Flag'),
 		'po_flag':fields.boolean('PO Flag'),
 		'gp_flag':fields.boolean('PO Flag'),
 		'billing_type': fields.selection([('free', 'Free'), ('cost', 'Cost')], 'Billing Type'),
-		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type'),
+		'inward_type': fields.many2one('kg.inwardmaster','Inward Type',domain="[('state','=','approved')]"),
 		'ser_no':fields.char('Ser No', size=128, readonly=True),
 		'serial_no':fields.many2one('stock.production.lot','Serial No',domain="[('product_id','=',product_id)]", readonly=True),  
 		'order_no': fields.char('No.',readonly=True),
@@ -1160,7 +1125,7 @@ class po_grn_line(osv.osv):
 		'breadth': fields.float('Breadth',readonly=True),
 		'weight': fields.float('Weight',readonly=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
-		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
+		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','=','approved')]"),
 		'uom_category': fields.selection([('length','Length'),('other','Others')],'UOM Category',required=True),
 		
 		## Child Tables Declaration
@@ -1210,10 +1175,10 @@ class po_grn_line(osv.osv):
 		
 	}   
 	
-	def _check_weight(self, cr, uid, ids, context=None):		
+	def _check_weight(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.weight < 0.00:
-			return False					
+			return False
 		return True
 	
 	_constraints = [
@@ -1243,10 +1208,10 @@ class kg_po_exp_batch(osv.osv):
 		
 	}
 	
-	def _check_qty(self, cr, uid, ids, context=None):		
+	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.product_qty <= 0:
-			return False					
+			return False
 		return True
 	
 	_constraints = [
@@ -1313,10 +1278,10 @@ class ch_po_grn_wo(osv.osv):
 			value = {'wo_id':wo_rec.order_no}
 		return {'value':value}
 	
-	def _check_qty(self, cr, uid, ids, context=None):		
+	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.qty <= 0.00:
-			return False					
+			return False
 		return True
 	
 	_constraints = [
