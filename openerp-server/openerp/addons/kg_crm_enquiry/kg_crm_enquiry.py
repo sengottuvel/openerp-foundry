@@ -1285,7 +1285,7 @@ class kg_crm_enquiry(osv.osv):
 			moc_changed_flag = bom_item.moc_changed_flag
 			if bom_item.header_id.header_id.segment == 'dom':
 				hsn = bom_item.ms_id.hsn_no.id
-				if not bom_item.pattern_id.hsn_no.igst_id:
+				if not bom_item.ms_id.hsn_no.igst_id:
 					raise osv.except_osv(_('Warning!'),_('Configure Pump of (%s) IGST Tax in HSN master for Item (%s) and HSN (%s) !!' %(bom_item.header_id.pump_id.name,item_name,bom_item.ms_id.hsn_no.name)))
 				gst = bom_item.ms_id.hsn_no.igst_id.id
 		elif item_type == 'bot':
@@ -1299,7 +1299,7 @@ class kg_crm_enquiry(osv.osv):
 			moc_changed_flag = bom_item.moc_changed_flag
 			if bom_item.header_id.header_id.segment == 'dom':
 				hsn = bom_item.ms_id.hsn_no.id
-				if not bom_item.pattern_id.hsn_no.igst_id:
+				if not bom_item.ms_id.hsn_no.igst_id:
 					raise osv.except_osv(_('Warning!'),_('Configure Pump of (%s) IGST Tax in HSN master for Item (%s) and HSN (%s) !!' %(bom_item.header_id.pump_id.name,item_name,bom_item.ms_id.hsn_no.name)))
 				gst = bom_item.ms_id.hsn_no.igst_id.id
 		
