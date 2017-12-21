@@ -634,8 +634,8 @@ class kg_po_grn(osv.osv):
 					po_ids.append(item.id)
 				for line in grn_entry.line_ids:
 					line_po_ids.append(line.po_line_id.order_id.id)
-				if po_ids != line_po_ids:
-					raise osv.except_osv(_('Warning !'),_('Mapped PO and Lines are mismatched !!'))
+				#~ if po_ids != line_po_ids:
+					#~ raise osv.except_osv(_('Warning !'),_('Mapped PO and Lines are mismatched !!'))
 			
 			for line in grn_entry.line_ids:
 				if line.billing_type == 'cost':
@@ -687,8 +687,8 @@ class kg_po_grn(osv.osv):
 					po_ids.append(item.id)
 				for line in grn_entry.line_ids:
 					line_po_ids.append(line.po_line_id.order_id.id)
-				if po_ids != line_po_ids:
-					raise osv.except_osv(_('Warning !'),_('Mapped PO and Lines are mismatched !!'))
+				#~ if po_ids != line_po_ids:
+					#~ raise osv.except_osv(_('Warning !'),_('Mapped PO and Lines are mismatched !!'))
 			
 			for line in grn_entry.line_ids:
 				
