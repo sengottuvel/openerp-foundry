@@ -52,7 +52,7 @@
 						<group>
 							<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							<field name="csd_code"/>
-							<field name="hsn_no"/>
+							<field name="hsn_no" required="1"/>
 							<field name="painting_cost"/>
 							<field name="breadth" invisible="1"/>
 							<field name="thickness" invisible="1"/>																
