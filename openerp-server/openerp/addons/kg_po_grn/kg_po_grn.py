@@ -978,6 +978,24 @@ class kg_po_grn(osv.osv):
 									  'approved_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 									  })
 		
+		return True
+	
+	# GRN Reject #
+	
+	def entry_reject(self, cr, uid, ids, context=None):
+		grn = self.browse(cr, uid, ids[0])
+		if grn.state =='confirmed':
+			if not grn.reject_remark:
+				raise osv.except_osv(_('Warning !'),_('Enter Remarks for GRN Rejection !!'))
+			else:
+				self.write(cr, uid, ids[0], {'state': 'draft','rej_user_id': uid,'reject_date': time.strftime("%Y-%m-%d %H:%M:%S")})
+		return True
+	
+	# GRN Cancel #
+	
+	def entry_cancel(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.state == 'done':
 			po_id = self.pool.get('purchase.order')
 			so_id = self.pool.get('kg.service.order')
 			if not rec.can_remark:
