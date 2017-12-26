@@ -57,7 +57,7 @@ class kg_product(osv.osv):
 		'sleeve_dia': fields.char('Sleeve dia(MM)'),
 		'coupling_make': fields.many2one('kg.brand.master','Coupling Make'),
 		'is_depreciation': fields.boolean('Is Depreciation'),
-		'hsn_no': fields.many2one('kg.hsn.master','HSN No.',domain="[('state','=','approved')]",readonly=False,states={'approved':[('readonly',True)]}),
+		'hsn_no': fields.many2one('kg.hsn.master','HSN No.',domain="[('state','=','approved')]"),
 		'primemover_id': fields.many2one('kg.primemover.master','Prime mover',readonly=False,states={'approved':[('readonly',True)]}),
 		
 		'po_copy_uom': fields.many2one('product.uom','PO Copy UOM'),
