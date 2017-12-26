@@ -8,9 +8,7 @@ from datetime import datetime
 import base64
 from itertools import groupby
 import re
-
 from PIL import Image
-
 import StringIO
 import base64
 import string
@@ -36,7 +34,6 @@ style2 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz right;'
 style3 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz right;''borders: left thin, right thin, top thin, bottom thin')
 style41 = xlwt.easyxf('font: height 200,bold on,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')		
 style4 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin')
-
 
 
 CALL_TYPE_SELECTION = [
@@ -69,16 +66,12 @@ class kg_crm_offer(osv.osv):
 				'component_net_amount': 0.0,
 				'supervision_amount': 0.0,
 				'offer_prime_cost_tot': 0.0,
-			}
-			
-			#~ cur = order.customer_id.property_product_pricelist_purchase.currency_id
-			
+			}		
+		
 			for line in order.line_pump_ids:
 				pump_net_amount += line.net_amount
-				print"pump_net_amount",pump_net_amount
 				supervision_amount += line.supervision_amount
 				offer_sam_ratio_tot += line.r_sam_ratio_tot
-				print"pump_offer_sam_ratio_tot-------------------",offer_sam_ratio_tot
 				offer_prime_cost_tot += line.prime_cost
 				offer_dealer_discount_tot += line.r_dealer_discount_tot
 				offer_spl_discount_tot += line.r_spl_discount_tot
@@ -90,10 +83,8 @@ class kg_crm_offer(osv.osv):
 				offer_net_amount += line.r_net_amt_tot
 			for line in order.line_spare_ids:
 				spare_net_amount += line.net_amount
-				print"spare_net_amount",spare_net_amount
 				supervision_amount += line.supervision_amount
 				offer_sam_ratio_tot += line.r_sam_ratio_tot
-				print"sasasasaoffer_sam_ratio_tot",offer_sam_ratio_tot
 				offer_prime_cost_tot += line.prime_cost
 				offer_dealer_discount_tot += line.r_dealer_discount_tot
 				offer_spl_discount_tot += line.r_spl_discount_tot
@@ -105,9 +96,7 @@ class kg_crm_offer(osv.osv):
 				offer_net_amount += line.r_net_amt_tot
 			for line in order.line_accessories_ids:
 				access_net_amount += line.net_amount
-				print"access_net_amount",access_net_amount
 				offer_sam_ratio_tot += line.r_sam_ratio_tot
-				print"acacaoffer_sam_ratio_tot",offer_sam_ratio_tot
 				offer_prime_cost_tot += line.prime_cost
 				offer_dealer_discount_tot += line.r_dealer_discount_tot
 				offer_spl_discount_tot += line.r_spl_discount_tot
@@ -119,14 +108,10 @@ class kg_crm_offer(osv.osv):
 				offer_net_amount += line.r_net_amt_tot
 			for line in order.line_component_ids:
 				component_net_amount += line.net_amount
-				print"component_net_amount",component_net_amount
 				
 			res[order.id]['pump_net_amount'] = round(pump_net_amount)
 			res[order.id]['spare_net_amount'] = round(spare_net_amount)
 			res[order.id]['access_net_amount'] = round(access_net_amount)
-			print"pump_net_amount",pump_net_amount
-			print"access_net_amount",access_net_amount
-			#~ res[order.id]['offer_net_amount'] = pump_net_amount + spare_net_amount + access_net_amount
 			sam_ratio_tot = round((offer_sam_ratio_tot / (offer_prime_cost_tot or 1)),2)
 			res[order.id]['sam_ratio_tot'] = sam_ratio_tot
 			res[order.id]['offer_prime_cost_tot'] = round(offer_prime_cost_tot)
@@ -139,130 +124,137 @@ class kg_crm_offer(osv.osv):
 			res[order.id]['offer_tax_tot'] = round(offer_tax_tot)
 			res[order.id]['offer_customer_discount_tot'] = round(offer_customer_discount_tot)
 			res[order.id]['offer_net_amount'] = round(offer_net_amount)
-			print"res[order.id]['offer_net_amount']--------------",res[order.id]['offer_net_amount']
-			
 			res[order.id]['component_net_amount'] = round(component_net_amount)
 			res[order.id]['supervision_amount'] = round(supervision_amount)
 			
 		return res
 	
 	_name = "kg.crm.offer"
-	_description = "CRM Offer Entry"
+	_description = "Enquiry Offer"
 	_order = "enquiry_date desc"
 	
 	_columns = {
 		
 		## Basic Info
 		
-		'name': fields.char('Offer No', size=128,select=True,readonly=True, states={'draft':[('readonly',False)]}),
+		'name': fields.char('Offer No',size=128,select=True,readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
 		'note': fields.char('Notes'),
 		'offer_date': fields.date('Offer Date',required=True),
 		'remarks': fields.text('Remarks'),
 		'reject_remarks': fields.text('Reject Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
-		'state': fields.selection(STATE_SELECTION,'Status', readonly=True),
+		'state': fields.selection(STATE_SELECTION,'Status',readonly=True),
 		
 		## Module Requirement Info
 		
 		'enquiry_id': fields.many2one('kg.crm.enquiry','Enquiry No.'),
 		'enquiry_no': fields.char('Enquiry No.'),
-		'schedule_no': fields.char('Schedule No', size=128,select=True),
-		'enquiry_date': fields.related('enquiry_id','offer_date', type='date', string='Enquiry Date', store=True,required=True),
-		'customer_id': fields.related('enquiry_id','customer_id', type='many2one', relation="res.partner", string='Customer Name', store=True),
-		'del_date': fields.date('Expected Delivery Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'due_date': fields.date('Due Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'schedule_no': fields.char('Schedule No',size=128,select=True),
+		'enquiry_date': fields.related('enquiry_id','offer_date',type='date',string='Enquiry Date',store=True,required=True),
+		'customer_id': fields.related('enquiry_id','customer_id',type='many2one',relation="res.partner",string='Customer Name',store=True),
+		'del_date': fields.date('Expected Delivery Date',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'due_date': fields.date('Due Date',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
 		'md_approved_date': fields.date('MD Approved Date',readonly=True),
 		'service_det': fields.char('Service Details'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'dom_freight': fields.selection([('topay','To pay'),('paid','Paid'),('paid_reimburse','Paid & reimbursement')],'Freight',readonly=False,states={'wo_created':[('readonly',True)]}),
-		'freight': fields.selection([('topay','Topay'),('paid','Paid')],'Freight',readonly=False,states={'wo_created':[('readonly',True)]}),
+		'freight': fields.selection([('topay','To pay'),('paid','Paid')],'Freight',readonly=False,states={'wo_created':[('readonly',True)]}),
 		'offer_copy': fields.char('Offer Copy'),
 		'term_copy': fields.char('Terms Copy'),
-		'customer_po_no': fields.char('Customer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'cust_po_date': fields.date('Customer PO Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'cpo_del': fields.char('Delivery as per C.P.O',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'dealer_po_no': fields.char('Dealer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'deal_po_date': fields.date('Dealer PO Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'sam_del': fields.char('Delivery consider by SAM',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'customer_po_no': fields.char('Customer PO No.',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'cust_po_date': fields.date('Customer PO Date',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'cpo_del': fields.char('Delivery as per C.P.O',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'dealer_po_no': fields.char('Dealer PO No.',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'deal_po_date': fields.date('Dealer PO Date',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'sam_del': fields.char('Delivery consider by SAM',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
 		'revision': fields.integer('Revision'),
 		'wo_flag': fields.boolean('WO Flag'),
-		'load_term': fields.boolean('Terms Applicable',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'load_term': fields.boolean('Terms Applicable',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
 		'revision_remarks': fields.text('Revision Remarks'),
-		
-		#~ 'ch_line_ids': fields.one2many('ch.kg.crm.pumpmodel', 'header_id', "Pump/Spare Details"),
 		'due_date': fields.date('Due Date',required=True),
-		'call_type': fields.selection(CALL_TYPE_SELECTION,'Call Type', required=True),
-		'ref_mode': fields.selection([('direct','Direct'),('dealer','Dealer')],'Reference Mode', required=True),
+		'call_type': fields.selection(CALL_TYPE_SELECTION,'Call Type',required=True),
+		'ref_mode': fields.selection([('direct','Direct'),('dealer','Dealer')],'Reference Mode',required=True),
 		'market_division': fields.selection(MARKET_SELECTION,'Marketing Division'),
-		'division_id': fields.many2one('kg.division.master','Division',domain="[('state','not in',('reject','cancel'))]",required=True),
-		'division_code': fields.char('Division Code',readonly=True,required=True),
+		'division_id': fields.many2one('kg.division.master','Division',domain="[('state','=','approved')]",required=True),
+		'division_code': fields.char('Division Code',readonly=True),
 		'ref_no': fields.char('Reference Number'),
-		'segment': fields.selection([('dom','Domestic'),('exp','Export')],'Segment', required=True),
-		'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True),('contact','=',False)]),
-		'industry_id': fields.many2one('kg.industry.master','Sector'),
+		'segment': fields.selection([('dom','Domestic'),('exp','Export')],'Segment',required=True),
+		'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True),('contact','=',False),('partner_state','=','approve')]),
+		'industry_id': fields.many2one('kg.industry.master','Sector',domain="[('state','=','approved')]"),
 		'expected_value': fields.float('Expected Value'),
 		'del_date': fields.date('Expected Del Date'),
-		'reminder_date': fields.date('Reminder Date',readonly=True, states={'draft':[('readonly',False)]}),
-		'purpose': fields.selection(PURPOSE_SELECTION,'Purpose'),
-		'chemical_id': fields.many2one('kg.chemical.master','Chemical',domain=[('purpose','=','general')]),
-		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Name'),
+		'reminder_date': fields.date('Reminder Date',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'purpose': fields.selection(PURPOSE_SELECTION,'Category'),
+		'chemical_id': fields.many2one('kg.chemical.master','Chemical',domain=[('purpose','=','general'),('state','=','approved')]),
+		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Name',domain="[('state','=','approved')]"),
 		's_no': fields.char('Serial Number'),
 		'wo_no': fields.char('WO Number'),
 		'requirements': fields.text('Requirements'),
 		'is_zero_offer': fields.boolean('Is Zero Value Offer'),
-		'flag_data_bank': fields.boolean('Is Data WO',readonly=True, states={'draft':[('readonly',False)]}),
+		'flag_data_bank': fields.boolean('Is Data WO',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
 		
 		'scope_of_supply': fields.selection([('bare_pump','Bare Pump'),('pump_with_acces','Pump With Accessories'),('pump_with_acces_motor','Pump With Accessories And Motor')],'Scope of Supply'),
-		'pump': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Sealing', required=True),
+		'pump': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Sealing',required=True),
 		'drive': fields.selection([('motor','Motor'),('vfd','VFD'),('engine','Engine')],'Drive'),
-		'transmision': fields.selection([('cpl','Coupling'),('belt','Belt Drive'),('fc','Fluid Coupling'),('gear_box','Gear Box'),('fc_gear_box','Fluid Coupling With Gear Box')],'Transmision', required=True),
+		'transmision': fields.selection([('cpl','Coupling'),('belt','Belt Drive'),('fc','Fluid Coupling'),('gear_box','Gear Box'),('fc_gear_box','Fluid Coupling With Gear Box')],'Transmision',required=True),
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
-		'excise_duty': fields.selection([('inclusive','Inclusive'),('extra','Extra'),('exemted','Exemted - Export'),('pac','PAC'),('sez','SEZ'),('ct1','CT1'),('ct3','CT3')],'EXCISE DUTY',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'road_permit': fields.selection([('yes','Yes'),('no','No')],'Road Permit',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'inspection': fields.selection([('yes','Yes(customers)'),('no','No(works)'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'excise_duty': fields.selection([('inclusive','Inclusive'),('extra','Extra'),('exemted','Exemted - Export'),('pac','PAC'),('sez','SEZ'),('ct1','CT1'),('ct3','CT3')],'EXCISE DUTY',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'road_permit': fields.selection([('yes','Yes'),('no','No')],'Road Permit',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'inspection': fields.selection([('yes','Yes(customers)'),('no','No(works)'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
 		'l_d_clause': fields.char('L. D. CLAUSE / Penalty',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		#~ 'l_d_clause': fields.selection([('5_1','0.5 - 1.0% of total order value'),('1_10','1 to 10% of total order value'),('nill','Nill')],'L. D. CLAUSE / Penalty',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
-		'pump_per_flag': fields.boolean('Pump',readonly=True, states={'draft':[('readonly',False)]}),
-		'spare_per_flag': fields.boolean('Spare',readonly=True, states={'draft':[('readonly',False)]}),
-		'access_per_flag': fields.boolean('Accessories',readonly=True, states={'draft':[('readonly',False)]}),
-		'super_per_flag': fields.boolean('Supervision',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_sam_ratio': fields.float('Sam Ratio',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_dealer_discount': fields.float('Dealer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_special_discount': fields.float('Special Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_p_f': fields.float('P&F(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_freight': fields.float('Freight(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_insurance': fields.float('Insurance(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_tax_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Tax',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_ed_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'ED',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_customer_discount': fields.float('Mark-Up(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_tax': fields.float('Tax(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_ed': fields.float('ED(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'o_agent_com': fields.float('Agent Commission(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'off_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Offer Status',readonly=False,states={'wo_created':[('readonly',True)],'wo_released':[('readonly',True)]}),
-		'dummy_flag': fields.boolean('Dummy Flag'),
-		'annexure_1': fields.html('Annexure 1',readonly=True, states={'draft':[('readonly',False)]}),
-		'prj_name': fields.char('Project Name',readonly=True, states={'draft':[('readonly',False)]}),
-		'del_term': fields.selection([('ex_works','Ex-Works'),('fob','FOB'),('cfr','CFR'),('cif','CIF'),('cpt','CPT')],'Delivery Term',readonly=True, states={'draft':[('readonly',False)]}),
-		'mode_of_dispatch': fields.selection([('sea','Sea Worthy'),('air','Air Worthy')],'Mode Of Dispatch',readonly=True, states={'draft':[('readonly',False)]}),
-		'zone': fields.selection([('north','North'),('south','South'),('east','East'),('west','West'),('mines','Mines')],'Zone',readonly=True, states={'draft':[('readonly',False)]}),
 		
-		'r_o_dealer_discount': fields.float('Dealer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'r_o_special_discount': fields.float('Special Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'r_o_p_f': fields.float('P&F(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'r_o_freight': fields.float('Freight(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'r_o_insurance': fields.float('Insurance(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'r_o_p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F',readonly=True, states={'draft':[('readonly',False)]}),
-		'r_o_freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight',readonly=True, states={'draft':[('readonly',False)]}),
-		'r_o_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance',readonly=True, states={'draft':[('readonly',False)]}),
-		'r_o_customer_discount': fields.float('Customer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
-		'r_o_cust_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Customer Discount',readonly=True, states={'draft':[('readonly',False)]}),
+		## Child Tables Declaration
+		
+		'line_pump_ids': fields.one2many('ch.pump.offer','header_id',"Pump Offer"),
+		'line_spare_ids': fields.one2many('ch.spare.offer','header_id',"Spare Offer"),
+		'line_component_ids': fields.one2many('ch.crm.component.offer', 'header_id',"Component Offer"),
+		'line_accessories_ids': fields.one2many('ch.accessories.offer','header_id',"Accessories Offer"),
+		'line_supervision_ids': fields.one2many('ch.supervision.offer','header_id',"Supervision Charge"),
+		'line_term_ids': fields.one2many('ch.term.offer','header_id',"Term Offer"),
+		'line_remark_ids': fields.one2many('ch.crm.off.remark', 'header_id',"Remarks",readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'line_attach_ids': fields.one2many('ch.crm.off.attachments','header_id',"Attachments",readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+
+		'pump_per_flag': fields.boolean('Pump'),
+		'spare_per_flag': fields.boolean('Spare'),
+		'access_per_flag': fields.boolean('Accessories'),
+		'super_per_flag': fields.boolean('Supervision',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'o_sam_ratio': fields.float('Sam Ratio'),
+		'o_dealer_discount': fields.float('Dealer Discount(%)'),
+		'o_special_discount': fields.float('Special Discount(%)'),
+		'o_p_f': fields.float('P&F(%)'),
+		'o_freight': fields.float('Freight(%)'),
+		'o_insurance': fields.float('Insurance(%)'),
+		'o_p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'o_freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'o_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'o_tax_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Tax',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'o_ed_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'ED',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'o_customer_discount': fields.float('Mark-Up(%)'),
+		'o_tax': fields.float('Tax(%)',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'o_ed': fields.float('ED(%)',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'o_agent_com': fields.float('Agent Commission(%)',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'off_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Offer Status',readonly=False,states={'wo_created':[('readonly',True)],'wo_released':[('readonly',True)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'dummy_flag': fields.boolean('Dummy Flag'),
+		'annexure_1': fields.html('Annexure 1',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'prj_name': fields.char('Project Name',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'del_term': fields.selection([('ex_works','Ex-Works'),('fob','FOB'),('cfr','CFR'),('cif','CIF'),('cpt','CPT')],'Delivery Term',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'mode_of_dispatch': fields.selection([('sea','Sea Worthy'),('air','Air Worthy')],'Mode Of Dispatch',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'zone': fields.selection([('north','North'),('south','South'),('east','East'),('west','West'),('mines','Mines')],'Zone',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		
+		'r_o_dealer_discount': fields.float('Dealer Discount(%)'),
+		'r_o_special_discount': fields.float('Special Discount(%)'),
+		'r_o_p_f': fields.float('P&F(%)'),
+		'r_o_freight': fields.float('Freight(%)'),
+		'r_o_insurance': fields.float('Insurance(%)'),
+		'r_o_p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'r_o_freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'r_o_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
+		'r_o_customer_discount': fields.float('Customer Discount(%)'),
+		'r_o_cust_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Customer Discount',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'design_checked':[('readonly',False)],'design_verified':[('readonly',False)]}),
 		
 		# Pump Offer Fields
-		'offer_prime_cost_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Primecost',multi="sums",store=True),
+		'offer_prime_cost_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),
 		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),
 		'pump_sam_ratio': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),
 		'pump_dealer_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),
@@ -297,7 +289,7 @@ class kg_crm_offer(osv.osv):
 		
 		'offer_sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Works Value',multi="sums",store=True),
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),
-		'offer_dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Dsicount',multi="sums",store=True),
+		'offer_dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount',multi="sums",store=True),
 		'offer_spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount',multi="sums",store=True),
 		'offer_p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),
 		'offer_insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),
@@ -307,17 +299,6 @@ class kg_crm_offer(osv.osv):
 		'offer_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Offer Amount',multi="sums",store=True),
 		'component_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Component Charge',multi="sums",store=True),
 		'supervision_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Supervision Charge',multi="sums",store=True),
-		
-		## Child Tables Declaration
-		
-		'line_pump_ids': fields.one2many('ch.pump.offer', 'header_id', "Pump Offer"),
-		'line_spare_ids': fields.one2many('ch.spare.offer', 'header_id', "Spare Offer"),
-		'line_component_ids': fields.one2many('ch.crm.component.offer', 'header_id', "Component Offer"),
-		'line_accessories_ids': fields.one2many('ch.accessories.offer', 'header_id', "Accessories Offer"),
-		'line_supervision_ids': fields.one2many('ch.supervision.offer', 'header_id', "Supervision Charge"),
-		'line_term_ids': fields.one2many('ch.term.offer', 'header_id', "Term Offer"),
-		'line_remark_ids': fields.one2many('ch.crm.off.remark', 'header_id', "Remarks",readonly=True, states={'draft':[('readonly',False)]}),
-		'line_attach_ids': fields.one2many('ch.crm.off.attachments', 'header_id', "Attachments",readonly=True, states={'draft':[('readonly',False)]}),
 		
 		## Entry Info
 		
@@ -340,7 +321,7 @@ class kg_crm_offer(osv.osv):
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	   
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		
 		## Offer Copy 
 		
@@ -358,11 +339,11 @@ class kg_crm_offer(osv.osv):
 	
 	_defaults = {
 		
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_crm_offer', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.crm.offer', context=c),
 		'enquiry_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'offer_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+		'crt_date':  lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 		'pump': 'gld_packing',
 		'transmision': 'cpl',
@@ -370,7 +351,6 @@ class kg_crm_offer(osv.osv):
 		'call_type': 'new_enquiry',
 		'active': True,
 		'wo_flag': False,
-	#	'division_id':_get_default_division,
 		'due_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'revision': 0,
 		'is_zero_offer': False,
@@ -379,36 +359,31 @@ class kg_crm_offer(osv.osv):
 		'r_o_cust_in_ex':'inclusive',
 	}
 	
-	def _supervision(self, cr, uid, ids, context=None):		
+	def _supervision(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.line_supervision_ids:
 			if len(rec.line_supervision_ids) > 1:
-				raise osv.except_osv(_('Warning!'),_('Supervision more than one not allowed!!'))
+				raise osv.except_osv(_('Warning !'),_('More than one supervision not allowed !!'))
 		if rec.off_status in ('on_hold','closed'):
 			if not rec.line_remark_ids:
-				raise osv.except_osv(_('Warning!'),_('You cannot save without Remarks'))
-			for item in rec.line_remark_ids:
-				name_special_char = ''.join(c for c in item.remarks if c in '!@#$%^~*{}?+/=')
-				if name_special_char:
-					raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in Remarks!'))
+				raise osv.except_osv(_('Warning !'),_('You cannot save without Remarks !!'))
 		return True
 	
-	def _line_validations(self, cr, uid, ids, context=None):		
+	def _line_validations(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.name:
-			cr.execute(""" select upper(name) from kg_crm_offer where upper(name)  = '%s' and state != 'revised' """ %(rec.name.upper()))
+			cr.execute(""" select upper(name) from kg_crm_offer where upper(name) = '%s' and state != 'revised' and id != %s """ %(rec.name.upper(),rec.id))
 			data = cr.dictfetchall()
 			if rec.revision_remarks:
 				if len(data) > 2:
-					raise osv.except_osv(_('Warning'), _('Offer No. must be unique !!'))
+					raise osv.except_osv(_('Warning !'),_('Offer No. must be unique !!'))
 			elif len(data) > 1:
-				raise osv.except_osv(_('Warning'), _('Offer No. must be unique !!'))
+				raise osv.except_osv(_('Warning !'),_('Offer No. must be unique !!'))
 			else:
 				pass
 		if rec.line_pump_ids:
 			for item in rec.line_pump_ids:
 				if item.hsn_no.id:
-					print"item.hsn_no.id",item.hsn_no.id
 					sql_check = """ select hsn_id from hsn_no_product where hsn_id = %s and pump_id = %s """ %(item.hsn_no.id,item.pump_id.id)
 					cr.execute(sql_check)
 					data = cr.dictfetchall()
@@ -420,90 +395,25 @@ class kg_crm_offer(osv.osv):
 						for ele in data_1:
 							hsn_rec = self.pool.get('kg.hsn.master').browse(cr,uid,ele['hsn_id'])
 							hsn = str(hsn_rec.name) + ',' + hsn
-						raise osv.except_osv(_('Warning!'),_('You can choose only HSN %s'%(hsn)))
-		#~ if rec.is_zero_offer != True:
-			#~ if rec.line_pump_ids:
-				#~ for item in rec.line_pump_ids:
-					#~ if item.cpo_quote_cust == 'quoted' and item.net_amount == 0.00:
-						#~ raise osv.except_osv(_('Warning!'),_('Pump %s Kindly verify quoted price is zero!'%(item.pump_id.name)))
-			#~ if rec.line_spare_ids:
-				#~ for item in rec.line_spare_ids:
-					#~ if item.cpo_quote_cust == 'quoted' and item.net_amount == 0.00:
-						#~ raise osv.except_osv(_('Warning!'),_('Sapre %s %s Kindly verify quoted price is zero!'%(item.pump_id.name,item.item_name)))
-			#~ if rec.line_accessories_ids:
-				#~ for item in rec.line_accessories_ids:
-					#~ if item.cpo_quote_cust == 'quoted' and item.net_amount == 0.00:
-						#~ raise osv.except_osv(_('Warning!'),_('Accessories %s %s Kindly verify quoted price is zero!'%(item.pump_id.name,item.access_id.name)))
-		return True
-	
-	def _exceed_discount(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.customer_id:
-			if rec.o_customer_discount:
-				if rec.o_customer_discount > rec.customer_id.max_cust_discount:
-					raise osv.except_osv(_('Warning!'),_('Customer discount is more than maximum limit configured'))
-			if rec.o_special_discount:
-				if rec.o_special_discount > rec.customer_id.max_spl_discount:
-					raise osv.except_osv(_('Warning!'),_('Special discount is more than maximum limit configured'))
-			if rec.line_pump_ids:
-				for item in rec.line_pump_ids:
-					if item.customer_discount > rec.customer_id.max_cust_discount:
-						raise osv.except_osv(_('Warning!'),
-							_('%s Customer discount is more than maximum limit configured'%(item.pump_id.name)))
-					if item.special_discount > rec.customer_id.max_spl_discount:
-						raise osv.except_osv(_('Warning!'),
-							_('%s Special discount is more than maximum limit configured'%(item.pump_id.name)))
-			if rec.line_spare_ids:
-				for item in rec.line_spare_ids:
-					if item.customer_discount > rec.customer_id.max_cust_discount:
-						raise osv.except_osv(_('Warning!'),
-							_('%s - %s spare customer discount is more than maximum limit configured'%(item.pump_id.name,item.item_name)))
-					if item.special_discount > rec.customer_id.max_spl_discount:
-						raise osv.except_osv(_('Warning!'),
-							_('%s - %s spare special discount is more than maximum limit configured'%(item.pump_id.name,item.item_name)))
-			if rec.line_accessories_ids:
-				for item in rec.line_accessories_ids:
-					if item.customer_discount > rec.customer_id.max_cust_discount:
-						raise osv.except_osv(_('Warning!'),
-							_('%s customer discount is more than maximum limit configured'%(item.access_id.name)))
-					if item.special_discount > rec.customer_id.max_spl_discount:
-						raise osv.except_osv(_('Warning!'),
-							_('%s special discount is more than maximum limit configured'%(item.access_id.name)))
-			if rec.line_supervision_ids:
-				for item in rec.line_supervision_ids:
-					if item.customer_discount > rec.customer_id.max_cust_discount:
-						raise osv.except_osv(_('Warning!'),_('Supervision customer discount is more than maximum limit configured'))
-					if item.special_discount > rec.customer_id.max_spl_discount:
-						raise osv.except_osv(_('Warning!'),_('Supervision special discount is more than maximum limit configured'))
-		if rec.dealer_id:
-			if rec.o_dealer_discount:
-				if rec.o_dealer_discount > rec.dealer_id.max_deal_discount:
-					raise osv.except_osv(_('Warning!'),_('Dealer discount is more than maximum limit configured'))
-			if rec.line_pump_ids:
-				for item in rec.line_pump_ids:
-					if item.dealer_discount > rec.dealer_id.max_deal_discount:
-						raise osv.except_osv(_('Warning!'),
-							_('%s Dealer discount is more than maximum limit configured'%(item.pump_id.name)))
-			if rec.line_spare_ids:
-				for item in rec.line_spare_ids:
-					if item.dealer_discount > rec.dealer_id.max_deal_discount:
-						raise osv.except_osv(_('Warning!'),
-							_('%s - %s dealer discount is more than maximum limit configured'%(item.pump_id.name,item.item_name)))
-			if rec.line_accessories_ids:
-				for item in rec.line_accessories_ids:
-					if item.dealer_discount > rec.dealer_id.max_deal_discount:
-						raise osv.except_osv(_('Warning!'),
-							_('%s dealer discount is more than maximum limit configured'%(item.access_id.name)))
-			if rec.line_supervision_ids:
-				for item in rec.line_supervision_ids:
-					if item.dealer_discount > rec.dealer_id.max_deal_discount:
-						raise osv.except_osv(_('Warning!'),_('Supervision dealer discount is more than maximum limit configured'))
-		return True
+						raise osv.except_osv(_('Warning !'),_('You can choose one HSN (%s) for pump (%s) !!'%(hsn,item.pump_id.name)))
+		if rec.line_term_ids:
+			cr.execute('''SELECT term_id, term
+							FROM ch_term_offer where header_id = %s
+							GROUP BY term_id,term
+							HAVING ( COUNT(term_id) > 1 )''',[rec.id])
+			dup_ids = cr.fetchall()
+			if dup_ids:
+				for item in dup_ids:
+					term_rec = self.pool.get('kg.offer.term').browse(cr,uid,item[0])
+					raise osv.except_osv(_('Warning !'),_('Duplicate Terms Name (%s) are not allowed !!')%(term_rec.name))
+		
+		return True	
 	
 	_constraints = [
-		(_supervision, 'Supervision more than one not allowed!', ['']),
-		(_line_validations, 'Kindly check Line details!', ['']),
-		#~ (_exceed_discount, 'Discount more than confirgured not allowed!', ['']),
+	
+		(_supervision, ' ', ['']),
+		(_line_validations, ' ', ['']),
+		
 		]
 	
 	def onchange_delaer_discount(self, cr, uid, ids, o_dealer_discount):
@@ -550,52 +460,7 @@ class kg_crm_offer(osv.osv):
 					left join res_partner cust on(cust.id=offer.customer_id)
 					where offer.reminder_date = current_date and offer.off_status = 'to_be_follow' """)
 		off_data = cr.fetchall();
-		print"off_dataoff_data",off_data
-		return off_data
-	
-	def send_by_email(self, cr, uid, ids, context=None):
-		'''
-		This function opens a window to compose an email, with the edi purchase template message loaded by default
-		'''
-		ir_model_data = self.pool.get('ir.model.data')
-		try:
-			template_id = ir_model_data.get_object_reference(cr, uid, 'purchase', 'email_template_edi_purchase')[1]
-		except ValueError:
-			template_id = False
-		try:
-			compose_form_id = ir_model_data.get_object_reference(cr, uid, 'mail', 'email_compose_message_wizard_form')[1]
-		except ValueError:
-			compose_form_id = False 
-		ctx = dict(context)
-		print"template_idtemplate_id",template_id,type(template_id)
-		print"compose_form_idcompose_form_id",compose_form_id
-		
-		ctx.update({
-			'default_model': 'kg.crm.offer',
-			'default_res_id': ids[0],
-			'default_use_template': bool(8),
-			'default_template_id': 8,
-			'default_composition_mode': 'comment',
-		})
-		return {
-			'type': 'ir.actions.act_window',
-			'view_type': 'form',
-			'view_mode': 'form',
-			'res_model': 'mail.compose.message',
-			'views': [(compose_form_id, 'form')],
-			'view_id': compose_form_id,
-			'target': 'new',
-			'context': ctx,
-		}
-	
-	def unlink(self,cr,uid,ids,context=None):
-		unlink_ids = []	 
-		for rec in self.browse(cr,uid,ids): 
-			if rec.state != 'draft':			
-				raise osv.except_osv(_('Warning!'),_('You can not delete this entry !!'))
-			else:
-				unlink_ids.append(rec.id)
-		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+		return off_data	
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
@@ -604,8 +469,10 @@ class kg_crm_offer(osv.osv):
 	def update_percentage(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state in ('draft','moved_to_offer'):
-			#~ if entry.o_sam_ratio > 0 or entry.o_dealer_discount > 0 or entry.o_special_discount > 0 or entry.o_p_f > 0 or entry.o_freight > 0 or entry.o_insurance > 0 or entry.o_customer_discount > 0:
-			print"entry.pump_per_flag",entry.pump_per_flag
+			if entry.pump_per_flag == True or entry.spare_per_flag == True or entry.spare_per_flag == True:
+				pass
+			else:
+				raise osv.except_osv(_('Warning !'),_('Select applicable for Pump or Spare or Accessories is must !!'))
 			if entry.pump_per_flag == True:
 				if entry.line_pump_ids:
 					obj = self.pool.get('ch.pump.offer')
@@ -646,8 +513,7 @@ class kg_crm_offer(osv.osv):
 									  'ed_in_ex':entry.o_ed_in_ex,
 									  'customer_discount':entry.o_customer_discount,
 									  'tax':entry.o_tax,
-									  'ed':entry.o_ed,
-									  
+									  'ed':entry.o_ed,									  
 									  'r_dealer_discount':entry.r_o_dealer_discount,
 									  'r_special_discount':entry.r_o_special_discount,
 									  'r_p_f':entry.r_o_p_f,
@@ -728,45 +594,85 @@ class kg_crm_offer(osv.osv):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state in ('moved_to_offer','wo_created'):
 			revision = 0
-			if entry.is_zero_offer != True:
-				wo_obj = self.pool.get('kg.work.order')			
-				wo_id = wo_obj.search(cr,uid,[('offer_no','=',entry.name),('state','not in',('draft','cancel'))])
-				if wo_id:
-					raise osv.except_osv(_('Warning!'),_('You can not delete this entry because WO confirmed!'))
+			#~ if entry.is_zero_offer != True:
+			wo_obj = self.pool.get('kg.work.order')
+			wo_id = wo_obj.search(cr,uid,[('offer_no','=',entry.name),('state','not in',('draft','cancel'))])
+			if wo_id:
+				raise osv.except_osv(_('Warning !'),_('You can not revise this entry because WO confirmed !!'))
 			
-			if entry.wo_flag == False:
-				revision = entry.revision + 1
-				vals = {
-						'state' : 'draft',
-						'revision' : revision,
-						'revision_remarks' : '',
-						}
-				offer_id = self.copy(cr,uid,entry.id,vals,context) 
-				self.write(cr, uid, ids, {
-										  'state': 'revised',
-										})
-			if entry.wo_flag == True and entry.is_zero_offer == True:
-				revision = entry.revision + 1
-				vals = {
-						'state' : 'draft',
-						'revision' : revision,
-						'revision_remarks' : '',
-						}
-				offer_id = self.copy(cr,uid,entry.id,vals,context) 
-				
-				self.write(cr, uid, ids, {
-										  'state': 'revised',
-										})
+			#~ if entry.wo_flag == False:
+			revision = entry.revision + 1
+			vals = {
+					'state' : 'draft',
+					'revision' : revision,
+					'revision_remarks' : '',
+					}
+			offer_id = self.copy(cr,uid,entry.id,vals,context) 
+			self.write(cr, uid, ids, {
+									  'state': 'revised',
+									})
+			#~ if entry.wo_flag == True and entry.is_zero_offer == True:
+				#~ revision = entry.revision + 1
+				#~ vals = {
+						#~ 'state' : 'draft',
+						#~ 'revision' : revision,
+						#~ 'revision_remarks' : '',
+						#~ }
+				#~ offer_id = self.copy(cr,uid,entry.id,vals,context) 
+				#~ self.write(cr, uid, ids, {
+										  #~ 'state': 'revised',
+										#~ })
+		return True
+	
+	def entry_reset(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'revised':
+			enq_obj = self.pool.get('kg.crm.enquiry')
+			act_ids = self.search(cr,uid,[('state','!=','revised'),('name','=',entry.name)])
+			print"act_idsact_idsact_ids",act_ids
+			if act_ids:
+				for item in act_ids:
+					print"item.iditem.iditem.iditem.id",item
+					act_rec = self.browse(cr,uid,item)
+					wo_obj = self.pool.get('kg.work.order')
+					wo_id = wo_obj.search(cr,uid,[('offer_no','=',act_rec.name),('state','not in',('draft','cancel'))])
+					if wo_id:
+						raise osv.except_osv(_('Warning !'),_('You can not reset this entry because WO confirmed !!'))
+					wo_draft_id = wo_obj.search(cr,uid,[('offer_no','=',act_rec.name),('state','=','draft')])
+					if wo_draft_id:
+						del_sql = """ delete from kg_work_order where id = %s """ %(wo_draft_id[0])
+						cr.execute(del_sql)
+					
+					self.write(cr,uid,act_rec.id,{'state':'revised'})
+					
+					enq_ids = enq_obj.search(cr,uid,[('name','=',act_rec.enquiry_no)])
+					print"enq_ids",enq_ids
+					
+					if enq_ids:
+						for item in enq_ids:
+							print"item",item
+							enq_obj.write(cr,uid,item,{'state':'revised'})
+			
+			enq_obj.write(cr,uid,entry.enquiry_id.id,{'state':'moved_to_offer'})
+			
+			self.write(cr, uid, ids, {'state':'draft'})
 		return True
 	
 	def wo_creation(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state in ('moved_to_offer') and entry.revision == 0 and entry.purpose not in ('in_development'):
+		#~ if entry.state in ('moved_to_offer') and entry.revision == 0 and entry.purpose not in ('in_development'):
+		if entry.state in ('moved_to_offer') and entry.purpose not in ('in_development'):
+			if entry.is_zero_offer == True:
+				raise osv.except_osv(_('Warning !'),_('This is Zero value offer so not able to create work order !!'))
+			if entry.offer_net_amount <= 0:
+				raise osv.except_osv(_('Warning !'),_('Without value WO not create !!'))
+			#~ if obj.mkt_user_id.id == uid:
+				#~ raise osv.except_osv(_('Warning'),_('Create WO cannot be done by Design Approved user'))
 			if not entry.customer_po_no:
-				raise osv.except_osv(_('Warning!'),_('Update Customer PO No.'))
+				raise osv.except_osv(_('Warning !'),_('Update Customer PO No. !!'))
 			if entry.ref_mode == 'dealer':
 				if not entry.dealer_po_no:
-					raise osv.except_osv(_('Warning!'),_('Update Dealer PO No.'))
+					raise osv.except_osv(_('Warning !'),_('Update Dealer PO No. !!'))
 			
 			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
 																  'name': '',
@@ -775,8 +681,7 @@ class kg_crm_offer(osv.osv):
 																  'offer_no': entry.name,
 																  'project_name': entry.prj_name,
 																  'division_id': entry.division_id.id,
-																  'dealer_id': entry.dealer_id.id,
-																  #~ 'location': entry.location,
+																  'dealer_id': entry.dealer_id.id,														
 																  'entry_mode': 'auto',
 																  'partner_id': entry.customer_id.id,
 																  'order_value': entry.offer_net_amount,
@@ -787,18 +692,14 @@ class kg_crm_offer(osv.osv):
 																  'l_d_clause': entry.l_d_clause,
 																  'flag_data_bank': entry.flag_data_bank,
 																	})
-			print"wo_idwo_id",wo_id
 			if wo_id:
 				if entry.line_pump_ids:
-					groups = []
-					#~ for item in entry.line_spare_ids:
+					groups = []					
 					for key, group in groupby(entry.line_pump_ids, lambda x: x.enquiry_line_id.id):
 						groups.append(map(lambda r:r,group))
 					for key,group in enumerate(groups):
 						enquiry_line_id = group[0].enquiry_line_id.id
 						off_line_id = group[0]
-						print"enquiry_line_idenquiry_line_id",enquiry_line_id
-						print"off_line_idoff_line_id",off_line_id
 						purpose = 'pump'
 						if group[0].enquiry_line_id.purpose_categ not in ('in_development'):
 							pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
@@ -817,17 +718,13 @@ class kg_crm_offer(osv.osv):
 										self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
 				
 				if entry.line_spare_ids:
-					groups = []
-					#~ for item in entry.line_spare_ids:
+					groups = []					
 					for key, group in groupby(entry.line_spare_ids, lambda x: x.enquiry_line_id.id):
 						groups.append(map(lambda r:r,group))
 					for key,group in enumerate(groups):
 						enquiry_line_id = group[0].enquiry_line_id.id
 						off_line_id = group[0]
 						spa_off_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
-						print"spa_off_obj",spa_off_obj
-						print"enquiry_line_idenquiry_line_id*************************",enquiry_line_id
-						print"enquiry_line_idenquiry_line_id********off_line_id*****************",off_line_id
 						purpose = 'spare'
 						pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
 						if pump_vals:
@@ -837,7 +734,6 @@ class kg_crm_offer(osv.osv):
 								item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
 								if item:
 									for li in spa_off_obj:
-										print"liliii",li
 										off_line_id = spa_off_obj
 									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
 									## Accessories creation
@@ -850,21 +746,16 @@ class kg_crm_offer(osv.osv):
 								## Spare BOM creation start
 									
 								if group[0].enquiry_line_id.line_ids_spare_bom:
-									print"aaaaaaaaaaaaaaaaaaaaaa"
 									self.prepare_spare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
 				
 				if entry.line_accessories_ids:
 					groups = []
 					for key, group in groupby(entry.line_accessories_ids, lambda x: x.enquiry_line_id.id):
 						groups.append(map(lambda r:r,group))
-					print"ffffffffffffffffffff",groups
 					for key,group in enumerate(groups):
 						access_data = [x for x in group if x.enquiry_line_id.purpose_categ == 'access']
-						print"access_dataaccess_dataaccess_data",access_data
 						for ch_acc in access_data:
 							enquiry_line_id = ch_acc.enquiry_line_id.id
-							print"enquiry_line_idenquiry_line_id",enquiry_line_id
-							#~ if group[0].enquiry_line_id.purpose_categ == 'access':
 							off_line_id = group[0]
 							acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
 							purpose = 'access'
@@ -875,11 +766,9 @@ class kg_crm_offer(osv.osv):
 									item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
 									if item:
 										for li in acc_off_obj:
-											print"liliii",li
 											off_line_id = acc_off_obj
 										self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
 						
-			print"wo_idwo_idwo_id",wo_id
 			if wo_id:
 				self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created'})
 				self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})
@@ -891,26 +780,18 @@ class kg_crm_offer(osv.osv):
 				wo_rec = wo_obj.browse(cr,uid,wo_ids[0])
 				wo_id = wo_rec.id
 				if entry.line_pump_ids:
-					groups = []
-					#~ for item in entry.line_spare_ids:
+					groups = []					
 					for key, group in groupby(entry.line_pump_ids, lambda x: x.enquiry_line_id.id):
 						groups.append(map(lambda r:r,group))
 					for key,group in enumerate(groups):
 						enquiry_line_id = group[0].enquiry_line_id.id
 						off_line_id = group[0]
-						print"enquiry_line_idenquiry_line_id",enquiry_line_id
-						print"off_line_idoff_line_id",off_line_id
 						wo_line_id = self.pool.get('ch.pump.offer').browse(cr,uid,off_line_id)
 						purpose = 'pump'
 						
 						wo_line_id = off_line_id.wo_line_id.id
-						print"wo_line_id",wo_line_id
-						print"off_line_id.id",off_line_id.id
 						self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'pump_offer_line_id':off_line_id.id})
-						#~ if wo_line_id:
-							#~ item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
-							#~ if item:
-								#~ self.prepare_bom_revision(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+						
 				if entry.line_spare_ids:
 					groups = []
 					for key, group in groupby(entry.line_spare_ids, lambda x: x.pump_id.id):
@@ -921,33 +802,22 @@ class kg_crm_offer(osv.osv):
 						off_ids = self.pool.get('kg.crm.offer').search(cr,uid,[('enquiry_no','=',entry.enquiry_no),('state','!=','revised')])
 						off_rec = self.pool.get('kg.crm.offer').browse(cr,uid,off_ids[0])
 						spa_off_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('header_id','=',off_rec.id),('enquiry_line_id','=',enquiry_line_id)])
-						print"off_line_idoff_line_id++++++++++++++++++++++++",off_line_id.id
-						wo_line_id = self.pool.get('ch.spare.offer').browse(cr,uid,off_line_id.id)
-						print"wo_line_idwo_line_id",wo_line_id.spare_offer_line_id.id
-						
-						purpose = 'spare'
-						print"off_line_idoff_line_id",off_line_id
-						#~ stop
-						#~ wo_line_id = off_line_id.wo_line_id.id
-						#~ 
-						#~ self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'pump_offer_line_id':0})
+						wo_line_id = self.pool.get('ch.spare.offer').browse(cr,uid,off_line_id.id)						
+						purpose = 'spare'						
 						if wo_line_id:
 							item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
 							if item:
 								for li in spa_off_obj:
-									print"liliii",li
 									off_line_id = spa_off_obj
 								self.prepare_bom_revision(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
 								
-			self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created'})
-			self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})			
+			self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created','wo_date':time.strftime('%Y-%m-%d %H:%M:%S'),'wo_user_id':uid})
+			self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})
 		
 		return True
 	
 	def _prepare_pump_details(self,cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose,context=None):	
-		print"iteiteitieiteitieit",enquiry_line_id
-		item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
-		#~ purpose = item.purpose_categ
+		item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)		
 		qty = 1
 		moc_const_id = m_power = setting_height = works_value = 0
 		pump_model_type = speed_in_rpm = rpm = bush_bearing = shaft_sealing = lubrication = lubrication_type = rpm = qap_plan_id = drawing_approval = inspection = ''
@@ -1042,8 +912,7 @@ class kg_crm_offer(osv.osv):
 			'm_power': m_power,
 			'setting_height': setting_height,
 			'suction_spool': suction_spool,
-			'shaft_sealing': shaft_sealing,
-			#~ 'lubrication_type': lubrication_type,
+			'shaft_sealing': shaft_sealing,			
 			'lubrication': lubrication,
 			'rpm': rpm,
 			'flag_offer': True,
@@ -1057,6 +926,10 @@ class kg_crm_offer(osv.osv):
 			'unit_price': works_value,
 			'size_suctionx': item.size_suctionx,
 			'consistency': item.consistency,
+			'equipment_no': item.equipment_no,
+			'description': item.description,
+			'npsh_avl': item.npsh_avl,
+			'npsh_r_m': item.npsh_r_m,
 			}
 		
 		return pump_vals
@@ -1069,16 +942,12 @@ class kg_crm_offer(osv.osv):
 				if item.line_ids:
 					for ele in item.line_ids:
 						if ele.is_applicable == True:
-							print"ele.position_id.idele.position_id.id",ele.position_id.id
 							if purpose == 'spare':
-								print"off_line_idoff_line_idoff_line_id0000000000000000",off_line_id
 								of_li_id = off_line_id[arr]
 								if ele.spare_offer_line_id > 0:
 									fou_ids = self.pool.get('ch.order.bom.details').search(cr,uid,[('spare_offer_line_id','=',ele.spare_offer_line_id)])
-									print"fou_idsfou_idsfou_ids------------",fou_ids
 									if fou_ids:
 										fou_rec = self.pool.get('ch.order.bom.details').browse(cr,uid,fou_ids[0])
-										print"fou_re///////////////////cfou_rec",fou_rec.id
 										self.pool.get('ch.order.bom.details').write(cr,uid,fou_rec.id,{'spare_offer_line_id':of_li_id})
 										self.pool.get('ch.kg.crm.foundry.item').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
 							arr = arr+1
@@ -1089,14 +958,11 @@ class kg_crm_offer(osv.osv):
 					for ele in item.line_ids_a:
 						if ele.is_applicable == True:
 							if purpose == 'spare':
-								print"off_line_idoff_line_idoff_line_id0000000000000000",off_line_id
 								of_li_id = off_line_id[arr]
 								if ele.spare_offer_line_id > 0:
 									ms_ids = self.pool.get('ch.order.machineshop.details').search(cr,uid,[('spare_offer_line_id','=',ele.spare_offer_line_id)])
-									print"ms_idsms_idsms_ids------------",ms_ids
 									if ms_ids:
 										ms_rec = self.pool.get('ch.order.machineshop.details').browse(cr,uid,ms_ids[0])
-										print"ms_rec///////////////////ms_rec",ms_rec.id
 										self.pool.get('ch.order.machineshop.details').write(cr,uid,ms_rec.id,{'spare_offer_line_id':of_li_id})
 										self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
 							arr = arr+1
@@ -1107,94 +973,18 @@ class kg_crm_offer(osv.osv):
 					for ele in item.line_ids_b:
 						if ele.is_applicable == True:
 							if purpose == 'spare':
-								print"off_line_idoff_line_idoff_line_id0000000000000000",off_line_id
 								of_li_id = off_line_id[arr]
 								if ele.spare_offer_line_id > 0:
 									bot_ids = self.pool.get('ch.order.bot.details').search(cr,uid,[('spare_offer_line_id','=',ele.spare_offer_line_id)])
-									print"bot_idsbot_idsbot_ids------------",bot_ids
 									if bot_ids:
 										bot_rec = self.pool.get('ch.order.bot.details').browse(cr,uid,bot_ids[0])
-										print"bot_rec///////////////////bot_rec",bot_rec.id
 										self.pool.get('ch.order.bot.details').write(cr,uid,bot_rec.id,{'spare_offer_line_id':of_li_id})
 										self.pool.get('ch.kg.crm.bot').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
 							arr = arr+1
 						else:
 							if purpose == 'spare':
 								of_li_id = 0
-		#~ if purpose == 'access':
-			#~ prime_cost = 0
-			#~ print"ddddddddddddddddddddddddddddD",prime_cost
-			#~ if item.acces == 'yes':
-				#~ arr = of_li_id = 0
-				#~ if item.line_ids_access_a:
-					#~ for line in item.line_ids_access_a:
-						#~ of_li_id = off_line_id[arr]
-						#~ print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",of_li_id
-						#~ wo_access_id = self.pool.get('ch.wo.accessories').create(cr,uid,{'header_id':wo_line_id,
-																						 #~ 'access_id':line.access_id.id,
-																						 #~ 'moc_id':line.moc_id.id,
-																						 #~ 'qty':line.qty,
-																						 #~ 'load_access':line.load_access,
-																						 #~ 'access_offer_line_id': of_li_id,
-																						#~ })
-						#~ arr = arr+1
-						#~ if wo_access_id:
-							#~ if line.line_ids:
-								#~ for ele in line.line_ids:
-									#~ if ele.is_applicable == True:
-										#~ fou_line = self.pool.get('ch.wo.accessories.foundry').create(cr,uid,{'header_id': wo_access_id,
-																										#~ 'is_applicable': True,
-																										#~ 'qty': ele.qty,
-																										#~ 'position_id': ele.position_id.id,
-																										#~ 'pattern_id': ele.pattern_id.id,
-																										#~ 'material_code': ele.material_code,
-																										#~ 'prime_cost': ele.prime_cost,
-																										#~ 'moc_id': ele.moc_id.id,
-																										#~ 'access_offer_line_id': off_line_id,
-																										#~ })
-										#~ prime_cost += ele.prime_cost
-							#~ if line.line_ids_a:
-								#~ for ele in line.line_ids_a:
-									#~ if ele.is_applicable == True:
-										#~ fou_line = self.pool.get('ch.wo.accessories.ms').create(cr,uid,{'header_id': wo_access_id,
-																										#~ 'is_applicable': True,
-																										#~ 'qty': ele.qty,
-																										#~ 'indent_qty': ele.qty,
-																										#~ 'position_id': ele.position_id.id,
-																										#~ 'position_id': ele.material_code,
-																										#~ 'ms_id': ele.ms_id.id,
-																										#~ 'prime_cost': ele.prime_cost,
-																										#~ 'moc_id': ele.moc_id.id,
-																										#~ 'access_offer_line_id': off_line_id,
-																										#~ })
-										#~ prime_cost += ele.prime_cost
-							#~ if line.line_ids_b:
-								#~ for ele in line.line_ids_b:
-									#~ if ele.is_applicable == True:
-										#~ fou_line = self.pool.get('ch.wo.accessories.bot').create(cr,uid,{'header_id': wo_access_id,
-																										#~ 'is_applicable': True,
-																										#~ 'qty': ele.qty,
-																										#~ 'position_id': ele.position_id.id,
-																										#~ 'position_id': ele.material_code,
-																										#~ 'csd_no': ele.csd_no,
-																										#~ 'ms_id': ele.ms_id.id,
-																										#~ 'prime_cost': ele.prime_cost,
-																										#~ 'moc_id': ele.moc_id.id,
-																										#~ 'access_offer_line_id': off_line_id,
-																										#~ })
-										#~ prime_cost += ele.prime_cost
-							#~ self.pool.get('ch.wo.accessories').write(cr,uid,wo_access_id,{'mar_prime_cost':prime_cost})
-							#~ prime_cost = 0.00
-							#~ off_access_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',item.id),('pump_id','=',item.pump_id.id)])
-							#~ if off_access_obj:
-								#~ print"off_access_obj",off_access_obj
-								#~ for line in off_access_obj:
-									#~ print"linelelelelelle",line
-									#~ off_access_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,line)
-									#~ prime_cost += off_access_rec.net_amount
-								#~ print"*************************************************",prime_cost
-								#~ self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'unit_price':prime_cost})
-		
+				
 		return True
 	
 	def prepare_spare_bom(self,cr,uid,wo_line_id,item,off_line_id,purpose,context=None):
@@ -1300,16 +1090,11 @@ class kg_crm_offer(osv.osv):
 		if purpose in ('pump','spare'):
 			if item.purpose_categ in ('pump','spare'):
 				arr = of_li_id = 0
-				if item.line_ids:
-					#~ spa_off_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
-					#~ print"spa_off_obj",spa_off_obj
-					print"off_line_idoff_line_idoff_line_idoff_line_idoff_line_id",off_line_id
+				if item.line_ids:					
 					for ele in item.line_ids:
 						if ele.is_applicable == True:
 							if purpose == 'spare':
 								of_li_id = off_line_id[arr]
-								print"of_li_id",of_li_id
-							print"ele.position_id.idele.position_id.id",ele.position_id.name
 							fou_line = self.pool.get('ch.order.bom.details').create(cr,uid,{'header_id': wo_line_id,
 																							'flag_applicable': True,
 																							'flag_standard': True,
@@ -1328,7 +1113,6 @@ class kg_crm_offer(osv.osv):
 																							})
 							self.pool.get('ch.kg.crm.foundry.item').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
 							prime_cost += ele.prime_cost
-							print"aaaaaaaaaaaaa",prime_cost
 							arr = arr+1
 						else:
 							if purpose == 'spare':
@@ -1338,7 +1122,6 @@ class kg_crm_offer(osv.osv):
 						if ele.is_applicable == True:
 							if purpose == 'spare':
 								of_li_id = off_line_id[arr]
-								print"of_li_id",of_li_id
 							ms_line = self.pool.get('ch.order.machineshop.details').create(cr,uid,{'header_id': wo_line_id,
 																							'flag_applicable': True,
 																							'flag_standard': True,
@@ -1371,7 +1154,6 @@ class kg_crm_offer(osv.osv):
 																				 })
 							self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
 							prime_cost += ele.prime_cost
-							print"bbbbbbbbbbbbbb",prime_cost
 							arr = arr+1
 						else:
 							if purpose == 'spare':
@@ -1381,7 +1163,6 @@ class kg_crm_offer(osv.osv):
 						if ele.is_applicable == True:
 							if purpose == 'spare':
 								of_li_id = off_line_id[arr]
-								print"of_li_id",of_li_id
 							bot_line = self.pool.get('ch.order.bot.details').create(cr,uid,{'header_id': wo_line_id,
 																							'flag_applicable': True,
 																							'flag_standard': True,
@@ -1399,38 +1180,23 @@ class kg_crm_offer(osv.osv):
 																							})
 							self.pool.get('ch.kg.crm.bot').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
 							prime_cost += ele.prime_cost
-							print"ccccccccccccccccc",prime_cost
 							arr = arr+1
 						else:
 							if purpose == 'spare':
 								of_li_id = 0
 				self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'mar_prime_cost':prime_cost})
-				prime_cost = 0.00
-				#~ if item.purpose_categ == 'pump':
-					#~ self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'unit_price':off_line_id.works_val})
-				#~ elif item.purpose_categ == 'spare':
-					#~ off_spare_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',item.id),('pump_id','=',item.pump_id.id)])
-					#~ if off_spare_obj:
-						#~ print"off_spare_obj",off_spare_obj
-						#~ for line in off_spare_obj:
-							#~ print"linelelelelelle",line
-							#~ off_spare_rec = self.pool.get('ch.spare.offer').browse(cr,uid,line)
-							#~ prime_cost += off_spare_rec.works_value
-						#~ self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'unit_price':prime_cost})
+				prime_cost = 0.00				
 		if purpose == 'access':
 			prime_cost = 0
-			print"ddddddddddddddddddddddddddddD",prime_cost
 			if item.acces == 'yes':
 				arr = of_li_id = 0
 				if item.line_ids_access_a:
 					for line in item.line_ids_access_a:
 						of_li_id = off_line_id[arr]
-						print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",of_li_id
 						wo_access_id = self.pool.get('ch.wo.accessories').create(cr,uid,{'header_id':wo_line_id,
 																						 'access_id':line.access_id.id,
 																						 'off_name':line.off_name,
 																						 'moc_const_id':line.moc_const_id.id,
-																						 #~ 'moc_id':line.moc_id.id,
 																						 'qty':line.qty,
 																						 'load_access':line.load_access,
 																						 'access_offer_line_id': of_li_id,
@@ -1447,8 +1213,7 @@ class kg_crm_offer(osv.osv):
 																										'pattern_id': ele.pattern_id.id,
 																										'material_code': ele.material_code,
 																										'prime_cost': ele.prime_cost,
-																										'moc_id': ele.moc_id.id,
-																										#~ 'access_offer_line_id': off_line_id,
+																										'moc_id': ele.moc_id.id,																										
 																										})
 										prime_cost += ele.prime_cost
 							if line.line_ids_a:
@@ -1463,7 +1228,7 @@ class kg_crm_offer(osv.osv):
 																										'ms_id': ele.ms_id.id,
 																										'prime_cost': ele.prime_cost,
 																										'moc_id': ele.moc_id.id,
-																										#~ 'access_offer_line_id': off_line_id,
+																										
 																										})
 										prime_cost += ele.prime_cost
 							if line.line_ids_b:
@@ -1478,22 +1243,13 @@ class kg_crm_offer(osv.osv):
 																										'ms_id': ele.ms_id.id,
 																										'prime_cost': ele.prime_cost,
 																										'moc_id': ele.moc_id.id,
-																										#~ 'access_offer_line_id': off_line_id,
+																										
 																										})
 										prime_cost += ele.prime_cost
 							self.pool.get('ch.wo.accessories').write(cr,uid,wo_access_id,{'mar_prime_cost':prime_cost})
 							prime_cost = 0.00
-							#~ off_access_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',item.id),('pump_id','=',item.pump_id.id)])
-							#~ if off_access_obj:
-								#~ print"off_access_obj",off_access_obj
-								#~ for line in off_access_obj:
-									#~ print"linelelelelelle",line
-									#~ off_access_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,line)
-									#~ prime_cost += off_access_rec.works_value
-								#~ print"*************************************************",prime_cost
-								#~ self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'unit_price':prime_cost})
+							
 						
-		print"prime_costprime_cost",prime_cost
 		return True
 	
 	def offer_copy(self,cr,uid,ids,context=None):
@@ -2077,7 +1833,7 @@ class kg_crm_offer(osv.osv):
 		left join ch_kg_crm_pumpmodel enquiry on(enquiry.id = spare.enquiry_line_id)
 		left join res_partner partner on(partner.id=offer.customer_id)
 		left join res_company company on(company.id=offer.company_id) 
-		where offer.id=%s and spare.enquiry_line_id is not null
+		where offer.id=%s and offer.state != 'draft' and spare.enquiry_line_id is not null
 		) as sample		
 		"""%(ids[0])
 		cr.execute(pump_sql)
@@ -2210,7 +1966,7 @@ class kg_crm_offer(osv.osv):
 		left join ch_kg_crm_pumpmodel enquiry on(enquiry.id = spare.enquiry_line_id)
 		left join res_partner partner on(partner.id=offer.customer_id)
 		left join res_company company on(company.id=offer.company_id) 
-		where offer.id=%s and spare.enquiry_line_id is not null
+		where offer.id=%s and offer.state != 'draft' and spare.enquiry_line_id is not null
 		) as sample		
 		"""%(ids[0])
 		cr.execute(pump_sql)
@@ -2400,15 +2156,15 @@ class kg_crm_offer(osv.osv):
 		rec_code = str(rec.name)		
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
-			
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&offer='+rec_code
-
+		
+		url = 'http://10.100.9.32/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&offer='+rec_code
+		
 		return {
 					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',
 					  'type'	 : 'ir.actions.act_url',
 					  'target'   : 'current',
-					  'url'	  : url
+					  'url'	  	 : url
 			   }
 	
 kg_crm_offer()
@@ -2422,7 +2178,6 @@ class ch_pump_offer(osv.osv):
 		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = supervision_tot = tot_price = net_amount = 0
 		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = r_dealer_discount = r_net_amt_tot = 0
 		for line in self.browse(cr, uid, ids, context=context):
-			print"linelineline",line
 			res[line.id] = {
 				
 				'sam_ratio_tot': 0.0,
@@ -2439,62 +2194,43 @@ class ch_pump_offer(osv.osv):
 				
 			}
 			
-			print"line.prime_cost",line.prime_cost
-			print"line.sam_ratio",line.sam_ratio
 			sam_ratio_tot = round(line.prime_cost * line.sam_ratio,2)
-			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
 			dealer_discount = round(sam_ratio_tot / (1-line.dealer_discount/100.00),2)
 			dealer_discount_tot = round(dealer_discount - sam_ratio_tot,2)
-			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
 			spl_discount = round(dealer_discount / (1-line.special_discount/100.00),2)
 			spl_discount_tot = round(spl_discount - dealer_discount,2)
-			print"spl_discount_totspl_discount_tot",spl_discount_tot
 			if line.p_f_in_ex == 'inclusive':
 				p_f = round(spl_discount / (1-line.p_f/100.00),2)
 			else:
 				p_f = spl_discount
 			p_f_tot = round(p_f - spl_discount,2)
-			print"p_f_totp_f_tot",p_f_tot
 			if line.freight_in_ex == 'inclusive':
 				insurance = round(p_f / (1-line.insurance/100.00),2)
 			else:
 				insurance = p_f
 			insurance_tot = round(insurance - p_f,2)
-			print"insurance_tot",insurance_tot
 			if line.freight_in_ex == 'inclusive':
 				freight = round(insurance / (1-line.freight/100.00),2)
 			else:
 				freight = insurance
 			freight_tot = round(freight - insurance,2)
-			print"freight_tot",freight_tot
 			pump_price_tot = freight
-			print"pump_price_tot",pump_price_tot
 			customer_discount = round(pump_price_tot / (1-line.customer_discount/100.00),2)
 			customer_discount_tot = round(customer_discount - pump_price_tot,2)
-			print"customer_discount_tot",customer_discount_tot
 			if line.gst:
 				tax = round(customer_discount / (1-(line.gst.amount*100)/100.00),2)
 			else:
 				tax = customer_discount
-			print"tax",tax
 			tax_tot = round(tax - customer_discount,2)
-			print"tax_tottax_tot",tax_tot
-			#~ supervision_tot = round(tax + line.supervision_amount,2)
-			#~ print"supervision_tot",supervision_tot
-			tot_price = round(customer_discount)
-			#~ tot_price = tax
-			print"tot_price",tot_price
-			
-			#~ r_customer_discount_tot = round((tot_price * line.r_customer_discount) / 100.00,2)
+			tot_price = round(customer_discount)						
 			r_customer_discount_tot = round((line.r_cpo_amount * line.r_customer_discount) / 100.00)
-			print"r_customer_discount_tot",r_customer_discount_tot
 			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot)
-			print"r_pump_price_tot",r_pump_price_tot
+
 			if line.gst:
-				r_tax_tot = round(((r_pump_price_tot + line.r_p_f_ex_tot)*(line.gst.amount*100))/100.00)
+				r_tax_tot = round(((r_pump_price_tot + line.r_p_f_ex_tot) *(line.gst.amount*100))/100.00)
 			else:
 				r_tax_tot = 0 
-			print"r_tax_tot",r_tax_tot
+
 			if line.r_freight_in_ex == 'inclusive':
 				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00)
 				r_freight_ex_tot = 0
@@ -2504,7 +2240,7 @@ class ch_pump_offer(osv.osv):
 			else:
 				r_freight_tot = 0
 				r_freight_ex_tot = 0
-			print"r_freight_tot",r_freight_tot
+			
 			if line.r_p_f_in_ex == 'inclusive':
 				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_ex_tot = 0
@@ -2514,6 +2250,7 @@ class ch_pump_offer(osv.osv):
 			else:
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
+				
 			if line.r_insurance_in_ex == 'inclusive':
 				#~ r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
 				if line.cpo_quote_cust == 'quoted':
@@ -2522,23 +2259,18 @@ class ch_pump_offer(osv.osv):
 					r_insurance_tot = round(((line.r_cpo_amount + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
 			else:
 				r_insurance_tot = 0
-			print"r_insurance_tot",r_insurance_tot
-			
-			print"r_p_f_tot",r_p_f_tot
+
 			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00)
-			print"r_spl_discount_tot",r_spl_discount_tot
+
 			r_spl_discount = r_pump_price_tot - r_spl_discount_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
-			print"r_spl_discount",r_spl_discount
+
 			r_dealer_discount = r_spl_discount
-			print"r_dealer_discount",r_dealer_discount
+
 			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00)
-			print"r_dealer_discount_tot",r_dealer_discount_tot
+
 			r_sam_ratio_tot = r_pump_price_tot - r_spl_discount_tot - r_dealer_discount_tot - r_p_f_tot - r_insurance_tot - r_freight_tot
-			print"r_sam_ratio_tot",r_sam_ratio_tot
-			print"line.prime_costline.prime_cost",line.prime_cost
-			r_sam_ratio = r_sam_ratio_tot / line.prime_cost
-			print"r_sam_ratio",r_sam_ratio
-			
+			r_sam_ratio = r_sam_ratio_tot / (line.prime_cost or 1)
+	
 			r_net_amt_tot =  line.r_cpo_amount_tot - r_customer_discount_tot
 			
 			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
@@ -2569,24 +2301,20 @@ class ch_pump_offer(osv.osv):
 			res[line.id]['r_customer_discount_tot'] = r_customer_discount_tot
 			res[line.id]['r_net_amt_tot'] = r_net_amt_tot
 			res[line.id]['r_tax_tot'] = r_tax_tot
-			#~ res[line.id]['r_tot_price'] = tot_price
+			
 			if line.cust_in_ex == 'inclusive':
 				res[line.id]['r_net_amount'] = r_pump_price_tot + r_p_f_ex_tot + r_tax_tot
 			else:
 				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot + r_p_f_ex_tot + r_tax_tot
 			res[line.id]['prime_cost'] = (line.per_pump_prime_cost * line.qty) + line.additional_cost
-			print"line.r_cpo_amount",line.r_cpo_amount
+
 			enq_no = line.header_id.enquiry_no
-			print"enq_noenq_no",enq_no
+
 			enq_ids = self.pool.get('kg.crm.enquiry').search(cr,uid,[('name','=',enq_no),('state','!=','revised')])
-			print"enq_ids",enq_ids
+
 			if enq_ids:
 				enq_rec = self.pool.get('kg.crm.enquiry').browse(cr,uid,enq_ids[0])
-				print"enq_recenq_rec",enq_rec.state
-			#~ if line.r_cpo_amount == 0.00 and not enq_rec.state == 'draft':
-				#~ print"tot_pricetot_price",tot_price
-				#~ cr.execute('''update ch_pump_offer set r_cpo_amount = %s where id = %s ''',(tot_price,line.id))
-			print"tot_pricetot_price",tot_price
+			
 			if line.cpo_quote_cust == 'quoted':
 				cr.execute('''update ch_pump_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(tot_price,tot_price,line.id))
 			elif line.cpo_quote_cust == 'cust_po':
@@ -2606,18 +2334,18 @@ class ch_pump_offer(osv.osv):
 		## Module Requirement Fields
 		
 		'offer_id':fields.many2one('kg.crm.offer','Offer'),
-		'customer_id':fields.many2one('res.partner','Customer Name'),
+		'customer_id':fields.many2one('res.partner','Customer Name',domain="[('partner_state','=','approve')]"),
 		'qty':fields.integer('Quantity'),
 		'invoice_pending_qty':fields.integer('Inv Pending Qty'),
-		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
-		'hsn_no': fields.many2one('kg.hsn.master','HSN No.'),
+		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type',domain="[('state','=','approved')]"),
+		'hsn_no': fields.many2one('kg.hsn.master','HSN No.',domain="[('state','=','approved')]"),
 		'gst': fields.many2one('account.tax','GST Tax'),
-		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
-		'moc_const_id': fields.many2one('kg.moc.construction','MOC'),
+		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series',domain="[('state','=','approved')]"),
+		'moc_const_id': fields.many2one('kg.moc.construction','MOC',domain="[('state','=','approved')]"),
 		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval'),
 		'purpose_categ': fields.selection([('pump','Pump'),('in_development','New Development')],'Purpose Categ'),
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
-		#~ 'prime_cost': fields.float('Prime Cost'),
+		
 		'additional_cost': fields.float('Additional Cost'),
 		'additional_cost_remark': fields.text('Additional Cost Remark'),
 		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),
@@ -2674,8 +2402,7 @@ class ch_pump_offer(osv.osv):
 		'supervision_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Supervision Price',multi="sums",store=True),
 		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),
 		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Quoted Value(GST Extra)',multi="sums",store=True),
-		
-		#~ 'r_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),
+				
 		'r_sam_ratio': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio(%)',multi="sums",store=True),
 		'r_works_value': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Works Value',multi="sums",store=True),
 		'r_sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Works Value',multi="sums",store=True),
@@ -2706,10 +2433,6 @@ class ch_pump_offer(osv.osv):
 	
 	_defaults = {
 		
-		#~ 'temperature': 'normal',
-		#~ 'flange_type': 'standard',
-		#~ 'load_bom':False,
-		#~ 'r_cpo_amount':0.00,
 		'cpo_quote_cust':'quoted',
 		'cust_in_ex':'inclusive',
 		
@@ -2787,37 +2510,7 @@ class ch_pump_offer(osv.osv):
 								})
 		return True
 		
-	#~ def onchange_gst(self, cr, uid, ids, pump_id,hsn_no, gst, context=None):
-		#~ value = {'hsn_no': '','gst': ''}
-		#~ pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr,uid,pump_id)
-		#~ 
-		#~ sql_check = """ select hsn_id from hsn_no_product where hsn_id = %s and pump_id = %s""" %(hsn_no,pump_id)
-		#~ cr.execute(sql_check)
-		#~ data = cr.dictfetchall()
-		#~ print"datadata",data
-		#~ if data:
-			#~ pass
-		#~ else:
-			#~ sql_check_1 = """ select hsn_id from hsn_no_product where hsn_id != %s and pump_id = %s""" %(hsn_no,pump_id)
-			#~ cr.execute(sql_check_1)
-			#~ data_1 = cr.dictfetchall()
-			#~ print"data_1data_1",data_1
-			#~ hsn = ''
-			#~ for item in data_1:
-				#~ print"item['hsn_id']",item['hsn_id']
-				#~ hsn_rec = self.pool.get('kg.hsn.master').browse(cr,uid,item['hsn_id'])
-				#~ hsn = hsn + ',' +str(hsn_rec.name)
-				#~ print"hsnhsnhsn**********",hsn
-			#~ raise osv.except_osv(_('Warning!'),_('You can choose only HSN %s'%(hsn)))
-			#~ if hsn_no:
-				#~ hsn_rec = self.pool.get('kg.hsn.master').browse(cr,uid,hsn_no)
-				#~ if gst == hsn_rec.igst_id.id:
-					#~ pass
-				#~ else:
-					#~ raise osv.except_osv(_('Warning!'),_('You can choose only %s '%(hsn_rec.igst_id.name)))
-				#~ value = {'gst': hsn_rec.igst_id.id}
-		#~ return {'value': value}
-	
+		
 ch_pump_offer()
 
 class ch_pump_offer_development(osv.osv):
@@ -2837,7 +2530,7 @@ class ch_pump_offer_development(osv.osv):
 		'pattern_no': fields.char('Pattern No.'),
 		'pattern_name': fields.char('Pattern Name'),
 		'material_code': fields.char('Material Code'),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','not in',('reject','cancel'))]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'csd_no': fields.char('CSD No.', size=128),
 		'qty':fields.integer('Quantity'),
 		'is_applicable': fields.boolean('Is Applicable'),
@@ -2855,7 +2548,7 @@ class ch_supervision_offer(osv.osv):
 		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
 		i_tot = k_tot = m_tot = p_tot = r_tot = 0
 		for line in self.browse(cr, uid, ids, context=context):
-			print"linelineline",line
+
 			res[line.id] = {
 				
 				'sam_ratio_tot': 0.0,
@@ -2866,39 +2559,35 @@ class ch_supervision_offer(osv.osv):
 				'p_f_tot': 0.0,
 				'freight_tot': 0.0,
 				'insurance_tot': 0.0,
-				#~ 'pump_price': 0.0,
-				#~ 'tot_price': 0.0,
 				
 			}
-			print"line.prime_cost",line.prime_cost
-			print"line.sam_ratio",line.sam_ratio
+
 			sam_ratio_tot = line.header_id.supervision_amount * line.sam_ratio
-			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
+
 			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
-			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
+
 			i_tot = sam_ratio_tot + dealer_discount_tot
 			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
-			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
+
 			k_tot = i_tot + customer_discount_tot
 			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
-			print"spl_discount_totspl_discount_tot",spl_discount_tot
+
 			m_tot = k_tot + spl_discount_tot
 			tax_tot = (m_tot / 100) * line.tax
-			print"tax_tottax_tot",tax_tot
+
 			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
-			print"p_f_totp_f_tot",p_f_tot
+
 			p_tot = m_tot + tax_tot + p_f_tot
 			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
-			print"freight_totfreight_tot",freight_tot
+
 			r_tot = p_tot + freight_tot
 			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
-			print"insurance_totinsurance_tot",insurance_tot
+
 			pump_price_tot = r_tot + insurance_tot
-			print"pump_price_totpump_price_tot",pump_price_tot
+
 			tot_price = pump_price_tot
-			print"tot_pricetot_price",tot_price
+
 			net_amount = tot_price
-			print"net_amountnet_amount",net_amount
 			
 			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
 			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
@@ -2915,7 +2604,7 @@ class ch_supervision_offer(osv.osv):
 		return res
 	
 	_name = "ch.supervision.offer"
-	_description = "Ch Supervision Offer"
+	_description = "Offer Supervision "
 	
 	_columns = {
 		
@@ -2939,8 +2628,7 @@ class ch_supervision_offer(osv.osv):
 		'ed': fields.float('ED(%)'),
 		'agent_com': fields.float('Agent Commission(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
-		'wo_line_id': fields.many2one('ch.work.order.details','WO Line'),
-		#~ 'total_price': fields.float('Total Price(%)'),
+		'wo_line_id': fields.many2one('ch.work.order.details','WO Line'),	
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
@@ -2951,7 +2639,7 @@ class ch_supervision_offer(osv.osv):
 		'p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
 		'freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
 		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
-		#~ 'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
+		
 		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
 		
 	}
@@ -2970,7 +2658,7 @@ class ch_spare_offer(osv.osv):
 		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = supervision_tot = tot_price = net_amount = 0
 		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = r_dealer_discount = r_net_amt_tot = r_freight_ex_tot = 0
 		for line in self.browse(cr, uid, ids, context=context):
-			print"linelineline",line
+
 			res[line.id] = {
 				
 				'sam_ratio_tot': 0.0,
@@ -2986,61 +2674,56 @@ class ch_spare_offer(osv.osv):
 				'prime_cost': 0.0,
 				
 			}
-			
-			print"line.prime_cost",line.prime_cost
-			print"line.sam_ratio",line.sam_ratio
+
 			sam_ratio_tot = round(line.prime_cost * line.sam_ratio,2)
-			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
+
 			dealer_discount = round(sam_ratio_tot / (1-line.dealer_discount/100.00),2)
 			dealer_discount_tot = round(dealer_discount - sam_ratio_tot,2)
-			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
+
 			spl_discount = round(dealer_discount / (1-line.special_discount/100.00),2)
 			spl_discount_tot = round(spl_discount - dealer_discount,2)
-			print"spl_discount_totspl_discount_tot",spl_discount_tot
+
 			if line.p_f_in_ex == 'inclusive':
 				p_f = round(spl_discount / (1-line.p_f/100.00),2)
 			else:
 				p_f = spl_discount
 			p_f_tot = round(p_f - spl_discount,2)
-			print"p_f_totp_f_tot",p_f_tot
+
 			if line.freight_in_ex == 'inclusive':
 				insurance = round(p_f / (1-line.insurance/100.00),2)
 			else:
 				insurance = p_f
 			insurance_tot = round(insurance - p_f,2)
-			print"insurance_tot",insurance_tot
+
 			if line.freight_in_ex == 'inclusive':
 				freight = round(insurance / (1-line.freight/100.00),2)
 			else:
 				freight = insurance
 			freight_tot = round(freight - insurance,2)
-			print"freight_tot",freight_tot
+
 			pump_price_tot = freight
-			print"pump_price_tot",pump_price_tot
+
 			customer_discount = round(pump_price_tot / (1-line.customer_discount/100.00),2)
 			customer_discount_tot = round(customer_discount - pump_price_tot,2)
-			print"customer_discount_tot",customer_discount_tot
+
 			if line.gst:
 				tax = round(customer_discount / (1-(line.gst.amount*100)/100.00),2)
 			else:
 				tax = customer_discount
-			print"tax",tax
+
 			tax_tot = round(tax - customer_discount,2)
-			print"tax_tottax_tot",tax_tot
+
 			tot_price = round(customer_discount)
-			#~ tot_price = tax
-			print"tot_price",tot_price
-			
-			#~ r_customer_discount_tot = round((tot_price * line.r_customer_discount) / 100.00,2)
+
 			r_customer_discount_tot = round((line.r_cpo_amount * line.r_customer_discount) / 100.00)
-			print"r_customer_discount_tot",r_customer_discount_tot
+
 			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot)
-			print"r_pump_price_tot",r_pump_price_tot
+
 			if line.gst:
 				r_tax_tot = round(((r_pump_price_tot + line.r_p_f_ex_tot)*(line.gst.amount*100))/100.00)
 			else:
 				r_tax_tot = 0 
-			print"r_tax_tot",r_tax_tot
+
 			if line.r_freight_in_ex == 'inclusive':
 				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00)
 				r_freight_ex_tot = 0
@@ -3050,7 +2733,7 @@ class ch_spare_offer(osv.osv):
 			else:
 				r_freight_tot = 0
 				r_freight_ex_tot = 0
-			print"r_freight_tot",r_freight_tot
+			
 			if line.r_p_f_in_ex == 'inclusive':
 				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_ex_tot = 0
@@ -3060,6 +2743,7 @@ class ch_spare_offer(osv.osv):
 			else:
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
+			
 			if line.r_insurance_in_ex == 'inclusive':
 				#~ r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
 				if line.cpo_quote_cust == 'quoted':
@@ -3068,22 +2752,18 @@ class ch_spare_offer(osv.osv):
 					r_insurance_tot = round(((line.r_cpo_amount + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
 			else:
 				r_insurance_tot = 0
-			print"r_insurance_tot",r_insurance_tot
 			
-			print"r_p_f_tot",r_p_f_tot
 			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00)
-			print"r_spl_discount_tot",r_spl_discount_tot
+
 			r_spl_discount = r_pump_price_tot - r_spl_discount_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
-			print"r_spl_discount",r_spl_discount
+
 			r_dealer_discount = r_spl_discount
-			print"r_dealer_discount",r_dealer_discount
+
 			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00)
-			print"r_dealer_discount_tot",r_dealer_discount_tot
+
 			r_sam_ratio_tot = r_pump_price_tot - r_spl_discount_tot - r_dealer_discount_tot - r_p_f_tot - r_insurance_tot - r_freight_tot
-			print"r_sam_ratio_tot",r_sam_ratio_tot
-			print"line.prime_costline.prime_cost",line.prime_cost
+			
 			r_sam_ratio = r_sam_ratio_tot / (line.prime_cost or 1)
-			print"r_sam_ratio",r_sam_ratio
 			
 			r_net_amt_tot =  line.r_cpo_amount_tot - r_customer_discount_tot
 			
@@ -3121,92 +2801,23 @@ class ch_spare_offer(osv.osv):
 			else:
 				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot + r_p_f_ex_tot + r_tax_tot
 			res[line.id]['prime_cost'] = (line.per_spare_prime_cost * line.qty) + line.additional_cost
-			print"line.r_cpo_amount",line.r_cpo_amount
+
 			enq_no = line.header_id.enquiry_no
-			print"enq_noenq_no",enq_no
+
 			enq_ids = self.pool.get('kg.crm.enquiry').search(cr,uid,[('name','=',enq_no),('state','!=','revised')])
-			print"enq_ids",enq_ids
+
 			if enq_ids:
 				enq_rec = self.pool.get('kg.crm.enquiry').browse(cr,uid,enq_ids[0])
-				print"enq_recenq_rec",enq_rec.state
-			print"tot_pricetot_price",tot_price
+
 			if line.cpo_quote_cust == 'quoted':
 				cr.execute('''update ch_spare_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(tot_price,tot_price,line.id))
 			elif line.cpo_quote_cust == 'cust_po':
 				cr.execute('''update ch_spare_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(line.r_cpo_amount,line.r_cpo_amount,line.id))
 		
 		return res
-	"""
-	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
-		res = {}
-		cur_obj=self.pool.get('res.currency')
-		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
-		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = 0
-		for line in self.browse(cr, uid, ids, context=context):
-			print"linelineline",line
-			res[line.id] = {
-				
-				'sam_ratio_tot': 0.0,
-				'dealer_discount_tot': 0.0,
-				'customer_discount_tot' : 0.0,
-				'spl_discount_tot' : 0.0,
-				'tax_tot': 0.0,
-				'p_f_tot': 0.0,
-				'freight_tot': 0.0,
-				'insurance_tot': 0.0,
-				'pump_price': 0.0,
-				'tot_price': 0.0,
-				'prime_cost': 0.0,
-				
-			}
-			print"line.prime_cost",line.prime_cost
-			print"line.sam_ratio",line.sam_ratio
-			sam_ratio_tot = line.prime_cost * line.sam_ratio
-			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
-			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
-			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
-			i_tot = sam_ratio_tot + dealer_discount_tot
-			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
-			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
-			k_tot = i_tot + customer_discount_tot
-			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
-			print"spl_discount_totspl_discount_tot",spl_discount_tot
-			m_tot = k_tot + spl_discount_tot
-			tax_tot = (m_tot / 100) * (line.gst.amount or 0 *100)
-			print"tax_tottax_tot",tax_tot
-			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
-			print"p_f_totp_f_tot",p_f_tot
-			p_tot = m_tot + tax_tot + p_f_tot
-			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
-			print"freight_totfreight_tot",freight_tot
-			r_tot = p_tot + freight_tot
-			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
-			print"insurance_totinsurance_tot",insurance_tot
-			pump_price_tot = r_tot + insurance_tot
-			print"pump_price_totpump_price_tot",pump_price_tot
-			tot_price = pump_price_tot / line.qty
-			print"tot_pricetot_price",tot_price
-			#~ net_amount = tot_price * 1
-			net_amount = tot_price * line.qty
-			print"net_amountnet_amount",net_amount
-			
-			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
-			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
-			res[line.id]['customer_discount_tot'] = customer_discount_tot
-			res[line.id]['spl_discount_tot'] = spl_discount_tot
-			res[line.id]['tax_tot'] = tax_tot
-			res[line.id]['p_f_tot'] = p_f_tot
-			res[line.id]['freight_tot'] = freight_tot
-			res[line.id]['insurance_tot'] = insurance_tot
-			res[line.id]['pump_price_tot'] = pump_price_tot
-			res[line.id]['tot_price'] = tot_price
-			res[line.id]['net_amount'] = net_amount
-			res[line.id]['prime_cost'] = (line.per_spare_prime_cost * line.qty) + line.additional_cost
-			
-		return res"""
-	
+		
 	_name = "ch.spare.offer"
-	_description = "Ch Spare Offer"
+	_description = "Offer Spare"
 	
 	_columns = {
 		
@@ -3217,26 +2828,26 @@ class ch_spare_offer(osv.osv):
 		## Module Requirement Fields
 		
 		'offer_id':fields.many2one('kg.crm.offer', 'Offer'),
-		'uom_id':fields.many2one('product.uom','UOM'),
+		'uom_id':fields.many2one('product.uom','UOM',domain="[('dummy_state','=','approved')]"),
 		'qty':fields.integer('Quantity'),
 		'invoice_pending_qty':fields.integer('Inv Pending Qty'),
 		'item_code': fields.char('Item Code'),
 		'item_name': fields.char('Item Name'),
-		'hsn_no': fields.many2one('kg.hsn.master','HSN No.'),
+		'hsn_no': fields.many2one('kg.hsn.master','HSN No.',domain="[('state','=','approved')]"),
 		'gst': fields.many2one('account.tax','GST Tax'),
-		'customer_id':fields.many2one('res.partner','Customer Name'),
-		'moc_id': fields.many2one('kg.moc.master','MOC Name'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
-		'ms_id': fields.many2one('kg.machine.shop','MS Name'),
-		'bot_id': fields.many2one('kg.machine.shop','BOT Name'),
-		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
-		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
-		'moc_const_id': fields.many2one('kg.moc.construction','MOC Construction'),
+		'customer_id':fields.many2one('res.partner','Customer Name',domain="[('partner_state','=','approve')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC Name',domain="[('state','=','approved')]"),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('state','=','approved')]"),
+		'ms_id': fields.many2one('kg.machine.shop','MS Name',domain="[('state','=','approved')]"),
+		'bot_id': fields.many2one('kg.machine.shop','BOT Name',domain="[('state','=','approved')]"),
+		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type',domain="[('state','=','approved')]"),
+		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series',domain="[('state','=','approved')]"),
+		'moc_const_id': fields.many2one('kg.moc.construction','MOC Construction',domain="[('state','=','approved')]"),
 		'per_spare_prime_cost': fields.float('Per Spare Prime Cost'),
 		'additional_cost': fields.float('Additional Cost'),
 		'additional_cost_remark': fields.text('Additional Cost Remark'),
 		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),
-		#~ 'prime_cost': fields.float('Prime Cost'),
+		
 		'sam_ratio': fields.float('Sam Ratio'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
 		'customer_discount': fields.float('Customer Discount(%)'),
@@ -3390,8 +3001,7 @@ class ch_spare_offer(osv.osv):
 	def entry_update(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		self.write(cr, uid, ids, {
-									'sam_ratio':entry.sam_ratio,
-									#~ 'r_cpo_amount':entry.sam_ratio,
+									'sam_ratio':entry.sam_ratio,									
 									
 								})
 		return True
@@ -3406,7 +3016,7 @@ class ch_accessories_offer(osv.osv):
 		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = supervision_tot = tot_price = net_amount = 0
 		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = r_dealer_discount = r_net_amt_tot = r_freight_ex_tot = 0
 		for line in self.browse(cr, uid, ids, context=context):
-			print"linelineline",line
+
 			res[line.id] = {
 				
 				'sam_ratio_tot': 0.0,
@@ -3423,60 +3033,55 @@ class ch_accessories_offer(osv.osv):
 				
 			}
 			
-			print"line.prime_cost",line.prime_cost
-			print"line.sam_ratio",line.sam_ratio
 			sam_ratio_tot = round(line.prime_cost * line.sam_ratio,2)
-			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
+
 			dealer_discount = round(sam_ratio_tot / (1-line.dealer_discount/100.00),2)
 			dealer_discount_tot = round(dealer_discount - sam_ratio_tot,2)
-			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
+
 			spl_discount = round(dealer_discount / (1-line.special_discount/100.00),2)
 			spl_discount_tot = round(spl_discount - dealer_discount,2)
-			print"spl_discount_totspl_discount_tot",spl_discount_tot
+
 			if line.p_f_in_ex == 'inclusive':
 				p_f = round(spl_discount / (1-line.p_f/100.00),2)
 			else:
 				p_f = spl_discount
 			p_f_tot = round(p_f - spl_discount,2)
-			print"p_f_totp_f_tot",p_f_tot
+
 			if line.freight_in_ex == 'inclusive':
 				insurance = round(p_f / (1-line.insurance/100.00),2)
 			else:
 				insurance = p_f
 			insurance_tot = round(insurance - p_f,2)
-			print"insurance_tot",insurance_tot
+
 			if line.freight_in_ex == 'inclusive':
 				freight = round(insurance / (1-line.freight/100.00),2)
 			else:
 				freight = insurance
 			freight_tot = round(freight - insurance,2)
-			print"freight_tot",freight_tot
+			
 			pump_price_tot = freight
-			print"pump_price_tot",pump_price_tot
+			
 			customer_discount = round(pump_price_tot / (1-line.customer_discount/100.00),2)
 			customer_discount_tot = round(customer_discount - pump_price_tot,2)
-			print"customer_discount_tot",customer_discount_tot
+
 			if line.gst:
 				tax = round(customer_discount / (1-(line.gst.amount*100)/100.00),2)
 			else:
 				tax = customer_discount
-			print"tax",tax
+
 			tax_tot = round(tax - customer_discount,2)
-			print"tax_tottax_tot",tax_tot
+
 			tot_price = round(customer_discount)
-			#~ tot_price = tax
-			print"tot_price",tot_price
 			
-			#~ r_customer_discount_tot = round((tot_price * line.r_customer_discount) / 100.00,2)
 			r_customer_discount_tot = round((line.r_cpo_amount * line.r_customer_discount) / 100.00)
-			print"r_customer_discount_tot",r_customer_discount_tot
+
 			r_pump_price_tot = round(line.r_cpo_amount - r_customer_discount_tot)
-			print"r_pump_price_tot",r_pump_price_tot
+
 			if line.gst:
 				r_tax_tot = round(((r_pump_price_tot + line.r_p_f_ex_tot)*(line.gst.amount*100))/100.00)
 			else:
 				r_tax_tot = 0 
-			print"r_tax_tot",r_tax_tot
+
 			if line.r_freight_in_ex == 'inclusive':
 				r_freight_tot = round((r_pump_price_tot*line.r_freight)/100.00)
 				r_freight_ex_tot = 0
@@ -3486,7 +3091,7 @@ class ch_accessories_offer(osv.osv):
 			else:
 				r_freight_tot = 0
 				r_freight_ex_tot = 0
-			print"r_freight_tot",r_freight_tot
+			
 			if line.r_p_f_in_ex == 'inclusive':
 				r_p_f_tot = round((r_pump_price_tot*line.r_p_f)/100.00)
 				r_p_f_ex_tot = 0
@@ -3496,6 +3101,7 @@ class ch_accessories_offer(osv.osv):
 			else:
 				r_p_f_tot = 0
 				r_p_f_ex_tot = 0
+			
 			if line.r_insurance_in_ex == 'inclusive':
 				#~ r_insurance_tot = round((r_pump_price_tot*line.r_insurance)/100.00)
 				if line.cpo_quote_cust == 'quoted':
@@ -3504,22 +3110,17 @@ class ch_accessories_offer(osv.osv):
 					r_insurance_tot = round(((line.r_cpo_amount + r_p_f_ex_tot + r_tax_tot)*line.r_insurance)/100.00)
 			else:
 				r_insurance_tot = 0
-			print"r_insurance_tot",r_insurance_tot
 			
-			print"r_p_f_tot",r_p_f_tot
 			r_spl_discount_tot = round((r_pump_price_tot*line.r_special_discount) / 100.00)
-			print"r_spl_discount_tot",r_spl_discount_tot
+
 			r_spl_discount = r_pump_price_tot - r_spl_discount_tot - r_freight_tot - r_insurance_tot - r_p_f_tot
-			print"r_spl_discount",r_spl_discount
+
 			r_dealer_discount = r_spl_discount
-			print"r_dealer_discount",r_dealer_discount
+
 			r_dealer_discount_tot = round((r_dealer_discount*line.r_dealer_discount) / 100.00)
-			print"r_dealer_discount_tot",r_dealer_discount_tot
+
 			r_sam_ratio_tot = r_pump_price_tot - r_spl_discount_tot - r_dealer_discount_tot - r_p_f_tot - r_insurance_tot - r_freight_tot
-			print"r_sam_ratio_tot",r_sam_ratio_tot
-			print"line.prime_costline.prime_cost",line.prime_cost
 			r_sam_ratio = r_sam_ratio_tot / (line.prime_cost or 1)
-			print"r_sam_ratio",r_sam_ratio
 			
 			r_net_amt_tot =  line.r_cpo_amount_tot - r_customer_discount_tot
 			
@@ -3551,97 +3152,29 @@ class ch_accessories_offer(osv.osv):
 			res[line.id]['r_net_amt_tot'] = r_net_amt_tot
 			res[line.id]['r_customer_discount_tot'] = r_customer_discount_tot
 			res[line.id]['r_tax_tot'] = r_tax_tot
-			#~ res[line.id]['r_tot_price'] = tot_price
+			
 			if line.cust_in_ex == 'inclusive':
 				res[line.id]['r_net_amount'] = r_pump_price_tot + r_p_f_ex_tot + r_tax_tot
 			else:
 				res[line.id]['r_net_amount'] = r_pump_price_tot + r_customer_discount_tot + r_p_f_ex_tot + r_tax_tot
 			res[line.id]['prime_cost'] = (line.per_access_prime_cost * line.qty) + line.additional_cost
-			print"line.r_cpo_amount",line.r_cpo_amount
+
 			enq_no = line.header_id.enquiry_no
-			print"enq_noenq_no",enq_no
+
 			enq_ids = self.pool.get('kg.crm.enquiry').search(cr,uid,[('name','=',enq_no),('state','!=','revised')])
-			print"enq_ids",enq_ids
+
 			if enq_ids:
 				enq_rec = self.pool.get('kg.crm.enquiry').browse(cr,uid,enq_ids[0])
-				print"enq_recenq_rec",enq_rec.state
-			print"tot_pricetot_price",tot_price
+			
 			if line.cpo_quote_cust == 'quoted':
 				cr.execute('''update ch_accessories_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(tot_price,tot_price,line.id))
 			elif line.cpo_quote_cust == 'cust_po':
 				cr.execute('''update ch_accessories_offer set r_cpo_amount = %s,r_cpo_amount_tot = %s where id = %s ''',(line.r_cpo_amount,line.r_cpo_amount,line.id))
 		
 		return res
-	"""
-	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
-		res = {}
-		cur_obj=self.pool.get('res.currency')
-		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
-		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = 0
-		for line in self.browse(cr, uid, ids, context=context):
-			print"linelineline",line
-			res[line.id] = {
-				
-				'sam_ratio_tot': 0.0,
-				'dealer_discount_tot': 0.0,
-				'customer_discount_tot' : 0.0,
-				'spl_discount_tot' : 0.0,
-				'tax_tot': 0.0,
-				'p_f_tot': 0.0,
-				'freight_tot': 0.0,
-				'insurance_tot': 0.0,
-				'pump_price': 0.0,
-				'tot_price': 0.0,
-				'prime_cost': 0.0,
-				
-			}
-			print"line.prime_cost",line.prime_cost
-			print"line.sam_ratio",line.sam_ratio
-			sam_ratio_tot = line.prime_cost * line.sam_ratio
-			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
-			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
-			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
-			i_tot = sam_ratio_tot + dealer_discount_tot
-			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
-			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
-			k_tot = i_tot + customer_discount_tot
-			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
-			print"spl_discount_totspl_discount_tot",spl_discount_tot
-			m_tot = k_tot + spl_discount_tot
-			tax_tot = (m_tot / 100) * (line.gst.amount or 0 *100)
-			print"tax_tottax_tot",tax_tot
-			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
-			print"p_f_totp_f_tot",p_f_tot
-			p_tot = m_tot + tax_tot + p_f_tot
-			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
-			print"freight_totfreight_tot",freight_tot
-			r_tot = p_tot + freight_tot
-			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
-			print"insurance_totinsurance_tot",insurance_tot
-			pump_price_tot = r_tot + insurance_tot
-			print"pump_price_totpump_price_tot",pump_price_tot
-			tot_price = pump_price_tot / line.qty
-			print"tot_pricetot_price",tot_price
-			net_amount = tot_price * line.qty
-			print"net_amountnet_amount",net_amount
-			
-			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
-			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
-			res[line.id]['customer_discount_tot'] = customer_discount_tot
-			res[line.id]['spl_discount_tot'] = spl_discount_tot
-			res[line.id]['tax_tot'] = tax_tot
-			res[line.id]['p_f_tot'] = p_f_tot
-			res[line.id]['freight_tot'] = freight_tot
-			res[line.id]['insurance_tot'] = insurance_tot
-			res[line.id]['pump_price_tot'] = pump_price_tot
-			res[line.id]['tot_price'] = tot_price
-			res[line.id]['net_amount'] = net_amount
-			res[line.id]['prime_cost'] = (line.per_access_prime_cost * line.qty) + line.additional_cost
-			
-		return res"""
-	
+		
 	_name = "ch.accessories.offer"
-	_description = "Ch Accessories Offer"
+	_description = "Offer Accessories"
 	
 	_columns = {
 		
@@ -3652,16 +3185,15 @@ class ch_accessories_offer(osv.osv):
 		## Module Requirement Fields
 		
 		'offer_id':fields.many2one('kg.crm.offer', 'Offer'),
-		'enquiry_line_id': fields.many2one('ch.kg.crm.pumpmodel','Enquiry Line'),
-		'access_id':fields.many2one('kg.accessories.master', 'Item Name'),
-		'hsn_no': fields.many2one('kg.hsn.master','HSN No.'),
+		'enquiry_line_id': fields.many2one('ch.kg.crm.pumpmodel','Enquiry Line',domain="[('state','=','approved')]"),
+		'access_id':fields.many2one('kg.accessories.master', 'Item Name',domain="[('state','=','approved')]"),
+		'hsn_no': fields.many2one('kg.hsn.master','HSN No.',domain="[('state','=','approved')]"),
 		'gst': fields.many2one('account.tax','GST Tax'),
-		'customer_id':fields.many2one('res.partner','Customer Name'),
-		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
-		'moc_id':fields.many2one('kg.moc.master', 'MOC'),
+		'customer_id':fields.many2one('res.partner','Customer Name',domain="[('partner_state','=','approve')]"),
+		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type',domain="[('state','=','approved')]"),
+		'moc_id':fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved')]"),
 		'qty':fields.integer('Quantity'),
 		'invoice_pending_qty':fields.integer('Inv Pending Qty'),
-		#~ 'prime_cost': fields.float('Prime Cost'),
 		'additional_cost': fields.float('Additional Cost'),
 		'additional_cost_remark': fields.text('Additional Cost Remark'),
 		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),
@@ -3819,7 +3351,6 @@ class ch_accessories_offer(osv.osv):
 		entry = self.browse(cr,uid,ids[0])
 		self.write(cr, uid, ids, {
 									'sam_ratio':entry.sam_ratio,
-									#~ 'r_cpo_amount':entry.sam_ratio,
 									
 								})
 		return True
@@ -3851,36 +3382,33 @@ class ch_crm_component_offer(osv.osv):
 				'prime_cost': 0.0,
 				
 			}
-			print"line.prime_cost",line.prime_cost
-			print"line.sam_ratio",line.sam_ratio
 			sam_ratio_tot = line.prime_cost * line.sam_ratio
-			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
+
 			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
-			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
+
 			i_tot = sam_ratio_tot + dealer_discount_tot
 			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
-			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
+
 			k_tot = i_tot + customer_discount_tot
 			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
-			print"spl_discount_totspl_discount_tot",spl_discount_tot
+
 			m_tot = k_tot + spl_discount_tot
 			tax_tot = (m_tot / 100) * (line.gst.amount or 0 *100)
-			print"tax_tottax_tot",tax_tot
+
 			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
-			print"p_f_totp_f_tot",p_f_tot
+
 			p_tot = m_tot + tax_tot + p_f_tot
 			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
-			print"freight_totfreight_tot",freight_tot
+
 			r_tot = p_tot + freight_tot
 			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
-			print"insurance_totinsurance_tot",insurance_tot
+
 			pump_price_tot = r_tot + insurance_tot
-			print"pump_price_totpump_price_tot",pump_price_tot
+
 			tot_price = pump_price_tot / line.qty
-			print"tot_pricetot_price",tot_price
+
 			net_amount = tot_price * 1
-			print"net_amountnet_amount",net_amount
-			
+
 			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
 			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
 			res[line.id]['customer_discount_tot'] = customer_discount_tot
@@ -3911,21 +3439,20 @@ class ch_crm_component_offer(osv.osv):
 		'qty':fields.integer('Quantity'),
 		'item_code': fields.char('Item Code'),
 		'item_name': fields.char('Item Name'),
-		'hsn_no': fields.many2one('kg.hsn.master','HSN No.'),
+		'hsn_no': fields.many2one('kg.hsn.master','HSN No.',domain="[('state','=','approved')]"),
 		'gst': fields.many2one('account.tax','GST Tax'),
-		'customer_id':fields.many2one('res.partner','Customer Name'),
-		'moc_id': fields.many2one('kg.moc.master','MOC Name'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
-		'ms_id': fields.many2one('kg.machine.shop','MS Name'),
-		'bot_id': fields.many2one('kg.machine.shop','BOT Name'),
-		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
-		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
-		'moc_const_id': fields.many2one('kg.moc.construction','MOC Construction'),
+		'customer_id':fields.many2one('res.partner','Customer Name',domain="[('partner_state','=','approve')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC Name',domain="[('state','=','approved')]"),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('state','=','approved')]"),
+		'ms_id': fields.many2one('kg.machine.shop','MS Name',domain="[('state','=','approved')]"),
+		'bot_id': fields.many2one('kg.machine.shop','BOT Name',domain="[('state','=','approved')]"),
+		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type',domain="[('state','=','approved')]"),
+		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series',domain="[('state','=','approved')]"),
+		'moc_const_id': fields.many2one('kg.moc.construction','MOC Construction',domain="[('state','=','approved')]"),
 		'per_spare_prime_cost': fields.float('Per Spare Prime Cost'),
 		'additional_cost': fields.float('Additional Cost'),
 		'additional_cost_remark': fields.text('Additional Cost Remark'),
 		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),
-		#~ 'prime_cost': fields.float('Prime Cost'),
 		'sam_ratio': fields.float('Sam Ratio'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
 		'customer_discount': fields.float('Customer Discount(%)'),
@@ -3962,14 +3489,6 @@ class ch_crm_component_offer(osv.osv):
 		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
 		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
 		
-		## Child Tables Declaration
-		
-		#~ 'enquiry_id': fields.many2one('kg.crm.enquiry','Enquiry No.'),
-		#~ 'off_fou_id': fields.related('enquiry_id','ch_line_ids_b', type='one2many', relation='ch.crm.component.fou', string='Foundry Items',store=True),
-		#~ 'off_ms_id': fields.related('enquiry_id','ch_line_ids_c', type='one2many', relation='ch.crm.component.ms', string='MS Items',store=True),
-		#~ 'off_bot_id': fields.related('enquiry_id','ch_line_ids_d', type='one2many', relation='ch.crm.component.bot', string='BOT Items',store=True),
-		#~ 'off_access_id': fields.related('enquiry_id','ch_line_ids_e', type='one2many', relation='ch.crm.component.access', string='Accessories Items',store=True),
-		
 	}
 	
 	def onchange_sam_ratio(self, cr, uid, ids, prime_cost, works_value, works_value_flag, sam_ratio, sam_ratio_flag, context=None):
@@ -3995,7 +3514,7 @@ class ch_term_offer(osv.osv):
 		
 		## Module Requirement Fields
 		
-		'term_id': fields.many2one('kg.offer.term','Name',domain="[('state','not in',('reject','cancel'))]"),
+		'term_id': fields.many2one('kg.offer.term','Name',domain="[('state','=','approved')]"),
 		'remark': fields.char('Remarks'),
 		'term': fields.text('Terms'),
 		
@@ -4011,71 +3530,6 @@ class ch_term_offer(osv.osv):
 		return {'value': value}
 	
 ch_term_offer()
-
-
-class kg_mail_compose_message(osv.osv):
-	
-	_name = "mail.compose.message"
-	_inherit = "mail.compose.message"
-	_description = "Email composition wizard"
-	
-	_columns = {
-		
-		'cc_mail' : fields.char('Cc'),
-		
-	}
-	
-	def send_mail_offer(self, cr, uid, ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		offer_id = rec.res_id
-		to_mails = []
-		cc_mails = []
-		attachments = []
-		partner_ids = rec.partner_ids
-		for email in partner_ids:
-			to_mails.append(email.email)
-		if rec.cc_mail:
-			if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", rec.cc_mail) != None:
-				pass
-			else:
-				raise osv.except_osv('Invalid Email', 'Please enter a valid Cc mail address')
-			cc_mails = [rec.cc_mail]
-		template = self.pool.get('email.template').browse(cr, uid,8)
-		ir_attachment_obj = self.pool.get('ir.attachment')
-		attachment_ids = [attach.id for attach in rec.attachment_ids]
-		if attachment_ids:
-			for attach_id in attachment_ids:
-				attach_rec = ir_attachment_obj.browse(cr,uid,attach_id)
-				attachments.append((str(attach_rec.datas_fname), base64.b64decode(attach_rec.db_datas)))
-		
-		off_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_id)
-		
-		res_ids = ids
-		
-		for res_id in res_ids:
-			if off_rec.term_data:
-				attachments.append(('Terms Copy.xls', base64.b64decode(off_rec.term_data)))
-			if off_rec.rep_data:
-				attachments.append(('Offer Copy.xls', base64.b64decode(off_rec.rep_data)))
-			
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = 'erpreport@kgcloud.org',
-					email_to = to_mails,
-					subject = rec.subject,
-					body = rec.body,
-					email_cc = cc_mails,
-					attachments = attachments,
-					object_id = res_id and ('%s-%s' % (res_id, 'kg.crm.offer')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-			print "Offer Copy and Term Copy Mail Seccessfully Sent TO ---->>> ::",to_mails 
-		
-		return True
-	
-kg_mail_compose_message()
 
 class ch_crm_off_remark(osv.osv):
 	
@@ -4095,6 +3549,9 @@ ch_crm_off_remark()
 
 class ch_crm_off_attachments(osv.osv):
 	
+	def getFilename(self):
+		self.filename = 'filename_ConfidentialReports.xls'
+	
 	_name = "ch.crm.off.attachments"
 	_description = "Ch CRM Off Attachments"
 	
@@ -4105,6 +3562,7 @@ class ch_crm_off_attachments(osv.osv):
 		'header_id': fields.many2one('kg.crm.offer', 'Offer No.', ondelete='cascade'),
 		'description': fields.char('Description'),
 		'file': fields.binary('File'),
+		'filename': fields.char('file name',readonly=True,store=False,compute='getFilename'),
 		
 	}
 	
