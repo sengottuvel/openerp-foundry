@@ -2374,6 +2374,7 @@ class ch_primecost_view_access(osv.osv):
 		if data_rec:
 			if data_rec.line_ids_b:
 				for item in data_rec.line_ids_b:
+					moc_id = ''
 					pat_obj = self.pool.get('kg.pattern.master').search(cr,uid,[('id','=',item.pattern_id.id)])
 					if pat_obj:
 						pat_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pat_obj[0])
@@ -2406,6 +2407,7 @@ class ch_primecost_view_access(osv.osv):
 									})
 			if data_rec.line_ids_a:
 				for item in data_rec.line_ids_a:
+					moc_id = ''
 					ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
 					if ms_obj:
 						ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
@@ -2439,6 +2441,7 @@ class ch_primecost_view_access(osv.osv):
 									})
 			if data_rec.line_ids:
 				for item in data_rec.line_ids:
+					moc_id = ''
 					bot_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.ms_id.id)])
 					if bot_obj:
 						bot_rec = self.pool.get('kg.machine.shop').browse(cr,uid,bot_obj[0])
