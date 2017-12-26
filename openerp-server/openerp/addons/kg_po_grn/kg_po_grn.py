@@ -151,7 +151,7 @@ class kg_po_grn(osv.osv):
 		'order_date': fields.char('Date',readonly=True),
 		'pos_date': fields.char('PO Date',readonly=True),
 		'po_date':fields.date('PO Date',readonly=True),
-		'supplier_id':fields.many2one('res.partner','Supplier',domain=[('supplier','=',True),('partner_state','=','approve')],required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'supplier_id':fields.many2one('res.partner','Supplier',domain=[('supplier','=',True)],required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'billing_status': fields.selection([
 			('applicable', 'Applicable'),
 			('not_applicable', 'Not Applicable')], 'Billing Status',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
