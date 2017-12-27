@@ -3214,9 +3214,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		total = 0.00
 		water_total = 0.00
 		if efficiency_in:
-			#~ total = ((capacity_in * head_in * specific_gravity) / 367.00 ) / efficiency_in
-			total = ((capacity_in * head_in) / 367.00) * specific_gravity * efficiency_in
+			total = ((capacity_in * head_in * specific_gravity) / 367.00 ) / efficiency_in
 			water_total = ((capacity_in * head_in * 1) / 367.00 ) / efficiency_in
+			#~ water_total = round(water_total,2)
 			value = {'bkw_liq': total * 100 ,'bkw_water':water_total * 100}
 		return {'value': value}
 	
