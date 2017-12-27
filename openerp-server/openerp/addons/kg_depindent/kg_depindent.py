@@ -353,7 +353,7 @@ class kg_depindent_line(osv.osv):
 		'breadth': fields.float('Breadth'),
 		'flag_dynamic_length': fields.boolean('Dynamic Length'),
 		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor',readonly=True,required=True),
-		'uom_category': fields.selection([('length','Length'),('other','Others')],'UOM Category',required=True),
+		'uom_category': fields.selection([('length','Length'),('other','Others')],'UOM Category'),
 		
 		## Child Tables Declaration
 		

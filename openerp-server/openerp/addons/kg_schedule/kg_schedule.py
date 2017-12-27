@@ -2193,12 +2193,14 @@ class kg_schedule(osv.osv):
 										else:
 											cutting_qty = cutting_qty
 											indent_qty = indent_qty
-											
+										
+										uom_rec = self.pool.get('product.uom').browse(cr, uid, ms_indent_item['uom'])											
 										
 										ms_dep_indent_line_vals = {
 											'indent_id':indent_id,
 											'product_id':ms_indent_item['product_id'],
 											'uom':ms_indent_item['uom'],
+											'uom_category':uom_rec.uom_category,
 											'dep_id':dep_id[0],
 											'line_state':'noprocess',
 											'line_date':entry.entry_date,
@@ -2373,11 +2375,14 @@ class kg_schedule(osv.osv):
 											cutting_qty = cutting_qty
 											indent_qty = indent_qty
 											
+										uom_rec = self.pool.get('product.uom').browse(cr, uid, ms_indent_item['uom'])	
+											
 										
 										ms_dep_indent_line_vals = {
 											'indent_id':indent_id,
 											'product_id':ms_indent_item['product_id'],
 											'uom':ms_indent_item['uom'],
+											'uom_category':uom_rec.uom_category,
 											'dep_id':dep_id[0],
 											'line_state':'noprocess',
 											'line_date':entry.entry_date,
@@ -2588,12 +2593,14 @@ class kg_schedule(osv.osv):
 										else:
 											cutting_qty = cutting_qty
 											indent_qty = indent_qty
-											
+										
+										uom_rec = self.pool.get('product.uom').browse(cr, uid, acc_ms_indent_item['uom'])	
 										
 										acc_ms_dep_indent_line_vals = {
 											'indent_id':indent_id,
 											'product_id':acc_ms_indent_item['product_id'],
 											'uom':acc_ms_indent_item['uom'],
+											'uom_category':uom_rec.uom_category,
 											'dep_id':dep_id[0],
 											'line_state':'noprocess',
 											'line_date':entry.entry_date,
@@ -2770,12 +2777,13 @@ class kg_schedule(osv.osv):
 										else:
 											cutting_qty = cutting_qty
 											indent_qty = indent_qty
-											
+										uom_rec = self.pool.get('product.uom').browse(cr, uid, acc_ms_indent_item['uom'])		
 										
 										acc_ms_dep_indent_line_vals = {
 											'indent_id':indent_id,
 											'product_id':acc_ms_indent_item['product_id'],
 											'uom':acc_ms_indent_item['uom'],
+											'uom_category':uom_rec.uom_category,
 											'dep_id':dep_id[0],
 											'line_state':'noprocess',
 											'line_date':entry.entry_date,
@@ -2955,11 +2963,14 @@ class kg_schedule(osv.osv):
 									length = ms_raw_rec.length
 									breadth = ms_raw_rec.breadth
 									cutting_qty = ms_raw_rec.temp_qty
+									
+								uom_rec = self.pool.get('product.uom').browse(cr, uid, bot_indent_item['uom'])		
 								
 								bot_dep_indent_line_vals = {
 									'indent_id':indent_id,
 									'product_id':bot_indent_item['product_id'],
 									'uom':bot_indent_item['uom'],
+									'uom_category':uom_rec.uom_category,
 									'dep_id':dep_id[0],
 									'line_state':'noprocess',
 									'line_date':entry.entry_date,
@@ -3101,11 +3112,14 @@ class kg_schedule(osv.osv):
 									length = ms_raw_rec.length
 									breadth = ms_raw_rec.breadth
 									cutting_qty = ms_raw_rec.temp_qty
+									
+								uom_rec = self.pool.get('product.uom').browse(cr, uid, acc_bot_indent_item['uom'])		
 								
 								acc_bot_dep_indent_line_vals = {
 									'indent_id':indent_id,
 									'product_id':acc_bot_indent_item['product_id'],
 									'uom':acc_bot_indent_item['uom'],
+									'uom_category':uom_rec.uom_category,
 									'dep_id':dep_id[0],
 									'line_state':'noprocess',
 									'line_date':entry.entry_date,
