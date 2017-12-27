@@ -2964,7 +2964,10 @@ class kg_schedule(osv.osv):
 									breadth = ms_raw_rec.breadth
 									cutting_qty = ms_raw_rec.temp_qty
 									
-								uom_rec = self.pool.get('product.uom').browse(cr, uid, bot_indent_item['uom'])		
+								uom_rec = self.pool.get('product.uom').browse(cr, uid, bot_indent_item['uom'])
+								print"bot_indent_item['uom']",bot_indent_item['uom']		
+								print"uom_rec.uom_category",uom_rec.uom_category		
+								print"fns_item_name",fns_item_name		
 								
 								bot_dep_indent_line_vals = {
 									'indent_id':indent_id,
@@ -3113,7 +3116,11 @@ class kg_schedule(osv.osv):
 									breadth = ms_raw_rec.breadth
 									cutting_qty = ms_raw_rec.temp_qty
 									
-								uom_rec = self.pool.get('product.uom').browse(cr, uid, acc_bot_indent_item['uom'])		
+								uom_rec = self.pool.get('product.uom').browse(cr, uid, acc_bot_indent_item['uom'])
+								
+								print"bot_indent_item['uom']",acc_bot_indent_item['uom']		
+								print"uom_rec.uom_category",uom_rec.uom_category		
+								print"fns_item_name",fns_item_name		
 								
 								acc_bot_dep_indent_line_vals = {
 									'indent_id':indent_id,
