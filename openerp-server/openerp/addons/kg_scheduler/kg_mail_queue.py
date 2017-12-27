@@ -101,10 +101,10 @@ class kg_mail_queue(osv.osv):
 		return super(kg_mail_queue, self).write(cr, uid, ids, vals, context)
 		
 		
-	def send_mail(self,cr,uid,ids,context = None):	
+	def send_mail(self,cr,uid,ids=0,context = None):
 		today = date.today()
 		que_search = self.search(cr,uid,[('created_date','=',today),('state','=','pending')])
-		if que_search:	
+		if que_search:
 			for que_rec in self.browse(cr, uid, que_search, context=context):
 				if que_rec.state == 'pending':
 					email_from = [que_rec.mail_from]
