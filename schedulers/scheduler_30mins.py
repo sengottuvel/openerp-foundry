@@ -10,4 +10,4 @@ sock_common = xmlrpclib.ServerProxy ('http://localhost:8069/xmlrpc/common')
 uid = sock_common.login(dbname, username, pwd)
 sock = xmlrpclib.ServerProxy('http://localhost:8069/xmlrpc/object')
 
-sock.execute(dbname, uid, pwd, 'kg.acheduler', 'approved_po_mail')
+sock.execute(dbname, uid, pwd, 'kg.scheduler', 'approved_po_mail')
