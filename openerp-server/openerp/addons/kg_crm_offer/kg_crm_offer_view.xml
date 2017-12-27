@@ -1325,9 +1325,7 @@
 		<!-- Offer West --> 
 		<menuitem action="tma_crm_offer_west" name="West Offer" id="tam_crm_offer_west" parent="kg_menus.tpm_crm_enquiry_west" sequence="2"/>
 		<!-- Offer Mines --> 
-<!--
 		<menuitem action="tma_crm_offer_mines" name="Mines Offer" id="tam_crm_offer_mines" parent="kg_menus.tpm_crm_enquiry_mines" sequence="2"/>
--->
 		<!-- Offer Export --> 
 		<menuitem action="tma_crm_offer_exp" name="Export Offer" id="tam_crm_offer_exp" parent="kg_menus.tpm_crm_enquiry_export" sequence="2"/>
 		<!-- Offer IPD --> 
