@@ -601,7 +601,7 @@
 												<field name="access_id" required="1" attrs="{'readonly':['|',('load_access','=',True),('access_categ_id','=',False)]}"/>
 												<field name="accessories_type" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
 												<field name="moc_const_id" required="1" attrs="{'readonly':[('load_access','=',True)]}" invisible="1"/>
-												<field name="flag_standard"/>
+												<field name="flag_standard" attrs="{'readonly':[('load_access','=',True)]}"/>
 												<field name="moc_id" invisible="1"/>
 											</group>
 											<group>
@@ -613,7 +613,7 @@
 											</group>
 											<group>
 											<group>
-												<field name="load_access" on_change="onchange_load_access(load_access,flag_standard,access_id,moc_const_id,qty,is_selectable_all,purpose_categ)"/>
+												<field name="load_access" on_change="onchange_load_access(load_access,flag_standard,access_id,moc_const_id,qty,is_selectable_all,purpose_categ)" attrs="{'invisible':[('access_id','=',False)]}"/>
 											</group>
 											<group>
 												<field name="is_selectable_all" on_change="onchange_load_access(load_access,flag_standard,access_id,moc_const_id,qty,is_selectable_all,purpose_categ)" attrs="{'invisible':[('load_access','!=',True)]}"/>
@@ -621,7 +621,7 @@
 											</group>
 										</group>
 										<notebook>
-											<page string = "Foundry Items">
+											<page string = "Foundry Items" attrs="{'invisible':[('load_access','=',False)]}">
 												<field name="line_ids" nolabel="1">
 													<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
 														<field name="is_applicable"/>
@@ -642,7 +642,7 @@
 													</tree>
 												</field>								
 											</page>
-											<page string = "MS Items">
+											<page string = "MS Items" attrs="{'invisible':[('load_access','=',False)]}">
 												<field name="line_ids_a" nolabel="1">
 													<tree string="MS Item" editable="top" create="false" delete="false">
 														<field name="is_applicable"/>
@@ -659,11 +659,11 @@
 														<field name="moc_name" invisible="1"/>
 														<field name="moc_changed_flag" invisible="1"/>
 														<field name="flag_standard" invisible="1"/>
-														<field name="purpose_categ" invisible="1"/>
+														<field name="purpose_categ"/>
 													</tree>
 												</field>								
 											</page>
-											<page string = "BOT Items">
+											<page string = "BOT Items" attrs="{'invisible':[('load_access','=',False)]}">
 												<field name="line_ids_b" nolabel="1">
 													<tree string="BOT Item" editable="top" create="false" delete="false">
 														<field name="is_applicable"/>

@@ -433,10 +433,11 @@ class kg_crm_enquiry(osv.osv):
 			if wo_ids:
 				raise osv.except_osv(_('Warning !'),_('You can not reset this entry because WO confirmed !!'))
 			
-			off_ids = off_obj.search(cr,uid,[('enquiry_no','=',entry.name),('state','!=','revised')])
+			off_ids = off_obj.search(cr,uid,[('enquiry_id','=',entry.id)])
+			print"off_ids",off_ids
 			if off_ids:
 				off_obj.write(cr,uid,off_ids[0],{'state':'draft'})
-				self.write(cr,uid,ids,{'state':'moved_to_offer'})
+			self.write(cr,uid,ids,{'state':'moved_to_offer'})
 		return True
 	
 	def send_to_dms(self,cr,uid,ids,context=None):
@@ -4390,12 +4391,12 @@ class ch_kg_crm_accessories(osv.osv):
 		return context
 	
 	def onchange_access_id(self, cr, uid, ids, access_categ_id,access_id):
-		value = {'access_id':access_id,'off_name':''}
+		value = {'access_id':'','off_name':''}
 		if access_categ_id:
 			acc_rec = self.pool.get('kg.accessories.category').browse(cr,uid,access_categ_id)
 			value = {'access_id':'','off_name':acc_rec.name}
 		else:
-			raise osv.except_osv(_('Warning!'),_('System should allow without accessories category!'))
+			raise osv.except_osv(_('Warning !'),_('System should allow without accessories category !!'))
 		return {'value': value}
 	
 	def onchange_load_access(self,cr,uid,ids,load_access,flag_standard,access_id,moc_const_id,qty,is_selectable_all,purpose_categ):
@@ -4406,7 +4407,7 @@ class ch_kg_crm_accessories(osv.osv):
 		moc_changed_flag = False
 		if load_access == True and access_id:
 			if qty == 0:
-				raise osv.except_osv(_('Warning!'),_('Kindly Configure Qty'))
+				raise osv.except_osv(_('Warning !'),_('Kindly Configure Qty !!'))
 			access_obj = self.pool.get('kg.accessories.master').search(cr, uid, [('id','=',access_id)])
 			if access_obj:
 				data_rec = self.pool.get('kg.accessories.master').browse(cr, uid, access_obj[0])
@@ -4480,6 +4481,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'csd_no': item.csd_no,
 									'remarks': item.remarks,
 									'flag_standard': flag_standard,
+									'purpose_categ': purpose_categ,
 									})
 			if data_rec.line_ids:
 				for item in data_rec.line_ids:
@@ -4516,6 +4518,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'csd_no': item.csd_no,
 									'remarks': item.remark,
 									'flag_standard': flag_standard,
+									'purpose_categ': purpose_categ,
 									})
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
 	
