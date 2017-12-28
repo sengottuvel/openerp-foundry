@@ -1199,13 +1199,26 @@ class kg_ms_daily_planning(osv.osv):
 					sc_name = cr.fetchone();
 					
 					
-					sc_vals = {
+					sc_vals = {			
+						
+						
 						'name': sc_name[0],
 						'ms_plan_id': entry_rec.id,
 						'ms_plan_line_id': line_item.id,
 						'total_qty': header_sc_qty,
 						'pending_qty': header_sc_qty,
 						'actual_qty': header_sc_qty,
+						
+						'order_id': line_item.order_id.id,
+						'order_line_id': line_item.order_line_id.id,
+						'moc_id': line_item.moc_id.id,
+						'position_id': line_item.position_id.id,
+						'pattern_id': line_item.pattern_id.id,						
+						'item_code': line_item.item_code,
+						'item_name': line_item.item_name,
+						'order_no': line_item.order_no,
+						
+						
 						#~ 'contractor_id': sc_item.contractor_id.id,
 						
 					}
