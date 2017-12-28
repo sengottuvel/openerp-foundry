@@ -617,70 +617,25 @@ class kg_purchase_order(osv.osv):
 			prod_obj = self.pool.get('product.product')
 			prod_obj.write(cr,uid,po_lines[i].product_id.id,{'latest_price' : po_lines[i].price_unit})
 			
-			## Purchase Rate update process starts
 			bmr_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',po_lines[i].product_id.id),('state','=','approved')])
 			if bmr_obj:
 				bmr_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,bmr_obj[0])
 				for item in bmr_rec.line_ids:
 					if item.brand_id.id == po_lines[i].brand_id.id and item.moc_id.id == po_lines[i].moc_id.id and po_lines[i].rate_revise == 'yes':
-						purchase_price = po_lines[i].price_unit
-						if po_lines[i].length == 0:
-							length = 1
-						else:
-							length = po_lines[i].length
-						if po_lines[i].breadth == 0:
-							breadth = 1
-						else:
-							breadth = po_lines[i].breadth
-						product_qty = (po_lines[i].product_qty) * (length or 1) * (breadth or 1)
-						price_unit = po_lines[i].price_unit
-						if po_lines[i].price_type == 'po_uom':
-							print"aaaaaaaaaaA"
-							if po_lines[i].product_uom.id == bmr_rec.uom_id.id:
-								print"aaaa"
-								print"price_unit",price_unit
-								self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : price_unit})
-							else:
-								print"bbb"
-								if po_lines[i].product_uom.id == po_lines[i].product_id.uom_po_id.id:
-									print"1111111111"
-									purchase_price = (product_qty * price_unit) * (product_qty * (po_lines[i].product_id.po_uom_coeff or 1))
-									#~ purchase_price = price_unit * (po_lines[i].product_id.po_uom_coeff or 1)
-									print"purchase_price",purchase_price
-								elif po_lines[i].product_uom.id == po_lines[i].product_id.uom_id.id:
-									print"22222222222"
-									purchase_price = (product_qty * price_unit) / (product_qty * (po_lines[i].product_id.po_uom_coeff or 1))
-									print"purchase_pricepurchase_price",purchase_price
-								self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : purchase_price})
-						elif po_lines[i].price_type == 'per_kg':
-							print"bbbbbbbbbbbb",bmr_rec.product_id.name,bmr_rec.id,bmr_rec.uom_id.id,bmr_rec.uom_id.code
-							if bmr_rec.uom_id.code == 'Kg':
-								print"price_unit",price_unit
-								self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : price_unit})
-							#~ if po_lines[i].product_uom.id != bmr_rec.uom_id.id:
-								#~ self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : price_unit})
-							else:
-								purchase_price = (((product_qty * po_lines[i].product_id.po_uom_in_kgs) * price_unit) / product_qty)
-								print"purchase_price",purchase_price
-								self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : purchase_price})
-						## Purchase Rate update process ends
+						self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
 						
-						## Design Rate update process starts
+						## Design Rate update process start
 						
 						design_rate = 0
-						print "item.rateitem.rateitem.rateitem.rate",item.rate
-						print "po_lines[i].price_unitpo_lines[i].price_unitpo_lines[i].price_unitpo_lines[i].price_unitpo_lines[i].price_unit",po_lines[i].price_unit
 						if item.rate <= po_lines[i].price_unit:
 							design_rate = ((po_lines[i].price_unit/100.00) * 5) + po_lines[i].price_unit
-							print "design_ratedesign_ratedesign_ratedesign_ratedesign_rate---------------",design_rate
 							self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'rate' : design_rate})
 						#~ elif (item.rate - ((item.rate/100.00) * 5)) >= po_lines[i].price_unit:
 							#~ design_rate = ((po_lines[i].price_unit/100.00)*5) + po_lines[i].price_unit
-							#~ print "design_ratedesign_ratedesign_ratedesign_ratedesign_rate***********",design_rate
 							#~ self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'rate' : design_rate})
 						else:
 							pass
-						## Design Rate update process ends
+						## Design Rate update process end
 					else:
 						pass
 			
