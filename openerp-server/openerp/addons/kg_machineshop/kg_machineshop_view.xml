@@ -388,7 +388,7 @@
 		
 	<!-- MS Schedule List Search View End -->	
 	
-	<!-- MS Schedule List Menu Action Start-->
+	<!-- MS Schedule List Menu Action Start-->	
 	
 	<record id="tma_ms_schedule_list_list" model="ir.actions.act_window">
 		<field name="name">MS Schedule List</field>
@@ -398,7 +398,8 @@
 		<field name="view_mode">tree</field>
 		<field name="context">{}</field>
 		<field name="view_id" ref="t_tree_v_ms_schedule_list_list"/>
-		<field name="search_view_id" ref="t_search_v_ms_schedule_list_list"/>		
+		<field name="search_view_id" ref="t_search_v_ms_schedule_list_list"/>
+		<field name="domain">[('ms_plan_rem_qty','>=', 0)]</field>
 	</record>
 	
 	<!--MS Schedule List Menu Action Start-->
