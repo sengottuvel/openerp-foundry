@@ -469,7 +469,7 @@ class kg_crm_offer(osv.osv):
 	def update_percentage(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state in ('draft','moved_to_offer'):
-			if entry.pump_per_flag == True or entry.spare_per_flag == True or entry.spare_per_flag == True:
+			if entry.pump_per_flag == True or entry.spare_per_flag == True or entry.access_per_flag == True:
 				pass
 			else:
 				raise osv.except_osv(_('Warning !'),_('Select applicable for Pump or Spare or Accessories is must !!'))
@@ -611,6 +611,10 @@ class kg_crm_offer(osv.osv):
 			self.write(cr, uid, ids, {
 									  'state': 'revised',
 									})
+			draft_wo_id = wo_obj.search(cr,uid,[('offer_no','=',entry.name),('state','=','draft')])
+			if draft_wo_id:
+				del_sql = """ delete from kg_work_order where id = %s """ %(draft_wo_id[0])
+				cr.execute(del_sql)
 			#~ if entry.wo_flag == True and entry.is_zero_offer == True:
 				#~ revision = entry.revision + 1
 				#~ vals = {
