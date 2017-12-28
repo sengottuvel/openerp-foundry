@@ -96,8 +96,8 @@
 					<field name="ms_type" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id"/>
-					<field name="pattern_id"/>
-					<field name="pattern_name"/>
+					<field name="item_name"/>
+					<field name="item_code"/>
 					<field name="moc_id"/>
 					<field name="location"/>
 					<field name="fettling_qty" string="Fettling completed Qty" sum="Total Fettling Qty"/>
@@ -346,8 +346,8 @@
 					<field name="flag_planning" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id"/>
-					<field name="pattern_id"/>
-					<field name="pattern_name"/>
+					<field name="item_name"/>
+					<field name="item_code"/>
 					<field name="moc_id"/>
 					<field name="location"/>
 					<field name="fettling_qty" string="Fettling completed Qty" sum="Total Fettling Qty"/>
@@ -376,6 +376,7 @@
 					<separator/>
 					<group expand="0" string="Group By...">
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+						<filter string="MS Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'ms_state'}"/>
 						<filter string="Item Type" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'ms_type'}"/>
 						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
 						<filter string="Order No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
@@ -397,8 +398,7 @@
 		<field name="view_mode">tree</field>
 		<field name="context">{}</field>
 		<field name="view_id" ref="t_tree_v_ms_schedule_list_list"/>
-		<field name="search_view_id" ref="t_search_v_ms_schedule_list_list"/>
-		<field name="domain">[('state','=','accept'),('ms_plan_rem_qty','>', 0)]</field>
+		<field name="search_view_id" ref="t_search_v_ms_schedule_list_list"/>		
 	</record>
 	
 	<!--MS Schedule List Menu Action Start-->
