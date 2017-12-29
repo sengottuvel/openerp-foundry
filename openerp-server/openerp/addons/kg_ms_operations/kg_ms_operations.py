@@ -6,8 +6,6 @@ from datetime import date
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
 
-dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
-
 ORDER_PRIORITY = [
    ('1','MS NC'),
    ('2','Break down'),
@@ -20,7 +18,6 @@ ORDER_PRIORITY = [
   
 ]
 
-
 ORDER_CATEGORY = [
    ('pump','Pump'),
    ('spare','Spare'),
@@ -29,7 +26,6 @@ ORDER_CATEGORY = [
    ('project','Project'),
    ('access','Accessories')
 ]
-
 
 class kg_ms_operations(osv.osv):
 
@@ -50,18 +46,12 @@ class kg_ms_operations(osv.osv):
 		'ms_id': fields.many2one('kg.machineshop','MS Id'),
 		'production_id': fields.related('ms_id','production_id', type='many2one', relation='kg.production', string='Production No.', store=True, readonly=True),
 		'ms_plan_id': fields.many2one('kg.ms.daily.planning','Planning Id'),
-		'ms_plan_line_id': fields.many2one('ch.ms.daily.planning.details','Planning Line Id'),
-		#~ 'position_id': fields.related('ms_plan_line_id','position_id', type='many2one', relation='kg.position.number', string='Position No.', store=True, readonly=True),
-		#~ 'order_id': fields.related('ms_plan_line_id','order_id', type='many2one', relation='kg.work.order', string='Work Order', store=True, readonly=True),
-		#~ 'order_line_id': fields.related('ms_plan_line_id','order_line_id', type='many2one', relation='ch.work.order.details', string='Order Line', store=True, readonly=True),
-		
+		'ms_plan_line_id': fields.many2one('ch.ms.daily.planning.details','Planning Line Id'),		
 		'order_id': fields.many2one('kg.work.order','Work Order',readonly=True),
 		'order_line_id': fields.many2one('ch.work.order.details','Order Line',readonly=True),
-		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
-		
+		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),		
 		'order_category': fields.selection(ORDER_CATEGORY,'Category',readonly=True),
-		'order_priority': fields.selection(ORDER_PRIORITY,'Priority',readonly=True),
-		
+		'order_priority': fields.selection(ORDER_PRIORITY,'Priority',readonly=True),		
 		'position_id': fields.many2one('kg.position.number','Position No.', readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', readonly=True),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',readonly=True),
@@ -71,19 +61,14 @@ class kg_ms_operations(osv.osv):
 		'item_name': fields.char('Item Name', readonly=True),
 		'moc_id': fields.many2one('kg.moc.master', 'MOC', readonly=True),
 		'ms_type': fields.selection([('foundry_item','Foundry Item'),('ms_item','MS Item')], 'Item Type', store=True, readonly=True),
-
-		
 		'inhouse_qty': fields.integer('In-house Qty'),
 		'parent_id': fields.integer('Parent Id'),
 		'last_operation_check_id': fields.integer('Last Operation Check Id'),
 		'state': fields.selection([('active','Active'),('complete','Complete'),('reject','Reject')],'Status'),
-		'oth_spec': fields.related('ms_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),
-		
+		'oth_spec': fields.related('ms_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),		
 		'flag_allocated': fields.boolean('Allocated from stock'),
 		'stock_inward_id': fields.many2one('ch.stock.inward.details','Inward No.', readonly=True),
-		
-		
-		
+
 		### Operation 1 ###
 		'op1_stage_id': fields.many2one('kg.stage.master','Stage'),
 		'op1_shift_id': fields.many2one('kg.shift.master','Shift'),
@@ -99,6 +84,7 @@ class kg_ms_operations(osv.osv):
 		'op1_idle_time': fields.float('Idle Time'),
 		'op1_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op1_idle_reason': fields.char('Reason for Idle'),
+		'op1_reject_remark': fields.char('Reject Remarks'),
 		'op1_comp_wgt': fields.float('Component weight'),
 		'op1_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op1_cost_incurred': fields.float('Cost Incurred'),
@@ -131,6 +117,7 @@ class kg_ms_operations(osv.osv):
 		'op2_idle_time': fields.float('Idle Time'),
 		'op2_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op2_idle_reason': fields.char('Reason for Idle'),
+		'op2_reject_remark': fields.char('Reject Remarks'),
 		'op2_comp_wgt': fields.float('Component weight'),
 		'op2_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op2_cost_incurred': fields.float('Cost Incurred'),
@@ -162,6 +149,7 @@ class kg_ms_operations(osv.osv):
 		'op3_idle_time': fields.float('Idle Time'),
 		'op3_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op3_idle_reason': fields.char('Reason for Idle'),
+		'op3_reject_remark': fields.char('Reject Remarks'),
 		'op3_comp_wgt': fields.float('Component weight'),
 		'op3_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op3_cost_incurred': fields.float('Cost Incurred'),
@@ -193,6 +181,7 @@ class kg_ms_operations(osv.osv):
 		'op4_idle_time': fields.float('Idle Time'),
 		'op4_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op4_idle_reason': fields.char('Reason for Idle'),
+		'op4_reject_remark': fields.char('Reject Remarks'),
 		'op4_comp_wgt': fields.float('Component weight'),
 		'op4_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op4_cost_incurred': fields.float('Cost Incurred'),
@@ -224,6 +213,7 @@ class kg_ms_operations(osv.osv):
 		'op5_idle_time': fields.float('Idle Time'),
 		'op5_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op5_idle_reason': fields.char('Reason for Idle'),
+		'op5_reject_remark': fields.char('Reject Remarks'),
 		'op5_comp_wgt': fields.float('Component weight'),
 		'op5_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op5_cost_incurred': fields.float('Cost Incurred'),
@@ -255,6 +245,7 @@ class kg_ms_operations(osv.osv):
 		'op6_idle_time': fields.float('Idle Time'),
 		'op6_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op6_idle_reason': fields.char('Reason for Idle'),
+		'op6_reject_remark': fields.char('Reject Remarks'),
 		'op6_comp_wgt': fields.float('Component weight'),
 		'op6_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op6_cost_incurred': fields.float('Cost Incurred'),
@@ -286,6 +277,7 @@ class kg_ms_operations(osv.osv):
 		'op7_idle_time': fields.float('Idle Time'),
 		'op7_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op7_idle_reason': fields.char('Reason for Idle'),
+		'op7_reject_remark': fields.char('Reject Remarks'),
 		'op7_comp_wgt': fields.float('Component weight'),
 		'op7_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op7_cost_incurred': fields.float('Cost Incurred'),
@@ -317,6 +309,7 @@ class kg_ms_operations(osv.osv):
 		'op8_idle_time': fields.float('Idle Time'),
 		'op8_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op8_idle_reason': fields.char('Reason for Idle'),
+		'op8_reject_remark': fields.char('Reject Remarks'),
 		'op8_comp_wgt': fields.float('Component weight'),
 		'op8_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op8_cost_incurred': fields.float('Cost Incurred'),
@@ -348,6 +341,7 @@ class kg_ms_operations(osv.osv):
 		'op9_idle_time': fields.float('Idle Time'),
 		'op9_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op9_idle_reason': fields.char('Reason for Idle'),
+		'op9_reject_remark': fields.char('Reject Remarks'),
 		'op9_comp_wgt': fields.float('Component weight'),
 		'op9_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op9_cost_incurred': fields.float('Cost Incurred'),
@@ -379,6 +373,7 @@ class kg_ms_operations(osv.osv):
 		'op10_idle_time': fields.float('Idle Time'),
 		'op10_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op10_idle_reason': fields.char('Reason for Idle'),
+		'op10_reject_remark': fields.char('Reject Remarks'),
 		'op10_comp_wgt': fields.float('Component weight'),
 		'op10_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op10_cost_incurred': fields.float('Cost Incurred'),
@@ -410,6 +405,7 @@ class kg_ms_operations(osv.osv):
 		'op11_idle_time': fields.float('Idle Time'),
 		'op11_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op11_idle_reason': fields.char('Reason for Idle'),
+		'op11_reject_remark': fields.char('Reject Remarks'),
 		'op11_comp_wgt': fields.float('Component weight'),
 		'op11_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op11_cost_incurred': fields.float('Cost Incurred'),
@@ -441,6 +437,7 @@ class kg_ms_operations(osv.osv):
 		'op12_idle_time': fields.float('Idle Time'),
 		'op12_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op12_idle_reason': fields.char('Reason for Idle'),
+		'op12_reject_remark': fields.char('Reject Remarks'),
 		'op12_comp_wgt': fields.float('Component weight'),
 		'op12_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op12_cost_incurred': fields.float('Cost Incurred'),
@@ -468,16 +465,15 @@ class kg_ms_operations(osv.osv):
 		
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
-		
-		
+
 	}
 	
 	_defaults = {
 	
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_schedule', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.ms.operations', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		### Operation 1 ###
 		'op1_sc_status':'inhouse',
@@ -610,7 +606,6 @@ class kg_ms_operations(osv.osv):
 		### Checking Item is in MS Store ###
 		cr.execute("""select id from kg_ms_stores where order_line_id = %s and ms_type in ('foundry_item','ms_item') """%(entry_rec.order_line_id.id))
 		store_id = cr.fetchone();
-		print "store_id",store_id
 		if store_id:
 			if entry_rec.ms_type == 'foundry_item':
 				### Check for foundry Item ##
@@ -637,7 +632,6 @@ class kg_ms_operations(osv.osv):
 					}
 					self.pool.get('kg.ms.stores').write(cr, uid, foundry_store_id[0],ms_store_vals)
 			if entry_rec.ms_type == 'ms_item':
-				print "entry_rec.item_code",entry_rec.item_code,type(entry_rec.item_code),"'"+entry_rec.item_code+"'"
 				### Check for MS Item ##
 				cr.execute(""" select id from kg_ms_stores where  
 				item_code = %s and moc_id = %s and ms_type = 'ms_item' and accept_state = 'pending' 
@@ -809,74 +803,79 @@ class kg_ms_operations(osv.osv):
 		value = {'op1_cost_incurred': cost_incurred}
 		return {'value': value}
 		
+	def all_operations_validations (self,cr,uid,start_date,end_date,start_time,end_time,actual_val,context=None):
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')
+		start_date = str(start_date)
+		start_date = datetime.strptime(start_date, '%Y-%m-%d')
+		end_date = str(end_date)
+		end_date = datetime.strptime(end_date, '%Y-%m-%d')
+		
+		if start_date > today and end_date > today:
+			raise osv.except_osv(_('Warning!'),
+					_('Start and End date should be less than or equal to current date !!'))
+		if start_date > end_date :
+			raise osv.except_osv(_('Warning!'),
+					_('Start date should be greater than End Date !!'))
+		
+		if start_time <= 0 or end_time <= 0:			
+			raise osv.except_osv(_('Warning!'),
+					_('Start and End time should not allow zero and negative values !!'))
+						
+		if start_time > 24 or end_time > 24:
+			raise osv.except_osv(_('Warning!'),
+					_('Start and End time should not exceed 24 hrs !!'))
+					
+		if start_time > end_time:
+			raise osv.except_osv(_('Warning!'),
+					_('Start time should be greater than End time !!'))
+	
+		if actual_val < 0:
+			raise osv.except_osv(_('Warning!'),
+					_('System not allow to save negative. Check the actual value !!'))
+		
 	def operation1_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
 		
-		if entry_rec.ms_id.state != 'accept':
+		if entry_rec.ms_id.flag_trimming_dia == True:
 			raise osv.except_osv(_('Warning!'),
-				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
+		
+		print"entry_rec.ms_id.state",entry_rec.ms_id.state
+		if entry_rec.ms_id.state is not None:
+			if entry_rec.ms_id.state != 'accept':
+				raise osv.except_osv(_('Warning!'),
+					_('Still (%s) item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		
 		if entry_rec.op1_state == 'pending':
 			if entry_rec.op1_flag_sc != True:
 			
 				for dim_item in entry_rec.op1_line_ids:
+					#~ self.all_operations_validations(cr,uid,entry_rec.op1_start_date,entry_rec.op1_end_date,entry_rec.op1_start_time,
+					#~ entry_rec.op1_end_time,dim_item.actual_val)
 					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op1_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op1_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date !!'))
-					
-					if entry_rec.op1_start_time > 0 and entry_rec.op1_end_time > 0:
-						if entry_rec.op1_start_time == entry_rec.op1_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op1_start_time > 24 or entry_rec.op1_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-								
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op1_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
 						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								print ""
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								print ""
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
-								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
 					and header_id = %s and is_last_operation = 't' """ %(entry_rec.op1_id.id,entry_rec.op1_stage_id.id,entry_rec.position_id.id))
 				last_operation_id = cr.fetchone()
-				print "last_operation_id------------------>>>",last_operation_id
 				pending_operation_id = []
 				if last_operation_id:
 					cr.execute(""" select id from kg_ms_operations
@@ -1045,7 +1044,7 @@ class kg_ms_operations(osv.osv):
 						if pending_operation_id[0] > 0:
 							if entry_rec.op1_process_result != 'reject':
 								raise osv.except_osv(_('Warning!'),
-										_('This is last operation. Previous operations yet to be complete. !!'))
+										_('This is last operation. Previous operations yet to be completed. !!'))
 									
 				### Cost Incurred Calculation ###
 				cr.execute(""" select in_house_cost from ch_kg_position_number 
@@ -1064,8 +1063,6 @@ class kg_ms_operations(osv.osv):
 					
 				### Operation Completion ###
 				if last_operation_id:
-					print "pending_operation_id",pending_operation_id
-					print "last_operation_id[0]",last_operation_id[0]
 					if pending_operation_id == None and last_operation_id[0] > 0:
 						cr.execute(""" select id from kg_ms_operations
 
@@ -1229,7 +1226,6 @@ class kg_ms_operations(osv.osv):
 							entry_rec.position_id.id,entry_rec.id,
 							))
 						pending_operation = cr.fetchone()
-						print "pending_operation",pending_operation
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op1_process_result == 'accept':
@@ -1304,7 +1300,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id,
@@ -1466,6 +1461,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op1_contractor_id.id,
 							'operation_id': entry_rec.op1_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -1514,63 +1518,37 @@ class kg_ms_operations(osv.osv):
 	def operation2_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
-		if entry_rec.ms_id.state != 'accept':
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
 			raise osv.except_osv(_('Warning!'),
-				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
+		if entry_rec.ms_id.state is not None:
+			if entry_rec.ms_id.state != 'accept':
+				raise osv.except_osv(_('Warning!'),
+					_('Still (%s) item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op2_state == 'pending':
 			if entry_rec.op2_flag_sc != True:
 			
 				for dim_item in entry_rec.op2_line_ids:
-					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op2_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op2_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date !!'))
-					
-					if entry_rec.op2_start_time > 0 and entry_rec.op2_end_time > 0:			
-						if entry_rec.op2_start_time == entry_rec.op2_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op2_start_time > 24 or entry_rec.op2_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op2_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
+					self.all_operations_validations(cr,uid,entry_rec.op2_start_date,entry_rec.op2_end_date,
+					entry_rec.op2_start_time,entry_rec.op2_end_time,dim_item.actual_val)
+				
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
+								
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
 						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								print ""
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								print ""
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
-				
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -1745,7 +1723,7 @@ class kg_ms_operations(osv.osv):
 						if pending_operation_id[0] > 0:
 							if entry_rec.op2_process_result != 'reject':
 								raise osv.except_osv(_('Warning!'),
-										_('This is last operation. Previous operations yet to be complete. !!'))
+										_('This is last operation. Previous operations yet to be completed. !!'))
 									
 				### Cost Incurred Calculation ###
 				cr.execute(""" select in_house_cost from ch_kg_position_number 
@@ -2000,7 +1978,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -2156,6 +2133,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op2_contractor_id.id,
 							'operation_id': entry_rec.op2_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -2201,62 +2187,31 @@ class kg_ms_operations(osv.osv):
 	def operation3_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.ms_id.state != 'accept':
 			raise osv.except_osv(_('Warning!'),
-				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
+				_('Still (%s) item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op3_state == 'pending':
 			if entry_rec.op3_flag_sc != True:
 			
 				for dim_item in entry_rec.op3_line_ids:
+					self.all_operations_validations(cr,uid,entry_rec.op3_start_date,entry_rec.op3_end_date,
+					entry_rec.op3_start_time,entry_rec.op3_end_time,dim_item.actual_val)
 					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op3_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op3_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date!!'))
-					
-					
-					if entry_rec.op3_start_time > 0 and entry_rec.op3_end_time > 0:				
-						if entry_rec.op3_start_time == entry_rec.op3_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op3_start_time > 24 or entry_rec.op3_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op3_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
-						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
+						if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+							raise osv.except_osv(_('Warning!'),
+									_('Actual value should lie in the range of Minimum and Maximum value !!'))
+						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -2431,7 +2386,7 @@ class kg_ms_operations(osv.osv):
 						if pending_operation_id[0] > 0:
 							if entry_rec.op3_process_result != 'reject':
 								raise osv.except_osv(_('Warning!'),
-										_('This is last operation. Previous operations yet to be complete. !!'))
+										_('This is last operation. Previous operations yet to be completed. !!'))
 									
 				### Cost Incurred Calculation ###
 				cr.execute(""" select in_house_cost from ch_kg_position_number 
@@ -2633,7 +2588,6 @@ class kg_ms_operations(osv.osv):
 										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'sent_to_store'})
 									
 							else:
-								print "entry_reccccccccccccccccc",entry_rec.stock_inward_id.id
 								if entry_rec.stock_inward_id.id > 0:
 									stock_obj = self.pool.get('ch.stock.inward.details')
 									### Updation in stock inward ###
@@ -2687,7 +2641,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -2844,6 +2797,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op3_contractor_id.id,
 							'operation_id': entry_rec.op3_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 				
@@ -2891,62 +2853,36 @@ class kg_ms_operations(osv.osv):
 	def operation4_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.ms_id.state != 'accept':
 			raise osv.except_osv(_('Warning!'),
-				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
+				_('Still (%s) item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op4_state == 'pending':
 			if entry_rec.op4_flag_sc != True:
 			
 				for dim_item in entry_rec.op4_line_ids:
+					self.all_operations_validations(cr,uid,entry_rec.op4_start_date,entry_rec.op4_end_date,
+					entry_rec.op4_start_time,entry_rec.op4_end_time,dim_item.actual_val)
 					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op4_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op4_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date!!'))
-					
-					
-					if entry_rec.op4_start_time > 0 and entry_rec.op4_end_time > 0:		
-						if entry_rec.op4_start_time == entry_rec.op4_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op4_start_time > 24 or entry_rec.op4_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op4_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
-						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
+						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -3121,7 +3057,7 @@ class kg_ms_operations(osv.osv):
 						if pending_operation_id[0] > 0:
 							if entry_rec.op4_process_result != 'reject':
 								raise osv.except_osv(_('Warning!'),
-										_('This is last operation. Previous operations yet to be complete. !!'))
+										_('This is last operation. Previous operations yet to be completed. !!'))
 									
 				### Cost Incurred Calculation ###
 				cr.execute(""" select in_house_cost from ch_kg_position_number 
@@ -3376,7 +3312,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -3534,6 +3469,16 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op4_contractor_id.id,
 							'operation_id': entry_rec.op4_id.id,
+							
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 				
@@ -3580,61 +3525,37 @@ class kg_ms_operations(osv.osv):
 	def operation5_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
+		
 		if entry_rec.ms_id.state != 'accept':
 			raise osv.except_osv(_('Warning!'),
-				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
+				_('Still (%s) item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op5_state == 'pending':
 			if entry_rec.op5_flag_sc != True:
 			
 				for dim_item in entry_rec.op5_line_ids:
+					self.all_operations_validations(cr,uid,entry_rec.op5_start_date,entry_rec.op5_end_date,
+					entry_rec.op5_start_time,entry_rec.op5_end_time,dim_item.actual_val)
 					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op5_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op5_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date!!'))
-					
-					if entry_rec.op5_start_time > 0 and entry_rec.op5_end_time > 0:	
-						if entry_rec.op5_start_time == entry_rec.op5_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op5_start_time > 24 or entry_rec.op5_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op5_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
-						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
+						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -3809,7 +3730,7 @@ class kg_ms_operations(osv.osv):
 						if pending_operation_id[0] > 0:
 							if entry_rec.op5_process_result != 'reject':
 								raise osv.except_osv(_('Warning!'),
-										_('This is last operation. Previous operations yet to be complete. !!'))
+										_('This is last operation. Previous operations yet to be completed. !!'))
 									
 				### Cost Incurred Calculation ###
 				cr.execute(""" select in_house_cost from ch_kg_position_number 
@@ -4064,7 +3985,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -4222,6 +4142,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op5_contractor_id.id,
 							'operation_id': entry_rec.op5_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -4267,61 +4196,37 @@ class kg_ms_operations(osv.osv):
 	def operation6_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
+		
 		if entry_rec.ms_id.state != 'accept':
 			raise osv.except_osv(_('Warning!'),
-				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
+				_('Still (%s) item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op6_state == 'pending':
 			if entry_rec.op6_flag_sc != True:
 			
 				for dim_item in entry_rec.op6_line_ids:
+					self.all_operations_validations(cr,uid,entry_rec.op6_start_date,entry_rec.op6_end_date,
+					entry_rec.op6_start_time,entry_rec.op6_end_time,dim_item.actual_val)
 					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op6_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op6_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date!!'))
-					
-					if entry_rec.op6_start_time > 0 and entry_rec.op6_end_time > 0:		
-						if entry_rec.op6_start_time == entry_rec.op6_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op6_start_time > 24 or entry_rec.op6_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op6_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
-						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
+						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -4751,7 +4656,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -4909,6 +4813,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op6_contractor_id.id,
 							'operation_id': entry_rec.op6_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -4954,6 +4867,10 @@ class kg_ms_operations(osv.osv):
 	def operation7_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.ms_id.state != 'accept':
 			raise osv.except_osv(_('Warning!'),
 				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
@@ -4961,54 +4878,25 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op7_flag_sc != True:
 			
 				for dim_item in entry_rec.op7_line_ids:
+					self.all_operations_validations(cr,uid,entry_rec.op7_start_date,entry_rec.op7_end_date,
+					entry_rec.op7_start_time,entry_rec.op7_end_time,dim_item.actual_val)
 					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op7_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op7_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date!!'))
-					
-					if entry_rec.op7_start_time > 0 and entry_rec.op7_end_time > 0:			
-						if entry_rec.op7_start_time == entry_rec.op7_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op7_start_time > 24 or entry_rec.op7_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op7_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
-						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
+						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -5183,7 +5071,7 @@ class kg_ms_operations(osv.osv):
 						if pending_operation_id[0] > 0:
 							if entry_rec.op7_process_result != 'reject':
 								raise osv.except_osv(_('Warning!'),
-										_('This is last operation. Previous operations yet to be complete. !!'))
+										_('This is last operation. Previous operations yet to be completed. !!'))
 									
 				### Cost Incurred Calculation ###
 				cr.execute(""" select in_house_cost from ch_kg_position_number 
@@ -5438,7 +5326,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -5596,6 +5483,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op7_contractor_id.id,
 							'operation_id': entry_rec.op7_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -5641,61 +5537,36 @@ class kg_ms_operations(osv.osv):
 	def operation8_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.ms_id.state != 'accept':
 			raise osv.except_osv(_('Warning!'),
-				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
+				_('Still (%s) item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op8_state == 'pending':
 			if entry_rec.op8_flag_sc != True:
 			
 				for dim_item in entry_rec.op8_line_ids:
-					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op8_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op8_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date!!'))
-					
-					if entry_rec.op8_start_time > 0 and entry_rec.op8_end_time > 0:				
-						if entry_rec.op8_start_time == entry_rec.op8_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op8_start_time > 24 or entry_rec.op8_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op8_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
+					self.all_operations_validations(cr,uid,entry_rec.op8_start_date,entry_rec.op8_end_date,
+					entry_rec.op8_start_time,entry_rec.op8_end_time,dim_item.actual_val)
+						
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
-						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
+						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -5870,7 +5741,7 @@ class kg_ms_operations(osv.osv):
 						if pending_operation_id[0] > 0:
 							if entry_rec.op8_process_result != 'reject':
 								raise osv.except_osv(_('Warning!'),
-										_('This is last operation. Previous operations yet to be complete. !!'))
+										_('This is last operation. Previous operations yet to be completed. !!'))
 									
 				### Cost Incurred Calculation ###
 				cr.execute(""" select in_house_cost from ch_kg_position_number 
@@ -6125,7 +5996,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -6283,6 +6153,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op8_contractor_id.id,
 							'operation_id': entry_rec.op8_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -6328,6 +6207,10 @@ class kg_ms_operations(osv.osv):
 	def operation9_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.ms_id.state != 'accept':
 			raise osv.except_osv(_('Warning!'),
 				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
@@ -6335,54 +6218,25 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op9_flag_sc != True:
 			
 				for dim_item in entry_rec.op9_line_ids:
+					self.all_operations_validations(cr,uid,entry_rec.op9_start_date,entry_rec.op9_end_date,
+					entry_rec.op9_start_time,entry_rec.op9_end_time,dim_item.actual_val)
 					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op9_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op9_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date!!'))
-					
-					if entry_rec.op9_start_time > 0 and entry_rec.op9_end_time > 0:				
-						if entry_rec.op9_start_time == entry_rec.op9_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op9_start_time > 24 or entry_rec.op9_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op9_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
-						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
+						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -6815,7 +6669,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -6973,6 +6826,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op9_contractor_id.id,
 							'operation_id': entry_rec.op9_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -7018,6 +6880,10 @@ class kg_ms_operations(osv.osv):
 	def operation10_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.ms_id.state != 'accept':
 			raise osv.except_osv(_('Warning!'),
 				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
@@ -7025,56 +6891,25 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op10_flag_sc != True:
 			
 				for dim_item in entry_rec.op10_line_ids:
+					self.all_operations_validations(cr,uid,entry_rec.op10_start_date,entry_rec.op10_end_date,
+					entry_rec.op10_start_time,entry_rec.op10_end_time,dim_item.actual_val)
 					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op10_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op10_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date!!'))
-					
-					
-					if entry_rec.op10_start_time > 0 and entry_rec.op10_end_time > 0:
-								
-						if entry_rec.op10_start_time == entry_rec.op10_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op10_start_time > 24 or entry_rec.op10_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op10_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
-						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
+						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -7249,7 +7084,7 @@ class kg_ms_operations(osv.osv):
 						if pending_operation_id[0] > 0:
 							if entry_rec.op10_process_result != 'reject':
 								raise osv.except_osv(_('Warning!'),
-										_('This is last operation. Previous operations yet to be complete. !!'))
+										_('This is last operation. Previous operations yet to be completed. !!'))
 									
 				### Cost Incurred Calculation ###
 				cr.execute(""" select in_house_cost from ch_kg_position_number 
@@ -7505,7 +7340,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -7663,6 +7497,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op10_contractor_id.id,
 							'operation_id': entry_rec.op10_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -7708,61 +7551,36 @@ class kg_ms_operations(osv.osv):
 	def operation11_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.ms_id.state != 'accept':
 			raise osv.except_osv(_('Warning!'),
-				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
+				_('Still (%s) item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op11_state == 'pending':
 			if entry_rec.op11_flag_sc != True:
 			
 				for dim_item in entry_rec.op11_line_ids:
+					self.all_operations_validations(cr,uid,entry_rec.op11_start_date,entry_rec.op11_end_date,
+					entry_rec.op11_start_time,entry_rec.op11_end_time,dim_item.actual_val)
 					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op11_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op11_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date!!'))
-					
-					if entry_rec.op11_start_time > 0 and entry_rec.op11_end_time > 0:			
-						if entry_rec.op11_start_time == entry_rec.op11_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op11_start_time > 24 or entry_rec.op11_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op11_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
 						#### Min and Max Tolerance Checking ####
 						
-						if dim_item.pos_dimension_id != None:
-						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
+						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -7937,7 +7755,7 @@ class kg_ms_operations(osv.osv):
 						if pending_operation_id[0] > 0:
 							if entry_rec.op11_process_result != 'reject':
 								raise osv.except_osv(_('Warning!'),
-										_('This is last operation. Previous operations yet to be complete. !!'))
+										_('This is last operation. Previous operations yet to be completed. !!'))
 									
 				### Cost Incurred Calculation ###
 				cr.execute(""" select in_house_cost from ch_kg_position_number 
@@ -8193,7 +8011,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -8351,6 +8168,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op11_contractor_id.id,
 							'operation_id': entry_rec.op11_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -8396,62 +8222,36 @@ class kg_ms_operations(osv.osv):
 	def operation12_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_obj = self.pool.get('kg.machineshop')
+		
+		if entry_rec.ms_id.flag_trimming_dia == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Still (%s) item has Trimming dia pending, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.ms_id.state != 'accept':
 			raise osv.except_osv(_('Warning!'),
-				_('Still %s item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
+				_('Still (%s) item has not yet inwarded, Kindly check and update !!')%(entry_rec.item_code))
 		if entry_rec.op12_state == 'pending':
 			if entry_rec.op12_flag_sc != True:
 			
 				for dim_item in entry_rec.op12_line_ids:
+					self.all_operations_validations(cr,uid,entry_rec.op12_start_date,entry_rec.op12_end_date,
+					entry_rec.op12_start_time,entry_rec.op12_end_time,dim_item.actual_val)
 					
-					today = date.today()
-					today = str(today)
-					today = datetime.strptime(today, '%Y-%m-%d')
-					start_date = entry_rec.op12_start_date
-					start_date = str(start_date)
-					start_date = datetime.strptime(start_date, '%Y-%m-%d')
-					end_date = entry_rec.op12_end_date
-					end_date = str(end_date)
-					end_date = datetime.strptime(end_date, '%Y-%m-%d')
-					if start_date > today or end_date > today:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End date should be less than or equal to current date!!'))
-					
-					
-					if entry_rec.op12_start_time > 0 and entry_rec.op12_end_time > 0:			
-						if entry_rec.op12_start_time == entry_rec.op12_end_time:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not be equal !!'))
-									
-						if entry_rec.op12_start_time > 24 or entry_rec.op12_end_time > 24:
-							raise osv.except_osv(_('Warning!'),
-									_('Start and End time should not exceed 24 hrs !!'))
-					
-					if dim_item.actual_val < 0:
-						raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative. Check the actual value !!'))
-					
-					#~ if entry_rec.op12_process_result != 'reject':			
-						#~ 
-						#~ if dim_item.actual_val == 0:
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('System not allow to save zero values. Check the actual value !!'))
-									
 						#### Min and Max Tolerance Checking ####
-						
-						if dim_item.pos_dimension_id != None:
-						
-							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-									
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should greater or equal to Minimum value !!'))
-										
-							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lesser or equal to Maximum value !!'))
+					
+					if dim_item.pos_dimension_id != None:
+					
+						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
+						if dim_item.actual_val != 0.00:	
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+							else:
+								pass
+						else:
+							pass
+						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
 					where operation_id = %s and stage_id = %s
@@ -8626,7 +8426,7 @@ class kg_ms_operations(osv.osv):
 						if pending_operation_id[0] > 0:
 							if entry_rec.op12_process_result != 'reject':
 								raise osv.except_osv(_('Warning!'),
-										_('This is last operation. Previous operations yet to be complete. !!'))
+										_('This is last operation. Previous operations yet to be completed. !!'))
 									
 				### Cost Incurred Calculation ###
 				cr.execute(""" select in_house_cost from ch_kg_position_number 
@@ -8873,7 +8673,6 @@ class kg_ms_operations(osv.osv):
 									'qty': indent_item.qty * entry_rec.inhouse_qty,
 									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-									#~ 'cutting_qty':ms_raw_rec.temp_qty,
 									'ms_bot_id':entry_rec.ms_id.ms_id.id,
 									'fns_item_name':entry_rec.item_name,
 									'position_id': entry_rec.position_id.id
@@ -9031,6 +8830,15 @@ class kg_ms_operations(osv.osv):
 							'ms_op_id': entry_rec.id,
 							'contractor_id': entry_rec.op12_contractor_id.id,
 							'operation_id': entry_rec.op12_id.id,
+							
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'moc_id': entry_rec.moc_id.id,
+							'position_id': entry_rec.position_id.id,
+							'pattern_id': entry_rec.pattern_id.id,						
+							'item_code': entry_rec.item_code,
+							'item_name': entry_rec.item_name,
+							'order_no': entry_rec.order_no,
 						}
 						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -9042,34 +8850,11 @@ class kg_ms_operations(osv.osv):
 				
 		return True
 		
-	
-	
-	def _future_entry_date_check(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		today = date.today()
-		today = str(today)
-		today = datetime.strptime(today, '%Y-%m-%d')
-		entry_date = rec.entry_date
-		entry_date = str(entry_date)
-		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
-		if entry_date > today:
-			return False
-		return True
-	
-	_constraints = [		
-			  
-		
-		#~ (_future_entry_date_check, 'System not allow to save with future date. !!',['']),   
-		
-	   ]
-	   
-		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []
 		for rec in self.browse(cr,uid,ids):
 			if rec.state != 'draft':			
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
+				raise osv.except_osv(_('Delete access denied !'), _('Unable to delete. Draft entry only you can delete !!'))
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
@@ -9104,4 +8889,3 @@ class ch_ms_dimension_details(osv.osv):
 	}
 	
 ch_ms_dimension_details()
-

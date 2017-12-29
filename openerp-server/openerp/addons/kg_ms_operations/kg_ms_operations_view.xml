@@ -39,9 +39,7 @@
 							<field name="op1_id" invisible="1" />
 							<field name="op1_total_time" on_change="onchange_operation1_cost_incurred(op1_id,op1_stage_id,position_id,op1_total_time)" widget="float_time" readonly="1"/>
 							<field name="op1_idle_reason" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
-<!--
 							<field name="op1_reject_remark" attrs="{'invisible': [('op1_process_result','in',('accept','rework'))] ,'required': [('op1_process_result','=','reject')] ,'readonly': [('op1_button_status','=','invisible')]}"/>
--->
 							<field name="op1_process_result" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
 							
 							<field name="op1_sc_status" invisible="1" />
@@ -246,9 +244,7 @@
 							<field name="op2_id" invisible="1" />
 							<field name="op2_total_time" on_change="onchange_operation2_cost_incurred(op2_id,op2_stage_id,position_id,op2_total_time)" widget="float_time" readonly="1"/>
 							<field name="op2_idle_reason"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
-<!--
 							<field name="op2_reject_remark"  attrs="{'invisible': [('op2_process_result','in',('accept','rework'))] ,'required': [('op2_process_result','=','reject')] ,'readonly': [('op2_button_status','=','invisible')]}"/>
--->
 							<field name="op2_process_result"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
 							<field name="op2_sc_status" invisible="1" />
 							<field name="op2_button_status" invisible="1" />
@@ -452,9 +448,7 @@
 							<field name="op3_id" invisible="1" />
 							<field name="op3_total_time" on_change="onchange_operation3_cost_incurred(op3_id,op3_stage_id,position_id,op3_total_time)" widget="float_time" readonly="1"/>
 							<field name="op3_idle_reason"  attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
-<!--
 							<field name="op3_reject_remark"  attrs="{'invisible': [('op3_process_result','in',('accept','rework'))] ,'required': [('op3_process_result','=','reject')] ,'readonly': [('op3_button_status','=','invisible')]}"/>
--->
 							<field name="op3_process_result"  attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
 							<field name="op3_sc_status" invisible="1" />
 							<field name="op3_button_status" invisible="1" />
@@ -660,9 +654,7 @@
 							<field name="op4_id" invisible="1" />
 							<field name="op4_total_time" on_change="onchange_operation4_cost_incurred(op4_id,op4_stage_id,position_id,op4_total_time)" widget="float_time" readonly="1"/>
 							<field name="op4_idle_reason"  attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
-<!--
 							<field name="op4_reject_remark"  attrs="{'invisible': [('op4_process_result','in',('accept','rework'))] ,'required': [('op4_process_result','=','reject')] ,'readonly': [('op4_button_status','=','invisible')]}"/>
--->
 							<field name="op4_process_result"  attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
 							<field name="op4_sc_status" invisible="1" />
 							<field name="op4_button_status" invisible="1" />
@@ -868,9 +860,7 @@
 							<field name="op5_id" invisible="1" />
 							<field name="op5_total_time" on_change="onchange_operation5_cost_incurred(op5_id,op5_stage_id,position_id,op5_total_time)" widget="float_time" readonly="1"/>
 							<field name="op5_idle_reason"  attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
-<!--
 							<field name="op5_reject_remark"  attrs="{'invisible': [('op5_process_result','in',('accept','rework'))] ,'required': [('op5_process_result','=','reject')] ,'readonly': [('op5_button_status','=','invisible')]}"/>
--->
 							<field name="op5_process_result"  attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
 							<field name="op5_sc_status" invisible="1" />
 							<field name="op5_button_status" invisible="1" />
@@ -1076,9 +1066,7 @@
 							<field name="op6_id" invisible="1" />
 							<field name="op6_total_time" on_change="onchange_operation6_cost_incurred(op6_id,op6_stage_id,position_id,op6_total_time)" widget="float_time" readonly="1"/>
 							<field name="op6_idle_reason"  attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
-<!--
 							<field name="op6_reject_remark"  attrs="{'invisible': [('op6_process_result','in',('accept','rework'))] ,'required': [('op6_process_result','=','reject')] ,'readonly': [('op6_button_status','=','invisible')]}"/>
--->
 							<field name="op6_process_result"  attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
 							<field name="op6_sc_status" invisible="1" />
 							<field name="op6_button_status" invisible="1" />
@@ -1284,9 +1272,7 @@
 							<field name="op7_id" invisible="1" />
 							<field name="op7_total_time" on_change="onchange_operation7_cost_incurred(op7_id,op7_stage_id,position_id,op7_total_time)" widget="float_time" readonly="1"/>
 							<field name="op7_idle_reason"  attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
-<!--
 							<field name="op7_reject_remark"  attrs="{'invisible': [('op7_process_result','in',('accept','rework'))] ,'required': [('op7_process_result','=','reject')] ,'readonly': [('op7_button_status','=','invisible')]}"/>
--->
 							<field name="op7_process_result"  attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
 							<field name="op7_sc_status" invisible="1" />
 							<field name="op7_button_status" invisible="1" />
@@ -1492,9 +1478,7 @@
 							<field name="op8_id" invisible="1" />
 							<field name="op8_total_time" on_change="onchange_operation8_cost_incurred(op8_id,op8_stage_id,position_id,op8_total_time)" widget="float_time" readonly="1"/>
 							<field name="op8_idle_reason"  attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
-<!--
 							<field name="op8_reject_remark"  attrs="{'invisible': [('op8_process_result','in',('accept','rework'))] ,'required': [('op8_process_result','=','reject')] ,'readonly': [('op8_button_status','=','invisible')]}"/>
--->
 							<field name="op8_process_result"  attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
 							<field name="op8_sc_status" invisible="1" />
 							<field name="op8_button_status" invisible="1" />
@@ -1700,9 +1684,7 @@
 							<field name="op9_id" invisible="1" />
 							<field name="op9_total_time" on_change="onchange_operation9_cost_incurred(op9_id,op9_stage_id,position_id,op9_total_time)" widget="float_time" readonly="1"/>
 							<field name="op9_idle_reason"  attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
-<!--
 							<field name="op9_reject_remark"  attrs="{'invisible': [('op9_process_result','in',('accept','rework'))] ,'required': [('op9_process_result','=','reject')] ,'readonly': [('op9_button_status','=','invisible')]}"/>
--->
 							<field name="op9_process_result"  attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
 							<field name="op9_sc_status" invisible="1" />
 							<field name="op9_button_status" invisible="1" />
@@ -1908,9 +1890,7 @@
 							<field name="op10_id" invisible="1" />
 							<field name="op10_total_time" on_change="onchange_operation10_cost_incurred(op10_id,op10_stage_id,position_id,op10_total_time)" widget="float_time" readonly="1"/>
 							<field name="op10_idle_reason"  attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
-<!--
 							<field name="op10_reject_remark"  attrs="{'invisible': [('op10_process_result','in',('accept','rework'))] ,'required': [('op10_process_result','=','reject')] ,'readonly': [('op10_button_status','=','invisible')]}"/>
--->
 							<field name="op10_process_result"  attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
 							<field name="op10_sc_status" invisible="1" />
 							<field name="op10_button_status" invisible="1" />
@@ -2116,9 +2096,7 @@
 							<field name="op11_id" invisible="1" />
 							<field name="op11_total_time" on_change="onchange_operation11_cost_incurred(op11_id,op11_stage_id,position_id,op11_total_time)" widget="float_time" readonly="1"/>
 							<field name="op11_idle_reason"  attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
-<!--
 							<field name="op11_reject_remark"  attrs="{'invisible': [('op11_process_result','in',('accept','rework'))] ,'required': [('op11_process_result','=','reject')] ,'readonly': [('op11_button_status','=','invisible')]}"/>
--->
 							<field name="op11_process_result"  attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
 							<field name="op11_sc_status" invisible="1" />
 							<field name="op11_button_status" invisible="1" />
@@ -2324,9 +2302,7 @@
 							<field name="op12_id" invisible="1" />
 							<field name="op12_total_time" on_change="onchange_operation12_cost_incurred(op12_id,op12_stage_id,position_id,op12_total_time)" widget="float_time" readonly="1"/>
 							<field name="op12_idle_reason"  attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
-<!--
 							<field name="op12_reject_remark"  attrs="{'invisible': [('op12_process_result','in',('accept','rework'))] ,'required': [('op12_process_result','=','reject')] ,'readonly': [('op12_button_status','=','invisible')]}"/>
--->
 							<field name="op12_process_result"  attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
 							<field name="op12_sc_status" invisible="1" />
 							<field name="op12_button_status" invisible="1" />
