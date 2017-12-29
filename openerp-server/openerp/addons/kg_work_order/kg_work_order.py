@@ -119,6 +119,7 @@ class kg_work_order(osv.osv):
 		'flag_data_bank': fields.boolean('Is Data WO'),
 		'project_name':fields.char('Project Name'),
 		'stock_check': fields.selection([('yes','Yes'),('no','No')],'Stock Check'),
+		'reject_remarks': fields.text('Reject Remarks'),
 		
 		## WO Copy 
 		
@@ -999,6 +1000,21 @@ class kg_work_order(osv.osv):
 		elif delivery_date < today_date:
 			raise osv.except_osv(_('Warning!'),
 					_('Delivery Date should not be less than current date!!'))	
+	
+	def entry_reject(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])	
+		if entry.reject_remarks:
+			if entry.state=='mkt_approved':			
+				self.write(cr,uid,ids,{'state':'draft'})
+			if entry.state=='design_approved':			
+				self.write(cr,uid,ids,{'state':'mkt_approved'})
+			if entry.state=='design_check':			
+				self.write(cr,uid,ids,{'state':'design_approved'})			
+		else:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter the remarks in rejection remark field !!'))			
+		return True
+	
 	
 	def mkt_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])

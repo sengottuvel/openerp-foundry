@@ -18,6 +18,7 @@
 							attrs="{'invisible': ['|',('state','!=','design_approved'),('wo_spc_app_flag','=',False)]}"/>
 						<button name="entry_confirm" type="object" string="WFMD Approval" class="oe_highlight" confirm="Are you sure to proceed ?"
 							attrs="{'invisible': ['|',('state','!=','design_approved'),('wo_spc_app_flag','=',True)]}"/>
+						<button name="entry_reject" type="object" string="Reject" class="oe_highlight" attrs="{'invisible': [('state','in',('draft','confirmed'))]}"/>
 						<button name="wo_copy" type="object" string="WO Copy" class="oe_highlight" />
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
@@ -40,6 +41,7 @@
 							<field name="design_flag" invisible="1"/>
 							<field name="stock_check" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="flag_data_bank" readonly="1"/>
+							<field name="reject_remarks" string="Reject Remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 						</group>											
 						<group>
 							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
