@@ -27,7 +27,7 @@
 							<field name="name" attrs="{'readonly': [('state','in',['confirmed','cancel'])],'required': [('state','!=','draft')]}"/>
 							<field name="offer_no" readonly="1"/>
 							<field name="enquiry_no" readonly="1"/>
-							<field name="division_id"/>
+							<field name="division_id" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="drawing_approval" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="inspection" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" />
 							<field name="order_category" on_change="onchange_order_category_delivery_date(order_category,order_priority)" string="Purpose" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
@@ -239,6 +239,7 @@
 							<field name="mar_prime_cost" readonly="1" invisible="0"/>
 							<field name="wo_prime_cost" readonly="1"/>
 							<field name="flag_offer" invisible="1"/>
+							<field name="entry_mode" invisible="1"/>
 							<field name="schedule_status" invisible="1"/>
 							<field name="order_summary" readonly="1"/>
 							<field name="spl_remarks"/>
@@ -250,9 +251,10 @@
 						<group>
 							
 							<field name="flag_load_bom" on_change="onchange_bom_details(flag_load_bom,pump_model_id, qty,moc_construction_id,order_category,flag_standard,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,pump_model_type,flag_offer,flag_select_all)"
-								/>
+								attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 								
-							<field name="flag_select_all" on_change="onchange_bom_details(flag_load_bom,pump_model_id, qty,moc_construction_id,order_category,flag_standard,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,pump_model_type,flag_offer,flag_select_all)"/>
+							<field name="flag_select_all" on_change="onchange_bom_details(flag_load_bom,pump_model_id, qty,moc_construction_id,order_category,flag_standard,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,pump_model_type,flag_offer,flag_select_all)"
+									attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 						</group>
 						<group></group>
 					</group>
@@ -531,7 +533,7 @@
 										<group>
 											<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 											<field name="moc_const_id" invisible="1"/>
-											<field name="flag_standard" on_change="onchange_spare_bom(bom_id,off_name,moc_const_id,qty,flag_standard)"/>
+											<field name="flag_standard"/>
 										</group>
 									</group>
 									

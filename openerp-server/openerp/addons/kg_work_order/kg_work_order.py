@@ -30,6 +30,12 @@ ORDER_CATEGORY = [
    
 ]
 
+ENTRY_MODE = [
+   ('manual','Manual'),
+   ('auto','Auto')
+   
+]
+
 def roundPartial (value, resolution):
 	return round (value / resolution) * resolution
 
@@ -73,7 +79,7 @@ class kg_work_order(osv.osv):
 		### Header Details  ###########
 		'name': fields.char('WO No.', size=128,select=True),
 		'entry_date': fields.date('WO Date',required=True),
-		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved')]"),
+		'division_id': fields.many2one('kg.division.master','Division', states={'draft':[('readonly',False)]},domain="[('state','not in',('reject','cancel')),('code','in',('CPD','IPD'))]"),		
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
@@ -2204,6 +2210,7 @@ class ch_work_order_details(osv.osv):
 		### Order Details ####
 		'header_id':fields.many2one('kg.work.order', 'Work Order', required=1, ondelete='cascade'),
 		'order_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
+		'entry_mode': fields.related('header_id','entry_mode', type='selection', selection=ENTRY_MODE, string='Entry Mode', store=True, readonly=True),
 		'order_priority': fields.related('header_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		'order_ref_no': fields.related('header_id','name', type='char', string='Work Order No.', store=True, readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved')]"),
