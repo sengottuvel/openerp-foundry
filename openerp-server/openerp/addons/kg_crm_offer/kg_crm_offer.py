@@ -877,19 +877,19 @@ class kg_crm_offer(osv.osv):
 			elif item.purpose_categ in ('spare','access'):
 				moc_const_id = item.moc_const_id.id
 		pump_id = item.pump_id.id
-		pump_off_ids = self.pool.get('ch.pump.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+		pump_off_ids = self.pool.get('ch.pump.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id),('header_id','=',entry.id)])
 		if pump_off_ids:
 			for ele in pump_off_ids:
 				pump_off_rec = self.pool.get('ch.pump.offer').browse(cr,uid,ele)
 				wrk_val = pump_off_rec.r_sam_ratio_tot
 				works_value += wrk_val
-		spare_off_ids = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+		spare_off_ids = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id),('header_id','=',entry.id)])
 		if spare_off_ids:
 			for ele in spare_off_ids:
 				spare_off_rec = self.pool.get('ch.spare.offer').browse(cr,uid,ele)
 				wrk_val = spare_off_rec.r_sam_ratio_tot
 				works_value += wrk_val
-		access_off_ids = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+		access_off_ids = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id),('header_id','=',entry.id)])
 		if access_off_ids:
 			for ele in access_off_ids:
 				access_off_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,ele)
