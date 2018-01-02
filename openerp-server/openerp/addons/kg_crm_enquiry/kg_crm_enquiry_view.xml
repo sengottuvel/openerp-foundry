@@ -168,12 +168,12 @@
 									<field name="qap_plan_id"/>
 									<field name="ph_value"/>
 					<!--	Vertical Specification added start	-->
-									<field name="motor_power" attrs="{'required':[('pump_model_type','=','vertical')],'invisible':[('pump_model_type','!=','vertical')]}"/>
+									<field name="motor_power" attrs="{'invisible':[('pump_model_type','!=','vertical')]}"/>
 					<!--	Vertical Specification end	-->
-									<field name="del_pipe_size" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
+									<field name="del_pipe_size" />
 									<field name="sump_depth"/>
 									<field name="pre_suppliy_ref"/>
-									<field name="shaft_sealing" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
+									<field name="shaft_sealing"/>
 									<field name="scope_of_supply" on_change="onchange_scope_of_supply(scope_of_supply,primemover_categ)"/>
 									<field name="number_of_stages" />
 									<field name="impeller_type" />
@@ -189,7 +189,7 @@
 									<field name="impeller_dia_rated" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
 									<field name="impeller_tip_speed"/>
 									<field name="hydrostatic_test_pressure"/>
-									<field name="setting_height" attrs="{'required':[('pump_model_type','=','vertical')],'invisible':[('pump_model_type','!=','vertical')]}"/>
+									<field name="setting_height" attrs="{'invisible':[('pump_model_type','!=','vertical')]}"/>
 									<field name="suction_spool"/>
 									<field name="full_load_rpm" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
 									<field name="insulation" class="aplhanum_expect" attrs="{'invisible':[('primemover_categ','not in',['motor'])]}"/>
@@ -230,10 +230,10 @@
 									<field name="impeller_dia_max" />
 									<field name="max_allowable_test" />
 									<field name="crm_type" />
-									<field name="bush_bearing_lubrication" attrs="{'invisible':[('pump_model_type','!=','vertical')],'required':[('pump_model_type','=','vertical')]}"/>
-									<field name="push_bearing" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
+									<field name="bush_bearing_lubrication" attrs="{'invisible':[('pump_model_type','!=','vertical')]}"/>
+									<field name="push_bearing" />
 									<field name="suction_size" />
-									<field name="rpm" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
+									<field name="rpm"/>
 									<field name="speed_in_rpm"/>
 									<field name="casing_design" />
 									<field name="shut_off_head" on_change="onchange_shut_off_pressure(shut_off_head)"/>

@@ -339,8 +339,12 @@ class kg_crm_enquiry(osv.osv):
 								raise osv.except_osv(_('Warning!'),_('%s %s You cannot save without Qty in Pump BOM MS'%(line.pump_id.name,ms.name)))
 					if line.line_ids_b:
 						for bot in line.line_ids_b:
+							if bot.is_applicable == True and bot.flag_is_bearing == True:
+								if not bot.brand_id:
+									raise osv.except_osv(_('Warning!'),_('%s You cannot save without Brand'%(bot.ms_id.code)))
 							if bot.is_applicable == True and bot.qty == 0:
 								raise osv.except_osv(_('Warning!'),_('%s %s You cannot save without Qty in Pump BOM BOT'%(line.pump_id.name,bot.ms_id.name)))
+					
 					## Accessories warnings
 					if line.acces == 'yes' and line.line_ids_access_a:
 						for access in line.line_ids_access_a:
@@ -388,7 +392,7 @@ class kg_crm_enquiry(osv.osv):
 		if entry.state == 'moved_to_offer':
 			off_obj = self.pool.get('kg.crm.offer')
 			if not entry.revision_remarks:
-				raise osv.except_osv(_('Warning!'),_('System should not accept without revision remarks'))
+				raise osv.except_osv(_('Warning !'),_('System should not accept without revision remarks !!'))
 			revision = 0
 			if entry.wo_flag == False:
 				#~ del_sql = """ delete from kg_crm_offer where enquiry_id = %s """ %(entry.id)
@@ -912,6 +916,7 @@ class kg_crm_enquiry(osv.osv):
 										'confirm_user_id': uid, 
 										'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
 									})
+		
 		return True
 	
   	def access_creation(self,cr,uid,offer_id,order_item,item_type,context=None):
@@ -1670,12 +1675,36 @@ class ch_kg_crm_pumpmodel(osv.osv):
 					if rec.purpose_categ in ('pump','spare','pump_spare','access'):
 						raise osv.except_osv(_('Warning!'),_('Qty should be greater than Zero for Pump (%s) and Accessories (%s)'%(rec.pump_id.name,item.access_id.name)))
 		if rec.load_bom != True:
-			cr.execute(''' delete from ch_kg_crm_spare_fou where header_id = %s '''%(rec.id))
-			cr.execute(''' delete from ch_kg_crm_spare_ms where header_id = %s '''%(rec.id))
-			cr.execute(''' delete from ch_kg_crm_spare_bot where header_id = %s '''%(rec.id))
+			if rec.line_ids:
+				cr.execute(''' delete from ch_kg_crm_foundry_item where header_id = %s '''%(rec.id))
 			if rec.line_ids_a:
+				cr.execute(''' delete from ch_kg_crm_machineshop_item where header_id = %s '''%(rec.id))
 				for item in rec.line_ids_a:
-					cr.execute(''' delete from ch_kg_crm_spare_ms_raw where header_id = %s '''%(item.id))
+					if item.line_ids:
+						cr.execute(''' delete from ch_kg_crm_ms_raw where header_id = %s '''%(item.id))
+			if rec.line_ids_b:
+				cr.execute(''' delete from ch_kg_crm_bot where header_id = %s '''%(rec.id))
+		if rec.line_ids_spare_bom:
+			for line in rec.line_ids_spare_bom:
+				if line.load_bom != True:
+					if line.line_ids:
+						cr.execute(''' delete from ch_kg_crm_spare_fou where header_id = %s '''%(line.id))
+					if line.line_ids_a:
+						cr.execute(''' delete from ch_kg_crm_spare_ms where header_id = %s '''%(line.id))
+						for item in line.line_ids_a:
+							if item.line_ids:
+								cr.execute(''' delete from ch_kg_crm_spare_ms_raw where header_id = %s '''%(item.id))
+					if line.line_ids_b:
+						cr.execute(''' delete from ch_kg_crm_spare_bot where header_id = %s '''%(line.id))
+		if rec.line_ids_access_a:
+			for line in rec.line_ids_access_a:
+				if line.load_access != True:
+					if line.line_ids:
+						cr.execute(''' delete from ch_crm_access_fou where header_id = %s '''%(line.id))
+					if line.line_ids_a:
+						cr.execute(''' delete from ch_crm_access_ms where header_id = %s '''%(line.id))
+					if line.line_ids_b:
+						cr.execute(''' delete from ch_crm_access_bot where header_id = %s '''%(line.id))
 		
 		data=''
 		if rec.template_name and rec.header_id.state != 'draft':
