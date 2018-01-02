@@ -1216,7 +1216,7 @@ class kg_ms_daily_planning(osv.osv):
 						'pattern_id': line_item.pattern_id.id,						
 						'item_code': line_item.item_code,
 						'item_name': line_item.item_name,
-						'order_no': line_item.order_no,
+						'order_no': line_item.order_line_id.order_no,
 						
 						
 						#~ 'contractor_id': sc_item.contractor_id.id,
