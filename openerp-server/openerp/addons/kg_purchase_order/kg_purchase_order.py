@@ -1120,8 +1120,8 @@ class kg_purchase_order_line(osv.osv):
 		# Need to do block flow
 		value = {'pending_qty': '','quantity': 0}
 		quantity = 0
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
 		if price_type == 'per_kg':
-			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
 			if uom_conversation_factor == 'two_dimension':
 				if prod_rec.po_uom_in_kgs > 0:
 					quantity = product_qty * prod_rec.po_uom_in_kgs * length * breadth
@@ -1162,8 +1162,9 @@ class kg_purchase_order_line(osv.osv):
 	def onchange_price_type(self, cr, uid, ids,product_qty,uom_conversation_factor,length,breadth,price_type,product_id):
 		value = {'quantity': 0}
 		quantity = 0
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
 		if price_type == 'per_kg':
-			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+			
 			if uom_conversation_factor == 'two_dimension':
 				if prod_rec.po_uom_in_kgs > 0:
 					quantity = product_qty * prod_rec.po_uom_in_kgs * length * breadth
