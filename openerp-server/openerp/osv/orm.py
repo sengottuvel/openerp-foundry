@@ -1537,11 +1537,11 @@ class BaseModel(object):
                 else:
                     translated_msg = trans._get_source(cr, uid, self._name, 'constraint', lng, msg)
                 error_msgs.append(
-                        _("Warring fields: %s- %s") % (','.join(fields), translated_msg)
+                        _("Warning fields: %s- %s") % (','.join(fields), translated_msg)
                 )
                 self._invalids.update(fields)
         if error_msgs:
-            raise except_orm('Warring', '\n'.join(error_msgs))
+            raise except_orm('Warning', '\n'.join(error_msgs))
         else:
             self._invalids.clear()
 
@@ -2804,7 +2804,7 @@ class BaseModel(object):
             except ValueError:
                 pass
             if not val_id:
-                raise except_orm(_('Warring'),
+                raise except_orm(_('Warning'),
                                  _('Invalid value for reference field "%s.%s" (last part must be a non-zero integer): "%s"') % (self._table, field, value))
             val = val_model
         else:
@@ -2814,7 +2814,7 @@ class BaseModel(object):
                 return
         elif val in dict(self._columns[field].selection(self, cr, uid, context=context)):
             return
-        raise except_orm(_('Warring'),
+        raise except_orm(_('Warning'),
                          _('The value "%s" for the field "%s.%s" is not in the selection') % (value, self._table, field))
 
     def _check_removed_columns(self, cr, log=False):
