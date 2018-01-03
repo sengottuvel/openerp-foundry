@@ -539,7 +539,17 @@ class kg_purchase_order(osv.osv):
 				else:
 					qty = item.product_qty
 			else:
-				qty = item.product_qty
+				#~ qty = item.product_qty
+				if item.product_id.uom_conversation_factor == 'two_dimension':
+					if item.product_id.po_uom_coeff > 0:
+						qty = item.product_qty * item.product_id.po_uom_coeff * item.length * item.breadth
+				elif item.product_id.uom_conversation_factor == 'one_dimension':
+					if item.product_id.po_uom_coeff > 0:
+						qty = item.product_qty * item.product_id.po_uom_coeff
+					else:
+						qty = item.product_qty
+				else:
+					qty = item.product_qty
 			self.pool.get('purchase.order.line').write(cr,uid,item.id,{'quantity':qty})			
 		
 		if obj.payment_mode.term_category == 'advance':
@@ -1124,6 +1134,17 @@ class kg_purchase_order_line(osv.osv):
 				quantity = product_qty
 		else:
 			quantity = product_qty
+			if uom_conversation_factor == 'two_dimension':
+				if prod_rec.po_uom_coeff > 0:
+					quantity = product_qty * prod_rec.po_uom_coeff * length * breadth
+			elif uom_conversation_factor == 'one_dimension':
+				if prod_rec.po_uom_coeff > 0:
+					quantity = product_qty * prod_rec.po_uom_coeff
+				else:
+					quantity = product_qty
+			else:
+				quantity = product_qty
+			
 		if pi_line_id:
 			if product_qty and product_qty > pi_qty:
 				raise osv.except_osv(_('Warning !'),_("PO Qty can not be greater than Indent Qty !!") )
@@ -1154,7 +1175,17 @@ class kg_purchase_order_line(osv.osv):
 			else:
 				quantity = product_qty
 		else:
-			quantity = product_qty
+			#~ quantity = product_qty
+			if uom_conversation_factor == 'two_dimension':
+				if prod_rec.po_uom_coeff > 0:
+					quantity = product_qty * prod_rec.po_uom_coeff * length * breadth
+			elif uom_conversation_factor == 'one_dimension':
+				if prod_rec.po_uom_coeff > 0:
+					quantity = product_qty * prod_rec.po_uom_coeff
+				else:
+					quantity = product_qty
+			else:
+				quantity = product_qty
 		value = {'quantity': quantity}
 		return {'value': value}
 	
