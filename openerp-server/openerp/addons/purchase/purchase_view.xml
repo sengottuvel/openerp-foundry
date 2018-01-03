@@ -215,7 +215,7 @@
 				</group>
 				<notebook>
 					<page string="Order Item Details" autofocus="True" attrs="{'invisible': [('type_flag', '=', False),('po_flag', '=', False)]}">
-						<field name="order_line" context="{'po_type':po_type,'product_qty':1,'state':'draft','invoiced':0,'name':'PO',
+						<field name="order_line" context="{'po_type':po_type,'product_qty':0,'state':'draft','invoiced':0,'name':'PO',
 							'date_planned':date_order,'line_state':'draft','cancel_flag':False,'price_type':'po_uom',
 							'discount_flag':False,'discount_per_flag':False,'rate_revise':'yes','approval_flag':False,'test_cert_flag':False}">
 							<tree string="Purchase Order Lines" >

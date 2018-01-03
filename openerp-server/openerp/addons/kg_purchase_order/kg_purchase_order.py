@@ -400,7 +400,16 @@ class kg_purchase_order(osv.osv):
 					else:
 						qty = item.product_qty
 				else:
-					qty = item.product_qty
+					if item.product_id.uom_conversation_factor == 'two_dimension':
+						if item.product_id.po_uom_coeff > 0:
+							qty = item.product_qty * item.product_id.po_uom_coeff * item.length * item.breadth
+					elif item.product_id.uom_conversation_factor == 'one_dimension':
+						if item.product_id.po_uom_coeff > 0:
+							qty = item.product_qty * item.product_id.po_uom_coeff
+						else:
+							qty = item.product_qty
+					else:
+						qty = item.product_qty
 				
 				self.pool.get('purchase.order.line').write(cr,uid,item.id,{'quantity':qty})
 			
@@ -1133,7 +1142,6 @@ class kg_purchase_order_line(osv.osv):
 			else:
 				quantity = product_qty
 		else:
-			quantity = product_qty
 			if uom_conversation_factor == 'two_dimension':
 				if prod_rec.po_uom_coeff > 0:
 					quantity = product_qty * prod_rec.po_uom_coeff * length * breadth
