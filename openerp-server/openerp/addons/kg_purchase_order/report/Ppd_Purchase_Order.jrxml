@@ -400,7 +400,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["(PROCESS PUMPS DIVISION)"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="339" y="33" width="52" height="13"/>
+				<reportElement x="339" y="33" width="42" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" DATE  :"]]></textFieldExpression>
 			</textField>
@@ -477,14 +477,14 @@ where po.id = $P{po_id}]]>
 				<reportElement x="0" y="0" width="801" height="1"/>
 			</line>
 			<textField>
-				<reportElement x="391" y="33" width="67" height="13"/>
+				<reportElement x="381" y="33" width="112" height="13"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{po_date}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="391" y="21" width="78" height="13"/>
+				<reportElement x="381" y="21" width="111" height="13"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
@@ -538,7 +538,7 @@ where po.id = $P{po_id}]]>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="338" y="20" width="53" height="13"/>
+				<reportElement x="338" y="20" width="43" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" PO No :"]]></textFieldExpression>
 			</textField>
@@ -568,13 +568,13 @@ where po.id = $P{po_id}]]>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="338" y="46" width="53" height="14"/>
+				<reportElement x="338" y="46" width="43" height="14"/>
 				<box topPadding="1"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" Rev.No :"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="391" y="46" width="102" height="14"/>
+				<reportElement x="381" y="46" width="112" height="14"/>
 				<box topPadding="1"/>
 				<textElement>
 					<font isBold="true"/>
