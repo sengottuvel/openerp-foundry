@@ -819,21 +819,21 @@ class kg_ms_operations(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 					_('Start date should be greater than End Date !!'))
 		
-		if start_time <= 0 or end_time <= 0:			
-			raise osv.except_osv(_('Warning!'),
-					_('Start and End time should not allow zero and negative values !!'))
-						
-		if start_time > 24 or end_time > 24:
-			raise osv.except_osv(_('Warning!'),
-					_('Start and End time should not exceed 24 hrs !!'))
+		#~ if start_time <= 0 or end_time <= 0:			
+			#~ raise osv.except_osv(_('Warning!'),
+					#~ _('Start and End time should not allow zero and negative values !!'))
+						#~ 
+		#~ if start_time > 24 or end_time > 24:
+			#~ raise osv.except_osv(_('Warning!'),
+					#~ _('Start and End time should not exceed 24 hrs !!'))
 					
-		if start_time > end_time:
-			raise osv.except_osv(_('Warning!'),
-					_('Start time should be greater than End time !!'))
+		#~ if start_time > end_time:
+			#~ raise osv.except_osv(_('Warning!'),
+					#~ _('Start time should be greater than End time !!'))
 	
-		if actual_val < 0:
-			raise osv.except_osv(_('Warning!'),
-					_('System not allow to save negative. Check the actual value !!'))
+		#~ if actual_val < 0:
+			#~ raise osv.except_osv(_('Warning!'),
+					#~ _('System not allow to save negative. Check the actual value !!'))
 		
 	def operation1_update(self, cr, uid, ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
