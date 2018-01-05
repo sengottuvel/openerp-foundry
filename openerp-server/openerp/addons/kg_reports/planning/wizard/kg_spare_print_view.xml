@@ -13,7 +13,8 @@
 						<notebook tabpos="up" colspan="4">
 						<page string="Filters" name="filters">	
 						<group>										
-												   				     
+							
+							<field name="report_type" required = "1" />					   				     
 							<field name="order_id" required = "1" />						   				     
 							
 						</group>					   				     

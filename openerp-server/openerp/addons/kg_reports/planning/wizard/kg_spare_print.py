@@ -23,6 +23,7 @@ class kg_spare_print(osv.osv_memory):
 		'company_id': fields.many2one('res.company', 'Company'),
 		'print_date': fields.datetime('print Date', readonly=True),
 		'printed_by': fields.many2one('res.users','Printed By',readonly=True),  
+		'report_type': fields.selection([('pdf','PDF'),('xls','XLS')],'Report Type'), 
 		
 		## If any filter it should be many2many only. Don't use many2one filter unless it's must			
 		'order_id': fields.many2many('ch.work.order.details', 'm2m_work_order_spare_print_report_details', 'foundry_wiz_id', 'order_id','WO No' ,domain="[('state','=','confirmed'),('order_category','=','spare')]"),
@@ -34,7 +35,8 @@ class kg_spare_print(osv.osv_memory):
 	_defaults = {		
 		
 		'print_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-		'printed_by': lambda obj, cr, uid, context: uid,		
+		'printed_by': lambda obj, cr, uid, context: uid,	
+		'report_type': 'pdf',	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.spare.print', context=c),
 	 }
 	
@@ -43,7 +45,11 @@ class kg_spare_print(osv.osv_memory):
 	def create_report(self, cr, uid, ids, context={}):	
 	
 		rec = self.browse(cr,uid,ids[0])	
-		data = self.read(cr,uid,ids,)[-1]		
+		data = self.read(cr,uid,ids,)[-1]	
+		if rec.report_type == 'pdf':
+			 report_format = 'pdf'
+		else:
+			report_format = 'xls'		
 		print data,' create_report('
 		return {
 			'type'		 : 'ir.actions.report.xml',
@@ -52,7 +58,7 @@ class kg_spare_print(osv.osv_memory):
 					'model':'kg.spare.print',
 					'id': context.get('active_ids') and context.get('active_ids')[0] or False,
 					'ids': context.get('active_ids') and context.get('active_ids') or [],
-					'report_type': 'pdf',
+					'report_type': report_format,
 					'form':data
 				},
 			'nodestroy': False
