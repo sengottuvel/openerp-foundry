@@ -1087,18 +1087,18 @@ class product_product(osv.osv):
 			uom=uom_obj.browse(cursor,user,[uom_id])[0]
 			uom_po=uom_obj.browse(cursor,user,[uom_po_id])[0]
 			if uom.category_id.id != uom_po.category_id.id:
-				return {'value': {'uom_po_id':'','po_uom_coeff':po_coeff,'uom_code':uom.code}}
+				return {'value': {'uom_po_id':'','po_uom_coeff':po_coeff}}
 			else:
-				return {'value': {'uom_po_id':uom_po_id,'po_uom_coeff':po_coeff,'uom_code':uom.code}}
+				return {'value': {'uom_po_id':uom_po_id,'po_uom_coeff':po_coeff,}}
 		return False
 	
 	def onchange_po_uom(self, cursor, user, ids, uom_id, uom_po_id):
 		uom_obj=self.pool.get('product.uom')
 		uom=uom_obj.browse(cursor,user,[uom_id])[0]	
 		if uom_id == uom_po_id:
-			return {'value': {'po_uom_coeff': 1,'uom_code':uom.code,'po_copy_uom':uom_po_id}}
+			return {'value': {'po_uom_coeff': 1,'po_copy_uom':uom_po_id}}
 		else:
-			return {'value': {'po_uom_coeff': 0,'uom_code':uom.code,'po_copy_uom':uom_po_id}}
+			return {'value': {'po_uom_coeff': 0,'po_copy_uom':uom_po_id}}
 		return {}
 	
 	def _check_ean_key(self, cr, uid, ids, context=None):
