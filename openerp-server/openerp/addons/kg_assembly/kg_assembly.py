@@ -204,7 +204,7 @@ class kg_assembly_inward(osv.osv):
 								#~ raise osv.except_osv(_('Warning !'), _('DB Reference No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
 				if foundry_line_item.pattern_id.flag_heat_no == True:
 					if not foundry_line_item.line_ids:
-						raise osv.except_osv(_('Warning !'), _('Heat No. is required for Pattern %s and Heat no %s !!')%(foundry_line_item.pattern_id.name,foundry_line_item.melting_id.name))
+						raise osv.except_osv(_('Warning !'), _('Heat No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
 					if foundry_line_item.line_ids:
 						for foun_item in foundry_line_item.line_ids:
 							if not foun_item.melting_id:
