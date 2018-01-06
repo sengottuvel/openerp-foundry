@@ -229,8 +229,8 @@ class kg_assembly_inward(osv.osv):
 								raise osv.except_osv(_('Warning !'), _('Kindly give correct heat qty for Pattern %s !!')%(foundry_line_item.pattern_id.name))
 			for ms_line_item in entry_rec.line_ids_a:
 				if ms_line_item.ms_id.flag_heat_no == True:
-					if not ms_line_item.line_ids:
-						raise osv.except_osv(_('Warning !'), _('Heat No. is required for MS Item %s !!')%(ms_line_item.ms_id.name))
+					#~ if not ms_line_item.line_ids:
+						#~ raise osv.except_osv(_('Warning !'), _('Heat No. is required for MS Item %s !!')%(ms_line_item.ms_id.name))
 					if ms_line_item.line_ids:
 						cr.execute(''' select qty from ch_assembly_ms_heat_details where header_id=%s ''',[ms_line_item.id])
 						ms_heat_qty = cr.fetchone()
