@@ -210,17 +210,17 @@ class kg_assembly_inward(osv.osv):
 							if not foun_item.melting_id:
 								raise osv.except_osv(_('Warning !'), _('Heat No. is required for Pattern %s and Heat no %s !!')%(foundry_line_item.pattern_id,name,foun_item.melting_id.name))
 							
-							print"entry_rec.order_line_id.id",entry_rec.order_line_id.id
-							print"entry_rec.order_line_id.id",foun_item.melting_id.id
-							print"foundry_line_item.pattern_id.id",foundry_line_item.pattern_id.id
-							
-							cr.execute(''' select pour.id from 	kg_pouring_log pour
-											left join ch_pouring_details pour_line on (pour.id = pour_line.header_id)
-											 where pour_line.order_line_id =  %s and pour_line.pattern_id = %s ''',[entry_rec.order_line_id.id,foundry_line_item.pattern_id.id])
-											 
-							foundry_work_order_check = cr.fetchone()							
-							if foundry_work_order_check is None:								
-								raise osv.except_osv(_('Warning !'), _('Heat No. Not mapped in particular work order for Pattern %s and Heat No. %s !!')%(foundry_line_item.pattern_id.name,foun_item.melting_id.name))							
+								print"entry_rec.order_line_id.id",entry_rec.order_line_id.id
+								print"entry_rec.order_line_id.id",foun_item.melting_id.id
+								print"foundry_line_item.pattern_id.id",foundry_line_item.pattern_id.id
+								
+								cr.execute(''' select pour.id from 	kg_pouring_log pour
+												left join ch_pouring_details pour_line on (pour.id = pour_line.header_id)
+												 where pour_line.order_line_id =  %s and pour_line.pattern_id = %s ''',[entry_rec.order_line_id.id,foundry_line_item.pattern_id.id])
+												 
+								foundry_work_order_check = cr.fetchone()							
+								if foundry_work_order_check is None:								
+									raise osv.except_osv(_('Warning !'), _('Heat No. Not mapped in particular work order for Pattern %s and Heat No. %s !!')%(foundry_line_item.pattern_id.name,foun_item.melting_id.name))							
 												
 						cr.execute(''' select qty from ch_assembly_foundry_heat_details where header_id=%s ''',[foundry_line_item.id])
 						foundry_heat_qty = cr.fetchone()
