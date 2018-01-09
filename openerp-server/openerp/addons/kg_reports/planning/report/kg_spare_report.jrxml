@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="842" pageHeight="605" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="0.8857805000000005"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="280"/>
+	<property name="ireport.y" value="247"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -26,11 +26,12 @@
 	<subDataset name="dataset3">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
-			<![CDATA[SELECT company_name,date,wo_no,pump_type,trimming_dia,flange_name,pattern_check,position_no,drawing_no,
+			<![CDATA[
+SELECT company_name,date,wo_no,pump_type,trimming_dia,flange_name,pattern_check,position_no,drawing_no,
 case
-when mtl_form = 'AFoundry' then 'Foundry'
-when mtl_form = 'BOT' then 'BOT'
-when mtl_form = 'MS' then 'MS'
+when mtl_form = '1#Foundry' then split_part(mtl_form, '#', 2)
+when mtl_form = '3#BOT' then split_part(mtl_form, '#', 2)
+when mtl_form = '2#MS' then split_part(mtl_form, '#', 2)
 else
 '-' end as mtl_form,
 material_code,pattern_no,csd_no,pattern_name,moc_name,weight_kg,qty,uom,sequence_no,
@@ -53,7 +54,7 @@ position_num.name as position_no,
 case
 when position_num.drawing_no is null then '-'
 else position_num.drawing_no end as drawing_no,
-'AFoundry' as mtl_form,
+'1#Foundry' as mtl_form,
 case
 when ch_bom.material_code is null then '-'
 else ch_bom.material_code end as material_code,
@@ -98,7 +99,7 @@ position_num.name as position_no,
 case
 when position_num.drawing_no is null then '-'
 else position_num.drawing_no end as drawing_no,
-'MS' as mtl_form,
+'2#MS' as mtl_form,
 case
 when ch_machineshop.material_code is null then '-'
 else ch_machineshop.material_code end as material_code,
@@ -145,7 +146,7 @@ flange.name as flange_name,
 '-' as pattern_check,
 '-' as position_no,
 '-' as drawing_no,
-'BOT' as mtl_form,
+'3#BOT' as mtl_form,
 case
 when ch_bot.material_code is null then '-'
 else ch_bot.material_code end as material_code,
@@ -178,7 +179,8 @@ where ch_bot.flag_applicable = True and
 work_order.id = $P{header_id}
 
 order by sequence_no,mtl_form
-) as sample]]>
+) as sample
+]]>
 		</queryString>
 		<field name="company_name" class="java.lang.String"/>
 		<field name="date" class="java.lang.String"/>
