@@ -43,10 +43,10 @@
 						<field name="pricelist_id" invisible="1"/>
                     </group>
                     <group>
-						<field name="date"/>
+						<field name="date" options="{'datepicker':{'minDate': -10,'maxDate': 0,}}"/>
 						<field name="partner_address"/>
 						<field name="delivery_address"/>
-						<field name="quot_date"/>
+						<field name="quot_date" options="{'datepicker':{'minDate': -10,'maxDate': 0,}}"/>
 						<field name="quot_ref_no"/>
 						<field name="dep_name"/>
 						<field name="price"/>
@@ -69,7 +69,7 @@
 						<field name="taxes_id" widget="char"/>
 						<field name="price_subtotal"/>
 						<field name="kg_discount_per_value" invisible="1"/>
-					</tree>										
+					</tree>
 				</field>
 				<group>
 					<group>
@@ -79,9 +79,8 @@
 					<group>
 					<field name="po_expenses_type2" invisible="1"/>
 					<field name="value2" attrs="{'readonly':[('po_expenses_type2','=',False)]}" invisible="1"/>
-					</group>					
+					</group>
 				</group>
-
 				<group class="oe_subtotal_footer oe_right">
 					<field name="total_amount"/>
 					<field name="discount"/>
@@ -106,7 +105,7 @@
 						<field name="pending_qty" readonly="1"/>
 						</tree>
 					</field>
-					<button name="update_soindent" type='object' string="Save Record"/>					
+					<button name="update_soindent" type='object' string="Save Record"/>
 				</page>
 				<page string="Additonal Charges" invisible="1">
 					<field colspan="4" mode="tree" name="expense_line_id" nolabel="1" widget="one2many_list" >
@@ -204,6 +203,7 @@
 					<field name="date"/>
 					<field name="so_type"/>
 					<field name="partner_id"/>
+                   
                     <field name="amount_tax"/>
                     <field name="amount_total"/>
 					<field name="state"/>
@@ -212,7 +212,7 @@
         </record>
        
        <!-- Search View Start -->
-
+		
 		<record id="t_search_v_service_order" model="ir.ui.view">
             <field name="name">Service Order Search</field>
             <field name="model">kg.service.order</field>
@@ -221,10 +221,10 @@
 					<field name="name" string="SO No" filter_domain="[('name','ilike',self)]" />
 					<field name="partner_id" string="Supplier" filter_domain="[('partner_id','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
-					<filter icon="terp-check" name="confirm" string="WFA" domain="[('state','=','confirm')]"/>					
-					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>					
-					<filter icon="terp-check" name="inv" string="Invoiced" domain="[('state','=','inv')]"/>					
-					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>					
+					<filter icon="terp-check" name="confirm" string="WFA" domain="[('state','=','confirm')]"/>
+					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>
+					<filter icon="terp-check" name="inv" string="Invoiced" domain="[('state','=','inv')]"/>
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="Supplier" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'partner_id'}"/>
@@ -239,7 +239,7 @@
         =====================
         Form Action
         ===================== -->
-
+		
 		<record id="action_kg_serviceorder_form" model="ir.actions.act_window">
 			<field name="name">Service order</field>
 			<field name="type">ir.actions.act_window</field>
@@ -248,9 +248,9 @@
 			<field name="view_id" ref="view_kg_serviceorder_tree"/>
 			<field name="search_view_id" ref="t_search_v_service_order"/>
 		</record>
-	
+		
 		<!-- Service order line tree view -->
-	
+		
 		<record id="view_kg_serviceorder_line_tree" model="ir.ui.view">
             <field name="name">kg.deporder.line.tree</field>
             <field name="model">kg.service.order.line</field>
@@ -288,7 +288,7 @@
 				</search>
 			</field>
 		</record>
-	
+		
 		<record id="kg_soline_confirmed_action" model="ir.actions.act_window">
 			<field name="name">SO Item Details</field>
 			<field name="type">ir.actions.act_window</field>
@@ -299,20 +299,19 @@
 			<field name="context">{'search_default_group_service_id':1}</field>
 			<field name="search_view_id" ref="sol_search_view"/>
 		</record>
-
+		
 		<record id="so_line_new_tree" model="ir.actions.act_window.view">
 			<field eval="1" name="sequence"/>
 			<field name="view_mode">tree</field>
 			<field name="view_id" ref="view_kg_serviceorder_line_tree"/>
 			<field name="act_window_id" ref="kg_soline_confirmed_action"/>
 		</record>
-	
+		
 		<!-- Service Order Transaction -->
 		<menuitem action="action_kg_serviceorder_form" id="sam_service_order" name="Service Order" parent="kg_menus.spm_service_order_menu" sequence="1"/>
 		
-		<!-- SO Item Details  --> 
+		<!-- SO Item Details  -->
 		<menuitem action="kg_soline_confirmed_action" id="sam_service_order_line" name="SO Item Details" parent="kg_menus.spm_service_order_menu" sequence="3"/>
-
 
     </data>
 </openerp>
