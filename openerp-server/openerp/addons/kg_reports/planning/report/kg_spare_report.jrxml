@@ -34,8 +34,9 @@ when mtl_form = '3#BOT' then split_part(mtl_form, '#', 2)
 when mtl_form = '2#MS' then split_part(mtl_form, '#', 2)
 else
 '-' end as mtl_form,
-material_code,pattern_no,csd_no,pattern_name,moc_name,weight_kg,qty,uom,sequence_no,
- case when ((row_number() OVER (PARTITION by sequence_no)) = 1 ) then sequence_no else null end as ref_seq_no,
+material_code,pattern_no,csd_no,pattern_name,moc_name,weight_kg,qty,uom,
+case when sequence_no is null then 0 else sequence_no end as sequence_no,
+case when ((row_number() OVER (PARTITION by sequence_no)) = 1 ) then sequence_no else null end as ref_seq_no,
 remarks from (
 SELECT
 company.name as company_name,
@@ -67,7 +68,7 @@ moc.name as moc_name,
 trim(TO_CHAR(ch_bom.weight::float, '999G999G99G999G99G99G990D99'))  as weight_kg,
 ch_bom.qty as qty,
 'Nos' as uom,
-ch_bom.sequence_no as sequence_no,
+case when ch_bom.sequence_no is null then 0 else ch_bom.sequence_no end as sequence_no,
 ch_bom.add_spec as remarks
 
 FROM ch_work_order_details work_order
@@ -114,7 +115,7 @@ trim(TO_CHAR('0.00'::float, '999G999G99G999G99G99G990D99'))  as weight_kg,
 
 ch_machineshop.qty as qty,
 'Nos' as uom,
-ch_machineshop.sequence_no as sequence_no,
+case when ch_machineshop.sequence_no is null then 0 else ch_machineshop.sequence_no end as sequence_no,
 ch_machineshop.remarks as remarks
 
 FROM ch_work_order_details work_order
@@ -160,8 +161,8 @@ moc.name as moc_name,
 trim(TO_CHAR('0.00'::float, '999G999G99G999G99G99G990D99'))  as weight_kg,
 
 ch_bot.qty as qty,
-'Nos' as uom,
-ch_bot.sequence_no as sequence_no,
+'Nos' as uom,case when ch_bot.sequence_no is null then 0 else
+ch_bot.sequence_no end as sequence_no,
 ch_bot.remarks as remarks
 
 FROM ch_work_order_details work_order
