@@ -82,15 +82,15 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		self.cr.execute('''
 			   select sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
-				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date >= %s and b.date <= %s and b.location_id = %s) as stock_uom_close,
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.trans_date >= %s and b.trans_date <= %s and b.location_id = %s) as stock_uom_close,
 				(case when a.uom_conversation_factor = 'two_dimension' then
 				(sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
-				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date >= %s and b.date <= %s and b.location_id = %s)) / prod.po_uom_in_kgs
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.trans_date >= %s and b.trans_date <= %s and b.location_id = %s)) / prod.po_uom_in_kgs
 				else
 				(sum(a.product_qty) -
 				(select (case when sum(b.product_qty) is not null then sum(b.product_qty) else 0 end) from stock_move b where b.move_type = 'out'
-				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.date >= %s and b.date <= %s and b.location_id = %s)) / prod.po_uom_coeff
+				and b.product_id = a.product_id and b.brand_id = a.brand_id and a.moc_id = b.moc_id and b.trans_date >= %s and b.trans_date <= %s and b.location_id = %s)) / prod.po_uom_coeff
 				end) as po_uom_close,
 				a.product_id as product_id,
 				prod.name_template as product,
@@ -116,7 +116,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				left JOIN product_template pt ON (pt.id=a.product_id)
 				left join product_category pc on(pc.id=pt.categ_id)
 				
-			   where a.move_type = 'in' and a.date >= %s and a.date <= %s and a.state=%s and a.location_dest_id = %s'''+ major + product + pro_type +'''
+			   where a.move_type = 'in' and a.trans_date >= %s and a.trans_date <= %s and a.state=%s and a.location_dest_id = %s'''+ major + product + pro_type +'''
 			   group by 3,4,5,6,7,8,9,10,11,12,13,14,15 order by prod.name_template ''',(start_date,form['date'],location,start_date,form['date'],location,start_date,form['date'],location,start_date,form['date'],'done',location))
 		
 		data=self.cr.dictfetchall()
