@@ -40,7 +40,7 @@
 								<field name="cust_po_date" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
 								<field name="cpo_del"/>
 								<field name="dealer_po_no"/>
-								<field name="deal_po_date" options="{'datepicker':{'minDate': -20,'maxDate': 0,}}"/>
+								<field name="deal_po_date" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
 								<field name="sam_del"/>
 								<field name="division_id" readonly="1"/>
 								<field name="road_permit"/>
