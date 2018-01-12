@@ -26,7 +26,7 @@ class kg_spare_print(osv.osv_memory):
 		'report_type': fields.selection([('pdf','PDF'),('xls','XLS')],'Report Type'), 
 		
 		## If any filter it should be many2many only. Don't use many2one filter unless it's must			
-		'order_id': fields.many2many('ch.work.order.details', 'm2m_work_order_spare_print_report_details', 'foundry_wiz_id', 'order_id','WO No' ,domain="[('state','=','confirmed'),('order_category','=','spare')]"),
+		'order_id': fields.many2many('ch.work.order.details', 'm2m_work_order_spare_print_report_details', 'foundry_wiz_id', 'order_id','WO No' ,domain="[('order_category','=','spare')]"),
 		
 		
 	}
