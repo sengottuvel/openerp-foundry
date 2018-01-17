@@ -66,7 +66,7 @@
 									</group>
 									<group>
 <!--									<field name="wo_moc_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>-->
-										<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" required="1"/>
+										<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" required="1" attrs="{'readonly':[('w_order_line_id','!=',False)]}"/>
 										<field name="uom_id" readonly="0" on_change="onchange_uom_id(product_id,uom_id)" required="1"/>
 										<field name="issue_qty" on_change="onchange_issue_qty_2(issue_qty)"/>
 <!--
@@ -83,6 +83,7 @@
 										<field name="dep_code" invisible="1"/>
 										<field name="uom_conversation_factor" invisible="1"/>
 										<field name="uom_category" invisible="1"/>
+										<field name="w_order_line_id" invisible="1"/>
 									</group>
 								</group>
 								<group string="WO Details" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}">
