@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="casting_list_report" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.2396694214876032"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="3"/>
 	<parameter name="wiz_id" class="java.lang.Integer"/>
 	<parameter name="printed_by" class="java.lang.String"/>
 	<parameter name="print_date" class="java.lang.String"/>
@@ -47,7 +47,7 @@ company.name as company_name,
 ch_work.id as ch_work_order_id,
 to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
 ch_work.order_no as wo_no,
-ch_work.note as remarks,
+trim(regexp_replace(ch_work.note, '\n', '  ', 'g') ) as remarks,
 pump_type.name as pump_type,
 pattern.name as pattern_no,
 ch_bom.pattern_name as pattern_name,
@@ -61,7 +61,8 @@ WHEN ch_bom.flag_pattern_check = 'f'
 THEN '-'
 ELSE '-'
 end ) as pat_ch,
-ch_work.note as note
+trim(regexp_replace(ch_work.note, '\n', '  ', 'g') ) as note
+
 
 from kg_work_order work_order
 
@@ -87,7 +88,9 @@ company.name as company_name,
 ch_work.id as ch_work_order_id,
 to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
 ch_work.order_no as wo_no,
-ch_work.note as remarks,
+
+trim(regexp_replace(ch_work.note, '\n', '  ', 'g') ) as remarks,
+
 pump_type.name as pump_type,
 pattern.name as pattern_no,
 ch_bom.pattern_name as pattern_name,
@@ -96,7 +99,7 @@ ch_bom.qty as qty,
 trim(TO_CHAR(ch_bom.weight::float, '999G999G99G999G99G99G990D99'))  as weight,
 trim(TO_CHAR((ch_bom.qty * ch_bom.weight)::float, '999G999G99G999G99G99G990D99'))  as total_weight,
 '-' as pat_ch,
-ch_work.note as note
+trim(regexp_replace(ch_work.note, '\n', '  ', 'g') ) as note
 
 from kg_work_order work_order
 
