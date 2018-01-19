@@ -299,6 +299,8 @@ class kg_ms_daily_planning(osv.osv):
 				actual_qty = 0
 				if line_item.inhouse_qty > 0:
 					if line_item.position_id.id != False:
+						if len(line_item.position_id.line_ids) == 0:
+							raise osv.except_osv(_('Warning !'),_('Operations Configure in Position No.(%s)!!'%(line_item.position_id.name)))
 						for pos_line_item in line_item.position_id.line_ids:
 							
 							if pos_line_item.operation_id.name == '10':

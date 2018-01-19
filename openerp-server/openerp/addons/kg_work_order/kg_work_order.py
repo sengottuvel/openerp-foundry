@@ -4585,7 +4585,7 @@ class ch_wo_accessories_bot(osv.osv):
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
 		'order_id': fields.related('header_id','order_id', type='many2one',relation='kg.work.order', string='Order No', store=True, readonly=True),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
-		'position_id': fields.many2one('kg.position.number','Position No'),
+		'position_id': fields.many2one('kg.position.number','Position No',domain="[('state','=','approved')]"),
 		'csd_no': fields.char('CSD No.'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot'),('state','=','approved')], ondelete='cascade',required=True),
 		'item_name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
