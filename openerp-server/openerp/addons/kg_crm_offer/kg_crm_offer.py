@@ -677,8 +677,11 @@ class kg_crm_offer(osv.osv):
 			if entry.ref_mode == 'dealer':
 				if not entry.dealer_po_no:
 					raise osv.except_osv(_('Warning !'),_('Update Dealer PO No. !!'))
-			
-			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
+			if entry.purpose == 'prj':
+				order_categ = 'project'
+			else:
+				order_categ = entry.purpose			
+			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': order_categ,
 																  'name': '',
 																  'order_priority': '',
 																  'enquiry_no': entry.enquiry_id.name,
