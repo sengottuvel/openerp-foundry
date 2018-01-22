@@ -220,6 +220,7 @@ class kg_department_issue(osv.osv):
 						'state' : 'confirmed',
 						'indent_line_id' : group[0].id,
 						'wo_moc_id' : group[0].moc_id.id,
+						'moc_id_temp' : group[0].moc_id_temp.id,
 						'issue_type':'material',
 						'wo_state':'accept',
 						'dep_issue_type':obj.dep_issue_type,
