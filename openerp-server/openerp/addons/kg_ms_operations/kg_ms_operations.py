@@ -862,14 +862,14 @@ class kg_ms_operations(osv.osv):
 					
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -1540,14 +1540,14 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -2208,7 +2208,7 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 							#~ raise osv.except_osv(_('Warning!'),
 									#~ _('Actual value should lie in the range of Minimum and Maximum value !!'))
 						
@@ -2874,14 +2874,14 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -3547,14 +3547,14 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -4218,14 +4218,14 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -4888,14 +4888,14 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -5558,14 +5558,14 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -6228,14 +6228,14 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -6901,14 +6901,14 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -7572,14 +7572,14 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -8243,14 +8243,14 @@ class kg_ms_operations(osv.osv):
 						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
-						if dim_item.actual_val != 0.00:	
-							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
+						#~ if dim_item.actual_val != 0.00:	
+							#~ if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
 								#~ raise osv.except_osv(_('Warning!'),
 										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
-							else:
-								pass
-						else:
-							pass
+							#~ else:
+								#~ pass
+						#~ else:
+							#~ pass
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
