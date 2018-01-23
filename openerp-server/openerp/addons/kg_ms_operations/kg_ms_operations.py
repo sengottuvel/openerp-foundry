@@ -864,8 +864,8 @@ class kg_ms_operations(osv.osv):
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
@@ -1542,8 +1542,8 @@ class kg_ms_operations(osv.osv):
 								
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
@@ -2209,8 +2209,8 @@ class kg_ms_operations(osv.osv):
 						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 								
 						if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lie in the range of Minimum and Maximum value !!'))
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('Actual value should lie in the range of Minimum and Maximum value !!'))
 						
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -2876,8 +2876,8 @@ class kg_ms_operations(osv.osv):
 								
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
@@ -3549,8 +3549,8 @@ class kg_ms_operations(osv.osv):
 								
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
@@ -4220,8 +4220,8 @@ class kg_ms_operations(osv.osv):
 								
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
@@ -4890,8 +4890,8 @@ class kg_ms_operations(osv.osv):
 								
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
@@ -5560,8 +5560,8 @@ class kg_ms_operations(osv.osv):
 								
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
@@ -6230,8 +6230,8 @@ class kg_ms_operations(osv.osv):
 								
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
@@ -6903,8 +6903,8 @@ class kg_ms_operations(osv.osv):
 								
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
@@ -7574,8 +7574,8 @@ class kg_ms_operations(osv.osv):
 								
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
@@ -8245,8 +8245,8 @@ class kg_ms_operations(osv.osv):
 								
 						if dim_item.actual_val != 0.00:	
 							if dim_item.actual_val < (dim_item.min_val - min_tol_value) or dim_item.actual_val > (dim_item.max_val + max_tol_value):
-								raise osv.except_osv(_('Warning!'),
-										_('Actual value should lie within the range of Minimum and Maximum Value !!'))
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Actual value should lie within the range of Minimum and Maximum Value !!'))
 							else:
 								pass
 						else:
