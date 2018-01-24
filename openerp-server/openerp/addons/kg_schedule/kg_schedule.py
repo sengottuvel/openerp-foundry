@@ -6,8 +6,6 @@ from datetime import date
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
 
-dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
-
 ORDER_PRIORITY = [
    ('normal','Normal'),
    ('emergency','Emergency'),
@@ -3691,22 +3689,9 @@ class kg_fabrication_process(osv.osv):
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_fabrication_process, self).write(cr, uid, ids, vals, context)
 	
 kg_fabrication_process()
-
-
-
-
-
-
-
-
-
-
-
-
-
-

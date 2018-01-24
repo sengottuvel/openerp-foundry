@@ -777,7 +777,7 @@ class kg_purchase_amendment(osv.osv):
 				po_record = po_obj.browse(cr,uid,po_id)
 				po_obj.write(cr,uid,po_id,{'amend_flag': False})
 				if amend_obj.partner_id.id != amend_obj.partner_id_amend.id:
-					po_obj.write(cr,uid,po_id,{'partner_id': amend_obj.partner_id_amend.id,'add_test':amend_obj.add_text_amend})
+					po_obj.write(cr,uid,po_id,{'partner_id': amend_obj.partner_id_amend.id,'add_text':amend_obj.add_text_amend})
 				if amend_obj.po_date != amend_obj.po_date_amend:
 					po_obj.write(cr,uid,po_id,{'date_order': amend_obj.po_date_amend})
 				if amend_obj.quot_ref_no != amend_obj.quot_ref_no_amend:
