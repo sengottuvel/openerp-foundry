@@ -1873,7 +1873,7 @@ class kg_schedule(osv.osv):
 		self.pool.get('kg.indent.queue').create(cr,uid,{
 		
 										'entry_date': entry.entry_date,									  
-										'schedule_no': entey.name,
+										'schedule_no': entry.name,
 										'schedule_id': entry.id,
 									})
 		
