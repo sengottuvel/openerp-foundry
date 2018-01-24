@@ -147,3 +147,38 @@ class kg_mail_queue(osv.osv):
 	
 	
 kg_mail_queue()
+
+
+
+
+class kg_indent_queue(osv.osv):
+
+	_name = "kg.indent.queue"
+	_description = "Indent Queue"	
+	
+	_columns = {	
+		
+	   
+		'state': fields.selection([('pending','Pending'),('completed','Completed')],'Status', readonly=True),	
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'entry_date':fields.date('Entry Date'),
+		'schedule_id': fields.integer('Schedule ID'),	
+		'schedule_no': fields.char('Schedule No'),	
+		'completed_time': fields.datetime('Completed Time'),	
+		}
+		
+	_defaults = {
+	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.indent.queue', context=c),		
+		'state': 'pending',
+		'entry_mode': 'auto',
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
+		
+	}
+	
+kg_indent_queue()	
+
