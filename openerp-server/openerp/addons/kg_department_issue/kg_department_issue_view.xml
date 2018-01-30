@@ -54,7 +54,7 @@
 								<group string="Product Details" colspan="4">
 									<group>
 										<field name="product_id" on_change="onchange_product_id(product_id)" attrs="{'readonly':[('dep_issue_type','!=','direct')]}"/>
-										<field name="brand_id" required="1" on_change="onchange_brand_id(brand_id)"/>
+										<field name="brand_id" required="1" on_change="onchange_brand_id(brand_id,moc_id_temp,dep_issue_type)"/>
 										<field name="wo_moc_id" required="1" invisible="1"/>
 										<field name="indent_qty" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 										<field name="traceability_no"/>
@@ -66,9 +66,9 @@
 									</group>
 									<group>
 <!--									<field name="wo_moc_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>-->
-										<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" required="1" attrs="{'readonly':[('moc_id_temp','!=',False)]}"/>
+										<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp,kg_grn_moves)" required="1" attrs="{'readonly':[('moc_id_temp','!=',False)]}"/>
 										<field name="uom_id" readonly="0" on_change="onchange_uom_id(product_id,uom_id)" required="1"/>
-										<field name="issue_qty" on_change="onchange_issue_qty_2(issue_qty)"/>
+										<field name="issue_qty" on_change="onchange_issue_qty_2(issue_qty)" attrs="{'readonly':[('dep_issue_type','!=','direct')]}"/>
 <!--
 										<field name="length" attrs="{'invisible':[('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')],'required':['|',('dep_code','=','DP2'),('uom_conversation_factor','=','two_dimension')]}"/>
 										<field name="breadth" attrs="{'invisible':[('dep_code','!=','DP2'),('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
@@ -114,7 +114,7 @@
 											<field name="batch_no" readonly = "1"/>
 										</tree>
 									</field>
-								</group>							
+								</group>
 							</form>
 							<tree string="Entry Tree">
 								<field name="product_id"/>
@@ -224,8 +224,8 @@
 					<field name="product_id" string="Product" filter_domain="[('product_id','ilike',self)]" />
 					<field name="department_id" string="Department" filter_domain="[('department_id','ilike',self)]" />
 					<filter icon="terp-check" name="state" string="Draft" domain="[('state','=','draft')]"/>
-					<filter icon="terp-check" name="state" string="WFA" domain="[('state','=','approve')]"/>					
-					<filter icon="terp-check" name="issue_type" string="Material" domain="[('issue_type','=','material')]"/>					
+					<filter icon="terp-check" name="state" string="WFA" domain="[('state','=','approve')]"/>
+					<filter icon="terp-check" name="issue_type" string="Material" domain="[('issue_type','=','material')]"/>
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="Issue Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'issue_date'}"/>
@@ -328,7 +328,7 @@
             <field name="act_window_id" ref="tma_fou_store_issue"/>
         </record>
         
-		<record forcecreate="1" id="seq_store_issue" model="ir.sequence.type">	
+		<record forcecreate="1" id="seq_store_issue" model="ir.sequence.type">
 			<field name="name">Store Issue</field>
 			<field name="code">kg.department.issue</field>
 		</record>
@@ -441,7 +441,7 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
 				<tree colors="blue:state in ('draft','confirmed');red:state == 'approve';gray:state in ('reject','cancel');black:state == 'done'" 
-								string="BOT Store Issue" toolbar="1" create="false">   
+								string="BOT Store Issue" toolbar="1" create="false">
 					<field name="name"/>
 					<field name="issue_date"/>
 					<field name="wo_line_id"/>
@@ -541,7 +541,7 @@
 							<field name="indent_qty" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 							<field name="issue_qty_2" string="Issued Qty" readonly="1"/>
 							<field name="issue_qty" string="Accepted Qty" invisible="1" on_change="onchange_reject_qty(issue_qty_2,issue_qty)"/>
-							<field name="cutting_qty" string="Accepted Qty" required="1" on_change="onchange_cutting_qty(cutting_qty,indent_qty,indent_line_id)"/>
+							<field name="cutting_qty" string="Accepted Qty" required="1" on_change="onchange_cutting_qty(cutting_qty,indent_qty,indent_line_id)" readonly="1"/>
 							<field name="reject_qty" readonly="1"/>
 							<field name="remarks" readonly="1"/>
 							<field name="state" invisible="1"/>
@@ -612,7 +612,7 @@
 							<field name="issue_date" readonly="1"/>
 							<field name="indent_qty" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 							<field name="issue_qty_2" string="Issued Qty" readonly="1"/>
-							<field name="issue_qty" string="Accepted Qty" on_change="onchange_reject_qty(issue_qty_2,issue_qty)"/>
+							<field name="issue_qty" string="Accepted Qty" on_change="onchange_reject_qty(issue_qty_2,issue_qty)" readonly="1"/>
 							<field name="reject_qty" readonly="1"/>
 							<field name="remarks" readonly="1"/>
 							<field name="state" invisible="1"/>

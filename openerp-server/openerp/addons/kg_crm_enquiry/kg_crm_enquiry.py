@@ -1627,7 +1627,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		values = self.copy_data(cr, uid, rec.template_id.id, default=None, context=None)
 		self.write(cr,uid,ids,values)
-		self.write(cr,uid,ids,{'template_name':rec.template_name,'template_type':rec.template_type,'template_id':rec.template_id.id,'template_copy_flag':True,'template_flag':True})
+		self.write(cr,uid,ids,{'template_name':rec.template_name,'template_type':rec.template_type,'template_id':rec.template_id.id,'template_copy_flag':True,'template_flag':True,'line_state':'draft'})
 		return True
 	
 	def entry_approve(self, cr, uid, ids, context):
@@ -4585,6 +4585,7 @@ class ch_crm_access_fou(osv.osv):
 		'material_code': fields.char('Material Code'),
 		'flag_standard': fields.boolean('Non Standarad'),
 		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories'),('in_development','New Development')],'Purpose Category'),
+		'flag_pattern_check': fields.boolean('Is Pattern Check'),
 		
 	}
 	

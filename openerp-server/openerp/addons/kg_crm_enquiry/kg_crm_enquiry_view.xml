@@ -629,6 +629,7 @@
 														<field name="pattern_id" readonly="1"/>
 														<field name="pattern_name" readonly="1"/>
 														<field name="material_code"/>
+														<field name="flag_pattern_check"/>
 														<field name="moc_id" attrs="{'readonly':[('flag_standard','!=',True)],'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 														<field name="csd_no" readonly="1"/>
 														<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
@@ -1133,7 +1134,7 @@
 		<field name="arch" type="xml">
 		<form string="Pumpmodel Details" version="7.0">
 			<header>
-				<button name="entry_approve" type="object" string="Approve" attrs="{'invisible':[('template_copy_flag','!=','draft')]}" class="oe_highlight"/>
+				<button name="entry_approve" type="object" string="Approve" attrs="{'invisible':['|',('template_copy_flag','=','True'),('line_state','!=','draft')]}" class="oe_highlight"/>
 			</header>
 			<group>
 				<group>

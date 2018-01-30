@@ -43,9 +43,9 @@ class kg_department_issue(osv.osv):
 		'kg_dep_indent_line':fields.many2many('kg.depindent.line', 'kg_department_indent_picking', 'kg_depline_id', 'stock_picking_id', 'Department Indent', 
 				 domain="[('indent_id.state','=','approved'), '&', ('indent_id.main_store','=',False),'&', ('indent_id.dep_name','=',department_id),'&', ('issue_pending_qty','>','0'),'&', ('pi_cancel' ,'!=', 'True')]", 
 				 readonly=True, states={'draft': [('readonly', False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-		'outward_type': fields.many2one('kg.outwardmaster', 'Outward Type',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
+		'outward_type': fields.many2one('kg.outwardmaster','Outward Type',domain="[('state','=','approved')]",readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'department_id': fields.many2one('kg.depmaster','Department',required=True,readonly=True, 
-						 domain="[('item_request','=',True),('state','in',('draft','confirmed','approved'))]", states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
+						 domain="[('item_request','=',True),('state','=','approved')]", states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'type': fields.selection([('in', 'IN'), ('out', 'OUT'), ('internal', 'Internal')], 'Type'),
 		'products_flag':fields.boolean('Products Flag'),
 		'user_id' : fields.many2one('res.users', 'User', readonly=False),
@@ -185,7 +185,7 @@ class kg_department_issue(osv.osv):
 					depindent_line_ids = map(lambda x:x.id,group)
 					prod_browse = group[0].product_id
 					ms_bot_id = group[0].ms_bot_id.id
-					brand_id = group[0].brand_id.id				
+					brand_id = group[0].brand_id.id
 					uom =False
 					indent = group[0].indent_id
 					dep = indent.dep_name.id
@@ -241,7 +241,7 @@ class kg_department_issue(osv.osv):
 			move_obj = self.pool.get('stock.move')
 			prod_obj = self.pool.get('product.product')
 			dep_obj = self.pool.get('kg.depmaster')
-			line_ids = []			   
+			line_ids = []
 			res={}
 			line_ids = []
 			res['move_lines'] = []
@@ -264,7 +264,7 @@ class kg_department_issue(osv.osv):
 					qty = map(lambda x:float(x.issue_pending_qty),group)[0]
 					depindent_line_ids = map(lambda x:x.id,group)
 					prod_browse = group[0].product_id
-					brand_id = group[0].brand_id.id				
+					brand_id = group[0].brand_id.id
 					uom =False
 					indent = group[0].service_id
 					dep = indent.dep_name.id
@@ -299,11 +299,8 @@ class kg_department_issue(osv.osv):
 			raise osv.except_osv(_('Warning !'),_('You cannot process Issue without Item Line !!'))
 		else:
 			for item in obj_rec.issue_line_ids:
-				lot_sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(item.id)
-				cr.execute(lot_sql)
-				lot_data = cr.dictfetchall()
-				if not lot_data:
-					raise osv.except_osv(_('No GRN Entry !'), _('There is no GRN reference for this Issue. You must associate GRN entries %s !!' %(item.product_id.name)))
+				if not item.kg_grn_moves:
+					raise osv.except_osv(_('No GRN Entry !'),_('There is no GRN reference for this Issue. You must associate GRN entries %s !!' %(item.product_id.name)))
 				if item.issue_qty <= 0:
 					raise osv.except_osv(_('Warning !'),
 						_('Issue Qty should be greater than Zero for Product (%s) Brand (%s) MOC (%s) !!' %(item.product_id.name,item.brand_id.name,item.moc_id.name)))
@@ -392,8 +389,6 @@ class kg_department_issue(osv.osv):
 						#~ dep_issue_line_rec.product_id.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id)
 						#~ cr.execute(sql)
 						#~ lot_datas = cr.dictfetchall()
-						#~ print"dep_issue_line_rec",dep_issue_line_rec.id
-						#~ print"obj_recobj_rec",obj_rec.id
 						#~ if lot_datas:
 							#~ if lot_datas[0]['qty'] < 0:
 								#~ raise osv.except_osv(_('Stock not available!'),
@@ -419,8 +414,6 @@ class kg_department_issue(osv.osv):
 						#~ dep_issue_line_rec.product_id.id,dep_issue_line_rec.product_id.id,dep_issue_line_rec.brand_id.id)
 						#~ cr.execute(sql)
 						#~ lot_datas = cr.dictfetchall()
-						#~ print"dep_issue_line_rec",dep_issue_line_rec.id
-						#~ print"obj_recobj_rec",obj_rec.id
 						#~ if lot_datas:
 							#~ if lot_datas[0]['qty'] < 0:
 								#~ raise osv.except_osv(_('Stock not available!'),
@@ -459,25 +452,25 @@ class kg_department_issue(osv.osv):
 			issue_line_ids = line_id
 			if issue_line_ids:
 				self.issue_item_approval(cr,uid,issue_line_ids)
-			line_sql = """ select line.issue_qty,line.id from kg_department_issue_line line 
-						left join kg_department_issue issue on(issue.id=line.issue_id)
-						where line.issue_id = %s and issue.state = 'approve' """ %(issue_record.id)
-			cr.execute(line_sql)
-			line_data = cr.dictfetchall()
-			if line_data:
-				if len(line_data) == 1:
-					self.write(cr,uid,issue_record.id,{'state':'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
-				elif len(line_data) > 1:
-					approve_line_sql = """ select line.issue_qty from kg_department_issue_line line 
-								where line.issue_id = %s and issue_qty >= 0 and state = 'confirmed' """ %(issue_record.id)
-					cr.execute(approve_line_sql)
-					approve_line_data = cr.dictfetchall()
-					if not approve_line_data:
-						self.write(cr,uid,issue_record.id,{'state':'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
-				else:
-					pass
-			else:
-				pass
+			#~ line_sql = """ select line.issue_qty,line.id from kg_department_issue_line line 
+						#~ left join kg_department_issue issue on(issue.id=line.issue_id)
+						#~ where line.issue_id = %s and issue.state = 'approve' """ %(issue_record.id)
+			#~ cr.execute(line_sql)
+			#~ line_data = cr.dictfetchall()
+			#~ if line_data:
+				#~ if len(line_data) == 1:
+					#~ self.write(cr,uid,issue_record.id,{'state':'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
+				#~ elif len(line_data) > 1:
+					#~ approve_line_sql = """ select line.issue_qty from kg_department_issue_line line 
+								#~ where line.issue_id = %s and issue_qty >= 0 and state = 'confirmed' """ %(issue_record.id)
+					#~ cr.execute(approve_line_sql)
+					#~ approve_line_data = cr.dictfetchall()
+					#~ if not approve_line_data:
+						#~ self.write(cr,uid,issue_record.id,{'state':'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
+				#~ else:
+					#~ pass
+			#~ else:
+				#~ pass
 			self.write(cr,uid,issue_record.id,{'state':'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
@@ -494,7 +487,7 @@ class kg_department_issue(osv.osv):
 			issue_record = line_rec.issue_id
 			line_ids = line_rec
 		
-		#### Updating Department Issue to Stock Move ####			
+		#### Updating Department Issue to Stock Move ####
 		#~ for line_ids in issue_record.issue_line_ids:
 			if issue_record.issue_type == 'material':
 				if issue_record.dep_issue_type == 'from_indent':
@@ -519,9 +512,8 @@ class kg_department_issue(osv.osv):
 					dep_stock_location = issue_record.department_id.stock_location.id
 			
 			if line_ids.issue_qty > 0:
-				
+				self.pool.get('kg.department.issue.line').write(cr,uid,line_ids.id,{'state':'done'})
 				if issue_record.dep_issue_type == 'from_indent':
-					self.pool.get('kg.department.issue.line').write(cr,uid,line_ids.id,{'state':'done'})
 					if line_ids.w_order_line_id:
 						## MS store inward process
 						if line_ids.issue_id.department_id.name == 'DP2':
@@ -594,9 +586,6 @@ class kg_department_issue(osv.osv):
 						#~ line_ids.product_id.id,line_ids.product_id.id,line_ids.brand_id.id)
 						#~ cr.execute(sql)
 						#~ lot_datas = cr.dictfetchall()
-						#~ print"dep_issue_line_rec",line_ids.id
-						#~ print"issue_record",issue_record.id
-						#~ print"lot_datas",lot_datas,lot_datas[0]['qty']
 						#~ if lot_datas:
 							#~ if lot_datas[0]['qty'] < 0:
 								#~ raise osv.except_osv(_('Stock not available!'),
@@ -622,8 +611,6 @@ class kg_department_issue(osv.osv):
 						#~ line_ids.product_id.id,line_ids.product_id.id,line_ids.brand_id.id)
 						#~ cr.execute(sql)
 						#~ lot_datas = cr.dictfetchall()
-						#~ print"dep_issue_line_rec",line_ids.id
-						#~ print"issue_record",issue_record.id
 						#~ if lot_datas:
 							#~ if lot_datas[0]['qty'] < 0:
 								#~ raise osv.except_osv(_('Stock not available!'),
@@ -836,7 +823,7 @@ class kg_department_issue(osv.osv):
 								'product_qty': move_pending_qty,
 								'po_to_stock_qty': move_pending_qty,
 								'stock_uom': line_ids.product_id.uom_id.id,
-								'product_uom': line_ids.product_id.uom_po_id.id,			
+								'product_uom': line_ids.product_id.uom_po_id.id,
 								'location_id': line_ids.location_id.id,
 								'location_dest_id': dep_stock_location,
 								'move_type': 'out',
@@ -896,7 +883,7 @@ class kg_department_issue(osv.osv):
 			self.write(cr, uid,ids,{'state':'draft','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
 		return True
 	
-	def entry_cancel(self, cr, uid, ids, context=None):		
+	def entry_cancel(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'done':
 			if not rec.can_remark:
@@ -904,7 +891,7 @@ class kg_department_issue(osv.osv):
 			self.write(cr, uid,ids,{'state':'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
 		return True
 	
-	def write(self, cr, uid, ids, vals, context=None):		
+	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_department_issue, self).write(cr, uid, ids, vals, context)
 	
@@ -914,7 +901,7 @@ class kg_department_issue(osv.osv):
 		if rec.state == 'draft':
 			unlink_ids.append(rec.id)
 		else:
-			raise osv.except_osv(_('Warning !'), _('Unable to delete. Draft entry only you can delete !!'))
+			raise osv.except_osv(_('Warning !'),_('Unable to delete. Draft entry only you can delete !!'))
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 	
 kg_department_issue()
@@ -930,14 +917,14 @@ class kg_department_issue_line(osv.osv):
 		
 		'issue_id': fields.many2one('kg.department.issue','Issue No',ondelete='cascade'),
 		'name': fields.related('issue_id','name', type='char', string='Issue No'),
-		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('done','Done'),('cancel','Cancelled')],'Status',readonly=True),
 		'remarks': fields.text('Remarks'),
 		
 		## Module Requirement Fields
 		
-		'issue_date': fields.related('issue_id','issue_date', type='date', string='Issue Date',store=True),
-		'product_id': fields.many2one('product.product','Product Name',required=True,domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
-		'uom_id': fields.many2one('product.uom','UOM'),
+		'issue_date': fields.related('issue_id','issue_date', type='date',string='Issue Date',store=True),
+		'product_id': fields.many2one('product.product','Product Name',required=True,domain="[('state','=','approved'),('purchase_ok','=',True)]"),
+		'uom_id': fields.many2one('product.uom','UOM',domain="[('dummy_state','=','approved')]"),
 		'uom_category': fields.selection([('length','Length'),('other','Others')],'UOM Category',required=True),
 		'issue_qty': fields.float('Issue Qty',required=True,readonly=False,states={'done':[('readonly',True)]}),
 		'issue_qty_2': fields.float('Issue Qty 2',required=True),
@@ -945,20 +932,20 @@ class kg_department_issue_line(osv.osv):
 		'indent_qty': fields.float('Indent Quantity'),
 		'reject_qty': fields.float('Reject Qty'),
 		'price_unit': fields.float('Unit Price'),
-		'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
+		'kg_discount_per': fields.float('Discount (%)',digits_compute= dp.get_precision('Discount')),
 		'kg_discount': fields.float('Discount Amount'),
-		'tax_id': fields.many2many('account.tax', 'department_issue_tax', 'issue_line_id', 'taxes_id', 'Taxes'),
-		'location_id': fields.many2one('stock.location', 'Source Location'),
-		'location_dest_id': fields.many2one('stock.location', 'Destination Location'),
+		'tax_id': fields.many2many('account.tax','department_issue_tax','issue_line_id','taxes_id','Taxes'),
+		'location_id': fields.many2one('stock.location','Source Location'),
+		'location_dest_id': fields.many2one('stock.location','Destination Location'),
 		'indent_id': fields.many2one('kg.depindent','Department Indent'),
 		'indent_line_id': fields.many2one('kg.depindent.line','Department Indent Line'),
 		'service_indent_line_id': fields.many2one('kg.service.indent.line','Service Indent Line'),
-		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type'),
-		'dep_issue_type': fields.selection([('from_indent','From Indent'),('direct','Direct')], string='Issue Type'),
-		'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry',
+		'issue_type': fields.selection([('material','Material'),('service','Service')],'Issue Type'),
+		'dep_issue_type': fields.selection([('from_indent','From Indent'),('direct','Direct')],string='Issue Type'),
+		'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id','GRN Entry',
 					domain="[('product_id','=',product_id),'&',('grn_type','=',issue_type),'&',('pending_qty','>',0),'&',('store_pending_qty','>',0),'&',('lot_type','!=','out'),'&',('moc_id','=',wo_moc_id),'&',('location_id','=',location_id),'&',('moc_id','=',wo_moc_id)]",
 					),
-		'brand_id': fields.many2one('kg.brand.master','Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
+		'brand_id': fields.many2one('kg.brand.master','Brand Name',domain="[('product_ids','in',(product_id)),('state','=','approved')]"),
 		'issue_return_line': fields.boolean('Excess Return Flag'),
 		'excess_return_qty': fields.float('Excess Return Qty'),
 		'damage_flag': fields.boolean('Damage Return Flag'),
@@ -969,14 +956,14 @@ class kg_department_issue_line(osv.osv):
 		'w_order_line_id': fields.many2one('ch.work.order.details','WO No'),
 		'ms_bot_id': fields.many2one('kg.machine.shop', 'MS Item Name'),
 		'traceability_no': fields.char('Traceability No'),
-		'wo_id': fields.related('w_order_line_id','header_id', type='many2one',relation='kg.work.order', string='WO No.',store=True),
-		'wo_delivery_date': fields.related('wo_id','delivery_date', type='date', string='Delivery Date',store=True),
-		'wo_pump_model_id': fields.related('w_order_line_id','pump_model_id', type='many2one',relation='kg.pumpmodel.master', string='Pump Model',store=True),
-
+		'wo_id': fields.related('w_order_line_id','header_id',type='many2one',relation='kg.work.order',string='WO No.',store=True),
+		'wo_delivery_date': fields.related('wo_id','delivery_date',type='date',string='Delivery Date',store=True),
+		'wo_pump_model_id': fields.related('w_order_line_id','pump_model_id', type='many2one',relation='kg.pumpmodel.master',string='Pump Model',store=True),
+		
 		'wo_moc_id': fields.many2one('kg.moc.master','MOC'),
-		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
-		'wo_position_id': fields.related('indent_line_id','position_id', type='many2one',relation='kg.position.number', string='Position No.',store=True),
-		'order_priority': fields.related('wo_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True),
+		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','=','approved')]"),
+		'wo_position_id': fields.related('indent_line_id','position_id',type='many2one',relation='kg.position.number',string='Position No.',store=True),
+		'order_priority': fields.related('wo_id','order_priority',type='selection', selection=ORDER_PRIORITY,string='Priority',store=True),
 		'accept_date': fields.date('Accepted Date'),
 		'remark_id': fields.many2one('kg.rejection.master','Rejection Remarks'),
 		'dep_id': fields.many2one('kg.depmaster','Department Name'),
@@ -1016,14 +1003,21 @@ class kg_department_issue_line(osv.osv):
 			value = {'uom_id':prod.uom_id.id,'uom_conversation_factor':prod.uom_conversation_factor,'brand_id':'','moc_id_temp':'','issue_qty':0}
 		return {'value': value}
 	
-	def onchange_brand_id(self, cr, uid, ids, brand_id,context=None):
-		value = {'moc_id_temp':''}
+	def onchange_brand_id(self, cr, uid, ids, brand_id, moc_id_temp, dep_issue_type, context=None):
+		value = {'moc_id_temp':'','kg_grn_moves':''}
+		if dep_issue_type == 'from_indent':
+			value = {'moc_id_temp':moc_id_temp}
 		return {'value': value}
 	
-	def onchange_moc(self, cr, uid, ids, moc_id_temp):
+	def onchange_moc(self, cr, uid, ids, moc_id_temp, kg_grn_moves):
 		value = {'wo_moc_id':'','kg_grn_moves':''}
 		if moc_id_temp:
 			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
+			if kg_grn_moves[0][2] and ids:
+				lot_id = ( ",".join( repr(e) for e in kg_grn_moves[0][2]))
+				cr.execute(""" delete from kg_department_issue_details where lot_id in (%s) and grn_id = %s """ %(lot_id,ids[0]))
+			else:
+				pass
 			value = {'wo_moc_id':rate_rec.moc_id.id,'kg_grn_moves':''}
 		return {'value': value}
 	
@@ -1078,8 +1072,8 @@ class kg_department_issue_line(osv.osv):
 			self.pool.get('kg.department.issue').issue_item_approval(cr,uid,issue_line_id)
 			
 			if issue_record.issue_qty > 0:
-				self.write(cr,uid,issue_record.id,{'state':'done'})
 				if issue_record.issue_id.department_id.name == 'DP2':
+					self.write(cr,uid,issue_record.id,{'state':'done'})
 					ms_obj = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',issue_record.w_order_line_id.id),('ms_id','=',issue_record.ms_bot_id.id),('state','=','raw_pending')])
 					if ms_obj:
 						ms_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_obj[0])
@@ -1104,6 +1098,7 @@ class kg_department_issue_line(osv.osv):
 					pass
 			else:
 				pass
+		
 		return True
 	
 	def update_lines(self, cr, uid, ids, context=None):
@@ -1143,8 +1138,8 @@ class kg_item_wise_dept_issue(osv.osv):
 		
 		## Module Requirement Fields
 		
-		'product_id':fields.many2one('product.product','Product Name',required=True),
-		'uom_id':fields.many2one('product.uom','UOM',readonly=True),
+		'product_id':fields.many2one('product.product','Product Name',domain="[('state','=','approved')]",required=True),
+		'uom_id':fields.many2one('product.uom','UOM',domain="[('dummy_state','=','approved')]",readonly=True),
 		'grn_qty':fields.float('GRN Quantity',required=True),
 		'issue_qty':fields.float('Issue Quantity'),
 		'price_unit':fields.float('Price Unit'),
