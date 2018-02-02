@@ -3030,7 +3030,9 @@ where off.id = $P{offer_id}]]>
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<textElement/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$F{dom_freight}]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -3040,7 +3042,9 @@ where off.id = $P{offer_id}]]>
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<textElement/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
 				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 		</band>
