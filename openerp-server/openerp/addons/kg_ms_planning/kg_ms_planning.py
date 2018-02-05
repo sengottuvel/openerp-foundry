@@ -126,8 +126,8 @@ class kg_ms_daily_planning(osv.osv):
 					'header_id': entry.id,
 					'ms_id': item.id,
 					'csd_no': csd_no,
-					'schedule_qty': item.ms_sch_qty - item.ms_plan_qty,
-					'inhouse_qty': item.ms_sch_qty - item.ms_plan_qty,
+					'schedule_qty': item.ms_plan_rem_qty,
+					'inhouse_qty': item.ms_plan_rem_qty,
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
