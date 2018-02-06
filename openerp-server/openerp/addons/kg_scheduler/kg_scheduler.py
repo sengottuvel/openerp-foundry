@@ -1919,5 +1919,39 @@ class kg_scheduler(osv.osv):
 				self.pool.get('kg.indent.queue').write(cr,uid,entry[2],{'state':'completed','completed_time':time.strftime('%Y-%m-%d %H:%M:%S')})
 						
 		return True
+		
+	def duplicate_checking(self,cr,uid,ids=0,context = None):
+		cr.execute("""select fn_alert_duplicates()""")
+		data = cr.fetchall();		
+		if (data[0][0] is None) and (data[0][0] != ''):	
+			return False
+		if (data[0][0] is not None) and (data[0][0] != ''):	
+			maildet = (str(data[0])).rsplit('~');
+			cont = data[0][0].partition('.UNWANTED.')		
+			email_from = 'iaskgisl@gmail.com'	
+			if maildet[2]:	
+				email_to = [maildet[1]]
+			else:
+				email_to = ['']			
+			if maildet[3]:
+				email_cc = [maildet[2]]
+				print"email_cc",email_cc
+			else:
+				email_cc = ['']								
+			ir_mail_server = self.pool.get('ir.mail_server')
+			if maildet[4] == 'pass':
+				msg = ir_mail_server.build_email(
+					email_from = email_from,
+					email_to = email_to,
+					subject = maildet[3],
+					body = cont[0],
+					email_cc = email_cc,
+					object_id = ids and ('%s-%s' % (ids, 'kg.mail.settings')),
+					subtype = 'html',
+					subtype_alternative = 'plain')
+				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
+			else:
+				pass
+		return True
 	
 kg_scheduler()

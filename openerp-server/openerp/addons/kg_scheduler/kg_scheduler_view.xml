@@ -18,6 +18,7 @@
 					<button name="auto_primecost_delete" string="Delete Primecost" type="object" class="oe_highlight"/>
 					<button name="weekly_excel_report_deletion" string="Excel Deletion" type="object" class="oe_highlight"/>
 					<button name="create_sch_indent" string="Indent Creation" type="object" class="oe_highlight"/>
+					<button name="duplicate_checking" string="MS Store Duplicate" type="object" class="oe_highlight"/>
 				</header>	
 				<group>
 					<button name="auto_scheduler_pouring_date" string="Pouring Date" type="object" class="oe_highlight"/>
