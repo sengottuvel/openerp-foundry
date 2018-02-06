@@ -637,16 +637,16 @@ class kg_ms_stores(osv.osv):
 		return True
 	   
 		
-	#~ def unlink(self,cr,uid,ids,context=None):
-		#~ unlink_ids = []
-		#~ for rec in self.browse(cr,uid,ids):
-			#~ if rec.state != 'draft':			
-				#~ raise osv.except_osv(_('Warning!'),
-						#~ _('You can not delete this entry !!'))
-			#~ else:
-				#~ unlink_ids.append(rec.id)
-		#~ return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		#~ 
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []
+		for rec in self.browse(cr,uid,ids):
+			if rec.state != 'draft':			
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+		
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
