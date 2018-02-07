@@ -1,0 +1,17 @@
+[options]
+
+##Database related options
+
+db_user = openerp
+db_password = OpenErp~!32
+db_host = 192.168.1.5
+db_port=5432
+
+## Performance Properties
+
+workers = 100
+limit_memory_hard = 25690208256
+limit_memory_soft = 21408506880
+limit_request = 8192
+limit_time_cpu = 60
+limit_time_real = 120
