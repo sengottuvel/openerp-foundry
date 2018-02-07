@@ -33,7 +33,10 @@
 		<field name="is_company" position="replace">
 		<field name="is_company" invisible="1"/>
 		
+<!--
 		<field name="tin_no" class="aplhanum_expect" required="1" attrs = "{'readonly':[('partner_state','=','approve')]}" string="GSTIN No."/>
+-->
+		<field name="tin_no" class="aplhanum_expect" required="1" string="GSTIN No."/>
 		</field>
 		
 		<field name="mobile" position="before">
