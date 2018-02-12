@@ -1069,7 +1069,7 @@ class kg_mould_batch(osv.osv):
 			for req_item in entry.line_ids:
 				production_obj.write(cr, uid,req_item.production_id.id,{'mould_remarks':req_item.remarks,'mould_date':req_item.mould_date,
 				'mould_shift_id':req_item.mould_shift_id.id,'mould_contractor':req_item.mould_contractor.id,'mould_moulder':req_item.mould_moulder,
-				'mould_helper':req_item.mould_helper,'mould_qty':req_item.mould_qty,'mould_hardness':req_item.mould_hardness,'mould_box_id':req_item.mould_box_id.id,
+				'mould_helper':req_item.mould_helper,'mould_qty':req_item.mould_qty,'mould_hardness':req_item.mould_hardness,
 				'mould_by':req_item.mould_by,'mould_operator':req_item.mould_operator.id})
 				production_obj.mould_update(cr, uid, [req_item.production_id.id])
 				

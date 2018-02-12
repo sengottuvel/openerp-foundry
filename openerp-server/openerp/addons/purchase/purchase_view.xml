@@ -208,7 +208,7 @@
 				<group string='Remarks' attrs="{'invisible':[('state','in',('draft'))]}">
 					<group>	
 						<field name="can_remark" attrs="{'invisible':[('state','not in',('approved','cancel'))],'readonly':[('state','in',['cancel','reject'])]}"/>
-						<field name="reject_remark" attrs="{'invisible':[('state','not in',['confirmed','verified'])],'readonly':[('state','in',['cancel','reject'])]}"/>	
+						<field name="reject_remark" attrs="{'invisible':[('state','not in',['draft','confirmed','verified'])],'readonly':[('state','in',['cancel','reject','draft'])]}"/>
 					</group>
 					<group>												
 					</group>
