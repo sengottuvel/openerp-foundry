@@ -642,8 +642,8 @@ class kg_purchase_amendment(osv.osv):
 							grn_bro = self.pool.get('po.grn.line').browse(cr, uid, grn_id[0])
 							if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
 								pass
-							else:
-								raise osv.except_osv(_('You can not decrease PO Qty'),_('Because GRN is already created'))
+							#~ else:
+								#~ raise osv.except_osv(_('You can not decrease PO Qty'),_('Because GRN is already created'))
 						else:
 							pass
 					if amend_line.product_id:
@@ -920,8 +920,8 @@ class kg_purchase_amendment(osv.osv):
 								re_qty = amend_line.product_qty - amend_line.product_qty_amend
 								pi_pending_qty += re_qty
 								pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : pi_pending_qty})
-							else:
-								raise osv.except_osv(_('You can not decrease PO Qty'),_('Because GRN is already created'))
+							#~ else:
+								#~ raise osv.except_osv(_('You can not decrease PO Qty'),_('Because GRN is already created'))
 						else:
 							pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
 							pi_pending_qty = pi_line_record.pending_qty
